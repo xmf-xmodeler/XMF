@@ -1,0 +1,574 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+
+context Code
+
+  @Class OCLWalker extends Walker
+  
+    // The basic walker for code. Extend this walker with walkers
+    // for specific features of code and for DSL walkers...
+
+    @Operation walkAddp(left:Pattern,right:Pattern,arg)
+      Addp[
+        left=self.walk(left,arg),
+        right=self.walk(right,arg)
+      ]
+    end
+
+    @Operation walkApply(args:Seq(OCL),operator:OCL,arg)
+      Apply[
+        args=args->collect(x | self.walk(x,arg)),
+        operator=self.walk(operator,arg)
+      ]
+    end
+
+    @Operation walkBinExp(binOp:String,left:OCL,right:OCL,arg)
+      BinExp[
+        binOp=self.walk(binOp,arg),
+        left=self.walk(left,arg),
+        right=self.walk(right,arg)
+      ]
+    end
+
+    @Operation walkBinding(name:String,arg)
+      Binding[
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkBoolExp(line:Integer,value:Boolean,arg)
+      BoolExp[
+        line=line,
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkCollExp(args:Seq(OCL),collOp:String,collection:OCL,arg)
+      CollExp[
+        args=args->collect(x | self.walk(x,arg)),
+        collOp=self.walk(collOp,arg),
+        collection=self.walk(collection,arg)
+      ]
+    end
+
+    @Operation walkCondp(condition:Performable,pattern:Pattern,arg)
+      Condp[
+        condition=self.walk(condition,arg),
+        pattern=self.walk(pattern,arg)
+      ]
+    end
+
+    @Operation walkConsExp(head:OCL,tail:OCL,arg)
+      ConsExp[
+        head=self.walk(head,arg),
+        tail=self.walk(tail,arg)
+      ]
+    end
+
+    @Operation walkConsp(head:Pattern,tail:Pattern,arg)
+      Consp[
+        head=self.walk(head,arg),
+        tail=self.walk(tail,arg)
+      ]
+    end
+
+    @Operation walkConst(value:Element,arg)
+      Const[
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkConstp(const:Performable,arg)
+      Constp[
+        const=self.walk(const,arg)
+      ]
+    end
+
+    @Operation walkContextDef(element:OCL,isForward:Boolean,path:Seq(Element),arg)
+      ContextDef[
+        element=self.walk(element,arg),
+        isForward=self.walk(isForward,arg),
+        path=self.walk(path,arg)
+      ]
+    end
+
+    @Operation walkDot(name:String,target:OCL,arg)
+      Dot[
+        name=self.walk(name,arg),
+        target=self.walk(target,arg)
+      ]
+    end
+
+    @Operation walkDrop(exp:OCL,arg)
+      Drop[
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkDropPattern(pattern:Pattern,arg)
+      DropPattern[
+        pattern=self.walk(pattern,arg)
+      ]
+    end
+
+    @Operation walkFloatExp(line:Integer,postPoint:String,prePoint:String,arg)
+      FloatExp[
+        line=line,
+        postPoint=self.walk(postPoint,arg),
+        prePoint=self.walk(prePoint,arg)
+      ]
+    end
+
+    @Operation walkFunBinding(name:String,args:Seq(Pattern),type:OCL,value:OCL,arg)
+      FunBinding[
+        name=self.walk(name,arg),
+        args=args->collect(a | self.walk(a,arg)),
+        value=self.walk(value,arg),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkHeadUpdate(seq:Performable,value:Performable,arg)
+      HeadUpdate[
+        seq=self.walk(seq,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+    
+    @Operation walkIf(line:Integer,test:Performable,e1:Performable,e2:Performable,arg)
+      If(line,self.walk(test,arg),self.walk(e1,arg),self.walk(e2,arg))
+    end
+
+    @Operation walkImportIn(body:Performable,nameSpace:Performable,arg)
+      ImportIn[
+        body=self.walk(body,arg),
+        nameSpace=self.walk(nameSpace,arg)
+      ]
+    end
+
+    @Operation walkIncludingp(element:Pattern,set:Pattern,arg)
+      Includingp[
+        element=self.walk(element,arg),
+        set=self.walk(set,arg)
+      ]
+    end
+
+    @Operation walkInstantiate(args:Seq(KeyArg),class:Performable,arg)
+      Instantiate[
+        args=args->collect(x | self.walk(x,arg)),
+        class=self.walk(class,arg)
+      ]
+    end
+
+    @Operation walkIntExp(line:Integer,value:Integer,arg)
+      IntExp[
+        line=line,
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,arg)
+      IterExp[
+        body=self.walk(body,arg),
+        collection=self.walk(collection,arg),
+        iterOp=self.walk(iterOp,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,arg)
+      Iterate[
+        accumulator=self.walk(accumulator,arg),
+        body=self.walk(body,arg),
+        collection=self.walk(collection,arg),
+        name=self.walk(name,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkKeyArg(name:String,value:Performable,arg)
+      KeyArg[
+        name=self.walk(name,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkKeyp(name:String,pattern:Pattern,arg)
+      Keyp[
+        name=self.walk(name,arg),
+        pattern=self.walk(pattern,arg)
+      ]
+    end
+
+    @Operation walkKeywordp(class:String,keys:Seq(Keyp),names:Seq(String),arg)
+      Keywordp[
+        class=self.walk(class,arg),
+        keys=keys->collect(x | self.walk(x,arg)),
+        names=names->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkLet(line:Integer,bindings:Seq(ValueBinding),body:OCL,arg)
+      Let[
+        line=line,
+        bindings=
+          if bindings.isKindOf(Drop)
+          then self.walk(bindings,arg)
+          else bindings->collect(x | self.walk(x,arg))
+          end,
+        body=self.walk(body,arg)
+      ]
+    end
+
+    @Operation walkLift(line:Integer,exp:OCL,arg)
+      Lift[
+        line=line,
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkNamedType(path:Seq(String),arg)
+      NamedType[
+        path=path->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkNegate(exp:OCL,arg)
+      Negate[
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkObjectp(class:String,names:Seq(String),slots:Seq(Pattern),arg)
+      Objectp[
+        class=self.walk(class,arg),
+        names=names->collect(x | self.walk(x,arg)),
+        slots=slots->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkOpType(domains:Seq(TypeExp),range:TypeExp,arg)
+      OpType[
+        domains=domains->collect(x | self.walk(x,arg)),
+        range=self.walk(range,arg)
+      ]
+    end
+
+    @Operation walkOperation(documentation:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,parameters:Seq(Pattern),performable:Performable,type:TypeExp,arg)
+      Operation[
+        documentation=self.walk(documentation,arg),
+        imports=imports->collect(x | self.walk(x,arg)),
+        isMultiArgs=self.walk(isMultiArgs,arg),
+        name=self.walk(name,arg),
+        parameters=parameters->collect(x | self.walk(x,arg)),
+        performable=self.walk(performable,arg),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkOrder(first:OCL,second:OCL,arg)
+      Order[
+        first=self.walk(first,arg),
+        second=self.walk(second,arg)
+      ]
+    end
+
+    @Operation walkParametricType(args:Seq(TypeExp),constructor:Seq(String),arg)
+      ParametricType[
+        args=args->collect(x | self.walk(x,arg)),
+        constructor=constructor->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkParentheses(exp:Performable,arg)
+      Parentheses[
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkParserImport(exp:Performable,names:Seq(String),arg)
+      ParserImport[
+        exp=self.walk(exp,arg),
+        names=names->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkPath(names:Seq(Element),root:OCL,arg)
+      Path[
+        names=names->collect(x | self.walk(x,arg)),
+        root=self.walk(root,arg)
+      ]
+    end
+
+    @Operation walkPathUpdate(path:Path,value:Performable,arg)
+      PathUpdate[
+        path=self.walk(path,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkSelf(line:Integer,arg)
+      Self[line=line]
+    end
+
+    @Operation walkSend(args:Seq(OCL),message:String,target:OCL,arg)
+      Send[
+        args=args->collect(x | self.walk(x,arg)),
+        message=self.walk(message,arg),
+        target=self.walk(target,arg)
+      ]
+    end
+
+    @Operation walkSetExp(line:Integer,collType:String,elements:Seq(OCL),arg)
+      SetExp[
+        line=line,
+        collType=self.walk(collType,arg),
+        elements=elements->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkSlotUpdate(name:String,target:OCL,value:OCL,arg)
+      SlotUpdate[
+        name=self.walk(name,arg),
+        target=self.walk(target,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkStrExp(line:Integer,value:String,arg)
+      StrExp[
+        line=line,
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkSyntaxp(exp:Performable,arg)
+      Syntaxp[
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkTailUpdate(seq:Performable,value:Performable,arg)
+      TailUpdate[
+        seq=self.walk(seq,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkThrow(line:Integer,exp:Performable,arg)
+      Throw[
+        line=line,
+        exp=self.walk(exp,arg)
+      ]
+    end
+
+    @Operation walkTry(line:Integer,body:Performable,handler:Performable,name:String,arg)
+      Try[
+        line=line,
+        body=self.walk(body,arg),
+        handler=self.walk(handler,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkValueBinding(name:String,type:OCL,value:OCL,arg)
+      ValueBinding[
+        name=self.walk(name,arg),
+        value=self.walk(value,arg),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkVar(line:Integer,name:String,arg)
+      Var[
+        line=line,
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkVarUpdate(name:String,value:Performable,arg)
+      VarUpdate[
+        name=self.walk(name,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkVarp(name:String,pattern:Pattern,type:TypeExp,arg)
+      Varp[
+        name=self.walk(name,arg),
+        pattern=self.walk(pattern,arg),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkObject(o,arg)
+      @CaseObj o of
+        Addp[left,right] do
+          self.walkAddp(left,right,arg)
+        end
+        Apply[args,operator] do
+          self.walkApply(args,operator,arg)
+        end
+        BinExp[binOp,left,right] do
+          self.walkBinExp(binOp,left,right,arg)
+        end
+        Binding[name] do
+          self.walkBinding(name,arg)
+        end
+        BoolExp[line,value] do
+          self.walkBoolExp(line,value,arg)
+        end
+        CollExp[args,collOp,collection] do
+          self.walkCollExp(args,collOp,collection,arg)
+        end
+        Condp[condition,pattern] do
+          self.walkCondp(condition,pattern,arg)
+        end
+        ConsExp[head,tail] do
+          self.walkConsExp(head,tail,arg)
+        end
+        Consp[head,tail] do
+          self.walkConsp(head,tail,arg)
+        end
+        Const[value] do
+          self.walkConst(value,arg)
+        end
+        Constp[const] do
+          self.walkConstp(const,arg)
+        end
+        ContextDef[element,isForward,path] do
+          self.walkContextDef(element,isForward,path,arg)
+        end
+        Dot[name,target] do
+          self.walkDot(name,target,arg)
+        end
+        Drop[exp] do
+          self.walkDrop(exp,arg)
+        end
+        DropPattern[pattern] do
+          self.walkDropPattern(pattern,arg)
+        end
+        FloatExp[line,postPoint,prePoint] do
+          self.walkFloatExp(line,postPoint,prePoint,arg)
+        end
+        FunBinding[name,args,type,value] do
+          self.walkFunBinding(name,args,type,value,arg)
+        end
+        HeadUpdate[seq,value] do
+          self.walkHeadUpdate(seq,value,arg)
+        end
+        If[line] do
+          self.walkIf(line,o.test,o.get("then"),o.get("else"),arg)
+        end
+        ImportIn[body,nameSpace] do
+          self.walkImportIn(body,nameSpace,arg)
+        end
+        Includingp[element,set] do
+          self.walkIncludingp(element,set,arg)
+        end
+        Instantiate[args,class] do
+          self.walkInstantiate(args,class,arg)
+        end
+        IntExp[line,value] do
+          self.walkIntExp(line,value,arg)
+        end
+        IterExp[body,collection,iterOp,name] do
+          self.walkIterExp(body,collection,iterOp,name,arg)
+        end
+        Iterate[accumulator,body,collection,name,value] do
+          self.walkIterate(accumulator,body,collection,name,value,arg)
+        end
+        KeyArg[name,value] do
+          self.walkKeyArg(name,value,arg)
+        end
+        Keyp[name,pattern] do
+          self.walkKeyp(name,pattern,arg)
+        end
+        Keywordp[class,keys,names] do
+          self.walkKeywordp(class,keys,names,arg)
+        end
+        Let[line,bindings,body] do
+          self.walkLet(line,bindings,body,arg)
+        end
+        Lift[line,exp] do
+          self.walkLift(line,exp,arg)
+        end
+        NamedType[path] do
+          self.walkNamedType(path,arg)
+        end
+        Negate[exp] do
+          self.walkNegate(exp,arg)
+        end
+        Objectp[class,names,slots] do
+          self.walkObjectp(class,names,slots,arg)
+        end
+        OpType[domains,range] do
+          self.walkOpType(domains,range,arg)
+        end
+        Operation[documentation,imports,isMultiArgs,name,parameters,performable,type] do
+          self.walkOperation(documentation,imports,isMultiArgs,name,parameters,performable,type,arg)
+        end
+        Order[first,second] do
+          self.walkOrder(first,second,arg)
+        end
+        ParametricType[args,constructor] do
+          self.walkParametricType(args,constructor,arg)
+        end
+        Parentheses[exp] do
+          self.walkParentheses(exp,arg)
+        end
+        ParserImport[exp,names] do
+          self.walkParserImport(exp,names,arg)
+        end
+        Path[names,root] do
+          self.walkPath(names,root,arg)
+        end
+        PathUpdate[path,value] do
+          self.walkPathUpdate(path,value,arg)
+        end
+        Self[line] do
+          self.walkSelf(line,arg)
+        end
+        Send[args,message,target] do
+          self.walkSend(args,message,target,arg)
+        end
+        SetExp[line,collType,elements] do
+          self.walkSetExp(line,collType,elements,arg)
+        end
+        SlotUpdate[name,target,value] do
+          self.walkSlotUpdate(name,target,value,arg)
+        end
+        StrExp[line,value] do
+          self.walkStrExp(line,value,arg)
+        end
+        Syntaxp[exp] do
+          self.walkSyntaxp(exp,arg)
+        end
+        TailUpdate[seq,value] do
+          self.walkTailUpdate(seq,value,arg)
+        end
+        Throw[line,exp] do
+          self.walkThrow(line,exp,arg)
+        end
+        Try[line,body,handler,name] do
+          self.walkTry(line,body,handler,name,arg)
+        end
+        ValueBinding[name,type,value] do
+          self.walkValueBinding(name,type,value,arg)
+        end
+        Var[line,name] do
+          self.walkVar(line,name,arg)
+        end
+        VarUpdate[name,value] do
+          self.walkVarUpdate(name,value,arg)
+        end
+        Varp[name,pattern,type] do
+          self.walkVarp(name,pattern,type,arg)
+        end
+        else o
+      end
+    end
+  end

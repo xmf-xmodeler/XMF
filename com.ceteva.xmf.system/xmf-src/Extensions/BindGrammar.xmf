@@ -1,0 +1,25 @@
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Binding Syntax                               *
+ *                            -------------------                             *
+ *                                                                            *
+ *   A binding has the general form:                                          *
+ *                                                                            *
+ *     @Bind name =                                                           *
+ *       value                                                                *
+ *     end                                                                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XOCL;
+import Parser::BNF;
+
+context XOCL::Bind
+
+  @Grammar extends OCL::OCL.grammar
+  
+    Bind ::= name = Name '=' value = Exp 'end' { XOCL::Bind(name,value) }.
+    
+  end

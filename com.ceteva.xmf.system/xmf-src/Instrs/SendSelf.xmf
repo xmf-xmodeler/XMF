@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Send a Message To The Current Target                    *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as SEND except that the target of the message is the current target. *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class SendSelf extends Instr
+ 
+    @Attribute arity : Integer end
+    @Attribute message : Symbol end
+    @Attribute messageOffset : Integer end
+    
+    @Constructor(message,arity) end
+    
+    @Operation toString():String
+      "<SendSelf " + arity + "," + message.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.messageOffset := codeBox.constOffset(message);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(messageOffset.byte(2),arity,messageOffset.byte(1))
+    end
+    
+  end
+  

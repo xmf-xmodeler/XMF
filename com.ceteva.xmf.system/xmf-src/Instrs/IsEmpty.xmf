@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                     Checking Whether Something is Empty                    *
+ *                    -------------------------------------                   *
+ *                                                                            *
+ *  Pops a value from the stack and pushes a boolean determining whether the  *
+ *  value is an empty collection. The VM knows about sets, sequences and      *
+ *  vectors. If the value is an object then it is sent an isEmpty/0 message.  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class IsEmpty extends Instr
+    
+  end

@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Sending Messages                             *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A message has a target, a message name and a sequence of arguments. The   *
+ *  target is evaluated, the message name is looked up in the type of the     *
+ *  target value. This should result in an invokable element. If so, then the *
+ *  args are evaluated and supplied as arguments. The target value is supplied*
+ *  as the value of self to the element.                                      *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Send extends OCL::OCL 
+  
+    @Attribute target  : OCL::OCL      end
+    @Attribute message : String        end
+    @Attribute args    : Seq(OCL::OCL) end
+    
+    @Constructor(target,message,args) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S.~S(~{,~;~S~})",Seq{
+        target.pprint(indent),
+        if message.isKindOf(SeqOfElement) then message->at(0) else message end,
+        args->collect(arg | arg.pprint(indent))})
+    end
+    
+  end

@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Literal String Matching                           *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Matches when the prefix of the input matches the literal value. Leaves    *
+ *  the literal value as a sequence of characters at the head of the stack.   *
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Literal extends Pattern
+  
+    @Attribute value : String end
+    
+    @Constructor(value) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      if chars->size < value->size
+      then fail()
+      else
+        let prefix = chars->take(value->size)
+        in if prefix->asString = value
+           then succ(chars->drop(value->size),env,Seq{prefix | stack},fail)
+           else fail()
+           end
+        end
+      end
+    end
+    
+    @Operation vars():Set(String)
+      // Returns the set of vars bound in the receiver.
+      Set{}
+    end
+    
+  end
+          

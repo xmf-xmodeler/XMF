@@ -1,0 +1,181 @@
+parserImport XOCL;
+
+import Docs;
+        
+context Docs
+
+  @Class Machine 
+  
+    @Attribute stack          : Vector = Vector(1024 * 5)  end
+    @Attribute TOS            : Integer                    end
+    @Attribute frame          : Integer                    end
+    @Attribute fail           : Vector = Vector(1024 * 2)  end
+    @Attribute buffer         : Buffer = Buffer(1024,true) end
+    @Attribute pageWidth      : Integer = 80               end
+    @Attribute ribbonWidth    : Integer = 50               end
+    @Attribute textPosition   : Integer                    end
+    @Attribute linePosition   : Integer                    end
+    @Attribute ribbonPosition : Integer                    end
+    @Attribute failFrame      : Integer                    end
+    
+    @Constructor(pageWidth,ribbonWidth) ! end
+    
+    @Operation fail()
+      // Unwind the stack back to the previous frame
+      // in the fail frame and push the fail frame.
+      // Pop the fail stack...
+      @WithDocEnv
+        self.frame := fail.ref(failFrame + PREV_FRAME) + FRAME_SIZE;
+        self.TOS := self.frame + FRAME_SIZE;
+        stack.put(frame + PREV_FRAME,fail.ref(failFrame + PREV_FRAME));
+        stack.put(frame + INDENT,fail.ref(failFrame + INDENT));
+        self.textPosition := fail.ref(failFrame + TEXT_POSITION);
+        self.linePosition := fail.ref(failFrame + LINE_POSITION);
+        self.ribbonPosition := fail.ref(failFrame + RIBBON_POSITION);
+        stack.put(frame + CODE,fail.ref(failFrame + CODE));
+        stack.put(frame + CUT,fail.ref(failFrame + CUT));
+        self.failFrame := fail.ref(failFrame + FAIL)
+      end
+    end
+    
+    @Operation load(code)
+      self.load(code,0)
+    end
+    
+    @Operation load(code,linePosition)
+      @WithDocEnv
+        stack.put(TOS + PREV_FRAME,0-1);
+        stack.put(TOS + INDENT,linePosition);
+        self.textPosition := 0;
+        self.linePosition := linePosition;
+        self.ribbonPosition := 0;
+        self.failFrame := 0-1;
+        stack.put(TOS + CODE,code);
+        stack.put(TOS + CUT,0-1);
+        self.frame := TOS;
+        self.TOS := TOS + FRAME_SIZE
+      end
+    end
+    
+    @Operation pushFrame(indent,cut,code)
+      @WithDocEnv
+        let prevFrame = frame
+        in self.frame := TOS;
+           self.TOS := TOS + FRAME_SIZE;
+           stack.put(frame + PREV_FRAME,prevFrame);
+           stack.put(frame + INDENT,indent);
+           stack.put(frame + CODE,code);
+           stack.put(frame + CUT,cut)
+        end
+      end
+    end
+    
+    @Operation pprint()
+      @WithDocEnv
+        format(stdout,"frame = ~S~%",Seq{frame});
+        format(stdout,"CUT = ~S~%",Seq{stack.ref(frame + CUT)});
+        format(stdout,"CODE = ~S~%",Seq{stack.ref(frame + CODE)});
+        format(stdout,"FAIL = ~S~%",Seq{failFrame});
+        format(stdout,"RIBBON_POSITION = ~S~%",Seq{ribbonPosition});
+        format(stdout,"LINE_POSITION = ~S~%",Seq{linePosition});
+        format(stdout,"TEXT_POSITION = ~S~%",Seq{textPosition});
+        format(stdout,"INDENT = ~S~%",Seq{stack.ref(frame + INDENT)});
+        format(stdout,"PREV_FRAME = ~S~%~%~%",Seq{stack.ref(frame + PREV_FRAME)});
+        
+        if failFrame >= 0
+        then 
+          format(stdout,"fail = ~S~%",Seq{failFrame});
+          format(stdout,"CUT = ~S~%",Seq{fail.ref(failFrame + CUT)});
+          format(stdout,"CODE = ~S~%",Seq{fail.ref(failFrame + CODE)});
+          format(stdout,"FAIL = ~S~%",Seq{fail.ref(failFrame + FAIL)});
+          format(stdout,"RIBBON_POSITION = ~S~%",Seq{fail.ref(failFrame + RIBBON_POSITION)});
+          format(stdout,"LINE_POSITION = ~S~%",Seq{fail.ref(failFrame + LINE_POSITION)});
+          format(stdout,"TEXT_POSITION = ~S~%",Seq{fail.ref(failFrame + TEXT_POSITION)});
+          format(stdout,"INDENT = ~S~%",Seq{fail.ref(failFrame + INDENT)});
+          format(stdout,"PREV_FRAME = ~S~%~%~%",Seq{fail.ref(failFrame + PREV_FRAME)})
+        end
+      end
+    end
+        
+    
+    @Operation pushFail(code)
+      @WithDocEnv
+        let failFrame = if failFrame < 0 then 0 else failFrame + FAIL_FRAME_SIZE end
+        in fail.put(failFrame + PREV_FRAME,stack.ref(frame + PREV_FRAME));
+           fail.put(failFrame + INDENT,stack.ref(frame + INDENT));
+           fail.put(failFrame + TEXT_POSITION,textPosition);
+           fail.put(failFrame + LINE_POSITION,linePosition);
+           fail.put(failFrame + RIBBON_POSITION,ribbonPosition);
+           fail.put(failFrame + FAIL,self.failFrame);
+           fail.put(failFrame + CODE,code);
+           fail.put(failFrame + CUT,stack.ref(frame + CUT));
+           self.failFrame := failFrame
+         end
+      end
+    end 
+    
+    @Operation run()
+      @WithDocEnv
+        @While frame >= 0 do
+          let code = stack.ref(frame + CODE)
+          in if code->isEmpty
+             then self.frame := stack.ref(frame + PREV_FRAME)
+             else
+               let instr = code->head 
+               in stack.put(frame + CODE,code->tail);
+                  @CaseObj instr of
+                    Just[text] do
+                      if canPrint(text,pageWidth,ribbonWidth,linePosition,ribbonPosition) or failFrame < 0
+                      then 
+                        emit(text,buffer,textPosition);
+                        self.textPosition := textPosition + text->size;
+                        self.linePosition := linePosition + text->size;
+                        self.ribbonPosition := ribbonPosition + text->size
+                      else self.fail() 
+                      end
+                    end
+                    Order[left,right] do
+                      stack.put(frame + CODE,Seq{left,right} + code->tail)
+                    end
+                    Indent[cols,doc] do
+                      self.pushFrame(stack.ref(frame + INDENT) + cols,stack.ref(frame + CUT),Seq{doc})
+                    end
+                    Block[doc] do
+                      self.pushFrame(linePosition,stack.ref(frame + CUT),Seq{doc})
+                    end
+                    Cut[doc] do
+                      self.failFrame := stack.ref(frame + CUT);
+                      self.pushFrame(stack.ref(frame + INDENT),stack.ref(frame + CUT),Seq{doc})
+                    end
+                    Newline[ ] do
+                      let indent = stack.ref(frame + INDENT)
+                      in newline(indent,buffer,textPosition);
+                         self.textPosition := textPosition + indent + 1;
+                         self.linePosition := indent;
+                         self.ribbonPosition := 0
+                      end
+                    end
+                    Mark[doc] do
+                      self.pushFrame(stack.ref(frame + INDENT),failFrame,Seq{doc})
+                    end
+                    Alt[left,right] do
+                      stack.put(frame + CODE,Seq{left | code->tail});
+                      self.pushFail(Seq{right | code->tail})
+                    end
+                    else self.error(instr.toString())
+                  end
+               end
+             end
+          end
+          //format(stdout,"Produced~S frame = ~S~%",Seq{buffer.toString().subString(0,textPosition),frame})
+        end
+      end
+    end
+    
+    @Operation text()
+      @WithDocEnv
+        buffer.toString().subString(0,textPosition)
+      end
+    end
+    
+  end

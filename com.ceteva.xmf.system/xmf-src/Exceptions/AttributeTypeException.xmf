@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class AttributeTypeException extends Exception
+ 
+    @Attribute name      : String     end
+    @Attribute type      : String     end
+    @Attribute exception : Exception  end
+    
+    @Constructor(name,type,exception) !
+      self.backtrace := exception.backtrace;
+      self.message := 
+        formats("Something has gone wrong with the attribute definition:~%~%" +
+                "~V@Attribute ~S : ~S ... end~%~%" +
+                "Probably the referenced type does not exist.~%~%" +
+                "The actual exception is as follows:~%~%~V~S~%~%",Seq{2,name,type,2,exception.message})
+    end
+    
+  end
+      
+     

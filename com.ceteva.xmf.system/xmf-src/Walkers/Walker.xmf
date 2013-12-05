@@ -1,0 +1,411 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Walker                                    *
+ *                       ---------------------------                          *
+ *                                                                            *
+ * An element walker is used to perform some arbitrary task over the structure*
+ * of a value. A walker recursively descends into an element's structure and  *
+ * dispatches to appropriate walking operations. A walker handles cycles in a *
+ * value by dispatching to a special operation after an element has been      *
+ * encountered for the first time. To create your own walker you should       *
+ * specialise this class or one of its descendants and override the provided  *
+ * operations. By default, a walker just traverses the supplied element and   *
+ * returns it.                                                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Walkers
+
+  @Class Walker
+    
+     // The table is used to record elements that have identity when they are
+     // encountered by the walker. This allows subsequent encounters to be
+     // detected and prevents the walker looping...
+     
+     @Attribute table    : Table = Table(1000) end
+     
+     // Each element in the table is allocated a unique reference as its
+     // value in the table. This counter is used to allocate the labels...
+     
+     @Attribute refCount : Integer            end
+     
+     // A walker keeps track of the number of steps it takes...
+     
+     @Attribute visited  : Integer        (?) end
+     
+     @Operation defaultWalk(e:Element,arg:Element):Element
+     
+       // Called when the type of e is unknown....
+       
+       e
+     end
+     
+     @Operation encounter(element)
+     
+       // Each time an element is encountered for the
+       // first time by the walker, it is added to the table
+       // associated with a unique label...
+       
+       self.encounter(element,self.newRef())
+     end
+     
+     @Operation encounter(element,label)
+     
+       // Save a reference to the label against the walked 
+       // element....
+       
+       table.put(element,label)
+     end
+     
+     @Operation encountered(element):Boolean
+     
+       // Returns true when we have already walked 
+       // the element...
+       
+       table.hasKey(element)
+     end
+     
+     @Operation getRef(element)
+     
+       // Returns the label associated with the element
+       // assuming that the element has been encountered...
+       
+       table.get(element)
+     end
+     
+     @Operation initWalker()
+       self.reset()
+     end
+     
+     @Operation newRef():Integer
+     
+       // Allocate a new unique label for an element
+       // in the table...
+       
+       self.refCount := refCount + 1;
+       refCount
+     end
+     
+     @Operation reset()
+     
+       // Call reset each time you walk a fresh value....
+       
+       table.clear();
+       self.refCount := 0;
+       self.visited := 0
+     end
+     
+     @Operation reWalk(element,arg) 
+     
+       // Called when the element has already been
+       // encountered. Redefine this operation
+       // to take appropriate action...
+       
+       element
+     end
+     
+     @Operation walk(e,arg)
+     
+       // The walk operation is the entry point for walking.
+       // The first argument e is the element that is to be
+       // walked. The second argument is an arbitrary value
+       // (often ignored and supplied as null) that allows 
+       // context information to be processed during the walk...
+       
+       // Take another step...
+       
+       self.visited := self.visited + 1;
+       
+       // If the element has already been encountered then
+       // just call reWalk...
+       
+       if Kernel_tableHasKey(table,e) 
+       then self.reWalk(e,arg)
+       else
+       
+         // Dispatch on the type of the element...
+         
+         @CaseInt[35] Kernel_tag(e) of 
+           XMF::ARRAY          do self.walkVector(e,arg)        end
+           XMF::BOOL           do self.walkBoolean(e,arg)       end
+           XMF::BUFFER         do self.walkBuffer(e,arg)        end
+           XMF::CLIENT         do self.walkClient(e,arg)        end
+           XMF::CODE           do self.walkCode(e,arg)          end
+           XMF::CODEBOX        do self.walkCodeBox(e,arg)       end
+           XMF::CONS           do self.walkSeq(e,arg)           end
+           XMF::CONT           do self.walkCont(e,arg)          end
+           XMF::DAEMON         do self.walkDaemon(e,arg)        end
+           XMF::FLOAT          do self.walkFloat(e,arg)         end
+           XMF::FOREIGNFUN     do self.walkForeignFun(e,arg)    end
+           XMF::FOREIGNOBJ     do self.walkForeignObj(e,arg)    end
+           XMF::FUN            do self.walkFun(e,arg)           end
+           XMF::HASHTABLE      do self.walkTable(e,arg)         end
+           XMF::INPUT_CHANNEL  do self.walkInputChannel(e,arg)  end
+           XMF::INT            do self.walkInteger(e,arg)       end
+           XMF::NEGINT         do self.walkInteger(e,arg)       end
+           XMF::NIL            do self.walkNil(arg)             end
+           XMF::OBJ            do self.walkObject(e,arg)        end
+           XMF::OUTPUT_CHANNEL do self.walkOutputChannel(e,arg) end
+           XMF::SET            do self.walkSet(e,arg)           end
+           XMF::STRING         do self.walkString(e,arg)        end
+           XMF::SYMBOL         do self.walkSymbol(e,arg)        end
+           XMF::THREAD         do self.walkThread(e,arg)        end
+           XMF::UNDEFINED      do self.walkNull(arg)            end
+           XMF::BIGINT         do self.walkBigInt(e,arg)        end
+           else self.defaultWalk(e,arg)
+         end
+       end
+     end
+     
+     @Operation walkBigInt(b:Integer,arg)
+     
+       // Just return the bigint...
+       
+       b
+     end
+     
+     @Operation walkBoolean(b:Boolean,arg:Element):Element 
+     
+       // Just return the boolean value...
+       
+       b
+     end
+     
+     @Operation walkBuffer(buffer,arg)
+     
+       // Buffers have state, so encounter the buffer and
+       // then walk the elements of the buffer...
+       
+       self.encounter(buffer);
+       @Count i from 0 to buffer->size do
+         self.walk(buffer->at(i),arg)
+       end;
+       buffer
+     end
+     
+     @Operation walkClient(client,arg)
+     
+       // Clients are atomic...
+       
+       client
+     end
+     
+     @Operation walkCode(code,arg) 
+     
+       // Code vectors are atomic...
+     
+       code 
+       
+     end
+     
+     @Operation walkCodeBox(codeBox,arg)
+     
+       // Code boxes have state, so encounter the code
+       // box and then walk the components...
+     
+       self.encounter(codeBox); 
+       self.walk(Kernel_codeBoxConstants(codeBox),arg);
+       self.walk(Kernel_codeBoxLocals(codeBox),arg);
+       self.walk(Kernel_codeBoxName(codeBox),arg);
+       self.walk(Kernel_codeBoxResourceName(codeBox),arg);
+       self.walk(Kernel_codeBoxSource(codeBox),arg);
+       codeBox 
+     end
+     
+     @Operation walkCont(cont,arg) 
+     
+       // Continuations are assumed to be atomic...
+       
+       cont 
+     end
+     
+     @Operation walkDaemon(daemon,arg) 
+     
+       // Encounter the daemon and then walk the 
+       // components...
+     
+       self.encounter(daemon);
+       self.walk(Kernel_daemonId(daemon),arg);
+       self.walk(Kernel_daemonType(daemon),arg);
+       self.walk(Kernel_daemonSlot(daemon),arg);
+       self.walk(Kernel_daemonAction(daemon),arg);
+       self.walk(Kernel_daemonPersistent(daemon),arg);
+       self.walk(Kernel_daemonTraced(daemon),arg);
+       self.walk(Kernel_daemonTarget(daemon),arg);
+       daemon 
+     end
+     
+     @Operation walkFloat(float,arg) 
+     
+       // Floats are atomic...
+       
+       float 
+     end
+     
+     @Operation walkForeignFun(fun,arg) 
+     
+       // Foreign functions are atomic...
+       
+       fun 
+     end
+     
+     @Operation walkForeignObj(obj,arg) 
+     
+       // This probably needs extending to get the slots of
+       // the foreign object and then walk the values...
+     
+       self.encounter(obj);
+       obj 
+       
+     end
+     
+     @Operation walkFun(fun,arg) 
+     
+       // Encounter the function and then walk the
+       // components...
+     
+       self.encounter(fun);
+       self.walk(Kernel_funArity(fun),arg);
+       self.walk(Kernel_funCodeBox(fun),arg);
+       self.walk(Kernel_funDoc(fun),arg);
+       self.walk(Kernel_funDynamics(fun),arg);
+       self.walk(Kernel_funGlobals(fun),arg);
+       self.walk(Kernel_funOwner(fun),arg);
+       self.walk(Kernel_funProperties(fun),arg);
+       fun 
+     end
+     
+     @Operation walkInputChannel(inch,arg) 
+     
+       // Input channels are atomic...
+       
+       inch 
+     end
+     
+     @Operation walkInteger(i:Integer,arg:Element)
+     
+       // Integers are atomic...
+        
+       i
+     end
+     
+     @Operation walkNil(arg:Element):Element 
+     
+       // The empty sequence is a special value and is
+       // atomic...
+       
+       Seq{} 
+     end
+     
+     @Operation walkNull(arg:Element)
+     
+       // The value null is special and atomic...
+       
+       null
+     end
+     
+     @Operation walkObject(o:Object,arg:Element)
+     
+       // An object has state, so it is encountered.
+       // Then the slots of the object are walked before
+       // returning the object...
+       
+       self.encounter(o);
+       @For slot in Kernel_objSlots(o) do
+         self.walkSlot(o,slot->head,slot->tail,arg)
+       end;
+       o
+     end
+     
+     @Operation walkOutputChannel(out,arg) 
+     
+       // Output channels are atomic...
+       
+       out 
+     end
+     
+     @Operation walkSeq(s:SeqOfElement,arg:Element):Element 
+     
+       // Sequences are treated as pairs. They have state
+       // so they are encountered and then the head and tail
+       // of the sequence is walked...
+       
+       self.encounter(s);
+       self.walk(s->head,arg);
+       self.walk(s->tail,arg);
+       s   
+     end
+     
+     @Operation walkSet(s:SetOfElement,arg:Element):Element 
+     
+       // Sets have no state so they are not encountered...
+       
+       @For e in s do
+         self.walk(e,arg)
+       end;
+       s 
+     end
+     
+     @Operation walkSlot(o:Object,s:String,v:Element,arg:Element) 
+     
+       // This operation is called as a side-effect of encountering
+       // an object. The object, slot and slot-value are passed
+       // to this operation. The default action is to walk the
+       // slot-value...
+       
+       self.walk(v,arg)
+     end
+     
+     @Operation walkString(s:String,arg:Element):Element 
+     
+       // Strings are atomic and have no state...
+       
+       s   
+     end
+     
+     @Operation walkSymbol(symbol,arg) 
+     
+       // Symbols are atomic...
+       
+       symbol 
+     end
+     
+     @Operation walkTable(t:Table,arg:Element):Element 
+     
+       // Tables have state, so they are encountered.
+       // Don't walk the table of the walker...
+       
+       if t <> table
+       then
+         self.encounter(t);
+         @For key inTableKeys t do
+           self.walk(key,arg);
+           self.walk(t.get(key),arg)
+         end;
+         t 
+       end
+     end
+     
+     @Operation walkThread(thread,arg) 
+     
+       // Threads are atomic...
+       
+       thread 
+     end
+     
+     @Operation walkVector(v:Vector,arg:Element):Element 
+     
+       // Buffers have state, so they are encountered and then
+       // the elements of the vector are walked...
+       
+       self.encounter(v);
+       @Count i from 0 to v->size() do
+         self.walk(v->at(i),arg)
+       end;
+       v 
+     end
+     
+   end
+            

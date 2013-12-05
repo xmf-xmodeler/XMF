@@ -1,0 +1,17 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Element
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Element tag=tag>
+        @For att in attributes do
+          att.toXML(out)
+        end;
+        children.toXML(out)
+      </Grammar>
+    end
+  end

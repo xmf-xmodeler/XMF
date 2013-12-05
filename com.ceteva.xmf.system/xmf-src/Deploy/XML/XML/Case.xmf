@@ -1,0 +1,17 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Case
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Case>
+        @For clause in clauses do
+          clause.toXML(out)
+        end;
+        otherwise.toXML(out)
+      </Case>
+    end
+  end

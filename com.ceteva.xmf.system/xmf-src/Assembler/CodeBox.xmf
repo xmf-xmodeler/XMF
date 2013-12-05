@@ -1,0 +1,425 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Code Boxes                                  *
+ *                             ----------------                               *
+ *                                                                            *
+ *  A code box is the fundamental executable VM component. A code box contains*
+ *  instructions (a vector of instruction words). The instructions reference  *
+ *  values in a constants vector held in the code box. The constants are      *
+ *  referenced by indices encoded in the instruction operands. A code box     *
+ *  also defines the number of local variables required by the instructions   *
+ *  when they are executed. A code box has a name and may contain a source    *
+ *  code string.                                                              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Instrs;
+
+context Assembler
+
+    @Class CodeBox extends Resource
+
+      // Each code box has a name. If a code box is
+      // created to hold the code of an operation
+      // then the code box name is the name of the
+      // operation. If no name is supplied then the
+      // code box may be attributed the name 'anonymous'...
+      
+      @Attribute name      : String            end  
+      
+      // The maximum number of locals that are required
+      // to execute the code in the box. When the code
+      // box is 'entered' by the VM, a new call frame is
+      // constructed. Each call frame allocates space for
+      // local variables based on the value of the locals
+      // slot of the code box...
+      
+      @Attribute locals    : Integer           end  
+
+      // Each code box contains a vector of constant values.
+      // The instructions in the code box reference the
+      // constants in the code box using indices into the
+      // vector (encoded into the instruction operands).
+      // The constant at index 0 is always a vector of 
+      // local variable names. This vector is used by the 
+      // LOCALNAME and UNSETLOCAL instructions to set
+      // the slot in the current call frame to be the name
+      // of a local variable. debuggers can make use of these
+      // names to associate names with the local variable
+      // slots in the call frame...
+      
+      @Attribute constants : Seq(Element)      end  
+
+      // The instructions that will be performed when the code
+      // box is 'entered' are held in a sequence of instruction
+      // objects. Code box objects are transformed into VM
+      // code boxes by the assembler. At this point the 
+      // sequence of instructions is transformed into a code
+      // vector...
+      
+      @Attribute code      : Seq(Element)      end  
+      
+      // The source code that was compiled to produce this code
+      // box. A compiler switch may be used to suppress the
+      // retention of source code...
+      
+      @Attribute source    : String            end  
+      
+      @Constructor()
+        self.initConstants()
+      end
+      
+      @Constructor(name) ! 
+        self.initConstants()
+      end
+      
+      @Constructor(name,locals,source) 
+        self.initConstants()
+      end
+      
+      @Operation addInstr(instr):Element
+        
+        // Instructions are added to the code box using
+        // this operation. Note that the first pass of
+        // the assembler adds instructions to the hed of the
+        // sequence and therefore the instructions are
+        // in reverse order before they are finally processed...
+          
+        self.code := Seq{instr | code}
+      end
+
+      @Operation codeBoxes():Set(CodeBox)
+      
+        // A code box may contain sub-code-boxes as part of 
+        // its constants area. Typically the sub-code-boxes 
+        // contain instructions for functions that are created 
+        // when the parent is executed. This operation returns 
+        // all the code boxes in a parent...
+         
+        constants
+          ->select(c | c.isKindOf(CodeBox))
+          ->collect(cb | cb.codeBoxes())
+          ->asSet
+          ->flatten
+          ->including(self)
+      end
+       
+      @Operation constOffset(value:Element):Element
+      
+        // Find the offset in the constants are of the code box 
+        // for a given value. A given value should not occur more 
+        // than once in the constants area of a code box...
+        
+        if constants->includes(value)
+        then constants->indexOf(value)
+        elseif value.isKindOf(Compiler::Symbol)
+        then self.symbolOffset(value)
+        else 
+          self.constants := constants.linkAt(value,constants->size);
+          constants->size - 1
+        end
+      end  
+      
+      @Operation initConstants()
+      
+        // The first constant in the constants vector is always a
+        // vector of local names. The local names are used by 
+        // VM instructions and can be set in the locals slots of
+        // the call frame. The locals names in the call frame
+        // can be used by debuggers to name the variable values in
+        // the call frame...
+        
+        self.constants := Seq{Vector(0)}
+      end
+      
+      @Operation localNames()
+        
+        // Returns the local names in the constants table.
+        // This is always at position 0...
+        
+        constants->at(0)
+      end
+      
+      @Operation setLocalNames(names)
+      
+        // Updates the local names...
+        
+        constants->head := names
+        
+      end
+      
+      @Operation newLocalName(name:String):Integer
+      
+        // Local names exist at position 0 in the constants table of
+        // an operation. Add in the names and return the index into
+        // the names ...
+        
+        let names = self.localNames()
+        in if names.indexOf(name) < 0
+           then 
+             let newNames = names + Seq{name}.asVector()
+             in self.setLocalNames(newNames);
+                names->size
+             end
+           else names.indexOf(name)
+           end
+        end
+      end
+      
+      @Operation offset(label:String,instrs):Integer
+      
+        // Work out the number of instructions necessary
+        // to jump to get to the label...
+        
+        let offset = 0;
+            found = false
+        in @While not(found or instrs->isEmpty) do
+             if instrs->head.label() = label
+             then found := true
+             else 
+               offset := offset + 1;
+               instrs := instrs->tail
+             end
+           end;
+           if found
+           then offset
+           else 
+             format(stdout,"source = ~S~%",Seq{source});
+             format(stdout,"code = ~S~%",Seq{code}); 
+             self.error("Cannot calculate offset to non-existent label: " + label)
+           end
+        end
+      end
+      
+      @Operation ppCode(out):Element
+         
+         format(out,"Instructions:~%");
+         @For i in code->reverse do
+            if i.label() = ""  
+            then format(out,"~V ~S~%",Seq{10,i})
+            else format(out,"~<10>S ~S~%",Seq{i.label(),i})
+            end
+         end
+      end 
+      
+      @Operation ppConstants(out):Element
+          
+        if constants->isEmpty
+        then self
+        else 
+          format(out,"  Constants:~%    ");
+          @Count i from 0 to constants->size do
+            let constant = constants->at(i)
+            in if constant.isKindOf(CodeBox)
+               then format(out,"~S: [~S]~%",Seq{i,constant.name})
+               else
+                 @TypeCase(constant)
+                   Symbol do format(out,"~S: '~S'~%",Seq{i,constant.toString()}) end
+                   String do format(out,"~S: \"~S\"~%",Seq{i,constant.toString()}) end
+                   else format(out,"~S: ~S : ~S~%",Seq{i,constant.toString(),constant.of().path()})
+                 end
+               end;
+               if (i + 1) < constants->size
+               then format(out,"    ")
+               else self
+               end
+            end
+          end
+        end
+      end
+      
+      @Operation ppSource(out):Element
+         format(out,"  Source Code:~%    ~S~%",Seq{source})
+      end
+      
+      @Operation pprint(out)
+        self.setCodeBoxNames();
+        @For codeBox in self.codeBoxes() do
+          format(out,"Code Box: ~S(~S)~%",Seq{codeBox.name,codeBox.locals});
+          codeBox.ppConstants(out);
+          codeBox.ppSource(out);
+          codeBox.ppCode(out);
+          format(out,"~%~%")
+        end
+      end
+      
+      @Operation resolveLabels()
+        
+         // This operation is called in order to transform symbolic labels
+         // to relative instruction offsets in SKIP instructions...
+   
+        self.resolveLabelsForward();
+        self.resolveLabelsBackward()
+      end 
+      
+      @Operation resolveLabelsBackward()
+        let is = code
+        in @While not is->isEmpty do
+             let i = is->head
+             in @TypeCase(i)
+                  SkipBack do   
+                    i.setOffset(self.offset(i.targetLabel(),is)) 
+                  end
+                  else self
+                end;
+                is := is->tail
+             end
+           end
+        end
+      end
+      
+      @Operation resolveLabelsForward()
+        let is = code->reverse
+        in @While not is->isEmpty do
+             let i = is->head
+             in is := is->tail;
+                @TypeCase(i)
+                  Skip      do 
+                    i.setOffset(self.offset(i.targetLabel(),is))
+                  end
+                  SkipFalse do 
+                    i.setOffset(self.offset(i.targetLabel(),is)) 
+                  end
+                  Dispatch do
+                    @Count index from 0 to i.jumpTable.size() do
+                      let jumpTable = i.jumpTable then
+                          label = jumpTable.ref(index) then
+                          offset = self.offset(label,is)
+                      in i.jumpTable.put(index,offset)
+                      end
+                    end
+                  end
+                  else self
+                end
+             end
+           end
+        end
+      end
+     
+      @Operation setCodeBoxNames():Element
+      
+        // Some code boxes are named. For example because they correspond to 
+        // named class operations. If a code box is not given a name then 
+        // it it is allocated a unique name here...
+         
+        let codeBoxes = self.codeBoxes()->asSeq
+        in @Count i from 0 to codeBoxes->size do
+              let cb = codeBoxes->at(i)
+              in if cb.name = ""
+                 then cb.name := ("Code Box " + i)
+                 else cb
+                 end
+              end
+           end
+        end
+      end
+      
+      @Operation setResourceName(resourceName:String)
+        @For codeBox in self.codeBoxes() do
+          codeBox.resourceName := resourceName
+        end
+      end
+
+      @Operation symbolOffset(symbol):Element
+      
+         // Symbols (somewhat confusingly) can wind up in the
+         // constants area being instances of Compiler::Symbol
+         // rather than XCore::Symbol. These two types are
+         // intended to be the same...
+         
+         @Find(c,constants)
+           when c.isKindOf(Compiler::Symbol) andthen c.name = symbol.name
+           do constants->indexOf(c)
+           else
+             self.constants := constants + Seq{symbol};
+             constants->size - 1
+         end
+      end
+      
+      @Operation toMachineArray(values:Seq(Element)):Element
+        
+        // Translates a sequence of values to an array. This is necessary to
+        // represent code box constants (for example) as a machine data 
+        // structure...
+         
+        let array = Kernel_mkArray(values->size)
+        in if values->isEmpty
+           then array
+           else 
+             @Count i from 0 to values->size do
+               Kernel_arraySet(array,i,self.toMachineValue(values->at(i)))
+             end;
+             array
+           end
+        end
+      end 
+      
+      @Operation toMachineValue(element:Element)
+      
+        // All the constants in a code box need to be translated
+        // into VM values. Careful about compiler symbols (that
+        // should be XCore symbols) and translate any sub-code boxes...
+        
+        if element.isKindOf(Compiler::Symbol)
+        then Kernel_mkSymbol(element.name)
+        else 
+          if element.isKindOf(CodeBox)
+          then element.toMachineCodeBox()
+          else element
+          end
+        end
+      end
+      
+      @Operation toMachineCode(instrs:Seq(Instr))
+      
+        // Translate a sequence of instructions into a VM
+        // code vector...
+        
+        let code = Kernel_mkCode(instrs->size)
+        in @Count i from 0 to instrs->size do
+             Kernel_codeSet(code,i,instrs->at(i).code(),instrs->at(i).operands())
+           end;
+           code
+        end   
+      end
+      
+      @Operation toMachineCodeBox()
+      
+        // Translates the receiver to a machine code box and
+        // returns the result...
+        
+        self.resolveLabels();
+        let codeBox = Kernel_mkCodeBox(locals);
+            array = self.toMachineArray(constants);
+            code = self.toMachineCode(code->reverse + Seq{Return()})
+        in Kernel_codeBoxSetName(codeBox,name);
+           Kernel_codeBoxSetConstants(codeBox,array);
+           Kernel_codeBoxSetCode(codeBox,code);
+           Kernel_codeBoxSetSource(codeBox,source);
+           Kernel_codeBoxSetResourceName(codeBox,resourceName);
+           codeBox
+        end
+      end
+      
+      @Operation toMachineFun(arity:Integer,dynamics:Seq(Element)):Operation
+      
+        // Translates a code box to a machine function suitable for 
+        // applying to the appropriate number of arguments. The function 
+        // can then be called or serialized as appropriate. It is assumed 
+        // that the correct number of locals has been set in the code box 
+        // to support at least the required number arguments. 
+        // The dynamics define the non-local variables that can be referenced 
+        // by the function body. The dynamics are supplied as a sequence 
+        // of pairs of the form: Seq{<INTEGER> | <ELEMENT>} where the first 
+        // element is a type code and the second is a dynamic value. If the 
+        // first element is 1 then the second element should be a pair containing 
+        // a symbol and a value. If the first element is 2 then the second 
+        // element should be a hashtable that associates symbols (the names) 
+        // with values...
+         
+        Kernel_codeBoxToFun(self.toMachineCodeBox(),arity,dynamics)
+      end
+
+    end

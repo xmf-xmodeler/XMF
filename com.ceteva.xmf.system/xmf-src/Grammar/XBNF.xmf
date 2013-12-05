@@ -1,0 +1,243 @@
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XBNF  Grammar                                 *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  The syntax of grammars. The grammar for XBNF extends the OCL grammar      *
+ *  which provides the syntax for expressions in grammar actions.             *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Parser::BNF;
+  
+context Grammar
+
+  @Grammar extends OCL::OCL.grammar
+
+    XBNF_Action ::= 
+    
+      // An action is either an expression in { and } 
+      // which synthesizes a value or is a predicate that
+      // must be true for the parse to proceed...
+      
+      '{' exp = Exp '}' 
+      { PreAction(exp) } 
+    | '?' boolExp = Exp
+      { PrePredicate(boolExp) }.
+    
+    XBNF_Atom ::= 
+    
+      // An atom is the basic unit of a clause...
+      
+      XBNF_Action    
+    | XBNF_Literal   
+    | XBNF_Call      
+    | XBNF_Not       
+    | '(' XBNF_Disjunction ')'.
+  
+    XBNF_Binding ::= 
+    
+      // A clause binding performs a grammar action and
+      // associates the value produced with a named 
+      // local...
+      
+      name = Name '=' atom = XBNF_Sequence { 
+        And(atom,Bind(name)) 
+      }.
+    
+    XBNF_Call ::= 
+    
+      // Call a clause. The arguments are optional...
+      
+      name = Name args = XBNF_CallArgs { Call(name,args) }.
+      
+    XBNF_CallArgs ::= 
+    
+      // Arguments supplied to a clause are optional.
+      // The args must be preceded by a ^ to distinguish
+      // the args from a pair of calls with 0 args...
+    
+      '^' '(' n = Name ns = (',' Name)* ')' { Seq{n|ns} } 
+    | { Seq{} }.
+  
+    XBNF_Clause ::= 
+    
+      name = Name args = XBNF_ClauseArgs '::=' body = XBNF_Disjunction '.' 
+      { Clause(name,args,body) }. 
+  
+    XBNF_ClauseArgs ::= 
+    
+      '(' n = Name ns = (',' Name)* ')' { Seq{n|ns} } 
+    | { Seq{} }.
+    
+    XBNF_Conjunction ::= 
+    
+      // Conjunction is just a sequence of 1 or more
+      // clause elements...
+    
+      elements = XBNF_Element+ { 
+       elements->tail->iterate(e conj = elements->head | 
+         And(conj,e)) 
+    }. 
+  
+    XBNF_Disjunction ::= 
+    
+      // A disjunction is a sequence of elements
+      // separated by | ...
+    
+      element = XBNF_Conjunction (
+        '|' rest = XBNF_Disjunction { Or(element,rest) } | { element }).
+   
+    XBNF_Element ::= 
+    
+      XBNF_Optional    
+    | XBNF_Binding   
+    | XBNF_Sequence.
+  
+    Grammar ::= 
+    
+      parents = XBNF_GrammarParents
+      imports = XBNF_GrammarImports
+      clauses = XBNF_Clause* 
+      'end'
+      { Grammar(parents,clauses->asSet,"",imports) }.
+  
+    XBNF_GrammarImports ::=
+    
+      // The imports of a grammar affect the grammars that are
+      // available via @... 
+    
+      'import' class = Exp classes = (',' Exp)* { Seq{class | classes} } 
+    | { Seq{} }.
+  
+    XBNF_GrammarParents ::= 
+    
+      // A grammar may inherit from 0 or more parent grammars.
+      // The parent clauses are added to the child...
+    
+      'extends' parent = Exp parents = (',' Exp)* { parents->asSet->including(parent) } 
+    | { Set{} }.
+
+    XBNF_Literal ::=  
+    
+      // The following literals are built-in non-terminals of a
+      // grammar. The action uses getElement to reference the
+      // classes (and therefore the constructors) because a grammar
+      // cannot reference a variable with the same name as a terminal
+      // in an action...
+      
+      // Get the next character...
+    
+      'Char'       { (Parser::BNF.getElement("Char"))() }    
+      
+      // Get the next line...
+       
+    | 'Line'       { (Parser::BNF.getElement("Line"))() }     
+    
+      // Get a string...
+      
+    | 'Str'        { (Parser::BNF.getElement("Str"))() }      
+    
+      // Get a terminal (in ' and ')...
+      
+    | 'Terminal'   { (Parser::BNF.getElement("Term"))() }     
+    
+      // Return the current token...
+      
+    | 'Token'      { (Parser::BNF.getElement("Tok"))() } 
+    
+      // Get an integer...
+           
+    | 'Int'        { (Parser::BNF.getElement("Int"))() }      
+    
+      // Get a float...
+      
+    | 'Float'      { (Parser::BNF.getElement("Float"))() }    
+    
+      // Get a name...
+      
+    | 'Name'       { (Parser::BNF.getElement("Name"))() } 
+    
+      // Expect end-of-file...
+          
+    | 'EOF'        { (Parser::BNF.getElement("EOF"))() }      
+    
+      // Throw away all choice points created since starting
+      // the current clause...
+      
+    | '!'          { (Parser::BNF.getElement("Cut"))() }   
+    
+      // Dispatch to the grammar on the most recently
+      // synthesized value which should be a sequence of
+      // names the represent a path to a classifier with
+      // respect to the currently imported name-spaces...
+         
+    | '@'          { (Parser::BNF.getElement("At"))() }      
+    
+      // Add a name-space to the currently imported 
+      // name-spaces...
+       
+    | 'ImportAt'   { (Parser::BNF.getElement("ImportAt"))() } 
+    
+      // Get the current state of the parsing engine...
+      
+    | 'pState'     { (Parser::BNF.getElement("PState"))() }   
+    
+      // Get the current line position...
+      
+    | 'LinePos'    { (Parser::BNF.getElement("LinePos"))() }  
+    
+      // Define a new terminal in the form NewToken(NAME,ID)...
+      
+    | XBNF_NewToken                                
+    
+      // Get a terminal name...
+                      
+    | terminal = Terminal { (Parser::BNF.getElement("Terminal"))(terminal) }.
+    
+    XBNF_NewToken ::= 
+    
+      // A new token is defined as a name and an integer id.
+      // The tokenizer used to parse the grammar is responsible
+      // for returning a token with the type set to the id...
+    
+      'NewToken' '(' n = Name ',' t = Int ')' {
+        (Parser::BNF.getElement("NewToken"))(n,t) 
+    }.
+       
+    XBNF_Not ::= 
+    
+      // Deprecated...
+    
+      'Not' '(' parser = XBNF_Sequence ')' { (Parser::BNF.getElement("Not"))(parser) }.
+
+    XBNF_Optional ::= 
+    
+      // An optional clause element is tried and ignored if it fails...
+      
+      '[' opt = XBNF_Disjunction ']'
+      { Opt(opt) }.
+  
+    XBNF_Path ::= name = Name names = ('::' Name)* { Seq{name | names} }.
+    
+    XBNF_TypeCheck ::=
+    
+      // An element that checks the type of the synthesized value...
+    
+      element = XBNF_Atom (':' type = XBNF_Path { And(element,TypeCheck(type)) } 
+    | { element }).
+  
+    XBNF_Sequence ::=
+    
+      // An element an be followed by a * or a + for 0
+      // or more and 1 or more repetitions...
+    
+      element = XBNF_TypeCheck ( 
+        '*' { StarCons(element) } 
+      | '+' { PlusCons(element) } 
+      | { element }
+      ).
+    
+end

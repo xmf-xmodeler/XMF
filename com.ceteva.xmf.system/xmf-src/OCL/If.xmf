@@ -1,0 +1,62 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 If Expressions                             *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A conditional expression that evaluates the test and performs the then    *
+ *  expression if the test is true or the false expression otherwise. Note    *
+ *  the stupid naming of the attributesin this class that makes reference to  *
+ *  the slots impossible using '.' (duh!)                                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class If extends OCL::OCL
+  
+    @Attribute test : OCL::OCL end
+    @Attribute "then" : OCL::OCL end
+    @Attribute "else" : OCL::OCL end
+    
+    @Operation init(args):Element 
+      if args->size = 2
+      then 
+        self.test := args->at(0);
+        self.set("then",args->at(1));
+        self.set("else",BoolExp(false))
+      elseif args->size = 3
+      then
+        self.test := args->at(0);
+        self.set("then",args->at(1));
+        self.set("else",args->at(2))
+      elseif args->size = 4
+      then
+        self.line := args->at(0);
+        self.test := args->at(1);
+        self.set("then",args->at(2));
+        self.set("else",args->at(3))
+      else self
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"if ~S~%~Vthen~%~V~S~%~Velse~%~V~S~%~Vend",Seq{
+        test.pprint(indent),
+        indent,
+        indent + 2,
+        self.get("then").pprint(indent + 2),
+        indent,
+        indent + 2,
+        self.get("else").pprint(indent + 2),
+        indent})
+    end
+    
+    @Operation toString()
+      "If(" + test.toString() + "," + self.get("then").toString() + "," + self.get("else").toString() + ")"
+    end
+    
+  end

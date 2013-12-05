@@ -1,0 +1,16 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Commands
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Commands>
+        @For command in commands do
+          command.toXML(out)
+        end
+      </Commands>
+    end
+  end

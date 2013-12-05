@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            String Output Channel                           *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Used to buffer the output sent to the channel and return the output as a *
+ *   string. Use getString() to get the output as a string.                   *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import IO;
+
+context IO
+
+  @Class StringOutputChannel extends OutputChannel
+       
+     @Attribute chars : Buffer = Buffer(100,true) end
+           
+     @Operation close():Element
+       self
+     end
+     
+     @Operation flush() 
+       self
+     end
+       
+     @Operation getString():String
+       chars.toString()
+     end
+       
+     @Operation write(char)
+       chars.add(char)
+     end
+       
+   end

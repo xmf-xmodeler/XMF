@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import IO;
+
+context String
+
+  @Operation asXML()
+  
+    // Translates a string representation of an XML document into
+    // an instance of an XML document.
+    
+    let sin = StringInputChannel(self) then
+        xin = DOMInputChannel(sin)
+    in xin.parse()
+    end
+    
+  end

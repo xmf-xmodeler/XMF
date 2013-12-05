@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Centre An Entry                               *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Centre extends Entry
+
+    @Attribute entry : Entry (?,!,+,-) end
+    
+    @Constructor(entry) ! end
+    
+    @Operation contents()
+      Seq{entry}
+    end
+
+  end

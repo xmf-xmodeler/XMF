@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Object Classification                        *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    An object is correct when it has slots for each of the attributes       *
+ *    defined by its class and the values of the slots are all of the correct *
+ *    type.                                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+context Object
+  @Constraint AllSlotsTypeCorrect
+    self.of().allAttributes()->forAll(a |
+      self.get(a.name).isKindOf(a.type))
+    fail
+      let report = ""
+      in @For att in self.of().allAttributes() do
+           let value = self.get(att.name);
+               type = att.type
+           in if not value.isKindOf(type)
+              then 
+                let message = att.name + " = " + value.toString() + ":" + value.of().path() + " is not of type " + type.path()
+                in if isFirst
+                   then report := report + message
+                   else report := report + ", " + message
+                   end
+                end
+              end
+           end
+         end;
+         report
+       end    
+   end

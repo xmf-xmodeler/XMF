@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Lifted Expressions                           *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A lifted expression [| e |] produces the performable instance that is the *
+ *  abstract syntax for e. Therefore [| x + y |] produces                     *
+ *    BinExp(Var("x"),"+",Var("y"))                                           *
+ *  instead of the value of x added to the value of y.                        *
+ *  See Drop for more details about common usage of Lift.                     *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context OCL
+
+  @Class Lift extends OCL::OCL
+  
+    @Attribute exp : OCL::OCL end
+    
+    @Constructor(exp) ! end
+    
+    @Constructor(line,exp) end
+    
+    @Operation pprint(out,indent)
+      format(out,"[| ");
+      exp.pprint(out,indent + 2);
+      format(out," |]")
+    end
+    
+  end 

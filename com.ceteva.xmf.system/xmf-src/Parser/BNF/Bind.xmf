@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Binding Local Variables                            *
+ *                         -----------------------                            *
+ *                                                                            *
+ *  Local variables are bound in clauses. The XBNF parse arranges for X = A   *
+ *  to become A Bind(X) since A will leave the appropriate value in the parse *
+ *  machine RESULT register. The grammar compiler translates Bind(X) into a   *
+ *  SetLoc(n) instruction where n is the index of the local X in the stack    *
+ *  frame.                                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Bind extends Recognizer
+    
+    @Attribute name : String end
+    
+    @Constructor(name) end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," = ~S ",Seq{name})
+    end
+    
+    @Operation FV():Set(String)
+      Set{name}
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Bind(<StrExp(name)>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

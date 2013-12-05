@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Parentheses                                *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *                                                                            *  
+ *  When '(' and ')' occur in source code they are retained in order that     *
+ *  they can be faithfully reproduced if the source code is printed out.      *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Parentheses extends OCL::OCL
+  
+    @Attribute exp : Performable end
+    
+    @Constructor(exp) ! end
+ 
+    @Operation pprint(out,indent)
+      format(out,"(");
+      exp.pprint(out,indent);
+      format(out,")")
+    end
+    
+  end

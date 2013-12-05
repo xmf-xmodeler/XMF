@@ -1,0 +1,33 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import Associations;
+import OCL;
+import XOCL;
+
+context Associations
+
+  @Class EndDef extends Attribute
+  
+    @Attribute mult : Multiplicity end
+    
+    @Constructor(name,type,modifiers,init,doc,mult) ! end
+    
+    @Operation initSlotsExp(newEnd):Performable
+      [| <newEnd>.mult := <self.multExp()> |]
+    end
+    
+    @Operation metaExp():Performable
+      [| Associations::End |]
+    end
+    
+    @Operation multExp():Performable
+      @Case mult of
+        One()       do [| Associations::One() |]                          end
+        Opt(isStar) do [| Associations::Opt(<BoolExp(isStar)>) |]         end
+        Range(n,m)  do [| Associations::Range(<IntExp(n)>,<IntExp(m)>) |] end
+        Star()      do [| Associations::Star() |]                         end
+      end
+    end
+    
+  end

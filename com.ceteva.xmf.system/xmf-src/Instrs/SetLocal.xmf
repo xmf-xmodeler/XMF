@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Set the Value of a Local Variable                     *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Local variables live at specific offsets in the current call frame. The   *
+ *  operand of this instruction is the local offset. The local slot in the    *
+ *  current stack frame is set to the top value of the stack. NB the value is *
+ *  not popped from the stack.                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SetLocal extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<SetLocal " + name + "," + offset + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

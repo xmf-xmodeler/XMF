@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Local Parser Import                            *
+ *                             -------------------                            *
+ *                                                                            *
+ *  The most recent result produced by a parser action should be a sequence   *
+ *  of name-spaces. By performing this parse instruction, the name-spaces are *
+ *  added to the imported name-spaces used by the parser machine to resolve   *
+ *  the names that follow '@'.                                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class ImportAt extends Recognizer
+    
+    @Operation code(out)
+      format(out,"ImportAt")
+    end
+    
+    @Operation FV()
+      Set{}
+    end
+    
+    @Operation transform(FV:Set(String),grammar)
+      self
+    end
+    
+    @Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::ImportAt() |]
+	end
+    
+  end
+    

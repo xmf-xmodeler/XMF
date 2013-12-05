@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Dot Expressions                            *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A dot expression involves an object and a name. The expression produces a *
+ *  value and the dot references a slot of the value. If the value is an      *
+ *  object then the name references a slot. For any other value, the VM will  *
+ *  implement certain pseudo slots. If the value is a collection then the dot *
+ *  is iterated over the elements and the results are flattened if necessary. *
+ *                                                                            *
+ *  If an object does not have a slot with the given name then a NoSlot       *
+ *  exception is thrown. If the VM does not know how to reference a slot then *
+ *  a dot(name) operation is called from the VM.                              *
+ *                                                                            *
+ *  Slot access is part of the MOP. If an object's type is not an instance of *
+ *  Class and if the object's meta-type defines an operation getInstanceSlot  *
+ *  then a dot expression will cause this operation to be called at the type  *
+ *  level.                                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Dot extends OCL::OCL
+    
+    @Attribute target : OCL::OCL end
+    @Attribute name : String end
+    
+    @Constructor(target,name) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S.~S",Seq{target.pprint(indent),if name.isKindOf(Drop) then name.pprint() else name end})
+    end
+    
+  end

@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Create a Sequence                             *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Sequences that end in Seq{} are compiled into a sequence of instructions  *
+ *  that pushe the values onto the stack and then perform a MKSEQ n           *
+ *  instruction, where n is the number of elements in the sequence. The values*
+ *  are popped off the stack, the sequence is populated and then pushed onto  *
+ *  the stack.                                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class MkSeq extends Instr
+  
+    @Attribute size : Integer end
+    
+    @Constructor(size) end
+    
+    @Operation toString():String
+      "<MkSeq " + size + ">"
+    end
+    
+    @Operation operands():Integer
+      size
+    end
+    
+  end

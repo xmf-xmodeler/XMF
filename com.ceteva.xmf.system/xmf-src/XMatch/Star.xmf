@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          0 or More Repetition                              *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Greedily matches 0 or more occurrences of the sub-pattern.                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Star extends Pattern
+  
+    @Attribute pattern : Pattern end
+    
+    @Constructor(pattern) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      Or(And(pattern,Star(pattern)),Empty()).match(chars,env,stack,succ,fail)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver.
+      // Cannot bind in a * pattern...
+      
+      Set{}
+    end
+    
+  end

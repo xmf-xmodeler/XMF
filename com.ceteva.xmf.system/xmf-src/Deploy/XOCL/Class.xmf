@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+import IO;
+      
+  
+context XCore::Class
+  @Operation deployXOCL(dir:String)
+  
+    // Writes out the text that can be used to reconstruct
+    // the element.
+    
+    try
+      @WithOpenFile(fout -> dir + "/" + self.name() + ".xmf")
+         format(fout,"parserImport XOCL;~%~%");
+         format(fout,"import ~{::~;~S~};~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"context ! ~{::~;~S~}~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"  @Class ~S ",Seq{name});
+         if self.of() <> XCore::Class
+         then format(fout,"metaclass ~S ",Seq{self.of().path()})
+         end;
+         if isAbstract
+         then format(fout,"isabstract ")
+         end;
+         if parents->exists(p | p <> XCore::Object)
+         then format(fout,"extends ~{,~;~S~}",Seq{parents->map("name")->asSeq})
+         end;
+         format(fout,"~%~%");
+         @For a in attributes do
+           a.deployXOCL(fout);
+           format(fout,"~%~%")
+         end;
+         format(fout,"  end~%");
+         fout.close()
+      end
+    catch(exception)
+      format(stdout,"Error writing class source: ~S~%",Seq{exception})
+    end
+  end

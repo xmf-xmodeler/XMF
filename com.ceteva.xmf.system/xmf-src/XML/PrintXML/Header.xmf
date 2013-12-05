@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import XML::PrintXML;
+
+context XML::PrintXML
+
+// Class deployed by Tony Clark on Wed Apr 06 10:57:52 BST 2005
+
+@Class Header extends Node
+  @Attribute attributes : Seq(Attribute) end
+  @Constructor(attributes) end
+  @Operation desugar(out:Performable):Performable
+    [| format(<out>,"<?xml ");
+       <attributes->reverse->iterate(a e = [| format(<out>,"?>") |] |
+         [| <a.desugar(out)>; <e> |])>
+    |]
+  end
+end

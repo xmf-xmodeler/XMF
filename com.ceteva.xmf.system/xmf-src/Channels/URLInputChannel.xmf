@@ -1,0 +1,66 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              URL Input Channels                            *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Given a URL this channel reads input from the URL. For example:          *
+ *                                                                            *
+ *   u := URLInputChannel("http://www.bbc.co.uk")                             *
+ *                                                                            *
+ *   creates a channel that reads from the supplied location.                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class URLInputChannel extends InputChannel
+    
+    @Doc
+       Reads input from a URL.
+    end
+        
+    @Attribute channel : Element end
+      
+    @Operation asString():String
+      Kernel_readString(channel)
+    end
+    
+    @Operation channel()
+      channel
+    end
+        
+    @Operation close()
+      Kernel_close(channel)
+    end
+    
+    @Operation init(args) 
+      let url = args->at(0)
+      in self.channel := Kernel_URLInputChannel(url)
+      end
+    end    
+      
+    @Operation eof():Boolean
+      Kernel_eof(channel)  
+    end 
+    
+    @Operation peek():Integer
+      Kernel_peek(channel)
+    end
+       
+    @Operation read():Integer
+       Kernel_read(channel)
+    end
+    
+    @Operation read(v:Vector):Integer
+      Kernel_readVector(channel,v)
+    end
+    
+    @Operation setChannel(channel)
+      self.channel := channel
+    end
+     
+  end

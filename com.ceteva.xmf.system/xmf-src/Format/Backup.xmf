@@ -1,0 +1,16 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~^                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Backup one element in the format args. The arg will be reprocessed by   *
+ *    the next control character.                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleBackup =
+     @Operation(char,output,formatContext)
+       formatContext.backup()
+     end
+in format.defineHandler("^"->at(0),handleBackup)
+end;

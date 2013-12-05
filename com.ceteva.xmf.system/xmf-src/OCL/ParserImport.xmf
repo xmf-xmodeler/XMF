@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Parser Import                               *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *                                                                            *  
+ * Parser imports can occur at the head of a compilation unit. They inform the*
+ * parser that the supplied name-space should be placed in scope. When the    *
+ * parser encounters an expression of the form @X ... it looks up X in the    *
+ * name-spaces that are in scope and uses the grammar defined by X. If X is   *
+ * not defined by a name-space that has been imported in this way then an     *
+ * error occurs.                                                              *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class ParserImport extends OCL::OCL
+  
+    @Attribute names : Seq(String) end
+    @Attribute exp   : Performable end
+    
+    @Constructor(names,exp) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"parserImport ~S in ~%~V",Seq{names->separateWith("::"),indent+2});
+      exp.pprint(out,indent);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

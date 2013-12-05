@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+import CodeGen;
+
+context CodeGen
+
+  @Class NewLine extends CodeElement
+  
+    // Base is the left-hand margin that is to be ignored.
+    // It is set at the start of processing. All indentation
+    // is shifted left by the value of base...
+  
+    @Attribute base   : Integer end
+    
+    // Indent is the amount of whitespace that was found
+    // in the code template...
+    
+    @Attribute indent : Integer end
+    
+    @Constructor(base,indent) ! end
+  
+    @Operation desugar(path:String,lstart,lend,dstart,dend,estart,eend,out:Performable,level):Performable
+      [| format(<out>,"~%~V",Seq{<(indent - base).lift()>}) |]
+    end
+    
+    @Operation dropString(path:String,out,lstart,lend,dstart,dend,estart,eend,level):String
+      "\n" + formats("~V",Seq{indent})
+    end
+  
+  end

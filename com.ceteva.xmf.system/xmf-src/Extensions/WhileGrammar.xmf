@@ -1,0 +1,9 @@
+parserImport Parser::BNF;
+
+import XOCL;
+
+context While
+  @Grammar extends OCL::OCL.grammar
+    While ::= test = Exp 'do' body = Exp l = LinePos 'end'
+    { While(l,test,body) }.
+  end

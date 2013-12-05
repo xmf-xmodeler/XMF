@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+
+context XCore::Class
+ 
+   @Derived toType():Signature
+     let sig = Signature(self.path())
+     in @For operation in self.allOperations() do
+          sig.bind(operation.name().toString(),operation.toNamedElement())
+        end;
+        @For attribute in self.allAttributes() do
+          sig.bind(attribute.name().toString(),Field(Delayed(@Operation() attribute.toType() end)))
+        end;
+        sig
+     end
+   end

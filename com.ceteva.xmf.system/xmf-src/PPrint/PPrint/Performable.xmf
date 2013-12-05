@@ -1,0 +1,13 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+  
+@Handler XCore::Performable in PPrint(code,depth,encountered) 
+  if pprintExp and not code.of().getOperation("pprint",0) = Performable::pprint
+  then Just("[| " + code.pprint() + " |]")
+  else self.pprintObject(code,depth,encountered)
+  end
+end;
+          

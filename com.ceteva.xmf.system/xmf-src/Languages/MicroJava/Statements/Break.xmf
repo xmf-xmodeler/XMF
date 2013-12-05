@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Statements;
+import Expressions;
+
+context Statements
+
+  @Class Break extends Statement
+  
+    @Operation pprint(out,indent)
+      format(out,"break;")
+    end
+    
+    @Operation toXOCL():Performable
+      self.error("Break is not supported for translation to XOCL.")
+    end
+    
+  end

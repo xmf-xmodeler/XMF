@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+  
+@Handler XCore::Operation in PPrint(operation,depth,encountered)
+  if pprintOps
+  then self.pprintObject(operation,depth,encountered)
+  else 
+    @TypeCase(operation)
+      CompiledOperation do
+        Just("<Op " + operation.name() + ">")
+      end
+      InterpretedOperation do
+        Just("<IOp " + operation.name() + ">")
+      end
+      else Just(operation.toString())
+    end
+  end
+end;
+          

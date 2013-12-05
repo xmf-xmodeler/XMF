@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               End Of Input                                 *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Forces the input to have been exhausted at this point in the match. Leaves*
+ *  the empty sequence at the head of the stack.                              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class EOI extends Pattern
+  
+    @Operation match(chars,env,stack,succ,fail)
+      if chars->isEmpty
+      then succ(chars,env,Seq{Seq{} | stack},fail)
+      else fail()
+      end
+    end
+    
+    @Operation vars():Set(String)
+      // Returns the set of vars bound in the receiver.
+      Set{}
+    end
+    
+  end

@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   XML Attributes                           *
+ *                              ----------------------                        *
+ *                                                                            *
+ *  An XML element attribute.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context XML
+
+  @Class Attribute
+  
+    @Attribute name : String end
+    @Attribute value : String (!) end
+    
+    @Constructor(name,value) ! end
+    
+    @Operation print(out)
+      format(out,"~S='~X'",Seq{name,value})
+    end
+    
+  end

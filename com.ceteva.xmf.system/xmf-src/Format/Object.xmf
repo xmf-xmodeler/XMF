@@ -1,0 +1,28 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~O                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The ~O directive allows slots to be referenced in objects. ~O<x,y,z>    *
+ *    gets the next format arg and then references the slots x.y.z of the     *
+ *    object before using ~S to print out the result.                         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleObject(char,output,formatContext) =
+  if formatContext.args->isEmpty
+  then output.writeString(formatContext.nextValueToString())
+  else 
+    let object = formatContext.nextValue();
+        slots = formatContext.args
+    in try 
+         let value = slots->iterate(slot o = object | o.get(slot))
+         in format(output,"~S",Seq{value})
+         end
+       catch(exception)
+         self.error("Error in format directive O: " + exception.message)
+       end
+    end
+  end
+in format.defineHandler("O"->at(0),handleObject)
+end;

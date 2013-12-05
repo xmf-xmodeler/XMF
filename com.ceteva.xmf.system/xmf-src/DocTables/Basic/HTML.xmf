@@ -1,0 +1,27 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   HTML                                     *
+ *                            -------------------                             *
+ * This is not currently required since you should create a page which is     *
+ * wrapped with an <html> ... </html> when it is rendered as a string.        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class HTML extends Entry
+
+    @Attribute text : String (?,!) end
+
+    @Constructor(text) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

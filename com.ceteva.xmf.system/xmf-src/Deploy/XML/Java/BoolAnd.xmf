@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context BoolAnd
+  @Operation toJava(out:OutputChannel)
+    format(out,"    boolAnd = new BoolAnd();~%");
+    left.toJava(out);
+    format(out,"    boolAnd.setLeft((GuardExp)stack.pop());~%");
+    right.toJava(out);
+    format(out,"    boolAnd.setRight((GuardExp)stack.pop());~%");
+    format(out,"    stack.push(boolAnd);~%")
+  end

@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Clause
+  @Operation toJava(out:OutputChannel)
+    format(out,"  public static void ~S()  {~%",Seq{self.name});
+    format(out,"    c = new Clause();~%");
+    format(out,"    c.setName(\"~S\");~%",Seq{name});
+    format(out,"    clauses.add(c);~%");
+    format(out,"    PPT = new java.util.Hashtable();~%");
+    format(out,"    c.setPPT(PPT);~%");
+    @For key inTableKeys PPT do
+      format(out,"    entry = new java.util.Vector();~%");
+      format(out,"    PPT.put(\"~S\",entry);~%",Seq{key});
+      @For patterns in PPT.get(key) do
+        @For pattern in patterns do
+          pattern.toJava(out);
+          format(out,"    entry.addElement(stack.pop());~%")
+        end
+      end
+    end;
+    format(out,"  }~%~%")
+  end          

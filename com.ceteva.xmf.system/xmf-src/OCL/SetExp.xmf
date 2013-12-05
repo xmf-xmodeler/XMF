@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Set Expressions                            *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  Instances of SetExp represent literal sets and sequences. The collType    *
+ *  string should be "Set" or "Seq" to indicate the type of literal.          *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class SetExp extends OCL::OCL
+  
+    @Attribute elements : Seq(OCL::OCL) end
+    @Attribute collType : String        end
+    
+    @Constructor(collType,elements) ! end
+    
+    @Constructor(line,collType,elements) end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S{~{,~;~S~}}",Seq{collType,elements->collect(element | element.pprint(indent))})
+    end
+    
+  end

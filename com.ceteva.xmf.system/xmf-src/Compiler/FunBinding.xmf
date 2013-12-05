@@ -1,0 +1,13 @@
+import OCL;
+
+context FunBinding
+  @Operation lift()
+    let nameExp =
+          if name.isKindOf(Drop)
+          then name.lift()
+          else StrExp(name)
+          end
+    in Apply(self.typeExp(),Seq{nameExp,args.lift(),type.lift(),value.lift()})
+    end
+  end
+    

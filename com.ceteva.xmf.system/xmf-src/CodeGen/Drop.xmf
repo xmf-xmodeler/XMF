@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+import CodeGen;
+
+context CodeGen
+
+  @Class Drop extends CodeElement
+  
+    @Operation desugar(path:String,lstart,lend,dstart,dend,estart,eend,out:Performable,level:Integer):Performable
+    
+      // Turn the elements into code. The elements are strings that
+      // are concatenated to produce XOCL code that is parsed using 
+      // the OCL grammar...
+      
+      let str = elements->iterate(e s = "" | s + e.dropString(path,out,lstart,lend,dstart,dend,estart,eend,0)) then
+          code = OCL::OCL.grammar.parseString(str,"Exp1",Seq{XOCL,CodeGen})
+      in [| let s = <code>
+            in if s <> null
+               then format(<out>,"~S",Seq{s})
+               end
+            end
+         |]
+      end
+    end
+    
+    @Operation dropString(path,out,lstart,lend,dstart,dend,estart,eend,level):String
+    
+      // To create a string from a drop. Wrap it with the 
+      // drop-start and drop-end tokens...
+      
+      dstart + elements->iterate(e s = "" | 
+        s + e.dropString(path,out,lstart,lend,dstart,dend,estart,eend,level)) + 
+      dend
+    end
+  
+  end

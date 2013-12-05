@@ -1,0 +1,23 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+context XML::Parser
+
+  @Class EventManager extends NameSpace
+  
+    // Used to define the commands that events call when prototyping a
+    // grammar for deployment as a Java stand-along. Not normally used 
+    // for internal XML processing...
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      EventManager ::= name = Name handlers = Exp* 'end' {
+      
+        handlers->iterate(handler e = [| XML::Parser::EventManager(<OCL::StrExp(name)>) |] |
+          [| <e>.add(<handler>) |])
+          
+      }.
+      
+    end
+    
+  end

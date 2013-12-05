@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Return From The Current Call Frame                      *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  The current call frame has completed all instructions and is ready to     *
+ *  return. The value at the top of the stack is the return value. The call   *
+ *  frame is popped from the call stack and the return value is re-pushed     *
+ *  for the previously open frame.                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Return extends Instr
+    
+  end

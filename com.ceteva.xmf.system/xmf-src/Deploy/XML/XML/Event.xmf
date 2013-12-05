@@ -1,0 +1,16 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Event
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Event name=name result=result>
+        @For arg in args do
+          arg.toXML(out)
+        end
+      </Grammar>
+    end
+  end

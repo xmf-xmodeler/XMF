@@ -1,0 +1,62 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Zip Output Channels                         *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    A Zip Output Channel encodes output in a compressed format. A zipped    *
+ *    output resource has a number of labelled entries. Use newEntry to create*
+ *    a new label for the output. When reading in a zipped resource you can   *
+ *    then index in via the labels to the appropriate zipped entry.           *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class ZipOutputChannel extends OutputChannel
+  
+    @Doc
+      Writes output to an output channel in compressed format.
+    end
+  
+    @Attribute out : OutputChannel end
+    @Attribute zout : Element end
+    
+    @Constructor(out) ! 
+      self.zout := Kernel_zipOutputChannel(out.channel())
+    end
+    
+    @Operation channel()
+      zout
+    end
+    
+    @Operation close()
+      Kernel_close(zout)
+    end
+    
+    @Operation flush()
+      Kernel_flush(zout)
+      self
+    end
+    
+    @Operation newEntry(name:String)
+      @Doc
+        Create a new label. When reading from a zipped
+        resource, the label is used as an index.
+      end
+      Kernel_zipNewEntry(zout,name)
+    end
+    
+    @Operation setChannel(channel)
+      out.setChannel(channel);
+      self.zout := Kernel_zipOutputChannel(channel)
+    end
+    
+    @Operation write(value)
+      Kernel_write(zout,value)
+    end
+    
+  end

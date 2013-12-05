@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                  Add a Value to the Start of a Sequence                    *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops a sequence s and then a value v. Pushes a new sequence with v at the *
+ *  head and s at the tail.                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Prepend extends Instr
+    
+  end

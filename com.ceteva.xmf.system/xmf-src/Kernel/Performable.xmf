@@ -1,0 +1,120 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Performable Elements                             *
+ *                           --------------------                             *
+ *                                                                            *
+ *   A performable element is essentially source code. You can do two basic   *
+ *   things with a performable element: you can evaluate it or you can        *
+ *   compile it. In fact the latter is just another way of doing the former   *
+ *   since the target code produced by the compiler is then evaluated (albeit *
+ *   in a different language).                                                *
+ *                                                                            *
+ *   Mostly, performable elements live in operation bodies, but they can also *
+ *   occur virtually anywhere: as top-level commands read in from the console *
+ *   or the value in some object-slot waiting to be performed using a special *
+ *   purpose evaluator.                                                       *
+ *                                                                            *
+ *   The class Performable is abstract. It defines the interface that must be *
+ *   implemented in order to be performable. The key operations are eval and  *
+ *   compile. The other operations are used as helpers for evaluation or      *
+ *   compilation.                                                             *
+ *                                                                            *
+ *   Classes in the package OCL are all sub-classes of Performable. You can   *
+ *   use OCL as either a target language or you can look at OCL and see how   *
+ *   to implement your own performable language that has an evaluator and a   *
+ *   compiler that targets the XMF VM.                                        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Performable
+  @AbstractOp compile(env,frame,isLast,saveSource)
+    @Doc
+      Every performable thing must be able to be compiled.
+      The arguments are as follows: env contains information about the context;
+      frame defines how statically nested inside binding contours we are;
+      isLast is a boolean determining whether we are the last performable thing;
+      saveSource controls whether or not source is dumped to the output.
+    end
+  end
+  
+context Performable
+  @AbstractOp eval(target,env,imports)
+    @Doc
+      Every performable thing can be evaluated (as opposed to compiled and 
+      then performed).Evaluation occurs in a context that includes the value
+      of 'self' (i.e. the target of the evaluating message), an
+      environment of local variables and a sequence of imported name spaces.
+    end
+  end
+  
+context Performable
+  @Operation FV():Set(String)
+    @Doc
+      All performable things contain variables. If the variables are not
+      bound then they are free. This returns the set of free variables
+      in a performable thing.
+    end
+    Set{}
+  end
+  
+context Performable
+  @Operation maxLocals():Integer
+    @Doc
+      Any performable thing requires some local storage. This will
+      occur in the machine stack frame. It is possible to statically 
+      determine how much storage is required and this operation returns
+      the amount of storage needed.
+    end
+    0
+  end
+
+context Performable
+  @Operation pprint(out,indent:Integer):String
+    @Doc
+      Any performable thing can be turned into code. The default
+      behaviour is to produce a comment. All performable subclasses
+      should redefined this operation as appropriate.
+    end
+    format(out,"// ~S~%~V",Seq{self.toString(),indent})
+  end
+  
+context Performable
+  @Operation pprint(indent):String
+    @Doc
+      Pretty prints the receiver to a string.
+    end
+    let out = IO::StringOutputChannel()
+    in self.pprint(out,indent);
+       out.getString()
+    end
+  end
+  
+context Performable
+  @Operation pprint():String
+    @Doc
+      Pretty prints the receiver to a string.
+    end
+    self.pprint(0)
+  end
+  
+context Performable
+  @Operation setLine(line:Integer)
+    self.line := line
+  end
+  
+context Performable
+  @Operation line():Integer
+    line
+  end
+  
+context Performable
+  @Operation setEndLine(endLine:Integer)
+    self.endLine := endLine
+  end
+  
+context Performable
+  @Operation endLine():Integer
+    endLine
+  end

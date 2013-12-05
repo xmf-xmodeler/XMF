@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Set the Slot of an Element                            *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops an element whose slot is to be set and then a value. The name of the *
+ *  slot is the constant indexed by the instruction operand. If the element is*
+ *  an object with a standard MOP then the value of the slot is set and the   *
+ *  object is pushed. If the object does not have a slot with the given name  *
+ *  then slotMissing/3 is sent to the object. If the object has a non-standard*
+ *  MOP then its class is sent a setInstanceSlot message. The object is left  *
+ *  at the head of the stack.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SetSlot extends Instr
+  
+    @Attribute name : String end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation toString():String
+      "<SetSlot " + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end 
+  

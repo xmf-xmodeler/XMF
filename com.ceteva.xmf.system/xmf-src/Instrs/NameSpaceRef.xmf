@@ -1,0 +1,54 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Referencing A Name In A NameSpace                     *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  This instruction is emitted when a named-element references another       *
+ *  named-element in the same name-space. The name-space must be the owner of *
+ *  the referencing named-element as the contour slot causes chaining up      *
+ *  through the parents before the named element is referenced. This is mainly*
+ *  used for lexical named-element references (e.g. a package definition in a *
+ *  file with multiple classes each of which reference each other in terms of *
+ *  attributes and parents).                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class NameSpaceRef extends Instr
+  
+  
+    // The number of parent name-spaces to chain back
+    // through before performing a name reference...
+    
+    @Attribute contour    : Integer end 
+    
+    // The name to reference...
+    
+    @Attribute name       : String end   
+    
+    // The constant offset for the name...
+    
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name,contour) end
+    
+    @Operation toString():String
+      "<NameSpaceRef " + contour + ":" + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.symbolOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(contour,nameOffset.byte(1),nameOffset.byte(2))
+    end
+    
+  end
+  

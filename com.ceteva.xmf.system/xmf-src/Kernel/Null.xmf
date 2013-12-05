@@ -1,0 +1,25 @@
+/******************************************************************************
+ *                                                                            *
+ *                                   Null                                     *
+ *                              ---------------                               *
+ *                                                                            *
+ *   There is only one instance of the class Null and this is the value of    *
+ *   the global variable Root::null. The value null is used as the default    *
+ *   value for object-valued slots (i.e. Classifier::default() returns null). *
+ *                                                                            *
+ *   Note that null.isKindOf(C) for any C because the value null is to be     *
+ *   viewed as an undefined value that *could* be anything.                   *
+ *                                                                            *
+ *   The value null is only ever = to itself.                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ 
+ context Null
+
+    // The null value is used as the default value of
+    // many classes. It represents unitialised data.
+    
+    @Operation toString():String
+      "null"
+    end  

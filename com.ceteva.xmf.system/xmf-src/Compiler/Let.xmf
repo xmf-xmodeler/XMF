@@ -1,0 +1,131 @@
+/******************************************************************************
+ *                                                                            *
+ *                 Compilation of Local Variable Introduction                 *
+ *                 ------------------------------------------                 *
+ *                                                                            *
+ *  Local variables are managed in the env-table passed around during         *
+ *  compilation. Each local is allocated an index into the locals area of the *
+ *  current call frame. Locals are introduced by a let-expression or operation*
+ *  arguments. Local scope is managed in a stack-like manner so that local    *
+ *  variable indices can be added to the end of the current variables and then*
+ *  removed when the current scope is exited. Compilation of a let-expression *
+ *  involves adding the locals to the current variable table and dealing with *
+ *  the variable compiler debugging options for variables.                    *
+ *                                                                            *
+ ******************************************************************************/
+
+parserImport XOCL;
+
+import Compiler;
+import OCL;
+import Instrs;
+  
+context Let
+  @Operation FV():Set(String)
+    bindings->iterate(binding FV = self.dropDeclarations(body).FV()->reject(name | bindings->exists(b | b.name = name)) |
+      FV->union(binding.desugar().value.FV()))
+  end 
+
+context Let 
+  @Operation maxLocals():Element
+    let valueMaxLocals = bindings->collect(b | b.desugar().value.maxLocals())->max; 
+        bindingMaxLocals = bindings->size; 
+        bodyMaxLocals = self.checkTypes(body).maxLocals()
+    in valueMaxLocals.max(bindingMaxLocals + bodyMaxLocals)
+    end
+  end  
+ 
+context Let  
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    let valueCode = bindings->reverse->collect(b |
+           b.desugar().value.compile(env,frame,false,saveSource))->flatten; 
+        letEnv = env.allocateLocals(bindings->collect(b |
+          b.name),env.maxLocal());
+        basicBody = self.dropDeclarations(body) then
+        checkedBody = self.checkTypes(basicBody) then
+        bodyInstrs = checkedBody.compile(letEnv,frame,isLast,saveSource)
+    in // Dump the line position for debugging...
+       if sourcePos and line > 0
+       then Seq{Line(line)}
+       else Seq{}
+       end +
+       // Compile the values and leave them on the stack...
+       valueCode + 
+       // Set the values of the locals...
+       letEnv.setLocalsCode(bindings->collect(b | b.name)) + 
+       // Set the value of the local names...
+       self.compileLocalNames(letEnv) + 
+       // Instructions for the body. If the body
+       // is not the last expression then the local
+       // names may need to be unset... 
+       if isLast
+       then bodyInstrs
+       else bodyInstrs + self.unsetLocalNames(letEnv)
+       end
+    end
+  end
+  
+context Let
+  @Operation compileLocalNames(env):Seq(Instr)
+  
+    // Produce the instructions for setting local names in 
+    // the stack frame at run-time. If the locals are declared
+    // as hidden then the instructions are not produced...
+    
+    if localNames
+    then
+      let arity = env.arity();
+          hidden = self.hiddenLocals(body)
+      in bindings->reject(binding | hidden->includes(binding.name))->collect(binding |
+           LocalName(binding.name,env.localIndex(binding.name)-arity))
+      end
+    else Seq{}
+    end
+  end 
+  
+context Let
+  @Operation unsetLocalNames(env):Seq(Instr)
+    
+    // At the end of the let any names that have been established
+    // must be reset. Locals are allocated stack-like so the
+    // names can be reset to null...
+    
+    if localNames
+    then 
+      let arity = env.arity();
+          hidden = self.hiddenLocals(body)
+      in bindings->reject(binding | hidden->includes(binding.name))->collect(binding |
+           UnsetLocal(env.localIndex(binding.name)-arity))
+      end
+    else Seq{}
+    end
+  end
+  
+context Let
+  @Operation checkTypes(body)
+  
+    // If the compiler flag checkTypes is set then
+    // add code that checks the type of the bound
+    // variables...
+    
+    if checkTypes
+    then 
+      bindings->iterate(binding body = body |
+        let binding = binding.desugar() then
+            name = binding.name.toString(); 
+            value = binding.value;
+            type = binding.type
+        in [| if <Var(name)>.isKindOf(<type.toExp()>)
+              then <body>
+              else throw Exceptions::LocalTypeError(<name.lift()>,<Var(name)>,<type.toExp()>)
+              end 
+           |]
+        end)
+    else body
+    end
+  end
+  
+context Let
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line),bindings.lift(),body.lift()})
+  end

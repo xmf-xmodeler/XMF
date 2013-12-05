@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Names                                   *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Name is a builtin non-terminal of XBNF. The next grammar token must be a  *
+ *  name token that is not a terminal of the grammar being parsed. The name   *
+ *  is returned by the parser as a string.                                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Name extends Recognizer 
+    
+    @Operation code(outputChannel)
+      format(outputChannel," Name ")
+    end
+    
+    @Operation first(grammar)
+    
+      // The token type goes by the name Builtin(Name) so
+      // that is does not clash...
+      
+      Set{"Builtin(Name)"}
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+    
+	@Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Name() |]
+    end
+     
+   end

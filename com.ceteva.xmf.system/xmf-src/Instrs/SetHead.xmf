@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Set the Head of a Sequence                          *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Sequences have state. This instruction pops a sequence sets the head of   *
+ *  the sequence to be the value at the head of the stack. The value is left  *
+ *  at the head of the stack.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SetHead extends Instr
+  
+  end

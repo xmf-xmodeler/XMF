@@ -1,0 +1,36 @@
+/******************************************************************************
+ *                                                                            *
+ *                           Compilation of Self                              *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  Reference to the current message target is performed by the SELF          *
+ *  instruction. Note, that like variables, self can produce line number      *
+ *  information.                                                              *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Compiler;
+import OCL;
+
+context Self
+  @Operation FV():Element
+    Set{}
+  end
+
+context Self
+  @Operation maxLocals():Element
+    0
+  end
+
+context Self
+  @Operation compile(env:Element,frame:Element,isLast:Boolean,saveSource:Boolean):Element
+    if sourcePos and line > 0
+    then Seq{Instrs::Line(line),Instrs::Self()}
+    else Seq{Instrs::Self()}
+    end
+  end
+
+context Self
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line)})
+  end

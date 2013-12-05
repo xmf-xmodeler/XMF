@@ -1,0 +1,75 @@
+parserImport XOCL;
+
+// Service related utilities
+
+context String
+  @Operation getManifestDirectoryPath():String
+    if self.hasSuffix("Manifest.xmf")
+    then self.subString(0,self.size()-13)
+    elseif self.hasSuffix("Manifest.o")
+    then self.subString(0,self.size()-11)
+    else self
+    end
+  end
+
+context String
+  @Operation stripXmfFileExtension():String
+    self.stripXmfSourceExtension().stripXmfBinaryExtension()
+  end
+
+context String
+  @Operation stripXmfSourceExtension():String
+    if self.hasSuffix(".xmf")
+    then self.subString(0,self.size()-4)
+    else self
+    end
+  end
+  
+context String
+  @Operation stripXmfBinaryExtension():String
+    if self.hasSuffix(".o")
+    then self.subString(0,self.size()-2)
+    else self
+    end
+  end
+
+// Services
+
+@Service com.ceteva.manifest.load(manifestFile) !
+  let manifestDirectory = manifestFile.getManifestDirectoryPath();
+      manifestPath = manifestFile.stripXmfFileExtension() then
+      manifestSource = manifestPath + ".xmf";
+      manifestBinary = manifestPath + ".o"
+  in  if manifestBinary.fileExists()
+      then
+        let manifest = manifestBinary.loadBin(true)
+        in  manifest.load(manifestDirectory)
+        end
+      else throw FileNotFound(manifestBinary)
+      end
+  end
+end;
+
+// Utility operation to test a service
+
+context Root
+  @Operation invokeService(name:String,args:Seq(Object))
+    if xmf.hasClientHandler(name)
+    then
+      let handler = xmf.clientHandler(name)
+      in
+        handler.invoke(self,args)
+      end
+    else
+      format(stdout,"Service not found ~S~%",Seq{name})
+    end
+  end
+
+// Save Image
+
+context Root 
+  @Operation saveImage()
+    gc();
+    saveMachineState("../xmf-img/system.img");
+    xmf.setReady(true)
+  end

@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Logical Implication                           *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops b2 then b1 and performs b1 => b2. If the two values are booleans     *
+ *  then the VM handles the implication and pushes a boolean. Otherwise the   *
+ *  value b1 is sent an implies/1 message.                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class Implies extends Instr
+    
+  end

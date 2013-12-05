@@ -1,0 +1,47 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("sh",
+  @Operation(args,target,env,imports) 
+    @Doc
+      ?sh                  Start a dos shell. Enter exit to return.
+    end  
+    let inout = Kernel_exec("cmd",Seq{}) then
+        inch = inout->head;
+        outch = inout->tail;
+        thread = xmf.thread();
+        alive = Seq{true} then
+        inputThread =
+          @Fork(Input)
+            @While alive->head do 
+              let c = Kernel_read(inch)
+              in if c < 0
+                 then 
+                   alive->head := false; 
+                   thread.wake(null)
+                 else format(stdout,"~C~F",Seq{c}) 
+                 end
+              end
+            end
+          end;
+        outputThread = 
+          @Fork(Output)
+            @While alive->head do 
+              let c = stdin.read()
+              in Kernel_write(outch,c);
+                 if c = "\r"->at(0)
+                 then Kernel_write(outch,"\n"->at(0))
+                 end;
+                 Kernel_flush(outch)
+              end
+            end
+          end
+      in thread.sleep();
+         Kernel_close(inch);
+         Kernel_close(outch);
+         Kernel_threadKill(inputThread);
+         Kernel_threadKill(outputThread)
+      end
+   end);

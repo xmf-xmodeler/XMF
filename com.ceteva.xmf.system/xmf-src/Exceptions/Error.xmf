@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               General Error                                *
+ *                              ---------------                               *
+ *                                                                            *
+ *    A general error exception. Use this when other exception classes        *
+ *    are not provided for the specific exception you want to raise.          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Exceptions
+
+  @Class Error extends Exception
+     
+    @Constructor(message) ! 
+      self.setBacktrace()
+    end
+    
+  end
+      
+    

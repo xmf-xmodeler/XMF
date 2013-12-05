@@ -1,0 +1,39 @@
+/******************************************************************************
+ *                                                                            *
+ *                            Compilation of Throw                            *
+ *                      --------------------------------                      *
+ *                                                                            *
+ *  You can throw any value. Compilation just compiles the component exp and  *
+ *  then performs a THROW instruction.                                        *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Compiler;
+import OCL;
+
+context Throw
+  @Operation compile(env,frame,isLast,saveSource)
+    if sourcePos and line > 0
+    then Seq{Instrs::Line(line)}
+    else Seq{}
+    end 
+    +
+    exp.compile(env,frame,false,saveSource) 
+    + 
+    Seq{Instrs::Throw()}
+  end
+
+context Throw
+  @Operation FV():Set(String)
+    exp.FV()
+  end
+  
+context Throw
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line),exp.lift()})
+  end
+  
+context Throw
+  @Operation maxLocals():Integer
+    exp.maxLocals()
+  end

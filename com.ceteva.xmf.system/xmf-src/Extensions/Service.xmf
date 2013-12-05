@@ -1,0 +1,94 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Services                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   A service is  an operation that is offered by the VM to Java clients.    *
+ *   The service can be called from Java methods via the VM and can be        *
+ *   supplied with arguments. The service has a name that the Java supplies   *
+ *   to the VM in order to invoke the service.                                *
+ *                                                                            *
+ *   A service is run in a separate XMF thread, possibly concurrently with    *
+ *   other threads. The service does not run in the same Java thread that     *
+ *   invoked the service. The service invocation may be synchronous or        *
+ *   a-synchronous on the Java side.                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Service extends Sugar
+  
+    // The name of the service that can 
+    // be called from Java...
+     
+    @Attribute name  : String       end
+    
+    // The service arguments...
+    
+    @Attribute args  : Seq(Pattern) end
+    
+    // The return type of the service...
+    
+    @Attribute type  : TypeExp      end
+    
+    // The body of the service as supplied in
+    // its definition...
+    
+    @Attribute body  : Performable  end
+    
+    // Whether the service should produce 
+    // debug output...
+    
+    @Attribute debug : Boolean      end
+    
+    @Grammar extends XCore::Operation.grammar
+      Service ::= name = ServiceName '(' args = OpArgs ')' type = ReturnType debug = IsDebug body = Exp 'end' {
+        Service(name,args,type,debug,body)
+      }.
+      ServiceName ::= n = Name ns = ('.' Name)* { Seq{n|ns}->separateWith(".") }.
+      IsDebug ::= 
+        '!' { true }
+      | { false }.
+    end
+    
+    @Constructor(name,args,type,body) end
+    
+    @Constructor(name,args,type,debug,body) end
+    
+    @Operation desugar()
+      [| let service = <Operation(self.serviceOperationName(),args,type).add(self.serviceBody())>
+         in xmf.registerClientHandler(<name.lift()>,service);
+            service
+         end |]
+    end
+   
+    @Operation serviceBody()
+      [| @WithoutLocalNames
+      
+           // For some reason, local names conflict with the
+           // way in which services are invoked...
+           
+           try 
+             <if debug
+              then [| format(stdout,"Calling ~S~%",Seq{<name.lift()>}); <body> |]
+              else body
+              end> 
+           catch(exception) 
+             exception.display(); 
+             exception.message 
+           end 
+         end
+       |]
+    end
+    
+    @Operation serviceOperationName():String
+      "Service(" + name + ")"
+    end
+  end

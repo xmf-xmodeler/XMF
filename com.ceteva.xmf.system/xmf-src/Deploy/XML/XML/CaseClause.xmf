@@ -1,0 +1,15 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context CaseClause
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <CaseClause>
+        guard.toXML(out);
+        pattern.toXML(out)
+      </CaseClause>
+    end
+  end

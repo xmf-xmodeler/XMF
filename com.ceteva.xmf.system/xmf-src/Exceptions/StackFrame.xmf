@@ -1,0 +1,208 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Stack Frames                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The VM represents stack frames on a Java array, they get poked up into  *
+ *    the XOCL level as a sequence of sequences. Finally, they are translated *
+ *    to instances of StackFrame. Once as an instance of StackFrame, the      *
+ *    frames can be manipulated by the error handling machinery.              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Exceptions
+
+  @Class StackFrame
+  
+    @Attribute codeBox   : CodeBox        end  // The executing code.
+    @Attribute codeIndex : Integer        end  // The index into the code.
+    @Attribute globals   : Element        end  // The 'closure' variables.
+    @Attribute dynamics  : Seq(Element)   end  // The 'dynamic' variables and tables.
+    @Attribute locals    : Integer        end  // The number of local variables.
+    @Attribute target    : Element        end  // The value of 'self'.
+    @Attribute supers    : Seq(Operation) end  // A sequence of operations.
+    @Attribute handler   : Operation      end  // A handler if this is a 'trye' frame.
+    @Attribute values    : Seq(Element)   end  // The parameter and local values.
+    @Attribute line      : Integer        end  // The line in the source file.
+    
+    @Operation arity():Integer
+    
+      // Arity of a stack frame is the arity of the currently
+      // executing operation (or 0)...
+      
+      if self.operation() = null
+      then 0
+      else self.operation().arity()
+      end
+    end
+    
+    @Operation args():Seq(Element)
+    
+      // The arguments in a stack frame are the first local
+      // variables...
+      
+      values->take(self.arity())
+    end
+    
+    @Operation localValues():Seq(Element)
+    
+      // After the args are the current local values. Note that
+      // the locals value in a stack frame is calculated as the
+      // arity + maxLocals*2 to allow for the values of the locals
+      // followed by the names of the locals...
+      
+      values->drop(self.arity())->take((locals - self.arity()).div(2))
+    end
+    
+    @Operation localNames():Seq(String)
+    
+      // The local names are in the local positions above the local
+      // variables (but do not include the parameter names since these
+      // are statically available in the operation). Note that the
+      // names must have been set by a LOCALNAME instruction. Not all
+      // locals need be set, in which case the name in the local
+      // names part will be null.
+      
+      values->drop(self.arity())->drop((locals - self.arity()).div(2))
+    end
+    
+    @Operation name():String
+    
+      if codeBox <> null
+      then codeBox.name()
+      else "?"
+      end
+      
+    end
+    
+    @Operation operation():Operation
+      
+      // If the supers of the stack frame is defined then the
+      // head of the supers sequence is the currently invoked
+      // operation.
+      
+      if supers = null or supers = Seq{}
+      then null
+      else supers->head
+      end
+      
+    end
+    
+    @Operation owner():Element
+    
+      // The owner of the operation invoked in the stack frame.
+      
+      if self.operation() = null
+      then null
+      else self.operation().owner
+      end
+      
+    end
+    
+    @Operation ownerName():String
+      if self.owner() = null
+      then "?"
+      else self.owner().name().toString()
+      end
+    end
+    
+    @Operation paramNames():Seq(String)
+    
+      // If the stack frame operation is defined then the names
+      // are found there.
+      
+      if self.operation() <> null
+      then self.operation().paramNames()
+      else Seq{}
+      end
+      
+    end
+    
+    @Operation paramTypes():Seq(Classifier)
+    
+      // If the stack frame operation is defined then the types
+      // are found there.
+      
+      if self.operation() <> null
+      then self.operation().paramTypes()
+      else Seq{}
+      end
+      
+    end
+    
+    @Operation printCall(out)
+    
+      // Just print out the operation that was called
+      // to create this stack frame...
+      
+      try 
+        let ownerName = self.ownerName();
+            name = self.name() then
+            width = ownerName->size + name->size;
+            topLevel = xmf.property("topLevel") then
+            printDepth = topLevel.printDepth;
+            printLength = topLevel.printLength
+        in format(out,"~S::~S(",Seq{ownerName,name});
+           @For arg in self.args() do
+             let pp = arg.pprint(80,80,printDepth,printLength,width + 3)
+             in format(out,"~S",Seq{pp});
+                if pp->asSeq->includes("\n") and not isLast
+                then format(out,",~%~V",Seq{width+3})
+                elseif not isLast
+                then format(out,",")
+                end
+             end
+           end;
+           format(out,") aborted at line = ~S",Seq{line})
+        end
+      catch(exception)
+        format(out,"Problem printing call: ~S~%",Seq{exception.message})
+      end
+    end 
+    
+    @Operation print(out)
+    
+      // Print out the complete stack frame including
+      // the target, the operation, the args, the locals.
+      // Use the local names to show the values of variables
+      // currently in scope...
+      
+      try
+        format(out,"~S::~S(~{,~;~S~}) aborted at line = ~S ~%~%",Seq{self.ownerName(),self.name(),self.paramNames(),line});
+        if not self.paramNames()->isEmpty then format(out,"Argument values:~%") end;
+        @For name,arg in self.paramNames(),self.args() do
+          format(out,"  ~S = ~S~%",Seq{name,arg})
+        end;
+        format(out,"Target of message:~%  self = ~S~%",Seq{target});
+        if not self.localNames()->forAll(n | n = null)
+        then 
+          format(out,"Local values:~%");
+          @For value,name in self.localValues(),self.localNames() do
+             if name <> null
+             then format(out,"  ~S = ~S~%",Seq{name,value})
+             end
+          end
+        end
+      catch(exception)
+        format(out,"Error printing stack frame ~S~%",Seq{exception})
+      end
+    end
+    
+    @Operation resourceName():String
+    
+      if codeBox <> null
+      then codeBox.resourceName()
+      else ""
+      end
+      
+    end
+    
+    @Operation toString():String
+      target.toString() + "." + self.name() + "(" + values->map("toString")->separateWith(",") + ")"
+    end
+    
+  end
+    
+    

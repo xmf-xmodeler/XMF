@@ -1,0 +1,59 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Sequenced Regular Expressions                        *
+ *                       -----------------------------                        *
+ *                                                                            *
+ *  A sequence of patterns that both must match the input string in order.    *
+ *  The results of the matches are appended at the head of the stack.         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class And extends Pattern
+  
+    @Attribute left : Pattern end
+    @Attribute right : Pattern end
+    
+    @Constructor(left,right) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+    
+      // Match the left hand pattern first...
+      
+      left.match(chars,env,stack, 
+      
+        // Pass a continuation...
+        
+        @Operation(chars,env,stack,fail)
+        
+          // Match the right-hand pattern next...
+          
+          right.match(chars,env,stack,
+          
+            // Pass a continuation...
+            
+            @Operation(chars,env,stack,fail)
+            
+              // Both must have succeeded at this point so append
+              // the results and continue...
+              
+              succ(chars,env,Seq{stack->at(1) + stack->at(0) | stack->drop(2)},fail)
+            end,
+            fail)
+        end,
+        fail)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver...
+      
+      left.vars() + right.vars()
+    end
+    
+  end

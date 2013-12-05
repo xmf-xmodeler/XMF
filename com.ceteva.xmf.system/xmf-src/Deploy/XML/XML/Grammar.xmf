@@ -1,0 +1,23 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Grammar
+  @Operation toXMLFile(file:String)
+    @WithOpenFile(fout -> file)
+      self.toXML(fout)
+    end
+  end
+  
+context Grammar
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Grammar name=name>
+        @For clause in clauses do
+          clause.toXML(out)
+        end
+      </Grammar>
+    end
+  end   

@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Break A Line                                 *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Break extends Entry
+  
+    @Operation contents()
+      Seq{}
+    end
+
+  end

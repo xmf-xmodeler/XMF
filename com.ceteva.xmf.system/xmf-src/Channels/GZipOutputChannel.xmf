@@ -1,0 +1,53 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                GZip Output Channels                        *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    Writes output to an underlying output channel in a compressed format.   *
+ *    Use a GZip Input Channel to read the compressed contents from a suitable*
+ *    input channel.                                                          *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class GZipOutputChannel extends OutputChannel
+  
+    @Doc
+      Writes output to an output channel in compressed format.
+    end
+  
+    @Attribute out : OutputChannel end
+    @Attribute zout : Element end
+    
+    @Constructor(out) ! 
+      self.zout := Kernel_gzipOutputChannel(out.channel())
+    end
+    
+    @Operation channel()
+      zout
+    end
+    
+    @Operation close()
+      Kernel_close(zout)
+    end
+    
+    @Operation flush()
+      Kernel_flush(zout)
+      self
+    end
+    
+    @Operation setChannel(channel)
+      out.setChannel(channel);
+      self.zout := Kernel_gzipOutputChannel(channel)
+    end
+    
+    @Operation write(value)
+      Kernel_write(zout,value)
+    end
+    
+  end

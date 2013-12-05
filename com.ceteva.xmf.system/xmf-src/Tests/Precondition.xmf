@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import Tests;
+
+context Tests
+  @Class Precondition extends Condition
+    @Grammar extends OCL::OCL.grammar
+      Precondition ::= e = Exp 'end' { Precondition(e) }.
+    end
+  end

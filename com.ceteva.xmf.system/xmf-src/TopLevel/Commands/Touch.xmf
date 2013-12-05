@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+   
+Command::handlers.put("t",
+  @Operation(args,target,env,imports) 
+     @Doc 
+       ?t <FILE>            Update the last write date of the file.
+     end
+     @Case args of
+       Seq{s | moreArgs} do
+         let file =
+           if s.fileExists()
+           then s
+           elseif (s + ".xmf").fileExists()
+           then s + ".xmf"
+           elseif (s + ".o").fileExists()
+           then s + ".o"
+           else throw FileNotFound(s)
+           end
+         in file.setFileLastModified(Time())
+         end
+       end
+       else null
+     end
+   end);

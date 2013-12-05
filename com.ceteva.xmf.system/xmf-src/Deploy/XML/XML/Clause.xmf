@@ -1,0 +1,26 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Clause
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Clause name=name>
+        @For key inTableKeys PPT do
+          @XML(out)
+            <Entry key=key>
+              @For patterns in PPT.get(key) do
+                @XML(out)
+                  @For pattern in patterns do
+                    pattern.toXML(out)
+                  end
+                end
+              end
+            </Entry>
+          end
+        end
+      </Grammar>
+    end
+  end       

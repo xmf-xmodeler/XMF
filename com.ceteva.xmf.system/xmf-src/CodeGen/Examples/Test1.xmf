@@ -1,0 +1,57 @@
+parserImport XOCL;
+parserImport CodeGen;
+
+import IO;
+  
+context Root
+  @Operation classToHTML(c)
+    let sout = StringOutputChannel() 
+    in
+    @HTML(sout,4)
+      <HTML> 
+        <HEAD>
+          <TITLE> {c.name} </TITLE> 
+        </HEAD>
+        <FONT SIZE="+2"> 
+          <B> { c.name } </B>
+        </FONT>
+        <BR><BR><HR>
+        <FONT SIZE="+1">
+          <B>Overview</B>
+        </FONT>
+        <BR>
+        <P> {c.doc().doc}
+        <BR><HR><BR>
+        <FONT SIZE="+1"> 
+          <B>Parents:</B>
+        </FONT>
+        { @For p in c.allParents() do
+            [ { p.name.toString() } ]
+          e_nd }
+        <BR><HR><BR>
+        <TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
+          <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+            <TD COLSPAN=3>
+              <FONT SIZE="+2">
+                <B>Attributes</B>
+              </FONT>
+            </TD>
+          </TR>
+          { @For a in c.attributes->asSeq->sortNamedElements do
+             [ <TR>
+                 <TD>
+                   <B> {a.name.toString()} </B>
+                 </TD>
+                 <TD>
+                   <B> { a.type.name().toString() } </B>
+                 </TD>
+               </TR>
+             ]
+           e_nd
+         }
+       </TABLE>
+     </HTML>
+    end;
+    sout.getString()
+    end
+  end

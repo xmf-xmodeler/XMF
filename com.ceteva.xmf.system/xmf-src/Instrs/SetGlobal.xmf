@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Set the Value of a Closure Variable                     *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Variables local to operations are called 'globals'. They arise because    *
+ *  local variables are in scope when the operation is created and are        *
+ *  referenced in the body of the operation. Each operation has a linked list *
+ *  of vectors each of which contains global variables. An operation extends  *
+ *  the globals list of its parent operation. To index a global, chain up the *
+ *  list of vectors and then index into the vector. This instruction encodes  *
+ *  the two indices as operands. It pops a value from the stack and sets the  *
+ *  indexed global slot in the globals list of the current call frame.        *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class SetGlobal extends Instr
+ 
+    @Attribute name : String end
+    @Attribute frame : Integer end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,frame,offset) end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(0,frame,offset)
+    end
+    
+    @Operation toString():String
+      "<SetGlobal " + name + "," + frame + "," + offset + ">"
+    end
+    
+    
+  end

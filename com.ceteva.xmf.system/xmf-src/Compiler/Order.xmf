@@ -1,0 +1,33 @@
+/******************************************************************************
+ *                                                                            *
+ *                    Compilation of Ordered Expressions                      *
+ *                    ----------------------------------                      *
+ *                                                                            *
+ *  Just compile one expression, produce a POP instruction and then compile   *
+ *  the second expression.                                                    *                                   
+ *                                                                            *
+ ******************************************************************************/
+ 
+import OCL;
+import Instrs;
+
+context Order
+  @Operation FV():Element
+    first.FV()->union(second.FV())
+  end
+
+context Order
+  @Operation maxLocals():Element
+    first.maxLocals().max(second.maxLocals())
+  end
+
+context Order
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    first.compile(env,frame,false,saveSource) + 
+    Seq{Pop() | second.compile(env,frame,isLast,saveSource)}
+  end
+  
+context Order
+  @Operation lift()
+    Apply(self.typeExp(),Seq{first.lift(),second.lift()})
+  end

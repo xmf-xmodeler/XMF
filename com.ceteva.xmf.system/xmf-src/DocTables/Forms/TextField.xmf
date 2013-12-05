@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Text Input Field                              *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class TextField extends Entry
+
+    @Attribute label 	 : String (?,!) end
+    @Attribute size  	 : Integer (?,!) end
+    @Attribute value 	 : String = "" (?,!) end
+    @Attribute hideInput : Boolean = false end
+
+    @Constructor(label,size) ! end
+    
+    @Constructor(label,size,value) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

@@ -1,0 +1,49 @@
+/******************************************************************************
+ *                                                                            *
+ *                                 Booleans                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   A boolean is either true or false. Boolean operations are typically      *
+ *   handled by the VM in compiled code, but operations are provided here     *
+ *   to allow the operations to be passed around etc.                         *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ context Boolean
+  @Operation asBool():Boolean
+    self
+  end
+
+context Boolean
+  @Operation booland(other)
+  
+    // Types that can be compared with binary and must implement the operator
+    //  booland. The type Boolean implements this operator to perform the usual
+    //  logical operator.
+    
+    if other.isKindOf(Boolean)
+    then self and other
+    else self.error("Boolean::booland expects a boolean " + other.toString())
+    end
+  end
+  
+context Boolean
+  @Operation boolor(other)
+  
+    // Types that can be compared with binary or must implement the operator
+    //  boolor. The type Boolean implements this operator to perform the usual
+    //  logical operator.
+    
+    if other.isKindOf(Boolean)
+    then self or other
+    else self.error("Boolean::boolor expects a boolean " + other.toString())
+    end
+  end
+    
+context Boolean
+  @Operation toString():String
+    if self
+    then "true"
+    else "false"
+    end
+  end

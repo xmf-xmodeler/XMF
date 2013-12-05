@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Constant Expressions                          *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  In general all constants that can be expressed in source code have their  *
+ *  own expression types (IntExp, BoolExp, StrExp, etc). However there are    *
+ *  occasions when mechanically producing source code thet you want to embed  *
+ *  constants into the code and for the compiler to emit the constants into   *
+ *  the VM instructions via the constants table in the code box. This syntax  *
+ *  construct supports this activity. Use with care since the constants must  *
+ *  be serialized when they are written out.                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Const extends OCL::OCL
+  
+    @Attribute value : Element end
+    
+    @Constructor(value) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S",Seq{value})
+    end
+    
+  end

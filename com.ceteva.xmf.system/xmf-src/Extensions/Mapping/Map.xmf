@@ -1,0 +1,182 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Mappings                                     *
+ *                        -----------------------                             *
+ *                                                                            *
+ *   A mapping is a combination of a class and a case-expression. The mapping *
+ *   contains clauses that define patterns over values that are supplied to   *
+ *   the mapping. The idea is that the mapping is supplied with values which  *
+ *   it transforms into new values using a case-analysis over the clause-     *
+ *   patterns. Often, a mapping requires some state to perform the task. A    *
+ *   basic case-expression has no state, but an object does. Therefore, by    *
+ *   merging a class and a case-expression we get a mapping whose instances   *
+ *   have state and can perform case-analysis on values in order to transform *
+ *   them.                                                                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Map extends Class
+  
+    @Grammar extends Class.grammar
+    
+      Map ::= 
+      
+        // A mapping has a name...
+      
+        name = Name 
+        
+        // ... the types of the values that
+        // will be supplied to the mapping...
+        
+        domains = Domains 
+        
+        // The type of the value returned by
+        // the mapping...
+        
+        '->' range = Exp 
+        
+        // The mapping may have no instances...
+        
+        isAbstract = IsAbstract 
+        
+        // The mapping may inherit from a parent
+        // mapping...
+        
+        parents = Parents 
+        
+        // Like a class, the mapping may have
+        // attribute definitions and operations...
+        
+        defs = Exp* 
+        
+        'end'
+        
+      { Map(name,
+            [| XMap::Map |],
+            domains,
+            range,
+            isAbstract,
+            parents,
+            defs->reject(c | c.isKindOf(Clause)),
+            defs->select(c | c.isKindOf(Clause))) }.
+            
+      Domains ::= 
+      
+        // The domain types of a mapping are defined
+        // as expresions that evaluate to produce
+        // classifiers...
+      
+        '(' d = Exp 
+        
+            ds = (',' Exp)* 
+            
+        ')' 
+        
+        { Seq{d | ds} }.
+      
+    end
+    
+    // The pattern matching clauses of the mapping...
+    
+    @Attribute clauses : Seq(Clause)      end
+    
+    // The domain types of the values supplied to 
+    // the mapping...
+    
+    @Attribute domains : Seq(Performable) end
+    
+    // The type of the value returned by the mapping...
+    
+    @Attribute range   : Performable      end
+    
+    @Constructor(name,metaClass,domains,range,isAbstract,parents,defs,clauses) end
+    
+    @Operation allDefs()
+      super() + Seq{self.invokeDef()}
+    end
+    
+    @Operation lift():Performable
+      let domainExps = SetExp("Seq",domains->collect(d | d.lift()));
+          parentExps = SetExp("Seq",parents->collect(p | p.lift()));
+          defExps = SetExp("Seq",defs->collect(d | d.lift()));
+          clauseExps = SetExp("Seq",clauses->collect(c | c.lift()));
+          metaExp = self.metaExp()
+      in [| XOCL::Map(<StrExp(name)>,<metaExp>,<domainExps>,<range.lift()>,<BoolExp(isAbstract)>,<parentExps>,<defExps>,<clauseExps>) |]
+      end
+    end
+    
+    @Operation initExp(newMap:Performable):Performable
+      [| let domains = @Operation() <SetExp("Seq",domains)> end;
+             range = @Operation () <range> end
+         in domains.setOwner(<newMap>);
+            range.setOwner(<newMap>);
+            <self.setClausesExp(newMap)>;
+            <newMap>.set("domains",domains);
+            <newMap>.set("range",range)
+         end
+      |]
+    end 
+    
+    @Operation invokeBody()
+    
+      // When the mapping is invoked, each of the clauses are
+      // tried in turn to see if their patterns match the supplied
+      // arguments...
+      
+      let values = 0.to(domains->size - 1)->collect(i | [| args->at(<IntExp(i)>) |]);
+          arms = clauses->collect(c | c.desugar())
+      in Case(values,arms,[| throw Exceptions::MapFailed(self,<SetExp("Seq",values)>) |])
+      end
+    end
+    
+    @Operation invokeDef()
+    
+      // A mapping may be used as an operation in which
+      // case it supplies the arguments to the clauses
+      // in turn. The first clause that matches executes
+      // its body and produces the return value of the
+      // mapping application...
+      
+      [| @Operation invoke(target,args): <range> <self.invokeBody()> end |]
+    end
+    
+    @Operation metaExp():Performable
+      [| XMap::Map |]
+    end
+    
+    @Operation pprint(out,indent) 
+      format(out,"@Map ~S(",Seq{name});
+      @For domain in domains do
+        domain.pprint(out,indent);
+        if not isLast then format(out,",") end
+      end;
+      format(out,")->");
+      range.pprint(out,indent);
+      @For clause in clauses do
+        format(out,"~%~V",Seq{indent+2});
+        clause.pprint(out,indent+2)
+      end;
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+    @Operation setClausesExp(map:Performable)
+    
+      // Produce an expression that sets the clauses
+      // in the mapping 'map'...
+      
+      clauses->iterate(c e = map |
+        let nameExp = StrExp(c.name.toString());
+            sourceExp = StrExp(c.pprint())
+        in [| <e>.add(XMap::Clause(<nameExp>,<sourceExp>)) |]
+        end)
+    end
+    
+  end

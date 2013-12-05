@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Preformatted Text                              *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Code extends Entry
+
+    @Attribute text : String (?,!) end
+
+    @Constructor(text) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

@@ -1,0 +1,64 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Case Integer Constant                             *
+ *                          ---------------------                             *
+ *                                                                            *
+ *   A constant in a case clause is actually an expression that is evaluated  *
+ *   at compile-time to produce an integer.                                   *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XOCL;
+
+context XOCL
+
+  @Class CaseIntConst extends CaseIntValue
+  
+    @Attribute value : Performable end  // Might be a sequence of integers if dropped.
+    
+    @Constructor(value) ! end
+    
+    @Operation addLabel(label,jumpTable)
+    
+      // Add the label into the jump-table at
+      // the indices specified by the constant.
+      // If the constant has been dropped then 
+      // it may be a sequence of integers...
+      
+      if value.isKindOf(Seq(Element))
+      then
+        @For i in value do
+          jumpTable.put(i,label)
+        end
+      else jumpTable.put(self.rangeSize(),label)
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      if value.isKindOf(Seq(Element))
+      then 
+        @For i in value do
+          format(out,"~S",Seq{i});
+          if not isLast
+          then format(out,",")
+          end
+        end
+      else value.pprint(out,indent)
+      end 
+    end
+    
+    @Operation rangeSize():Integer
+    
+      // The constant expression must be evaluated at
+      // compile-time...
+      
+      try
+        value.eval(null,Env::NullEnv(),Seq{Root,XCore})
+      catch(exception)
+        self.error("CaseInt constant: " + self.toString() + " " + exception.message)
+      end
+    end
+    
+  end

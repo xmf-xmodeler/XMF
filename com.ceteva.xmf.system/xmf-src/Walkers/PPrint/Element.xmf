@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+
+context Element
+  @Operation pprint(depth:Integer,length:Integer):String
+  
+    // Returns a string after pretty-printing the supplied
+    // value.
+    
+    let printer = Walkers::PPrint(depth,length)
+    in printer.countRefs(self);
+       printer.dispatch(self,false);
+       printer.getString()
+    end
+  end
+  
+@Handler XCore::Element in PPrint(element,isComponent,encountered)
+  self.buffer().append(element.toString())
+end;
+          

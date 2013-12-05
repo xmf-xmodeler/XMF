@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Drop Down Lists                               *
+ *                            -------------------                             *
+ *                                                                            *
+ *  A combo-box is a drop down list. The label defines the name of an argument*
+ *  that is supplied to each handler on the form when an event occurs. The    *
+ *  value of the argument is the currently selected value from the values in  *
+ *  the drop down list.                                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class ComboBox extends Entry
+
+    @Attribute label  : String (?,!) end
+    @Attribute displays : Seq(String) (?,!) end
+    @Attribute values : Seq(String) (?,!) end
+    @Attribute selected : String (?,!) end
+    
+    @Constructor(label,displays) !
+      self.displays := displays->map("toString");
+      self.values := self.displays
+    end
+
+    @Constructor(label,displays,values) 
+      self.displays := displays->map("toString")
+    end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

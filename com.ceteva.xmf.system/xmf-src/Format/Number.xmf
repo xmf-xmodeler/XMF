@@ -1,0 +1,34 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~N                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next control arg should be a number. The display width W for the    *
+ *    number is optionally supplied as a control arg ~<W>N. If the number     *
+ *    requires padding to the supplied width, then leading 0's are added to   *
+ *    the output.                                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleNumber =
+      @Operation(char,output,formatContext)
+        if formatContext.args->isEmpty
+        then output.writeString(formatContext.nextValue().toString())
+        else 
+          let width = formatContext.args->at(0)
+          in if width.isKindOf(Integer)
+             then 
+               let string = formatContext.nextValue().toString()
+               in if string->size > width
+                  then output.writeString(string->truncate(width))
+                  else output.writeString(string->padFrom(width,"0"->at(0)))
+                  end
+               end
+             else self.error("~S expects first argument to be an integer: " + width)
+             end
+          end
+        end
+      end
+in format.defineHandler("N"->at(0),handleNumber)
+end;
+     

@@ -1,0 +1,16 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+import CodeContext;
+
+context CodeContext
+
+  @Class Units extends Context
+    
+    @Attribute units : Seq(CompilationModuleElement) (?,!,+,-) end
+    
+    @Constructor(units,next) ! end
+    
+  end

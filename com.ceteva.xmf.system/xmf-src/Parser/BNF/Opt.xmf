@@ -1,0 +1,48 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Optional Input                               *
+ *                               --------------                               *
+ *                                                                            *
+ *  An optional recognizer has a parser that is processed by the parser       *
+ *  machine. If the parser succeeds then OK, otherwise if it fails then it is *
+ *  also OK. If parser succeeds then it returns the value synthesized by the  *
+ *  parser, otherwise it returns Seq{}.                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class Opt extends Recognizer 
+    
+    @Attribute parser : Recognizer end
+    
+    @Constructor(parser) end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," [ ");
+      parser.code(outputChannel);
+      format(outputChannel," ]")
+    end
+    
+    @Operation FV():Set(String)
+      // An optional clause introduces no new free variables.
+      Set{}
+    end
+    
+    @Operation setOwner(owner)
+      parser.setOwner(owner)
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Opt(<parser.toExp(FV)>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self.parser := parser.transform(FV,grammar)
+    end
+    
+  end

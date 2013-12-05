@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 EMF Lists                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   EMF lists are unfortunately not EMF objects and therefore need to be     *
+ *   treated specially. They are so pervasive in EMF that is useful to have a *
+ *   predefined class that handles the instances. A key feature is the        *
+ *   operation for asSeq that is used by the VM when the ASSEQ instruction is *
+ *   used for an elist.                                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Java;
+
+context Java
+
+  @Class EList metaclass JavaClass
+  
+    JavaDescriptor("org.eclipse.emf.common.util.EList","")
+    
+    @Operation asSeq()
+      let s = Seq{}
+      in @Count x from 0 to self.size() do
+           s := s + Seq{self.basicGet(x)}
+         end;
+         s
+      end
+    end
+    
+    @Operation excluding(element)
+      self.remove(element)
+    end
+    
+    @Operation sel()
+      self.asSeq()->asSet()->sel
+	end
+	    
+    @Operation toString()
+      "[" + self.asSeq()->collect(v | v.toString())->separateWith(",") + "]"
+    end
+  
+  end

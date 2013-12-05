@@ -1,0 +1,15 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Equals
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Equals>
+        left.toXML(out);
+        right.toXML(out)
+      </Equals>
+    end
+  end

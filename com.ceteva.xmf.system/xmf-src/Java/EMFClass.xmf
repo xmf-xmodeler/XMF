@@ -1,0 +1,158 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 EMF Class                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   A type of Java class where the MOP is known and the Java descriptor      *
+ *   contains the name of a factory object that can be used to create         *
+ *   instances of the class.                                                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Java;
+
+context Java
+
+  @Class EMFClass extends JavaClass
+
+    @Operation addDescriptor(d:JavaDescriptor)
+    
+      // The descriptor may not be completely 
+      // populated. Set the values to defaults
+      // using the class name...
+      
+      if d.package = ""
+      then self.error("Illegal EMF descriptor: must define package name.")
+      end;
+      if d.nsURI = ""
+      then self.error("Illegal EMF descriptor: must define a name-space URI.")
+      end;
+      if d.type = ""
+      then d.setType(d.package + "." + name.toString())
+      end;
+      super(d)
+    end
+    
+    @Operation eclipseClassify(emfObject)
+    
+      // Perform normal classification, reset the error reports
+      // against the supplied object and then report the errors
+      // in the problem view...
+      
+      self.eclipseReset(emfObject);
+      self.eclipseReport(self.classify(emfObject))
+    end
+    
+    @Operation eclipseReport(ConstraintReport(o,c,b,"",C))
+    
+      // Skip the empty report (supplied as the container)...
+      
+      @For report in C do
+        self.eclipseReport(report)
+      end
+    end
+    
+    @Operation eclipseReport(ConstraintReport(o,c,true,r,C))
+    
+      // The report is satisfied so skip it...
+      
+      @For report in C do
+        self.eclipseReport(report)
+      end
+    end
+    
+    @Operation eclipseReport(ConstraintReport(o,c,false,r,C))
+    
+      // An error so report it...
+      
+      self.reportError(o,c.name + ": " + r);
+      @For report in C do
+        self.eclipseReport(report)
+      end
+    end
+    
+    @Operation eclipseReset(emfObject)
+    
+      // Remove the issues recorded against the object...
+      
+      let Helper = xmf.javaClass("org.eclipse.emf.edit.ui.util.EditUIMarkerHelper")
+      in if Helper = null
+         then self.error("Cannot find EditUIMarkerHelper")
+         else Helper().deleteMarkers(emfObject,true,999)
+         end
+      end
+    end
+    
+    @Operation getFactory()
+    
+      // Returns the factory defined by the descriptor
+      // and throws an error if the factory does not
+      // exist...
+      
+      let factory = descriptor.getFactory()
+      in if factory = null
+         then throw MissingFactory(self)
+         else factory
+         end
+      end
+    end
+    
+    @Operation getPackage()
+    
+      // returns the package defined by the descriptor
+      // and throws an error if the package does not
+      // exist...
+      
+      let package = descriptor.getPackage()
+      in if package = null
+         then throw MissingPackage(self)
+         else package
+         end
+      end
+    end
+
+    @Operation invoke(target,args)
+    
+      // Use the package to create an instance of the
+      // class...
+      
+      let factory = self.getFactory() then
+          package = self.getPackage() then
+          class = package.send("get" + name,Seq{}) then
+          object = factory.create(class);
+          constructor = 
+            @Find(c,self.allConstructors())
+              when c.names->size = args->size
+              else null
+            end
+      in if constructor <> null
+         then
+           @For name,value in constructor.names,args do
+             object.set(name,value)
+           end
+         end;
+         object
+      end
+    end
+    
+    @Operation reportError(emfObject:ForeignObject,message:String)
+      
+      // Reports an error in Eclipse using the EMF interface.
+      
+      let Diagnostic = xmf.javaClass("org.eclipse.emf.common.util.Diagnostic");
+          BasicDiagnostic = xmf.javaClass("org.eclipse.emf.common.util.BasicDiagnostic");
+          Helper = xmf.javaClass("org.eclipse.emf.edit.ui.util.EditUIMarkerHelper")
+      in if Diagnostic = null or BasicDiagnostic = null or Helper = null
+         then self.error("Cannot find EMF Diagnostic class")
+         else
+           let helper = Helper();
+               diagnostic = BasicDiagnostic(Diagnostic.ERROR,"",0,message,Seq{emfObject})
+           in helper.createMarkers(diagnostic)
+           end
+         end
+      end
+    end
+   
+  end

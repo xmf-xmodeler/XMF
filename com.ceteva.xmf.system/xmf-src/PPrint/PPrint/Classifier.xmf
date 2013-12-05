@@ -1,0 +1,10 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+  
+@Handler XCore::Classifier in PPrint(element,depth,encountered)
+  Just(element.toString())
+end;
+          

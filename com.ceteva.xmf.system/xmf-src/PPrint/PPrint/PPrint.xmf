@@ -1,0 +1,185 @@
+parserImport XOCL;
+
+import Walkers;
+import Docs;
+  
+context Walkers
+
+  @Class PPrint metaclass Dispatcher 
+  
+    // The following constants define the default
+    // pretty-printing parameters...
+    
+    // The depth limit...
+  
+    @Bind PRINTDEPTH   = 5              end
+    
+    // The limit on the number of elements 
+    // in a sequence...
+    
+    @Bind PRINTLENGTH  = 10             end
+    
+    // If possible everything should fit 
+    // into the page width...
+    
+    @Bind PAGEWIDTH    = 100            end
+    
+    // If possible everything should fit into 
+    // the ribbon width on a page...
+    
+    @Bind RIBBONWIDTH  = 40             end
+    
+    // Values used by pprint as defined by Element...
+    
+    @Bind PPRINTDEPTH  = 3              end
+    @Bind PPRINTLENGTH = 10             end
+    
+    // The following controls whether or not operations
+    // are printed in all their glory. Should be true 
+    // only when debugging compiled operations...
+    
+    @Bind PPRINTOPS   = false           end
+    
+    // Controls whether quasi-quotes are used to
+    // print expressions...
+    
+    @Bind PPRINTEXP   = true            end
+    
+    // The following constants are used throughout
+    // the Element pretty-printer...
+    
+    @Bind EQUALS      = Just(" = ")     end
+    @Bind COMMA       = Just(",")       end
+    @Bind LSQUARE     = Just("[")       end
+    @Bind RSQUARE     = Just("]")       end
+    @Bind NOTHING     = Just("")        end
+    @Bind LCURL       = Just("{")       end
+    @Bind RCURL       = Just("}")       end
+    @Bind SEQ         = Just("Seq{")    end
+    @Bind SET         = Just("Set{")    end
+    @Bind BAR         = Just(" | ")     end
+    @Bind DOTS        = Just("...")     end
+    @Bind HASH        = Just("###")     end
+    @Bind VECTOR      = Just("Vector[") end
+    @Bind TABLE       = Just("Table[")  end
+    
+    // Controls the depth in each dispatcher...
+  
+    @Attribute depth     : Integer = PPrint::PRINTDEPTH   end
+    
+    // Controls the length in each dispatcher...
+    
+    @Attribute length    : Integer = PPrint::PRINTLENGTH  end
+    
+    // Shqring is handled by associating elements with labels
+    // and using the labels for subsequent occurrences of an 
+    // element. The jlabels table contains an empty string
+    // literal that is updated with the label if the associated
+    // element is ever encountered twice. If the label is included
+    // in the first generation then it will be "" until the element
+    // is encountered again at which point it is replaced with
+    // a #(n)= which defines the label n t be the element...
+    
+    @Attribute jlabels   : Table   = Table(10)            end
+    
+    // A table associating elements with tags. Each element is
+    // allocated a tag that can be used in subsequent references...
+    
+    @Attribute tlabels   : Table   = Table(10)            end
+    
+    // A counter that is used to generate labels...
+    
+    @Attribute labelc    : Integer = 0                    end
+    
+    // Whether operations are pretty-printed in long form...
+    
+    @Attribute pprintOps : Boolean = PPrint::PPRINTOPS    end
+    
+    // Whether expressions are pretty-printed using quasi-
+    // quotes...
+    
+    @Attribute pprintExp : Boolean = PPrint::PPRINTEXP    end
+    
+    @Constructor() end
+    
+    @Constructor(depth,length) ! end
+    
+    @Operation dispatch(element:Element,depth:Element)
+    
+      // Call dispatch to translate an element to a document.
+      // The current depath-level is supplied. If the max depth
+      // level is reached then generate a short version of the 
+      // element...
+      
+      if depth > self.depth
+      then Just("<a " + element.of().name() + ">")
+      else super(element,depth)
+      end
+    end
+    
+    @Operation label(e)
+    
+      // Record a label for e...
+      
+      labels.put(e,self.nextLabel())
+    end
+    
+    @Operation indent()
+    
+      // Increase the indentation...
+      
+      self.indent := indent + 2
+    end
+    
+    @Operation mark(element)
+    
+      // An element is marked by associating it with an
+      // empty label. This empty label is generated along
+      // with the document for the element. If the element
+      // is subsequently encountered then the empty label 
+      // is replaced by a unique label and the generated
+      // occurrence becomes the defining occurrence...
+      
+      if jlabels.hasKey(element)
+      then jlabels.get(element)
+      else
+        let just = Just("");
+            tag = self.nextLabel()
+        in jlabels.put(element,just);
+           tlabels.put(element,tag);
+           just
+        end
+      end
+    end
+    
+    @Operation nextLabel()
+    
+      // Get a new label...
+      
+      self.labelc := labelc + 1;
+      labelc
+    end
+    
+    @Operation ref(element)
+    
+      // A subsequent occurrence of an element. Generates
+      // a reference to the label. Note that the label is
+      // replaced if it is empty. Therefore the original
+      // occurrence of the label will become the defining
+      // occurrence...
+      
+      if jlabels.hasKey(element)
+      then 
+        let just = jlabels.get(element);
+            tag = tlabels.get(element)
+        in just.setText("#(" + tag + ")=");
+           Just("#(" + tag + ")")
+        end
+      else self.error("Cannot reference " + element)
+      end
+    end
+    
+  end
+
+
+

@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Missing Package Errors                         *
+ *                             ---------------------                          *
+ *                                                                            *
+ *  At run-time, the instantiation of an EMF class requires a package. This   *
+ *  exception is thrown if the package is not found against the name-space    *
+ *  URI.                                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Exceptions;
+import Java;
+
+context Java
+
+  @Class MissingPackage extends Exception
+     
+    @Attribute class  : EMFClass  (?,!) end // The offending class.
+    
+    @Constructor(class)
+      self.setBacktrace();
+      self.message :=
+        "The class " + class.name + " is defined to have a package\n" +
+        "named " + class.descriptor.package + " but the package cannot\n" +
+        "be found."
+    end
+    
+  end
+      

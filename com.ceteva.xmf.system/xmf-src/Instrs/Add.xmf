@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XMF VM Instructions                           *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Pops the top two elements, adds them and pushes the result. ADD is        *
+ *  overloaded for strings, integers, floats, vectors, buffers. If the VM     *
+ *  does not implement the instruction directly then it send the left hand    *
+ *  operand an add message with the right-hand operand as an argument.        *
+ *                                                                            *
+ ******************************************************************************/
+
+import Root::Instrs;
+
+context Root::Instrs
+
+  @Class Add extends Instr
+    
+  end 

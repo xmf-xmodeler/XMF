@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               XMF Assembler                                *
+ *                              ---------------                               *
+ *                                                                            *
+ *  The XMF assembler transforms a sequence of instructions into a code box.  *
+ *  A code box is the basis for execution on the XMF VM. Code boxes are       *
+ *  components of operations. The assembler deals with encoding instruction   *
+ *  operands and replacing symbolic label names with numeric offsets.         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+
+context Root
+
+  @Package Assembler
+    
+    @Operation assemble(instrs,locals,source):Assembler::CodeBox
+      @Doc
+        Produces a code box from a sequence of instructions, the required number of locals
+        and the source code represented as a string. The source code is optional and may be
+        supplied as the empty string.
+      end
+      let codeBox = Assembler::CodeBox("anonymous",locals,source)
+      in @For instr in instrs do
+           instr.assemble(codeBox)
+         end;
+         codeBox
+      end
+    end
+
+  end   

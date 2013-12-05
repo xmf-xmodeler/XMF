@@ -1,0 +1,52 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             XMF Disassembler                               *
+ *                             ----------------                               *
+ *                                                                            *
+ *  Take a code box or an operation and produce a symbolic description of the *
+ *  contents.                                                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+  
+context XCore::CodeBox
+
+  @Operation disassemble(out,indent)
+    format(out,"~VCODEBOX(~S,~S)~%",Seq{indent,self.name(),self.locals()});
+    @Count i from 0 to self.codeSize() - 1 do
+      format(out,"~V",Seq{indent});
+      Instrs::disassemble(out,i,self.instrAt(i),self.operandsAt(i),self.constants())
+    end;
+    @Count i from 0 to self.constants()->size do
+      let constant = self.constants()->at(i)
+      in if constant.isReallyKindOf(CodeBox) or constant.isReallyKindOf(CompiledOperation)
+         then 
+           format(out,"~VConstant(~S)~%",Seq{indent,i});
+           constant.disassemble(out,indent+2)
+         else format(out,"~VConstant(~S) = ~S~%",Seq{indent,i,constant.toString()})
+         end
+      end
+    end
+  end   
+
+context XCore::CompiledOperation
+
+  @Operation disassemble():String
+    let out = StringOutputChannel()
+    in self.disassemble(out,0);
+       out.getString()
+    end
+  end 
+ 
+context XCore::CompiledOperation
+
+  @Operation disassemble(out,indent)
+    @Count i from 0 to self.paramNames()->size do
+      format(out,"~V[ARG~S] ~S~%",Seq{indent,i,self.paramNames()->at(i)})
+    end;
+    self.codeBox().disassemble(out,indent)
+  end
+  

@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Return a Slot Value of Self                         *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Covers the fairly frequent occurrence where an operation is to return a   *
+ *  slot value of the target. The instruction operand is an index in the      *
+ *  constants table of the slot name. The slot value of the current target is *
+ *  pushed and the call frame is popped.                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class RetDotSelf extends Instr
+  
+    @Attribute name : String end
+    @Attribute constOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation assemble(codeBox)
+      self.constOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      constOffset
+    end
+    
+    @Operation toString():String
+      "<RetDotSelf " + name.toString() + ">"
+    end
+    
+  end

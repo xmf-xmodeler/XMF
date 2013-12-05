@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Mark extends Doc
+
+    @Attribute doc : Doc (?,!) end
+    
+    @Constructor(doc) ! end
+    
+    @Operation pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+      doc.pprint(w,r,pl,b,pt,pl,pr,
+        @Operation(pt,pl,pr,f,ignore)
+          s(pt,pl,pr,f,cut)
+        end,f,f)
+    end
+
+  end

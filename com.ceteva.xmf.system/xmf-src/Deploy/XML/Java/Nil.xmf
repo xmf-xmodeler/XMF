@@ -1,0 +1,9 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Nil
+  @Operation toJava(out:OutputChannel)
+    format(out,"    stack.push(new Nil());~%")
+  end

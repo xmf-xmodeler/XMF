@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Alt extends Doc
+
+    @Attribute right : Doc (?,!) end
+    @Attribute left : Doc (?,!) end
+    
+    @Constructor(left,right) ! end
+    
+    @Operation pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+      left.pprint(w,r,i,b,pt,pl,pr,s,
+        @Operation()
+          right.pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+        end,
+        cut)
+    end
+
+  end

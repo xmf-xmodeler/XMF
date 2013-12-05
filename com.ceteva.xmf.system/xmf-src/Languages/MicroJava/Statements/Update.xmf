@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Statements;
+import Expressions;
+
+context Statements
+
+  @Class Update extends Statement
+  
+    @Attribute name  : String  (?) end
+    @Attribute value : JExp    (?) end
+    
+    @Constructor(name,value) ! end
+  
+    @Operation pprint(out,indent)
+      format(out,"~S = ",Seq{name});
+      value.pprint(out);
+      format(out,";") 
+    end
+    
+    @Operation toXOCL():Operation
+      @Operation(next:Performable):Performable
+        [| <OCL::Var(name)> := <value.toXOCL()>;
+           <next>
+        |]
+      end
+    end
+    
+  end

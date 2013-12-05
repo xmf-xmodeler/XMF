@@ -1,0 +1,140 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Precompiled Actions                            *
+ *                             -------------------                            *
+ *                                                                            *
+ *  When actions are created by the XBNF grammar they require analysis and    *
+ *  transformation. In particular the action expression needs to be turned    *
+ *  into an operation expression with the appropriate arguments and local     *
+ *  variables. To achieve this, the XBNF grammar creates pre-actions which    *
+ *  are then transformed into proper actions by a source code transformation. *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class PreAction extends Recognizer
+    
+    @Attribute action : Element end
+    
+    @Constructor(action) end
+    
+    @Operation code(out)
+       format(out,"{ ");
+       action.pprint(out,0);
+       format(out," }")
+    end
+    
+    @Operation compiledBody(FV:Set(String)):Performable
+    
+      // Return the body of the action with the local variables
+      // bound. The values of the local variables are found in 
+      // the current parse machine stack frame. The stack and the
+      // frame pointer are supplied as arguments. Note that
+      // the MAGIC VALUE 7 is the LOC0 offset in the stack frame...
+      
+      let names = FV->asSeq.qsort(@Operation(x,y) x < y end)
+      in names->iterate(var exp = action | 
+            [| let <var> = stack.ref(frame + 7 + <IntExp(names->indexOf(var))>) 
+              in <exp> 
+              end 
+            |])
+      end
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp(FV:Set(String)):Performable
+    
+      // Perform the pre-action to action transformation.
+      // Certain forms of action can be transformed to 
+      // special instructions for the machine. This optimises
+      // performance. If the form of the action body is not
+      // recognised then the action is transformed into an
+      // operation that references the current call stack frame...
+      
+      @Case action of
+      
+        StrExp(s) do
+        
+          // A string constant...
+          
+          [| Root::Parser::BNF::Const(<s.lift()>) |]
+        end
+        
+        SetExp("Seq",Seq{}) do
+        
+          // The empty sequence...
+          
+          [| Root::Parser::BNF::Const(Seq{}) |]
+        end
+        
+        Var("null") do
+        
+          // Handle null specially...
+          
+          [| Root::Parser::BNF::Const(null) |]
+        end
+        
+        Var(name) do
+        
+          // If the action is just a variable reference in the current
+          // stack frame then the VarRef instruction is more efficient...
+          
+          let names = FV->asSeq.qsort(@Operation(x,y) x < y end)
+          in if FV->includes(name)
+             then [| Root::Parser::BNF::VarRef(<name.lift()>,<names->indexOf(name).lift()>) |]
+             else self.toActionExp(FV)
+             end
+          end 
+        end
+        
+        ConsExp(Var(head),Var(tail)) do
+        
+          // A common pattern in grammar actions is to cons up 
+          // a pair of values bound to locals. This can be handled
+          // more efficiently by a special instruction...
+          
+          let names = FV->asSeq.qsort(@Operation(x,y) x < y end)
+          in [| Root::Parser::BNF::Pair(
+                 <head.lift()>,
+                 <tail.lift()>,
+                 <names->indexOf(head).lift()>,
+                 <names->indexOf(tail).lift()>) |]
+          end
+        end
+        else self.toActionExp(FV)
+      end
+    end
+    
+    @Operation toActionExp(FV:Set(String)):Performable
+    
+      // Perform the transformation from a pre-action to an
+      // action. The operation in the action is created by a 
+      // source code transformation...
+      
+      let args = Seq{Varp("env")};
+          cargs = Seq{Varp("stack"),Varp("frame")};
+          type = NamedType();
+          source = action.pprint()
+      in [| let compiledOp = <Operation("anonymous",cargs,type,self.compiledBody(FV))>
+            in Root::Parser::BNF::Action(compiledOp,<StrExp(source)>) 
+            end |]
+      end
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      let actionFun = Compiler::compileToFun("",self.body(FV),Seq{"env"},grammar.dynamics,true);
+          actionSource = action.pprint()
+      in Action(actionFun,actionSource)
+      end
+    end
+    
+  end

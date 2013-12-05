@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Applications                                *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  An application involves an operator applied to a sequence of arguments.   *
+ *  The operator can be any applicable value. Usually this means an operator  *
+ *  or a class (which is to be instantiated). Note that message passing is    *
+ *  handled by the Send construct and is not viewed as simple application.    *
+ *                                                                            *
+ *  The meta-interpretation of application is handled by invoke/2 and invoke/3*
+ *  which for the most part are handled by the machine. If the VM does not    *
+ *  know how to perform the application then it calls the invoke operation of *
+ *  the operator.                                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+context OCL
+
+  @Class Apply extends OCL::OCL
+  
+    @Attribute operator : OCL::OCL      end
+    @Attribute args     : Seq(OCL::OCL) end
+    
+    @Constructor(operator,args) ! end
+    
+    @Operation pprint(out,indent)
+      operator.pprint(out,indent);
+      format(out,"(");
+      let A = args
+      in @While not A->isEmpty do
+           A->head.pprint(out,indent);
+           A := A->tail;
+           if not A->isEmpty
+           then format(out,",")
+           else self
+           end
+         end
+      end;
+      format(out,")")
+    end
+    
+  end

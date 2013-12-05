@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Greater Than                               *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops two values n2 then n1 and performs n1 > n2. If they are numbers then *
+ *  the VM handles it otherwise it send n1 a greater/1 message. A boolean     *
+ *  value is left at the head of the stack.                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Greater extends Instr
+    
+  end

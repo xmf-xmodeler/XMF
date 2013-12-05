@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Set a Slot of Self                              *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as SETSLOT instruction except that the element whose slot is to be   *
+ *  updated is the target in the current call frame.                          *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SetSelfSlot extends Instr
+  
+    @Attribute name : String end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation toString():String
+      "<SetSelfSlot " + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end 

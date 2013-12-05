@@ -1,0 +1,29 @@
+/******************************************************************************
+ *                                                                            *
+ *                              Local Type Error                              *
+ *                              ----------------                              *
+ *                                                                            *
+ *    Thrown when an arg is bound to a value of the wrong type.              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+parserImport XOCL;
+
+import Exceptions;
+
+context Exceptions
+
+  @Class ArgTypeError extends LocalTypeError
+     
+    @Attribute opName : String end
+        
+    @Constructor(opName,name,value,type) !
+      self.setBacktrace();
+      self.message := 
+        "The arg " + name + " of operation " + opName + " expects a value of type " + self.typePath() + 
+        " got " + value.toString() + " of type " + value.of().path()
+    end
+    
+  end
+      
+    

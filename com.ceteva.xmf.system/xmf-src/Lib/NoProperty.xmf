@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class NoProperty extends Exception
+     
+    @Attribute object   : ObjectWithProperties end
+    @Attribute property : Element              end
+    
+    @Constructor(object,name) !
+       self.setBacktrace();
+       self.message := 
+         object.toString() + 
+         " does not have a property " + property + " (try: " +
+         object.getProperties()->asSeq->separateWith(",") + ")"
+    end
+    
+  end
+      
+    

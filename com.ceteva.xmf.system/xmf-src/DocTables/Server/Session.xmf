@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Browser Sessions                              *
+ *                            -------------------                             *
+ *                                                                            *
+ *  Each new session creates an instance of this class. The page is displayed *
+ *  and the events are handled using the handle operation.                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import DocTables;
+import Basic;
+
+context Server
+
+  @Class Session 
+
+    @Attribute page : Page end
+    
+    @Constructor(page) ! end
+    
+    @Operation handle(args:Seq(Element))
+      self.page := page.handle(args);
+      self.page.html()
+    end
+
+  end

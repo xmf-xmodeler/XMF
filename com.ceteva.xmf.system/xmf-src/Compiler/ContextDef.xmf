@@ -1,0 +1,35 @@
+/******************************************************************************
+ *                                                                            *
+ *                      Compiling Context Definitions                         *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  A context definition occurs in a file and is nothing more than a directive*
+ *  to add a named-element to a name-space. The isForward directive determines*
+ *  whether or not the named-element is initialized by the process of adding  *
+ *  it to the name-space. If the named-element might contain forward refs     *
+ *  then it should not be initialized at the point of adding it.              *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import OCL;
+import Instrs;
+
+context ContextDef
+  @Operation FV():Element
+    self.desugar().FV()
+  end
+
+context ContextDef
+  @Operation maxLocals():Element
+    self.desugar().maxLocals()
+  end
+  
+context ContextDef
+  @Operation desugar()
+    [| XCore::NameSpace::define(<element>,<Path::toPath(path)>,<BoolExp(isForward)>) |]
+  end
+    
+context ContextDef
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    self.desugar().compile(env,frame,isLast,saveSource)
+  end

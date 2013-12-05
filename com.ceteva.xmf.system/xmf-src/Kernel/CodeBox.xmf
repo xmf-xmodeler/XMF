@@ -1,0 +1,143 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Code Boxes                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   A code box is the static part of an operation (known as FUNs in the VM). *
+ *   A code box contains a vector of compiled instructions, the name of the   *
+ *   code, the locals required by the code and the constants used by the      *
+ *   instructions. Best treated as read-only.                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+context CodeBox
+  @Operation binaryString():String
+  
+    // Turn the code into a string that can be used to
+    // recreate the code box later on. Used for serialization
+    // of code-boxes and operations...
+    
+    let s = ""
+    in @Count i from 0 to self.codeSize() do
+         s := s + self.instrAt(i) + ",";
+         s := s + self.operandsAt(i);
+         if i < (self.codeSize() - 1)
+         then s := s + ","
+         end
+       end;
+       s
+    end
+  end
+  
+context CodeBox
+  @Operation codeSize()
+  
+    // How many instructions?
+    
+    Kernel_codeBoxCodeSize(self)
+  end
+
+context CodeBox
+  @Operation constants()
+  
+    // A vector of the constants used by the
+    // instructions in the code-box...
+    
+    Kernel_codeBoxConstants(self)
+  end
+  
+context CodeBox
+  @Operation init(args)
+  
+    // Create a code box with the required number
+    // of instructions. Code boxes are managed by the
+    // VM...
+    
+    Kernel_mkCodeBox(args->at(0))
+  end
+  
+context CodeBox
+  @Operation instrAt(index)
+  
+    // Return the instruction at the the given
+    // index as an integer code...
+    
+    Kernel_codeBoxInstrAt(self,index)
+  end
+  
+context CodeBox
+  @Operation locals()
+  
+    // How many locals required?
+    
+    Kernel_codeBoxLocals(self)
+  end
+  
+context CodeBox
+  @Operation name()
+  
+    // The name of the code-box (and therefore any
+    // operation based on the code-box)...
+    
+    Kernel_codeBoxName(self)
+  end
+
+context CodeBox
+  @Operation operandsAt(index):Integer
+  
+    // The operations of the instruction at the
+    // supplied index...
+    
+    Kernel_codeBoxOperandsAt(self,index)
+  end
+  
+context CodeBox
+  @Operation resourceName()
+  
+    // Code-boxes have a resource name that is generally the
+    // source file that was compiled to produce the binary
+    // stored in the code-box...
+    
+    Kernel_codeBoxResourceName(self)
+  end
+  
+context CodeBox
+  @Operation setCode(instrs)
+    Kernel_codeBoxSetCode(self,instrs)
+  end
+   
+context CodeBox
+  @Operation setConstants(constants)
+    Kernel_codeBoxSetConstants(self,constants)
+  end
+  
+context CodeBox
+  @Operation setName(name)
+    Kernel_codeBoxSetName(self,name)
+  end
+  
+context CodeBox
+  @Operation setInstrAt(index,instr,operands)
+    Kernel_codeBoxSetInstrAt(self,index,instr,operands)
+  end
+  
+context CodeBox
+  @Operation setResourceName(resourceName)
+    Kernel_codeBoxSetResourceName(self,resourceName)
+  end
+
+context CodeBox
+  @Operation setSource(source)
+    Kernel_codeBoxSetSource(self,source)
+  end
+
+context CodeBox
+  @Operation source()
+  
+    // Code-boxes optionally contains a  string that 
+    // represents the original source code that was compiled
+    // to produce the instructions...
+    Kernel_codeBoxSource(self)
+  end

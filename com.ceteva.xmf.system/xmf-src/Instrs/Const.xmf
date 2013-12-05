@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Push a Constant Value                          *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  The operand for this instruction is the index into the constant table of  *
+ *  the current frame. The constant is pushed onto the stack.                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Const extends Instr
+   
+    @Attribute value : Element end
+    @Attribute offset : Integer end
+    
+    @Constructor(value) ! end
+  
+    @Operation toString():String
+      "<Const " + value.toString() + " >"
+    end
+    
+    @Operation assemble(codeBox)
+      self.offset := codeBox.constOffset(value);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands()
+      offset
+    end
+
+  end

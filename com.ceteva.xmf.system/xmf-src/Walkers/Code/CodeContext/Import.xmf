@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+import CodeContext;
+
+context CodeContext
+
+  @Class Import extends Context
+    
+    @Attribute path : Seq(String) (?,!) end
+    
+    @Constructor(path,next) ! end
+    
+  end

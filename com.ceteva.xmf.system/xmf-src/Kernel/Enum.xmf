@@ -1,0 +1,176 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Enumerated Types                               *
+ *                             ----------------                               *
+ *                                                                            *
+ *   Enumerated types are collections of distinguished values. Each value is  *
+ *   an instance of the enumerated type and is different from all other values*
+ *   of the enumerated type. An example is the type Colour which might have   *
+ *   instances RED, GREEN and BLUE.                                           *
+ *                                                                            *
+ *   The class Enum is a meta-class. Instances of Enum are enumerated types   *
+ *   whose instances are the values of the enumerated type such as RED and    *
+ *   GREEN above.                                                             *
+ *                                                                            *
+ *   Enum uses the standard meta-class pattern of specifying a super-class    *
+ *   via defaultParents(). The super-class EnumChoice specifies the interface *
+ *   of an enumerated type.                                                   *
+ *                                                                            *
+ *   If E is an enumerated type, then E will have names (such as RED above).  *
+ *   When E is created, a new instance of E is created and added to E for     *
+ *   each name. Therefore, each name gives rise to a named-element that is an *
+ *   instance of E and which is different from all other instances of E. Since*
+ *   an enumerated type is a name-space you can reference the names using ::  *
+ *   as in Colour::RED.                                                       *
+ *                                                                            *
+ *   You may also register classes with an enumerated type. Do this with      *
+ *   addClass(name,classifiers). The result is a member of the enumerated type*
+ *   which is a sub-class of the type and which has a collection of attributes*
+ *   whose types are the supplied classifiers (and whose names are irrelevant)*
+ *   The class will have a single constructor that matches the attributes.    *
+ *   The idea of adding a class is that the elements of the enumerated type   *
+ *   are structured. You can create instances of the type by supplying the    *
+ *   class with init args.                                                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XCore
+
+  @Class Enum extends Class
+    @Doc
+      The enumerated data type. Create an instance of this class to
+      create a new named enumeration type. The names passed to the
+      constructor are the names of the unique elements of the
+      enumeration. On creation, the names are mapped to instances
+      of the new enumeration type and can be referenced via their name
+      using getElement (or ::).
+    end
+  
+    @Attribute names : Seq(String) (?,!,+,-) end
+    
+    @Constructor(name,names) 
+    
+      // Add a new instance of the receiver for each of the
+      // supplied names...
+      
+      @For name in names do
+        self.addEnumElement(name)
+      end
+    end
+    
+    @Operation default()
+    
+      // The instance with the first name is the default
+      // value of the enumerated type...
+      
+      if names->isEmpty
+      then null
+      else self.getEnumElement(names->head)
+      end 
+    end
+    
+    @Operation defaultParents():Set(Classifier)
+      Set{EnumChoice}
+    end
+    
+    @Operation add(n)
+  
+      @Doc
+        Exte-nd the behaviour for 'add' inherited from
+        Class by taking name strings into account.
+      end
+   
+      if n.isKindOf(Symbol)
+      then
+        self.addName(n.toString())
+      elseif n.isKindOf(String)
+      then 
+        self.addName(n)
+      else 
+        super(n)
+      end
+    end
+    
+    @Operation addClass(name:String,args:Seq(Classifier))
+    
+      // Add a class as a sub-class of the Enum so that
+      // instances of the class are also instances of the
+      // Enum. This means that you can define an enum
+      // with a member which is a class and match using
+      // the constructor of the class...
+      
+      let class = Class(name);
+          names = 1.to(args->size)->collect(i | "att" + i)
+      in class.addParent(self);
+         @For type,name in args,names do
+           class.add(Attribute(name,type))
+         end;
+         class.add(Constructor(names,@Operation() null end,"","",true));
+         self.add(class)
+      end
+    end
+  
+    @Operation addEnumElement(name:String)
+    
+      // Create an instance of the receiver, set its name
+      // and add it to the receiver...
+      
+      let value = self()
+      in value.name := Symbol(name);
+         self.add(value)
+      end;
+      self
+    end
+  
+    @Operation addName(name:String)
+      self.resolveNameClash(name,names);
+      self.names := names->including(name);
+      self.addEnumElement(name)
+    end
+
+    @Operation getEnumElement(name:String)
+      self.contents.get(Symbol(name))
+    end
+
+    @Operation remove(n)
+  
+      @Doc
+        Exte-nd the behaviour inherited from Class by
+        taking name strings into account.
+      end
+  
+      if n.isKindOf(Symbol)
+      then
+        self.removeName(n.toString())
+      elseif n.isKindOf(String)
+      then
+        self.removeName(n)
+      else
+        super(n)
+      end
+    end
+
+    @Operation removeEnumElement(name:String)
+      if self.contents.hasKey(Symbol(name))
+      then self.remove(self.getEnumElement(name))
+      end;
+      self
+    end
+
+    @Operation removeName(name:String)
+      self.names := names.excluding(name);
+      self.removeEnumElement(name)
+    end
+
+    @Operation resolveNameClash(name,collection)
+      @Find(e,collection)
+        when (e.isKindOf(String) andthen e = name) or
+             (e.isKindOf(NamedElement) andthen e.name = name)
+        do self.remove(e)
+      end;
+      self
+    end
+
+  end

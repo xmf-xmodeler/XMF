@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+import Associations;
+
+context Associations
+
+  @Class One extends Multiplicity
+  
+    //  An end with multiplicity 1 requires that the attribute
+    //  is associated with exactly one instance of the appropriate 
+    //  class or null.
+    
+    @Constructor() end
+    
+    @Operation typeExp(type)
+      type
+    end
+    
+    @Operation labelString():String
+      ""
+    end
+    
+  end

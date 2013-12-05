@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Text                                    *
+ *                            -------------------                             *
+ * Just some text in the document, no formatting.                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Text extends Entry
+
+    @Attribute text : String (?,!) end
+
+    @Constructor(text) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

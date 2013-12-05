@@ -1,0 +1,29 @@
+/******************************************************************************
+ *                                                                            *
+ *                              Local Type Error                              *
+ *                              ----------------                              *
+ *                                                                            *
+ *    Thrown when a local is bound to a value of the wrong type.              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+parserImport XOCL;
+
+import Exceptions;
+
+context Exceptions
+
+  @Class LocalTypeError extends TypeError
+     
+    @Attribute name : String end
+        
+    @Constructor(name,value,type) !
+      self.setBacktrace();
+      self.message := 
+        "The local " + name + " expects a value of type " + self.typePath() + 
+        " got " + value.toString() + " of type " + value.of().path()
+    end
+    
+  end
+      
+    

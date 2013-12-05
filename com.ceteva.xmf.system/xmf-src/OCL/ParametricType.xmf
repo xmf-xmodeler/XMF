@@ -1,0 +1,46 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Parametric Type Expressions                         *
+ *                        ---------------------------                         *
+ *                                                                            *
+ *  A type consisting of a named parametric type and its arguments. For       *
+ *  example Seq(String) is a parametric type.                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import TypeExp;
+
+context OCL
+
+  @Class ParametricType extends TypeExp
+    
+    @Attribute constructor : Seq(String) end
+    @Attribute args        : Seq(TypeExp) end
+    
+    @Constructor(constructor,args) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~{::~;~S~}(",Seq{constructor});
+      @For arg in args do
+        arg.pprint(out,indent);
+        if not isLast then format(out,",") end
+      end;
+      format(out,")")
+    end
+    
+    @Operation toExp():Performable
+      
+      // Expect the constructor to be referenced by name
+      // and supply the types as arguments...
+      
+      Apply(Path::toPath(constructor->map("toString")),args->collect(arg | arg.toExp()))
+    end
+    
+    @Operation toSig()
+      Seq{PARAMETRIC,constructor,args->collect(a | a.toSig())}
+    end
+    
+  end

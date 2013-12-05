@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Check Boxes                                  *
+ *                            -------------------                             *
+ *                                                                            *
+ *  A check box defines a label which is the name of an argument supplied to  *
+ *  an event handling operation. Note that the label argument is only supplied*
+ *  when the check box is set.
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class CheckBox extends Entry
+
+    @Attribute label : String (?,!) end
+    @Attribute checked : Boolean (?,!) end
+
+    @Constructor(label,checked) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+import Signatures;
+
+context Signatures
+
+  @Type NamedElement 
+
+    Field(Type)
+  | Operation(Seq(Type),Type)
+  | Class(Signature)
+  | Package(Signature)
+  | NameSpace(Signature)
+  | Value(Type)
+
+  end
+  
+context NamedElement 
+  
+    @Operation pprint(out)
+      @Case self of
+        NamedElement::Field(t) do
+          t.pprint(out)
+        end
+        NamedElement::Operation(domain,range) do
+          Fun(domain,range).pprint(out)
+        end
+        NamedElement::Class(s) do
+          s.pprint(out)
+        end
+        NamedElement::Package(s) do
+          s.pprint(out)
+        end
+        NamedElement::NameSpace(s) do
+          s.pprint(out)
+        end
+        NamedElement::Value(t) do
+         t.pprint(out)
+        end
+      end
+    end 

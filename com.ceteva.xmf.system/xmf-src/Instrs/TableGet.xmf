@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                     Get The Value Of A Key In A Table                      *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Expects a table above a key in the stack. Pops these and pushes the value *
+ *  of the key in the table on the stack. Raises an exception if the key is   *
+ *  not in the table.                                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class TableGet extends Instr
+    
+  end
+  
+  

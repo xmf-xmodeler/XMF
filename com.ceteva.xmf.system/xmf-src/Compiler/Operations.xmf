@@ -1,0 +1,99 @@
+/******************************************************************************
+ *                                                                            *
+ *                         Compilation of Operations                          *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  Multiple operations can be grouped together to form an Operations. Each   *
+ *  of the component operations is partial and has a domain based on the      *
+ *  argument patterns. Compilation of a group of operations chains the        *
+ *  operations together so that when the composite operation is called, each  *
+ *  operation in the sequence is tried in turn. The first operation whose     *
+ *  arguments match is then called and the rest of the operations in the      *
+ *  sequence are ignored.                                                     *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import OCL;
+
+context Compiler
+  
+  @Class Operations
+  
+    // A collection of operations that are defined in the same
+    // scope and which should be merged into a single operation
+    // via pattern matching. The order of the operation elements
+    // is important since they will be each tried in turn when
+    // pattern matching occurs...
+     
+     @Attribute name : String end
+     @Attribute operations : Seq(Operation) end
+     
+     @Constructor(name,operations) end
+     
+     @Operation arity():Integer
+       let arity = operations->iterate(o arity = 0 | arity.max(o.parameters->size))
+       in if arity = 0 and operations->size > 1
+          then self.error("Cannot overload operations with 0 arity.")
+          else arity
+          end
+       end
+     end
+     
+     @Operation bindVars(names:Seq(String),patterns:Seq(Pattern))
+       if names->isEmpty
+       then Seq{}
+       else 
+         if patterns->head.isKindOf(Varp)
+         then self.bindVarp(names->head,patterns->head,self.bindVars(names->tail,patterns->tail))
+         elseif patterns->head.isKindOf(Condp)
+         then self.bindVars(names,Seq{patterns->head.pattern | patterns->tail})
+         else self.bindVars(names->tail,patterns->tail)
+         end
+       end
+     end
+     
+     @Operation bindVarp(name:String,varp:Varp,rest)
+       if name = varp.name
+       then rest
+       else Seq{ValueBinding(varp.name,Var(name)) | rest}
+       end
+     end
+     
+     @Operation compile(env,frame,isLast,saveSource)
+       let params = 0.to(self.arity() - 1)->collect(n | Varp("arg_" + n));
+           fail = [| self.error("All clauses for " + <StrExp(name)> + " failed.") |]
+       in Operation(name,params,NamedType(),self.desugarBody(operations,params.name,fail)).compile(env,frame,isLast,saveSource)
+       end
+     end
+     
+     @Operation desugarBody(ops:Seq(Operation),paramNames:Seq(String),fail:Performable):Performable
+       if ops->isEmpty
+       then fail
+       else
+         let bindings = self.bindVars(paramNames,ops->head.parameters);
+             matchCode = self.matchCode(paramNames,ops->head.parameters,ops->head.performable,self.desugarBody(ops->tail,paramNames,fail))
+         in if bindings->isEmpty
+            then matchCode
+            else Let(bindings,matchCode)
+            end
+         end
+       end
+     end
+       
+     @Operation matchCode(paramNames:Seq(String),patterns:Seq(Pattern),success:Performable,fail:Performable):Performable
+       if paramNames->isEmpty
+       then success
+       else 
+         let paramName = paramNames->head;
+             pattern = patterns->head;
+             value = Var(paramNames->head);
+             preMessage = "Match failed in operation " + name + ". Supplied parameter ";
+             postMessage = " does not match " + patterns->head.pprint()
+         in pattern.matchCode(Var(paramName),self.matchCode(paramNames->tail,patterns->tail,success,fail),fail)
+         end
+       end
+     end
+  
+   end

@@ -1,0 +1,50 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Context Definitions                          *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  Definitions are evaluated and (typically) added to a container. The       *
+ *  'context' construct is a declarative way of specifying that a given       *
+ *  definition should be added to a particular container. The context         *
+ *  construct should occur at the top level in files. If the context is a     *
+ *  name space then the context expression does not cause the name space to   *
+ *  be imported.                                                              *
+ *                                                                            *
+ *  The isForward directive is used to determine whether the definition that  *
+ *  is added might contain references to variables that have yet to be bound. *
+ *  This might happen, for example, in class definitions where the types of   *
+ *  the attributes are not yet defined. The usual way of protecting against   *
+ *  potentially undefined references is to delay them and for the definition  *
+ *  force and resolve the reference when the definition is initialized via    *
+ *  the init() operation. Therefore, the use of isForward will cause the      *
+ *  init() operation of the defined element *not* to be called. In general,   *
+ *  this means that you have to arrange for the init() operation to be called *
+ *  from somewhere else.                                                      * 
+ *                                                                            *
+ ******************************************************************************/
+
+
+import OCL;
+
+context OCL
+
+  @Class ContextDef extends OCL::OCL
+  
+    @Attribute path      : Seq(String) end   // Reference to owner.
+    @Attribute element   : OCL::OCL    end   // Definition to add to owner.
+    @Attribute isForward : Boolean     end   // Whether to initialize the new element.
+    
+    @Constructor(path,element) end
+    
+    @Constructor(path,element,isForward) end
+    
+    @Operation pprint(out,indent)
+      format(out,"context ~{::~;~S~}",Seq{path});
+      if isForward then format(out," ! ") end;
+      format(out,"~%~V",Seq{indent + 2});
+      element.pprint(out,indent + 2)
+    end
+    
+  end

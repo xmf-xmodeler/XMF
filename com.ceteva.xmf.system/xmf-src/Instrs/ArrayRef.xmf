@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Array References                            *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Pops an array and then an index at the head of the stack and pushes the   *
+ *  indexed value back on the stack. Raises an exception if the index is out  *
+ *  of range.                                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class ArrayRef extends Instr
+    
+  end
+  
+  

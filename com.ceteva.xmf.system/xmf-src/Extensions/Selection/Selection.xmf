@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+context XOCL
+
+  @Package Selection 
+  
+    @Operation select(collection:Seq(Element),succ,fail)
+      if collection->isEmpty
+      then fail()
+      else 
+        let value = collection->head
+        in succ(value,@Operation() select(collection->excluding(value),succ,fail) end)
+        end
+      end
+    end
+  
+  end

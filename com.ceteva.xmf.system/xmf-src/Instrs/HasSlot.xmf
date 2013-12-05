@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Check Whether an Object Has A Slot                  *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a slot name and then an element and pushes true when the element     *
+ *  can produce a value using '.'. If the element is an object then the VM    *
+ *  can deal with the request directly. If the object is not an instance of a *
+ *  standard class or is not an object then it must implement its own protocol*
+ *  for slot handling so it is sent an appropriate message.                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class HasSlot extends Instr
+    
+  end

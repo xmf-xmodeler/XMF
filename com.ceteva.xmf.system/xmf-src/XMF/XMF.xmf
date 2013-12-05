@@ -1,0 +1,605 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              The XMF System                                *
+ *                              ---------------                               *
+ *                                                                            *
+ *    XMF itself is represented by an instance of the class class XMF. This   *
+ *    instance is referenced as the value of the global variable 'xmf' and    *
+ *    provides operations to interrogate and control the system.              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Class XMF extends ObjectWithProperties
+  
+    // This class defines a collection of utility operations and values
+    // that relate to the XMF system. There is a single global instance of
+    // this class that is populated with information when the system boots.
+    // Reference the system descriptor as Root::xmf.
+  
+    // VM type tags...
+  
+    @Bind UNDEFINED      = 0  end             // Memory is initialised to undefined.
+    @Bind ARRAY          = 1  end             // A fixed size indexed sequence of values.
+    @Bind CODE           = 2  end             // A fixed size indexed sequence of instructions.
+    @Bind INT            = 3  end             // A positive integer.
+    @Bind STRING         = 4  end             // A fixed size indexed sequence of char-codes.
+    @Bind CODEBOX        = 5  end             // Code + constants + globals.
+    @Bind BOOL           = 6  end             // Either true or false.
+    @Bind OBJ            = 7  end             // An object with fields.
+    @Bind FUN            = 8  end             // A function.
+    @Bind FOREIGNFUN     = 9  end             // A Java function.
+    @Bind FOREIGNOBJ     = 10 end             // A Java object.
+    @Bind FORWARD        = 11 end             // Used by the garbage collector.
+    @Bind CONT           = 12 end             // A continutation (stack copy).
+    @Bind CONS           = 15 end             // A cons pair.
+    @Bind NIL            = 16 end             // The empty list.
+    @Bind SYMBOL         = 17 end             // Symbolic names.
+    @Bind SET            = 18 end             // A set of elements.
+    @Bind INPUT_CHANNEL  = 19 end             // A chanel of input data.
+    @Bind OUTPUT_CHANNEL = 20 end             // A channel for output data.
+    @Bind HASHTABLE      = 21 end             // A table associating keys with values.
+    @Bind NEGINT         = 22 end             // Negative integers.
+    @Bind FLOAT          = 23 end             // Floating point numbers.
+    @Bind CLIENT         = 24 end             // Clients.
+    @Bind THREAD         = 26 end             // Threads.
+    @Bind DAEMON         = 27 end             // Daemons.
+    @Bind BUFFER         = 28 end             // Dynamic arrays.
+    @Bind BIGINT         = 34 end             // Arbitrary sized integers.
+    @Bind LASTVALUE      = 25 end             // The first unused type tag.
+  
+    @Bind resources = Table(100) end          // A table of resources used by save and load
+    @Bind versions = Seq{"1.0",
+                         "1.5",
+                         "1.7",
+                         "1.8",
+                         "1.9",
+                         "2.0",
+                         "2.1",
+                         "2.2"} end           // A sequence of all released versions so we can compare them.
+  
+    @Attribute homeDir        : String   (?,!)                          end // Supplied on startup.
+    @Attribute docDir         : String   (?,!)                          end // Not used.
+    @Attribute buildDate      : String   (?)                            end // When the system was created.
+    @Attribute version        : String   (!,?)                          end // The system version.
+    @Attribute user           : String   (!,?)                          end // The name of the user.
+    @Attribute preferences    : PreferenceManager = PreferenceManager() end // Sets preferences.
+    @Attribute exception      : Exception                               end // The most recently raised exception.
+    @Attribute standardOutput : String = "CONSOLE" (!,?)                end // Not used.
+    @Attribute initFile       : String   (!,?)                          end // The name of the init file.
+    @Attribute imageDir       : String   (!,?)                          end // Not used.
+    @Attribute startupArgs    : Seq(Element) (!,?)                      end // Command line arguments.
+    @Attribute banner         : String = self.basicBanner() (?,!)       end // Banner describing system.
+    
+    @Constructor(homeDir) ! 
+      self.buildDate := self.date()
+    end
+    
+    @Operation basicBanner():String
+      "XMF"
+    end
+    
+    @Operation bootDir():String
+      homeDir + "/Boot"
+    end
+    
+    @Operation browser(title:String,html:String)
+    
+      // Create a browser in Eclipse...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then self.error("Cannot find dialogs client for browsing.")
+         else DialogsClient.browser(title,html)
+         end
+      end
+    end
+    
+    @Operation busy(label:String)
+      // Mosaic defines this to display an appropriate dialog.
+      null
+    end
+    
+    @Operation canUndo():Boolean
+    
+      // returns true when there is comething to undo...
+      
+      Kernel_undoStackSize() > 0
+    end
+    
+    @Operation canRedo():Boolean
+    
+      // returns true when there is something to redo...
+      
+      Kernel_redoStackSize() > 0
+    end
+    
+    @Operation choose(title:String,question:String,values:Seq(Element)):Seq(Element)
+     
+      // Order the elements via a dialog. Returns null if the
+      // reordering is cancelled otherwise returns a sequence
+      // of elements chosen from the values sequence...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then null
+         else
+           let strings = values->map("toString") then
+               choices = DialogsClient.orderingDialog(title,question,strings)
+           in if choices = null
+              then choices
+              else choices->collect(choice | values->at(strings->indexOf(choice)))
+              end
+           end
+         end
+      end
+    end
+    
+    @Operation clearClassLoader() 
+      // Resets the class loader. New calls to load classes will
+      // load the most up-to-date version...
+      self.javaClass("xjava.XJ").clearClassLoader()
+    end
+
+    @Operation clientHandler(name:String):Operation
+
+      // Returns the handler used by clientSend...
+
+      Kernel_clientInterface().get(name)
+    end
+    
+    @Operation clientNamed(name:String)
+      self.clientManager().findClientByName(name)
+    end
+     
+    @Operation date():String
+      Kernel_date(true)
+    end
+
+    @Operation date(verbose:Boolean):String
+      Kernel_date(verbose)
+    end
+    
+    @Operation definePreference(name,value,type,askUser)
+      preferences.definePreference(name.asSymbol(),value,type,askUser)
+    end
+    
+    @Operation dialogsClient():ForeignObject
+    
+      // Return the Java class that implements dialogs...
+      
+      self.javaClass("com.ceteva.dialogs.DialogsClient")
+    end
+    
+    @Operation endUndoable()
+    
+      // Call this to complete an undoable transaction.
+      // the most recently recorded transaction is undone using
+      // undo().
+      
+      Kernel_endUndoContext()
+    end
+    
+    @Operation ensureHeap(amount):Boolean
+    
+      // Try to ensure that the required number of heap words are
+      // allocated. Returns whether or not it succeeded...
+      
+      if self.heapSize() < amount
+      then self.extendHeap(amount - self.heapSize())
+      else true
+      end
+    end
+    
+    @Operation exec(command:String . args:Seq(String))
+      
+      // Performs the operating system command with the
+      // supplied arguments. Returns a pair which contains
+      // an input and output channel for communicating
+      // with the command. These can be ignored if the
+      // command is performed for side effect...
+      
+      Kernel_exec(command,args)
+    end
+    
+    @Operation extendHeap(amount):Boolean
+    
+      // Tries to extend the heap by the supplied amount and
+      // returns a boolean showing whether it succeeded...
+      
+      Kernel_extendHeap(amount)
+    end
+    
+    @Operation foreignTypeMapping()
+      Kernel_foreignTypeMapping()
+    end
+    
+    @Operation foreignMOPMapping()
+      Kernel_foreignMOPMapping()
+    end
+    
+    @Operation forwardRefs():Set(ForwardRef)
+      Kernel_forwardRefs()
+    end
+    
+    @Operation getString(title:String,label:String,default:String):String
+    
+      // Prints out the title and the label and requests
+      // a string. If the system can do this via a GUI
+      // dialog then it will use default to populate the
+      // dialog. Returns null if cancelled and a string
+      // otherwise...
+      
+      let DialogClients = self.dialogsClient()
+      in if DialogClients = null
+         then
+           format(stdout,"~S~%~S: ",Seq{title,label});
+           stdin.readLine()
+         else DialogClients.inputDialog(title,label,default)
+         end
+      end
+    end
+    
+    @Operation gc()
+      gc()
+    end
+    
+    @Operation gc2()
+      gc();
+      gc();
+      resetOperatorTable()
+    end
+
+    @Operation gc2heap()
+      // Garbage collects and returns the amount of memory currently allocated.
+      gc();
+      gc();
+      resetOperatorTable();
+      Kernel_usedHeap()
+    end
+
+    @Operation killProgressDialogs()
+      // Remove this....
+      null
+    end
+    
+    @Operation load(path:String)
+      let fullPath = homeDir + "/" + path
+      in if fullPath.fileExists()
+         then fullPath.loadBin(true)
+         else throw FileDoesNotExist(fullPath)
+         end
+      end
+    end
+
+    @Operation hasClientHandler(name:String):Boolean
+    
+      // Returns true when the VM has a handler for the
+      // gven name so that clients can call the handler
+      // using clientCall.
+
+      Kernel_clientInterface().hasKey(name)
+    end
+
+    
+    @Operation hasPreference(name):Boolean
+      preferences.hasPreference(name)
+    end
+    
+    @Operation heapSize():Integer
+      Kernel_heapSize()
+    end
+    
+    @Operation info(title:String,warning:String)
+    
+      // Report information...
+      
+      self.textArea("info",title,warning)
+    end
+    
+    @Operation isFirstVersionLater(v1:String,v2:String):Boolean
+      let versions = XMF::versions then
+          index1 = versions.indexOf(v1);
+          index2 = versions.indexOf(v2)
+      in
+        index1 > index2
+      end
+    end
+    
+    @Operation isValidVersion(v:String):Boolean
+      XMF::versions.includes(v)
+    end
+    
+    @Operation javaClass(path:String):ForeignObject
+    
+      // Get a Java class with the supplied java path name.
+      // Returns null if there is no class with the given
+      // name...
+      
+      self.javaClass(path,Seq{})
+    end
+    
+    @Operation javaClass(path:String,dirs:Seq(String)):ForeignObject
+    
+      // Returns a Java class with the given path name.
+      // The dirs argument is a sequence of file system
+      // paths that are effectively added to CLASSPATH.
+      // Returns null if there is no class with the given
+      // name...
+      
+      Kernel_forName(path,dirs)
+    end
+
+    @Operation needsGC():Boolean
+      Kernel_needsGC()
+    end
+    
+    @Operation machine()
+    
+      // Returns the running XMF VM...
+      
+      Kernel_self()
+    end
+    
+    @Operation memory()
+    
+      // Returns a sequence of memory records. Each record is of the form:
+      // Seq{time,usedMem,data} where data is a vector of memory usage by
+      // type...
+      
+      Kernel_memory()
+    end
+    
+    @Operation mineForwardRefs()
+    
+      // Find forward refs that have been missed by the loader...
+      
+      let walker = Walkers::Find(@Operation(x) x <> null and x.isKindOf(ForwardRef) end)
+      in walker.walk(Root,null);
+         @For ref in walker.results() when not self.forwardRefs()->includes(ref) do
+           Kernel_setForwardRefs(self.forwardRefs()->including(ref))
+         end
+      end
+    end
+    
+    @Operation newListeners():Table
+      Kernel_newListeners()
+    end
+    
+    @Operation newListenersFor(class:Classifier):Seq(Operation)
+      let listeners = self.newListeners()
+      in if listeners.hasKey(class)
+         then listeners.get(class)
+         else Seq{}
+         end
+      end
+    end
+    
+    @Operation openFile(path:String,type:String,initial:String):String
+    
+      // Find a file...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then
+           self.error("Cannot create dialog to open a file.")
+         else DialogsClient.fileDialog("open",path,type,initial)
+         end
+      end
+    end
+    
+    @Operation preference(name)
+      preferences.preference(name)
+    end
+    
+    @Operation question(question:String):Boolean
+    
+      // Ask a question and return true or false...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then
+           format(stdout,"~S: ~F",Seq{question});
+           let answer = "" 
+           in @While not Set{"yes","y","no","n"}->includes(answer) do
+                answer := stdin.readLine().stripWhiteSpace()
+              end;
+              answer = "yes" or answer = "y"
+          end
+         else DialogsClient.questionDialog(question)
+         end
+      end
+    end
+    
+    @Operation raise(exception:Exception)
+      self.exception := exception;
+      exception.display()
+    end
+    
+    @Operation redo():Boolean
+    
+      // Call this to perform the most recently recorded
+      // redoable transaction. Returns true when the undo
+      // occurred and false otherwise...
+      
+      if self.canRedo()
+      then 
+        Kernel_execRedo();
+        true
+      else false
+      end
+    end
+
+    @Operation registerClientHandler(name:String,handler:Operation)
+
+      // Registers the handler against the given name.
+      // Once registered, the handler can be called from Java
+      // using clientCall(String name,Object[] args)...
+
+      Kernel_clientInterface().put(name,handler) 
+    end
+
+    @Operation removeClientHandler(name:String)
+  
+      // Removes the client handler for the supplied name...
+      Kernel_clientInterface().remove(name)
+    end
+    
+    @Operation reportError(error:String)
+    
+      // Report an error via a dialog....
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then
+           format(stdout,"~S~%",Seq{error})
+         else DialogsClient.errorDialog(error)
+         end
+      end
+    end
+    
+    @Operation resolveRefs()
+      // Tries to resolve all the forward refs...
+      @For r in self.forwardRefs() do
+        r.resolve()
+      end;
+      gc();
+      Kernel_setForwardRefs(self.forwardRefs()->select(r | r.isReallyKindOf(ForwardRef)))
+    end
+    
+    @Operation saveDir():String
+      homeDir + "/Save"
+    end
+    
+    @Operation saveFile(path:String,type:String,initial:String):String
+    
+      // Save a file...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then
+           self.error("Cannot create dialog to save a file.")
+         else DialogsClient.fileDialog("save",path,type,initial)
+         end
+      end
+    end
+    
+    @Operation saveState(file:String,restart:Operation):Boolean
+    
+      @Doc
+        Saves the state of the system and returns true.
+        When the system is restarted, any arguments are
+        passed to the restart operation.
+      end
+      
+      let startup = saveMachineState(file)
+      in if startup = true
+         then true
+         else restart(startup)
+         end
+      end
+    end
+    
+    @Operation setClassLoader(pluginId:String)
+    
+      // Can be used to set the class loader in Eclipse...
+      
+      let C = self.javaClass("com.ceteva.xmf.integration.infrastructure.ClassLoaderUtils");
+          XJ = self.javaClass("xjava.XJ")
+      in if C = null
+         then self.error("Cannot find the class ClassLoaderUtils.")
+         else XJ.setLoader(C.getLoader(pluginId))
+         end
+      end
+    end
+    
+    @Operation setPreference(name,value)
+      preferences.setPreference(name,value)
+    end
+    
+    @Operation setReady(state:Boolean)
+    
+      @Doc
+        Sets the ready state of the VM. Once ready, the VM can
+        receive requests from Java clients.
+      end
+      
+      Kernel_ready(state)
+    end
+    
+    @Operation startUndoable()
+    
+      // Call this before any changes that are to be recorded
+      // in the VM. Complete the transaction using endUndoable().
+      // The most recently recorded transaction is undone using
+      // undo().
+      
+      Kernel_startUndoContext()
+    end
+    
+    @Operation sleep()
+    
+      // Sends the current thread to sleep. Will continue computation
+      // from current point when the thread is woken up...
+      
+      Kernel_sleep(self.thread())
+    end 
+    
+    @Operation textArea(type:String,message:String,text:String)
+    
+      // Display some text...
+      
+      let DialogsClient = self.dialogsClient()
+      in if DialogsClient = null
+         then
+           format(stdout,"~S~%",Seq{text})
+         else DialogsClient.textAreaDialog(type,message,text)
+         end
+      end
+    end
+    
+    @Operation thread():Thread
+    
+      // Returns the current thread...
+      
+      Kernel_thread()
+    end
+    
+    @Operation threads():Seq(Thread)
+      self.thread().asSeq()
+    end
+    
+    @Operation undo():Boolean
+    
+      // Call this to perform the most recently recorded
+      // undoable transaction. Returns true when the undo
+      // occurred and false otherwise...
+      
+      if self.canUndo()
+      then 
+        Kernel_execUndo();
+        true
+      else false
+      end
+    end
+    
+    @Operation usedHeap()
+    
+      // Returns the amount of memory currently allocated...
+      
+      Kernel_usedHeap()
+    end
+    
+    @Operation warning(title:String,warning:String)
+    
+      // Report a warning...
+      
+      self.textArea("warning",title,warning)
+    end
+    
+  end
+  
+Root::xmf := XMF(".");

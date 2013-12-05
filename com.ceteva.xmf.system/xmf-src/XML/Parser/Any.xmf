@@ -1,0 +1,36 @@
+parserImport XML::PrintXML;
+parserImport XOCL;
+
+import IO;
+import XML;
+import Parser;
+
+context Parser
+
+  @Class Any extends Pattern
+  
+    //  Succeeds when the input is non-empty and produces the next input.
+    
+    @Constructor() end
+    
+    @Operation binds():Seq(String)
+      Seq{}
+    end
+    
+    @Operation first(grammar):Set(String)
+      Set{"ANY"}
+    end
+    
+    @Operation nullable(grammar)
+      false
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"ANY")
+    end
+    
+    @Operation terminals():Set(String)
+      Set{"ANY"}
+    end
+    
+  end

@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Checking For Membership                         *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a collection and an element and pushes a boolean if the collection   *
+ *  contains the element. The VM knows about sets, sequences and strings and  *
+ *  otherwise raises an exception.                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Includes extends Instr
+    
+  end

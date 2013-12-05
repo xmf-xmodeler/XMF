@@ -1,0 +1,71 @@
+parserImport XOCL;
+
+import Exceptions;
+import Compiler;
+import OCL;
+import XOCL; 
+
+context Class
+     
+     @Operation compile(env,frame,isLast,saveSource)
+       self.compileClassPopulation(
+          self.compileClassCreation(env,frame),env,frame,isLast,saveSource)
+     end 
+
+context Class
+     
+     @Operation compileClassCreation(env,frame)
+     
+       // Turn all type references in the parents of the class into
+       // standard expressions delayed by an operation. Initialisation
+       // of a compiled class will perform the operation and thereby
+       // construct the parents. The delay is necessary to allow classes
+       // to involve forward references in a package.
+       
+       let parents = 
+             if parents->isEmpty 
+             then [| @Operation <name + "DelayedDefaultParents">() newClass.defaultParents() end |] 
+             else [| @Operation <name + "DelayedParents">() 
+                       try <parents->iterate(p e = [| Set{} |] | [| <e> ->including(<p>) |])> 
+                       catch(exception)
+                         throw Exceptions::ClassInheritanceException(<name.lift()>,<parents->map("pprint").lift()>,exception)
+                       end
+                     end |]
+             end
+       in [| let newClass = <self.metaExp()>.new() in
+             let parents = <parents>
+             in parents.owner := newClass;
+                newClass.set("name",XCore::Symbol(<StrExp(name)>));
+                newClass.set("parents",parents);
+                newClass.set("isAbstract",<BoolExp(isAbstract)>);
+                newClass.set("imports",@Imports(imports) imports end);
+                <self.initExp([| newClass |])>
+             end end
+          |].setLine(line).compile(env.incNameSpaceRefs(),frame,false,false)
+       end
+     end 
+
+context Class
+     
+     @Operation compileClassPopulation(classInstrs,env,frame,isLast,saveSource)
+       // Compile the elements and add them to the class at the head
+       // of the stack.
+       let env = env.incNameSpaceRefs().consNameSpaceRef(name,1);  // The class is defined wrt its container.
+           add = Compiler::Symbol("add")
+       in self.allDefs()->iterate(def instrs = classInstrs |
+            Seq{Instrs::StartCall() | def.compile(env,frame,false,saveSource)} + 
+            instrs + 
+            Seq{Instrs::Send(add,1)})
+       end
+     end 
+
+context Class
+     
+     @Operation maxLocals()
+       // A class definition *should* be Sugar. However, until this happens
+       // calculate the max locals by hand.
+       let importsLocals = [| @Imports(imports) imports end |].maxLocals();
+           creationLocals = 2
+       in defs->iterate(def maxLocals = importsLocals + creationLocals | maxLocals.max(def.maxLocals()))
+       end
+     end

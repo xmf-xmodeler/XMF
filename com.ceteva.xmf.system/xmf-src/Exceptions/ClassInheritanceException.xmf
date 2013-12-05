@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class ClassInheritanceException extends Exception
+  
+    @Attribute name      : String      end
+    @Attribute parents   : Seq(String) end
+    @Attribute exception : Exception   end
+    
+    @Constructor(name,parents,exception) !
+      self.backtrace := exception.backtrace;
+      self.message := 
+        formats("Something has gone wrong with the class definition:~%~%" +
+                "~V@Class ~S extends ~{,~;~S~} ... end~%~%" +
+                "Probably one of the referenced super-classes does not exist.~%~%" +
+                "The actual exception is as follows:~%~%~V~S~%~%",Seq{2,name,parents,2,exception.message})
+    end
+    
+  end
+      
+     

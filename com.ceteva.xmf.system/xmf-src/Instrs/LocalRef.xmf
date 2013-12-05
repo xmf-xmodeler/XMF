@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Reference to Local Variables                       *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Local variables are typically arguments of operations or let-bound vars.  *
+ *  Local variables are allocated an index in a stack frame and are referenced*
+ *  via the index. The LOCALREF instruction has an operand which is the index *
+ *  of the variable. the value of the variable in the current stack frame is  *
+ *  pushed onto the stack.                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class LocalRef extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+    @Operation toString():String
+      "<LocalRef " + name + "," + offset + ">"
+    end
+    
+  end
+  

@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Name Space Ref                                *
+ *                              --------------                                *
+ *                                                                            *
+ *    An exception that is raised when a name cannot be found in a            *
+ *    name-space.                                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context Exceptions
+
+  @Class NameSpaceRef extends Exception
+     
+    @Attribute nameSpace : NameSpace end
+    @Attribute name      : String    end
+    
+    @Constructor(nameSpace,name) !
+       self.setBacktrace();
+       self.message := 
+         "The name space " + nameSpace.toString() +
+         " does not define " + name + ". \n" +
+         "The following names are defined: " + nameSpace.names()->asSeq->separateWith(",")
+    end
+    
+  end
+      
+    

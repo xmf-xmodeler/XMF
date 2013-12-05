@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Local Import Expressions                          *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *   A namespace can be imported for the scope of an expression. The names in *
+ *   the name space are available in the expression. Note that if the names   *
+ *   are the same as lexically bound names currently in scope then the        *
+ *   lexically bound names take precedence.                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class ImportIn extends OCL::OCL
+  
+    @Attribute nameSpace : Seq(String) end
+    @Attribute body : Performable end
+   
+    @Constructor(nameSpace,body) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"import ~{::~;~S~}",Seq{nameSpace});
+      format(out,"~%~Vin ",Seq{indent});
+      body.pprint(out,indent + 2);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

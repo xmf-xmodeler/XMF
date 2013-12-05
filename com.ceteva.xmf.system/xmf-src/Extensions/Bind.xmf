@@ -1,0 +1,51 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Binding Definitions                             *
+ *                            -------------------                             *
+ *                                                                            *
+ *   A binding occurs in a name-space and allows an arbitrary value to be     *
+ *   named in the name-space. XOCL::bind is the syntax class for bindings.    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Bind extends Def
+     
+     @Attribute value : Performable end
+    
+     @Constructor(name,value) end
+     
+     @Operation compile(env,frame,isLast,saveSource)
+       self.desugar().setLine(line).compile(env,frame,isLast,saveSource)
+     end
+     
+     @Operation desugar()
+     
+       // A binding is created as an instance of XCore::Bind at run-time...
+       
+       let name = if name.isKindOf(Symbol) then name.name else name end 
+       in [| XCore::Bind(XCore::Symbol(<StrExp(name)>),@Operation () <value> end) |]
+       end
+     end
+     
+     @Operation FV()
+       self.desugar().FV()
+     end
+     
+     @Operation maxLocals()
+       self.desugar().maxLocals()
+     end
+     
+     @Operation pprint(out,indent)
+       format(out,"@Bind ~S = ",Seq{name});
+       value.pprint(out,indent);
+       format(out," end")
+     end
+     
+   end

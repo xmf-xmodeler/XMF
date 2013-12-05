@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Decrementing A Slot Of Self By 1                      *
+ *                      --------------------------------                      *
+ *                                                                            *
+ *  The operand is an index into the constants table that names a slot of the *
+ *  self object. The value of this slot should be an integer. The value is    *
+ *  decremented by 1.                                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class DecSelfSlot extends Instr
+  
+    @Attribute name : String end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation toString():String
+      "<DecSelfSlot " + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end 
+  

@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Update the Value of A Key In A Table                    *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Expects a table above a key and a value on the stack. Pops these and sets *
+ *  the value of the key in the table. Causes any daemons on the table to     *
+ *  fire.                                                                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class TablePut extends Instr
+    
+  end
+  
+  

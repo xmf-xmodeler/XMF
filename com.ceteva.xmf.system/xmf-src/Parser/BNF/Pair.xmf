@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Constructing Pairs                           *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Clause actions can often be just Seq{x|y} to construct a pair from the    *
+ *  values of the local variables x and y. This action is handled by a single *
+ *  instruction where the variable references have been replaced by their     *
+ *  indices into the stack frame.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Pair extends Recognizer
+    
+    @Attribute headName : String end
+    @Attribute tailName : String end
+    @Attribute headIndex : Integer end
+    @Attribute tailIndex : Integer end
+    
+    @Constructor(headName,tailName,headIndex,tailIndex) end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp()
+      self.lift()
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

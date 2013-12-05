@@ -1,0 +1,564 @@
+parserImport XOCL;
+
+import XOCL;
+import Walkers;
+import Code;
+
+context Root
+
+  @Class XOCLWalker extends OCLWalker 
+   
+    // This class extends the basic OCL walker with features from 
+    // XOCL. By default sugar will desugar before walking if there is
+    // not an entry in this class. 
+    // Use this walker as the basis for specific DSL walkers...
+
+    @Operation walkAbstractOp(line:Integer,args:Seq(Element),doc:Performable,name:String,type:TypeExp,arg)
+      AbstractOp[
+        line=line,
+        args=args->collect(x | self.walk(x,arg)),
+        doc=self.walk(doc,arg),
+        name=self.walk(name,arg),
+        type=self.walk(type,arg) 
+      ]
+    end
+
+    @Operation walkAttribute(line:Integer,doc:Performable,init:Performable,meta:Performable,modifiers:AttributeModifiers,mult:String,name:String,properties:Seq(Element),type:Performable,arg)
+      Attribute[
+        line=line,
+        doc=self.walk(doc,arg),
+        init=self.walk(init,arg),
+        meta=self.walk(meta,arg),
+        modifiers=self.walk(modifiers,arg),
+        mult=self.walk(mult,arg),
+        name=self.walk(name,arg),
+        properties=properties->collect(x | self.walk(x,arg)),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkAttributeModifiers(accessor:Boolean,extender:Boolean,guard:Boolean,guardExp:Performable,reducer:Boolean,setOwner:Boolean,updater:Boolean,arg)
+      AttributeModifiers[
+        accessor=self.walk(accessor,arg),
+        extender=self.walk(extender,arg),
+        guard=self.walk(guard,arg),
+        guardExp=self.walk(guardExp,arg),
+        reducer=self.walk(reducer,arg),
+        setOwner=self.walk(setOwner,arg),
+        updater=self.walk(updater,arg)
+      ]
+    end
+
+    @Operation walkBind(line:Integer,name:String,value:Performable,arg)
+      Bind[
+        line=line,
+        name=self.walk(name,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkCase(line:Integer,arms:Seq(CaseArm),default:Performable,values:Seq(Performable),arg)
+      Case[
+        line=line,
+        arms=arms->collect(x | self.walk(x,arg)),
+        default=self.walk(default,arg),
+        values=values->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkCaseArm(action:Performable,patterns:Seq(Pattern),arg)
+      CaseArm[
+        action=self.walk(action,arg),
+        patterns=patterns->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkCaseInt(line:Integer,clauses:Seq(CaseIntClause),exp:Performable,limit:Integer,otherwise:Performable,arg)
+      CaseInt[
+        line=line,
+        clauses=clauses->collect(x | self.walk(x,arg)),
+        exp=self.walk(exp,arg),
+        limit=self.walk(limit,arg),
+        otherwise=self.walk(otherwise,arg)
+      ]
+    end
+
+    @Operation walkCaseIntClause(body:Performable,head:Seq(CaseIntValue),arg)
+      CaseIntClause[
+        body=self.walk(body,arg),
+        head=head->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkCaseIntConst(value:Performable,arg)
+      CaseIntConst[
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkCaseIntRange(lower:Performable,upper:Performable,arg)
+      CaseIntRange[
+        lower=self.walk(lower,arg),
+        upper=self.walk(upper,arg)
+      ]
+    end
+
+    @Operation walkCaseObj(line:Integer,arg)
+      CaseObj[line=line]
+    end
+
+    @Operation walkCharacter(char:String,arg)
+      Character[
+        char=self.walk(char,arg)
+      ]
+    end
+
+    @Operation walkClass(line:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),arg)
+      Class[
+        line=line,
+        defs=defs->collect(x | self.walk(x,arg)),
+        isAbstract=self.walk(isAbstract,arg),
+        metaClass=self.walk(metaClass,arg),
+        name=self.walk(name,arg),
+        parents=parents->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkClause(bindings:Seq(Binding),body:Performable,name:String,patterns:Seq(Pattern),arg)
+      Clause[
+        bindings=bindings->collect(x | self.walk(x,arg)),
+        body=self.walk(body,arg),
+        name=self.walk(name,arg),
+        patterns=patterns->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkConstraint(line:Integer,body:Performable,name:String,reason:Performable,arg)
+      Constraint[
+        line=line,
+        body=self.walk(body,arg),
+        name=self.walk(name,arg),
+        reason=self.walk(reason,arg)
+      ]
+    end
+
+    @Operation walkConstructor(line:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,arg)
+      Constructor[
+        line=line,
+        body=self.walk(body,arg),
+        doc=self.walk(doc,arg),
+        names=names->collect(x | self.walk(x,arg)),
+        toString=self.walk(toString,arg)
+      ]
+    end
+
+    @Operation walkCount(line:Integer,body:Performable,lower:Performable,upper:Performable,var:String,arg)
+      Count[
+        line=line,
+        body=self.walk(body,arg),
+        lower=self.walk(lower,arg),
+        upper=self.walk(upper,arg),
+        var=self.walk(var,arg)
+      ]
+    end
+
+    @Operation walkDoc(line:Integer,doc:String,arg)
+      Doc[
+        line=line,
+        doc=self.walk(doc,arg)
+      ]
+    end
+
+    @Operation walkEnum(line:Integer,exps:Seq(Performable),name:String,names:SetExp,arg)
+      Enum[
+        line=line,
+        exps=exps->collect(x | self.walk(x,arg)),
+        name=self.walk(name,arg),
+        names=self.walk(names,arg)
+      ]
+    end
+
+    @Operation walkExtendClass(arg)
+      ExtendClass[      ]
+    end
+
+    @Operation walkFind(line:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,arg)
+      Find[
+        line=line,
+        action=self.walk(action,arg),
+        alternative=self.walk(alternative,arg),
+        collection=self.walk(collection,arg),
+        name=self.walk(name,arg),
+        test=self.walk(test,arg)
+      ]
+    end
+
+    @Operation walkFor(line:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),arg)
+      For[
+        line=line,
+        body=self.walk(body,arg),
+        colls=colls->collect(x | self.walk(x,arg)),
+        directive=self.walk(directive,arg),
+        guard=self.walk(guard,arg),
+        isExp=self.walk(isExp,arg),
+        names=names->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkFork(line:Integer,body:Performable,name:String,arg)
+      Fork[
+        line=line,
+        body=self.walk(body,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkImports(line:Integer,body:Performable,name:String,arg)
+      Imports[
+        line=line,
+        body=self.walk(body,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkIndex(line:Integer,collection:String,slot:String,arg)
+      Index[
+        line=line,
+        collection=self.walk(collection,arg),
+        slot=self.walk(slot,arg)
+      ]
+    end
+
+    @Operation walkLetrec(line:Integer,bindings:Seq(ValueBinding),body:Performable,arg)
+      Letrec[
+        line=line,
+        bindings=bindings->collect(x | self.walk(x,arg)),
+        body=self.walk(body,arg)
+      ]
+    end
+
+    @Operation walkMap(line:Integer,clauses:Seq(Clause),defs:Seq(Performable),domains:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),range:Performable,arg)
+      Map[
+        line=line,
+        clauses=clauses->collect(x | self.walk(x,arg)),
+        defs=defs->collect(x | self.walk(x,arg)),
+        domains=domains->collect(x | self.walk(x,arg)),
+        isAbstract=self.walk(isAbstract,arg),
+        metaClass=self.walk(metaClass,arg),
+        name=self.walk(name,arg),
+        parents=parents->collect(x | self.walk(x,arg)),
+        range=self.walk(range,arg)
+      ]
+    end
+
+    @Operation walkNameSpace(line:Integer,bindings:Seq(ValueBinding),name:String,arg)
+      NameSpace[
+        line=line,
+        bindings=bindings->collect(x | self.walk(x,arg)),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkNotNull(line:Integer,args:Seq(Performable),error:Performable,exp:String,isMessage:Boolean,name:String,arg)
+      NotNull[
+        line=line,
+        args=args->collect(x | self.walk(x,arg)),
+        error=self.walk(error,arg),
+        exp=self.walk(exp,arg),
+        isMessage=self.walk(isMessage,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkPackage(line:Integer,defs:Seq(Performable),meta:Performable,metaPackage:Performable,name:String,parents:Seq(Performable),arg)
+      Package[
+        line=line,
+        defs=defs->collect(x | self.walk(x,arg)),
+        meta=self.walk(meta,arg),
+        metaPackage=self.walk(metaPackage,arg),
+        name=self.walk(name,arg),
+        parents=parents->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkRecord(line:Integer,class:Performable,slots:Seq(Element),arg)
+      Record[
+        line=line,
+        class=self.walk(class,arg),
+        slots=slots->collect(x | self.walk(x,arg))
+      ]
+    end
+
+    @Operation walkRepeat(line:Integer,body:Performable,test:Performable,arg)
+      Repeat[
+        line=line,
+        body=self.walk(body,arg),
+        test=self.walk(test,arg)
+      ]
+    end
+
+    @Operation walkSendCommand(line:Integer,args:Seq(Performable),commandInterpreter:Performable,name:String,arg)
+      SendCommand[
+        line=line,
+        args=args->collect(x | self.walk(x,arg)),
+        commandInterpreter=self.walk(commandInterpreter,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkSnapshot(linearg)
+      Snapshot[line=line]
+    end
+
+    @Operation walkStats(line:Integer,body:Performable,exp:Performable,memory:String,time:String,value:String,arg)
+      Stats[
+        line=line,
+        body=self.walk(body,arg),
+        exp=self.walk(exp,arg),
+        memory=self.walk(memory,arg),
+        time=self.walk(time,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkTableGet(line:Integer,action:Boolean,alternative:Performable,key:Performable,name:String,table:Performable,arg)
+      TableGet[
+        line=line,
+        action=self.walk(action,arg),
+        alternative=self.walk(alternative,arg),
+        key=self.walk(key,arg),
+        name=self.walk(name,arg),
+        table=self.walk(table,arg)
+      ]
+    end
+
+    @Operation walkTodo(line:Integer,doc:String,name:String,arg)
+      Todo[
+        line=line,
+        doc=self.walk(doc,arg),
+        name=self.walk(name,arg)
+      ]
+    end
+
+    @Operation walkTypeCase(line:Integer,arms:Seq(TypeCaseArm),default:Performable,value:Performable,arg)
+      TypeCase[
+        line=line,
+        arms=arms->collect(x | self.walk(x,arg)),
+        default=self.walk(default,arg),
+        value=self.walk(value,arg)
+      ]
+    end
+
+    @Operation walkTypeCaseArm(body:Performable,type:Performable,arg)
+      TypeCaseArm[
+        body=self.walk(body,arg),
+        type=self.walk(type,arg)
+      ]
+    end
+
+    @Operation walkUndoable(line:Integer,body:Performable,arg)
+      Undoable[
+        line=line,
+        body=self.walk(body,arg)
+      ]
+    end
+
+    @Operation walkWhen(line:Integer,body:Performable,guard:Performable,arg)
+      When[
+        line=line,
+        body=self.walk(body,arg),
+        guard=self.walk(guard,arg)
+      ]
+    end
+
+    @Operation walkWhile(line:Integer,endLine:Integer,body:Performable,test:Performable,arg)
+      While[
+        line=line,
+        endLine=endLine,
+        body=self.walk(body,arg),
+        test=self.walk(test,arg)
+      ]
+    end
+
+    @Operation walkWithOpenFile(line:Integer,body:Performable,channel:String,file:Performable,mode:String,arg)
+      WithOpenFile[
+        line=line,
+        body=self.walk(body,arg),
+        channel=self.walk(channel,arg),
+        file=self.walk(file,arg),
+        mode=self.walk(mode,arg)
+      ]
+    end
+
+    @Operation walkWithoutDaemons(line:Integer,body:Performable,object:Performable,arg)
+      WithoutDaemons[
+        line=line,
+        body=self.walk(body,arg),
+        object=self.walk(object,arg)
+      ]
+    end
+
+    @Operation walkWithoutSourcePos(line:Integer,isDynamic:Boolean,body:Performable,arg)
+      WithoutSourcePos[
+        line=line,
+        isDynamic=isDynamic,
+        body=self.walk(body,arg)
+      ]
+    end
+
+    @Operation walkWithoutLocalNames(line:Integer,isDynamic:Boolean,body:Performable,arg)
+      WithoutLocalNames[
+        line=line,
+        isDynamic=isDynamic,
+        body=self.walk(body,arg)
+      ]
+    end
+
+    @Operation walkObject(o,arg)
+      @CaseObj o of
+        AbstractOp[line,args,doc,name,type] do
+          self.walkAbstractOp(line,args,doc,name,type,arg)
+        end
+        Attribute[line,doc,init,meta,modifiers,mult,name,properties,type] do
+          self.walkAttribute(line,doc,init,meta,modifiers,mult,name,properties,type,arg)
+        end
+        AttributeModifiers[accessor,extender,guard,guardExp,reducer,setOwner,updater] do
+          self.walkAttributeModifiers(accessor,extender,guard,guardExp,reducer,setOwner,updater,arg)
+        end
+        Bind[line,name,value] do
+          self.walkBind(line,name,value,arg)
+        end
+        Case[line,arms,default,values] do
+          self.walkCase(line,arms,default,values,arg)
+        end
+        CaseArm[action,patterns] do
+          self.walkCaseArm(action,patterns,arg)
+        end
+        CaseInt[line,clauses,exp,limit,otherwise] do
+          self.walkCaseInt(line,clauses,exp,limit,otherwise,arg)
+        end
+        CaseIntClause[body,head] do
+          self.walkCaseIntClause(body,head,arg)
+        end
+        CaseIntConst[value] do
+          self.walkCaseIntConst(value,arg)
+        end
+        CaseIntRange[lower,upper] do
+          self.walkCaseIntRange(lower,upper,arg)
+        end
+        CaseObj[line] do
+          self.walkCaseObj(line,arg)
+        end
+        Character[char] do
+          self.walkCharacter(char,arg)
+        end
+        Class[line,defs,isAbstract,metaClass,name,parents] do
+          self.walkClass(line,defs,isAbstract,metaClass,name,parents,arg)
+        end
+        Clause[bindings,body,name,patterns] do
+          self.walkClause(bindings,body,name,patterns,arg)
+        end
+        Constraint[line,body,name,reason] do
+          self.walkConstraint(line,body,name,reason,arg)
+        end
+        Constructor[line,body,doc,names,toString] do
+          self.walkConstructor(line,body,doc,names,toString,arg)
+        end
+        Count[line,body,lower,upper,var] do
+          self.walkCount(line,body,lower,upper,var,arg)
+        end
+        Doc[line,doc] do
+          self.walkDoc(line,doc,arg)
+        end
+        Enum[line,exps,name,names] do
+          self.walkEnum(line,exps,name,names,arg)
+        end
+        ExtendClass[] do
+          self.walkExtendClass(arg)
+        end
+        Find[line,action,alternative,collection,name,test] do
+          self.walkFind(line,action,alternative,collection,name,test,arg)
+        end
+        For[line,body,colls,directive,guard,isExp,names] do
+          self.walkFor(line,body,colls,directive,guard,isExp,names,arg)
+        end
+        Fork[line,body,name] do
+          self.walkFork(line,body,name,arg)
+        end
+        Imports[line,body,name] do
+          self.walkImports(line,body,name,arg)
+        end
+        Index[line,collection,slot] do
+          self.walkIndex(line,collection,slot,arg)
+        end
+        Letrec[line,bindings,body] do
+          self.walkLetrec(line,bindings,body,arg)
+        end
+        Map[line,clauses,defs,domains,isAbstract,metaClass,name,parents,range] do
+          self.walkMap(line,clauses,defs,domains,isAbstract,metaClass,name,parents,range,arg)
+        end
+        NameSpace[line,bindings,name] do
+          self.walkNameSpace(line,bindings,name,arg)
+        end
+        NotNull[line,args,error,exp,isMessage,name] do
+          self.walkNotNull(line,args,error,exp,isMessage,name,arg)
+        end
+        Package[line,defs,meta,metaPackage,name,parents] do
+          self.walkPackage(line,defs,meta,metaPackage,name,parents,arg)
+        end
+        Record[line,class,slots] do
+          self.walkRecord(line,class,slots,arg)
+        end
+        Repeat[line,body,test] do
+          self.walkRepeat(line,body,test,arg)
+        end
+        SendCommand[line,args,commandInterpreter,name] do
+          self.walkSendCommand(line,args,commandInterpreter,name,arg)
+        end
+        Snapshot[line] do
+          self.walkSnapshot(line,arg)
+        end
+        Stats[line,body,exp,memory,time,value] do
+          self.walkStats(line,body,exp,memory,time,value,arg)
+        end
+        TableGet[line,action,alternative,key,name,table] do
+          self.walkTableGet(line,action,alternative,key,name,table,arg)
+        end
+        Todo[line,doc,name] do
+          self.walkTodo(line,doc,name,arg)
+        end
+        TypeCase[line,arms,default,value] do
+          self.walkTypeCase(line,arms,default,value,arg)
+        end
+        TypeCaseArm[body,type] do
+          self.walkTypeCaseArm(body,type,arg)
+        end
+        Undoable[line,body] do
+          self.walkUndoable(line,body,arg)
+        end
+        When[line,body,guard] do
+          self.walkWhen(line,body,guard,arg)
+        end
+        While[line,endLine,body,test] do
+          self.walkWhile(line,endLine,body,test,arg)
+        end
+        WithOpenFile[line,body,channel,file,mode] do
+          self.walkWithOpenFile(line,body,channel,file,mode,arg)
+        end
+        WithoutDaemons[line,body,object] do
+          self.walkWithoutDaemons(line,body,object,arg)
+        end
+        WithoutLocalNames[line,isDynamic,body] do
+          self.walkWithoutLocalNames(line,isDynamic,body,arg)
+        end
+        WithoutSourcePos[line,isDynamic,body] do
+          self.walkWithoutSourcePos(line,isDynamic,body,arg)
+        end
+        else 
+          if o.isKindOf(Sugar)
+          then self.walk(o.desugar(),arg)
+          else super(o,arg)
+          end
+      end
+    end
+  end

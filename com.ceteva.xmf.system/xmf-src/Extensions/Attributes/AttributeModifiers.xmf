@@ -1,0 +1,91 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Attribute Modifiers                             *
+ *                            -------------------                             *
+ *                                                                            *
+ *   Attribute modifiers are used to automatically generate component features*
+ *   of a class definition. The modifiers are owned by an attribute syntax    *
+ *   definition and are processed by a class definition.                      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XOCL
+
+  @Class AttributeModifiers 
+  
+    // Generate an operation that accesses the slot value...
+  
+    @Attribute accessor : Boolean             end
+    
+    // Generate an operation that updates the slot value...
+    
+    @Attribute updater  : Boolean             end
+    
+    // For collection valued slots, generate an operation that
+    // adds a value into the collection in the slot...
+    
+    @Attribute extender : Boolean             end
+    
+    // For collection valued slots, generate an operation that
+    // removes a value from the collection in the slot...
+    
+    @Attribute reducer  : Boolean             end
+    
+    // For containers, if an owned-element is added to the slot
+    // through one of the generated operations, set the owner
+    // slot of the added element...
+    
+    @Attribute setOwner : Boolean             end
+    
+    // Guards and guard expressions are used to allow classes
+    // to be upgraded by adding new attributes and to deal with
+    // legacy objects. If a guard is specified then the accessor
+    // checks to see of the slot exists in an object, if it does not
+    // exist (because the object is legacy) then the guard exp
+    // produces the value of the slot...
+    
+    @Attribute guard    : Boolean     = false end
+    @Attribute guardExp : Performable = null  end
+    
+    @Constructor(accessor,updater,extender,reducer) end
+    
+    @Constructor(accessor,updater,extender,reducer,guard,guardExp) end
+    
+    @Operation defineModifier(mod)
+      if mod.isKindOf(SeqOfElement)
+      then
+        self.guard := true;
+        self.guardExp := mod->at(0)
+      else
+        if mod = "?" then self.accessor := true 
+        elseif mod = "!" then self.updater := true
+        elseif mod = "+" then self.extender := true 
+        elseif mod = "-" then self.reducer := true
+        elseif mod = "^" then self.setOwner := true
+        end
+      end
+    end
+    
+    @Operation emptyModifier():Boolean
+      not(accessor or updater or extender or reducer)
+    end
+    
+    @Operation pprint(out)
+      let printComma = false
+      in if not self.emptyModifier()
+         then 
+           let accessorStr = if accessor then Seq{"?"} else Seq{} end;
+               updaterStr = if updater then Seq{"!"} else Seq{} end;
+               extenderStr = if extender then Seq{"+"} else Seq{} end;
+               reducerStr = if reducer then Seq{"?"} else Seq{} end;
+               setOwnerStr = if setOwner then Seq{"^"} else Seq{} end;
+               guardStr = if guard then Seq{"#" + if guardExp = null then "" else guardExp.pprint() end} else Seq{} end
+           in format(out," (~S)",Seq{(accessorStr+updaterStr+extenderStr+reducerStr+setOwnerStr+guardStr)->separateWith(",")})
+           end
+         end
+      end
+    end
+    
+  end  

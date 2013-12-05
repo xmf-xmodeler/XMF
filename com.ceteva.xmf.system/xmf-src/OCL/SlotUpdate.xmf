@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Slot Updates                              *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A slot update involves a target, the slot name and a new value. If the    *
+ *  target is an object whose meta-class does not redefine the basic MOP for  *
+ *  updating slots then the named slot in the object is updated and any       *
+ *  daemons that monitor the object are informed. Otherwise, the target may   *
+ *  be something that implements its own MOP via setSlotInstance. In this case*
+ *  the meta-class of the target handles the slot update.                     *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class SlotUpdate extends OCL::OCL
+  
+    @Attribute target : OCL::OCL end
+    @Attribute name   : String   end
+    @Attribute value  : OCL::OCL end
+    
+    @Constructor(target,name,value) ! end
+  
+    @Operation pprint(out,indent)
+      format(out,"~S.~S := ~S",Seq{target.pprint(indent),if name.isKindOf(Drop) then name.pprint() else name end,value.pprint(indent)})
+    end
+    
+  end

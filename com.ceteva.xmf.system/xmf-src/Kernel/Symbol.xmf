@@ -1,0 +1,63 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Symbols                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   Symbols are essentially strings, however the XMF VM maintains a global   *
+ *   table of symbols and always returns the same symbol (with the same       *
+ *   memory address) when supplied with equivalent strings. This property     *
+ *   makes symbols useful as keys in tables since symbol comparison involves  *
+ *   comparing two memory addresses. Symbols are used as the names of XCore   *
+ *   names-elements and the keys in the contents tables of name-spaces.       *
+ *                                                                            *
+ *   A symbol is created by supplying the Symbol class with a string. Other   *
+ *   than their comparison property, symbols have no special uses. Note that  *
+ *   symbols are *different* to strings. Comparison of a symbols with a string*
+ *   will always fail (even if the symbol is based on the string). When       *
+ *   comparing symbols with values that *may* be strings it is usual to use   *
+ *   'toString' to ensure both are strings before using '='.                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Symbol
+  @Operation asSymbol():Symbol
+    @Doc 
+      Returns self.
+    end
+    self
+  end
+  
+context Symbol
+  @Operation greater(other)
+    @Doc
+      Returns true if self is alphanumerically greater
+      than other.
+    end
+    self.toString() > other.toString()
+  end
+
+context Symbol
+  @Operation init(args)
+    Kernel_mkSymbol(args->at(0))
+  end
+
+Symbol.default := Symbol("");
+
+context Symbol
+  @Operation less(other)
+    @Doc
+      Returns true if self is alphanumerically less
+      than other.
+    end
+    self.toString() < other.toString()
+  end
+  
+context Symbol
+  @Operation toString():String
+    @Doc
+      Converts a symbol to a string.
+    end
+    self.name
+  end

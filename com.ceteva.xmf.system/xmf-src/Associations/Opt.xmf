@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+import Associations;
+
+context Associations
+
+  @Class Opt extends Multiplicity
+  
+    // An en-d with multiplicity 0..1 or 0..* requires that the attribute
+    // is associated with 0 or one instance of the appropriate class.
+    
+    @Attribute isStar : Boolean end
+    
+    @Constructor(isStar) ! end
+    
+    @Constructor() end
+    
+    @Operation typeExp(type)
+      [| Set(<type>) |]
+    end
+
+    @Operation labelString():String
+      if isStar then "0..*" else "0..1" end
+    end
+
+  end

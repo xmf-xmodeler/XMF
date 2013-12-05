@@ -1,0 +1,207 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Parsing Constants                               *
+ *                            -----------------                               *
+ *                                                                            *
+ *  Constants related to parsing.                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser;
+import BNF;
+
+// The parsing machine is stack based and uses call frames to
+// contain the context information local to a call. The call frame
+// indices are defined below...
+
+context BNF
+
+  // The parsing machine uses a stack to represent call frames.
+  // PREV_FRAME is the previous frame pointer in a call frame...
+  
+  @Bind PREV_FRAME = 0 end 
+  
+context BNF
+
+  // Each parse stack call frame contains the current grammar
+  // since this might change due to '@'...
+  
+  @Bind GRAMMAR    = 1 end
+  
+context BNF
+
+  // The instructions (sequence of recognizers) in a parse
+  // machine call frame...
+  
+  @Bind CODE       = 2 end
+   
+context BNF
+
+  // Debugging uses indent to show call nesting. The debug
+  // level is saved in the parse machine call frame...
+  
+  @Bind INDENT     = 3 end 
+  
+context BNF
+
+  // The value of 'self' in each parse action. Held in the
+  // call frames...
+  
+  @Bind TARGET     = 4 end
+  
+context BNF
+
+  // The current fail point to reset to when performing a
+  // cut instruction. Held in the call frame...
+  
+  @Bind CUT        = 5 end
+  
+context BNF
+
+  // The number of locals in the parse call frame...
+  
+  @Bind LOCALS     = 6 end
+  
+context BNF
+
+  // The index of the first local in the parse call frame...
+  
+  @Bind LOC0       = 7 end
+  
+// The parsing machine has a fail stack that is used to
+// contain the choice points in a parse. This is separate
+// to, but linked with, the call stack. The fail stack
+// has frames similar to those in the call stack. The
+// indices into the frames are defined below...
+  
+context BNF
+
+  // The saved call frame which is returned to if
+  // fail occurs. This call frame represents a choice 
+  // point...
+  
+  @Bind FAIL_PREV    = 0 end
+  
+context BNF
+
+  // The previous fail stack frame. The fail stack
+  // frame is popped and the fail stack pointer is
+  // reset to this frame...
+  
+  @Bind FAIL_FAIL    = 1 end
+  
+context BNF
+
+  // The tokenizer must be reset on fail. The tokenizer
+  // uses a character position in the input to fetch
+  // the next token. This is the saved character position
+  // at the choice point...
+  
+  @Bind FAIL_CHARPOS = 2 end
+  
+context BNF
+
+  // The saved grammar, reset on fail...
+  
+  @Bind FAIL_GRAMMAR = 3 end
+  
+context BNF
+
+  // The saved instructions, reset on fail...
+  
+  @Bind FAIL_CODE    = 4 end
+  
+context BNF
+
+  // The saved indent, reset on fail...
+  
+  @Bind FAIL_INDENT  = 5 end
+  
+context BNF
+
+  // The saved target, reset on fail... 
+  
+  @Bind FAIL_TARGET  = 6 end
+  
+context BNF
+
+  // The saved cut point, reset on fail...
+  
+  @Bind FAIL_CUT     = 7 end
+  
+context BNF
+
+  // The name is used for debugging, reset on fail...
+  
+  @Bind FAIL_NAME    = 8 end
+  
+context BNF
+
+  // When the choice point is created, the current
+  // token is saved, to be reset on fail...
+  
+  @Bind FAIL_TOKEN   = 9 end
+  
+context BNF
+
+  // When the choice point is created, the current
+  // token type is saved, to be reset on fail...
+  
+  @Bind FAIL_TYPE    = 10 end
+  
+context BNF
+
+  // When the choice point is created, the current
+  // args are saved, to be reset on fail...
+  
+  @Bind FAIL_ARGS    = 11 end
+  
+context BNF
+
+  // Start of saved args..
+  
+  @Bind FAIL_ARG0    = 12 end
+  
+context BNF
+
+  // Token type for end of input...
+  
+  @Bind EOI     = 1 end
+  
+context BNF
+
+  // Token type for a terminal ('t')...
+  
+  @Bind TERM    = 2 end
+  
+context BNF
+
+  // Token type for a float...
+  
+  @Bind FLOAT   = 4 end
+  
+context BNF
+
+  // Token type for a string...
+  
+  @Bind STRING  = 5 end
+  
+context BNF
+
+  // Token type for a name...
+  
+  @Bind NAME    = 6 end
+  
+context BNF
+
+  // Token type for an integer...
+  
+  @Bind INT     = 7 end
+  
+context BNF
+
+  // Token type for a special...
+  
+  @Bind SPECIAL = 8 end

@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Manifests;
+
+@Manifest Parser
+  @File ^None Boot end
+  @File +WithoutLocalNames +WithoutSourcePos Parser   end
+  @Ref  +WithoutLocalNames +WithoutSourcePos Tokens   end
+  @Ref  +WithoutLocalNames +WithoutSourcePos BNF      end
+  @Ref  +WithoutLocalNames +WithoutSourcePos Machine  end
+  @File                                      XOCLOps   end
+end;

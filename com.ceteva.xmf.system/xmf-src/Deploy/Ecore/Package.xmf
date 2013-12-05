@@ -1,0 +1,45 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+context Package
+  @Operation writeEcore(path:String)
+  
+    // Writes a .ecore file for the receiver in the supplied
+    // directory providing that the .ecore file does not already
+    // exist...
+    
+    let file = path + "/" + name + ".ecore"
+    in if not file.fileExists()
+       then 
+         @WithOpenFile(fout -> path + "/" + name + ".ecore")
+           self.deployEcore(fout,path)
+         end
+       end
+    end
+  end
+
+context Package
+  @Operation deployEcore(out:OutputChannel,path:String)
+  
+    // Deploy a header for the file and then an EPackage
+    // containing the appropriate information...
+    
+    @XML(out)
+      <?xml version="1.0" encoding="UTF-8" ?>
+      <ecore:EPackage
+        xmi:version="2.0"
+        xmlns:xmi="http://www.omg.org/XMI" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" 
+        name=name
+        nsURI=name 
+        nsPrefix=name>
+        
+      // Deploy the classes in the package...
+      
+      @For class in classes do
+        class.deployEcore(out,self,path)
+      end
+      </ecore:EPackage>
+    end
+  end

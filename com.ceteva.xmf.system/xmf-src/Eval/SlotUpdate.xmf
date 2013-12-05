@@ -1,0 +1,16 @@
+import OCL;
+
+context SlotUpdate
+  @Operation eval(element,env,imports)
+    let o = self.target.eval(target,env,imports);
+        v = value.eval(element,env,imports)
+    in if o.isKindOf(Object) 
+       then 
+         if o.hasSlot(name.asSymbol())
+         then o.set(name.asSymbol(),v)
+         else o.slotMissing(name.asSymbol(),v)
+         end
+       else o.set(name.asSymbol(),v)
+       end
+    end
+  end

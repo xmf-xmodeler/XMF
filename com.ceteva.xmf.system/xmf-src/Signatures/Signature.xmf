@@ -1,0 +1,81 @@
+parserImport XOCL;
+
+import Signatures;
+
+context Signatures
+
+  @Class Signature extends Type
+
+    @Attribute path     : String       (?,!)     end
+    @Attribute bindings : Set(Binding) (?,!,+,-) end
+    
+    @Constructor(path) end
+    
+    @Constructor(path,bindings) end
+    
+    @Operation bind(name:String,element:NamedElement)
+      let binding = Binding(name,element)
+      in self.addToBindings(binding);
+         binding
+      end
+    end
+    
+    @Operation getBinding(name:String):Binding
+      @Find(b,bindings)
+        when b.name() = name
+        else null
+      end
+    end
+    
+    @Operation getElement(name:String):Type
+      let binding = self.getBinding(name)
+      in if binding = null
+         then self.error("Cannot find " + name)
+         else binding.element()
+         end
+      end
+    end
+    
+    @Operation hasBinding(name:String):Boolean
+      self.getBinding(name) <> null
+    end
+    
+    @Operation hasField(name:String):Boolean
+      self.hasBinding(name) andthen
+      self.getBinding(name).element().isKindOf(NamedElement::Field)
+    end
+    
+    @Operation lookup(path:Seq(String))
+      if path->isEmpty
+      then self
+      else
+        if self.hasBinding(path->head)
+        then  
+          @Case self.getElement(path->head),path->tail of
+            NamedElement::Class(s),path do
+              s.force().lookup(path)
+            end
+            NamedElement::Package(s),path do
+              s.force().lookup(path)
+            end
+            NamedElement::NameSpace(s),path do
+              s.force().lookup(path)
+            end
+            NamedElement::Value(t),Seq{} do
+              t.force()
+            end
+            NamedElement::Operation(D,t),Seq{} do
+              Fun(D,t)
+            end
+            else self.error("Cannot lookup " + path)
+          end
+        else self.error("No binding for " + path->head)
+        end
+      end
+    end
+    
+    @Operation pprint(out:OutputChannel)
+      format(out,"sig(~S) ",Seq{path})
+    end
+
+  end

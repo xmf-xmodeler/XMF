@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+import Signatures;
+
+context Signatures
+
+  @Class Binding 
+
+    @Attribute name    : String       (?,!) end
+    @Attribute element : NamedElement (?,!) end
+    
+    @Constructor(name,element) ! end
+    
+    @Operation type()
+      @Case element of
+        NamedElement::Class() do
+          XCore::Class.toType()
+        end
+        NamedElement::Package() do
+          XCore::Package.toType()
+        end
+        NamedElement::NameSpace() do
+          XCore::NameSpace.toType()
+        end
+        NamedElement::Operation(domain,range) do
+          Fun(domain,range)
+        end
+        NamedElement::Value(t) do
+          t
+        end
+      end
+    end
+    
+    @Operation pprint(out)
+      format(out,"~S -> ",Seq{name});
+      element.pprint(out)
+    end
+
+  end

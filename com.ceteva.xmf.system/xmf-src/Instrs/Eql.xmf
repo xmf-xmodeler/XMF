@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Compare Two Values for Equality                     *
+ *                      -----------------------------------                   *
+ *                                                                            *
+ *  The two elements at the head of the stack are popped and a boolean is     *
+ *  pushed that represents whether or not they are equal. The = operation is  *
+ *  implemented by the machine. Values with state are compared in terms of    *
+ *  heap address (identity) and values with no state (integers, strings, sets,*
+ *  etc.) are compared in terms of their structure and the elements that they *
+ *  contain.                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Eql extends Instr
+    
+  end
+  

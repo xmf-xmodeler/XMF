@@ -1,0 +1,122 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+import OCL;
+import XOCL;
+import Parser::BNF;
+import Languages;
+import MicroJava;
+import Structure;
+import Statements;
+import Expressions;
+
+context MicroJava
+
+  @Class Java
+  
+    @Grammar extends Statement.grammar
+    
+      Java ::= j = JCompilationUnit 'end' { j.toXOCL() }.
+      
+      PackageDec ::= 'package' n = Name ';' { n } | { "" }.
+      
+      Class ::= Visibility isAbstract = OptAbstract 'class' name = Name parent = JParent implements = JImplements '{' features = Features '}' { Class(name,isAbstract,implements,parent,features) }.
+      
+      JCompilationUnit ::= p = PackageDec i = JImport* c = (Class | Interface) { CompilationUnit(p,i,c) }.
+      
+      Interface ::= Visibility 'interface' name = Name parent = JParent implements = JImplements '{' features = IFeatures '}' { Interface(name,implements,parent,features) }.
+      
+      JImport ::= 'import' p = JImportPath ';' { Import(Path(p)) }.
+      
+      JImportPath ::= Path | p = Path '.' '*' { p + Seq{"*"} }.
+      
+      JParent ::= 'extends' Path | { null }.
+      
+      JImplements ::= 'implements' p = Path ps = (',' Path)* { Seq{p | ps} } | { Seq{} }.
+      
+      JThrows ::= 'throws' p = Path ps = (',' Path)* { Seq{p | ps} } | { Seq{} }.
+      
+      Features ::= Feature*.
+      
+      IFeatures ::= IFeature*.
+      
+      Feature ::= Field ! | Method | Constructor | LanguageEscape.
+      
+      IFeature ::= Field ! | MethodSig.
+      
+      Field ::= visibility = Visibility isStatic = OptStatic OptFinal type = JType name = Name value = FieldInit ';' { Field(Modifiers(visibility,isStatic,false),type,name,value) }.
+      
+      FieldInit ::= '=' JExp | { null}.
+      
+      Constructor ::= 
+        visibility = Visibility 
+        name = Name 
+        params = Formals 
+        body = Block 
+        { Constructor(visibility,name,params,body) }.
+      
+      LanguageEscape ::= 
+        'with' language = XMFPath '{' 
+          state = pState exp = { 
+            let classifier = language.lookup() then
+                grammar = classifier.grammar
+            in state.call(grammar,0,grammar.startingSymbol,Seq{},false) 
+            end
+          }
+        '}'
+        { ExternalFeature(language.lookup(),language.lookup().grammar.startingSymbol,exp) }.
+        
+      XMFPath ::= n = Name ns = ('::' Name)* { Seq{n|ns} }.
+      
+      MethodSig ::= 
+        visibility = Visibility 
+        isStatic = OptStatic 
+        isAbstract = OptAbstract 
+        type = ReturnType 
+        name = Name 
+        params = Formals 
+        throws = JThrows
+        ';' { 
+          MethodSig(Modifiers(visibility,isStatic,isAbstract),type,name,params,throws) 
+        }.
+      
+      Method ::= 
+        visibility = Visibility 
+        isStatic = OptStatic 
+        isAbstract = OptAbstract 
+        type = ReturnType 
+        name = Name 
+        params = Formals 
+        throws = JThrows
+          (  body = Block { 
+               Method(Modifiers(visibility,isStatic,isAbstract),type,name,params,throws,body) 
+             } 
+               | 
+             ';' { 
+               MethodSig(Modifiers(visibility,isStatic,isAbstract),type,name,params,throws) 
+             }
+          ).
+      
+      JType ::= path = Path ( '[' ']' { ArrayType(NamedType(path)) } | { NamedType(path) } ).
+      
+      Path ::= n = Name ns = ('.' Name)* { Seq{n|ns} }.
+      
+      ReturnType ::= 'void' { Void() } | JType.
+      
+      Formals ::= '(' FormalList ')'.
+      
+      FormalList ::= formal = Formal formals = (',' Formal)* { Seq{formal | formals} } | { Seq{} }.
+      
+      Formal ::= type = JType name = Name { Formal(type,name) }.
+      
+      Visibility ::= 'public' { "public" } | 'private' { "private" } | 'protected' { "protected" } | { "public" }.
+      
+      OptStatic ::= 'static' { true } | { false }.
+      
+      OptAbstract ::= 'abstract' { true } | { false }.
+      
+      OptFinal ::= 'final' { true } | { false }.
+      
+    end
+    
+  end

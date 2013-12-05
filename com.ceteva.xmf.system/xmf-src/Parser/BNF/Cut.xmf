@@ -1,0 +1,51 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                     Cut                                    *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Grammars are compiled into predictive parsing tables. The idea is that    *
+ *  the grammars are LL(1) and the parsing machine simply dispatches on the   *
+ *  type of the next token. There are occasions where LL(1) parsing makes the *
+ *  grammar difficult to read. This should be the exception rather than the   *
+ *  rule, but it can occur that the parsing machine is faced with more than   *
+ *  one alternative block for the next token. When this occurs, the parsing   *
+ *  machine can branch and set up a choice point. If the first branch fails   *
+ *  then the machine can backtrack to the choice point and try one of the     *
+ *  alternative branches. The parse is then tree-shaped and can involve a lot *
+ *  of backtracking. Cut allows the branches in the search space that have    *
+ *  been created since the call of the current clause to be pruned from the   *
+ *  tree (presumably because we have found out they are not needed). Cut can  *
+ *  make a significant difference to the efficiency of the parse where the    *
+ *  grammar is not LL(1). For the most part, try to write grammars that are   *
+ *  LL(1) - only very large grammars should have a requirement for Cut.       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Cut extends Recognizer 
+    
+    @Constructor() ! end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," ! ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Cut() |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

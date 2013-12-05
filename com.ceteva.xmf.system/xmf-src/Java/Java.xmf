@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Java Interface                               *
+ *                               --------------                               *
+ *                                                                            *
+ *   Java objects and classes are supported by foreign objects and            *
+ *   xmf.javaClass(). When a new instance of a class loaded using             *
+ *   xmf.javaClass() is created it is automatically classified (via of()) by  *
+ *   ForeignObject. Foreign objects do not generally have XOCL defined        *
+ *   operations (they are all instances of the same XOCL class anyway).       *
+ *                                                                            *
+ *   A foreign object MOP is an implementation of an interface that handles   *
+ *   the operations:                                                          *
+ *                                                                            *
+ *      dot(object,name)                                                      *
+ *      update(object,name,value)                                             *
+ *      send(object,name,args)                                                *
+ *                                                                            *
+ *   The MOP is defined in the XMF VM. The class ForeignObject uses a         *
+ *   standard MOP that uses Java reflection to implement the operations.      *
+ *                                                                            *
+ *   It is useful to be able to associate Java classes with specific          *
+ *   sub-classes of ForeignObject and to associate Java classes with specific *
+ *   foreign object MOPs.                                                     *
+ *                                                                            *
+ *   The JavaClass language construct allows specific Java class to be        *
+ *   mapped to specific XOCL classes and allows specific Java classes to be   *
+ *   associated with specific Java implementations of foreign object MOPs.    *
+ *   The information is declared at the XOCL level in a class-like definition *
+ *   and is handled by the VM provided the declared Java classes can be found.*
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Package Java
+    
+  end

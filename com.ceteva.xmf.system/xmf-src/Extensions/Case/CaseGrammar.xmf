@@ -1,0 +1,108 @@
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Case-Expression Syntax                              *
+ *                        ----------------------                              *
+ *                                                                            *
+ *   A case-expression has the following form:                                *
+ *                                                                            *
+ *     @Case v1,v2,...,vn of                                                  *
+ *       p1,p2,...,pn do                                                      *
+ *         e                                                                  *
+ *       end                                                                  *
+ *       ...                                                                  *
+ *       else e                                                               *
+ *     end                                                                    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+import Parser::BNF;
+
+context Case
+
+  @Grammar extends OCL::OCL.grammar
+  
+    Case ::= 
+    
+      // A case-expression starts with a sequence of exps...
+    
+      values = CaseExps 'of' 
+      
+      // A sequence of case-arms...
+      
+      arms = Arm* 
+      
+      // An optional default clause...
+      
+      default = Default 
+      
+      'end' 
+      
+      { Case(values,arms,default) }.
+    
+    Arm ::=
+    
+      // An arm is a sequence of patterns... 
+    
+      patterns = CasePatterns 'do' 
+      
+      // And a single action...
+      
+      action = ArmAction 
+      
+      'end' 
+      
+      { CaseArm(patterns,action) }.
+    
+    ArmAction ::= 
+    
+      // An arm action is an expression followed
+      // by an optional sequence of bindings...
+    
+      e = Exp 
+      
+      ( 'where' 
+      
+         bs = Bindings 
+         
+         { Let(bs,e) }   
+         
+      | {e}
+       
+      ).
+    
+    Default ::= 
+    
+      // The default clause is optional and
+      // is performed if all the case-arms fail
+      // to match...
+    
+      'else' Exp 
+      
+    | { null }.
+    
+    CaseExps ::= 
+    
+      // The expressions are separated with commas...
+    
+      exp = Exp 
+      
+      exps = (',' Exp)* 
+      
+      { Seq{exp | exps} }.
+    
+    CasePatterns ::= 
+    
+      // The patterns in a case-arm are sepaated
+      // by commas...
+    
+      pattern = Pattern 
+      
+      patterns = (',' Pattern)* 
+      
+      { Seq{pattern | patterns} }.
+    
+  end 

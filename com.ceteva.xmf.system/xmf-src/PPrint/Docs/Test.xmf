@@ -1,0 +1,127 @@
+parserImport XOCL;
+
+import Docs;
+
+context Root
+  @Class Record
+    @Attribute name : String end
+    @Attribute age : Integer end
+    @Attribute accounts : Seq(String) end
+    @Constructor(name,age,accounts) ! end
+  end
+
+context Root
+  @Class DataBase
+    @Attribute records : Seq(Record) end
+    @Constructor(records) ! end
+  end
+  
+context Root
+  @Operation testDB()
+    DataBase(Seq{
+      Record("Fred Jones",22,Seq{"A101","B204","A108"}),
+      Record("Sally Brown",32,Seq{"C202"}),
+      Record("Edward Clark",24,Seq{"A102","B222"})
+    })
+  end
+
+context Root
+  @Operation test1(w,r)
+    Order(Just("Plap"),Just("Spam")).pprint(w,r)
+  end
+
+context Root
+  @Operation test1a()
+    let m = Machine()
+    in m.load(Seq{Order(Just("Plap"),Just("Spam"))});
+       m.run();
+       m.text()
+    end
+  end
+
+context Root
+  @Operation test2(w,r)
+    Indent(2,Order(Just("Plap"),Order(Newline(),Just("Spam")))).pprint(w,r)
+  end
+  
+context Root
+  @Operation test2a()
+    let m = Machine()
+    in m.load(Seq{Indent(2,Order(Just("Plap"),Order(Newline(),Just("Spam"))))});
+       m.run();
+       m.text()
+    end
+  end
+
+context Root 
+  @Operation test3(w,r)
+    Alt( 
+      Order(Just("Spam"),Just("Plap")),
+      Order(Just("Plap"),Order(Newline(),Just("Spam")))).pprint(w,r)
+  end
+  
+context Root
+  @Operation test3a(l,r)
+    let m = Machine(l,r)
+    in m.load(Seq{Alt( 
+      Order(Just("Spam"),Just("Plap")),
+      Order(Just("Plap"),Order(Newline(),Just("Spam"))))});
+       m.run();
+       m.text()
+    end
+  end
+  
+context Root
+  @Operation line(ss:Seq(String)):Doc
+    ss->tail->iterate(s d = Just(ss->head) | Order(d,Just(" " + s)))
+  end
+  
+context Root
+  @Operation stack(ss:seq(string)):Doc
+    ss->tail->iterate(s d = Just(ss->head) | Order(d,Order(Newline(),Just(s))))
+  end
+  
+context Root
+  @Operation test4a()
+    let strings = Seq{"some text","then more text","end."}
+    in Alt(line(strings),stack(strings)).pprint(80,80)
+    end
+  end
+  
+context Root
+  @Operation test4b()
+    let strings = Seq{"some text","then more text","end."}
+    in Alt(line(strings),stack(strings)).pprint(80,10)
+    end
+  end
+  
+context Root
+  @Operation test5()
+    let m = Engine::Machine();
+        d = Just("some text")
+    in m.load(Seq{d});
+       m.run(80,30);
+       m.buffer
+    end
+  end
+  
+context Root
+  @Operation test6(w,r)
+    let m = Engine::Machine();
+        d = Order(Just("some text"),Order(Just(" more text"),Just(" the end.")))
+    in m.load(Seq{d});
+       m.run(w,r);
+       m.buffer
+    end
+  end
+  
+context Root
+  @Operation test7(w,r)
+    let m = Engine::Machine();
+        d = Order(Just("some text"),Order(Block(Order(Newline(),Just("more text"))),Indent(2,Order(Newline(),Just("the end.")))))
+    in d.pprint(40,40,10,0).println();
+       m.load(Seq{d});
+       m.run(w,r);
+       m.buffer
+    end
+  end

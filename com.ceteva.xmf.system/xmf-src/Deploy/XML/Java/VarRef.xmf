@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context VarRef
+  @Operation toJava(out:OutputChannel)
+    format(out,"    varRef = new VarRef();~%");
+    format(out,"    varRef.setName(\"~S\");~%",Seq{name});
+    format(out,"    stack.push(varRef);~%")
+  end

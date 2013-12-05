@@ -1,0 +1,103 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Calling Clauses                               *
+ *                              ---------------                               *
+ *                                                                            *
+ *  One clause can call another by name. A number of parameters can be passed *
+ *  from one clause to the other. The parameters are limited to being names   *
+ *  in the source code. When the call is compiled, the names are replaced     *
+ *  with an arg map that maps arg position to local stack frame position so   *
+ *  that the parsing machine just moves the values from one stack frame to    *
+ *  the other when the call takes place.                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Call extends Recognizer 
+    
+    @Attribute name   : String       end
+    @Attribute args   : Seq(String)  end
+    @Attribute argMap : Seq(Integer) end
+    @Attribute clause : Clause       end
+    
+    @Constructor(name) end
+    
+    @Constructor(name,args) end
+    
+    @Constructor(name,args,argMap) end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," ~S ",Seq{name})
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+
+    @Operation first(grammar):Set(String)
+    
+      // The set of forst token types for a call is the set of
+      // first token types for the called clause...
+      
+      let clause = grammar.clauseNamed(name)
+      in if clause <> null andthen clause.args->size = args->size
+         then clause.first()
+         else grammar.error("No clause named " + name + " with arity " + args->size)
+         end
+      end
+    end
+
+    @Operation follow(grammar):Set(String)
+    
+      // The set of token types that can follow this call are those
+      // that can follow the called clause...
+      
+      let clause = grammar.clauseNamed(name)
+      in if clause <> null andthen clause.args->size = args->size
+         then clause.follow()
+         else grammar.error("No clause named " + name + " with arity " + args->size)
+         end
+      end
+    end
+
+    @Operation nullable(grammar):Set(String)
+    
+      // The call need not cnsume any input if the called clause
+      // consumes no input...
+      
+      let clause = grammar.clauseNamed(name)
+      in if clause <> null
+         then clause.nullable()
+         else grammar.error("No clause named " + name)
+         end
+      end
+    end
+
+    @Operation setFollow(grammar,follow)
+      let clause = grammar.clauseNamed(name)
+      in if clause <> null
+         then clause.setFollow(follow)
+         else grammar.error("No clause named " + name)
+         end
+      end
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Call(<StrExp(name)>,<SetExp("Seq",args->collect(a | StrExp(a)))>) |]
+    end
+    
+    @Operation toString()
+      "Call(" + name + formats("(~{,~;~S~})",Seq{args}) + ")"
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

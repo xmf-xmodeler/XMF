@@ -1,0 +1,48 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    ~V                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg must be a number indicating the number of spaces to *
+ *    print on the output channel. Optionally the control arg can be used to  *
+ *    define the character printed to the output: ~<x>V prints x's instead of *
+ *    space characters.                                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleSpaces =
+     @Operation(char,output,formatContext)
+       let spaces = formatContext.nextValue()
+       in if spaces.isReallyKindOf(Integer)
+          then
+            let char = if formatContext.args->isEmpty then " "->at(0) else formatContext.args->at(0)->at(0) end
+            in @While spaces > 0 do
+                 format(output,"~C",Seq{char});
+                 spaces := spaces - 1
+               end
+            end
+          else self.error("The V directive expects a number but received: " + spaces.toString())
+          end
+       end
+     end
+in format.defineHandler("V"->at(0),handleSpaces)
+end;
+
+let compileSpaces =
+  @Operation compileSpaces(control,args,format):Performable
+    if args->isEmpty
+    then self.error("Ran out of control arguments when compiling ~V")
+    else
+      [| let spaces = <args->head>
+         in @While spaces > 0 do
+              formatOut.write(" "->at(0));
+              spaces := spaces - 1
+            end
+         end;
+         <format.compileControl(control,args->tail)> |]
+    end
+  end
+in format.defineCompiler("V"->at(0),compileSpaces)
+end;

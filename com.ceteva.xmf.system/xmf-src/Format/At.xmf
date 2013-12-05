@@ -1,0 +1,17 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~@                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg should be a sequence that is appended to the head   *
+ *    of the control arguments.                                               *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleAt =
+      @Operation(char,output,formatContext)
+         formatContext.at()
+       end
+in format.defineHandler("@"->at(0),handleAt)
+end;
+     

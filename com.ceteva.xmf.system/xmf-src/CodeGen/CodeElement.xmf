@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Code Elements                               *
+ *                   ---------------------------------------                  *
+ *                                                                            *
+ *    Code templates are translated by a mapping into code elements. The code *
+ *    elements are then desugared to produce XOCL code that generates the     *
+ *    text with the appropriate values dropped into the templates.            *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context CodeGen
+
+  @Class CodeElement isabstract
+  
+    // Code elements are tree structured...
+  
+    @Attribute elements : Seq(CodeElement) end
+    
+    @Constructor(elements) ! end
+    
+    @AbstractOp desugar(path:String,liftStart:String,liftEnd:String,dropStart:String,dropEnd:String,extractStart:String,extractEnd:String,out:Performable,level:Integer):Performable 
+      
+      // Produce code to produce the template. The tokens
+      // are passed in, out is an expression representing
+      // the output channel and level is the level of nesting...
+      
+    end
+    
+    @AbstractOp dropString(path:String,out,lstart,lend,dstart,dend,estart,eend):String 
+    
+      // Turn the receiver into a string representation of the
+      // code for the template...
+      
+    end
+      
+  end

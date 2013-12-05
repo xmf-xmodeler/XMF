@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Cons
+  @Operation toJava(out:OutputChannel)
+    format(out,"    cons = new Cons();~%");
+    head.toJava(out);
+    format(out,"    cons.setHead((Command)stack.pop());~%");
+    tail.toJava(out);
+    format(out,"    cons.setTail((Command)stack.pop());~%");
+    format(out,"    stack.push(cons);~%")
+  end

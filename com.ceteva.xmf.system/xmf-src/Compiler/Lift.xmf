@@ -1,0 +1,36 @@
+/******************************************************************************
+ *                                                                            *
+ *                     Compilation of Lifted Expressions                      *
+ *                     ---------------------------------                      *
+ *                                                                            *
+ *  Lifting an expression just produces an expression that recreates the      *
+ *  original. Therefore, compilation of a lifted exp, just compiles the       *
+ *  result of the lift.                                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context Lift
+  @Operation compile(env,frame,isLast,saveSource)
+  
+    // When we compile a lift expression we must construct an expression
+    // that will produce the expression when performed...
+    
+    exp.lift().compile(env,frame,isLast,saveSource)
+  end
+  
+context Lift
+  @Operation FV():Set(String)
+    exp.lift().FV()
+  end
+  
+context Lift
+  @Operation maxLocals():Integer
+    exp.lift().maxLocals()
+  end
+  
+context Lift
+  @Operation lift()
+    exp.lift().lift()
+  end  

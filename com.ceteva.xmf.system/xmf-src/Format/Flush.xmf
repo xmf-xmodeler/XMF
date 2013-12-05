@@ -1,0 +1,15 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~F                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The output channel is flushed.                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+ let handleFlush =
+       @Operation(char,output,formatContext)
+         output.flush()
+       end
+ in format.defineHandler("F"->at(0),handleFlush)
+ end;

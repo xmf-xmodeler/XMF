@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                   Read a Character From An Input Channel                   *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ * Pops an input channel from the stack and performs a read. If there is input*
+ * available then a single character is read and pushed onto the stack as an  *
+ * ASCII code integer. Otherwise, the input channel has nothing available and *
+ * the read blocks. This yields the current thread which will block in the    *
+ * operating system. The thread will awake when input becomes available.      *
+ * meanwhile, other XMF threads will continue.                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Read extends Instr
+    
+  end
+  
+  

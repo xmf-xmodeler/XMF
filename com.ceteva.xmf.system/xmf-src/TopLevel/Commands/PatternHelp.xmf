@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("ah",
+  @Operation(args,target,env,imports)
+    @Doc
+      ?ah                  Help on the syntax of patterns for ?a.
+    end
+    format(stdout,"~S~%",Seq{XMatch::Pattern.doc().doc})
+  end);

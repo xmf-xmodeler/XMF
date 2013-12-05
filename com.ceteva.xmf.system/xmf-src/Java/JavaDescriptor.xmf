@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+context Java
+
+  @Class JavaDescriptor 
+  
+    // A Type is the package qualified name to the class (see xmf::javaClass).
+    // A mopName is a package qualified name of the implementation of the MOP interface.
+    // A sequence of paths is a list of folder paths (see xmf::javaClass).
+     
+    @Attribute type    : String	     (?,!) end
+    @Attribute mopName : String      (?,!) end
+    @Attribute paths   : Seq(String) (?,!) end
+    
+    @Constructor(type) end
+    
+    @Constructor(type,mopName) ! end
+    
+    @Constructor(type,mopName,paths) ! end
+    
+  end

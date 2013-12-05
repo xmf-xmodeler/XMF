@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      Nodes                                 *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    A graph node is labelled with some data. A node may be the source and   *
+ *    target of many edges in the graph. Root nodes are the target of no edges*
+ *    and terminal nodes are the source of no edges.                          *
+ *                                                                            *
+ ******************************************************************************/
+
+context Graphs
+
+  @Class Node 
+  
+    @Attribute data : Element (!,?) end
+    
+    @Constructor(data) ! end
+    
+    @Operation equals(other:Element):Boolean
+      if other.isKindOf(Node)
+      then data.equals(other.data())
+      else false
+      end
+    end
+    
+    @Operation pprint(out)
+      format(out,"~S",Seq{data})
+    end
+    
+  end

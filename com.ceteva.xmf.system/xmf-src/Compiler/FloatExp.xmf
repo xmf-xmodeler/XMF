@@ -1,0 +1,35 @@
+/******************************************************************************
+ *                                                                            *
+ *                         Compiling Floating Point                           *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  Push a floating point number.                                             *
+ *                                                                            *
+ ******************************************************************************/
+import OCL;
+import Instrs;
+import Compiler;
+
+context FloatExp
+  @Operation FV():Element
+    Set{}
+  end
+
+context FloatExp
+  @Operation maxLocals():Element
+    0
+  end
+
+context FloatExp
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    if sourcePos and line > 0
+    then Seq{Line(line)}
+    else Seq{}
+    end +
+    ([| Kernel_mkFloat(<StrExp(prePoint)>,<StrExp(postPoint)>) |].compile(env,frame,isLast,saveSource))
+  end
+  
+context FloatExp
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line),StrExp(prePoint),StrExp(postPoint)})
+  end

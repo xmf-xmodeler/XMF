@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Value Bindings                             *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A binding that occurs in a let-expression.                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class ValueBinding extends Binding
+  
+    @Attribute value : OCL::OCL                     end
+    @Attribute type  : TypeExp = static NamedType() end
+    
+    @Constructor(name,value) end
+    
+    @Constructor(name,type,value) ! end
+    
+    @Operation desugar()
+      
+      // Specializations of ValueBinding might introduce
+      // sugar into bindings. This is always called before
+      // evaluation and compilation...
+      
+      self
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S : ~S = ~S",Seq{name,type.pprint(),value.pprint(indent + name.toString()->size + 3)})
+    end
+    
+  end 

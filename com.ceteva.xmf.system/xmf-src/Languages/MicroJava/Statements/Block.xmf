@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Statements;
+
+context Statements
+
+  @Class Block extends Statement
+  
+    @Attribute statements : Seq(Statement) end
+    
+    @Constructor(statements) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"{");
+      if statements.isKindOf(Seq(Element))
+      then
+        @For s in statements do
+          format(out,"~%~V",Seq{indent+2});
+          s.pprint(out,indent+2)
+        end
+      else statements.pprint(out,indent)
+      end;
+      format(out,"~%~V}",Seq{indent})
+    end
+    
+    @Operation toXOCL():Operation
+    
+      // Local variables need to be translated into let-expressions.
+      // Therefore each statement translated into an operation expecting
+      // the statement to be nested within its scope...
+      
+      @Operation(next:Performable):Performable
+        statements->reverse->iterate(statement e = [| null |] | 
+          let op  = statement.toXOCL()
+          in op(e)
+          end)
+      end
+      
+    end
+      
+    
+  end
+    

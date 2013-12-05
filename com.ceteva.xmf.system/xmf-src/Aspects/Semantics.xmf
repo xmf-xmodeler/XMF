@@ -1,0 +1,59 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Aspects                                    *
+ *                        ------------------------                            *
+ *                                                                            *
+ *   An aspect is a collection of components that are added to a name-space.  *
+ *   When it is defined, the aspect is added to the global name-space         *
+ *   AllAspects.                                                              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Aspects
+
+  @Package Semantics
+    
+    @Class Aspect extends IndexedContainer, NamedElement
+    
+      @Attribute components : Set(Component) end
+      
+      @Constructor(name) !
+        AllAspects.putElement(name,self);
+        self
+      end
+      
+      @Constructor(name,components) 
+        AllAspects.putElement(name,self);
+        self
+      end
+      
+      @Operation add(component)
+        super(component);
+        component.perform();
+        self
+      end 
+      
+    end
+    
+    @Class Component 
+    
+      @Attribute nameSpace : XCore::NameSpace end
+      @Attribute contents : Set(NamedElement) end
+  
+      @Constructor(nameSpace) ! end
+      
+      @Operation add(e:NamedElement)
+        self.contents := contents->including(e)
+      end
+      
+      @Operation perform()
+        @For e in self.contents do
+          nameSpace.add(e)
+        end
+      end
+      
+    end
+    
+  end 

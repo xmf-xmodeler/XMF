@@ -1,0 +1,27 @@
+parserImport XOCL;
+
+import Signatures;
+import IO;
+
+context Signatures
+
+  @Class Fun extends Type
+
+    @Attribute domain : Seq(Type) (?,!) end
+    @Attribute range : Type (?,!) end
+    
+    @Constructor(domain,range) ! end
+    
+    @Operation pprint(out:OutputChannel)
+      format(out,"(");
+      @For t in domain do
+        t.pprint(out);
+        if not isLast
+        then format(out,",")
+        end
+      end;
+      format(out,") -> ");
+      range.pprint(out)
+    end
+
+  end

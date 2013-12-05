@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Boolean Expressions                          *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A boolean expression is either true or false.                             *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import OCL;
+
+context OCL
+
+  @Class BoolExp extends OCL::OCL
+  
+    @Attribute value : Boolean end
+    
+    @Constructor(value) ! end
+    
+    @Constructor(line,value) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S",Seq{value})
+    end
+    
+  end

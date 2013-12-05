@@ -1,0 +1,71 @@
+parserImport XOCL;
+
+import IO;
+   
+context Package
+  @Operation performDeployXOCLCheck():Boolean
+    @Find(class,self.allContentsOf(Class))
+      when class.name() = self.name()
+      do self.error(formats("Cannot deploy: ~S clashes with ~S.~%Change the names so they do not clash.",Seq{self,class}));
+         false
+      else self.allContentsOf(Package)->forAll(p | p.performDeployXOCLCheck())
+    end
+  end
+   
+context XCore::Package
+  @Operation deployXOCL(dir:String)
+  
+    // Writes out the text that can be used to reconstruct
+    // the element. This operation should check that the directory
+    // is present before writing files to it.
+    
+    try
+      if if dir.fileExists()
+         then true
+         else dir.mkDir()
+         end
+      then
+        self.deployManifest(dir);
+        let owner = if self.owner() = null then Root else self.owner() end
+        in @WithOpenFile(fout -> dir + "/" + self.name() + ".xmf")
+             format(fout,"parserImport XOCL;~%~%");
+             format(fout,"context ! ~{::~;~S~}~%~%",Seq{owner.pathSeq()});
+             format(fout,"@Package ~S end",Seq{self.name()});
+             @For p in self.packages do
+               p.deployXOCL(dir + "/" + p.name())
+             end;
+             @For c in self.classes do
+               c.deployXOCL(dir)
+             end;
+             fout.close()
+           end
+        end
+      else self.error("Cannot find deployment directory " + dir)
+      end
+    catch(exception)
+      format(stdout,"Error writing package source: ~S~%",Seq{exception})
+    end
+  end
+  
+context XCore::Package
+  @Operation deployManifest(dir:String)
+  
+    // Creates a manifest for the receiver. The manifest contains an
+    // entry for each of the elements in the package.
+    
+    @WithOpenFile(fout -> dir + "/Manifest.xmf")
+       format(fout,"parserImport XOCL;~%");
+       format(fout,"parserImport Manifests;~%~%");
+       format(fout,"@Manifest ~S~%",Seq{self.name()});
+       format(fout,"  p = @File ~S end~%",Seq{self.name()});
+       @For c in self.classes do
+         format(fout,"  @File ~S end~%",Seq{c.name()})
+       end;
+       @For p in self.packages do
+         format(fout,"  @Ref ~S end~%",Seq{p.name()})
+       end;
+       format(fout,"do p~%");
+       format(fout,"end;~%");
+       fout.close()
+    end
+  end

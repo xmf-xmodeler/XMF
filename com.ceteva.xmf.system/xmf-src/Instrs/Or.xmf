@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Boolean Or of Values                             *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops b2 and then b1 from the stack and pushes the 'or' of these values.   *
+ *  The VM knows how to perform 'or' for boolean values and integers.         *
+ *  Otherwise it sends b1 a boolOr/1 message.                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Or extends Instr
+
+  end

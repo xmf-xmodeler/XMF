@@ -1,0 +1,666 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Grammar Clauses                              *
+ *                               ---------------                              *
+ *                                                                            *
+ *  A grammar is defined with a collection of clauses. Each clause is named,  *
+ *  has arguments and contains a sequence of recognizers. When the grammar    *
+ *  is used by the parser, it starts with a named starting clause and the     *
+ *  input tokens are consumed as required by the recognizers. One clause can  *
+ *  call another and pass arguments. The actions in the clauses synthesize a  *
+ *  result that is returned if the parse succeeds (by running out of things   *
+ *  to do).                                                                   *
+ *                                                                            *
+ *  Clauses exist in two modes: uncompiled and compiled. An uncompiled clause *
+ *  is more or less directly equivalent to that which is written - the lift() *
+ *  may have been used to process actions during the XMF compilation stage.   *
+ *                                                                            *
+ *  Compiling a clause transforms the clause into a collection of blocks that *
+ *  are used by the parsing machine to perform predictive parsing. The        *
+ *  compilation process involves a global analysis of the grammar to determine*
+ *  the token types that predict the various blocks derived from a clause.    *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+ @Class Clause extends NamedElement
+ 
+      // A clause has a sequence of named values that 
+      // can be passed to it...
+    
+      @Attribute args : Seq(String)              end  
+      
+      // An uncompiled clause contains a single recognizer.
+      // This will be translated to clause-normal-form and
+      // then to a collection of blocks by the clause
+      // compilation process...
+      
+      @Attribute body : Recognizer               end    
+      
+      // The clause compilation process translates the body
+      // of the clause into clause-normal-form and then to
+      // a collection of blocks. The blocks are used directly
+      // by the parsing machine...
+      
+      @Attribute blocks : Seq(Block) (?,!)       end
+      
+      // Can this clause be satisfied without consuming 
+      // any tokens?...
+      
+      @Attribute nullable : Boolean (?,!)        end
+      
+      // The set of token types that predict the use of
+      // this clause for parsing. The machine is predictive 
+      // and uses this set to pick out the next clause...
+      
+      @Attribute first : Set(String) (?,!,+,-)   end
+      
+      // If a clause is nullable, then it is important to
+      // know what types of token can follow it. This 
+      // information is used in calculatingthe predictive
+      // sets for other clause names...
+      
+      @Attribute follow : Set(String) (?,!,+,-)  end
+      
+      // A cache used in predictive parsing. Given a token
+      // type, which blocks are predicted?...
+      
+      @Attribute cache : Table = Table(10) (?,!) end
+    
+      @Constructor(name,body) end
+      @Constructor(name,args,body) end
+      @Constructor(name,args,body,blocks) end
+    
+      @Operation calculateSets(grammar):Boolean
+      
+        // Returns true when the sets have changed...
+        
+        let changed = false
+        in @For block in blocks do
+             changed := changed or block.calculateSets(grammar,self)
+           end;
+           changed
+        end
+      end
+    
+      @Operation clean()
+        self.first := Set{};
+        self.follow := Set{}
+      end
+      
+      @Operation cnf(grammar)
+      
+        // Translation to clause-normal-form is the first step in
+        // grammar compilation. The body is transated by lifting
+        // all disjuncts to the top-level and then splitting them
+        // into different sequences of conuncts. The conjuncts are
+        // then split into sequences...
+        
+        let bodies = body.cnf(grammar)->collect(instrs | self.compileLocals(args->asSet,instrs,grammar))
+        in CompiledClause(name,args,body,bodies)
+        end
+      end
+    
+      @Operation code(outputChannel,indent)
+      
+        // Write out the clause in a readbale form...
+      
+        format(outputChannel,"~V~S ::= ",Seq{indent,name});
+        body.code(outputChannel);
+        format(outputChannel,".~%")
+      end
+      
+      @Operation code()
+        let soc = IO::StringOutputChannel() in
+          self.code(soc,0);
+          soc.getString()
+        end
+      end
+      
+      @Operation compileLocals(locals,instrs,grammar)
+      
+        // Called to translate the sequence of recognizers (instrs)
+        // into a block ready for parsing. The locals are the names
+        // of all the locals that are currently known (i.e. the args)...
+ 
+        Block(0,instrs).compileLocals(args,locals,grammar)
+      end
+    
+      @Operation copy()
+      
+        // Clauses can be inherited from a parent grammar.
+        // When this occurs the clause must be copied because
+        // the compilation process in the child will modify the
+        // clause...
+        
+        CompiledClause(name,args,body,Seq{})
+      end
+    
+      @Operation dprint()
+      
+        // Diagnostic...
+        
+        format(stdout,"~S(~{,~;~S~}): nullable=~S first = ~S follow=~S~%",Seq{name,args,nullable,first,follow});
+        @For block in blocks do
+          block.dprint()
+        end
+      end
+    
+      @Operation equal(clause:Clause):Boolean
+      
+        // When clauses are inherited from a parent, the 
+        // clause is copied down to the child and then compiled.
+        // the compilation process may modify the inherited clause.
+        // If the compilation process does not change the inherited
+        // clause then it makes sense to discard the cope and use
+        // the inherited clause (they get quite large). This
+        // operation checks for equivalence...
+        
+        nullable = clause.nullable() and
+        first = clause.first() and
+        follow = clause.follow() and
+        blocks->size = clause.blocks()->size and
+        blocks->forAll(b1 | clause.blocks()->exists(b2 | b1.equal(b2)))
+      end
+    
+      @Operation expected()
+      
+        // Calculate the set of expected token types...
+        
+        blocks->iterate(b E = Set{} | E + b.expected())
+      end
+      
+      @Operation lift():Performable
+      
+        // The lifting process is performed by the XMF compiler in order
+        // to transform actions and introduce local variables so that the
+        // XMF compiler sees them...
+        
+        let nameExp = StrExp(name);
+            argsExp = SetExp("Seq",args->collect(a | StrExp(a)));
+            bodyExp = body.toExp(args->asSet + body.FV())
+        in [| Root::Parser::BNF::Clause(<nameExp>,<argsExp>,<bodyExp>) |]
+        end
+      end
+      
+      @Operation liftOrs(grammar)
+      
+        // Called by the grammar when it performs an initial transformation
+        // on the grammar definition. Causes disjuncts to be lifted out of
+        // conjuncts by introducing new rules. The different between liftOrsOuter
+        // and liftOrsInner is which side of a disjunct we are on...
+        
+        self.body := self.liftOrsOuter(grammar,body)
+      end
+      
+      @Operation liftOrsInner(grammar,locals,body,next)
+      
+        // We have seen an And in a clause body. We want to wind up with
+        // all the Or's at the top-level. So if we see an Or inside an And 
+        // we need to take action. The easiest thing to do is to introduce 
+        // a new clause for the nested Or and call it...
+        
+        @CaseObj body of
+        
+          Or[left,right] do
+          
+            // Create a new clause for the nested Or. Work out the current
+            // locals that are required by the Or and set them as arguments
+            // passed from the existing clause to the new clause...
+            
+            let name = grammar.newClauseName(name + "-Dis");
+                args =  locals->asSeq->qsort(@Operation(x,y) x < y end) then
+                call = Call(name,args);
+                clause = Clause(name,args,body)
+            in grammar.add(clause);
+               clause.liftOrs(grammar);
+               next(locals,call)
+            end
+          end
+          
+          PlusCons[parser] do
+          
+            // A + contains an implicit Or, therefore it needs to be
+            // lifted out via a new clause...
+            
+            let name = grammar.newClauseName(name + "-PlusCons");
+                args =  locals->asSeq->qsort(@Operation(x,y) x < y end) then
+                call = Call(name,args);
+                clause = Clause(name,args,And(parser,And(Bind("$head"),And(StarCons(parser),And(Bind("$tail"),Cons())))))
+            in grammar.add(clause);
+               clause.liftOrs(grammar);
+               next(locals,call)
+            end
+          end
+          
+          And[left,right] do
+          
+            // A nested And is OK...
+            
+            self.liftOrsInner(grammar,locals,left,
+              @Operation(locals,left)
+                self.liftOrsInner(grammar,locals,right,
+                  @Operation(locals,right)
+                    next(locals,And(left,right))
+                  end)
+              end)
+          end
+          
+          Parser::BNF::Bind[name] do
+            next(locals->including(name),body)
+          end
+          
+          Opt[parser] do
+          
+            // Just do the obvious transformation and retry...
+            
+            self.liftOrsInner(grammar,locals,Or(parser,Nil()),next)
+          end
+          
+          StarCons[parser] do
+          
+            // A * contains an implicit Or and therefore needs to be
+            // lifted out via a new clause. Note that we treat Char*
+            // specially...
+            
+            @CaseObj parser of
+              Char[ ] do
+                next(locals,Chars())
+              end
+              else
+                let name = grammar.newClauseName(name + "-Star") then
+                    args =  locals->asSeq->qsort(@Operation(x,y) x < y end) then
+                    newBody = Or(And(parser,And(Bind("$head"),And(Call(name,args),And(Bind("$tail"),Cons())))),Nil()) then
+                    clause = StarClause(name,args,newBody)
+                in grammar.add(clause);
+                   clause.liftOrs(grammar);
+                   next(locals,Call(name,args))
+                end
+            end
+          end
+          
+          Call[ ] do
+            next(locals,body)
+          end
+          
+          Terminal [ ] do
+            next(locals,body)
+          end
+          
+          Cons[ ] do
+            next(locals,body)
+          end
+          
+          Nil[ ] do
+            next(locals,body)
+          end
+          
+          PreAction[ ] do
+            next(locals,body)
+          end
+          
+          Name[ ] do
+            next(locals,body)
+          end
+          
+          Int[ ] do
+            next(locals,body)
+          end
+          
+          Float[ ] do
+            next(locals,body)
+          end
+          
+          Str[ ] do
+           next(locals,body)
+          end
+          
+          Tok[ ] do
+            next(locals,body)
+          end
+          
+          PState[ ] do
+            next(locals,body)
+          end
+          
+          LinePos[ ] do
+            next(locals,body)
+          end
+          
+          At[ ] do
+            next(locals,body)
+          end
+          
+          Bind[name] do
+            next(locals->including(name),body)
+          end
+          
+          Cut[ ] do
+            next(locals,body)
+          end
+          
+          EOF[ ] do
+            next(locals,body)
+          end
+          
+          ImportAt[ ] do
+            next(locals,body)
+          end
+          
+          Float[ ] do
+            next(locals,body)
+          end
+          
+          NewToken[ ] do
+            next(locals,body)
+          end
+          
+          Char[ ] do
+           next(locals,body)
+          end
+          
+          Chars[ ] do
+           next(locals,body)
+          end
+          
+          Line[ ] do
+           next(locals,body)
+          end
+          
+          Term[ ] do
+            next(locals,body)
+          end
+          
+          TypeCheck[ ] do
+            next(locals,body)
+          end
+          
+          else next(locals,body)
+        end
+      end
+      
+      @Operation liftOrsOuter(grammar,body)
+      
+        // 'Outer'  refers to the starting point for clause body transformation.
+        // We want the clause to wind up with no Or's nested within any And's.
+        // So long as we see Or's just keep calling liftOrsOuter. As soon as we see 
+        // an And then call liftClauseInner to deal with the transformation...
+        
+        @CaseObj body of
+        
+          Or[left,right] do
+          
+            // We are OK to keep Ors at the top-level. They will eventually
+            // turn into blocks...
+            
+            Or(self.liftOrsOuter(grammar,left),self.liftOrsOuter(grammar,right))
+          end
+          
+          And[left,right] do
+          
+            // We must not retain Or's nested inside an And. Therefore, once we
+            // see and And we must change state: any Or's will be lifted by
+            // introducing a new clause. The mode change is implemented by calling
+            // liftOrsInner...
+            
+            self.liftOrsInner(grammar,args->asSet,left,
+              @Operation(locals,left)
+                self.liftOrsInner(grammar,locals,right,
+                  @Operation(locals,right)
+                    And(left,right)
+                  end)
+              end)
+          end
+          
+          Opt[parser] do
+          
+            // No problem, just perform the obvious transformation and 
+            // try again...
+            
+            self.liftOrsOuter(grammar,Or(parser,Nil()))
+          end
+          
+          PreAction[ ] do
+            body
+          end
+          
+          Nil[ ] do
+            body
+          end
+          
+          Call[ ] do
+            body
+          end
+          
+          Name[ ] do
+            body
+          end
+          
+          Int[ ] do
+            body
+          end
+          
+          Float[ ] do
+            body
+          end
+          
+          NewToken[ ] do
+            body
+          end
+          
+          Str[ ] do
+            body
+          end
+          
+          PreAction[ ] do
+            body
+          end
+          
+          StarCons[ ] do
+          
+            // A * represents an implicit And since we have
+            // any number of sequences of elements. Perform a
+            // mode change...
+            
+            self.liftOrsInner(grammar,args->asSet,body,
+              @Operation(locals,body)
+                body
+              end)
+          end
+          
+          Char[ ] do
+            body
+          end
+          
+          Line[ ] do
+            body
+          end
+          
+          Term[ ] do
+            body
+          end
+          
+          TypeCheck[ ] do
+            body
+          end
+          
+          else body
+        end
+      end
+    
+      @Operation predict(grammar):Seq(Block)
+      
+        // This operation is called by the grammar to compile
+        // the prediction states in the blocks...
+        
+        @For block in blocks do
+          block.predict(self,grammar)
+        end
+      end
+    
+      @Operation predict(grammar,token,type)
+      
+        // Called by the parsing machine to return the collection of
+        // blocks that are predicated by the current state of the parer
+        // and the given token...
+        
+        // Bind the following since reference to local variables is more
+        // efficient than reference to dynamic variables...
+        
+        let EOF     = 1;
+            TERM    = 2;
+            FLOAT   = 4;
+            STRING  = 5;
+            NAME    = 6;
+            INT     = 7;
+            SPECIAL = 8
+        in 
+        
+           // The type of the supplied token is used to dispatch
+           // to particular blocks...
+           
+           @Case type of
+           
+             [EOF] do 
+               if cache.hasKey("EOF")
+               then cache.get("EOF")
+               else
+                 let blocks = blocks->select(b | b.EOFPredicts()) 
+                 in cache.put("EOF",blocks);
+                    blocks
+                 end
+               end
+             end
+             
+             [STRING] do 
+               if cache.hasKey("Str")
+               then cache.get("Str")
+               else
+                 let blocks = blocks->select(b | b.strPredicts() or b.charPredicts()) 
+                 in cache.put("Str",blocks);
+                    blocks
+                 end
+               end
+             end
+             
+             [NAME] do 
+               let token = token.toString()
+               in blocks->select(b | 
+                    b.namePredicts() orelse 
+                    b.charPredicts() orelse 
+                    b.predicts()->includes(token)) 
+               end
+             end
+             
+             [FLOAT] do 
+               if cache.hasKey("Float")
+               then cache.get("Float")
+               else
+                 let blocks = blocks->select(b | b.floatPredicts() orelse b.charPredicts()) 
+                 in cache.put("Float",blocks);
+                    blocks
+                 end
+               end
+             end
+             
+             [INT] do 
+               if cache.hasKey("Int")
+               then cache.get("Int")
+               else
+                 let blocks = blocks->select(b | b.intPredicts() orelse b.charPredicts()) 
+                 in cache.put("Int",blocks);
+                    blocks
+                 end
+               end
+             end
+             
+             [TERM] do 
+               if cache.hasKey("Term")
+               then cache.get("Term")
+               else
+                 let blocks = blocks->select(b | b.termPredicts() orelse b.charPredicts()) 
+                 in cache.put("Term",blocks);
+                    blocks
+                 end
+               end
+             end
+             
+             [SPECIAL] do
+               let token = token.toString()
+               in if cache.hasKey(token)
+                  then cache.get(token)
+                  else
+                    let blocks = blocks->select(b | b.charPredicts() orelse b.predicts()->includes(token)) 
+                    in cache.put(token,blocks);
+                       blocks
+                    end
+                  end
+               end
+             end
+             
+             else 
+             
+               // If the type is > SPECIAL then the token was
+               // produced by a user defined tokenizer and the
+               // token type is defined by the user....
+               
+               if type > SPECIAL
+               then
+                 if cache.hasKey(type)
+                 then cache.get(type)
+                 else
+                   let blocks = blocks->select(b | b.userPredicts()->includes(type))
+                   in cache.put(type,blocks);
+                      blocks
+                   end
+                 end
+               else
+               
+                 // Otherwise the token is a terminal...
+                 
+                 let token = token.toString()
+                 in if cache.hasKey(token)
+                    then cache.get(token)
+                    else
+                      let blocks = blocks->select(b | b.charPredicts() orelse b.predicts()->includes(token))
+                      in cache.put(token,blocks);
+                         blocks
+                      end
+                    end
+                 end
+               end
+           end
+        end
+      end
+      
+      @Operation setOwner(owner:Element)
+        body.setOwner(owner);
+        self.owner := owner
+      end
+      
+      @Operation terminals():Set(String)
+      
+        // The set of terminal names used by this clause...
+        
+        body.terminals()
+      end
+      
+      @Operation transform()
+      
+        // Used to resolve PreAction's and introduce
+        // variable bindings for the names bound by the
+        // clause body.
+        
+        self.body := body.transform(Set{},owner)
+      end
+      
+    end
+    
+ context Parser::BNF
+   @Class CompiledClause extends Clause end

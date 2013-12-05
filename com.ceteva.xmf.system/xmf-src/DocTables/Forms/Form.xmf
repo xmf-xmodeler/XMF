@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Forms                                    *
+ *                            -------------------                             *
+ *                                                                            *
+ *  A form contains input entries and event generating entries.               *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class Form extends Entry
+
+    // The action that is handled by the web server...
+    
+    @Attribute action  : String               end
+    
+    // Event handling entries...
+    
+    @Attribute entries : Seq(Entry) (?,!,+,-) end
+    
+    @Constructor(action,entries) end
+    
+    @Operation contents()
+      entries
+    end
+
+  end

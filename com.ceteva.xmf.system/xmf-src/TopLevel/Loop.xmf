@@ -1,0 +1,259 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Top-Level Command Interpreter                        *
+ *                       -----------------------------                        *
+ *                                                                            *
+ *  Create an instance of Loop and supply an input channel. This returns a    *
+ *  command interpreter for the input channel. Start the command interpreter  *
+ *  using 'loop/0'. The attributes of the class control the context and       *
+ *  behaviour of the command interpreter.                                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+import Parser;
+import Machine;
+import Tokens;
+import BNF; 
+import OCL;
+import Env;
+import TopLevel;
+
+context TopLevel
+
+  @Class Loop
+  
+    // Loops can be nested, this counter describes the level of nesting...
+    
+    @Bind level = 1 end
+    
+    // Input commands are read from the input channel...
+     
+    @Attribute inputChannel  : InputChannel             end
+    
+    // Results are printed to the output channel...
+    
+    @Attribute outputChannel : OutputChannel            end
+    
+    // The top-level prompt is printed before waiting for a command...
+    
+    @Attribute prompt        : String                   end
+    
+    // The top-level environment contains variables that are global 
+    // for commands read at the top-level...
+    
+    @Attribute env           : Env::Env                 end
+    
+    // The value of 'self' at the top-level...
+    
+    @Attribute target        : Element                  end
+    
+    // The name-spaces that are currently imported at the top-level...
+    
+    @Attribute imports       : Seq(NameSpace) (!,?)     end
+    
+    // The grammar that is used to parse commands at the top-level...
+    
+    @Attribute grammar       : Parser::BNF::Grammar (!) end
+    
+    // Where to start parsing in the grammar...
+    
+    @Attribute startNT       : String (!)               end
+    
+    // The banner is printed when the top-level starts...
+    
+    @Attribute printBanner   : Boolean (!)              end
+    
+    // The top-level has terminated...
+    
+    @Attribute terminated    : Boolean                  end
+    
+    // The value to return from the top-level when it terminates...
+    
+    @Attribute returnValue   : Element                  end
+    
+    // The value printed at the top-level after processing the most
+    // recent command...
+    
+    @Attribute value         : Element                  end
+    
+    // One generation back from value...
+    
+    @Attribute lastValue     : Element                  end
+    
+    // One generation back from lastValue...
+    
+    @Attribute lastLastValue : Element                  end
+    
+    // Use the pretty-printer for the values printed at the top-level...
+    
+    @Attribute printPrettily : Boolean = true           end
+    
+    // Control parameters for the pretty-printer...
+    
+    @Attribute pageWidth     : Integer = 100            end
+    @Attribute ribbonWidth   : Integer = 40             end
+    @Attribute printDepth    : Integer = 2              end
+    @Attribute printLength   : Integer = 10             end
+    
+    @Constructor() ! end
+    
+    @Constructor(inputChannel,outputChannel) 
+      
+      //  Create a top level loop whose input and output are bound to
+      //  the given channel. Assume that this loop is a fresh start. Use
+      //  other constructors to create top level loops that are initialised
+      //  with a given context...
+
+      self.prompt := "XMF> ";
+      self.env := NullEnv();
+      self.target := self;
+      self.imports := Seq{XCore,Root};
+      self.grammar := Command.grammar;
+      self.startNT := "Command";
+      self.printBanner := true
+    end
+     
+    @Constructor(prompt,env,target,inputChannel,outputChannel) 
+     
+      //  A top level loop that is initialised with the supplied
+      //  context. Use the updaters to set the values of various
+      //  control attributes of this class. Default values are set
+      //  in this constructor to import XCore and Root and to parse
+      //  top level commands (including expressions)...
+ 
+      self.imports := Seq{XCore,Root};
+      self.grammar := Command.grammar;
+      self.startNT := "Command"
+    end
+    
+    @Operation deleteNameSpace(nameSpace:NameSpace)
+      self.imports := imports->excluding(nameSpace)
+    end
+    
+    @Operation exitOperation()
+      @Operation exit()
+        self.terminated := true
+      end
+    end
+     
+    @Operation handleException(exception)
+      try
+        xmf.raise(exception);
+        format(outputChannel,"~%")
+      catch(newException)
+        format(outputChannel," **** Error reporting top level error! ***~%");
+        format(outputChannel," **** Tried to raise: ~S~%",Seq{exception});
+        format(outputChannel," **** Failed with: ~S~%",Seq{newException})
+      end
+    end
+    
+    @Operation importNameSpace(nameSpace:NameSpace)
+    
+      // Import the name space into the top level...
+      
+      self.imports := imports->including(nameSpace)
+    end
+  
+    @Operation loop()
+    
+       //  Start the command interpreter. The interpreter will continually
+       //  parse input from the input channel using the supplied grammar and
+       //  starting non terminal. Each command must be performable - it is
+       //  interpreted using 'eval/3'. The value is then printed. Any errors
+       //  are trapped and a backtrace is printed. Use 'exit/0' to leave the
+       //  loop and 'return/1' to exit and return a specific value.
+   
+       
+       let engine = Engine();
+           promptString = "[" + Loop::level.toString() + "] " + prompt;
+           env = self.loopEnv()
+       in if printBanner then self.printBanner() end;
+          Loop::level := Loop::level + 1;
+          @While not terminated do
+            try 
+              self.readEvalPrint(engine,promptString,env)
+            catch(exception)
+              self.handleException(exception)
+            end
+          end;
+          Loop::level := Loop::level - 1;
+          returnValue
+       end
+     end
+     
+     @Operation loopEnv()
+       env
+         .bind("exit",self.exitOperation())
+         .bind("return",self.returnOperation())
+     end
+     
+     @Operation printBanner()
+       format(outputChannel,"~%~S~%~%",Seq{xmf.banner()});
+       format(outputChannel,"~S (Built on ~S)~%",Seq{xmf.date(),xmf.buildDate()});
+       format(outputChannel,"~%Version ~S~%~%",Seq{xmf.version()});
+       format(outputChannel,"Type ?h for top level help.~%~%")
+     end
+     
+     @Operation read(engine)
+     
+       // Reads a top-level command. If an error occurs then this
+       // operation deals with the error and returns null otherwise
+       // it returns the command...
+       
+       let command = 
+         try
+           engine.parse(self,grammar,Seq{Call(startNT)},Tokenizer(inputChannel),Seq{XCore,Root})
+         catch(x)
+           @TypeCase(x)
+             ParseError do
+               x.pprint().println();
+               null
+             end
+             else throw x
+           end
+         end  
+       in command
+       end
+     end
+     
+     @Operation readEvalPrint(engine,promptString,env)
+     
+       //  Read a command from the input channel, parse using the grammar
+       //  eval and then print out the result...
+       
+       format(outputChannel,promptString);
+       outputChannel.flush();
+       let command = self.read(engine)
+       in if command <> null
+          then
+            let env = env.bind("xx",xmf.exception)
+                       .bind("v0",self.value)
+                       .bind("v1",self.lastValue)
+                       .bind("v2",self.lastLastValue) then
+                result = command.eval(target,env,imports)
+            in self.lastLastValue := lastValue;
+               self.lastValue := value;
+               self.value := result;
+               if printPrettily
+               then 
+                 let pretty = result.pprint(pageWidth,ribbonWidth,printDepth,printLength)
+                 in format(outputChannel,"~S~%",Seq{pretty})
+                 end
+               else format(outputChannel,"~S~%",Seq{result})
+               end
+            end
+          end
+       end
+     end
+     
+     @Operation returnOperation()
+       @Operation return(value)
+         self.returnValue := value;
+         self.terminated := true
+       end
+     end
+     
+   end 

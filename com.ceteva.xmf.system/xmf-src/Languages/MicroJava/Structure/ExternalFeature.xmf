@@ -1,0 +1,27 @@
+parserImport XOCL;
+
+import Languages;
+import XOCL;
+import MicroJava;
+import Structure;
+import Expressions;
+
+context Structure
+
+  @Class ExternalFeature extends Feature
+  
+    @Attribute classifier : Classifier  end
+    @Attribute startNT    : String      end
+    @Attribute exp        : Performable end
+    
+    @Constructor(classifier,startNT,exp) end
+    
+    @Operation pprint(out,indent)
+      format(out,"with ~S.~S { ~S }",Seq{classifier.path(),startNT,exp.pprint()})
+    end
+    
+    @Operation toXOCL():Performable
+      exp
+    end
+    
+  end

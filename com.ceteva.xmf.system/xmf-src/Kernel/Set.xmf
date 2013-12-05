@@ -1,0 +1,77 @@
+/******************************************************************************
+ *                                                                            *
+ *                                Set Types                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   The class Set is a parametric type constructor (and meta-class) whose    *
+ *   instances are classifiers of sets. For example Set(T) is an instance of  *
+ *   the class Set whose elementType is T and whose instances are all sets    *
+ *   containing elements of type T.                                           *
+ *                                                                            *
+ *   A set-typed attribute (for example) might have a type that is Set(String)*
+ *   so that slots described by the attribute must have values that are sets  *
+ *   of strings. The type of the attribute, Set(String), is an instance of the*
+ *   class Set (since it has to be an instance of something).                 *
+ *                                                                            *
+ *   There is a distinguished instance of Set called Set(Element). It is      *
+ *   special because it is the classifier of all sets (since Element is the   *
+ *   classifier of all XMF elements). You may also refer to this type as      *
+ *   XCore::SetOfElement (since concrete syntax name rules forbid parentheses)*
+ *                                                                            *
+ *   When you create a new type Set(T) you *may* or *may not* get the same    *
+ *   object the next time you create Set(T). This rule is not true for        *
+ *   set(Element) when you *always* get back the same type.                   *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ context Set
+  @Operation equals(other):Boolean
+    if other.isKindOf(Set)
+    then
+      elementType.equals(other.elementType)
+    else false
+    end
+  end
+  
+context Set
+  @Operation inheritsFrom(c:Classifier):Boolean
+    if c.isKindOf(Set)
+    then elementType.inheritsFrom(c.elementType)
+    else c = Element
+    end
+  end
+  
+context Set
+  // Create a new set type by applying the class Set to a type.
+  @Operation init(args)
+    let type = args->at(0)
+    in if type = Element
+       then SetOfElement
+       else
+         self.contents := if contents = null then Table(10) else contents end;
+         self.setElementType(type);
+         self.parents := Set{SetOfElement};
+         self.isFinal := true;
+         self.default := Set{}
+       end
+    end
+  end
+  
+context Set
+  @Operation setElementType(type:Classifier)
+    self.elementType := type;
+    if type.hasSlot("name")
+    then self.name := "Set(" + type.name.toString() + ")"
+    else self.name := "Set(" + type.toString() + ")"
+    end;
+    self
+  end
+  
+context Set
+  // Create a new set type by sending an existing set type
+  // a message with the element type.
+  @Operation setType(type:Classifier)
+    let setType = Set.new()
+    in setType.setElementType(type) 
+    end
+  end

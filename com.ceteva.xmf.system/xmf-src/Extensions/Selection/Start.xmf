@@ -1,0 +1,31 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+
+context Selection
+
+  @Class Start extends Sugar
+  
+    @Attribute selection : Performable end
+    
+    @Constructor(selection) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      Start ::= 
+      
+        selection = Exp
+        
+        'end'
+        
+        { Start(selection) }.
+      
+    end
+    
+    @Operation desugar():Performable
+    
+      [| <selection>(@Operation(value,fail) value end,@Operation() "NO" end) |]
+     end
+    
+  end

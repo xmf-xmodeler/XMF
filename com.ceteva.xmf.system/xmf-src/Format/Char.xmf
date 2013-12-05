@@ -1,0 +1,19 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~C                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg is a numeric ASCII code that will be written as a   *
+ *    character to the output.                                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleChar =
+      @Operation(char,output,formatContext)
+        let c = formatContext.nextValue()
+        in output.write(c)
+        end
+      end
+in format.defineHandler("C"->at(0),handleChar)
+end;
+     

@@ -1,0 +1,108 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Operation Creation                             *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Operations are created using the MKOP instruction. The operands to the    *
+ *  MKOP instruction are ARITY GLOBALS CODEBOX. ARITY is the number of        *
+ *  expected arguments, GLOBALS is the amount of global variable storage that *
+ *  the operation requires and CODEBOX is an offset into the constants box    *
+ *  of the currently execution operation that indexes the code box for the    *
+ *  new operation. The instruction expects that the values for each global    *
+ *  variable has been pushed on the stack. The values are popped and the new  *
+ *  operation is pushed onto the stack.                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class MkOp extends Instr
+ 
+    // The name of the operation...
+    
+    @Attribute name          : String       end    
+    
+    // The number of arguments expected by the 
+    // operation...
+    
+    @Attribute arity         : Integer      end    
+    
+    // Whether the operation can take multiple
+    // arguments...
+    
+    @Attribute isMultiArgs   : Boolean      end  
+    
+    // The number of freely referenced variables
+    // in the body of the operation...
+    
+    @Attribute free          : Integer      end   
+    
+    // The number of locals required by the 
+    // operation. This does not include the arguments...
+    
+    @Attribute locals        : Integer      end 
+    
+    // The source code that was compiled to produce
+    // this instruction...
+    
+    @Attribute source        : String       end     
+    
+    // A sequence of body instructions...
+    
+    @Attribute code          : Seq(Element) end   
+    
+    // The constant offset of the operation name...
+    
+    @Attribute nameOffset    : Integer      end   
+    
+    // The constant offset of the code box for the
+    // operation...
+    
+    @Attribute codeBoxOffset : Integer      end  
+    
+    @Constructor(name,arity,isMultiArgs,free,locals,source,code) end
+    
+    @Operation toString():String
+      "<MkOp " + name + "," + arity + "," + isMultiArgs + "," + free + "," + locals + "," + codeBoxOffset + ">"
+    end
+    
+    @Operation assemble(codeBox)
+    
+      // The body instructions are assembled into a new code
+      // box that is inserted into the constants box of the
+      // supplied code box....
+      
+      let newBox = Assembler::assemble(code,locals,source)
+      in self.codeBoxOffset := codeBox.constOffset(newBox);
+         self.nameOffset := codeBox.constOffset(name);
+         
+         // We must be careful since the operands have to fit
+         // into specific bit-widths. If the offset values are
+         // too large for the operands then emit an extended
+         // instruction...
+         
+         if codeBoxOffset > 255 or nameOffset > 255
+         then
+           MkOpE(name,arity,isMultiArgs,free,locals,source,code).assemble(codeBox,newBox)
+         else
+           newBox.name := name;
+           codeBox.addInstr(self)
+         end
+      end 
+    end
+    
+    @Operation operands():Integer 
+    
+      // The high bit of arity is set if the operation
+      // takes a variable number of arguments...
+       
+      let arityByte = if isMultiArgs then 1.lsh(7) or arity else arity end
+      in Kernel_mk24bit(arityByte,free,codeBoxOffset)
+      end
+    end
+    
+  end

@@ -1,0 +1,59 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                File Output Channels                        *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    Files are written via file output channels. Create a channel by         *
+ *    supplying the path to the file. An underlying VM channel is created to  *
+ *    access the file. Characters are successively written as integer ASCII   *
+ *    codes.                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class FileOutputChannel extends OutputChannel
+       
+    @Attribute fileName : String  end
+    @Attribute channel  : Element end
+    
+    @Constructor(fileName) !
+      self.channel := Kernel_fileOutputChannel(fileName)
+    end  
+     
+    @Operation channel()
+      channel
+    end
+       
+    @Operation close()
+      @Doc
+        Each file output channel should be closed when
+        the channel is no longer needed.
+      end
+      Kernel_close(channel)
+    end
+     
+    @Operation flush()
+      @Doc
+        Use flush to ensure that the output has been
+        written to the file.
+      end
+      Kernel_flush(channel)
+    end
+     
+    @Operation setChannel(channel)
+      self.channel := channel
+    end
+       
+    @Operation write(value)
+      @Doc
+        Write a character to the file.
+      end
+      Kernel_write(channel,value)
+    end
+       
+  end

@@ -1,0 +1,112 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Recognizers                                *
+ *                               ---------------                              *
+ *                                                                            *
+ *  A recognizer is a grammar element that is used to process some input.     *
+ *  Recongnizers are compiled into parse tables that support LL(1) parsing.   *
+ *  When a grammar is defined, the actions are supplied as raw expressions.   *
+ *  The raw expressions need to be translated into operations and so the whole*
+ *  grammar is 'lifted' before it is compiled. The lifting is performed by    *
+ *  toExp. Compilation translates a grammar to a clause normal form where     *
+ *  disjuncts are promoted over conjuncts. The normal form then allows the    *
+ *  parse tables to be constructed.                                           *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+import Parser::BNF;
+
+context Parser::BNF
+    
+    @Class Recognizer isabstract
+      
+      @Operation cnf(grammar)
+      
+        // Translate the receiver into a clause normal-form. The normal
+        // form is a disjunctive-sequence-of(conjunctive-sequence-of(Recognizer)).
+        // Each disjunct is an alternative parser. Each conjunct is a sequence
+        // of recognizers that must succeed in sequence.
+        
+        Seq{Seq{self}}
+      end 
+     
+      @Operation code(outputChannel)
+         
+         // Write out a source code representation of the receiver...
+         format(outputChannel," ~S ",Seq{self})
+      end
+      
+      @Operation first(grammar):Set(String)
+      
+        // Return the set of terminals that indicate that
+        // this recognizer should be used next...
+        
+        Set{}
+      end
+
+      @Operation follow(grammar):Set(String)
+      
+        // Return the set of terminals that can follow this
+        // recognizer. This is important when calculating
+        // parse tables since rules may be satisfied by
+        // consuming no input...
+        
+        Set{}
+      end
+      
+      @Operation FV():Set(String)
+      
+        // Free variables occur in actions. This returns
+        // the set of free variables in a recognizer..
+        
+        self.error("FV: I don't know how to calculate the FV.")
+      end
+      
+      @Operation nullable(grammar):Boolean
+      
+        // Can this recognizer be satisfied without consuming
+        // any input?
+        
+        true
+      end
+
+      @Operation setFollow(grammar,follow)
+      
+        // Update the follow set for this recognizer...
+        
+        null
+      end
+      
+      @Operation setOwner(owner)
+      
+        // The actions are implemented by operations and
+        // operations can wind up with variable references that
+        // occur with respect to their owners. This allows the
+        // operation's owner to be set...
+        
+        self
+      end
+      
+      @Operation terminals():Set(String)
+      
+        // What terminal symbols are used by this recognizer?
+        
+        Set{}
+      end
+      
+      @Operation toExp(FV:Set(String)):Performable
+      
+        // Translates the receiver into a performable element
+        // that recreates it. This is equivalent to normal lifting
+        // except that actions will be transformed by the process...
+        
+        self.error("I don't know how to turn myself into an expression: " + self.toString())
+      end
+      
+      @Operation transform(FV:Set(String),grammar):Recognizer
+        self.error("I don't know how to transform myself: " + self.toString())
+      end
+      
+    end

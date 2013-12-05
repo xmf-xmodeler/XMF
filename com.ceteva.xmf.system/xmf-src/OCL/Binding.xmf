@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Bindings                                 *
+ *                             ---------------------                          *
+ *                                                                            *
+ *  Bindings occur in let expressions where they associate a name and a value *
+ *  when they are evaluated. Binding is the abstract super-class of all types *
+ *  of binding (probably only ValueBinding is defined).                       *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import OCL;
+
+context OCL
+
+  @Class Binding isabstract extends OCL::OCL
+  
+    @Attribute name : String end
+    
+  end

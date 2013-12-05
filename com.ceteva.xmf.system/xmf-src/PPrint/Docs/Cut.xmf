@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Cut extends Doc
+
+    @Attribute doc : Doc (?,!) end
+    
+    @Constructor(doc) ! end
+    
+    @Operation pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+      doc.pprint(w,r,pl,b,pt,pl,pr,s,cut,cut)
+    end
+
+  end

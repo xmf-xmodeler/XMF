@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                   Extending a Collection with an Element                   *
+ *                   --------------------------------------                   *
+ *                                                                            *
+ *  Pops a collection and then an element. Pushes a new collection of the same*
+ *  type extended with the element. The VM knows about sets and sequences     *
+ *  otherwise an exception is raised.                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Including extends Instr
+    
+  end

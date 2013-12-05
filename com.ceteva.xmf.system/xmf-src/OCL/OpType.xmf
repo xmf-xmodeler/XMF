@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Operation Type Expressions                         *
+ *                         --------------------------                         *
+ *                                                                            *
+ *  Operation types have the form (t1,t2,...,tn) -> t where ti are the        *
+ *  argument types and t is the return type.                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import TypeExp;
+
+context OCL
+
+  @Class OpType extends TypeExp
+    
+    @Attribute range   : TypeExp end
+    @Attribute domains : Seq(TypeExp) end
+    
+    @Constructor(domains,range) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"(");
+      @For domain in domains do
+        domain.pprint(out,indent);
+        if not isLast then format(out,",") end
+      end;
+      format(out,") -> ");
+      range.pprint(out,indent)
+    end
+    
+    @Operation toExp():Performable
+    
+      // Create an operation type from the referenced types...
+      
+      [| XCore::OpType(
+           <SetExp("Seq",domains->collect(t | t.toExp()))>,
+           <range.toExp()>) 
+      |]
+    end
+    
+    @Operation toSig()
+      Seq{OPTYPE,domains->collect(d | d.toSig()),range.toSig()}
+    end
+    
+  end

@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Table Columns                                *
+ *                            -------------------                             *
+ * Each row in a table contains a sequence of columns. Each column is a       *
+ * wrapper for a page entry.                                                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Col extends Properties, Entry
+
+    @Attribute entry : Entry (?,!) end
+
+    @Constructor(entry) ! end
+    @Constructor(properties,entry) end
+    
+    @Operation contents()
+      Seq{entry}
+    end
+  
+  end

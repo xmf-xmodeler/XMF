@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class IllegalParentsException extends Exception
+  
+    @Attribute classifier : Classifier      end
+    @Attribute parents    : Set(Classifier) end
+    
+    @Constructor(classifier,parents,message) !
+      self.setBacktrace();
+      self.message := 
+        formats("Illegal classifier parents for ~S:~%~%" +
+                "~V ~{,~;~S~} ~%~%" +
+                "~S~%~%",Seq{classifier,2,parents->asSeq,message})
+    end
+    
+  end
+      
+     

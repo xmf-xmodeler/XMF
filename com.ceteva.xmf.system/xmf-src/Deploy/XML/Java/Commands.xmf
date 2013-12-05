@@ -1,0 +1,16 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Commands
+  @Operation toJava(out:OutputChannel)
+    format(out,"    commands = new Commands();~%");
+    format(out,"    kommands = new java.util.Vector();~%");
+    @For command in commands do
+      command.toJava(out);
+      format(out,"    kommands.addElement(stack.pop());~%")
+    end;
+    format(out,"    commands.setCommands(kommands);~%");
+    format(out,"    stack.push(commands);~%")
+  end

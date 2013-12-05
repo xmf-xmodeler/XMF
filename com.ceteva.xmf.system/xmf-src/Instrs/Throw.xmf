@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Throw An Exception                            *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops an exception from the stack and throws it. Throwing an exception     *
+ *  causes call frames to be popped from the stack until a frame containing a *
+ *  HANDLER is found. The handler is then invoked by supplying it with the    *
+ *  exception.                                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Throw extends Instr
+   
+  end

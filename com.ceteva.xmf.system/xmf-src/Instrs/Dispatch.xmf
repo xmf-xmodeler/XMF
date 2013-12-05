@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Indexed Jumps                               *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  Pops an index into a table of code offsets. The machine then looks up an  *
+ *  offset at the index and advances the code point in the current stack      *
+ *  frame by the appropriate amount. The jump table is a vector of integers   *
+ *  held in the constants table of the current frame.                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class Dispatch extends Instr
+  
+    @Attribute jumpTable   : Vector  end
+    @Attribute constOffset : Integer end
+    
+    @Constructor(jumpTable) end
+    
+    @Operation assemble(codeBox)
+      self.constOffset := codeBox.constOffset(jumpTable);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      constOffset
+    end
+    
+    @Operation toString():String
+      "<Dispatch>" 
+    end
+   
+  end

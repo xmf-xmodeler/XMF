@@ -1,0 +1,29 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import Tests;
+
+context Tests
+
+  @Class Filmstrip extends NamedElement
+  
+    @Attribute steps : Seq(Step) end
+    
+    @Constructor(name,steps) 
+      self.setName(name)
+    end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      Filmstrip ::= n = Name es = Exp* 'where' bs = FBind* 'end' {
+        bs->collect(p | ValueBinding(p->head,p->tail))->reverse->iterate(vb e = 
+            [| Tests::Filmstrip(<n.lift()>,<SetExp("Seq",es)>) |] |
+          Let(Seq{vb},e))
+      }.
+      
+      FBind ::= n = Name '=' e = SimpleExp ';' { Seq{n|e} }.
+      
+    end
+    
+  end

@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Underlined Text                               *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Underline extends Entry
+
+    @Attribute entry : Entry (?,!,+,-) end
+    
+    @Constructor(entry) ! end
+    
+    @Operation contents()
+      Seq{entry}
+    end
+
+  end

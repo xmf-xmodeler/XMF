@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context BindVar
+  @Operation toJava(out:OutputChannel)
+    format(out,"    bindVar = new BindVar();~%");
+    format(out,"    names = new java.util.Vector();~%");
+    @For name in names do
+      format(out,"    names.addElement(\"~S\");~%",Seq{name})
+    end;  
+    format(out,"    bindVar.setNames(names);~%");
+    format(out,"    stack.push(bindVar);~%")
+  end

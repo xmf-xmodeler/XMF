@@ -1,0 +1,57 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Literal Terminals                            *
+ *                               -----------------                            *
+ *                                                                            *
+ *  A terminal in a grammar occurs as 't'. The recognizer for this in a       *
+ *  grammar is Terminal(t). The parsing machine will expect to receive a token*
+ *  of type SPECIAL that matches t.                                           *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Terminal extends Recognizer
+ 
+    @Attribute terminal : String end
+    
+    @Constructor(terminal) end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," '~S' ",Seq{terminal})
+    end
+    
+    @Operation first(grammar)
+      Set{terminal}
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+    
+    @Operation toString():String
+      "'" + terminal + "'"
+    end
+    
+    @Operation terminals():Set(String)
+      Set{terminal}
+    end
+     
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::Terminal(<StrExp(terminal)>) |]
+    end 
+     
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+     
+  end

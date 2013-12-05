@@ -1,0 +1,33 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XMatch::Pattern;
+import TopLevel;
+  
+Command::handlers.put("a",
+  @Operation(args,target,env,imports)
+    @Doc
+      ?a <PATTERN>         Named elements apropos the pattern. 
+    end
+    let pattern = parse(args->separateWith(" "))
+    in @Letrec match = 
+         @Operation(nameSpace)
+           @For e inTableValues nameSpace.contents do
+             if e <> null and e.isKindOf(NamedElement) and e <> nameSpace
+             then 
+               let matched = pattern.match(e.name().toString());
+                   owner = e.owner()
+               in if matched <> null
+                  then format(stdout,"~<40>S in ~S~%",Seq{e,if owner = null then "unknown parent." else e.owner().path() end})
+                  end;
+                  if e.isKindOf(NameSpace)
+                  then match(e)
+                  end
+               end
+              end
+           end
+         end
+       in match(Root)
+       end  
+    end 
+  end); 

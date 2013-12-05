@@ -1,0 +1,22 @@
+#!/bin/sh
+
+XMFHOME=$1
+XMFLIB="$XMFHOME:$XMFHOME/../../com.ceteva.xmf.machine/bin"
+PORT=10101
+EVALUATOR=$XMFHOME/../xmf-img/compiler.img
+HEAPSIZE=5000
+STACKSIZE=50
+FREEHEAP=20
+FILENAME=$2
+MAXJAVAHEAP="-Xmx200m"
+MAXJAVASTACK="-Xss5m"
+VERSION=2.0
+JAVA=java
+LOCALE="-Duser.country=UK"
+USERNAME=`whoami`
+
+if [[ -e "$FILENAME" ]]; then
+	$JAVA $LOCALE $MAXJAVAHEAP $MAXJAVASTACK -cp $XMFLIB xos.OperatingSystem -port $PORT -image $EVALUATOR -heapSize $HEAPSIZE -freeHeap $FREEHEAP -stackSize $STACKSIZE -arg filename:$FILENAME -arg user:$USERNAME -arg home:$XMFHOME -arg license:license.lic -arg projects:$XMFPROJECTS -arg version:$VERSION $3 $4 $5 $6 $7 $8 $9
+else
+	$JAVA $LOCALE $MAXJAVAHEAP $MAXJAVASTACK -XstartOnFirstThread -cp $XMFLIB xos.OperatingSystem -port $PORT -image $EVALUATOR -heapSize $HEAPSIZE -freeHeap $FREEHEAP -stackSize $STACKSIZE -arg user:$USERNAME -arg home:$XMFHOME -arg license:license.lic -arg projects:$XMFPROJECTS -arg version:$VERSION $2 $3 $4 $5 $6 $7 $8 $9
+fi

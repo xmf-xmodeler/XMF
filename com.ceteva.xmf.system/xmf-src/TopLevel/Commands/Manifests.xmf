@@ -1,0 +1,29 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("m",
+  let dir = ""
+  in @Operation(args,target,env,imports) 
+       @Doc
+         ?m (b|l|d|bl) [<Dir>] Build, load or delete manifest entries.
+         ?m w <Dir> <File>     Write boot file based on manifest to file.
+         ?m t <Dir> (s|b)      Touch binaries or sources.
+       end
+       if not args->isEmpty
+       then
+         let mod = args->head
+         in if args->tail->isEmpty
+            then
+              if dir <> ""
+              then Command::manifest(mod,dir,Seq{})
+              end
+            else
+              dir := args->tail->head;
+              Command::manifest(mod,dir,args->tail->tail)
+            end
+         end
+       end
+     end
+  end);

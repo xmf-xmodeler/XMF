@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Lastly Continue the Message Send                      *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as SUPER except this is the last action before the current call frame*
+ *  returns. Therefore the current call frame can be reused.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class TailSuper extends Instr
+  
+    @Attribute arity : Integer end
+    
+    @Constructor(arity) end
+    
+    @Operation toString():String
+      "<TailSuper " + arity + ">"
+    end
+    
+    @Operation operands():Integer
+      arity
+    end
+    
+  end

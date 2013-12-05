@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Go To Sleep                                 *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Causes the current thread to go to sleep. The thread yields and the OS    *
+ *  then schedules any pending threads. The current thread sleeps until it is *
+ *  woken up by another thread.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Sleep extends Instr
+    
+  end
+  
+  

@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Float Expressions                          *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A floating point number.                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class FloatExp extends OCL::OCL
+  
+    @Attribute prePoint : String end
+    @Attribute postPoint : String end
+    
+    @Constructor(prePoint,postPoint) ! end
+    
+    @Constructor(line,prePoint,postPoint) end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S.~S",Seq{prePoint,postPoint})
+    end
+    
+  end

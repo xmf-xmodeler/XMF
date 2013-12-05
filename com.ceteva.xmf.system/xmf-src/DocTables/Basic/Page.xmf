@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 HTML Pages                                 *
+ *                            -------------------                             *
+ * A page is an abstract representation of an HTML page and contains the      *
+ * page content as entries. A page is rendered as an HTML string ready for    *
+ * display using an appropriate engine. Event handlers should return a page   *
+ * when they handle an event.                                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Page 
+
+    @Attribute title : String (?,!) end
+    @Attribute stylesheet : String (?,!) end
+    @Attribute entries : Seq(Entry) (?,!,+,-) end
+
+    @Constructor(entries) ! end
+    
+    @Constructor(title,entries) ! end
+    
+    @Operation contents()
+      entries
+    end
+    
+    @Operation handle(args)
+      let page = null
+      in @For entry in self.contents() when page = null do
+           page := entry.handle(args)
+         end;
+         page
+      end
+    end
+    
+  end

@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Integer Expressions                           *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  An integer constant. Note that integers must (currently) live in 24 bits. *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class IntExp extends OCL::OCL
+  
+    @Attribute value : Integer end
+    
+    @Constructor(value) ! end
+    
+    @Constructor(line,value) end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S",Seq{value})
+    end
+    
+  end

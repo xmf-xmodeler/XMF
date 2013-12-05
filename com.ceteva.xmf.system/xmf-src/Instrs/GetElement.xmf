@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Reference a Named Element in a NameSpace                *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Name-space lookup is performed with res[ect to the name in the contents   *
+ *  table of the name-space. This instruction expects a name-space on the     *
+ *  stack. The instruction operand is a name. Lookup is performed and the     *
+ *  named value is pushed onto the stack. If the name-space does not define a *
+ *  named element with the given name then an exception is raised.            *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class GetElement extends Instr
+ 
+    @Attribute name : Symbol end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation toString():String
+      "<GetElement " + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end
+  

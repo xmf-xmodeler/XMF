@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Referencing a Slot                           *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  Pops a value. The operand is the index of a name in the constants table.  *
+ *  If the value is an object with a standard MOP then handle standard slot   *
+ *  access in the VM. Otherwise if there is a non-standard MOP then call the  *
+ *  getInstanceSlot/2 operation in the class. Otherwise if the value is not an*
+ *  object then call dot/1 on it. If the object with a standard MOP does not  *
+ *  have the named slot then the slotMissing/1 operation is called.           *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class Dot extends Instr
+  
+    @Attribute name : String end
+    @Attribute constOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation assemble(codeBox)
+      self.constOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      constOffset
+    end
+    
+    @Operation toString():String
+      "<Dot " + name.toString() + ">"
+    end
+    
+  end

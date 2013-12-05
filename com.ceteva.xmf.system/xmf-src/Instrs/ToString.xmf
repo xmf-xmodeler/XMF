@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Turn a Value Into a String                          *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops a value and pushes its string representation. Many string conversions*
+ *  can be performed directly in the VM. Objects cannot and cause the VM to   *
+ *  send a toString/0 message.                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class ToString extends Instr
+    
+  end

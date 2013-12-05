@@ -1,0 +1,68 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Actions                                   *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Actions are performed by the parsing machine to produce values. An action *
+ *  may reference any the variables that are in scope in the current clause.  *
+ *  The variables in scope include the arguments and any local variables that *
+ *  have been created using Bind.                                             *
+ *                                                                            *
+ *  Actions have action operations associated with them. The action is an     *
+ *  operation that requires some information about the state of the parse in  *
+ *  order to extract the local variables referenced in the body of the action.*
+ *  The action operation is supplied with the current stack and the current   *
+ *  stack frame index. Locals are then referenced in the body of the action   *
+ *  operation by indexing into the stack at the appropriate offset.           *
+ *                                                                            *
+ *  Note that Action's are not directly created by the XBNF parser since      *
+ *  code needs the be generated before that happens. The XBNF grammar         *
+ *  produces PreAction's that are translated by lift() and toExp() into       *
+ *  instances of Action.                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class Action extends Recognizer
+    
+    @Attribute action : Element end
+    @Attribute source : String end
+    
+    @Constructor(action,source) end
+    
+    @Constructor(action) 
+      self.source := ""
+    end
+    
+    @Operation code(outputChannel)
+      format(outputChannel,"{ ~S }",Seq{source})
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation setOwner(owner)
+      action.owner := owner
+    end
+    
+    @Operation toExp(FV:Set(String))
+    
+      // This should never be called since the XBNF parse creates
+      // PreAction's that are translated into instances of Action
+      // via toExp...
+      
+      [| Parser::BNF::PreAction(<OCL::OCL.grammar.parseString(source)>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end
+    

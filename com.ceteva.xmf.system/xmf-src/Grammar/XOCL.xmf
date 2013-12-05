@@ -1,0 +1,931 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XOCL  Grammar                                 *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  This file contains the grammar that is used to parse XOCL code. Parsing   *
+ *  XOCL has two phases: translation of the input characters into an abstract *
+ *  syntax tree and then syntax processing by walking the abstract syntax. A  *
+ *  key task of the abstract syntax walker is to organise the operators such  *
+ *  as + and * to ensure the associativity and precedence rules are correct.  *
+ *  To implement the rules, the abstract syntax walker may transform the      *
+ *  abstract syntax tree.                                                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser;
+import BNF;
+import OCL; 
+
+context OCL::OCL
+
+  @Grammar 
+  
+    AddPattern ::= 
+    
+      // An add pattern may use the infix + operator to specify
+      // that the pattern matches a collection split into two...
+    
+      p1 = AtomicPattern 
+      
+      (  '+' p2 = AddPattern { Addp(p1,p2) } 
+      
+      | { p1 }
+      
+      ).
+ 
+    AName ::=
+    
+      // Often it is desirable to allow a name to be
+      // specified as a dropped string, as in <s>.... 
+    
+      Name! | Drop. 
+    
+    Apply ::=
+    
+      // An application may be a simple atomic expression
+      // followed by some arguments and then optionally
+      // followed by an arrow ->... 
+    
+      a = Atom e = ApplyTail^(a) Arrow^(e).
+    
+    ApplyTail(a) ::= 
+    
+      args = Args! { Apply(a,args) }  
+      
+    | args = KeyArgs! { Instantiate(a,args) } 
+    
+    | { a }.
+    
+    Arrow(a) ::= 
+    
+      '->' ! ArrowTail^(a) 
+      
+    | { a }.
+    
+    Args ::= '(' ArgsTail.
+    
+    ArgsTail ::= 
+    
+      ')' { Seq{} } 
+      
+    | arg = Expr args = (',' Expr)* ')' { Seq{arg | args} }.
+    
+    ArrowTail(c) ::= 
+    
+      n = Name x = CollOp^(c,n) Arrow^(x).
+     
+    Atom ::= 
+    
+      // An atomic expression is self contained an involves no
+      // infix operators. Notice the use of ! to force the parse
+      // to be deterministic in case any of the different types 
+      // of atomic expression start with the same terminals...
+    
+      VarExp! 
+    | Self! 
+    | StrExp! 
+    | IntExp! 
+    | IfExp! 
+    | BoolExp! 
+    | LetExp! 
+    | CollExp! 
+    | Parentheses 
+    | Drop 
+    | Lift 
+    | Throw 
+    | Try 
+    | ImportIn 
+    | FloatExp 
+    | LocalParserImport 
+    | AtExp.
+    
+    AtExp ::=
+    
+      // An at-expression causes the parser to dispatch to
+      // another grammar for the scope of the @ ... end. The
+      // Terminal '@' is used in XOCL to introduce an at-expression,
+      // however this is not necessary - you could use any
+      // terminal to introduce an at-expression...
+    
+      l = LinePos '@' e = @ { e.setLine(l) }. 
+
+    AtomicPattern ::= 
+    
+      // An atomic pattern is one that is delimited and is
+      // not followed by a pattern infix operator...
+    
+      Varp 
+    | Constp 
+    | Objectp 
+    | Consp 
+    | Keywordp 
+    | Syntaxp 
+    | '(' Pattern ')'.
+    
+    Binding ::=
+    
+      // A binding is a name followed by a value expression...
+    
+      name = AName BindingTail^(name).
+    
+    BindingTail(name) ::= 
+    
+      // A binding may be a value binding or may introduce
+      // an operation...
+    
+      BindFun^(name) 
+    | BindValue^(name).
+    
+    BindFun(name) ::= 
+    
+      args = BindFunArgs type = OptType '=' value = SimpleExp { FunBinding(name,args,type,value) }.
+    
+    BindFunArgs ::= 
+    
+      '(' BindFunArgsTail.
+    
+    BindFunArgsTail ::= 
+    
+      p = Pattern ps = (',' Pattern)* ')' { Seq{p | ps} }
+      
+    | ')' { Seq{} }.
+    
+    BindValue(name) ::=
+    
+      // A value binding is a name, optionally a type designator and
+      // the value... 
+    
+      type = OptType '=' value = SimpleExp { ValueBinding(name,type,value) }.
+
+    BindingList ::=
+    
+      // Bindings in parallel are separated by ';' (note that sequential
+      // bindings are sneakily processed in the parser by flattening
+      // let-expressions)... 
+    
+      binding = Binding bindings = (';' Binding)* { Seq{ binding | bindings } }.
+
+    Bindings ::= 
+    
+      // You can drop a complete binding list into a 
+      // let-expression...
+    
+      BindingList 
+    | Drop.
+    
+    BinOp ::=
+    
+      // Binary operators are parsed with equal precedence. The
+      // operator associativity rules and precedence rules are
+      // organised by an abstract syntax tree transformation that
+      // occurs post parsing (called from the parser) using a 
+      // syntax walker... 
+    
+      '<' { "<" } 
+    | '<=' { "<=" } 
+    | '>' { ">" } 
+    | '>=' { ">=" } 
+    | '<>' { "<>" } 
+    | '=' { "=" } 
+    | '::' { "::" } 
+    | ':=' { ":=" } 
+    | '.' { "." } 
+    | 'and' { "and" } 
+    | 'andthen' { "andthen" } 
+    | 'implies' { "implies" } 
+    | 'or' { "or" } 
+    | 'orelse' { "orelse" } 
+    | '+' { "+" } 
+    | '-' { "-" } 
+    | '*' { "*" } 
+    | '/' { "/" }.
+    
+    BoolExp ::= 
+    
+      l = LinePos 'true' { BoolExp(l,true) } 
+    | l = LinePos 'false' { BoolExp(l,false) }.
+    
+    Boolp ::= 
+    
+      'true' { Constp(BoolExp(true)) } 
+    | 'false' { Constp(BoolExp(false)) }.
+
+    CollExp ::= 
+    
+      SetExp! 
+    | SeqExp!.
+    
+    CollOp(c,n) ::= 
+    
+      // Handling the different types of syntax construct
+      // that can occur after a ->... 
+    
+      CollMessage^(c,n) 
+    | Collect^(c,n) 
+    | Iterate^(c,n) 
+    | { CollExp(c,n,Seq{}) }.
+    
+    CollMessage(c,n) ::= 
+    
+      '(' as = CommaSepExps ')' { CollExp(c,n,as) }.
+    
+    Collect(c,n) ::= 
+    
+      '(' v = AName '|' e = Expr ')' { IterExp(c,n,v,e) }.
+    
+    CommaSepExps ::= 
+    
+      e = Expr es = (',' Expr)* { Seq{e | es} } 
+    | { Seq{} }.
+  
+    CompilationUnit ::= 
+    
+      // A compilation unit is essentially a file full of
+      // definitions with parser imports and name-space
+      // imports at the head of the file...
+      
+      // Parser imports affect the current parse...
+    
+      ParserImport* 
+      
+      // Name-space imports affect the dynamic variables
+      // referenced in the rest of the compilation unit...
+      
+      imports = Import* 
+      
+      // A sequence of definitions ot expressions...
+      
+      exps = CompilationBody* 
+      
+      // The end of the input...
+      
+      EOF 
+      
+      s = pState 
+      
+      { CompilationUnit("",imports,exps,s.getSource()) }.
+    
+    CompilationBody ::= 
+    
+      // An element in a compilation unit...
+      
+      Def 
+    | TopLevelExp.
+    
+    Consp ::= 
+    
+      // A sequence pattern...
+    
+      Pairp 
+    | Seqp 
+    | Emptyp.
+
+    Constp ::=  
+    
+      // A constant pattern...
+    
+      Intp 
+    | Strp 
+    | Boolp 
+    | Expp.
+
+    Def ::=
+    
+      // A definition is introduced into a compilation
+      // unit using the keyword 'context'. Essentially this
+      // just adds a value to the container designated by
+      // the path. The initialization of the value is suppressed
+      // using the optional ! modifier... 
+    
+      'context'
+      
+      // If ! is supplied then the expression
+      // may contain forward references and therefore
+      // the value is not initialized. The value should
+      // be initialized by other means (for example
+      // explicitly) at some later point... 
+      
+      isForward = ('!' { true } | { false }) 
+      
+      // The path designates a container...
+      
+      path = ImportPath 
+      
+      // The value of the expression is added to
+      // the container...
+      
+      exp = Exp { ContextDef(path,exp,isForward) }. 
+ 
+    Drop ::= 
+    
+      // A dropped value lives in < and > and a
+      // dropped pattern lives in <| and |>. Note
+      // that the call of resolve and order are
+      // used to transform an expression with respect
+      // to operator associativity and precedence...
+    
+      '<' e = DropExp '>' { Drop(resolve(order(e))) } 
+    | '<|' p = Pattern '|>' { DropPattern(p) }. 
+    
+    DropExp ::= 
+    
+      // We need to be careful inside dropped expressions
+      // because > is used as a terminator and not an
+      // operator...
+    
+      'not' e = DropExp { Negate(e) } 
+    | a = Apply DropExpTail^(a). 
+    
+    DropExpTail(a) ::= 
+    
+      o = DropOp! e = DropExp { BinExp(a,o,e) } 
+    | { a }.
+    
+    DropOp ::= 
+    
+      // Omit the > since this is a terminator
+      // for a dropped expresssion...
+    
+      '<' { "<" } 
+    | '<=' { "<=" } 
+    | '<>' { "<>" } 
+    | '=' { "=" } 
+    | '::' { "::" } 
+    | ':=' { ":=" } 
+    | '.' { "." } 
+    | 'and' { "and" } 
+    | 'andthen' { "andthen" } 
+    | 'implies' { "implies" } 
+    | 'or' { "or" } 
+    | 'orelse' { "orelse" } 
+    | '+' { "+" } 
+    | '-' { "-" } 
+    | '*' { "*" } 
+    | '/' { "/" }.
+    
+    EImport ::= 
+    
+      'import' exp = TopLevelExp { Evaluator::Import(exp) }.
+
+    Emptyp ::= 
+    
+      // Essentially a constant pattern...
+    
+      'Seq{' '}' { Constp(SetExp("Seq",Seq{})) } 
+    | 'Set{' '}' { Constp(SetExp("Set",Seq{})) }.
+
+    EmptySeqTail(l) ::= 
+    
+      '}' { SetExp(l,"Seq",Seq{}) }.
+    
+    EvaluationUnit ::= 
+    
+      // An evaluation unit is similar to a compilation
+      // unit but is used to construct a component that
+      // can evaluated (instead of compiled)...
+    
+      ParserImport* 
+      
+      imports = EImport* 
+      
+      exps = (Def | TopLevelExp)* 
+      
+      EOF 
+      
+      { Evaluator::EvaluationUnit(imports,exps) }.
+    
+    Exp ::= 
+    
+      // The usual entry point when parsing a single
+      // expression. Note that the resolve and order
+      // operators are used to transform the abstract 
+      // syntax tree in order to implement the rules
+      // of operator associativity and precedence. Note
+      // also that resolve and order *must* be called
+      // somewhere, therefore if you use a different
+      // clause as your entry point then you may need 
+      // to call these explicitly yourself...
+    
+      e = Expr! { resolve(order(e)) }.
+    
+    Expr ::= 
+    
+      // Expr is used throughout the grammar as the clause
+      // that produces a general expression. The difference
+      // between Exp and Expr is that the order and resolve
+      // operations are *not* called by Expr since these
+      // need only be called once for the root expression...
+    
+      'not' e = Expr { Negate(e) }
+      
+    | '-' e = SimpleExp { BinExp(IntExp(0),"-",e) }
+    
+    | a = Apply ExpTail^(a).
+    
+    ExpTail(a) ::= 
+    
+      o = Op! e = Expr { BinExp(a,o,e) } 
+    | { a }.
+    
+    Exp1 ::=
+    
+      // Use Exp1 if you require all of the input to be
+      // consumed by the parser... 
+    
+      Exp EOF.
+    
+    Expp ::= 
+    
+      // A pattern that evaluates a component expression
+      // and then compares the result with the supplied
+      // value...
+    
+      '[' exp = Exp ']' 
+      
+       { Constp(exp) }.
+    
+    FloatExp ::= 
+    
+      l = LinePos f = Float 
+      
+      { f.lift().line := l }.
+    
+    IfExp ::= 
+    
+      // An if-expression starts with 'if' and
+      // 'then'. After these have been consumed 
+      // there are a number of alternative forms...
+    
+      l = LinePos 
+      
+      'if' e1 = Expr 
+      
+      'then' e2 = Expr 
+      
+      e3 = IfTail 
+      
+      { If(l,e1,e2,e3) }.
+
+    IfTail ::= 
+    
+      // An if-expression may have an optional 'else'
+      // and may nest using 'elseif'...
+    
+      'else' Expr 'end' 
+      
+    | l = LinePos 'elseif' e1 = Expr 'then' e2 = Expr e3 = IfTail { If(l,e1,e2,e3) } 
+    
+    | 'end' { BoolExp(false) }.
+
+    Import ::= 
+    
+      'import' path = ImportPath ';' { Import(path) }.
+    
+    ImportPath ::= 
+    
+      n = Name ns = ('::' Name)* { Seq{n | ns} }.
+
+    ImportIn ::= 
+    
+      'import' path = ImportPath 'in' body = Exp 'end' { ImportIn(path,body) }. 
+
+    IntExp ::= 
+    
+      l = LinePos e = Int { IntExp(l,e) }. 
+    
+    Intp ::= 
+    
+      i = Int { Constp(IntExp(i)) }.
+
+    Iterate(c,n) ::= 
+    
+      '(' v1 = AName v2 = AName '=' init = Expr '|' body = Expr ')' 
+      
+      { Iterate(c,v1,v2,init,body) }.
+    
+    KeyArgs ::= 
+    
+      // Keyword arguments occur in keyword instantiation
+      // expressions...
+    
+      '[' (']' { Seq{} } 
+      
+    | arg = KeyArg args = (',' KeyArg)* ']' { Seq{arg | args} }).
+    
+    KeyArg ::= 
+    
+      name = Name '=' exp = Expr 
+      
+      { KeyArg(name,exp) }.
+    
+    Keywordp ::= 
+    
+      // A keyword instantiation pattern that matches an
+      // object that is an instance of the classifier
+      // designated by the path and whose slots match
+      // the patterns designated by the keyword patterns...
+    
+      name = Name names = ('::' Name)* '[' keys = Keyps ']' 
+      
+      { Keywordp(name,names,keys) }.
+    
+    Keyps ::= 
+    
+      key = Keyp keys = (',' Keyp)* { Seq{key | keys} } 
+      
+    | { Seq{} }.
+    
+    Keyp ::= 
+    
+      name = Name '=' pattern = Pattern 
+      
+      { Keyp(name,pattern) }.
+    
+    LetBody ::= 
+    
+      // A let-expression may contain sequential bindings using
+      // the 'then' keyword. These are flattened in the parser
+      // by nesting let-expressions...
+    
+      'in' body = Expr { body } 
+      
+    | 'then' bindings = Bindings body = LetBody { Let(bindings,body) }.
+
+    LetExp ::= 
+    
+      // A let-expression parses includes some bindings and then
+      // a body. The body may include some sequential bindings that
+      // are desugared in the parser as nested let-expressions...
+    
+      l = LinePos 
+      
+      'let' bindings = Bindings 
+      
+      body = LetBody 'end' 
+      
+      { Let(l,bindings,body) }.
+    
+    Lift ::= 
+    
+      l = LinePos 
+      
+      '[|' e = Exp '|]' 
+      
+      { Lift(l,e) }.
+
+    LocalParserImport ::= 
+    
+      // A local parser import allows name-spaces to be added
+      // to the current parse for use when at-expressions are
+      // encountered...
+    
+      'parserImport' 
+      
+      name = Name names = ('::' Name)* 
+      
+      { Seq{name | names} } 
+      
+      ImportAt 
+      
+      'in' e = Expr 'end' 
+      
+      { ParserImport(Seq{name | names},e) }.
+    
+    LogicalExp ::=
+    
+      // Sometimes used as an entry point to avoid the use
+      // of ';'... 
+    
+      e = SimpleExp 
+      
+      { resolve(order(e)) }.
+    
+    NonEmptySeqTail(l) ::= 
+    
+      e = Expr 
+      
+      PairOrElements^(l,e).
+    
+    Objectp ::= 
+    
+      // An object pattern involves a path that designates a
+      // class and a sequence of patterns. The class should define
+      // a constructor with the same arity as the number of
+      // patterns. The constructor is used to designate the slots
+      // whose values are matched against the component patterns...
+    
+      name = Name names = ('::' Name)* 
+      
+      '(' slots = Patterns ')' 
+      
+      { Objectp(name,names,slots) }.
+
+    Op ::= 
+    
+      BinOp! 
+       
+    | ';' { ";" }.
+    
+    OpType ::= 
+    
+      // Operations can be specified to have a type that defines
+      // their argument types and their return type...
+    
+      domains = TypeArgs '->' range = TypeExp { OpType(domains,range) }.
+
+    OptType ::= 
+    
+      // A binding may onclude an optional type after ':'...
+    
+      ':' TypeExp 
+      
+      // The syntax construct NamedType defaults the path
+      // to XCore::Element...
+      
+    | { NamedType() }.
+    
+    PairOrElements(l,e) ::= 
+    
+      '|' t = Expr '}' 
+      
+      { ConsExp(e,t) } 
+      
+    | es = (',' Expr)* '}' 
+    
+      { SetExp(l,"Seq",Seq{e|es}) }.
+    
+    Pairp ::=  
+    
+      'Seq{' head = Pattern '|' tail = Pattern '}' 
+      
+      { Consp(head,tail) }.
+    
+    ParserImport ::= 
+    
+      // A parser import occurs at the head of a compileration or evaluation
+      // unit and adds a name-space to the current collection of name-spaces
+      // used to resolve the paths found in at-expressions...
+      
+      'parserImport' 
+      
+      name = Name names = ('::' Name)* ';' 
+      
+      // construct the path...
+      
+      { Seq{name | names} } 
+      
+      // Add the name-space designated by the path to the
+      // current parse engine...
+      
+      ImportAt.
+
+    Parentheses ::= 
+    
+      // Retain the user's parentheses since they are important
+      // when processing the syntax tree with respect to associativity 
+      // and precedence rules...
+    
+      '(' e = Expr ')' 
+      
+      { Parentheses(e) }.
+    
+    PathExp ::= 
+    
+      // A path expression is rooted in an atom (usually a variable)
+      // and followed by a sequence of names...
+    
+      atom = Atom 
+      
+      ( '::'  name = AName names = ('::' AName)* 
+      
+        { Path(atom,Seq{name | names}) } 
+        
+      | { atom }).
+
+    Pattern ::= 
+    
+      p = AddPattern 
+      
+      es = PatternTail* 
+      
+      p = { es->iterate(e s = p | Includingp(s,e)) } 
+      
+      PatternGuard^(p).
+    
+    PatternGuard(p) ::= 
+    
+      'when' 
+      
+      e = Exp 
+      
+      { Condp(p,e) } 
+      
+    | {p}.
+
+    PatternTail ::= 
+    
+      '->' Name '(' p = Pattern ')' 
+      
+      { p }.
+    
+    Patterns ::= 
+    
+      head = Pattern tail = (',' Pattern)* { Seq{head | tail} }   
+      
+    | { Seq{} }.
+    
+    Self ::= 
+    
+      l = LinePos 
+      
+      'self' 
+      
+      { Self(l) }. 
+    
+    SetExp ::= 
+    
+      // Note that set-expressions are used to represent
+      // both sets and (proper) sequences. The difference
+      // in the abstract syntax is designated by "Set" or 
+      // "Seq"...
+    
+      l = LinePos 
+      
+      'Set{' es = CommaSepExps '}' 
+      
+      { SetExp(l,"Set",es) }.
+    
+    SeqExp ::= 
+    
+      // A seq-expression starts with a Seq( and then
+      // may be empty, a pair, or a proper sequence...
+    
+      l = LinePos 
+      
+      'Seq{' 
+      
+      (EmptySeqTail^(l) | NonEmptySeqTail^(l)).
+    
+    Seqp ::= 
+    
+      'Seq{' 
+      
+      head = Pattern 
+      
+      tail = SeqpTail 
+      
+      { Consp(head,tail) }.
+
+    SeqpTail ::= 
+    
+      ',' head = Pattern 
+      
+      tail = SeqpTail 
+      
+      { Consp(head,tail) } 
+      
+    | '}' 
+    
+      { Constp(SetExp("Seq",Seq{})) }.
+    
+    SimpleExp ::= 
+    
+      'not' e = SimpleExp { Negate(e) } 
+      
+    | '-' e = SimpleExp { BinExp(IntExp(0),"-",e) }
+      
+    | a = Apply SimpleExpTail^(a).
+    
+    SimpleExpTail(a) ::= 
+    
+      o = BinOp! e = SimpleExp { BinExp(a,o,e) } 
+      
+    | { a }.
+    
+    StrExp ::= 
+    
+      l = LinePos 
+      
+      e = Str 
+      
+      { StrExp(l,e) }. 
+    
+    Strp ::= 
+    
+      s = Str 
+      
+      { Constp(StrExp(s)) }.
+   
+    Syntaxp ::= 
+    
+      '[|' e = Exp '|]' 
+      
+      { Syntaxp(e) }.
+
+    Throw ::= 
+    
+      l = LinePos 
+      
+      'throw' 
+      
+      value = SimpleExp 
+      
+      { Throw(l,value) }.
+
+    TopLevelExp ::= 
+    
+      s = SimpleExp ';' 
+      
+      { resolve(order(s)) }.
+    
+    TopLevelCommand ::= 
+    
+      c = SimpleExp 
+      
+      p = pState 
+      
+      { p.consumeToken := false } ';' 
+      
+      { resolve(order(c)) }.
+    
+    TypeExp ::= 
+    
+      // Type-expressions designate classifiers. They are either
+      // named (via paths), parametric (a classifier applied to
+      // some arguments) or an operation type...
+    
+      path = TypePath (args = TypeArgs { ParametricType(path,args) } 
+      
+    | { NamedType(path) }) 
+    
+    | Drop 
+    
+    | OpType.
+    
+    TypeArgs ::= 
+    
+      '(' arg = TypeExp 
+      
+      args = (',' TypeExp)* ')' 
+      
+      { Seq{arg | args} }.
+    
+    TypePath ::= 
+    
+      name = Name names = ('::' Name)* 
+      
+      { Seq{name | names}->collect(n | Symbol(n)) }.
+    
+    Try ::= 
+    
+      l = LinePos 
+      
+      'try' 
+      
+      body = Expr 
+      
+      'catch' 
+      
+      '(' name = Name ')' 
+      
+      handler = Expr 
+      
+      'end' 
+      
+      { Try(l,body,name,handler) }.
+
+    VarExp ::= 
+    
+      name = Name 
+      
+      l = LinePos 
+      
+      { Var(name,l) }.
+    
+    Varp ::= 
+    
+      name = AName 
+      
+      pattern = 
+      
+      (  '=' Pattern 
+      
+      | { null } 
+      
+      ) 
+      
+      type = 
+      
+      ( ':' TypeExp 
+      
+      | { NamedType() }
+      
+      ) 
+      
+      { Varp(name,pattern,type) }.
+    
+  end

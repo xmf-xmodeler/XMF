@@ -1,0 +1,61 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Constant Patterns                            *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A constant pattern is essentially an expression that is evaluated each    *
+ *  time the pattern is matched. The resulting value is matched against the   *
+ *  supplied value. If they are equal then the pattern match succeeds.        *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Exceptions;
+import Env;
+
+context OCL
+
+  @Class Constp extends Pattern
+    
+     @Attribute const : Performable end
+     
+     @Constructor(const) ! end
+     
+     @Operation bind(value:Element,target:Element,env:Env,imports:Seq(NameSpace)):Env
+     
+       // Called by the evaluator. Evaluate the constant expression and compare
+       // with the supplied value...
+       
+       if const.eval(target,env,imports) = value
+       then NullEnv()
+       else throw PatternFailed(self,value)
+       end
+     end
+     
+     @Operation lift():Performable
+       Apply(self.typeExp(),Seq{const.lift()})
+     end
+     
+     @Operation matchCode(value:Performable,success:Performable,fail:Performable):Performable
+     
+       // Produce the code to perform the match...
+       
+       [| if <value> = <const> 
+          then <success> 
+          else <fail> 
+          end |]
+     end
+     
+     @Operation needsBacktrack():Boolean
+       false
+     end
+     
+     @Operation pprint(out)
+       format(out,"[ ");
+       const.pprint(out,0);
+       format(out," ]")
+     end
+     
+   end

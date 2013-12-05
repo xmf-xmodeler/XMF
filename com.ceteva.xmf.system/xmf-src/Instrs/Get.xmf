@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Get Slot Value Or Table Entry                       *
+ *                      -----------------------------------                   *
+ *                                                                            *
+ *  Pops a value and a key. The value should be something that can be indexed *
+ *  with the key such as an object (the key is a slot name) or a table. The   *
+ *  indexed value is pushed. If the key is missing then an appropriate        *
+ *  exception is raised. If the value is of an unknown type then it is sent a *
+ *  get/1 message.                                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Get extends Instr
+    
+  end

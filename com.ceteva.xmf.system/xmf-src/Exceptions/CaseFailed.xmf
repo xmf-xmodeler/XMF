@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 CaseFailed                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *    An exception that is raised when a case runs out of clauses and has     *
+ *    no else clause.                                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+context Exceptions
+
+  @Class CaseFailed extends Exception
+     
+    @Attribute values : Seq(Element) end
+    
+    @Constructor(values) !
+       self.setBacktrace();
+       self.message := "Case ran out of arms for: " + (values->map("toString")->separateWith(", "))
+    end
+    
+  end
+      
+    

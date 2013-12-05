@@ -1,0 +1,129 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Top-Level Commands                               *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  A top level command is typed at a top level loop and is preceded by '?'.  *
+ *  A command is a name optionally followed by some arguments. Each command   *
+ *  is defined as a name and a handler in the commands table. Each command    *
+ *  should have a documentation string that describes how to use the command. *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch::Pattern;
+import OCL;
+import Parser::BNF;
+import TopLevel;
+
+context TopLevel
+
+  @Class Command extends Performable
+     
+    @Grammar extends OCL::OCL.grammar 
+    
+      Command ::= '?' CommandExp | TopLevelCommand.
+      
+      CommandExp ::= c = Line { Command(c) }.
+      
+    end
+    
+    // The handlers table maps command names to an
+    // operation that is used to handle the command 
+    // when it is typed at the top-level...
+    
+    @XOCL::Bind handlers = Table(10) end
+    
+    // Each command is defined as a string...
+    
+    @Attribute command : String end
+    
+    // The name is the first element of the string...
+    
+    @Attribute name    : String end
+    
+    // Args are not currently supported...
+    
+    @Attribute args    : Seq(String) end
+    
+    @Constructor(command) ! 
+      let components = command->splitBy(" ",0,0)
+      in if components->size = 0
+         then self.error("Commands must be typed on a single line.")
+         else 
+           self.name := components->at(0);
+           self.args := components->tail
+         end
+      end
+    end
+    
+    @Operation ensureCompiledManifest(dir:String)
+    
+      // Make sure that the manifest in the supplied
+      // directory is up to date...
+      
+      let source = dir + "/Manifest.xmf";
+          binary = dir + "/Manifest.o"
+      in if source.fileExists()
+         then
+           if (not binary.fileExists()) or
+              binary.isOlder(source)
+           then Compiler::compileFile(source,true,true)
+           end
+         end
+      end
+    end
+     
+    @Operation eval(target,env,imports)
+    
+      // Commands are read as expressions and then evaluated by the
+      // top-level loop...
+      
+      if Command::handlers.hasKey(name)
+      then
+        let handler = Command::handlers.get(name)
+        in try 
+             handler(args,target,env,imports)
+           catch(exception)
+             format(stdout,"Top level command error: ~%~%~S~%",Seq{exception.message});
+             exception.printBacktrace();
+             Root::a := exception
+           end;
+           true
+        end
+      else self.error("Unknown type of top level command: " + name)
+      end
+    end
+    
+    @Operation manifest(mod,dir,args)
+      Command::ensureCompiledManifest(dir);
+      @Case mod of
+        "l" do
+          (dir + "/Manifest.o").loadBin().load(dir)
+        end
+        "b" do
+           (dir + "/Manifest.o").loadBin().build(dir)
+        end
+        "d" do
+          (dir + "/Manifest.o").loadBin().deleteBinary(dir)
+        end
+        "bl" do
+          Command::manifest("b",dir,Seq{});
+          Command::manifest("l",dir,Seq{})
+        end
+        "w" do
+          if not args->isEmpty
+          then (dir + "/Manifest.o").loadBin().writeBootFile(args->head,dir)
+          else format(stdout,"No boot file supplied.~%")
+          end
+        end
+        "t" do
+          (dir + "/Manifest.o").loadBin().touch(dir,(not args->isEmpty) andthen args->head = "s")
+        end
+        else self.error("Illegal manifest modifier: " + mod)
+      end
+    end
+    
+  end 

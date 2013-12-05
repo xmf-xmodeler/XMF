@@ -1,0 +1,74 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Keyword Pattern                              *
+ *                           ---------------------------                      *
+ *                                                                            *
+ * A keyword pattern occurs in a keyword instantiation pattern.               *                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Keyp
+    
+    @Attribute name : String end
+    @Attribute pattern : Pattern end
+    
+    @Constructor(name,pattern) ! end
+    
+    @Operation bind(value,target,env,imports)
+    
+      // Used by the evaluator to perform the binding...
+      
+      if value.isKindOf(Object)
+      then 
+        if value.hasStructuralFeature(name)
+        then pattern.bind(value.get(name),target,env,imports)
+        else throw PatternFailed(self,value)
+        end
+      else throw PatternFailed(self,value)
+      end
+    end
+    
+    @Operation lift():Performable
+      [| OCL::Keyp(<StrExp(name)>,<pattern.lift()>) |]
+    end
+    
+    @Operation matchCode(value:Performable,succ:Performable,fail:Performable):Performable
+    
+      // Used to desugar the pattern into pattern matching code...
+      
+      let newVar = pattern.newVar()
+      in 
+         
+         // The value must be an object with a structural feature
+         // of the given name. The value is then matched to the
+         // pattern. This either succeeds or fails - there is no
+         // backtracking possible unless the value pattern needs
+         // backtracking...
+         
+         [| if <value>.hasStructuralFeature(<StrExp(name)>)
+            then 
+              let <newVar> = <value>.<name>
+              in <pattern.matchCode([| <value>.<name> |],succ,fail)>
+              end
+            else <fail>
+            end
+         |]
+      end
+    end
+    
+    @Operation needsBacktrack():Boolean
+      pattern.needsBacktrack()
+    end
+    
+    @Operation pprint(out)
+      format(out,"~S = ",Seq{name});
+      pattern.pprint(out)
+    end
+    
+  end

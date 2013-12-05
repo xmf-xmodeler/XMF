@@ -1,0 +1,71 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Object with Properties                        *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    An object has slots that are usually thought of as properties. The      *
+ *    slots of an object are defined byt he attributes of its class. Therefore*
+ *    all objects of the same type have the same slots. Occasionally, it is   *
+ *    desirable to have objects of the same type with different properties.   *
+ *    The class ObjectWithProperties defines some simple features that        *
+ *    support individual object-based properties.                             *
+ *                                                                            *
+ *    Note that you can achieve the same effect by managing the underlying    *
+ *    slot storage of an object yourself. By doing so you are running against *
+ *    the grain of the XMF and XOCL underlying semantics.                     *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Exceptions;
+
+context Root
+
+  @Class ObjectWithProperties
+    
+    @Attribute properties : Seq(Element) end
+    
+    @Operation hasProperty(key):Boolean
+    
+      @Doc 
+        Returns true when the receiver has the supplied property.
+      end
+      
+      properties->binds(key)
+    end
+    
+    @Operation properties():Set(Element)
+      
+      @Doc
+        Returns the set of properties defined by the receiver.
+      end
+      
+      properties.dom()
+    end
+    
+    @Operation property(key)
+    
+      @Doc
+        Returns the current value of the property.
+        Raises an exception if the property cannot be found.
+      end
+      
+      if self.hasProperty(key)
+      then properties->lookup(key)
+      else throw NoProperty(self,key)
+      end
+      
+    end
+    
+    @Operation setProperty(key,value)
+    
+      @Doc
+        Updates the value of the property in the receiver.
+        The property is created if necessary.
+      end
+      
+      self.properties := properties->set(key,value)
+    end
+    
+  end

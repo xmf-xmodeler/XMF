@@ -1,0 +1,12 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+
+context BoolNot
+  @Operation toJava(out:OutputChannel)
+    format(out,"    boolNot = new BoolNot();~%");
+    guard.toJava(out);
+    format(out,"    boolNot.setGuard((GuardExp)stack.pop());~%");
+    format(out,"    stack.push(boolNot);~%")
+  end

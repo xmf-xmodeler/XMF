@@ -1,0 +1,48 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Environment Pairs                               *
+ *                            -----------------                               *
+ *                                                                            *
+ *   Adding two environments together. the left environment alwars shadows    *
+ *   the environment on the right.                                            *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Env;
+
+context Env
+
+  @Class Pair extends Env::Env
+  
+    @Attribute left:Env::Env end
+    @Attribute right:Env::Env end
+    
+    @Constructor(left,right) end
+    
+    @Operation binding(key)
+      let b = left.binding(key)
+      in if b = null
+         then right.binding(key)
+         else b
+         end
+      end
+    end
+    
+    @Operation dom()
+      left.dom() + right.dom()
+    end
+    
+    @Operation binds(name:String):Boolean
+      left.binds(name) or right.binds(name)
+    end
+    
+    @Operation lookup(name:String):Element
+      if left.binds(name)
+      then left.lookup(name)
+      else right.lookup(name)
+      end
+    end
+    
+  end

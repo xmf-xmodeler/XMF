@@ -1,0 +1,81 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                ~{S~;C~}                                    *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg should be a sequence of elements x1,x2,...          *
+ *    The sequence is processed by format control C repeatedly until the      *
+ *    sequence is exhausted. Each iteration through the sequence is separated *
+ *    from the next iteration by processing the control string S.             *
+ *                                                                            *
+ *    A typical example of the use of this control is to print out elements   *
+ *    in a sequence s where the elements are to be separated by commas:       *
+ *                                                                            *
+ *       format(out,"~{,~;~S~}",Seq{s})
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleIterate =
+        @Operation(char,output,formatContext)
+          let separating = false;
+              formatString = "";
+              separatorString = "";
+              nested = 0;
+              terminatorFound = false;
+              values = formatContext.nextValue()
+          in @While (not formatContext.complete()) and (not terminatorFound) do
+               let char = formatContext.nextChar()
+               in if char = "~"->at(0)
+                  then 
+                    if formatContext.complete()
+                    then formatContext.error("no terminator found for ~{")
+                    else 
+                      let char = formatContext.nextChar()
+                      in if "}"->at(0) = char
+                         then 
+                           if nested = 0
+                           then terminatorFound := true
+                           else 
+                             formatString := formatString + "~}";
+                             nested := nested - 1
+                           end
+                         elseif "{"->at(0) = char 
+                         then 
+                           formatString := formatString + "~{";
+                           nested := nested + 1
+                         else 
+                           if ";"->at(0) = char and nested = 0
+                           then 
+                             separating := true;
+                             separatorString := formatString;
+                             formatString := ""
+                           else
+                             formatString := formatString + Seq{"~"->at(0),char}->asString
+                           end
+                         end
+                      end
+                    end
+                  else formatString := formatString + Seq{char}->asString
+                  end
+                end
+              end; 
+              if values.isKindOf(SeqOfElement) or values.isKindOf(SetOfElement)
+              then (values := values->asSeq);
+                   @While not values->isEmpty do
+                     let value = values->at(0)
+                     in format(output,formatString,Seq{value});
+                        values := values->tail;
+                        if separating and not values->isEmpty
+                        then format(output,separatorString)
+                        else output
+                        end
+                     end
+                   end
+              else formatContext.error("{ expects a sequence: " + values.toString())
+              end
+          end
+        end
+in format.defineHandler("{"->at(0),handleIterate)
+end;

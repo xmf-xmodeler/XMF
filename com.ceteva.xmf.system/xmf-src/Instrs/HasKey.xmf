@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Check Whether a Table Has A Key                     *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a table and then a key and pushes a boolean determining whether the  *
+ *  table has the key or not.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class HasKey extends Instr
+    
+  end

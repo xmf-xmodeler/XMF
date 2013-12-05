@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+Root::server := DocTables::Server::WebServer();
+
+Root::club := Drinks::DrinksClub("123");
+
+@Service webserver(session,args)
+  if server.hasSession(session)
+  then server.handle(session,args->collect(arg | Seq{arg.getName() | arg.getValue()}))
+  else server.initSession(session,club.run())
+  end
+end;
+
+xmf.saveState("c:/tmp/webserver.img",
+     @Operation(args)
+       xmf.setReady(true);
+       xmf.thread().sleep()
+     end);
+

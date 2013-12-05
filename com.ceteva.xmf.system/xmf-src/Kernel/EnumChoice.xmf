@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                EnumChoice                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   The default super-class of an enumerated type. Ensures that each element *
+ *   in an enumerated type is a named-element.                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XCore
+
+  @Class EnumChoice isabstract extends NamedElement
+
+    @Operation deleteRecursive()
+      owner.remove(self.name());
+      self
+    end
+
+    @Operation setName(name)
+      let oldName = self.name().toString()
+      in
+        NamedElement::setName.invoke(self,Seq{name});
+        owner.names := owner.names->excluding(oldName);
+        owner.names := owner.names->including(name)
+      end
+    end
+
+  end

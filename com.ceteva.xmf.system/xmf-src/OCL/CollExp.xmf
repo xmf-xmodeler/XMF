@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Coll Expressions                            *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A collection expression occurs in source code as C->N and as C->N(x,y,...)*
+ *  There should be no difference between these two constructs and C.N() and  *
+ *  C.N(x,y,...) except for how they are handled by the compiler. The compiler*
+ *  can treat certain coll ecpressions specially and produce in-line code for *
+ *  them.                                                                     *
+ *                                                                            *
+ *  The reason for the existence of coll expressions relates to the OMG OCL   *
+ *  language that uses coll expression syntax to allow collections to have    *
+ *  properties and operations. This is handled differently in XMF OCL where   *
+ *  C.N is equivalent to C->collect(e | e.n)->flatten and C.N() always sends  *
+ *  the message N to the collection C.                                        *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class CollExp extends OCL::OCL
+    
+    @Attribute collection : OCL::OCL end
+    @Attribute collOp : String end
+    @Attribute args : Seq(OCL::OCL) end
+    
+    @Constructor(collection,collOp,args) ! end
+    
+    @Operation pprint(out,indent)
+      let ppCollection = collection.pprint(indent);
+          ppArgs = args->collect(arg | arg.pprint(indent))
+      in format(out,"~S->~S~[~;(~{,~;~S~})~]",Seq{ppCollection,collOp,args->isEmpty,ppArgs})
+      end
+    end
+    
+  end

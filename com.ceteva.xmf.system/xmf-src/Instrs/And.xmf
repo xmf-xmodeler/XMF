@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Logical And                               *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Expects two elements at the head of the stack. Pops the elements and      *
+ *  performs an 'and' operation. The machine knows how to perform 'and' for   *
+ *  boolean operands and integers. If the machine does not understand the     *
+ *  operand types then 'and/1' is sent to the left hand operand. The result   *
+ *  is left at the head of the stack.                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class And extends Instr
+    
+  end
+  

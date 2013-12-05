@@ -1,0 +1,21 @@
+parserImport XOCL;
+parserImport Manifests;
+
+@Manifest XML
+  @File ^None Boot      end
+  @File XML             end
+  @File Attribute       end
+  @File NoAttribute     end
+  @File Node            end
+  @File Element         end
+  @File ExpectingTag    end
+  @File Document        end
+  @File Text            end
+  @File UnknownTag      end
+  @Ref ^Both Parser     end
+  @Ref ^Both PrintXML   end
+  @Ref IO               end
+  @Ref Generator        end
+  @File DOMInputChannel end
+  @File String          end
+end;

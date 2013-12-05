@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+import PPrint;
+
+@Handler XCore::ForeignObject in PPrint(element,depth,encountered)
+  Just(element.toString())
+end;
+          

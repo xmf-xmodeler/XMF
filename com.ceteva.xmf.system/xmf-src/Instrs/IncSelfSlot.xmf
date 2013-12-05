@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Add 1 To A Slot Of Self                        *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Handles incrementing the value of a slot in the current target by 1. The  *
+ *  instruction operand is a constant index for the name of the slot.         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class IncSelfSlot extends Instr
+  
+    @Attribute name : String end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation toString():String
+      "<IncSelfSlot " + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end 
+  

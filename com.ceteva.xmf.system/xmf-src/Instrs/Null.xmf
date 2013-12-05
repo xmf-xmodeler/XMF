@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Push the Null Value                            *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Push the null value onto the stack. There is only one null value which is *
+ *  an instance of all classifiers.                                           *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Null extends Instr
+    
+  end

@@ -1,0 +1,104 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Add Sequence Patterns                          *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  A pattern may be of the form x + y in which case the matching value must  *
+ *  be a sequence for which some prefix matches x and the corresponding suffix*
+ *  matches y. For most values there will be some variability in the prefix   *
+ *  and suffix, therefore this is an example of a pattern that might require  *
+ *  backtracking when some later pattern fails to match.                      * 
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Exceptions;
+
+context OCL
+
+  @Class Addp extends Pattern
+    
+     @Attribute left  : Pattern end
+     @Attribute right : Pattern end
+     
+     @Constructor(left,right) end
+     
+     @Operation bind(value:Element,target:Element,env:Env::Env,imports:Seq(NameSpace)):Env::Env
+       self.error("bind is not implemented for Addp")
+     end
+     
+     @Operation lift():Performable
+       Apply(self.typeExp(),Seq{left.lift(),right.lift()})
+     end
+     
+     @Operation matchCode(value:Performable,success:Performable,fail:Performable):Performable
+     
+       // Returns code that will perform the match...
+       
+       let leftVar = left.newVar();
+           rightVar = right.newVar();
+           prefixesVar = self.newVar();
+           tryPrefixVar = self.newVar()
+       in 
+          // The value must be a sequence...
+         
+          [| if <value>.isKindOf(SeqOfElement)
+             then 
+               @Letrec
+               
+                 // The following recursive operation is used to implement
+                 // backtracking. The operation is supplied with all the
+                 // prefixes of the value and the operation supplies a fail
+                 // continuation that will try the next prefix if something
+                 // subsequently fails to match...
+                 
+                 <tryPrefixVar> =
+                   @Operation(<prefixesVar>) 
+                     if <Var(prefixesVar)> ->isEmpty
+                     then <fail>
+                     else 
+                     
+                       // Get the left and right candidate sequences ...
+                       
+                       let <leftVar> = <Var(prefixesVar)> ->head;
+                           <rightVar> = <value> ->drop(<Var(prefixesVar)> ->head->size)
+                       in 
+                          // Go ahead with the match but pass in a
+                          // fail continuation that will try another
+                          // prefix...
+                          
+                          <left.matchCode(
+                              Var(leftVar),
+                             right.matchCode(
+                               Var(rightVar),
+                               success,
+                               [| <Var(tryPrefixVar)>(<Var(prefixesVar)> ->tail) |]),
+                               [| <Var(tryPrefixVar)>(<Var(prefixesVar)> ->tail) |])>
+                       end
+                     end
+                   end
+                in <Var(tryPrefixVar)>(<value> ->prefixes)
+                end
+              else <fail>
+              end
+          |]
+       end
+     end
+     
+     @Operation needsBacktrack():Boolean
+       true
+     end
+     
+     @Operation pprint(out)
+       left.pprint(out);
+       format(out," + ");
+       right.pprint(out)
+     end
+     
+     @Operation toSig()
+       ParametricType(Seq{"Seq"},Seq{NamedType()}).toSig()
+     end
+     
+   end

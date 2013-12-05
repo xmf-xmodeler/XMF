@@ -1,0 +1,35 @@
+/******************************************************************************
+ *                                                                            *
+ *                      Compilation of String Constants                       *
+ *                      --------------------------------                      *
+ *                                                                            *
+ *  Just push the string onto the stack.                                      *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Compiler;
+import OCL;
+import Instrs;
+
+context StrExp
+  @Operation FV():Element
+    Set{}
+  end
+
+context StrExp
+  @Operation maxLocals():Element
+    0
+  end
+
+context StrExp
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    if sourcePos and line > 0
+    then Seq{Line(line),PushString(value)}
+    else Seq{PushString(value)}
+    end 
+  end
+  
+context StrExp
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line),StrExp(value)})
+  end

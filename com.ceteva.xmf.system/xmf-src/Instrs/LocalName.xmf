@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Recording the Name of a Local                         *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  A call stack frame contains space for the local variable values (args     *
+ *  and let-bound locals) and also space for the names of let-bound locals.   *
+ *  The names are set and unset as the variables are bound and unbound. The   *
+ *  names are used by XMF debuggers. The arg names are not required because   *
+ *  they are held in the signature of the operation that is currently active  *
+ *  in the call frame. The compiler has a switch that supresses the LOCALNAME *
+ *  instructions in order to produce optimal code. Local names are held in    *
+ *  the constants vector of a code box. They are the vector at constant index *
+ *  0.                                                                        *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class LocalName extends Instr
+  
+    @Attribute name       : String end
+    @Attribute index      : Integer end
+    @Attribute constOffset : Integer end
+    
+    @Constructor(name,index) end
+    
+    @Operation assemble(codeBox)
+      self.constOffset := codeBox.newLocalName(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      index.lsh(16) or constOffset
+    end
+    
+    @Operation toString():String
+      "<LocalName " + name.toString() + " " + index +">"
+    end
+    
+  end

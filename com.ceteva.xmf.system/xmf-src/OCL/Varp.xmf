@@ -1,0 +1,101 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Variable Patterns                           *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A name occurring in a pattern. Is bound to the corresponding value when   *
+ *  matched. Optionally involves a pattern and a type. Both are used to       *
+ *  restrict the match: the name is bound to the value if the value matches   *
+ *  pattern and is of the required type.                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Env;
+
+context OCL
+
+  @Class Varp extends Pattern
+     
+     @Attribute name    : String end
+     @Attribute pattern : Pattern end
+     @Attribute type    : TypeExp end
+     
+     @Constructor(name)
+       self.type := NamedType()
+     end
+     
+     @Constructor(name,type) ! end 
+     
+     @Constructor(name,pattern,type) end
+   
+     @Operation bind(value:Element,target:Element,env:Env,imports:Seq(NameSpace)):Env
+       env.bind(name,value)
+     end
+     
+     @Operation lift():Performable
+       if name.isKindOf(Drop)
+       then Apply(self.typeExp(),Seq{name.lift(),type.lift()})
+       else Apply(self.typeExp(),Seq{StrExp(name),type.lift()})
+       end
+     end
+     
+     @Operation matchCode(value:Performable,success:Performable,fail:Performable):Performable
+       if pattern = null
+       then [| if <value>.isKindOf(<type.toExp()>)
+               then <success>
+               else <fail>
+               end
+            |]
+       else [| if <value>.isKindOf(<type.toExp()>)
+               then <pattern.matchCode(value,success,fail)>
+               else <fail>
+               end
+            |]
+       end
+     end
+     
+     @Operation needsBacktrack():Boolean
+       if pattern <> null
+       then pattern.needsBacktrack()
+       else false
+       end
+     end
+     
+     @Operation newParam()
+       Parameter(self.newVar(),type)
+     end
+     
+     @Operation newVar():String
+     
+       // It is important that a Varp returns
+       // the name that it was created with when 
+       // asked for a new variable. The newVar
+       // operation is used to create synthetic
+       // variables when structural patterns are
+       // used in binding positions...
+       
+       name
+     end
+     
+     @Operation pprint(out)
+       format(out,"~S",Seq{name});
+       if pattern <> null
+       then 
+         format(out," = ");
+         pattern.pprint(out)
+       end;
+       format(out," : ");
+       type.pprint(out,0)
+     end
+     
+     @Operation toSig()
+       if type.isKindOf(TypeExp)
+       then type.toSig()
+       else NamedType().toSig()
+       end
+     end
+     
+   end

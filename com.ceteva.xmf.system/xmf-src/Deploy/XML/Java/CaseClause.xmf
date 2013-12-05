@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context CaseClause
+  @Operation toJava(out:OutputChannel)
+    format(out,"    caseClause = new CaseClause();~%");
+    guard.toJava(out);
+    format(out,"    caseClause.setGuard((Guard)stack.pop());~%");
+    pattern.toJava(out);
+    format(out,"    caseClause.setPattern((Pattern)stack.pop());~%");
+    format(out,"    stack.push(caseClause);~%")
+  end

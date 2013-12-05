@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Reference to Closure Variables                      *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  When an operation is created its body might reference variables from an   *
+ *  outer scope. These variables are maintained in the operations globals     *
+ *  table. Global tables are chained together with an operation's table being *
+ *  linked to that of its parent. Therefore, global tables are linked lists   *
+ *  of vectors. Globals are referenced by first chaining up a number of frames*
+ *  to a particular vector and then indexing into the vector.                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class GlobalRef extends Instr
+  
+    @Attribute name : String end
+    @Attribute frame : Integer end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,frame,offset) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(offset.byte(2),frame,offset.byte(1)) 
+    end
+    
+    @Operation toString():String
+      "<GlobalRef " + name + "," + frame + "," + offset + ">"
+    end
+    
+  end
+  

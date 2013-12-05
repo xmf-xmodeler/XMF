@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class NoKeyInTable extends Exception
+     
+    @Attribute table : Table end
+    @Attribute key : Element end
+    
+    @Constructor(key,table) !
+       Root::errorTable := table;
+       self.setBacktrace();
+       self.message := 
+         "Attempt to reference the non-existent key " + key.toString() + 
+         " in a table (set to Root::errorTable).\n" +
+         if table.isEmpty()
+         then "The table is currently empty."
+         else formats("Available keys are: ~{,~;~S~}",Seq{table.keys()->asSeq})
+         end
+    end
+    
+  end
+      
+    

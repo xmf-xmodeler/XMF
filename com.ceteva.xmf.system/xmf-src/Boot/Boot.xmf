@@ -1,0 +1,66 @@
+parserImport XOCL; 
+
+/******************************************************************************
+ *                                                                            *
+ *                            Booting the System                              *
+ *                            ------------------                              *
+ *                                                                            *
+ *    This file is the first file that should be loaded when the system is    *
+ *    being bootstrapped into an empty machine. XCore is loaded via the       *
+ *    Kernel. Once XCore is loaded there is sufficient life-support systems   *
+ *    to create classes and packages. However the order of the files in this  *
+ *    boot process is important and you should change the order with caution. *
+ *                                                                            *
+ ******************************************************************************/ 
+
+try 
+  Kernel_loadbin("Kernel/Boot.o");
+  ("Exceptions/Boot.o").loadBin(false);
+  ("Channels/Boot.o").loadBin(false);
+  ("Lib/Boot.o").loadBin(false);
+  ("Preferences/Boot.o").loadBin(true);
+  ("XMF/Boot.o").loadBin(true)
+catch(exception)
+  print("Exception booting kernel: " + exception.message + "\n");
+  @For frame in exception.backtrace do
+    print(frame);
+    print("\n")
+  end
+end;
+
+// Save a basic xmf image. This image has sufficient definitions to support
+// many applications and can be run by itself...
+
+gc();
+
+let startup = saveMachineState("../xmf-img/xmf.img")
+in if startup = true
+   then "XMF Build Completed."
+   else 
+   
+     // The else arm is run on restart using this saved image.
+     // If the image is supplied with a filename command line
+     // argument then the file is loaded and executed...
+     
+     let hasArg = @Operation(name) startup->exists(pair | pair->head = name) end;
+         getArg = @Operation(name) startup->select(pair | pair->head = name)->head->tail end
+     in if hasArg("filename") 
+        then 
+          if hasArg("home")
+          then 
+            let filename = getArg("filename");
+                home = getArg("home")
+            in xmf.setHomeDir(home);
+               let boot = Kernel_loadbin(filename)
+               in boot(startup)
+               end
+            end
+          else self.error("Must specify a home directory")
+          end
+        else self.error("Must specify a filename when loading base xmf image")
+        end
+     end
+   end
+end;
+
+ 

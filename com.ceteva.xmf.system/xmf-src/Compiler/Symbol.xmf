@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Compiler Symbols                                *
+ *                           ------------------                               *
+ *                                                                            *
+ *  The compiler tags elements in constant tables that should be saved as     *
+ *  symbols using this class. Be very careful as this class is used throughout*
+ *  the compiler but has the same name as XCore::Symbol and virtually the     *
+ *  same effect in the code box constant tables. Very confusing and not       *
+ *  necessary.                                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+
+context Compiler
+
+  @Class Symbol extends NamedElement
+     
+     @Constructor(name) end
+     
+  end

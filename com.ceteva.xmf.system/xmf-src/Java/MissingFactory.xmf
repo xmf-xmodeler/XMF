@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Missing Factory Errors                         *
+ *                             ---------------------                          *
+ *                                                                            *
+ *  At run-time, the instantiation of an EMF class requires a factory. This   *
+ *  exception is thrown if the factory is not found against the name-space    *
+ *  URI.                                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Exceptions;
+import Java;
+
+context Java
+
+  @Class MissingFactory extends Exception
+     
+    @Attribute class  : EMFClass  (?,!) end // The offending class.
+    
+    @Constructor(class)
+      self.setBacktrace();
+      self.message :=
+        "The class " + class.name + " is defined to have a factory\n" +
+        "with URI " + class.descriptor.nsURI + " but the factory cannot\n" +
+        "be found."
+    end
+    
+  end
+      

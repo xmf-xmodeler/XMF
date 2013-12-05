@@ -1,0 +1,69 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("c",
+  let fileName = ""
+  in @Operation(args,target,env,imports) 
+       @Doc 
+         ?c <FILE>            Compile the file.
+         ?c                   Compile the most recently compiled file.
+       end
+       @Case args of
+         Seq{} do 
+           if fileName <> ""
+           then 
+             try 
+               Compiler::resetCompilationErrors();
+               Compiler::compileFile(fileName,true,true);
+               if Compiler::compilationErrors()
+               then 
+                 Compiler::pprintCompilationErrors(stdout);
+                 Compiler::resetCompilationErrors()
+               end
+             catch(exception)
+               format(stdout,"Compilation error: ~S~%",Seq{exception.message})
+             end
+           end
+         end
+         Seq{s | moreArgs} do
+           if (s + ".xmf").fileExists()
+           then 
+             fileName := s;
+             try
+               Compiler::resetCompilationErrors();
+               Compiler::compileFile(fileName,true,true);
+               if Compiler::compilationErrors()
+               then 
+                 Compiler::pprintCompilationErrors(stdout);
+                 Compiler::resetCompilationErrors()
+               end
+             catch(exception)
+               format(stdout,"Compilation error: ~S~%",Seq{exception.message})
+             end  
+           else format(stdout,"The file ~S does not exist.~%",Seq{s})
+           end
+         end
+       end
+     end
+  end);
+  
+Command::handlers.put("cl",
+  @Operation(args,target,env,imports)
+    @Doc
+      ?cl [<FILE>]         Combines ?c and ?l.
+    end
+    let compile = Command::handlers.get("c");
+        load = Command::handlers.get("l")
+    in compile(args,target,env,imports);
+       let value = load(args,target,env,imports)
+       in if Compiler::compilationErrors()
+          then 
+            Compiler::pprintCompilationErrors(stdout);
+            Compiler::resetCompilationErrors()
+          end;
+          value
+       end
+    end
+  end); 

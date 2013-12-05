@@ -1,0 +1,147 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+
+context Code
+
+  @Class OpWalker extends CompilerWalker
+  
+    // This file deals with transforming source code that contains operators
+    // by applying operator precedence rules to binary expressions. The OCL
+    // grammar does not impose precedence rules via grammar clauses, all operators
+    // are parsed at the same precedence and with no heed to associativity.
+    // Therefore, expressions must be transformed during or after parsing in 
+    // order to impose precedence rules. This walker imposes operator precedence
+    // and returns source code with the correct precedences and associativites.
+  
+    @Operation walkApply(args,operator,arg)
+      Apply(self.walk(operator,arg),args->collect(a | self.walk(a,arg)))
+    end
+
+    @Operation walkInstantiate(args,class,arg)
+      Instantiate(self.walk(class,arg),args->collect(a | self.walk(a,arg)))
+    end
+
+    @Operation walkBinExp(op1,left1,right1,arg)
+      @Case op1 of
+        "." do
+          @CaseObj right1 of
+            Apply[operator,args] do
+              self.walk(Apply(BinExp(left1,".",operator),args),arg)
+            end
+            Instantiate[class,args] do
+              self.walk(Instantiate(BinExp(left1,".",class),args),arg)
+            end
+            BinExp[left,binOp,right] do
+              self.walk(BinExp(BinExp(left1,".",left),binOp,right),arg)
+            end
+            CollExp[collection,collOp,args] do
+              self.walk(CollExp(BinExp(left1,".",collection),collOp,args),arg)
+            end
+            IterExp[collection,name,iterOp,body] do
+              self.walk(IterExp(BinExp(left1,".",collection),iterOp,name,body),arg)
+            end
+            Iterate[collection,name,accumulator,value,body] do
+              self.walk(Iterate(BinExp(left1,".",collection),name,accumulator,value,body),arg)
+            end
+            else self.walkBinExpDefault(left1,op1,right1,arg)
+          end
+        end
+        "::" do
+          @CaseObj right1 of
+            Apply[operator,args] do
+              self.walk(Apply(BinExp(left1,"::",operator),args),arg) 
+            end
+            Instantiate[class,args] do
+              self.walk(Instantiate(BinExp(left1,"::",class),args),arg)
+            end
+            BinExp[left,binOp,right] do
+              self.walk(BinExp(BinExp(left1,"::",left),binOp,right),arg)
+            end
+            CollExp[collection,collOp,args] do
+              self.walk(CollExp(BinExp(left1,"::",collection),collOp,args),arg)
+            end
+            else self.walkBinExpDefault(left1,op1,right1,arg)
+          end
+        end
+        else self.walkBinExpDefault(left1,op1,right1,arg) 
+      end
+    end
+     
+    @Operation walkBinExpDefault(e1,o1,e2,arg)
+      let e1 = self.walk(e1,arg);
+          e2 = self.walk(e2,arg)
+      in @CaseObj e1 of
+           BinExp[left,binOp,right] do
+             let e11 = left;
+                 o11 = binOp;
+                 e12 = right
+             in if prec(o1) < prec(o11)
+                then self.walk(BinExp(e11,o11,BinExp(e12,o1,e2)),arg)
+                else
+                  @CaseObj e2 of
+                    BinExp[left,binOp,right] do
+                      let e21 = left;
+                          o22 = binOp;
+                          e22 = right
+                      in if prec(o1) < prec(o22)
+                         then self.walk(BinExp(BinExp(e1,o1,e21),o22,e22),arg)
+                         else BinExp(e1,o1,e2)
+                         end
+                      end
+                    end
+                    else BinExp(e1,o1,e2)
+                  end
+                end
+             end
+           end
+           else
+             @CaseObj e2 of
+               BinExp[left,binOp,right] do
+                 let e21 = left;
+                     o2 = binOp;
+                     e22 = right
+                 in if prec(o1) < prec(o2)
+                    then self.walk(BinExp(BinExp(e1,o1,e21),o2,e22),arg)
+                    else BinExp(e1,o1,e2)
+                    end 
+                 end
+               end
+               else BinExp(e1,o1,e2)
+             end 
+         end
+      end
+    end
+     
+    @Operation walkCollExp(args,collOp,collection,arg)
+      CollExp(self.walk(collection,arg),collOp,args->collect(e | self.walk(e,arg)))
+    end 
+    
+    @Operation walkIterExp(body,collection,iterOp,name,arg)
+      IterExp(self.walk(collection,arg),iterOp,name,self.walk(body,arg))
+    end
+    
+    @Operation walkIterate(accumulator,body,collection,name,value,arg)
+      Iterate(self.walk(collection,arg),name,accumulator,self.walk(value,arg),self.walk(body,arg))
+    end
+    
+    @Operation walkNegate(exp,arg)
+      @CaseObj exp of
+        BinExp[left,binOp,right] do
+          if binOp = ";"
+          then self.walk(BinExp(Negate(left),";",right),arg)
+          else Negate(self.walk(exp,arg))
+          end
+        end
+        else Negate(self.walk(exp,arg))
+      end
+    end
+
+  end 
+  
+context Root
+  @Operation order(exp)
+    OpWalker().walk(exp,null)
+  end

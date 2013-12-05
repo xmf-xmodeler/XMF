@@ -1,0 +1,51 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+context Class
+  @Operation deployEcore(out:OutputChannel,package:Package,path:String)
+  
+    // No need to include parents if it is Object...
+    
+    if parents->forAll(p | p = Object)
+    then 
+      @XML(out)
+        <eClassifiers xsi:type="ecore:EClass" name=name>
+        
+          // Generate the structure features of the class..
+          
+          @For attribute in attributes do
+            attribute.deployEcore(out,package,path)
+          end
+        </eClassifiers>
+      end
+    else 
+      @XML(out)
+        <eClassifiers 
+          xsi:type="ecore:EClass" name=name eSuperTypes=(self.eCoreParents(path))>
+        
+          // Generate the structure features of the class..
+          
+          @For attribute in attributes do
+            attribute.deployEcore(out,package,path)
+          end
+        </eClassifiers>
+      end 
+    end
+  end
+  
+context Class
+  @Operation eCoreParents(path:String):String
+    parents->asSeq->collect(p | p.eCoreRef(path))->separateWith(" ")
+  end
+  
+context Class
+  @Operation eCoreRef(path:String):String
+  
+    // Generate a reference to an imported type. The owner
+    // should be the imported package so deploy that and
+    // then produce a reference string in an EMF specific
+    // format...
+    
+    owner.writeEcore(path); 
+    "ecore:EClass " + owner.name() + ".ecore#//" + name
+  end

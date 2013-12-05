@@ -1,0 +1,24 @@
+/******************************************************************************
+ *                                                                            *
+ *                                  formats                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Writes the format output to a string and returns the string.            *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+
+context Root
+
+  @Operation formats(control:String,args:Seq(Element)):String
+    
+      // Takes a control string and a sequence of arguments and returns
+      // the string constructed by processing the control with respect
+      // to the arguments.
+      
+    let sout = StringOutputChannel()
+    in format(sout,control,args);
+       sout.getString()
+    end
+  end

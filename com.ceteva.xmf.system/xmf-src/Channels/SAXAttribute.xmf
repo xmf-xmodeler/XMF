@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               SAX Attribute                                *
+ *                            ------------------                              *
+ *                                                                            *
+ *   Instances of this class are created by a SAX input channel to represent  *
+ *   attributes as they are encountered in the input. Instances of this class *
+ *   are reused by the SAX parser so you should copy the information in order *
+ *   to retain it.                                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context IO
+
+  @Class SAXAttribute
+  
+    @Attribute name  : Buffer = Buffer(24,true) end
+    @Attribute value : Buffer = Buffer(24,true) end
+    
+    @Constructor(name,value) ! end
+    
+    @Operation name():String
+      name.toString()
+    end
+    
+    @Operation value():String
+      value.toString()
+    end
+    
+  end

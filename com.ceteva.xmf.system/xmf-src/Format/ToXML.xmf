@@ -1,0 +1,47 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~X                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg is consumed, translated to string using toString()  *
+ *    and then sent to the output channel. The string is processed so that it *
+ *    is suitable as text in an XML document. Various characters are illegal  *
+ *    in XML text (for example <) and must be translated to control chars     *
+ *    that are treated specially in by XML. The ~X control character performs *
+ *    these translations.                                                     *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+let handleToXMLValue =
+      @Operation(char,output,formatContext)
+        let s = formatContext.nextValueToString()
+        in if s->includes("&"->at(0))
+           then s := s.subst("&amp;","&",true)
+           end;
+           if s->includes(">"->at(0))
+           then s := s.subst("&gt;",">",true)
+           end;
+           if s->includes("<"->at(0))
+           then s := s.subst("&lt;","<",true)
+           end;
+           if s->includes("'"->at(0))
+           then s := s.subst("&apos;","'",true)
+           end;
+           if s->includes("\""->at(0))
+           then s := s.subst("&quot;","\"",true)
+           end;
+           if s->includes("\n"->at(0))
+           then s := s->subst("&#xa;","\n",true)
+           end;
+           if s->includes("\r"->at(0))
+           then s := s->subst("&#xd;","\r",true)
+           end;
+           if s->includes(" "->at(0))
+           then s := s->subst("&sp;"," ",true)
+           end;
+           output.writeString(s)
+        end
+      end
+in format.defineHandler("X"->at(0),handleToXMLValue)
+end;
+     

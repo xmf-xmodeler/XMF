@@ -1,0 +1,118 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Enum extends Sugar
+  
+    // Create an enumerated type. These are actually classes so
+    // we allow extra content expressions. The element classes are
+    // provided to allow enumerated types to be structured. When the
+    // enum is cretaed, the classes are added as elements of the
+    // enum class. The parameters supplied in the enum definition are
+    // paths to classifiers and are used to define the attributes of
+    // the component class. The component class wil also have a 
+    // constructor for creating instances of the class and for pattern
+    // matching against instances of the class.
+  
+    @Attribute name    : String           (?)   end
+    @Attribute names   : Seq(String)      (?,+) end
+    @Attribute classes : Seq(Element)     (?,+) end
+    @Attribute exps    : Seq(Performable) (?,!) end
+    
+    @Constructor(name) end
+
+    @Grammar extends OCL::OCL.grammar
+    
+      Enum ::= 
+      
+        // A name...
+      
+        n = Name e = { Enum(n) } 
+        
+        // ... followed by elements that define the
+        // enumerated type...
+        
+        '(' EnumElements^(e) ')' 
+        
+        // Followed by anything that a class can have...
+        
+        es = Exp* 
+        
+        'end' 
+        
+        { e.setExps(es) }.
+
+      EnumElements(e) ::= 
+      
+        // Names or class definitions...
+        
+        EnumElement^(e) (',' EnumElement^(e))*.
+
+      EnumElement(e) ::= 
+      
+        // Each element is named...
+        
+        n = Name 
+        
+        // ... it may be a class...
+        
+        EnumElementTail^(e,n).
+
+      EnumElementTail(e,n) ::=
+      
+        // The parameters define that the element will be a class.
+        // The parameters are paths to classifiers and will define
+        // the attributes and order of the constructor args for 
+        // the class...
+
+        '(' ps = EnumTypes ')' { e.addToClasses(Seq{n|ps}) }
+
+      |  { e.addToNames(n) }.
+
+      EnumTypes ::= 
+      
+        p = TypeExp 
+        
+        ps = (',' TypeExp)* 
+        
+        { Seq{p|ps} }.
+      
+    end
+    
+    @Operation desugar() 
+    
+      // Make sure that the enum is in scope for the evaluation
+      // of the expressions so that the classifier args to a class
+      // definition can refer recursively to the enum itself...
+      
+      [| let <name> = XCore::Enum(<name.lift()>)
+         in <exps->iterate(e x = 
+              self.classes()->iterate(c x =
+                names->iterate(n x = Var(name) | 
+                 [| <x>.addName(<n.lift()>) |]) |
+                   [| <x>.addClass(<c->head.lift()>,<self.desugarTypeArgs(c->tail)>) |]) |
+                     [| <x>.add(<e>) |])>
+         end
+       |]
+    end
+    
+    @Operation desugarTypeArgs(args:Seq(TypeExp)):Performable
+      SetExp("Seq",args->collect(typeExp | typeExp.toExp()))
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@Enum ~S(~{,~;~S~})~%~V",Seq{name,names.elements.value,indent+2});
+      @For exp in exps do
+        exp.pprint(out,indent+2);
+        if not isLast 
+        then format(out,"~%~V",Seq{indent+2})
+        end
+      end;
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

@@ -1,0 +1,179 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      Stacks                                *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    A stack is used for data storage. Elements are pushed onto the popped   *
+ *    from the head of the stack. This is often referred to as a last-in-     *
+ *    first-out mechanism. Use push() to add elements and pop() to remove     *
+ *    them. Elements are stored in a vector that is expanded as required.     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Stacks;
+
+context Stacks
+
+  @Class Stack
+  
+    @Attribute elements : Vector = Vector(100) end
+    @Attribute index    : Integer              end 
+    
+    @Operation asSeq():Seq(Element)
+    
+      @Doc
+        Returns the elements of the stack as a sequence.
+      end
+      
+      let s = Seq{};
+          i = index  - 1
+      in @While i >= 0 do
+           s := Seq{elements.ref(i) | s};
+           i := i - 1
+         end;
+         s
+      end
+    end
+    
+    @Operation expand()
+      let newElements = Vector(elements.size() * 2)
+      in newElements.copyInto(elements);
+         self.elements := newElements
+      end
+    end
+    
+    @Operation empty()
+    
+      @Doc
+        Empties the stack of all elements.
+      end
+      
+      self.index := 0
+    end
+    
+    @Operation indexOf(e):Integer
+    
+      @Doc 
+        Returns the first index of the supplied element in
+        the stack or -1 if it does not exist.
+      end
+      
+      let i = 0;
+          found = false
+      in @While i < elements.size() and not found do
+            if elements.ref(i) = e 
+            then found := true
+            else i := i + 1 
+            end
+         end;
+         if found
+         then i
+         else (0-1)
+         end
+      end
+    end
+    
+    @Operation isEmpty():Boolean
+    
+      @Doc
+        Returns true when the stack has no elements.
+      end
+      
+      index = 0
+    end
+    
+    @Operation isFull():Boolean
+    
+      @Doc
+        Returns true when the stack storage is full.
+        Note that push() expands the storage if necessary.
+      end
+      
+      elements.size() = index
+    end
+    
+    @Operation pop()
+    
+      @Doc
+        Returns and removes the head element of the
+        stack. Raises a StackUnderflow exception if the
+        stack is empty.
+      end
+      
+      if self.isEmpty()
+      then throw StackUnderflow(self)
+      else 
+        self.index := index - 1;
+        elements.ref(index)
+      end
+    end
+    
+    @Operation push(e)
+    
+      @Doc
+        Adds the element to the head of the stack, If the
+        storage is full then the stack is expanded.
+      end
+      
+      if self.isFull() 
+      then self.expand()
+      end;
+      elements.put(index,e);
+      self.index := index + 1;
+      self
+    end
+    
+    @Operation ref(index:Integer)
+    
+      @Doc
+        Returns the element at the supplied index.
+      end
+      
+      elements.ref(index)
+    end
+    
+    @Operation put(index:Integer,e)
+      
+      @Doc
+        Updates the element at the supplied index.
+      end
+      
+      elements.put(index,e)
+    end
+    
+    @Operation size():Integer
+    
+      @Doc
+        Returns the current storage size.
+      end
+      
+      elements.size()
+    end
+    
+    @Operation top()
+    
+      @Doc
+        Returns the top element of the stack without removing 
+        it. Raises an exception if the stack is empty.
+      end
+      
+      if self.isEmpty()
+      then throw StackUnderflow(self)
+      else elements.ref(index - 1)
+      end
+    end
+    
+    @Operation topIndex():Integer
+    
+      @Doc
+        Returns the index of the top element. Note that
+        this may be different from the size of the storage.
+      end
+      
+      index - 1
+    end
+    
+  end
+      

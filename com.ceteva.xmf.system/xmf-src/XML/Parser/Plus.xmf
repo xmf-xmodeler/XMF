@@ -1,0 +1,27 @@
+parserImport XOCL;
+
+import XML;
+import Parser;
+
+context Parser
+
+  @Class Plus extends Pattern
+  
+    //  Succeeds when 1 or more occurrences of the pattern occur in
+    //  the supplied element. The result is a sequence of values
+    //  produced by each successfully parsed occurrence.
+    
+    @Attribute pattern : Pattern end
+    
+    @Constructor(pattern) ! end
+    
+    @Operation checkForMissingClauses(grammar)
+      pattern.checkForMissingClauses(grammar)
+    end
+    
+    @Operation pprint(out,indent)
+      pattern.pprint(out,indent);
+      format(out,"+")
+    end
+    
+  end

@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Compiler Directives                          *
+ *                             ----------------------                         *
+ *                                                                            *
+ *  When an entry is compiled, a directive can be used to modify the compiler *
+ *  parameters.                                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+context Manifests
+
+  @Type CompilerDirective
+  
+      // Do not emit instructions that record the names 
+      // of let-bound variables...
+  
+      WithoutLocalNames
+    
+      // Do not emit instructions that record line
+      // numbers...
+    
+    | WithoutSourcePos
+    
+      // Specify the language to be used to compile the
+      // file...
+      
+    | Language(Classifier)
+    
+  end

@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+import OCL;
+
+context Root
+
+  @Package Tests
+  
+    @Operation bodyFormals(args)
+      formals(args) + Seq{Varp("post")}
+    end
+    
+    @Operation formals(args)
+      args->collect(a | Varp(a))
+    end
+    
+    @Operation post(name,args,predicate):Performable
+      Operation("post" + name,formals(args)+preFormals(args)+resultFormal(),NamedType(),predicate)
+    end
+    
+    @Operation postVals(args)
+      SetExp("Seq",args->collect(a | Var(a)))
+    end
+    
+    @Operation pre(name,args,predicate)
+      Operation("pre" + name,formals(args),NamedType(),predicate)
+    end
+    
+    @Operation preFormals(args)
+      args->collect(a | Varp("pre" + a)) + Seq{Varp("preSelf")}
+    end
+    
+    @Operation resultFormal()
+      Seq{Varp("result")}
+    end
+    
+    @Operation body(name,args,body)
+      Operation(name,bodyFormals(args),NamedType(),[| 
+        let preArgs = <postVals(args)> ->collect(a | a.copy());
+            preSelf = self.copy() then
+            result = <body>
+        in if post.invoke(self,<postVals(args)> + preArgs + Seq{preSelf,result})
+           then result
+           else throw Tests::PostFails(<name.lift()>,preArgs)
+           end
+        end |])
+    end
+  
+  end

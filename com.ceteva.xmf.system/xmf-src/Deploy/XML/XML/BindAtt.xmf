@@ -1,0 +1,19 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context BindAtt
+  @Operation toXML(out:OutputChannel)
+    if value <> null
+    then 
+      @XML(out)
+        <BindAtt var=var att=att value=(value.exp.value)/>
+      end
+    else
+      @XML(out)
+        <BindAtt var=var att=att/>
+      end
+    end
+  end

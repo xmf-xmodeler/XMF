@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Always Succeed                                *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  The empty pattern always succeeds and leaves the empty sequence at the    *
+ *  head of the stack.                                                        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Empty extends Pattern
+  
+    @Operation match(chars,env,stack,succ,fail)
+      succ(chars,env,Seq{Seq{} | stack},fail)
+    end
+    
+    @Operation vars():Set(String)
+      // Returns the set of vars bound in the receiver.
+      Set{}
+    end
+    
+  end

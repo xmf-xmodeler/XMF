@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Standard Channels                             *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Global variables 'stdin' and 'stdout' are bound to the standard input    *
+ *   and standard output respectively as supplied to the XMF VM.              *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context Root
+  @Bind 
+    stdout = IO::StandardOutputChannel(Kernel_stdout) 
+  end 
+  
+context Root
+  @Bind 
+    stdin = IO::StandardInputChannel(Kernel_stdin) 
+  end 

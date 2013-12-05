@@ -1,0 +1,44 @@
+parserImport XOCL;
+
+import Stacks;
+import OCL;
+import Walkers;
+  
+context Walkers
+
+  @Class Lift metaclass Dispatcher 
+  
+    // The stack is used to record the elements as they
+    // are encountered during dispatching. An equivalent 
+    // stack is used to record the elements as they
+    // are constructed at run-time. The handlers must
+    // arrange for the run-time elements to occur at the 
+    // same indices as the dispatch-time elements...
+    
+    @Attribute stack    : Stack = Stack() end
+    
+    // Local variables are used at run-time to manipulate
+    // the elements as they are constructed. The dispatcher
+    // uses the following counter to allocate unique variable
+    // names...
+    
+    @Attribute varCount : Integer         end
+    
+    @Operation newExp(o)
+      let path = o.of().pathSeq()
+      in Apply(Path(Var(path->head.toString()),path->tail),Seq{})
+      end
+    end
+    
+    @Operation newVar()
+    
+      // Allocate a new variable with a unique name...
+      
+      self.varCount := varCount + 1;
+      "var" + varCount.toString()
+    end
+    
+  end
+
+
+

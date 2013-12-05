@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Tokens                                  *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Under normal circumstances the current token cannot be accessed by the    *
+ *  parse actions. This is a built-in non-terminal that returns the most      *
+ *  processed token.                                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Tok extends Recognizer 
+	
+	@Operation code(outputChannel)
+      format(outputChannel," Token ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+	
+	@Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::Tok() |]
+	end
+	
+	@Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+  end

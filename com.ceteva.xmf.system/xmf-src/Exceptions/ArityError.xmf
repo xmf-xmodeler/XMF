@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Arity Error                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Thrown when an operator is called with the wrong number of args.        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Exceptions
+
+  @Class ArityError extends Exception
+     
+    @Attribute operator : Operation    end
+    @Attribute args     : Seq(Element) end
+    
+    @Constructor(operator,args) !
+      self.setBacktrace();
+      self.message := 
+        "Operator " + operator.toString() + " expects " + operator.arity() + 
+        " arguments but was supplied with " + args.toString()
+    end
+    
+  end
+      
+    

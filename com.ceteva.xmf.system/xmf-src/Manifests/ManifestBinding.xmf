@@ -1,0 +1,86 @@
+parserImport XOCL;
+
+import XOCL;
+import Manifests;
+import IO;
+
+context Manifests
+
+  @Class ManifestBinding extends Syntax
+  
+    // Variables can be bound to a manifest entry and then supplied
+    // to the manifest action that is performed in the 'do' part.
+    // The value of the variable is the value returned by the entry.
+    // If the entry is a file then the value is the last element in
+    // the file. Often used to get hold of packages for initialization.
+  
+    @Attribute name  : String        (?) end
+    @Attribute entry : ManifestEntry (?) end
+    
+    @Constructor(name,entry) ! end
+    
+    @Operation build(dir:String,doAll:Boolean,results:Table)
+      entry.build(dir,doAll,results)
+    end
+    
+    @Operation deleteBinary(dir:String)
+      entry.deleteBinary(dir)
+    end
+    
+    @Operation deref(dir:String) 
+      ManifestBinding(name,entry.deref(dir)) 
+    end
+    
+    @Operation display(out:OutputChannel)
+    
+      // Display the binding as source code...
+      
+      if name = ""
+      then entry.display(out)
+      else 
+        format(out,"~S = ",Seq{name});
+        entry.display(out)
+      end
+    end
+    
+    @Operation load(dir:String,loadSource:Boolean)
+      entry.load(dir,loadSource)
+    end
+    
+    @Operation module(dir:String)
+      entry.module(dir)
+    end
+    
+    @Operation parse(dir:String,doAll:Boolean,results:Table)
+      entry.parse(dir,doAll,results)
+    end
+    
+    @Operation processChangedFiles(dir:String,changedFiles:Seq(String),parse:Boolean,compile:Boolean,load:Boolean,results:Table)
+      entry.processChangedFiles(dir,changedFiles,parse,compile,load,results)
+    end
+    
+    @Operation refresh(dir)
+      entry.refresh(dir)
+    end
+    
+    @Operation stale()
+      entry.stale()
+    end
+    
+    @Operation touch(dir:String,source:Boolean)
+      entry.touch(dir,source)
+    end
+    
+    @Operation unxip(zipFile:ZipFile,prefix:String)
+      entry.unxip(zipFile,prefix)
+    end
+    
+    @Operation writeBoot(out:OutputChannel,dir:String,indent:Integer)
+      entry.writeBoot(out,dir,indent)
+    end
+    
+    @Operation xip(dir:String,prefix:String,zout:ZipOutputChannel)
+      entry.xip(dir,prefix,zout)
+    end
+    
+  end

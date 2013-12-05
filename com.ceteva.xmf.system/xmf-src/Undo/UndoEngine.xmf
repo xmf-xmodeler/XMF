@@ -1,0 +1,77 @@
+parserImport XOCL;
+
+import Undo;
+
+context Undo
+
+  @Class UndoEngine
+  
+    @Attribute stacklisteners     : Seq(UndoStackListener) (+,-) end
+    @Attribute executionlisteners : Seq(UndoExecutionListener) (+,-) end
+    
+    @Constructor()
+      Kernel_setUndoSize(10)
+    end
+  
+    @Operation endUndoContext()
+      Kernel_endUndoContext();
+      self.undoStackChanged()
+    end
+    
+    @Operation redo()
+      Kernel_execRedo();
+      self.redoExecuted();
+      self.redoStackChanged();
+      self.undoStackChanged()
+    end
+    
+    @Operation redoExecuted()
+      @For listener in executionlisteners
+      do
+        listener.redoExecuted()
+      end
+    end
+    
+    @Operation redoStackChanged()
+      let stackSize = Kernel_redoStackSize()
+      in
+        @For listener in stacklisteners
+        do
+          listener.redoStackChanged(stackSize)
+        end
+      end
+    end
+    
+    @Operation startUndoContext()
+      
+      // Note that the machine may need to contour nested undo so that
+      // only the outer one is scoped for the stopping of the context
+      
+      Kernel_startUndoContext()
+    end
+    
+    @Operation undo()
+      Kernel_execUndo();
+      self.undoExecuted();
+      self.undoStackChanged();
+      self.redoStackChanged()
+    end
+    
+    @Operation undoExecuted()
+      @For listener in executionlisteners
+      do
+        listener.undoExecuted()
+      end
+    end
+    
+    @Operation undoStackChanged()
+      let stackSize = Kernel_undoStackSize()
+      in
+        @For listener in stacklisteners
+        do
+          listener.undoStackChanged(stackSize)
+        end
+      end
+    end
+  
+  end  

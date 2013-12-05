@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+import Languages;
+import XOCL;
+import MicroJava;
+
+context Structure
+
+  @Class Path extends Syntax
+  
+    @Attribute names : Seq(String) (?) end
+    
+    @Constructor(names) ! end
+    
+    @Operation isEmpty():Boolean
+    
+      // No path was specified...
+      names->isEmpty
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"~{.~;~S~}",Seq{names})
+    end
+    
+    @Operation toXOCL():Performable
+      
+      // Just assume that the path can be translated to XOCL...
+      
+      if self.isEmpty()
+      then [| XOCL::Element |]
+      else OCL::Path::toPath(names)
+      end
+    end
+    
+  end

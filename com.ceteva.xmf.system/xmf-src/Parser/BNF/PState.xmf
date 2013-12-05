@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           The Current Parse State                          *
+ *                           -----------------------                          *
+ *                                                                            *
+ *  Occasionally it is useful to be able to process the current state of the  *
+ *  parse from a grammar action. pState will return the current parser        *
+ *  machine. It can then be bound to a local and processed by a parse action. *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class PState extends Recognizer
+    
+    @Operation code(outputChannel)
+      format(outputChannel," pState ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::PState() |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

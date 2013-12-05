@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Subtract 1 from a Local Variable                     *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Local variables live in the current call frame. The instruction operand   *
+ *  is the index of a local variable. Its value should be an integer and is   *
+ *  reduced by 1.                                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SubLocal extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<SubLocal " + name + "," + offset + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

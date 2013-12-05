@@ -1,0 +1,52 @@
+/******************************************************************************
+ *                                                                            *
+ *                                Collections                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *   Sequences and sets are both instances of collection types. Every         *
+ *   collection type is an instance of Collection. A collection type has a    *
+ *   slot called elementType whose value is a classifier of the type of       *
+ *   elements in the instance of the collection type. Note that XMF is        *
+ *   dynamically and very weakly typed: you must ask for type checking to     *
+ *   occur (via classify etc) and even then type checking is fairly minimal.  *
+ *   That is not to say you cannot extend XMF to do much more type checking   *
+ *   if you want.                                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ context Collection
+  @Operation equals(other):Boolean
+    if other.isKindOf(Collection)
+    then elementType.equals(other.elementType)
+    else false
+    end
+  end
+  
+context Collection
+  @Operation inheritsFrom(c:Classifier):Boolean
+    if c.isKindOf(Collection)
+    then elementType.inheritsFrom(c.elementType)
+    else c = Element
+    end
+  end
+  
+context Collection
+  // Create a new collection type by applying the class Collection to a type.
+  @Operation init(args)
+    let type = args->at(0)
+    in if type = Element
+       then CollectionOfElement
+       else
+         self.setElementType(type);
+         self.parents := Set{CollectionOfElement};
+         self.default := null
+       end
+    end
+  end
+  
+context Collection
+  @Operation setElementType(type)
+    self.elementType := type;
+    self.name := "Collection(" + type.name.toString() + ")";
+    self
+  end

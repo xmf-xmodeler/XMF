@@ -1,0 +1,91 @@
+parserImport XOCL;
+
+import Import;
+import Ecore;
+
+context Ecore
+
+  @Class EcoreImporter 
+  
+    // The Ecore importer class is used to create an importer
+    // of .ecore files. The importer manages more than one ecore
+    // file. This is required when imports are used across ecore
+    // models...
+    
+    @Attribute importedFiles : Table = Table(10) (?) end
+    
+    @Operation deployAll(dir:String)
+    
+      // Called to write out all the packages into sub-directories
+      // of the supplied directory...
+      
+      if dir.isDir()
+      then
+        @For package inTableValues importedFiles do
+          let packageDir = dir + "/" + package.name()
+          in if packageDir.mkDir()
+             then package.deployXOCL(packageDir)
+             end
+          end
+        end
+      else self.error("Cannot find root directory " + dir)
+      end
+    end
+    
+    @Operation getClass(file:String,class:String,isAtom:Boolean):Class
+    
+      // Find a class using the name of the file that defines it.
+      // The isAtom argument is used to translate the class into
+      // a sequence type if necessary. This operation is used by
+      // the cross-references in ecore files when classes have been
+      // imported...
+      
+      if importedFiles.hasKey(file)
+      then
+        let package = importedFiles.get(file)
+        in if package.hasElement(class)
+           then 
+             let type = package.getElement(class)
+             in if isAtom
+                then type
+                else Seq(type)
+                end
+             end
+           else self.error(formats("Cannot find ~S in ~S.",Seq{class,file}))
+           end
+        end
+      else self.error(formats("Cannot find ~S.",Seq{file}))
+      end
+    end
+    
+    @Operation initAll()
+    
+      // The packages that are imported have delayed references for
+      // types. They *must* be initialized before they can be used.
+      // This operation initializes all the packages in one go..
+      
+      @For package inTableValues importedFiles do
+        package.init()
+      end
+    end
+    
+    @Operation importFile(dir:String,file:String)
+    
+      // Import the file in the supplied directory. If the file
+      // references classes that have been imported from other files
+      // then the files are assumed to live in the same directory...
+      
+      if importedFiles.hasKey(file)
+      then importedFiles.get(file)
+      else
+        @WithOpenFile(fin <- dir + "/" + file)
+          let ein = EcoreInputChannel(dir,file,self,fin) then
+              package = ein.parse()
+          in importedFiles.put(file,package);
+             package
+          end
+        end
+      end
+    end
+  
+  end

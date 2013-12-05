@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Load Time                               *
+ *                              ----------------------                        *
+ *                                                                            *
+ *  A manifest declares the files and directories that constitute a functional*
+ *  unit. The files and compiled and loaded in the order that they occur in   *
+ *  a manifest. By default files are not loaded into the compile-time         *
+ *  environment and are always loaded into the run-time environent. However,  *
+ *  occasionally, it is necessary to load files at compile-time (for example  *
+ *  when the describe syntax features in terms of themselves) or not at all.  *
+ *  A manifest allows an optional annotation on an entry to describe its      *
+ *  load-time.                                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+context Manifests
+
+  @Enum LoadTime(
+  
+    // Load the entry before compiling it...
+    
+    CompileTime,
+    
+    // Load the entry when the functional unit is loaded...
+    
+    RunTime,
+    
+    // Same as CompileTime + LoadTime...
+    
+    Both,
+    
+    // Do not load the entry...
+    
+    None,
+    
+    // Used when deploying boot files via a manifest...
+    
+    Kernel) 
+  end

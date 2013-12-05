@@ -1,0 +1,9 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Tag
+  @Operation toJava(out:OutputChannel)
+    format(out,"    stack.push(new Tag(\"~S\"));~%",Seq{tag})
+  end

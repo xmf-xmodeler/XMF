@@ -1,0 +1,9 @@
+import OCL;
+
+context Let
+  @Operation eval(target,env,imports)
+    self.dropDeclarations(body).eval(target,bindings->iterate(b e = env | 
+      let b = b.desugar()
+      in e.bind(b.name,b.value.eval(target,env,imports))
+      end),imports)
+  end

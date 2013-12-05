@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Const
+  @Operation toJava(out:OutputChannel)
+    format(out,"    konst = new Const();~%");
+    format(out,"    konst.setValue(\"~S\");~%",Seq{value});
+    format(out,"    stack.push(konst);~%")
+  end

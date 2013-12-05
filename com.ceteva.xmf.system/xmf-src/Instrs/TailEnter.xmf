@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Lastly Enter An Operation                           *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as ENTER except that this is the last action performed by the current*
+ *  cal frame before it returns. Therefore the current frame can be reused.   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class TailEnter extends Instr
+  
+    @Attribute arity : Integer end
+    
+    @Constructor(arity) end
+    
+    @Operation toString():String
+      "<TailEnter " + arity + ">"
+    end
+    
+    @Operation operands():Integer
+      arity
+    end
+    
+  end
+  

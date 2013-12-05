@@ -1,0 +1,202 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Formatting Output                             *
+ *                              -----------------                             *
+ *                                                                            *
+ *    An output formatter is an invocable element that expects to be supplied *
+ *    with an output channel, a control string and some format args. The      *
+ *    formatter processes the control string, consuming the format args (and  *
+ *    occasionally generating format args) and writing characters to the      *
+ *    output channel.                                                         *
+ *                                                                            *
+ *    The control string may contain literal characters (that are just copied *
+ *    to the output channel) and control characters. Each control character   *
+ *    starts with a ~. The character following ~ is an index into a table of  *
+ *    handlers each of which determine what to do with the current format     *
+ *    context. The format context contains the current collection of format   *
+ *    args.                                                                   *
+ *                                                                            *
+ *    Format handlers are defined for each control character and are supplied *
+ *    with the current format context. The handler will process the context   *
+ *    in any way it wants to. This may involve consuming any number of format *
+ *    args, advancing the index into the format args or even adding some      *
+ *    format args to the context. In any case the handler will will send some *
+ *    characters to the output channel.                                       *
+ *                                                                            *
+ *    A format object is intended to be extensible and there may be more than *
+ *    one formatter created. By default XMF provides a standard formatter as  *
+ *    the value ofthe global variable 'format'.                               *
+ *                                                                            *
+ *    In addition to processing the control string at run-time, the compiler  *
+ *    can open-code a call of format. Each control character *may* define     *
+ *    a compiler that can produce code. If there are compilers defined for all*
+ *    the control characters in a control stringthen a particular use of      *
+ *    'format' in source code will be open-coded. This produces much more     *
+ *    efficient code since the context need never be created.                 *
+ *                                                                            *
+ *    Control characters start with ~ which must be followed by at least one  *
+ *    character. Occasionally a control character may take arguments which    *
+ *    by convention are supplied as comma separated values within < and >     *
+ *    following the ~ and before the control character.                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+
+context IO
+
+  @Class Format
+    
+    @Attribute handlers  : Table = Table(10) end
+    @Attribute compilers : Table = Table(10) end
+    
+    @Operation compile(out:Performable,control:String,args:Seq(Performable)):Performable
+      
+      // Translates the supplied format arguments to code that performs 
+      // formatting much more efficiently. Assumes that the control string
+      // has been analysed by canCompile so that no problems will occur.
+      
+      [| let formatOut = <out>
+         in <self.compileControl(control->asSeq,args)>
+         end |]
+    end
+    
+    @Operation compileControl(control:Seq(Integer),args:Seq(Performable)):Performable
+    
+      // Write out the prefix literal string then dispatch on the
+      // next control character...
+      
+      let pred = @Operation(c) c <> "~"->at(0) end then
+          prefix = control->takeWhile(pred) then
+          suffix = control->drop(prefix->size) then
+          command = [| formatOut.writeString(<OCL::StrExp(prefix->asString)>) |]
+      in if suffix->isEmpty 
+         then command
+         else [| <command>; <self.compileDispatch(suffix,args)> |]
+         end
+      end
+    end
+    
+    @Operation compileDispatch(control:Seq(Integer),args:Seq(Performable)):Performable
+    
+      // The first character in the control is ~ and the next is the
+      // control character that defines a compiler in the compilers
+      // table...
+      
+      let char = control->at(1)
+      in if compilers.hasKey(char)
+         then 
+           let handler = compilers.get(char)
+           in handler(control->drop(2),args,self)
+           end
+         else self.error("Cannot find format compiler for " + char)
+         end
+      end
+    end
+    
+    @Operation canCompile(control:Seq(Integer)):Boolean
+    
+      // The control can be compiled if there are compilation handlers
+      // for all of the control characters...
+      
+      if control->isEmpty
+      then true
+      elseif control->head = "~"->at(0) and control->size > 1
+      then 
+        compilers.hasKey(control->at(1)) andthen
+        self.canCompile(control->drop(2))
+      else self.canCompile(control->tail)
+      end
+    end
+    
+    @Operation defineCompiler(char:Integer,compiler)
+    
+      // A compiler should be an operation that takes three arguments:
+      //
+      // The rest of the control.
+      // The current collection of control arguments.
+      // The format object (to continue compilation of the control).
+      
+      compilers.put(char,compiler)
+    end
+    
+    @Operation defineHandler(char:Integer,handler)
+    
+      // Define a handler. The handler should take the following args:
+      // 
+      // The char.
+      // The output channel.
+      // The format context.
+      //
+      
+      handlers.put(char,handler)
+    end
+    
+    @Operation dispatch(char,output,formatContext)
+      // Find a handler for the char and invoke it.
+      if handlers.hasKey(char)
+      then 
+        let handler = handlers.get(char)
+        in 
+          handler(char,output,formatContext);
+          self.format(output,formatContext)
+        end
+      else self.error("Format::dispatch: no handler for " + Seq{char}->asString)
+      end
+    end
+    
+    @Operation format(output,formatContext):Element
+    
+      @Doc
+        This is the formatting loop. While there are control chars:
+        if the char is '~' then jump to the handler otherwise just
+         print the char and go round again.
+      end
+      
+      if formatContext.complete()
+      then self
+      else
+        let char = formatContext.nextChar()
+        in if char = "~"->at(0)
+           then 
+             if formatContext.complete()
+             then 
+               self.error("Format::format: expecting a char after ~ in " + formatContext.control)
+             else
+               formatContext.parseArgs(); 
+               self.dispatch(formatContext.nextChar(),output,formatContext)
+             end
+           else 
+             output.write(char);
+             self.format(output,formatContext)
+           end
+        end
+      end
+    end
+    
+    @Operation invoke(target:Element,args:Seq(Element)):Element
+    
+      // If a format has not been compiled out (or is evaluated) this this is
+      // the entry point for formatting the data..
+      
+      let outputChannel = args->at(0);
+          controlString = args->at(1);
+          values = if args->size > 2 then args->at(2) else Seq{} end
+      in self.format(outputChannel,FormatContext(controlString,values,0));
+         outputChannel
+      end
+    end
+    
+    @Operation target()
+      self
+    end
+    
+  end
+  
+context Root
+
+  // Define the basic formatter...
+  
+  @Bind format = Format() end

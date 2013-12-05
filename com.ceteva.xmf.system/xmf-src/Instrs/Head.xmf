@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Take the Head of a Sequence                       *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a sequence and pushes  the head of the sequence. If the value is not *
+ *  a sequence then the value is sent a head/1 message.                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class Head extends Instr
+      
+  end

@@ -1,0 +1,54 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Include a File                                 *
+ *                         ----------------------                             *
+ *                                                                            *
+ *   This construct allows you to statically include a file and to specify    *
+ *   the language that the file is to be processed using.                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XOCL
+
+  @Class Include 
+    
+    @Grammar 
+    
+      Include ::=
+      
+        '['
+      
+        // The language is specified as a path...
+        
+        language = Path
+        
+        // Followed by a starting NT...
+        
+        ',' start = Name
+        
+        // Followed by a sequence of imported name-spaces...
+        
+        imports = (',' Path)*
+        
+        ']'
+      
+        // The file is specified as a string...
+        
+        file = Str
+        
+        'end'
+        
+        { let grammar = language.lookup().grammar;
+              importedNameSpaces = imports->collect(path | path.lookup())
+          in grammar.parseFile(file,start,importedNameSpaces)
+          end
+        }.
+      
+      Path ::= n = Name ns = ('::' Name)* { Seq{n | ns} }.
+        
+    end
+    
+  end

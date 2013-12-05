@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                     Lastly Enter a Dynamic Operation                       *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as ENTERDYN except that this is the last thing to do in the current  *
+ *  call frame before it returns. Therefore the current call frame can be     *
+ *  reused.                                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class TailEnterDyn extends Instr
+ 
+    @Attribute arity : Integer end
+    @Attribute name : Symbol end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name,arity) end
+    
+    @Operation toString():String
+      "<TailEnterDyn " + arity + "," + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(nameOffset.byte(2),arity,nameOffset.byte(1))
+    end
+    
+  end
+  

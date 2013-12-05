@@ -1,0 +1,106 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Including Patterns                            *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  An including pattern matches a value that is a set. The first value       *
+ *  that matches the element pattern is selected such that the rest of the    *
+ *  set matches the set-pattern. Subsequence pattern failure causes           *
+ *  other matching combinations to be tried.                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import OCL;
+import Exceptions;
+
+context OCL
+
+  @Class Includingp extends Pattern
+    
+     @Attribute set     : Pattern end
+     @Attribute element : Pattern end
+     
+     @Constructor(set,element) end
+     
+     @Operation bind(value:Element,target:Element,env:Env::Env,imports:Seq(NameSpace)):Env::Env
+       self.error("bind is not implemented for Includingp")
+     end
+     
+     @Operation lift():Performable
+       Apply(self.typeExp(),Seq{set.lift(),element.lift()})
+     end
+     
+     @Operation matchCode(value:Performable,success:Performable,fail:Performable):Performable
+     
+       // Return code that performs the pattern match...
+       
+       let elementVar = element.newVar();
+           setVar = set.newVar()
+       in 
+       
+           // Including pattern match sets...
+           
+           [| if <value>.isKindOf(SetOfElement) and <value> <> Set{}
+             then 
+               @Letrec 
+                 
+                 // Set up a recursive operation that can be used to iterate
+                 // through the elements of the set and try the matches. If any
+                 // of the matches fail then the failure continuation will return
+                 // here to select an alternative...
+                 
+                 tryElement = 
+                   @Operation(set,tried)
+                     if set->isEmpty
+                     then <fail>
+                     else 
+                     
+                       // select the element at random from the set...
+                       
+                       let <elementVar> = set->sel then
+                       
+                           // Create the set without the element...
+                           
+                           set = set->excluding(<Var(elementVar)>) then
+                           
+                           // Failure continuation...
+                           
+                           backtrack = 
+                             @Operation() 
+                               tryElement(set,tried->including(<Var(elementVar)>)) 
+                             end then
+                           <setVar> = set + tried
+                       in 
+                          // Go ahead and try the matches..
+                       
+                          <element.matchCode(Var(elementVar),set.matchCode(Var(setVar),success,fail),fail)>
+                       end
+                     end
+                   end
+                 in tryElement(<value>,Set{})
+                 end
+              else <fail> 
+              end
+           |]
+        end                       
+     end
+     
+     @Operation needsBacktrack():Boolean
+       true
+     end
+     
+     @Operation pprint(out)
+       set.pprint(out);
+       format(out,"->including(");
+       element.pprint(out);
+       format(out,")")
+     end
+     
+     @Operation toSig()
+       ParametricType(Seq{"Set"},Seq{NamedType()}).toSig()
+     end
+     
+   end

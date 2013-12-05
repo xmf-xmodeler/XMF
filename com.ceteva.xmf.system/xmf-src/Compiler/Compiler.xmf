@@ -1,0 +1,137 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              The OCL Compiler                              *
+ *                              ----------------                              *
+ *                                                                            *
+ *  The OCL compiler is responsible for transforming the OCL source code into *
+ *  XMF VM instructions. The compiler extends each of the OCL classes with    *
+ *  a collection of compilation operations that are used to transform the     *
+ *  syntax. In addition the Compiler package defines some classes that are    *
+ *  used by the compiler, for example to maintain information on the type and *
+ *  scope of variables.                                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Package Compiler
+    
+    // The following counter is used to 
+    // allocate new jump labels...
+    
+    @Bind labelCount = 0     end   
+    
+    // Errors that occur during compilation are
+    // added to the following collection. Clients
+    // of the compile can then interrogate the errors.
+    // Clients should reset this collection before
+    // using the compiler...
+    
+    @Bind errors     = Set{} end 
+    
+    // The following flag is used to determine whether
+    // a file will be compiled whether it is out of date
+    // with respect to the binary or not...
+    
+    @Bind compileAll = false end   
+    
+    // The compiler specifies the language that will be
+    // used to process files etc. By default this language
+    // is XOCL. Changing this binding will cause the
+    // language to change...
+    
+    @Bind language = OCL::OCL end
+    
+    // When the following flag is set to true, the code
+    // boxes save the source code. This can be used by
+    // debugger clients...
+    
+    @Bind saveSource = false end
+    
+    // When the following compiler flag is true the
+    // compiler emits LINE instructions that record
+    // the position in the source file. This information
+    // can be used by debuggers...
+    
+    @Bind sourcePos  = true end  
+    
+    // When the following compiler flag is true, the
+    // compiler emits LOCALNAME and UNSETLOCAL instructions
+    // that register and deregister local names when the
+    // locals are bound. The information can be used
+    // by debuggers...
+    
+    @Bind localNames  = true end  
+    
+    // When the following compiler flag is true, the
+    // compiler emits code that checks the type of
+    // local variables when they are bound...
+    
+    @Bind checkTypes = false end
+    
+    @Operation compilationError(message,resource . rest)
+    
+      // Register a compilation error...
+      
+      if rest->isEmpty
+      then Compiler::errors := Compiler::errors->including(Compiler::CompilationError(message,resource))
+      else Compiler::errors := Compiler::errors->including(Compiler::CompilationError(message,resource,rest->at(0)))
+      end
+    end
+    
+    @Operation compilationErrors():Boolean
+    
+      // Returns true when there are some compilation errors...
+      
+      not errors->isEmpty
+    end
+    
+    @Operation label(p:Performable,env,frame,isLast,saveSource)
+      
+      // Compile the performable object p and label the first instruction
+      // with a new label. Returns a sequence of machine instructions for p...
+ 
+      Compiler::labelInstrs(p.compile(env,frame,isLast,saveSource),Compiler::newLabel())
+    end
+    
+    @Operation labelInstrs(instrs,label)
+     
+      // Set the label of the first instruction.
+     
+      instrs->head.setLabel(label);
+      instrs
+    end
+    
+    @Operation newLabel():String
+      
+      // Allocates a label to be used as the symbolic address of a
+      // machine instruction...
+  
+      Compiler::labelCount := Compiler::labelCount + 1;
+      "label" + Compiler::labelCount.toString()
+    end
+    
+    @Operation pprintCompilationErrors(out)
+      if Compiler::compilationErrors()
+      then
+        format(out,"~%The following compilation errors occurred:~%");
+        @For error in errors do
+          format(out,"  ");
+          error.pprint(out);
+          format(out,"~%")
+        end
+      else format(out,"~%There were no compilation errors.~%")
+      end
+    end
+    
+    @Operation resetCompilationErrors()
+    
+      // Clients should use this before compiling a
+      // collection of files to reset the errors...
+      
+      Compiler::errors := Set{}
+    end
+  
+  end

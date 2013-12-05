@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Transform a Value into a Sequence                    *
+ *                       ---------------------------------                    *
+ *                                                                            *
+ *  Pops a value and pushes a sequence. The VM handles a number of basic      *
+ *  value translations. Otherwise the asSeq() operation is called.            *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class AsSeq extends Instr
+    
+  end

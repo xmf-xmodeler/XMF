@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Links                                    *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Link extends Entry
+
+    @Attribute entry : Entry (?,!,+,-) end
+    @Attribute ref : String (?,!,+,-) end
+    
+    @Constructor(entry,ref) ! end
+    
+    @Operation contents()
+      entries
+    end
+
+  end

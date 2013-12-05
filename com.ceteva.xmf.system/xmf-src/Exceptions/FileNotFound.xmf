@@ -1,0 +1,16 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class FileNotFound extends Exception
+     
+    @Attribute path : String end
+    
+    @Constructor(path) !
+       self.setBacktrace();
+       self.message := "The file " + path + " cannot be found." 
+    end
+    
+  end
+      
+    

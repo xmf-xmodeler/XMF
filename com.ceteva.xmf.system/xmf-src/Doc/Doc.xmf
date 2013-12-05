@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Documentation                                 *
+ *                          --------------------                              *
+ *                                                                            *
+ *  Documented elements have a slot for documentation. This grammar allows    *
+ *  documents to be constructed using @Doc ... end. Many elements such as     *
+ *  classes and packages have syntaxes that allow documentation to be supplied*
+ *  as part of the definition.                                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import Parser::BNF;
+
+context Doc
+  
+  @Grammar
+    
+    Doc ::= doc = Char* 'end' { [| XCore::Doc(<StrExp(doc->asString)>) |] }.
+      
+  end
+  
+    

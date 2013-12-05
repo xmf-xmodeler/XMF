@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Updating A Tail                              *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  Setting the tail of a pair.                                               *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class TailUpdate extends OCL::OCL
+    
+    @Attribute seq   : Performable end
+    @Attribute value : Performable end
+    
+    @Constructor(seq,value) ! end
+    
+    @Operation pprint(out,indent)
+      seq.pprint(out,indent);
+      format(out,"->tail := ");
+      value.pprint(out,indent)
+    end
+    
+  end

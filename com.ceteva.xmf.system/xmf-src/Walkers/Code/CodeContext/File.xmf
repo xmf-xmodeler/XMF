@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+import CodeContext;
+
+context CodeContext
+
+  @Class File extends Context
+    
+    @Attribute path : String (?,!) end
+    
+    @Constructor(path,next) ! end
+    
+  end

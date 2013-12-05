@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Ordered Commands                             *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *                                                                            *  
+ *  XOCL is imperative and commands are ordered using infix ';'. Note that    *
+ *  the expression e1; e2 treats ';' as an infix operator that evaluates e1   *
+ *  then e2 and returns the value of e2. Since this is an expression it can   *
+ *  occur anywhere an expression can occur (virtually anywhere).              *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Order extends OCL::OCL
+  
+    @Attribute first  : OCL::OCL end
+    @Attribute second : OCL::OCL end
+    
+    @Constructor(first,second) ! end
+    
+    @Operation pprint(out,indent)
+      first.pprint(out,indent);
+      format(out,";~%~V",Seq{indent});
+      second.pprint(out,indent)
+    end
+    
+  end

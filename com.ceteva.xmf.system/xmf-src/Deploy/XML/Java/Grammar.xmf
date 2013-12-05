@@ -1,0 +1,76 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+
+context Grammar
+  @Operation toJavaFile(pname:String,root:String)
+    self.toJavaFile(pname,root,name)
+  end
+  
+context Grammar
+  @Operation toJavaFile(pname:String,root:String,gname:String)
+    let path = root + "/" + gname + ".java"
+    in if if path.fileExists()
+          then xmf.question("Overwrite " + path + "?")
+          else true
+          end
+       then 
+         @WithOpenFile(fout -> path)
+           self.toJava(pname,gname,fout)
+         end
+       end
+    end
+  end
+
+context Grammar
+  @Operation toJava(pname:String,gname:String,out:OutputChannel)
+    format(out,"package ~S;~%~%",Seq{pname});
+    format(out,"import Grammar.*;~%~%");
+    format(out,"public class ~S {~%~%",Seq{gname});
+    format(out,"  static Grammar g = new Grammar();~%");
+    format(out,"  static Clause c;~%");
+    format(out,"  static java.util.Vector entry;~%");
+    format(out,"  static java.util.Hashtable PPT;~%");
+    format(out,"  static Any any;~%");
+    format(out,"  static AttRef attRef;~%");
+    format(out,"  static java.util.Vector attributes;~%");
+    format(out,"  static BindAtt bindAtt;~%");
+    format(out,"  static BindVar bindVar;~%");
+    format(out,"  static BoolAnd boolAnd;~%");
+    format(out,"  static BoolOr boolOr;~%");
+    format(out,"  static BoolNot boolNot;~%");
+    format(out,"  static Call call;~%");
+    format(out,"  static Case kase;~%");
+    format(out,"  static java.util.Vector caseClauses;~%");
+    format(out,"  static CaseClause caseClause;~%");
+    format(out,"  static Commands commands;~%");
+    format(out,"  static java.util.Vector kommands;~%");
+    format(out,"  static CommandVar commandVar;~%");
+    format(out,"  static CommandConst commandConst;~%");
+    format(out,"  static Const konst;~%");
+    format(out,"  static Cons cons;~%");
+    format(out,"  static Element element;~%");
+    format(out,"  static Empty empty;~%");
+    format(out,"  static Equals equals;~%");
+    format(out,"  static Event event;~%");
+    format(out,"  static java.util.Vector eventArgs;~%");
+    format(out,"  static Nil nil;~%");
+    format(out,"  static Text text;~%");
+    format(out,"  static UpdateVar updateVar;~%");
+    format(out,"  static VarRef varRef;~%");
+    format(out,"  static java.util.Vector names = new java.util.Vector();~%");
+    format(out,"  static java.util.Stack stack = new java.util.Stack();~%");
+    format(out,"  static java.util.Vector clauses = new java.util.Vector();~%~%");
+    format(out,"  public static Grammar grammar() {~%");
+    format(out,"    g.setClauses(clauses);~%");
+    @For clause in clauses do
+      format(out,"    ~S();~%",Seq{clause.name})
+    end;
+    format(out,"    return g;~%");
+    format(out,"  }~%");
+    @For clause in clauses do
+      clause.toJava(out)
+    end;
+    format(out,"}~%")
+  end     

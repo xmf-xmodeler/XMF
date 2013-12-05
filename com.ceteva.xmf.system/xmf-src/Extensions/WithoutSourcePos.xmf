@@ -1,0 +1,91 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+import XOCL;
+
+context XOCL
+
+  @Class WithoutSourcePos extends Performable
+  
+    @Doc
+      Turns off source position recording for the duration of the
+      body of the construct. Source positions are maintained by
+      emitted instructions into the executable. This can slow down
+      code that must be highly efficient.
+    end
+    
+    // Determines whether or not the compiler is affected statically
+    // or dynamically...
+    
+    @Attribute isDynamic : Boolean end
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      WithoutSourcePos ::= isDynamic = IsDynamic body = Exp 'end' { WithoutSourcePos(isDynamic,body) }.
+      
+      IsDynamic ::= 'isDynamic' { true } | { false }.
+      
+    end 
+    
+    @Attribute body : Performable end
+    
+    @Constructor(body) ! end
+    
+    @Constructor(isDynamic,body) end
+    
+    @Operation compile(env,frame,isLast,saveSource)
+      if isDynamic
+      then self.compileDynamic(env,frame,isLast,saveSource)
+      else self.compileStatic(env,frame,isLast,saveSource)
+      end
+    end
+    
+    @Operation compileDynamic(env,frame,isLast,saveSource)
+      [| let sourcePos = Compiler::sourcePos
+         in try
+              Compiler::sourcePos := false;
+              let value = <body>
+              in Compiler::sourcePos := sourcePos;
+                 value
+              end
+           catch(exception)
+             Compiler::sourcePos := sourcePos;
+             throw exception
+           end
+         end |].compile(env,frame,isLast,saveSource)
+    end
+    
+    @Operation compileStatic(env,frame,isLast,saveSource)
+      let sourcePos = Compiler::sourcePos
+      in try
+           Compiler::sourcePos := false;
+           let instrs = body.compile(env,frame,isLast,saveSource)
+           in Compiler::sourcePos := sourcePos;
+              instrs
+           end
+         catch(exception)
+           Compiler::sourcePos := sourcePos;
+           throw exception
+         end
+      end
+    end
+    
+    @Operation eval(target,env,imports)
+      body.eval(target,env,imports)
+    end
+   
+    @Operation FV():Set(String)
+      body.FV()
+    end
+    
+    @Operation maxLocals():Integer
+      body.maxLocals()
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@WithoutSourcePos~%~V",Seq{indent+2});
+      body.pprint(out,indent+2);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

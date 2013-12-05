@@ -1,0 +1,31 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("i",
+  @Operation(args,target,env,imports) 
+    @Doc
+      ?i [+|-] <PATH>*     Import(+) or remove(-) a name space at the top level.
+    end
+    if args->size > 0 and xmf.hasProperty("topLevel")
+    then
+      let arg1 = args->at(0) then
+          mode = if arg1 = "+" then "+" elseif arg1 = "-" then "-" else "+" end then
+          nameSpaces = if arg1 = "+" or arg1 = "-" then args->tail else args end then
+          paths = nameSpaces->collect(ns | ns.subst(",","::",true).splitBy(",",0,0))
+      in @For path in paths do
+           let nameSpace = path->ref(xmf.topLevel().imports())
+           in if nameSpace <> null
+              then 
+                if mode = "+"
+                then xmf.topLevel().importNameSpace(nameSpace)
+                else xmf.topLevel().deleteNameSpace(nameSpace)
+                end
+              else format(stdout,"?i error: ~{::~;~S~} does not exist.~%",Seq{path})
+              end
+           end
+         end
+      end
+    end     
+  end);

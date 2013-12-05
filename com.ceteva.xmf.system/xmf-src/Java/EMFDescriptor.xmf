@@ -1,0 +1,58 @@
+parserImport XOCL;
+
+import Java;
+
+context Java
+
+  @Class EMFDescriptor extends JavaDescriptor
+     
+    @Attribute type    : String (!) end
+    @Attribute package : String end
+    @Attribute nsURI   : String end
+    
+    @Constructor(type,package,nsURI) ! 
+      self.mopName := "com.ceteva.xmf.emf.EObjectMOP"
+    end
+    
+    @Constructor(type,package,nsURI,mopName)
+    end
+    
+    @Constructor(package,nsURI) 
+    
+      // Let the type default when the descriptor 
+      // is added to an EMF class...
+      
+      self.mopName := "com.ceteva.xmf.emf.EObjectMOP"
+    end
+    
+    @Operation getEPackage()
+    
+      // Get the global definition of ECore EPackage...
+      
+      xmf.javaClass("org.eclipse.emf.ecore.EPackage")
+    end
+    
+    @Operation getFactory()
+    
+      // Get the globally registered factory defined
+      // by the name-space URI...
+      
+      self.getRegistry().getEFactory(nsURI)
+    end
+    
+    @Operation getRegistry()
+    
+      // Get the global package registry...
+      
+      self.getEPackage().get("org.eclipse.emf.ecore.EPackage$Registry").INSTANCE
+    end
+    
+    @Operation getPackage()
+    
+      // Get the globally registered package defined
+      // by the name-space URI...
+      
+      self.getRegistry().getEPackage(nsURI)
+    end
+    
+  end

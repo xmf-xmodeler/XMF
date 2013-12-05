@@ -1,0 +1,42 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+import PPrint;
+
+context Element
+  @Operation pprint()
+  
+    // Uses defaults defined in PPrint...
+    
+    self.pprint(PAGEWIDTH,RIBBONWIDTH,PPRINTDEPTH,PPRINTLENGTH)
+  end
+  
+context Element
+  @Operation pprint(width:Integer,ribbon:Integer,depth:Integer,length:Integer)
+  
+    // Legacy, defaults the text position to 0...
+    
+    self.pprint(width,ribbon,depth,length,0)
+  end
+
+context Element
+  @Operation pprint(width:Integer,ribbon:Integer,depth:Integer,length:Integer,linePosition:Integer):String
+  
+    // Returns a string after pretty-printing the supplied
+    // value.
+    
+    let printer = Walkers::PPrint(depth,length) then
+        doc = printer.dispatch(self,0);
+        machine = Machine(width,ribbon)
+    in machine.load(Seq{doc},linePosition);
+       machine.run();
+       machine.text()  
+    end
+  end
+  
+@Handler XCore::Element in PPrint(element,depth,encountered)
+  Just(element.toString())
+end;
+          

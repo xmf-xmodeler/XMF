@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Tag Expected                             *
+ *                              ----------------------                        *
+ *                                                                            *
+ *   A tag is expected but not found in an XML input.                         *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context XML
+
+  @Class ExpectingTag extends Exception
+  
+    @Operation init(Seq{tag})
+      self.message := "Expecting tag " + tag + " at this point."
+    end
+    
+  end

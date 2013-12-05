@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                XML Abstract Syntax                         *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    XML consists of nodes. The different types of XML node all inherit from *
+ *    the class XML::Node.                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import XML;
+
+context XML
+
+  @Class Node isabstract
+    
+    @AbstractOp isWhiteSpace():Boolean
+    end
+    
+    @AbstractOp pprint(out,indent)
+      
+      //  Prints the XML node to the supplied output channel
+      //  using newlines and indentation to show nesting.
+    
+    end
+  
+    @AbstractOp print(out) 
+      
+      //  Prints the XML node to the output channel. The output
+      //  occurs on a single line.
+ 
+    end
+    
+    @AbstractOp stripWhiteSpace():Node
+    end
+  
+  end
+  
+    

@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Update Head of a Pair                            *
+ *                        ---------------------------                         *
+ *                                                                            *
+ *  Sequences are made up of pairs (like Lisp). The head and tail of the pair *
+ *  can be updated.                                                           *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class HeadUpdate extends OCL::OCL
+    
+    @Attribute seq : Performable end
+    @Attribute value : Performable end
+    
+    @Constructor(seq,value) ! end
+    
+    @Operation pprint(out,indent)
+      seq.pprint(out,indent);
+      format(out,"->head := ");
+      value.pprint(out,indent)
+    end
+    
+  end

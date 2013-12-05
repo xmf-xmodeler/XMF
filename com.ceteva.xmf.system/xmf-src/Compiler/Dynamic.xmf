@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Dynamic Variables                                *
+ *                           -----------------                                *
+ *                                                                            *
+ *  Dynamic variables are those that live in name-spaces. Typically a dynamic *
+ *  variable is in scope because it has been imported into the current        *
+ *  compilation unit (i.e. file). When the compiler encounters a variable     *
+ *  reference for a variable that has not been declared, it assumes that the  *
+ *  reference is dynamic.                                                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+
+  context Compiler
+  
+    @Class Dynamic extends Var
+      
+      @Operation ref()
+      
+        // Produce a dynamic reference...
+        
+        Seq{Instrs::Dynamic(Symbol(name))}
+      end
+      
+    end

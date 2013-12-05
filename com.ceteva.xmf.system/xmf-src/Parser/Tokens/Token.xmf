@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  A Token                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *  The tokenizer does not construct instances of this class when asked for   *
+ *  the next token. This is used by the parsing machine when a grammar asks   *
+ *  for the current token. The information from the tokenizer is used to      *
+ *  create and return an instance of this class that can then be used in the  *
+ *  grammar actions.                                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser;
+import OCL;
+
+context Tokens
+
+  @Class Token 
+
+	@Attribute type      : Integer end     // An integer denoting the type.
+	@Attribute data      : Element end     // The whitespace stripped chars.
+	@Attribute charPos   : Integer end     // The current charPos.
+	@Attribute lineCount : Integer end     // The current lineCount.
+	@Attribute charCount : Integer end     // The total chars consumed in input.
+	@Attribute chars     : String  end     // The raw input.
+	
+	@Constructor(type,data,charPos,lineCount,charCount,chars) ! end
+	
+  end

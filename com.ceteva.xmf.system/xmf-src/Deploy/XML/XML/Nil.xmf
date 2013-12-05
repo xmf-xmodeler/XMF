@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Nil
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Nil/>
+    end
+  end

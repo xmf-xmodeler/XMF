@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Code Generation Syntax Constructs                    *
+ *                       ---------------------------------                    *
+ *                                                                            *
+ *    A code generation construct is defined using a grammar that uses the    *
+ *    mapping facilities provided by CodeGen. Each code generator syntax      *
+ *    construct should inherit from Generator. (NB not strictly true, but we  *
+ *    might add some definitions to Generator that make it necessary so it is *
+ *    useful to have a root construct).                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+context CodeGen
+
+  @Class Generator isabstract
+  
+  end

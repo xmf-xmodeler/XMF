@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Access to Line Position                        *
+ *                             -----------------------                        *
+ *                                                                            *
+ *  XBNF provides a built-in non-terminal that provides access to the current *
+ *  line position in the parse.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class LinePos extends Recognizer
+    
+    @Operation code(outputChannel)
+      format(outputChannel," LinePos ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::LinePos() |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

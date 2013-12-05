@@ -1,0 +1,52 @@
+parserImport XML::PrintXML;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Inflating Objects                             *
+ *                            ---------------------                           *
+ *                                                                            *
+ *    An object XML inflater is used to control how objects are               *
+ *    are mapped from XML to XMF. Typically a formatter has been              *
+ *    used to write out certain types of object in a bespoke XML              *
+ *    format. The generic XMLInputChannel is parameterized with               *
+ *    respect to an inflater so which performs the bespoke                    *
+ *    formatting in reverse.                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+import XML::Parser;
+
+context IO
+
+  @Class ObjectXMLInflater
+  
+    // The predicate is supplied to the reference resolver to
+    // determine whether or not to walk an element when looking
+    // for references. BY default all elements are walker, but you
+    // might want to prevent bleed into system objects for example...
+    
+    @Attribute pred : Operation = @Operation(x) true end (?,!) end
+    
+    @Constructor(pred) end
+    
+    @Operation endObject(tag:Buffer,inch:XMLInputChannel)
+      inch.endObject()
+    end
+    
+    @Operation result(value,idTable)
+    
+      // Perform any processing on the result of inflating the
+      // XML source file...
+      
+      let walker = ResolveRefs(idTable,pred)
+      in walker.walk(value,null)
+      end
+    end
+  
+    @Operation startObject(tag:Buffer,atts:Buffer,inch:XMLInputChannel)
+      inch.startObject(atts)
+    end
+    
+  end

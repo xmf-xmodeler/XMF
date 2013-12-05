@@ -1,0 +1,61 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Java Class                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   By specifying JavaClass as the meta-class of your class definition, you  *
+ *   declare that you will have foreign objects (i.e. Java objects) that will *
+ *   return your new class as their classifier (via of()). Since XOCL defined *
+ *   operations take precedence over Java methods, any operations you define  *
+ *   in your new class can be used with the instances of the Java class when  *
+ *   they are referenced within XOCL.                                         *
+ *                                                                            *
+ *   A JavaClass contains a Java descriptor that names the Java class whose   *
+ *   instances are mapped to be classified by the JavaClass. In addition the  *
+ *   descriptor optionally specifies a foreign object MOP that is used to     *
+ *   implement the how the VM manipulates the Java objects.                   *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Java;
+
+context Java
+
+  @Class JavaClass extends Class
+     
+    @Attribute descriptor : JavaDescriptor (?,!) end
+
+    @Operation add(element)
+      if element.isKindOf(JavaDescriptor)
+      then self.addDescriptor(element)
+      else super(element)
+      end
+    end
+
+    @Operation addDescriptor(d:JavaDescriptor)
+
+      // Update the tables so that new instances of
+      // the Java class are associated with this class
+      // as their type...
+
+      xmf.foreignTypeMapping().put(d.type(),self);
+      xmf.foreignMOPMapping().put(d.type(),d.mopName());
+      self.setDescriptor(d)
+    end
+
+    @Operation defaultParents()
+      Set{ForeignObject}
+    end
+
+    @Operation invoke(target,args)
+      let class = xmf.javaClass(descriptor.type(),descriptor.paths())
+      in if class = null
+         then self.error("Cannot find Java class " + descriptor.type())
+         else class.invoke(target,args)
+         end
+      end
+    end
+   
+  end

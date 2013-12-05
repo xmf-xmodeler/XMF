@@ -1,0 +1,100 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Constructors                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *   BOA (by order arguments) constructors are used by classes to create      *
+ *   their instances. BOA arguments are a layer above the new/init operations *
+ *   provided by classes and are used (in conjunction to keyword constructors)*
+ *   in preference to the new/init mechanism. When a class is applied to some *
+ *   values, the classes locals and inherited constructors are searched for   *
+ *   the first constructor that matches the number of values that are passed. *
+ *   If a constructor is found then the constructor lists a number of         *
+ *   attribute names in order (hence BOA). The correspondence between the     *
+ *   attribute names in the constructor and the supplied values is used to    *
+ *   initialise the slots of the new instance which is returned.              *
+ *                                                                            *
+ *   The body of a constructor is an operation used to initialise a new       *
+ *   instance created using the constructor. The valueof self in the body is  *
+ *   the new instance. Typically a constructor body is used to initialise or  *
+ *   tidy up the slot values.                                                 *
+ *                                                                            *
+ *   A constructor may be isDisplay which means that it is used by the        *
+ *   toString() operation to build a string representation of the object. A   *
+ *   class should have only one local isDisplay constructor and the most      *
+ *   specific constructor is used wrt inheritance.                            *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+context Constructor
+  @Operation body()
+    self.body
+  end
+  
+context Constructor
+  @Operation getBodySource()
+    self.body.source()
+  end
+
+context Constructor
+  @Operation init(args) 
+    self.names := args->at(0);
+    self.body := args->at(1);
+    // Migration to 3 initialization args. After full build no need to test.
+    if args->size >= 3 then self.documentation := args->at(2) end;
+    if args->size >= 4 then self.source := args->at(3) end;
+    if args->size >= 5 then self.isDisplay := args->at(4) end;
+    self
+  end
+
+context Constructor
+  @Operation invoke(object,args)
+    // Invoking a constructor will set the slots of the receiver to
+    // the supplied values.
+    if args->size <> names->size 
+    then self.error("Constructor expects " + names->size + " args, supplied with " + args->size)
+    else
+      @For name in names do
+        if object.hasStructuralFeature(name)
+        then object.set(name,args->head)
+        else self.error("Constructor for class " + object.of().path() + " attempting to set non-existent slot " + name)
+        end;
+        args := args->tail
+      end;
+      if body <> null then body.invoke(object,Seq{}) end;
+      object
+    end
+  end
+  
+context Constructor
+  @Operation ref(object:Object,index:Integer)
+    // Reference the index'th named slot in the object as defined by the
+    // sequence of names in the constructor.
+    if index < names->size
+    then 
+      let name = names->at(index)
+      in object.get(name)
+      end
+    else self.error("Constructor::ref: index " + index + " out of range.")
+    end
+  end
+  
+context Constructor
+  @Operation setOwner(owner:Class)
+    // When a constructor is added to a class, the owner of the body must
+    // be set in order for name space refs to be resolved correctly.
+    if body <> null
+    then body.owner := owner
+    end;
+    super(owner)
+  end
+
+context Constructor
+  @Operation toString():String
+    if owner.isReallyKindOf(Class)
+    then "<Constructor " + owner.name + "(" + names->separateWith(",") + ")>"
+    else super()
+    end
+  end

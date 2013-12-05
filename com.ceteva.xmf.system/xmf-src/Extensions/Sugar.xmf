@@ -1,0 +1,79 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Syntactic Sugar                               *
+ *                              ---------------                               *
+ *                                                                            *
+ *   One way of defining new syntax is to describe a construct in terms of a  *
+ *   collection of existing constructs. XMF syntax must be able to compile and*
+ *   evaluate itself. An easy way to implement these features is by           *
+ *   translating the new construct onto existing constructs that already know *
+ *   how to do these tasks. Definition by translation into existing constructs*
+ *   is often referred to as 'syntactic sugar'. This term refers to the fact  *
+ *   that the expressive power of the language is not really being ectended,  *
+ *   just made easier to write and understand. A class that extends Sugar must*
+ *   implement an operation called 'desugar' that translates the receiver into*
+ *   a performable element. When XMF wants to compile or evaluate an instance *
+ *   of Sugar it simply calls the 'desugar' operation and then compiles or    *
+ *   evaluates the result.                                                    * 
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Sugar isabstract extends Performable
+     
+     @Operation compile(env,frame,isLast,saveSource)
+     
+       // To compile, just desugar and then compile the result...
+       
+       self.desugar().setLine(line).compile(env,frame,isLast,saveSource)
+     end
+     
+     @AbstractOp desugar():Performable 
+     
+       // All concrete sub-classes of Sugar must implement this
+       // operation to return a performable element... 
+       
+     end
+     
+     @Operation eval(target,env,imports)
+     
+       // To evaluate, just desugar and then evaluate the result...
+       
+       self.desugar().setLine(line).eval(target,env,imports)
+     end
+     
+     @Operation FV():Set(String)
+     
+       // The free variables are those produced by desugaring...
+       
+       self.desugar().FV()
+     end
+     
+     @Operation lift():Performable
+     
+       // To lift the element, desugar it first...
+       
+       self.desugar().lift()
+     end
+     
+     @Operation maxLocals():Integer
+     
+       // Important to desugar before calculating the maximum 
+       // number of locals because the desugaring rule may
+       // introduce some local variables...
+       
+       self.desugar().maxLocals()
+     end
+     
+     @Operation typeExp():Performable
+       Path(Var("XOCL"),Seq{self.of().name})
+     end
+     
+   end

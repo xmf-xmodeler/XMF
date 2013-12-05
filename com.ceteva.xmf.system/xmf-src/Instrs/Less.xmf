@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Less Than Comparison of Values                     *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a value v2 and then v1 and performs v1 < v2, pushing the result on   *
+ *  the stack. If the values are integers then the VM handles it otherwise v1 *
+ *  is sent a less/1 message.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Less extends Instr
+    
+  end
+  

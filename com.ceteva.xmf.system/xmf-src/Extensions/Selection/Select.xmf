@@ -1,0 +1,69 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+
+context Selection
+
+  @Class Select extends Sugar
+  
+    @Attribute var        : String      end
+    @Attribute collection : Performable end
+    @Attribute predicate  : Performable end
+    @Attribute body       : Performable end
+    @Attribute default    : Performable end
+    
+    @Constructor(var,collection,predicate,body,default) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      Select ::= 
+      
+        var = Name
+        
+        'from'
+        
+        collection = Exp
+        
+        predicate = Predicate
+        
+        'do' body = Exp
+        
+        default = Default
+        
+        'end'
+        
+        { Select(var,collection,predicate,body,default) }.
+        
+      Predicate ::=
+      
+        'when' Exp
+        
+      | { [| true |] }.
+      
+      Default ::=
+      
+        'else' Exp
+        
+      | { [| @Operation(succ,fail) fail() end |] }.
+      
+    end
+    
+    @Operation desugar():Performable
+    
+      [| @Operation(succ,fail)
+           XOCL::Selection::select(<collection> ->asSeq,
+             @Operation(<var>,fail)
+               if <predicate>
+               then <body>(succ,fail)
+               else fail()
+               end
+             end,
+             @Operation()
+               <default>(succ,fail)
+             end)
+         end
+       |]
+     end
+    
+  end

@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Looking Up a Key in an A-List                     *
+ *                          -----------------------------                     *
+ *                                                                            *
+ *  Pops an a-list and then a key. Takes the tail of the a-list until a cell  *
+ *  whose key is the = to the supplied key. Pushes the a-list from that point *
+ *  on including the cell. Otherwise pushes the empty sequence.               *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Assoc extends Instr
+    
+  end

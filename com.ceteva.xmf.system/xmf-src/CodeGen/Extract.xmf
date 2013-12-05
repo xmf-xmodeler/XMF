@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+import CodeGen;
+
+context CodeGen
+
+  @Class Extract extends Literal
+  
+    @Operation desugar(path:String,lstart,lend,dstart,dend,estart,eend,out:Performable,level:Integer):Performable
+      [|
+        if <out>.of() = IO::FileOutputMergeChannel
+        then
+          let result = Kernel_patternMatch(<OCL::StrExp(chars)>,<out>.oldcontents)
+          in 
+            format(<out>,"~S",Seq{result})
+          end
+        end
+      |]
+    end
+    
+    @Operation dropString(path,out,lstart,lend,dstart,dend,estart,eend,level):String
+      if level = 0
+      then estart + chars.subst("end","e_nd",true) + eend
+      else estart + chars + eend
+      end
+    end
+  
+  end

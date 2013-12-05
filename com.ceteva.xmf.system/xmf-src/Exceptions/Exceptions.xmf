@@ -1,0 +1,53 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Exceptions                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *         When something goes wrong in XMF an exception is thrown. An        *
+ *         exception is an instance of the class XCore::Exception which       *
+ *         minimally contains a description of what went wrong. In addition   *
+ *         an exception should contain a snapshot of the VM state at the      *
+ *         point at which the exception was thrown. The snapshot allows       *
+ *         diagnostic information such as the sequence of operation calls     *
+ *         that lead to the problem.                                          *
+ *                                                                            *
+ *         When an exception is thrown it is handled by the most recently     *
+ *         established catch clause. The catch clause can choose to process   *
+ *         the exception and then proceed or it may choose to re-throw the    *
+ *         exception to a higher-level catch.
+ *                                                                            *
+ *         The Exceptions package contains sub-classes of Exception that      *
+ *         correspond to particular types of situation that arise. For example*
+ *         referencing a slot that does not exist. The sub-classes may contain*
+ *         extra information that relates to the particular type of situation *
+ *         (for example the object and slot name) that can be used to generate*
+ *         a more specific error message or may be used to handle the         *
+ *         exception effectively.                                             *
+ *                                                                            *
+ *         You are encouraged to define your own types of exception for your  *
+ *         applications and use them to handle error situations in a          *
+ *         systematic way. Note that there are some basic rules for using     *
+ *         exceptions - see some of the example classes in this package.      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Package Exceptions
+    
+    // Offsets into a VM supplied stack-frame...
+    
+    @Bind CODEBOX   = 0  end  // The code box of the frame.
+    @Bind CODEINDEX = 1  end  // Where we currently are in the code vector.
+    @Bind GLOBALS   = 2  end  // The 'closed in' variables vector.
+    @Bind DYNAMICS  = 3  end  // The imported tables.
+    @Bind LOCALS    = 4  end  // The number of args + locals + localnames
+    @Bind TARGET    = 5  end  // The target of the message (or null).
+    @Bind SUPERS    = 6  end  // A sequence of funs headed by the current fun.
+    @Bind HANDLER   = 7  end  // A handler arising from a try (or null).
+    @Bind VALUES    = 8  end  // The args + locals + localnames.
+    @Bind LINE      = 9  end  // The current source line.
+     
+   end

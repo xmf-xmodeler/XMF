@@ -1,0 +1,111 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Mapping Clauses                                 *
+ *                        -----------------------                             *
+ *                                                                            *
+ *   Clauses in mappings perform pattern matching and actions.                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import XOCL;
+import OCL;
+import IO;
+
+context XOCL
+
+  @Class Clause extends Performable
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      Clause ::= 
+      
+        // A Clause is a name...
+      
+        name = Name 
+        
+        // ... followed by patterns...
+        
+        patterns = ClausePatterns 
+        
+        // ... followed by a body...
+        
+        'do' body = Exp 
+        
+        // ... followed by optional bindings...
+        
+        bindings = ClauseBindings 
+        
+        'end' 
+        
+        { Clause(name,patterns,body,bindings) }.
+      
+      ClausePatterns ::= 
+      
+        // The clause patterns are just comma separated...
+      
+        p = Pattern 
+        
+        ps = (',' Pattern)* 
+        
+        { Seq{p | ps } }.
+      
+      ClauseBindings ::= 
+      
+        // The optional bindings are introduced by
+        // the 'where' keyword...
+      
+        'where' Bindings 
+        
+      | { Seq{} }.
+      
+    end
+    
+    @Attribute name     : String       end
+    @Attribute patterns : Seq(Pattern) end
+    @Attribute body     : Performable  end
+    @Attribute bindings : Seq(Binding) end
+    
+    @Constructor(name,patterns,body,bindings) end
+    
+    @Operation desugar()
+    
+      // If bindings are supplied then they are
+      // scoped over the body of the clause...
+      
+      if bindings->isEmpty
+      then CaseArm(patterns,body)
+      else CaseArm(patterns,Let(bindings,body))
+      end
+    end
+    
+    @Operation pprint():String
+      let out = StringOutputChannel()
+      in self.pprint(out,0);
+         out.getString()
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@Clause ~S~%~V",Seq{name,indent+2});
+      @For pattern in patterns do
+        pattern.pprint(out);
+        if not isLast then format(out,",") end
+      end;
+      format(out,"~%~Vdo~%~V",Seq{indent,indent+2});
+      body.pprint(out,indent+2);
+      if not bindings->isEmpty
+      then 
+        format(out,"~%~Vwhere~%~V",Seq{indent,indent+2});
+        @For binding in bindings do
+          binding.pprint(out,indent+2);
+          if not isLast then format(out,";~%~V",Seq{indent+2}) end
+        end
+      end;
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

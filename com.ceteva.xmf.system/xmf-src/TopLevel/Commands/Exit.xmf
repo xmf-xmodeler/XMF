@@ -1,0 +1,14 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("x",
+  @Operation(args,target,env,imports) 
+    @Doc
+      ?x                   Exit current XMF level.
+    end
+    let exit = env.lookup("exit")
+    in exit()
+    end
+  end);

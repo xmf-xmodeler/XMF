@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+
+context Call
+  @Operation toJava(out:OutputChannel)
+    format(out,"    call = new Call();~%");
+    format(out,"    call.setName(\"~S\");~%",Seq{name});
+    format(out,"    stack.push(call);~%")
+  end

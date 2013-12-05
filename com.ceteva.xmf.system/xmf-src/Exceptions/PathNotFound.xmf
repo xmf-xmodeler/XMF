@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Path Not Found                                *
+ *                              --------------                                *
+ *                                                                            *
+ *    An exception that is raised when a path cannot be resolved. The imports *
+ *    list the name-spaces that have been tried.                              *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context Exceptions
+
+  @Class PathNotFound extends Exception
+     
+    @Attribute path : Element end
+    @Attribute imports : Seq(NameSpace) end
+    
+    @Constructor(path,imports) !
+       self.setBacktrace();
+       self.message := 
+         "The path " + path.toString() +
+         " cannot be de-referenced" +
+         if imports->isEmpty
+         then "."
+         else ". The currently imported name spaces are: " + imports->collect(i | i.toString())->separateWith(",")
+         end
+    end
+    
+  end

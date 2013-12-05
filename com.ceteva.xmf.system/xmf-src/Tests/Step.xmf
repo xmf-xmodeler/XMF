@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+
+context Tests
+
+  @Class Step
+  
+    @Attribute message : String end
+    @Attribute beforeSelf : Object end
+    @Attribute afterSelf : Object end
+    @Attribute args : Seq(Element) end
+    @Attribute result : Element end
+    
+    @Constructor(beforeSelf,message,args,result,afterSelf) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      Step ::= beforeSelf = Name '.' message = Name '(' args = StepArgs ')' '->' result = Name 'and' afterSelf = Name 'end'
+      { [| Tests::Step(<Var(beforeSelf)>,<message.lift()>,<args>,<Var(result)>,<Var(afterSelf)>) |] }.
+      
+      StepArgs ::= n = Name ns = (',' Name)* { SetExp("Seq",Seq{n|ns}->collect(n | Var(n))) } | { SetExp("Seq",Seq{}) }.
+      
+    end
+    
+  end

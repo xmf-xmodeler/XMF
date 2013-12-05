@@ -1,0 +1,87 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Java Type Matching                             *
+ *                             ------------------                             *
+ *                                                                            *
+ *   Java methods are accessible via the Java class within XOCL. Overloading  *
+ *   in Java means that different methods with the same name are distinguished*
+ *   using the types of the arguments. The operation typeMatch defined below  *
+ *   is used to try to match the type of an XOCL element to a Java class.     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Java;
+
+context Java
+
+  @Operation typeMatch(element,class):Boolean
+  
+    @Doc
+      Return true when the XMF element can be interpreted
+      as being of the supplied Java class. This operation
+      matches the foreign object translation when XMF elements
+      are supplied to Java methods.
+    end
+    
+    @TypeCase(element)
+      Null do
+        true
+      end
+      String do
+        class.getName() = "java.lang.String" or
+        class.getName() = "java.lang.Object"
+      end
+      Integer do
+        class.getName() = "int" or
+        class.getName() = "java.lang.Integer" or
+        class.getName() = "java.lang.Object"
+      end
+      Boolean do
+        class.getName() = "boolean" or
+        class.getName() = "java.lang.Boolean" or
+        class.getName() = "java.lang.Object"
+      end
+      Float do
+        class.getName() = "double" or
+        class.getName() = "java.lang.Double" or
+        class.getName() = "java.lang.Object"
+      end
+      ForeignObject do
+        true
+      end
+      Seq(Element) do
+        class.getName() = "java.util.Vector" or
+        class.getName() = "java.lang.Object" or
+        (class.isArray() andthen 
+          element->forAll(e | typeMatch(e,class.getComponentType())))
+      end
+      Set(Element) do
+        class.getName() = "java.util.Vector" or
+        class.getName() = "java.lang.Object" or
+        (class.isArray() andthen 
+          element->forAll(e | typeMatch(e,class.getComponentType())))
+      end
+      Vector do
+        class.getName() = "java.lang.Vector" or
+        class.getName() = "java.lang.Object"
+      end
+      Table do
+        class.getName() = "java.util.Hashtable" or
+        class.getName() = "java.lang.Object"
+      end
+      else class.getName() = "java.lang.String"
+    end
+  end
+  
+context Java
+  @Operation typesMatch(elements,classes):Boolean
+    if elements->isEmpty or classes->isEmpty
+    then true
+    else 
+      typeMatch(elements->head,classes->head) andthen
+      typesMatch(elements->tail,classes->tail)
+    end
+  end   
+        

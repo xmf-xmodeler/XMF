@@ -1,0 +1,103 @@
+parserImport Walkers;
+parserImport XOCL;
+
+import Walkers;
+import Docs;
+import PPrint;
+  
+@Handler XCore::Object in PPrint(object,depth,encountered)
+  self.pprintObject(object,depth,encountered)
+end;
+
+context PPrint
+  @Operation displayBOAConstructor(object):Constructor
+  
+    // Returns a constructor that the class of the object will use to 
+    // display the object, or null if no constructor with isDisplay
+    // set is available...
+    
+    let class = object.of()
+    in @Find(c,class.allConstructors())
+         when c.isDisplay
+         else null
+       end
+    end
+  end
+  
+context PPrint
+  @Operation pprintViaBOAConstructor(object,depth)
+  
+    // Assumes that the object has a BOA constructor with isDisplay
+    // set. Use the BOA constructor to build a pprint document for
+    // the object...
+    
+    let c = displayBOAConstructor(object) then
+        slots = c.names then
+        listedSlots = 
+          slots->iterate(s d = NOTHING | 
+            let value = self.dispatch(object.get(s),depth+1)
+            in if s = slots->last 
+               then Order(d,value) 
+               else Order(d,Order(value,COMMA)) 
+               end
+            end);
+        type = object.of().name().toString()
+    in Order(Just(type + "("),Order(listedSlots,Just(")")))
+    end
+  end
+
+context PPrint
+  @Operation pprintObject(object,depth,encountered)
+  let just = self.mark(object) 
+  in if object = Root
+     then Order(just,Just("<Root>"))
+     elseif encountered
+     then self.ref(object)
+     elseif self.displayBOAConstructor(object) <> null
+     then self.pprintViaBOAConstructor(object,depth)
+     else
+       let type = object.of() then
+           attributes = type.allAttributes()->reject(a | a.getProperty("ppHide",false)) then
+           values = attributes->asSeq->iterate(a e = Seq{} | e->bind(a,self.dispatch(object.get(a.name()),depth+1))) then
+           slots1 = 
+             attributes->asSeq->collect(a | 
+               let label = Just(a.name() + " = ");
+                    value = values->lookup(a)
+               in Cut(Alt(
+                    Order(label,value),
+                     Block(Indent(2,above(Seq{label,value})))))
+               end) then
+           slots2 = 
+             attributes->asSeq->collect(a | 
+                let label = Just(a.name() + " = ");
+                    value = values->lookup(a)
+                in Order(label,value)
+                end) then
+            
+           OrderedSlots = 
+             slots2->iterate(s d = NOTHING |
+               if s = slots2->last
+               then Order(d,s)
+               else Order(d,Order(s,COMMA))
+               end);
+           listedSlots =
+             if slots1->isEmpty
+             then Just("")
+             else
+               slots1->tail->iterate(s d = Order(Newline(),slots1->head) |
+                 Order(d,Order(COMMA,Order(Newline(),s))))
+             end
+       in Mark(
+            Block(
+              Order(
+              Order(just,Just(type.name().toString())),
+                Order(
+                  LSQUARE,
+                  Order(
+                    Alt(OrderedSlots,Indent(2,listedSlots)),
+                    Cut(RSQUARE))))))
+       end
+     end
+  end
+end
+          

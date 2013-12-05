@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Run Super                                 *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  When a message is sent to an object, the name of the message is looked up *
+ *  in the class of the receiver. The operations of this class are linearized *
+ *  by performing a breadth first left to right walk of the inheritance tree. *
+ *  The first operation with the appropriate name and arity is invoked. The   *
+ *  rest of the lineraized operation (headed by the currently executing op)   *
+ *  is maintained in the call stack frame under SUPERS. When this instruction *
+ *  is performed, the lookup continues (skipping the current operation). The  *
+ *  instruction operand allows the number of arguments to change (but not the *
+ *  name).                                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Super extends Instr
+  
+    @Attribute arity : Integer end
+    
+    @Constructor(arity) end
+    
+    @Operation toString():String
+      "<Super " + arity + ">"
+    end
+    
+    @Operation operands()
+      arity
+    end
+    
+  end

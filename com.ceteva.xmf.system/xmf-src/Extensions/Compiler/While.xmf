@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+import Compiler;
+import Instrs;
+import XOCL;
+
+context While
+    
+    @Operation compile(env,frame,isLast,saveSource)
+      let testCode = test.compile(env,frame,false,saveSource);
+          bodyCode = body.compile(env,frame,false,saveSource);
+          testLabel = newLabel();
+          endLabel = newLabel() then
+          returnValue = labelInstrs(Seq{PushTrue()},endLabel)
+      in Compiler::labelInstrs(testCode,testLabel) +
+         Seq{SkipFalse(endLabel)} +
+         bodyCode + Seq{Pop()} +
+         if endLine > 0 and sourcePos
+         then Seq{Line(endLine),SkipBack(testLabel)}
+         else Seq{SkipBack(testLabel)} 
+         end +
+         returnValue
+      end
+    end
+
+context While
+  
+    @Operation maxLocals():Integer
+       test.maxLocals().max(body.maxLocals())
+    end
+    
+    
+     

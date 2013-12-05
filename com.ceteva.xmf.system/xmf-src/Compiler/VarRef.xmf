@@ -1,0 +1,37 @@
+/******************************************************************************
+ *                                                                            *
+ *                    Compilation of Variable References                      *
+ *                    ----------------------------------                      *
+ *                                                                            *
+ *  Variables are either local, global or dynamic. The compiler env table is  *
+ *  responsible for keeping track of the variables and their type. Compilation*
+ *  just requests the env table to translate the named variable into a        *
+ *  sequence of instructions.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import Compiler;
+import OCL;
+import Instrs;
+
+context Var
+  @Operation FV():Element
+    Set{name}
+  end
+
+context Var
+  @Operation maxLocals():Element
+    0
+  end
+
+context Var
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    env.ref(name,line)
+  end
+  
+context Var
+  @Operation lift()
+    Apply(self.typeExp(),Seq{StrExp(name),IntExp(line)})
+  end

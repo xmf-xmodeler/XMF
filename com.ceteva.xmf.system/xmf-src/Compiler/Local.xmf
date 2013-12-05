@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Local Variables                                *
+ *                           ------------------                               *
+ *                                                                            *
+ *  Local variables are established as operation arguments, via let or catch. *
+ *  A local variable has scope for the text of an expression after which the  *
+ *  variable can no longer be referenced. Each local variable is associated   *
+ *  with storage that can be updated. The storage for local variables is held *
+ *  in the  locals area of the current call frame. If the compiler has        *
+ *  emitted the instructions, then the local variable names are also held in  *
+ *  the locals are in the current call frame above the value storage. The     *
+ *  compiler is responsible for keeping track of the local variables that can *
+ *  be referenced at any given point and for allocating them indices into the *
+ *  locals area of the call frame at run time. The compiler variable table    *
+ *  contains a Local entry for each local variable that is current in scope   *
+ *  and the offset is the index into the locals area. When the local goes out *
+ *  of scope then the Local is removed from the compiler's variable table and *
+ *  the call frame storage is free for use by subsequent locals.              *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+import Instrs;
+
+context Compiler
+
+  @Class Local extends Var
+      
+      @Attribute offset : Integer end
+      
+      @Constructor(name,offset) ! end
+      
+      @Operation ref()
+        Seq{LocalRef(name,offset)}
+      end
+      
+    end

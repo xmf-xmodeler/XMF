@@ -1,0 +1,48 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Compiling Constants                              *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  The CONST instruction has an operand that is an index into the code-box   *
+ *  constants table. The constants table can contain any type of value. The   *
+ *  serializer and de-serializer will take care of writing the constant values*
+ *  out to files and then reconstructing them when the file is loaded. Values *
+ *  that are available at compile time and which are required at run-time can *
+ *  be translated into a constant instruction operand. Note that you should be*
+ *  careful that all the classes (in fact all the named-elements) referenced  *
+ *  directly and indirectly by the constant value are available at run-time   *
+ *  otherwise the loader will not find them and reference errors will occur.  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+import OCL;
+
+context Const
+  @Operation FV():Element
+    Set{}
+  end
+
+context Const
+  @Operation maxLocals():Element
+    0
+  end
+
+context Const
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    if value.isKindOf(String)
+    then Seq{PushString(value)}
+    else if value.isKindOf(Integer)
+         then Seq{PushInteger(value)}
+         else if value = true
+              then Seq{PushTrue()}
+              else if value = false
+                   then Seq{PushFalse()}
+                   else Seq{Instrs::Const(value)}
+                   end
+              end
+         end
+    end
+  end

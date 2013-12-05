@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Lists                                   *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class List extends Entry
+
+    @Attribute ordered : Boolean (?,!) end
+    @Attribute entries : Seq(Entry) (?,!,+,-) end
+    
+    @Constructor(ordered,entries) ! end
+    
+    @Operation contents()
+      entries
+    end
+
+  end

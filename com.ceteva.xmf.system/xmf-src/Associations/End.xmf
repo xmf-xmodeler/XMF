@@ -1,0 +1,244 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import Associations;
+
+context Associations
+
+  @Class End extends Attribute, Constraint
+  
+    //  An association en-d is a specialization of Attribute including a
+    //  multiplicity. the multiplicity defines part of an invariant that
+    //  holds between instances of the two en-ds of an association and
+    //  the slot values for the attributes. An en-d is also a constraint
+    //  that is attached to its type. The constraint requires that the
+    //  round trip from an instance of the type using both association en-ds
+    //  returns to the source of the trip.
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      End ::= 
+      
+        name = Name 
+        
+        ':' type = Apply 
+        
+        init = OptInit 
+        
+        mult = OptMult 
+        
+        'end' 
+        
+        { EndDef(name,mult.typeExp(type),XOCL::AttributeModifiers(),init,null,mult) }.
+      
+      OptInit ::= 
+      
+        '=' Exp 
+        
+      | { null }.
+      
+      OptMult ::= 
+      
+        '?' { Opt() } 
+        
+      | '(' n = Int ',' m = Int ')' { Range(n,m) } 
+      
+      | '*' { Star() } | { One() }.
+      
+    end
+  
+    @Attribute mult        : Multiplicity = One()     end
+    @Attribute association : Element              (!) end
+    
+    @Constructor(name,type,mult) ! end 
+    
+    @Operation checkRoundTrip(object):Boolean
+
+      //  Starting with object we navigate to the other en-d of the
+      //  association and back again. The round trip should return
+      //  us to the starting point (modulo the multiplicities involved).
+
+      if object.isKindOf(self.otherEnd().underlyingType()) and object <> null
+      then
+        @Case mult of
+          One() do 
+            self.otherEnd().checkRoundTrip(object.get(self.name()),object) 
+          end
+          Opt() do 
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          Range() do
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          Star() do
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          Mandatory() do
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          MandatoryOne() do
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          Ordered() do
+            object.get(self.name())->forAll(value |
+              self.otherEnd().checkRoundTrip(value,object))
+          end
+          
+        end
+      else
+        false
+      end
+    end
+    
+    @Operation checkRoundTrip(object,sourceObject)
+      if object.isKindOf(self.otherEnd().underlyingType()) and object <> null
+      then
+        @Case self.mult of
+          One() do
+            object.get(self.name()) = sourceObject
+          end
+          Opt() do
+            object.get(self.name())->isEmpty or
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+          Range() do
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+          Star() do
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+          Mandatory() do
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+          MandatoryOne() do
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+          Ordered() do
+            object.get(self.name())->exists(value | value = sourceObject)
+          end
+        end
+      else
+        false
+      end
+    end
+   
+    @Operation init()
+
+      // When an en-d is initialised we initialise as for an attribute
+      // and then add the en-d to the type.
+      // Set up the elements necessary to act as a constraint ...
+      
+      self.setBody();
+      self.setReason() ;
+      
+      // Set up the type ready for initialization as an attribute ...
+      
+      self.setType();
+      if association <> null
+      then 
+        super();
+        if self.underlyingType().isKindOf(XCore::Class)
+        then 
+        
+          // Make sure that this is added to the contents
+          // of the name space. Then add it as an attribute 
+          // and a constraint...
+          
+          self.underlyingType().add(self.otherEnd());
+          self.setMult(mult)
+        end;
+        self
+      else self
+      end
+    end
+    
+    @Operation init(args)
+    
+      // Attribute defines 'init/1' therefore constructors do not
+      // get nvoked. This should be changed. But for now ....
+      
+      if args->size = 3
+      then
+        self.name := args->at(0).asSymbol();
+        self.type := args->at(1);
+        self.mult := args->at(2)
+      else super(args)
+      end
+    end
+    
+    @Operation otherEnd():End
+      if association <> null
+      then 
+        if association.end1 = self
+        then association.end2
+        else association.end1
+        end
+      else self.error("Cannot find other end.")
+      end
+    end
+    
+    @Operation remove()
+    
+      // Remove the attribute and constraints...
+      
+      self.underlyingType().removeAttribute(self.otherEnd());
+      self.underlyingType().removeConstraint(self.otherEnd());
+      self.underlyingType().remove(self.otherEnd());
+      self
+    end
+    
+    @Operation setBody()
+      let associationEnd = self
+      in self.body :=
+           @Operation(classifier)
+             associationEnd.checkRoundTrip(self)
+           end
+      end
+    end
+    
+    @Operation setMult(m:Multiplicity)
+      self.mult := m;
+      @Case m of
+        One() do
+          self.type := self.underlyingType()
+        end
+        Opt() do
+          self.type := Set(self.underlyingType())
+        end
+        Mandatory() do
+          self.type := Set(self.underlyingType())
+        end
+        MandatoryOne() do
+          self.type := Set(self.underlyingType())
+        end
+        Star() do
+          self.type := Set(self.underlyingType())
+        end
+        Ordered() do
+          self.type := Seq(self.underlyingType())
+        end
+      end
+    end
+    
+    @Operation setReason()
+      self.reason :=
+        @Operation(classifier)
+          "Round trip failed"
+        end
+    end
+    
+    @Operation setType()
+      if type <> null and type.isKindOf(Operation)
+      then 
+        type.setOwner(self);
+        self.setOwner(association);
+        self.type := type()
+      end
+    end
+     
+  end

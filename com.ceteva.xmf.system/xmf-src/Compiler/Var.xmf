@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Compilation Variables                            *
+ *                           ---------------------                            *
+ *                                                                            *
+ *  The compiler maintains a table of information describing variables so that*
+ *  references and updates can be transformed into appropriate machine        *
+ *  instructions. Variables may be local, global or dynamic. In all cases     *
+ *  variables are named and the different classes of variable inherit from    *
+ *  the class Compiler::Var.                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+context Compiler
+
+  @Class Var extends NamedElement
+     
+     @Constructor(name) ! end
+     
+     @AbstractOp ref():Seq(Instrs::Instr)
+     
+       // The compiler uses the ref operation to
+       // produce instructions for a variable
+       // reference.
+       
+     end
+     
+   end

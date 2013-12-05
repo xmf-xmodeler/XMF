@@ -1,0 +1,10 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Action
+  @Operation toXML(out:OutputChannel)
+    self.error("Action::toXML not implemented.")
+  end     

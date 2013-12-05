@@ -1,0 +1,18 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context BindVar
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <BindVar>
+        @For name in names do
+          @XML(out)
+            <Name name=name/>
+          end
+        end
+      </BindVar>
+    end
+  end

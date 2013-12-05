@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Aspects                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *    An aspect is added to a collection of classes to introduce some new     *
+ *    functionality. When the aspect is added, an entry is added to the global*
+ *    AllAspects name-space so that other tools can interrogate the system to *
+ *    see if a given aspect has been defined.                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @NameSpace AllAspects
+  
+  end

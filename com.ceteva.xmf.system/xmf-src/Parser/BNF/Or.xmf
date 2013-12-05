@@ -1,0 +1,74 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Disjuncts                                 *
+ *                               ---------------                              *
+ *                                                                            *
+ *  An Or-recognizer consists of two alternative recognizers. When the Or is  *
+ *  processed by the parsing machine it will try the left recognizer and      *
+ *  consume tokens until it succeeds or fails. If it fails then the parsing   *
+ *  machine must unwind back to the state it was in when it encountered the   *
+ *  Or and then try the right hand recognizer.                                *
+ *                                                                            *
+ *  The parsing machine never encounters an Or. The grammar compilation       *
+ *  process ensures that all Or's have been transformed out. This is done by  *
+ *  lifting them to the outer fringes of the clause bodies and then turning   *
+ *  the left and right recognizers into different clause blocks.              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Or extends Recognizer
+    
+    @Attribute left  : Recognizer end
+    @Attribute right : Recognizer end
+    
+    @Constructor(left,right) end
+    
+    @Operation code(outputChannel)
+      left.code(outputChannel);
+      format(outputChannel," | ");
+      right.code(outputChannel)
+    end
+    
+    @Operation cnf(grammar):Seq(Seq(Recognizer))
+    
+      // Just merge the two sets together...
+      
+      left.cnf(grammar) + 
+      right.cnf(grammar)
+    end
+    
+    @Operation FV():Set(String)
+    
+      // There can be no binding inside an Or that establishes
+      // variables available outside the Or...
+      
+      Set{}
+    end
+    
+    @Operation terminals():Set(String)
+      left.terminals()->union(right.terminals())
+    end
+    
+    @Operation setOwner(owner)
+      left.setOwner(owner);
+      right.setOwner(owner)
+    end
+    
+    @Operation toExp(FV:Set(String)):Performable
+      [| Root::Parser::BNF::Or(<left.toExp(FV + left.FV())>,<right.toExp(FV + right.FV())>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self.left := left.transform(FV,grammar);
+      self.right := right.transform(FV,grammar)
+    end
+    
+  end 
+      

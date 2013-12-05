@@ -1,0 +1,141 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import IO;
+import Compiler;
+import XOCL;
+import Manifests;
+import LoadTime;
+import CompilerDirective;
+
+context Manifests
+
+  @Class ManifestEntry isabstract extends Syntax
+  
+    // An entry in a manifest can add to the current load path. Elements of a manifest should
+    // be sub-classes of ManifestEntry and can further extend the load path.
+  
+    @Attribute path               : String                 end
+    @Attribute loadTime           : LoadTime = RunTime     end
+    @Attribute compilerDirectives : Seq(CompilerDirective) end
+    
+    @Grammar extends OCL::OCL.grammar 
+    
+      OptBuilds ::= 
+      
+        '{' n = Name ns = (',' Name)* '}' 
+        
+        { ns->asSet->including(n) } 
+        
+      | { Set{} }.
+      
+      MPath ::=  
+      
+        n = MPathEntry 
+        
+        ns = ('/' MPathEntry)*  
+        
+        { Seq{n|ns}->separateWith("/") } 
+        
+      | Str.
+      
+      MPathEntry ::= 
+      
+        Name 
+        
+      | Str 
+      
+      | 'Kernel' { "Kernel" }
+      
+      | '.' { "." }
+      
+      | '.' '.' { ".." }.
+      
+      LoadTime ::= 
+      
+        '^' LoadDirective 
+        
+      | { RunTime }.
+      
+      LoadDirective ::= 
+      
+        'CompileTime' { CompileTime } |
+        
+        'RunTime' { RunTime } |
+        
+        'Both' { Both } |
+        
+        'Kernel' { Kernel } |
+        
+        'None' { None }.
+        
+      CompilerDirective ::= '+' (
+      
+        'WithoutSourcePos' { WithoutSourcePos }
+        
+      | 'WithoutLocalNames' { WithoutLocalNames }
+      
+      | 'Language' '(' p = LanguagePath ')' { Language(p.lookup()) }
+      
+      ).
+      
+      LanguagePath ::= 
+    
+        n = Name ns = ('::' Name)* { Seq{n | ns} }.
+      
+    end
+    
+    @Operation build(dir:String,doAll:Boolean,results:Table)
+    
+      // We need to check that the referenced manifest is present
+      // and up to date. It is compiled if necessary before loading
+      // it and building it.
+      
+      self.buildAfterCompilerDirectives(compilerDirectives,dir,doAll,results)
+      
+    end
+    
+    @Operation buildAfterCompilerDirectives(directives:Seq(CompilerDirective),dir:String,doAll:Boolean,results:Table)
+      if directives->isEmpty
+      then self.buildAfterCompilerDirectives(dir,doAll,results)
+      else 
+        @Case directives->head of
+          [WithoutSourcePos] do
+            @WithoutSourcePos isDynamic
+              self.buildAfterCompilerDirectives(directives->tail,dir,doAll,results)
+            end
+          end
+          [WithoutLocalNames] do
+            @WithoutLocalNames isDynamic
+              self.buildAfterCompilerDirectives(directives->tail,dir,doAll,results)
+            end
+          end
+          else self.error("Unknown compiler directive: " + directive)
+        end
+      end
+    end
+    
+    @AbstractOp buildAfterCompilerDirectives(dir:String,doAll:Boolean,results:Table) end
+    
+    @AbstractOp deleteBinary(dir:String) end
+    
+    @AbstractOp deref(dir:String):ManifestEntry end
+    
+    @AbstractOp display(out:OutputChannel) end
+    
+    @AbstractOp load(dir:String,loadSource:Boolean) end
+    
+    @AbstractOp module(dir):CompilationUnit end
+    
+    @AbstractOp parse(dir:String,doAll:Boolean,results:Table) end
+    
+    @AbstractOp refresh(dir) end
+    
+    @AbstractOp stale():Boolean end
+    
+    @AbstractOp touch(dir:String,source:Boolean) end
+    
+    @AbstractOp writeBoot(out:OutputChannel,dir:String,indent:Integer) end
+    
+  end

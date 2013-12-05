@@ -1,0 +1,47 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+
+context XOCL
+
+  @Class Index extends Sugar
+  
+    // This class implements a simple construct that defines
+    // an operation for indexing through a collection searching
+    // for a supplied slot value...
+    
+    @Attribute collection : String (?,!) end
+    @Attribute slot       : String (?,!) end
+    
+    @Constructor(collection,slot) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      Index ::= collection = Name '(' slot = Name ')' 'end' {
+      
+        Index(collection,slot)
+        
+      }.
+      
+    end
+    
+    @Operation desugar():Performable
+      [| @Operation <self.indexOpName()> (value,default)
+           @Find(candidate,self.<collection>)
+             when candidate.<slot> = value
+             else default
+           end
+         end
+      |]
+    end
+    
+    @Operation indexOpName():String
+      "index" + 
+        collection.upperCaseInitialLetter() + 
+        "By" + 
+        slot.upperCaseInitialLetter()
+    end
+  end
+      
+        

@@ -1,0 +1,1135 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              The Parsing Engine                            *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  The parsing engine performs a parse with respect to a grammar and a       *
+ *  tokenizer. The engine uses a stack to contain clause call frames. Each    *
+ *  frame contains the local variables for the call and various other support *
+ *  information. The engine uses a stack to contain choice points if the      *
+ *  grammar turns out to not be LL(1).  The grammar actions update a RESULT   *
+ *  register in the engine. If the grammar succeeds then the value is left in *
+ *  this register.                                                            *
+ *                                                                            *
+ *  The grammar is compiled into predictive parse tables that are used by the *
+ *  engine to predict the next sequence of instructions to perform given a    *
+ *  token from the tokenizer. The machine fails when the next token does not  *
+ *  predict any clause-block when a clause is called. At this point the fail  *
+ *  stack is inspected. If this is non-empty then the top element is the      *
+ *  most recently created choice point. The choice point is popped and the    *
+ *  parse tries again. If the prediction tables indicate more than one block  *
+ *  then the extra blocks are pushed onto the fail stack and the engine       *
+ *  proceeds with the first block. If the grammar predicts no clause-blocks   *
+ *  and the fail stack is empty then the engine reports that the parse has    *
+ *  failed.                                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Exceptions;
+import Parser;
+import Tokens;
+import BNF;
+  
+context Machine
+
+  @Class Engine
+ 
+    // The call stack contains call frames for each clause that
+    // is called during the parse. The frames are pushed and popped
+    // onto the stack as the calls are made and return. Each frame
+    // contains storage for the local variables of the clause...
+    
+    @Attribute callStack  : Vector = Vector(1024 * 15)       end  
+
+    // The fail stack contains frames that record choice points in
+    // the parse. When the current token predicts more than one 
+    // clause-block, the first block is parsed and the rest are
+    // left at the head of the fail stack. If the parse ever fails
+    // then the top fail frame is popped. The state of the parse
+    // is reset (including the tokenizer character position) and
+    // the parse tries an alternative block...
+    
+    @Attribute failStack  : Vector = Vector(1024 * 5)        end  
+    
+    // If the machine eventually fails then the parseError slot is
+    // set to tell the caller...
+    
+    @Attribute parseError : Boolean                    (?,!) end  
+    
+    // When failure occurs. The caller wants to know what tokens
+    // were expected. This buffer contains all the expected tokens
+    // that would have allowed the parse to continue when it failed...
+    
+    @Attribute expected   : Buffer = Buffer(10,false)  (?,!) end  
+    
+    // Since the engine supports choice points it is possible for 
+    // multiple alternatives to be tried before eventually failure
+    // occurs. The max char position is used to record the maximum
+    // character position in the input of any choice point that was
+    // tried. This allows error reporting to report greedily...
+    
+    @Attribute maxCharPos : Integer                          end  
+    
+    // In order to support backtracking we keep the most recently
+    // read token...
+    
+    @Attribute lastToken  : String                           end  
+
+    // The current call stack frame is maintained as an index into 
+    // the stack frame...
+    
+    @Attribute frame      : Integer = (0-1)                  end  
+
+    // The top frame on the fail stack is maintained in the following
+    // variable...
+    
+    @Attribute fail       : Integer = (0-1)                  end  
+
+    // The next free cell in the call stack...
+    
+    @Attribute TOCS       : Integer                          end  
+
+    // The next free cell in the fail stack...
+    
+    @Attribute TOFS       : Integer                          end  
+
+    // Each action during a parse syntheisizes a result. The value of
+    // an action is maintained in the following register and is returned
+    // as the value of a call when a call frame is popped...
+    
+    @Attribute RESULT     : Integer                          end  
+
+    // The next token...
+    
+    @Attribute token      : String                           end  
+
+    // The type of the next token...
+    
+    @Attribute type       : Integer                          end  
+
+    // The tokenizer that is being used to generate a sequence of
+    // tokens...
+    
+    @Attribute tokenizer  : Tokenizer                        end  
+
+    // By default, a parser will know about those name-spaces that have
+    // been parserImport'ed. These name-spaces determine the classifiers
+    // that are available when an At instruction is performed. The
+    // lsit of name-spaces can be extended and changed during a parse
+    // and is maintained as the value of imports...
+    
+    @Attribute imports    : Seq(NameSpace)                   end  
+
+    // When a token is consumed by a parse instruction we can choose
+    // whether or not to ask the tokenizer to generate a new token
+    // using this variable. Typically it is set by the grammar via an
+    // action...
+    
+    @Attribute consumeToken : Boolean                        end  
+    
+    @Constructor() ! end
+      
+    @Operation atClassifier()
+    
+      // The top of the stack should be a sequence of names that leads
+      // to a classifier with respect to the currently imported name spaces...
+      
+      let names = RESULT
+      in if names.isKindOf(SeqOfElement)
+         then 
+           let rootName = names->at(0);
+               elementNames = names->tail
+           in let nameSpaces = imports->select(nameSpace | nameSpace.hasElement(rootName))
+              in if nameSpaces->isEmpty
+                 then self.error("Cannot find " + rootName + " perhaps you need to import it.")
+                 else elementNames->iterate(name nameSpace = nameSpaces->head.getElement(rootName) |
+                   let value = nameSpace.getElement(name)
+                   in if value = null
+                      then self.error("At: " + nameSpace.toString() + "::" + name + " does not exist.")
+                      else value
+                      end
+                   end)
+                 end
+               end
+            end
+         else self.error("At: expecting a sequence of names, got " + names.toString())
+         end
+       end
+     end
+      
+    @Operation atNameSpace():NameSpace
+    
+      // When an ImportAt instruction is performed, a sequence of names has been
+      // synthesized in RESULT. These names are resolved here. The result should
+      // be a name-space that is added to the imports used by the parse engine...
+      
+      let names = RESULT
+      in if names.isKindOf(SeqOfElement)
+         then 
+           let rootName = names->at(0);
+               elementNames = names->tail
+           in elementNames->iterate(name nameSpace = Kernel_getVar(rootName) | 
+                if nameSpace.hasElement(name)
+                then nameSpace.getElement(name)
+                else self.error("At: " + nameSpace.toString() + "::" + name + " does not exist.")
+                end)
+           end
+         else self.error("At: expecting a sequence of names, got " + names.toString())
+         end
+      end
+    end
+    
+    @Operation atPath():Seq(String)
+    
+      // When an At instruction is encountered, the path that names the grammar to be
+      // used has yet to be processed in the input. This operation consumes tokens from
+      // the tokenizer. The tokens should be a valid path of the form P::Q::R. The 
+      // operation returns a path as a sequence of strings...
+      
+      if type = NAME
+      then 
+        let path = Seq{token.toString()};
+            isPath = true
+        in @While isPath do
+             let charPos = tokenizer.charPos()
+             in self.nextToken();
+                if token.stringEqual("::")
+                then
+                  self.nextToken();
+                  if type = NAME
+                  then path := path + Seq{token.toString()}
+                  else self.error(":: must be followed by name: " + path)
+                  end
+                else 
+                  tokenizer.setCharPos(charPos);
+                  self.nextToken();
+                  isPath := false
+                end
+             end
+           end;
+           self.RESULT := path
+        end
+      else self.error("@ must be followed by a path.")
+      end
+    end
+    
+    @Operation call(grammar,indent,name,argMap,isTailCall)
+    
+      // The named clause is to be called. The argMap defines the local
+      // indices of the argument variables so that they can easily be
+      // pushed onto the stack as part of the construction of a new call
+      // frame. 
+      // 
+      // The named clause is requested from the grammar and the next
+      // token is used to predict a sequence of clause blocks. This 
+      // results in either 0 blocks, 1 block or n blocks. If 0 then fail,
+      // if 1 then deterministically parse and if n then a choice point
+      // must be established...
+      
+      if callStack.ref(frame + GRAMMAR).debug
+      then self.debug1("Try ",name)
+      end;
+      
+      // The clause really should exist - the compiler should
+      // make sure of this...
+      
+      let clause = grammar.clauseNamed(name)
+      in if clause = null
+         then self.error(formats("No clause named ~S in ~{,~;~S~}",Seq{name,grammar.clauses.name->asSeq}))
+         else
+         
+          // Get the blocks predicted by the current token and its type...
+          
+          let blocks = clause.predict(grammar,token,type) then
+              target = callStack.ref(frame + TARGET)
+          in 
+             
+             // If no blocks then fail...
+             
+             if blocks->isEmpty
+             then self.failCall(clause) 
+             elseif blocks->size = 1
+             then 
+             
+               // 1 block is easy. If the call is a tail call then we
+               // can cannibalise the current call frame...
+               
+               let code = blocks->head.instrs();
+                   locals = blocks->head.locals();
+                   frameMap = blocks->head.argMap();
+                   prev = frame
+               in if isTailCall and argMap->isEmpty
+                  then 
+                    // Tail call...
+                    self.TOCS := frame;
+                    self.frame := callStack.ref(frame + PREV_FRAME)
+                  end;
+                  
+                  // Push the new call frame and set the args...
+                  
+                  self.frame := self.pushCall(frame,grammar,code,indent,target,fail,locals);
+                  @Count i from 0 to argMap->size do
+                    callStack.put(frame + LOC0 + frameMap->at(i),callStack.ref(prev + LOC0 + argMap->at(i)))
+                  end
+               end
+             else 
+             
+               // We have (n > 1) clause blocks. This will require a choice point.
+               
+               let prev = callStack.ref(frame + PREV_FRAME);
+                   cut = callStack.ref(frame + CUT);
+                   locals = callStack.ref(frame + LOCALS)
+               in if isTailCall and argMap->isEmpty
+                  then 
+                    // Tail call...
+                    self.TOCS := frame;
+                    self.frame := prev
+                  end;
+                  let frameMap = blocks->head.argMap();
+                      prev = frame
+                  in  
+                      // Push a frame for the first block...
+                  
+                      self.frame := self.pushCall(frame,grammar,blocks->head.instrs(),indent+2,target,fail,blocks->head.locals());
+                      @Count i from 0 to argMap->size do
+                        let arg = callStack.ref(prev + LOC0 + argMap->at(i))
+                        in callStack.put(frame + LOC0 + frameMap->at(i),arg)
+                        end
+                      end;
+                      
+                      // Push a fail frame for the rest of the blocks...
+                      
+                      self.pushFail(prev,fail,tokenizer.charPos(),grammar,blocks->tail,indent,target,fail,token.toString(),type,name,argMap)
+                  end
+               end
+             end
+          end
+         end
+      end
+    end
+    
+    @Operation code():Seq(Recognizer)
+    
+      // Access the instructions in the current call frame...
+      
+      callStack.ref(frame + CODE)
+    end 
+    
+    @Operation cut()
+    
+      // Throw away choice points that were established during the 
+      // execution of the current call frame instructions...
+      
+      self.fail := callStack.ref(frame + CUT);
+      if fail >= 0
+      then self.TOFS := fail + FAIL_ARG0 + failStack.ref(fail + FAIL_ARGS)
+      end
+    end
+    
+    // The following debug operations are defined to allow different debug
+    // arities for the arguments without consing anything dynamically since
+    // the debug may never happen.
+    
+    @Operation debug0(message)
+      if callStack.ref(frame + GRAMMAR).debug
+      then format(stdout,"~V[~S,~S,~S,~S,~S]~S~%",Seq{callStack.ref(frame + INDENT),frame,TOCS,fail,TOFS,consumeToken,message})
+      end
+    end
+    
+    @Operation debug1(message,arg)
+      if callStack.ref(frame + GRAMMAR).debug
+      then format(stdout,"~V[~S,~S,~S,~S,~S]~S~S~%",Seq{callStack.ref(frame + INDENT),frame,TOCS,fail,TOFS,consumeToken,message,arg})
+      end
+    end
+    
+    @Operation debug2(message,arg1,arg2)
+      if callStack.ref(frame + GRAMMAR).debug
+      then format(stdout,"~V[~S,~S,~S,~S,~S]~S~S~S~%",Seq{callStack.ref(frame + INDENT),frame,TOCS,fail,TOFS,consumeToken,message,arg1,arg2})
+      end
+    end
+    
+    @Operation debug3(message,arg1,arg2,arg3)
+      if callStack.ref(frame + GRAMMAR).debug
+      then format(stdout,"~V[~S,~S,~S,~S,~S]~S~S~S~S~%",Seq{callStack.ref(frame + INDENT),frame,TOCS,fail,TOFS,consumeToken,message,arg1,arg2,arg3})
+      end
+    end
+    
+    @Operation debugFailCall(clause)
+      if callStack.ref(frame + GRAMMAR).debug
+      then 
+         let message = formats("Fail ~S not in ~{,~;~S~}",Seq{token,clause.expected()->asSeq})
+         in format(stdout,"~V[~S,~S,~S,~S,~S]~S~%",Seq{callStack.ref(frame + INDENT),frame,TOCS,fail,TOFS,consumeToken,message})
+         end
+      end
+    end
+    
+    @Operation dupFrame()
+    
+      // Call frames can be returned to more than once due to choice points.
+      // This operation causes the current frame to be duplicated so that
+      // returns get a fresh copy...
+      
+      let locals = callStack.ref(frame + LOCALS)
+      in callStack.put(TOCS + PREV_FRAME,callStack.ref(frame + PREV_FRAME));
+         callStack.put(TOCS + GRAMMAR,callStack.ref(frame + GRAMMAR));
+         callStack.put(TOCS + CODE,callStack.ref(frame + CODE));
+         callStack.put(TOCS + INDENT,callStack.ref(frame + INDENT));
+         callStack.put(TOCS + TARGET,callStack.ref(frame + TARGET));
+         callStack.put(TOCS + CUT,callStack.ref(frame + CUT));
+         callStack.put(TOCS + LOCALS,locals);
+         @Count x from 0 to locals do
+           callStack.put(TOCS + LOC0 + x,callStack.ref(frame + LOC0 + x))
+         end;
+         self.frame := TOCS;
+         self.TOCS := TOCS + LOC0 + locals
+      end
+    end
+
+   @Operation getSource()
+   
+     // Get all the source code that has been read...
+     
+     tokenizer.buffer.toString()
+   end
+    
+    @Operation fail(expected:String)
+    
+      // The current call has failed. The argument describes the token
+      // that was expected and is added to the expected buffer. If there
+      // are any choice points on the fail stack then pop a fail frame,
+      // otherwise throw a TokenExpected exception...
+      
+      if tokenizer.charPos() >= maxCharPos
+      then self.expected.add(expected)
+      end;
+      self.unwindFail();
+      if fail >= 0
+      then 
+        self.popFail()
+      else throw TokenExpected(tokenizer.buffer().toString(),maxCharPos,lastToken,self.expected.asSeq()->asSet)
+      end
+    end
+    
+    @Operation failCall(clause)
+    
+      // A call of the supplied clause has failed. If there are any
+      // choice points on the fail stack then pop them otherwise throw
+      // a TokenExpected exception after adding everything from the
+      // starting nonterminals of the clause...
+      
+      if callStack.ref(frame + GRAMMAR).debug
+      then self.debugFailCall(clause)
+      end;
+      self.unwindFail();
+      if tokenizer.charPos() >= maxCharPos 
+      then 
+        @For term in clause.expected() do
+          expected.add(term)
+        end
+      end;
+      if fail >= 0
+      then self.popFail()
+      elseif type = EOI
+      then throw TokenExpected(tokenizer.buffer().toString(),tokenizer.charPos(),"EOF",clause.expected())
+      else
+        throw TokenExpected(tokenizer.buffer().toString(),maxCharPos,lastToken,expected.asSeq()->asSet)
+      end
+    end         
+    
+    @Operation linePos()
+    
+      // Where are we in the source code?...
+      
+      tokenizer.lineCount()
+    end  
+    
+    @Operation nextToken()
+    
+      // Get the next token and return it. Record the char position
+      // if it is the furthest we have ever reached in the source
+      // code...
+      
+      tokenizer.nextToken();
+      self.token := tokenizer.token();
+      self.type := tokenizer.type();
+      if tokenizer.charPos() > maxCharPos
+      then 
+      
+        // Thie following information is used when reporting errors.
+        // We take a greedy approach to reporting errors when there 
+        // are multiple choice points...
+        
+        self.maxCharPos := tokenizer.charPos();
+        self.lastToken := token.toString();
+        expected.setSize(0);
+        token
+      else token
+      end
+    end
+    
+    @Operation parse(target,grammar,code,tokenizer,imports)
+      self.parse(Seq{},target,grammar,code,tokenizer,imports)
+    end
+    
+    @Operation parse(args,target,grammar,code,tokenizer,imports)
+    
+      // The main entry point for the parse. Should be called
+      // with the value of self for the parse, the grammar, the
+      // starting code (usually a sequence containing a call to 
+      // the starting non-terminal), the tokenizer that generates
+      // the tokens for the parse and a sequence of imported
+      // namespaces to be used to resolve @ referenced constructs.
+      
+      self.reset();
+      self.tokenizer := tokenizer;
+      self.imports := imports;
+      self.frame := self.pushCall(0-1,grammar,code,0,target,0-1,args->size);
+      @Count i from 0 to args->size do
+        callStack.put(frame + LOC0 + i,args->at(i))
+      end;
+      self.nextToken();
+        
+      // Dispatch...
+        
+      @While frame >= 0 and not parseError do 
+        
+        if callStack.ref(frame + CODE)->isEmpty
+        then self.popFrame()
+        else 
+          let instr = self.popInstrs()
+          in
+          
+          // Dispatch on the next parse engine instruction...
+          
+          @CaseObj instr of 
+          
+            At[ ] do
+            
+              // Read the path, get the classifier and
+              // switch the parse state to the grammar... 
+               
+              self.atPath();
+              let classifier = self.atClassifier()  
+              in self.startAt(classifier)
+              end 
+            end
+            
+            Call[name,argMap] do
+            
+              // Call the named clause with the arguments. The
+              // arguments are defined as local indices into the 
+              // current call frame...
+              
+              let grammar = callStack.ref(frame + GRAMMAR);
+                  indent = callStack.ref(frame + INDENT)
+              in self.call(grammar,indent,name,argMap,self.code()->isEmpty)
+              end
+            end
+            
+            Int[ ] do
+            
+              // Expect an integer token...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug0("Try Int")
+              end;
+              if type <> INT
+              then
+                // Fail... 
+                self.debug0("Fail Int");
+                self.fail("Int")
+              else
+                // Push the integer...
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Succeed Int ",token)
+                end;
+                self.RESULT := token.toString().asInt();
+                self.nextToken()
+              end
+            end
+            
+            Float[ ] do
+            
+              // Expect a float token...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug0("Try Float")
+              end;
+              if type <> FLOAT
+              then
+                // Fail... 
+                self.debug0("Fail Float");
+                self.fail("Float")
+              else
+                // Push the float...
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Succeed Float ",token)
+                end;
+                self.RESULT := token.toString().asFloat();
+                self.nextToken()
+              end
+            end
+            
+            Name[ ] do
+            
+              // Expect a name token. Note that a name cannot be a terminal
+              // of the grammar...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug0("Try Name")
+              end;
+              let name = token.toString()
+              in if type <> NAME orelse callStack.ref(frame + GRAMMAR).terminals()->includes(name)
+                 then
+                   // Fail... 
+                   self.debug2("Fail Name: ",token,type);
+                   self.fail("Name")
+                 else
+                   // Push the name...
+                   if callStack.ref(frame + GRAMMAR).debug
+                   then self.debug1("Succeed Name ",token)
+                   end;
+                   self.RESULT := name;
+                   self.nextToken()
+                 end
+              end
+            end
+            
+            Str[ ] do
+            
+              // Expect a string token...
+              
+              self.debug0("Try Str");
+              if type <> STRING
+              then
+                // Fail... 
+                self.debug0("Fail Str");
+                self.fail("Str")
+              else
+                // Push the integer...
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Succeed Str ",token)
+                end;
+                self.RESULT := token.toString();
+                self.nextToken()
+              end
+            end
+            
+            EOF[ ] do
+            
+              // Expect the tokenizer to have run out of input...
+              
+              self.debug0("Try EOF");
+              if type <> EOI
+              then
+                // Fail... 
+                self.debug2("Fail EOF ",token,type);
+                self.fail("EOF")
+              else self.debug0("Succeed EOF ")
+              end
+            end 
+            
+            Action[action] do
+            
+              // Perform the action and set the RESULT register...
+              
+              self.RESULT := action(callStack,frame);
+              self.debug1("Action: ",RESULT)
+            end
+            
+            Predicate[predicate] do
+            
+              // Check the predicate and fail if it is not satisfied...
+              
+              if predicate(callStack,frame)
+              then self.debug0("Predicate OK")
+              else self.fail("Predicate")
+              end
+            end
+            
+            SetLoc[index] do
+            
+              // Set the local at the given index to the current result...
+              
+              callStack.put(frame + LOC0 + index,RESULT)
+            end
+            
+            Cut[ ] do
+            
+              // Throw away unwanted choice points. This instruction can
+              // save time because the choice points will not be tried...
+              
+              self.cut()
+            end
+            
+            Nil[ ] do
+            
+              // An action that produces the empty sequence...
+              
+              self.RESULT := Seq{}
+            end
+            
+            Cons[headIndex,tailIndex] do
+            
+              // Construct a sequence...
+              
+              self.RESULT := Seq{callStack.ref(frame + LOC0 + headIndex) | callStack.ref(frame + LOC0 + tailIndex)}
+            end
+            
+            Tok[ ] do
+            
+              // Return the current parse state as a token...
+              
+              self.RESULT := Token(type,token.toString(),tokenizer.charPos(),tokenizer.lineCount(),tokenizer.charCount(),"")
+            end
+            
+            Terminal[terminal] do
+            
+              // Expect the named terminal ...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug1("Try Terminal ",terminal)
+              end;
+              if not token.stringEqual(terminal) 
+              then
+                // Fail... 
+                self.debug3("Fail Terminal ",terminal," <> ",token);
+                self.fail(terminal)
+              else 
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Consume ",token)
+                end;
+                if consumeToken then self.nextToken() end
+              end
+            end
+            
+            ImportAt[ ] do 
+            
+              // Modify the imported name-spaces. Extend with a name-space that will be
+              // used to resolve @-paths...
+              
+              self.imports := Seq{self.atNameSpace() | self.imports}
+            end
+            
+            PState[ ] do
+            
+              // Return the current state of the engine...
+              
+              self.RESULT := self
+            end
+            
+            Char[ ] do
+            
+              // Return the next character...
+              
+              self.readChar()
+            end
+            
+            Line[ ] do
+            
+              // Return the next line of input...
+              
+              self.readLine()
+            end
+            
+            Chars[ ] do
+            
+              // Return the next sequence of characters until 'end' 
+              // is found...
+              
+              self.readChars()
+            end
+            
+            Term[ ] do
+            
+              // Expect a token of the form 'xxx'...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug0("Try Term ")
+              end;
+              if type <> TERM
+              then
+                // Fail... 
+                self.debug1("Fail Term ",token);
+                self.fail("Term")
+              else 
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Consume ",token)
+                end;
+                self.RESULT := token.toString();
+                self.nextToken()
+              end
+            end
+            
+            TypeCheck[type] do
+            
+              // Check that the current RESULT is of the given type...
+              
+              self.typeCheck(type)
+            end
+            
+            Const[value] do
+            
+              // An action that synthesizes a constant value...
+              
+              self.RESULT := value
+            end
+            
+            VarRef[name,index] do
+            
+              // An action that returns the value of a local variable.
+              // The variable is referenced by its index into the
+              // current stack frame...
+              
+              self.RESULT := callStack.ref(frame + 7 + index)
+            end
+            
+            // An action that pairs up two locals...
+            
+            Pair[headIndex,tailIndex] do
+              self.RESULT := Seq{callStack.ref(frame + 7 + headIndex) | callStack.ref(frame + 7 + tailIndex)}
+            end
+            
+            LinePos[ ] do
+            
+              // An action that returns the current line position...
+              
+              self.RESULT := self.linePos()
+            end
+            
+            // A user defined token...
+            
+            NewToken[name,tokenNumber] do
+            
+              // The current token type should be the same as the
+              // type in s recognizer...
+              
+              if callStack.ref(frame + GRAMMAR).debug
+              then self.debug1("Try NewToken ",name)
+              end;
+              if tokenNumber <> type
+              then
+                // Fail... 
+                self.debug1("Fail NewToken ",token);
+                self.fail(name)
+              else 
+                if callStack.ref(frame + GRAMMAR).debug
+                then self.debug1("Consume ",token)
+                end;
+                self.RESULT := token.toString();
+                self.nextToken()
+              end
+            end
+            else self.error("Unknown instruction " + instr.toString())
+          end
+        end
+        end
+      end;
+      
+      // Finally the parse returns a RESULT. If the engine failed
+      // then it will have thrown an exception...
+      
+      RESULT
+    end
+    
+    @Operation popFail()
+    
+      // The current parse has failed and there is a fail-stack frame that
+      // represents a choice point. Extract the choice point, update the
+      // state of the engine and carry on...
+      
+      let blocks = failStack.ref(fail + FAIL_CODE);
+          prev = failStack.ref(fail + FAIL_PREV);
+          grammar = failStack.ref(fail + FAIL_GRAMMAR);
+          indent = failStack.ref(fail + FAIL_INDENT);
+          target = failStack.ref(fail + FAIL_TARGET);
+          cut = failStack.ref(fail + FAIL_CUT);
+          name = failStack.ref(fail + FAIL_NAME);
+          charPos = failStack.ref(fail + FAIL_CHARPOS)
+      in 
+         // Remove the head block...
+         
+         failStack.put(fail + FAIL_CODE,blocks->tail);
+         
+         // Reset the state of the parse...
+         
+         self.token := failStack.ref(fail + FAIL_TOKEN);
+         self.type := failStack.ref(fail + FAIL_TYPE);
+         if callStack.ref(frame + GRAMMAR).debug
+         then format(stdout,"~VRetry ~S~%",Seq{indent,name})
+         end;
+         self.TOCS := prev + callStack.ref(prev + LOCALS) + LOC0;
+         
+         // Try the call again...
+         
+         self.frame := self.pushCall(prev,grammar,blocks->head.instrs(),indent,target,cut,blocks->head.locals());
+         @Count i from 0 to failStack.ref(fail + FAIL_ARGS) do
+           let arg = failStack.ref(fail + FAIL_ARG0 + i);
+               local = blocks->head.argMap()->at(i)
+           in callStack.put(frame + LOC0 + local,arg)
+           end
+         end;
+         
+         // Unwind if the current frame is exhausted...
+         
+         self.unwindFail();
+         
+         // Reset the tokenizer...
+         
+         tokenizer.setCharPos(charPos)
+      end
+    end
+    
+    @Operation popInstrs()
+    
+      // Get and remove the next instruction...
+      
+      let instrs = callStack.ref(frame + CODE)
+      in callStack.put(frame + CODE,instrs->tail);
+         instrs->head
+      end
+    end
+      
+    @Operation popFrame()
+    
+      // The current call has completed successfully and is to return to the
+      // previous call...
+      
+      self.frame := callStack.ref(frame + PREV_FRAME);
+      if frame >= 0 andthen callStack.ref(frame + GRAMMAR).debug
+      then format(stdout,"~VReturn ~S~%",Seq{callStack.ref(frame + INDENT),RESULT})
+      end;
+      
+      // Discard all unwanted call frames...
+      
+      if fail >= 0 andthen failStack.ref(fail + FAIL_PREV) >= frame
+      then 
+        let frame = failStack.ref(fail + FAIL_PREV) then
+            locals = callStack.ref(frame + LOCALS)
+        in self.TOCS := frame + LOC0 + locals
+        end
+      else self.TOCS := frame + LOC0 + callStack.ref(frame + LOCALS)
+      end;
+      
+      // A frame may be returned to multiple times
+      // due to choice points. A return must copy a 
+      // non-empty frame...
+      
+      if frame >= 0 andthen (not callStack.ref(frame + CODE)->isEmpty) andthen fail >= 0 andthen failStack.ref(fail + FAIL_PREV) >= frame
+      then self.dupFrame()
+      end
+    end       
+    
+    @Operation printFrame(frame)
+    
+      // Diagnostic...
+      
+      format(stdout,"frame = ~S, TOS = ~S~%",Seq{frame,TOCS});
+      format(stdout,"PREV = ~S~%",Seq{callStack.ref(frame + 0)});
+      format(stdout,"GRAMMAR = ~S~%",Seq{callStack.ref(frame + 1)});
+      format(stdout,"CODE = ~S~%",Seq{callStack.ref(frame + 2)});
+      format(stdout,"INDENT = ~S~%",Seq{callStack.ref(frame + 3)});
+      format(stdout,"TARGET = ~S~%",Seq{callStack.ref(frame + 4)});
+      format(stdout,"CUT = ~S~%",Seq{callStack.ref(frame + 5)});
+      format(stdout,"LOCALS = ~S~%",Seq{callStack.ref(frame + 6)});
+      @Count i from 0 to callStack.ref(frame + 6) do
+        format(stdout,"Loc(~S) = ~S~%",Seq{i,callStack.ref(frame + 7 + i)})
+      end;
+      format(stdout,"~%~%")
+    end
+    
+    @Operation printFail(fail)
+    
+      // Diagnostic...
+      
+      format(stdout,"fail = ~S~%",Seq{fail});
+      format(stdout,"PREV = ~S~%",Seq{failStack.ref(fail + 0)});
+      format(stdout,"FAIL = ~S~%",Seq{failStack.ref(fail + 1)});
+      format(stdout,"CHARPOS = ~S~%",Seq{failStack.ref(fail + 2)});
+      format(stdout,"GRAMMAR = ~S~%",Seq{failStack.ref(fail + 3)});
+      format(stdout,"CODE = ~S~%",Seq{failStack.ref(fail + 4)});
+      format(stdout,"INDENT = ~S~%",Seq{failStack.ref(fail + 5)});
+      format(stdout,"TARGET = ~S~%",Seq{failStack.ref(fail + 6)});
+      format(stdout,"CUT = ~S~%",Seq{failStack.ref(fail + 7)});
+      format(stdout,"NAME = ~S~%",Seq{failStack.ref(fail + 8)});
+      format(stdout,"TOKEN = ~S~%",Seq{failStack.ref(fail + 9)});
+      format(stdout,"TYPE = ~S~%",Seq{failStack.ref(fail + 10)});
+      format(stdout,"ARGS = ~S~%",Seq{failStack.ref(fail + 11)});
+      @Count i from 0 to failStack.ref(fail + 11) do
+        format(stdout,"ARG(~S) = ~S~%",Seq{i,failStack.ref(fail + FAIL_ARG0 + i)})
+      end;
+      format(stdout,"~%~%")
+    end
+    
+    @Operation pushCall(prev,grammar,code,indent,target,cut,locals)
+    
+      // Get ready to start a new call. Returns the new call frame...
+      
+      callStack.put(TOCS + PREV_FRAME,prev);
+      callStack.put(TOCS + GRAMMAR,grammar);
+      callStack.put(TOCS + CODE,code);
+      callStack.put(TOCS + INDENT,indent);
+      callStack.put(TOCS + TARGET,target);
+      callStack.put(TOCS + CUT,cut);
+      callStack.put(TOCS + LOCALS,locals);
+      self.TOCS := TOCS + LOC0 + locals;
+      TOCS - (LOC0 + locals)
+    end
+    
+    @Operation pushFail(prev,fail,charPos,grammar,code,indent,target,cut,token,type,name,argMap)
+    
+      // Create a choice point...
+      
+      failStack.put(TOFS + FAIL_PREV,prev);
+      failStack.put(TOFS + FAIL_FAIL,fail);
+      failStack.put(TOFS + FAIL_CHARPOS,charPos);
+      failStack.put(TOFS + FAIL_GRAMMAR,grammar);
+      failStack.put(TOFS + FAIL_CODE,code);
+      failStack.put(TOFS + FAIL_INDENT,indent);
+      failStack.put(TOFS + FAIL_CUT,cut);
+      failStack.put(TOFS + FAIL_TOKEN,token);
+      failStack.put(TOFS + FAIL_TYPE,type);
+      failStack.put(TOFS + FAIL_NAME,name);
+      failStack.put(TOFS + FAIL_ARGS,argMap->size);
+      @Count i from 0 to argMap->size do
+        let arg = callStack.ref(prev + LOC0 + argMap->at(i))
+        in failStack.put(TOFS + FAIL_ARG0 + i,arg)
+        end
+      end;
+      self.fail := TOFS;
+      self.TOFS := TOFS + FAIL_ARG0 + argMap->size
+    end
+    
+    @Operation readChar()
+    
+      // Implements the Char instruction...
+      
+      tokenizer.setCharPos(tokenizer.lastCharPos());
+      let char = tokenizer.readChar()
+      in if char = 256
+         then self.fail("Char")
+         else 
+           self.RESULT := char;
+           if consumeToken 
+           then self.nextToken() 
+           else tokenizer.setLastCharPos(tokenizer.charPos())
+           end
+         end
+      end
+    end
+    
+    @Operation readChars()
+    
+      // Implements the Chars instruction...
+      
+      tokenizer.setCharPos(tokenizer.lastCharPos());
+      let char = tokenizer.readChar()
+      in if char = 256
+         then self.fail("Chars")
+         else 
+           let chars = Seq{char};
+               reading = true
+           in @While reading do
+                if not tokenizer.peek("end")
+                then
+                  char := tokenizer.readChar();
+                  if char = 256
+                  then reading := false
+                  else chars := Seq{char | chars}
+                  end
+                else reading := false
+                end
+              end;
+              self.RESULT := chars->reverse;
+              self.nextToken()
+           end
+         end
+      end
+    end
+    
+    @Operation readLine()
+    
+      // Implements the ReadLine instruction...
+      
+      tokenizer.setCharPos(tokenizer.lastCharPos());
+      let chars = Buffer(80,true);
+          char = tokenizer.readChar()
+      in @While char <> 256 and char <> "\n"->at(0) and char <> "\r"->at(0) do
+           chars.add(char);
+           char := tokenizer.readChar()
+         end;
+         self.RESULT := chars.toString()
+      end
+    end
+    
+    @Operation reset()
+    
+      // Sets up the parse machine...
+      
+      self.parseError := false;
+      expected.setSize(0);
+      self.maxCharPos := 0;
+      self.frame := 0-1;
+      self.fail := 0-1;
+      self.TOFS := 0;
+      self.TOCS := 0;
+      self.imports := Seq{};
+      self.consumeToken := true
+    end
+      
+    @Operation startAt(classifier)
+    
+      // Implements the At instruction...
+      
+      let grammar = classifier.grammar
+      in if grammar = null
+         then self.error("At: " + classifier.path() + " does not define a grammar.")
+         else 
+           let name = grammar.startingSymbol.toString()
+           in self.call(grammar,0,name,Seq{},false)
+           end
+         end
+      end
+    end
+      
+    @Operation typeCheck(path:Seq(String))
+    
+      // Implements the TypeCheck instruction...
+      
+      let imports = imports + callStack.ref(frame + GRAMMAR).imports then
+          type =
+        @Find(nameSpace,imports + callStack.ref(frame + GRAMMAR).imports)
+          when nameSpace.hasElement(path->head)
+          do path->tail->iterate(name nameSpace = nameSpace.getElement(path->head) |
+               if nameSpace.hasElement(name)
+               then nameSpace.getElement(name)
+               else throw NameSpaceRef(nameSpace,name)
+               end)
+          else throw PathNotFound(path,imports)
+        end
+      in if not RESULT.isKindOf(type)
+         then 
+           self.debug0(formats("Fail TypeCheck ~S : ~{::~;~S~}",Seq{RESULT,path}));
+           self.fail("Type Check")
+         else self.debug0("Type check " + RESULT + ":" + type.path() + " succeeds.")
+         end
+      end
+    end   
+    
+    @Operation unwindFail()
+    
+      // While the fail stack contains barren choice frames, pop them...
+      
+      @While fail >= 0 andthen failStack.ref(fail + FAIL_CODE)->isEmpty do
+        self.fail := failStack.ref(fail + FAIL_FAIL)
+      end;
+      if fail >= 0
+      then self.TOFS := fail + failStack.ref(fail + FAIL_ARGS) + FAIL_ARG0
+      else self.TOFS := 0
+      end
+    end
+    
+  end
+        

@@ -1,0 +1,219 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Compiling Operator Application                        *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  The application of an operator to a collection of operands is compiled    *
+ *  into a sequence of machine instructions of the form:                      *
+ *                                                                            *
+ *     STARTCALL                                                              *
+ *     <ARG(1)CODE>                                                           *
+ *     <ARG(2)CODE>                                                           *
+ *     ...                                                                    *
+ *     <ARG(n)CODE>                                                           *
+ *     <OPCODE>                                                               *
+ *     ENTER(n)                                                               *
+ *                                                                            *
+ *  At run-time the STARTCALL instruction creates a new call-frame for the    *
+ *  execution of the operator. The arguments are evaluated an pushed onto the *
+ *  stack, the operator is evaluated and pushed onto the stack and then the   *
+ *  newly constructed call-frame is completed and made current.               *
+ *                                                                            *
+ *  A variation on the general call mechanism is when the application is the  *
+ *  last expression to be performed before the current call-frame returns.    *
+ *  Under these circumstances, the current call-frame can be reused. This is  *
+ *  called tail-calling and can significantly reduce the amount of stack      *
+ *  required to execute code (especially code that is heavily recursive).     *
+ *                                                                            *
+ *  A number of operators are handled specially by the compiler, mostly for   *
+ *  efficiency reasons. The application of these operators transform into     *
+ *  specific machine instructions.                                            *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Instrs;
+
+context Apply
+  @Operation canCompileFormat()
+  
+    // Assumes the application is a format and returns true
+    // when the current formatter can compile the expression...
+    
+    format.canCompile(args->at(1).value->asSeq)
+  end
+
+context Apply
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+  
+    // Various special cases are compiled specially before the expression
+    // is compiled to instructions for a standard application. The operator
+    // may be 'super' which is a directive to continue the operation lookup.
+    // It may be a builtin operator that requires special instructions.
+    // It may be a format command in which case the currentl formatter may
+    // be able to compile it. Otherwise give up and compile to bog standard
+    // push-enter instructions...
+    
+    if self.isSuper()
+    then self.compileSuper(env,frame,isLast,saveSource)
+    elseif self.isBuiltin()
+    then self.compileBuiltin(env,frame,isLast,saveSource)
+    elseif self.isFormat() andthen self.canCompileFormat()
+    then self.compileFormat(env,frame,isLast,saveSource)
+    else self.compileCall(env,frame,isLast,saveSource)
+    end
+  end
+   
+context Apply 
+  @Operation compileBuiltin(env,frame,isLast,saveSource) 
+  
+    // Many of the built-in operators have their own instructions.
+    // This is a way of open coding calls to known operators. BTW
+    // make sure you check that all of these operators are actually
+    // available - some are pseudo.
+    
+    @Case operator.name of
+      "Kernel_arrayRef" do 
+        let array = args->at(0).compile(env,frame,false,saveSource);
+            index = args->at(1).compile(env,frame,false,saveSource)
+        in index + array + Seq{ArrayRef()} 
+        end
+      end
+      "Kernel_arraySet" do 
+        let array = args->at(0).compile(env,frame,false,saveSource);
+            index = args->at(1).compile(env,frame,false,saveSource);
+            value = args->at(2).compile(env,frame,false,saveSource)
+        in value + index + array + Seq{ArraySet()} 
+        end
+      end
+      "Kernel_nextToken" do args->head.compile(env,frame,false,saveSource) + Seq{Read()} end
+      "Kernel_read" do args->head.compile(env,frame,false,saveSource) + Seq{Read()} end
+      "Kernel_server_accept" do args->head.compile(env,frame,false,saveSource) + Seq{Accept()} end
+      "Kernel_tableGet" do 
+        let table = args->at(0).compile(env,frame,false,saveSource);
+            key = args->at(1).compile(env,frame,false,saveSource)
+        in key + table + Seq{TableGet()} 
+        end
+      end 
+      "Kernel_tablePut" do 
+        let table = args->at(0).compile(env,frame,false,saveSource);
+            key = args->at(1).compile(env,frame,false,saveSource);
+            value = args->at(2).compile(env,frame,false,saveSource)
+        in value + key + table + Seq{TablePut()} 
+        end
+      end
+      "Kernel_sleep" do
+        args->at(0).compile(env,frame,false,saveSource) + Seq{Sleep()}
+      end
+      else self.compileCall(env,frame,isLast,saveSource)
+    end
+  end
+ 
+context Apply
+  @Operation compileCall(env,frame,isLast,saveSource)
+  
+    // The general purpose Apply compiler...
+    
+    let argCode = args->asSeq->collect(arg | arg.compile(env,frame,false,saveSource))->flatten;
+        arity = args->size
+    in if self.isDynamicOperator(env)
+       then 
+       
+         // If this application is last before the current call-frame
+         // is to be popped then there is no requirement to retain the
+         // current frame. The tail-enter instructions cause the
+         // current call-frame to be reused...
+         
+         if isLast
+         then argCode + Seq{TailEnterDyn(Compiler::Symbol(operator.name),arity)}
+         else Seq{StartCall()} + argCode + Seq{EnterDyn(Compiler::Symbol(operator.name),arity)}
+         end
+       else
+         let funCode = operator.compile(env,frame,false,saveSource)
+         in if isLast
+            then argCode + funCode + Seq{TailEnter(arity)}
+            else Seq{StartCall() | argCode + funCode + Seq{Enter(arity)}}
+            end
+         end
+      end
+    end
+  end
+  
+context Apply
+  @Operation compileFormat(env,frame,isLast,saveSource)
+    format.compile(args->at(0),args->at(1).value,args->at(2).elements).compile(env,frame,isLast,saveSource)
+  end
+  
+context Root::OCL::Apply
+  @Operation compileSuper(env,frame,isLast,saveSource)
+    let argCode = args->collect(arg | arg.compile(env,frame,false,saveSource))->asSeq->flatten;
+        arity = args->size
+    in if isLast
+       then argCode + Seq{TailSuper(arity)}
+       else Seq{StartCall() | argCode + Seq{Super(arity)}}
+       end
+    end
+  end
+  
+context Apply
+  @Operation FV():Element
+    args->collect(arg | arg.FV())->asSet->flatten->union(operator.FV())
+  end
+  
+context Apply
+  @Operation isBuiltin():Boolean
+    if operator.isKindOf(Var)
+    then operator.name = "Kernel_read" or 
+         operator.name = "Kernel_nextToken" or 
+         operator.name = "Kernel_server_accept" or
+         operator.name = "Kernel_arrayRef" or
+         operator.name = "Kernel_arraySet" or
+         operator.name = "Kernel_tableGet" or
+         operator.name = "Kernel_tablePut" or
+         operator.name = "Kernel_sleep" 
+    else false
+    end
+  end
+  
+context Apply
+  @Operation isFormat():Boolean
+    if operator.isKindOf(Var)
+    then operator.name = "format" and 
+         args->size = 3 andthen
+         args->at(1).isKindOf(StrExp) andthen
+         args->at(2).isKindOf(SetExp)
+    else false
+    end
+  end
+  
+context Apply
+  @Operation isDynamicOperator(env):Boolean
+    // Returns true when the operator will generate
+    // a dynamic lookup...
+    operator.isKindOf(Var) andthen
+    env.isDynamic(operator.name)
+  end
+  
+context Root::OCL::Apply
+  @Operation isSuper()
+    if operator.isKindOf(Var)
+    then operator.name = "super"
+    else false
+    end
+  end
+
+context Apply
+  @Operation maxLocals():Element
+    if self.isFormat() andthen self.canCompileFormat()
+    then format.compile(args->at(0),args->at(1).value,args->at(2).elements).maxLocals()
+    else operator.maxLocals().max(args->collect(arg | arg.maxLocals())->max)
+    end
+  end
+  
+context Apply
+  @Operation lift()
+    Apply(self.typeExp(),Seq{operator.lift(),SetExp("Seq",args->collect(arg | arg.lift()))})
+  end
+  

@@ -1,0 +1,53 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Characters                                   *
+ *                           -------------------                              *
+ *                                                                            *
+ *   A way of specifying characters.                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import XOCL;
+import OCL;
+
+context XOCL
+
+  @Class Character extends Sugar
+  
+    @Grammar
+    
+      Character ::= 
+      
+        'Space' { Character("Space") }     |
+        'Newline' { Character("Newline") } |
+        'Tab' { Character("Tab") }         |
+        c = Char Char { Character(Seq{c}->asString) }.
+        
+      
+    end
+    
+    @Attribute char : String end
+    
+    @Constructor(char) ! end
+    
+    @Operation desugar():Performable
+    
+      @Case char of 
+      
+        "Space" do IntExp(" "->at(0)) end
+        
+        "Newline" do IntExp("\n"->at(0)) end
+        
+        "Tab" do IntExp("\t"->at(0)) end
+        
+        else IntExp(char->at(0))
+        
+      end
+      
+    end
+    
+  end

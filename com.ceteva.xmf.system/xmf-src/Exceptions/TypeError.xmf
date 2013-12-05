@@ -1,0 +1,35 @@
+/******************************************************************************
+ *                                                                            *
+ *                                 Type Error                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Thrown when a value is not of the correct type.                         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+parserImport XOCL;
+
+context Exceptions
+
+  @Class TypeError extends Exception
+     
+    @Attribute value : Element    end
+    @Attribute type  : Classifier end
+    
+    @Constructor(value,type) !
+      self.setBacktrace();
+      self.message := 
+        "Expecting a value of type " + self.typePath() + 
+        " got " + value.toString() + " of type " + value.of().path()
+    end
+    
+    @Operation typePath():String
+      if type.isKindOf(Classifier)
+      then type.path()
+      else type
+      end
+    end
+    
+  end
+      
+    

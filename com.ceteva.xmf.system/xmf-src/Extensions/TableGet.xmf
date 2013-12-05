@@ -1,0 +1,48 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class TableGet extends Sugar
+  
+    // Table references often have to check that the key exists before the
+    // reference is made and take different actions depending on whether
+    // the key is present or not. This construct hides the key check and
+    // the if-expression...
+    
+    @Attribute name        : String      (?,!) end
+    @Attribute table       : Performable (?,!) end
+    @Attribute key         : Performable (?,!) end
+    @Attribute action      : Boolean     (?,!) end
+    @Attribute alternative : Performable (?,!) end
+    
+    @Constructor(name,table,key,action,alternative) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      TableGet ::= n = Name '=' t = Exp '[' k = Exp ']' 'do' a = Exp 'else' x = Exp 'end' {
+        TableGet(n,t,k,a,x)
+      }.
+      
+    end
+    
+    @Operation desugar():Performable
+      [| let tt = <self.table>;      // Bug somewhere in lift - don't use var table
+             kk = <key>
+         in if tt.hasKey(kk)
+            then 
+              let <name> = tt.get(kk)
+              in <action>
+              end
+            else <alternative>
+            end
+         end
+      |]
+    end
+    
+  end
+      
+        

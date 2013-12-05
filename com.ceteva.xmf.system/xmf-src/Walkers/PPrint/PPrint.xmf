@@ -1,0 +1,71 @@
+parserImport XOCL;
+
+import Walkers;
+  
+context Walkers
+
+  @Class PPrint metaclass Dispatcher 
+  
+    @Bind PRINTDEPTH  = 10 end
+    @Bind PRINTLENGTH = 10 end
+  
+    @Attribute refs    : Refs    = Refs()               end
+    @Attribute depth   : Integer = PPrint::PRINTDEPTH   end
+    @Attribute length  : Integer = PPrint::PRINTLENGTH  end
+    @Attribute buffer  : Buffer  = Buffer(100,true) (?) end
+    @Attribute indent  : Integer = 0                    end
+    @Attribute labels  : Table   = Table(10)            end
+    @Attribute labelc  : Integer = 0                    end
+    
+    @Constructor() end
+    
+    @Constructor(depth,length) ! end
+    
+    @Operation countRefs(element)
+      refs.walk(element,null)
+    end
+    
+    @Operation getString():String
+      buffer.toString()
+    end
+    
+    @Operation label(e)
+      labels.put(e,self.nextLabel())
+    end
+    
+    @Operation indent()
+      self.indent := indent + 2
+    end
+    
+    @Operation newline()
+      buffer.add("\n"->at(0));
+      @Count i from 0 to indent do
+        buffer.add(" "->at(0))
+      end
+    end
+    
+    @Operation nextLabel()
+      self.labelc := labelc + 1;
+      labelc
+    end
+    
+    @Operation print(s)
+      buffer.append(s)
+    end
+    
+    @Operation printRefTo(e)
+      self.print("#<" + labels.get(e) + ">")
+    end
+    
+    @Operation refCount(element)
+      refs.refCount(element)
+    end
+    
+    @Operation undent()
+      self.indent := indent - 2
+    end
+    
+  end
+
+
+

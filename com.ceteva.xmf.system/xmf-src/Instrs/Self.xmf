@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            The Current Target                              *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Get the value of the current target. The current target is held in the    *
+ *  current call frame. The value is pushed onto the stack.                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Self extends Instr
+    
+  end
+  

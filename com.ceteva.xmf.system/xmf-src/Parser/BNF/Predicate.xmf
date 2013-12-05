@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Predicates                                 *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Predicates are like actions but they return a boolean value that          *
+ *  determines whether the parse can proceed or not. Like actions, a predicate*
+ *  is created via a PrePredicate from the XBNF parser.                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class Predicate extends Recognizer
+    
+    @Attribute predicate : Element end
+    @Attribute source    : String end
+    
+    @Constructor(predicate,source) end
+    
+    @Constructor(predicate) 
+      self.source := ""
+    end
+    
+    @Operation code(outputChannel)
+      format(outputChannel,"{ ~S }",Seq{source})
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation setOwner(owner)
+      predicate.owner := owner
+    end
+    
+    @Operation toExp(FV:Set(String))
+      self.error("Cannot transform a predicate into an expression")
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

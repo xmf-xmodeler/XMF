@@ -1,0 +1,56 @@
+/******************************************************************************
+ *                                                                            *
+ *                           Various OCL Helpers                              *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import OCL;
+import Instrs;
+
+context Root::OCL::OCL
+
+  @AbstractOp FV():Set(String)
+  
+    // All expressions have free variables - those
+    // variables that are used but not declared in the
+    // expression...
+    
+  end 
+
+context Root::OCL::OCL
+
+  @AbstractOp maxLocals():Integer
+  
+    // The number of locals required to perform the
+    // expression. These are the locals declared
+    // within the expression and will co-exist at
+    // run-time in the current call-frame...
+  
+  end
+
+context Root::OCL::OCL
+
+  @AbstractOp compile(env:Element,frame:Integer,isLast:Boolean,saveSource:Boolean):Seq(Instr) 
+  
+    // Translates the receiver into a sequence of VM instructions.
+    // The first argument is an instance of Compiler::Env containing
+    // the declared variables, the frame argument describes the
+    // depth of operation-nesting, the isLast argument determines 
+    // whether or not calls should be tail-calls, the saveSource
+    // argument determines whether source should be saved in code-boxes...
+  
+  end
+  
+context Root::OCL::OCL
+
+  @Operation typeExp()
+  
+    // Returns an expression which when evaluated will produce
+    // the type of the receiver. Used when lifting expressions...
+    
+    Path(Var("Root"),Seq{"OCL",self.of().name})
+  end

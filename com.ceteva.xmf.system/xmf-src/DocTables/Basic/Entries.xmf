@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          A Sequence of Entries                             *
+ *                          ---------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Entries extends Entry
+
+    @Attribute entries : Seq(Entry) (?,!,+,-) end
+    
+    @Constructor(entries) ! end
+    
+    @Operation contents()
+      entries
+    end
+    
+  end

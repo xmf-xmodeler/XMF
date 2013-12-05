@@ -1,0 +1,15 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context Cons
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <Cons>
+        head.toXML(out);
+        tail.toXML(out)
+      </Cons>
+    end
+  end

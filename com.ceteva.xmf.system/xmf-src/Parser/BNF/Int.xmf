@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Integers                                 *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Int is a builtin non-terminal of XBNF. The next grammar token must be an  *
+ *  integer token. The integer is returned by the parser as a string.         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Int extends Recognizer 
+	
+	@Operation code(outputChannel)
+      format(outputChannel," Int ")
+    end
+
+    @Operation first(grammar)
+      Set{"Builtin(Int)"}
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+	
+	@Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::Int() |]
+	end
+	
+	@Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+  end

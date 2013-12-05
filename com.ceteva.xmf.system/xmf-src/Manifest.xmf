@@ -1,0 +1,60 @@
+parserImport Manifests;
+
+/******************************************************************************
+ *                                                                            *
+ *                                XMF Manifest                                *
+ *                              ---------------                               *
+ *                                                                            *
+ *         This file defines all the packages in the XMF System.              *
+ *         When compiling the system, use this file to determine which        *
+ *         files need recompiling Manifest load directives will load          *
+ *         packages in as appropriate when they are used by the compiler.     *
+ *         Use this manifest to generate boot files for the system.           *
+ *                                                                            *
+ ******************************************************************************/ 
+
+@Manifest XMF
+  @Ref Kernel          end
+  @Ref Exceptions      end
+  @Ref Channels        end
+  @Ref Comms           end
+  @Ref Format          end
+  @Ref Env             end
+  @Ref Arrays          end
+  @Ref Graphs          end
+  @Ref Stacks          end
+  @Ref Lib             end
+  @Ref Constraints     end
+  @Ref Preferences     end
+  @Ref Java            end
+  @Ref XMF             end
+  @Ref Boot            end
+  @Ref OCL             end
+  @Ref Parser          end
+  @Ref Instrs          end
+  @Ref Assembler       end
+  @Ref Signatures      end
+  @Ref Compiler        end
+  @Ref Grammar         end
+  @Ref Extensions      end
+  @Ref ^Both Aspects   end
+  @Ref DocTables       end
+  @Ref Doc             end
+  @Ref ^Both Eval      end
+  @Ref XMatch          end
+  @Ref TopLevel        end
+  @Ref Walkers         end
+  @Ref XML             end
+  @Ref XMap            end
+  @Ref Manifests       end
+  @Ref Associations    end
+  @Ref Deploy          end
+  @Ref Debug           end
+  @Ref XRules          end
+  @Ref Undo            end
+  @Ref ^Both CodeGen   end
+  @Ref PPrint          end
+  @Ref Comprehensions  end
+  @Ref Languages       end
+  @Ref Import          end
+end;

@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Decrement a Local Variable By 1                   *
+ *                          -------------------------------                   *
+ *                                                                            *
+ *  The operand indexes a local variable. The value of the variable should be *
+ *  an integer. The value of the variable is reduced by 1.                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class DecLocal extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<DecLocal " + name + "," + offset + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

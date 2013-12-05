@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+context Tests
+  @Class PostFails extends Exception
+    @Attribute name   : String       end
+    @Attribute values : Seq(Element) end
+    @Constructor(name,values)
+      self.setBacktrace();
+      self.message := formats("Postcondition fails for ~S(~{,~;~S~})",Seq{name,values})
+    end
+  end

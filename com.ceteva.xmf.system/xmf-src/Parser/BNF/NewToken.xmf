@@ -1,0 +1,56 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 New Tokens                                 *
+ *                               ---------------                              *
+ *                                                                            *
+ *  XBNF allows the user to define their own token types. Each new token type *
+ *  must have a unique name and a unique token number which is returned by the*
+ *  tokenizer at parse-time.                                                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class NewToken extends Recognizer 
+  
+    @Attribute name        : String  (?) end
+    @Attribute tokenNumber : Integer (?) end
+    
+    @Constructor(name,tokenNumber) ! end
+	
+	@Operation code(outputChannel)
+      format(outputChannel," NewToken(~S,~S) ",Seq{name,tokenNumber})
+    end
+
+    @Operation first(grammar)
+    
+      // New tokens must be returned in the following format because the
+      // prediction table compiler expects to find new token types
+      // defined as Builtin(NAME,TYPE) where TYPE is a unique number.
+      // The TYPE is added to the prediction table of a block in order
+      // for the block to be indexed by the token type at parse-time...
+      
+      Set{formats("Builtin(~S,~S)",Seq{name,tokenNumber})}
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+	
+	@Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::NewToken(<name.lift()>,<tokenNumber.lift()>) |]
+	end
+	
+	@Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+  end

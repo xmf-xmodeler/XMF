@@ -1,0 +1,63 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+import CodeContext;
+import Signatures;
+import TypeChecker;
+
+context TypeChecker
+
+  @Class Checker extends CompilerWalker
+  
+    @Attribute debug     : Boolean   (?,!) end
+    @Attribute signature : Signature (?,!) end
+    
+    @Constructor(signature) end
+    
+    @Operation initialEnv(imports:Seq(Seq(String)))
+    
+      // Create the initial environment. We know that Root and
+      // XCore are imported everywhere, so add the bindings for 
+      // those name-spaces to the environment. Also, add the
+      // bindings for the supplied imported name-spaces...
+      
+      imports
+        ->including(Seq{"Root"})
+        ->including(Seq{"XCore"})
+        ->iterate(path env = Seq{} |
+          let nameSpace = signature.lookup(path)
+          in @For binding in nameSpace.bindings() do
+               env := env.bind(binding.name(),binding.type())
+             end;
+             env
+          end)
+    end
+    
+    @Operation lookupVar(name:String,env)
+    
+      // Returns the type of the supplied variable.
+      // If the variable cannot be found then returns 
+      // null..
+      
+      if env.binds(name)
+      then env.lookup(name)
+      else null
+      end
+    end
+
+    @Operation walkDot(name:String,target:OCL,arg)
+      null
+    end
+    
+    @Operation walkVar(line:Integer,name:String,env)
+      let type = self.lookupVar(name,env)
+      in if type = null
+         then TypeAnnotation(Var(name,line))
+         else TypeAnnotation(Var(name,line),type)
+         end
+      end
+    end
+    
+  end

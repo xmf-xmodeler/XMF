@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XML SAX Constants                             *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Constants used by the SAX parser. The underlying VM processes an XML     *
+ *   file and generates 'events' based on the content. The events are encoded *
+ *   using the constants defined here and can be decoded by a SAXInputChannel.*
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class XMLData
+  
+    @Bind START_DOCUMENT = 1 end
+	
+	@Bind END_DOCUMENT = 2 end
+	
+	@Bind START_ELEMENT	= 3 end
+	
+	@Bind END_ELEMENT = 4 end
+	
+	@Bind CHARS	= 5 end
+  
+  end

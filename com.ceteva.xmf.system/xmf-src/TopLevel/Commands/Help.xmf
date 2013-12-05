@@ -1,0 +1,50 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("h", 
+  @Operation(args,target,env,imports) 
+    @Doc 
+      ?h                   Top level command help.
+    end
+    format(stdout,"Top Level Loop Help~%");
+    format(stdout,"-------------------~%~%");
+    format(stdout,"The XMF top level loop is a command interpreter that reads~%");
+    format(stdout,"commands typed at a console, evaluates the commands and then~%");
+    format(stdout,"prints the result. The interpreter understands any valid XMF syntax~%");
+    format(stdout,"(such as XOCL) including language extensions that have been defined~%");
+    format(stdout,"using XBNF and accessed using '@'. When you type these commands~%");
+    format(stdout,"you must terminate them with a ';' before pressing return (note that~%");
+    format(stdout,"';' is the command terminator and commands may span several lines).~%");
+    format(stdout,"Note if a single quote (') is used in a command it should be part of~%");
+    format(stdout,"of a pair. If not, input will be halted until another one is entered.~%~%");
+    format(stdout,"The command interpreter has its own state: it remembers the most~%");
+    format(stdout,"recently evaluated values and the last error that occurred.~%");
+    format(stdout,"The variables v0, v1 and v2 are the last three values produced~%");
+    format(stdout,"by the top level. These variables can be useful when you want to~%");
+    format(stdout,"navigate to or compute a value and then use it in a subsequent~%");
+    format(stdout,"command. Errors may occur in commands typed at the top level.~%");
+    format(stdout,"When an error occurs, an exception is thrown and caught by the top~%");
+    format(stdout,"level loop. The loop then prints out error diagnostics. The value~%");
+    format(stdout,"of the variable xx is the most recently raised exception.~%~%");
+    format(stdout,"The XMF Console uses the Escape key as an interrupt. This can be~%");
+    format(stdout,"useful if you have caused XMF to enter an infinite loop or to start~%");
+    format(stdout,"a lengthy calculation that you wish to terminate. Interrupts are~%");
+    format(stdout,"handled by XMF on the next instruction cycle, the interrupt will~%");
+    format(stdout,"throw an exception.~%~%");
+    format(stdout,"The command interpreter has its own command language.~%");
+    format(stdout,"Each top level command starts with a '?'. Top level commands must~%");
+    format(stdout,"occur on a single line and are terminated by return rather than ';'.~%~%");
+    format(stdout,"Top level commands~%");
+    format(stdout,"------------------~%~%  ");
+    
+    let keys = Command::handlers.keys()->asSeq->sortNames() in
+       @For key in keys do
+        let handler = Command::handlers.get(key) in
+          handler.doc().pprint(stdout,2)
+        end
+      end
+    end;
+    format(stdout,"~%")
+  end); 

@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context BindAtt
+  @Operation toJava(out:OutputChannel)
+    format(out,"    bindAtt = new BindAtt();~%");
+    format(out,"    bindAtt.setVar(\"~S\");~%",Seq{var});
+    format(out,"    bindAtt.setAtt(\"~S\");~%",Seq{att});
+    if value <> null
+    then format(out,"    bindAtt.setValue(\"~S\");~%",Seq{value.exp.value})
+    end;
+    format(out,"    stack.push(bindAtt);~%")
+  end

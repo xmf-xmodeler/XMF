@@ -1,0 +1,58 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Fun Bindings                               *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A binding that occurs in a let-expression that defines an operation. The  *
+ *  syntax of an operation is absorbed into the syntax of the binding which   *
+ *  makes the definition easier to read.                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class FunBinding extends ValueBinding
+  
+    @Attribute args : Seq(Pattern) end
+    
+    @Constructor(name,args,type,value) ! end
+    
+    @Operation desugar()
+    
+      // A function binding is just a value binding
+      // for an operation...
+      
+      ValueBinding(name,self.opType(),
+        Operation(name,args,type,value)
+      )
+    end
+    
+    @Operation opType():OpType
+    
+      // Construct an appropriate operation type...
+      
+      OpType(
+        args->collect(arg |
+          @Case arg of
+            Varp(name,type) do
+              type
+            end
+            else NamedType()
+          end),
+        type
+      )
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S(~{,~;~S~}):~S = ~S",Seq{
+        name,
+        args->collect(arg | arg.pprint()),
+        type.pprint(),
+        value.pprint(indent + name.toString()->size + 3)})
+    end
+    
+  end 

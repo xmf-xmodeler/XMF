@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Global Variables                                *
+ *                           ------------------                               *
+ *                                                                            *
+ *  A global variable is referenced within an operation but declared within a *
+ *  scope that encloses the operation. Operations have global variable        *
+ *  tables that are linked lists of vectors. The linkage arises because an    *
+ *  operations global table is linked to the global tables of its parent. A   *
+ *  global reference must chain to the appropriate frame (or global vector)   *
+ *  and then index into the vector. The frame and offset are recorded in an   *
+ *  entry in the compiler's variable table using this class.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+import Instrs;
+
+context Compiler
+   
+    @Class Global extends Var
+      
+      // How far to chain back in the linked list
+      // of global vectors...
+      
+      @Attribute frame  : Integer end
+      
+      // The index of the global variable in the
+      // global vector...
+      
+      @Attribute offset : Integer end
+      
+      @Constructor(name,frame,offset) ! end
+      
+      @Operation ref()
+        Seq{GlobalRef(name,frame,offset)}
+      end
+    end

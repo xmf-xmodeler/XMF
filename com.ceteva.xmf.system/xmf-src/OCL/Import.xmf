@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+context OCL
+  
+  @Class Import extends OCL::OCL
+    
+    // An 'import' clause at the start of a compilation unit.
+      
+    @Attribute nameSpace : Seq(String) end
+      
+    @Constructor(nameSpace) ! end
+      
+    @Operation desugar():Performable
+      [| let nameSpace = <OCL::Path::toPath(nameSpace)> 
+         in Kernel_import(nameSpace.contents);
+            Kernel_letVar(nameSpace.name,nameSpace) 
+         end 
+      |]
+    end
+      
+    @Operation pprint(out,indent)
+      format(out,"import ~{::~;~S~}",Seq{nameSpace})
+    end
+      
+  end
+  

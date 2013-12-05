@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("stats",
+  @Operation(args,target,env,imports) 
+    @Doc
+      ?stats               Print machine stats.
+    end
+    Kernel_stats()
+  end);

@@ -1,0 +1,49 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import IO;
+import Tests;
+
+context Tests
+
+  @Class TestScripts extends XCore::NameSpace
+  
+    @Grammar extends OCL::OCL.grammar
+      
+      TestScripts ::= n = Name es = Exp* 'end' {
+        es->iterate(e x = [| Tests::TestScripts(<n.lift()>) |] | [| <x>.add(<e>) |])
+      }.
+      
+    end
+  
+    @Operation archive(dir)
+      if dir.mkDir()
+      then
+        let file = IO::File::tempFile("Report_"+xmf.date().subst("_"," ",true).subst("_",":",true),".txt",dir)
+        in @WithOpenFile(fout -> file)
+             self.test(fout)
+           end
+        end
+      else xmf.message("Cannot create directory " + dir)
+      end
+    end 
+     
+    @Operation tests()
+      self.contents()->select(e | e.isKindOf(Operation) andthen e.property("isTest"))
+    end
+    
+    @Operation test(out:OutputChannel)
+      @For test in self.tests() do
+        test(out)
+      end
+    end
+    
+    @Operation test(name:String,out:OutputChannel)
+      @Find(test,tests)
+        when test.name().toString() = name
+        do test(out)
+      end
+    end
+    
+ end

@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Setting a Value in an Array                       *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  Pops an array, then an index and then a value. Updates the value at the   *
+ *  index in the array and pushes the array onto the stack. Causes daemons    *
+ *  monitoring the array to be fired.                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class ArraySet extends Instr
+    
+  end
+  
+  

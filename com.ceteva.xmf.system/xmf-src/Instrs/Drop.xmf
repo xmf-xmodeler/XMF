@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Drop Elements from a Sequence                     *
+ *                          -----------------------------                     *
+ *                                                                            *
+ *  Pops a sequence and then an integer n. Chains down the tail n-times and   *
+ *  pushes the resulting sequence back on the stack.                          *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Drop extends Instr
+    
+  end

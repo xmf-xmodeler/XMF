@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Comprehensions;
+
+context Comprehensions
+
+  @Class Bind extends Clause
+  
+    // A syntax class that corresponds to a clause
+    // of the form NAME : TYPE <- EXP.
+  
+    @Attribute name  : String end
+    @Attribute type  : Performable end
+    @Attribute value : Performable end
+    
+    @Constructor(name,type,value) ! end
+    
+  end

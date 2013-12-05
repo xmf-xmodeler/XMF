@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      EOF                                   *
+ *                               ---------------                              *
+ *                                                                            *
+ *  The input to the tokenizer must be exhausted for this to succeed.         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class EOF extends Recognizer
+    
+    @Operation code(outputChannel)
+      format(outputChannel," EOF ")
+    end
+
+    @Operation first(grammar)
+      Set{"Builtin(EOF)"}
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+    
+    @Operation toExp(FV:Set(String)):Performable
+      [| Root::Parser::BNF::EOF() |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

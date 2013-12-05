@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Do Nothing                                 *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  The VM does nothing when it encounters this instruction. It is typically  *
+ *  used as a place-holder for a label.                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class NoOp extends Instr
+  
+    @Constructor(label) ! end
+    
+  end

@@ -1,0 +1,30 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("s",
+  @Operation(args,target,env,imports) 
+    @Doc
+      ?s <FILE>            Saves a system image in the file.
+      ?s <FILE> <FILE>     Saves an image that boots from the second file.
+    end
+    if args->size > 0
+    then
+      if args->at(0).isKindOf(String)
+      then 
+       xmf.saveState(
+         args->at(0),
+         @Operation(ignore) 
+           if args->size = 1
+           then args
+           else 
+             @Fork
+               args->at(1).loadBin(true)
+             end;
+             self.die()
+           end
+         end)
+      end
+    end
+  end); 

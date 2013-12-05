@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+context Tests
+  @Class Body 
+    @Attribute exp : Performable (?) end
+    @Constructor(exp) ! end
+    @Grammar extends OCL::OCL.grammar
+      Body ::= e = Exp 'end' { Body(e) }.
+    end
+  end

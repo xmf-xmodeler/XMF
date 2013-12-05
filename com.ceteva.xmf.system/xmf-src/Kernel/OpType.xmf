@@ -1,0 +1,91 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Operation Types                                *
+ *                             ---------------                                *
+ *                                                                            *
+ *   XMF is weakly and dynamically typed. Parameters, attributes and operation*
+ *   results can be typed by specifying a classifier. Normally, a classifier  *
+ *   is a class or a data type (such as String). In addition, a classifier    *
+ *   might be created via a parametric meta-class as in Seq(String). The type *
+ *   of operations involves the type of the parameters and the return type.   *
+ *   Since XMF supports operations as data values, the classifier of these    *
+ *   values is an instance of OpType. Note that this is not used much in the  *
+ *   XMF source code. The classifier of an operation is usually left implicit *
+ *   or specified as Element.                                                 *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XCore
+
+  @Class OpType extends Classifier 
+  
+    @Attribute domains : Seq(Classifier) (?) end
+    @Attribute range   : Classifier      (?) end
+    
+    @Constructor(domains,range) end
+    
+    @Operation init()
+      self.name := self.toString();
+      super()
+    end
+     
+    @Operation inheritsFrom(type:Classifier):Boolean
+    
+      // Returns true when the supplied type inherits from
+      // Operation or when the arg and return types match...
+      
+      if type.isKindOf(OpType) andthen type.domains->size = domains->size
+      then
+        let inheritsFrom = true
+        in @For d1,d2 in domains,type.domains when inheritsFrom do
+             inheritsFrom := d1.inheritsFrom(d2)
+           end;
+           if inheritsFrom
+           then type.range.inheritsFrom(range)
+           else false
+           end
+        end
+      else super(type)
+      end
+    end
+    
+    @Operation matchesSig(sig,nameSpaces:Seq(NameSpace)):Boolean
+    
+      // Returns true when the domains and range of
+      // the operation type matches the signature...
+      
+      let args = sig->butLast;
+          result = sig->last;
+          matches = true
+      in if args->size = domains->size
+         then
+           @For arg,domain in args,domains when matches do
+             let type = arg->at(1)
+             in matches := Classifier::mapType(type,nameSpaces).inheritsFrom(domain)
+             end
+           end;
+           if matches
+           then range.inheritsFrom(Classifier::mapType(result,nameSpaces))
+           else false
+           end
+         else false 
+         end
+      end
+    end
+    
+    @Operation toString():String
+      let s = "(" 
+      in @For d in domains do
+           s := s + d.name();
+           if not isLast then s := s + "," end
+         end;
+         if range <> null
+         then s := s + ") -> " + range.name()
+         end;
+         s
+      end
+    end
+    
+  end

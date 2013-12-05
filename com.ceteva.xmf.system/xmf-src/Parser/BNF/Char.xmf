@@ -1,0 +1,46 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Characters                                 *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Char is a builtin non-terminal of XBNF. Providing that the input source   *
+ *  has not reached EOF, this will succeed and return the next character.     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Char extends Recognizer 
+	
+	@Constructor() ! end
+	
+	@Operation code(outputChannel)
+      format(outputChannel," Char ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+
+    @Operation first(grammar)
+      Set{"Builtin(Char)"}
+    end
+
+    @Operation nullable(grammar):Boolean
+       false
+    end
+	
+	@Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::Char() |]
+	end
+	
+	@Operation transform(FV:Set(String),grammar):Recognizer
+	  self
+	end
+	
+  end

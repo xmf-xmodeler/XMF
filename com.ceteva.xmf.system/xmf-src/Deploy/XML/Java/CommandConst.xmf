@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context CommandConst
+  @Operation toJava(out:OutputChannel)
+    format(out,"    commandConst = new CommandConst();~%");
+    format(out,"    commandConst.setValue(\"~S\");~%",Seq{value});
+    format(out,"    stack.push(commandConst);~%")
+  end

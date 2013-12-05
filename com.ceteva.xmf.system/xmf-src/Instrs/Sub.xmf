@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Subtraction                                *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops v2 then v1 from the stack and pushes v1 - v2. If the values are      *
+ *  numbers then the VM handles the subtraction. Otherwise v1 is sent a sub/1 *
+ *  message.                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Sub extends Instr
+
+  end

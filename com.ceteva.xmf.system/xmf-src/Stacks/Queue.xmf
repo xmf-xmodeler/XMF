@@ -1,0 +1,186 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      Queues                                *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    A queue has two en-ds: elements are added to one en_dof the queue and   *
+ *    removed from the other. This is sometimes referred to as a FIFO stack.  *
+ *    Use push(0 to add elements to the queue and pop to remove elements.     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Stacks;
+
+context Stacks
+
+  @Class Queue
+  
+    @Attribute elements : Vector = Vector(100) end
+    @Attribute first    : Integer              end 
+    @Attribute last     : Integer              end
+    
+    @Operation asSeq():Seq(Element)
+    
+      @Doc
+        Returns the queue as a sequence.
+      end
+      
+      let s = Seq{};
+          i = last
+      in @While i <> first do
+           s := Seq{elements.ref(i - 1) | s};
+           i := i - 1
+         end;
+         s
+      end
+    end
+    
+    @Operation expand()
+    
+      @Doc
+        Used to expand the internal storage of a queue.
+        Probably better to use a buffer for this.
+      end
+      
+      let newElements = Vector(elements.size() * 2);
+          index = 0
+      in @While not self.isEmpty() do
+           newElements.put(index,self.pop());
+           index := index + 1
+         end;
+         self.elements := newElements;
+         self.first := 0;
+         self.last := index
+      end
+    end
+    
+    @Operation empty()
+    
+      @Doc
+        Empties the queue.
+      end
+      
+      self.first := 0;
+      self.last := 0
+    end
+    
+    @Operation indexOf(e):Integer
+    
+      @Doc
+        Returns the index of the first occurrence of the supplied element 
+        in the queue or -1 if the element does not exist.
+      end
+      
+      let i = 0;
+          found = false
+      in @While i < elements.size() and not found do
+            if elements.ref(i) = e 
+            then found := true
+            else i := i + 1 
+            end
+         end;
+         if found
+         then i
+         else (0-1)
+         end
+      end
+    end
+    
+    @Operation isEmpty():Boolean
+    
+      @Doc
+        Returns true when the receiver has no elements.
+      end
+      
+      first = last
+    end
+    
+    @Operation isFull():Boolean
+    
+      @Doc
+        Returns true when the queue is full.
+      end
+      
+      elements.size() = last
+    end
+    
+    @Operation pop()
+    
+      @Doc
+        Returns the head element in the queue or raises
+        an exception of type StackUnderflow. The element is
+        removed from the queue.
+      end
+      
+      if self.isEmpty()
+      then throw StackUnderflow(self)
+      else 
+        self.first := first + 1;
+        elements.ref(first - 1)
+      end
+    end
+    
+    @Operation push(e)
+    
+      @Doc 
+        Adds the supplied element to the en-d of the queue.
+        The queue storage is expanded as necessary.
+      end
+      
+      if self.isFull() 
+      then self.expand()
+      end;
+      elements.put(last,e);
+      self.last := last + 1;
+      self
+    end
+    
+    @Operation ref(index:Integer)
+    
+      @Doc
+        Indexes into the queue with the supplied index.
+      end
+      
+      elements.ref(index)
+    end
+    
+    @Operation put(index:Integer,e)
+    
+      @Doc
+        Updates the queue element at the supplied index.
+      end
+      
+      elements.put(index,e)
+    end
+    
+    @Operation size():Integer
+    
+      @Doc
+        Returns the current size of the queue storage.
+      end
+      
+      elements.size()
+    end
+    
+    @Operation top()
+    
+      @Doc
+        Returns the next element in the queue if it exists
+        without removing it. Raises an exception if the 
+        queue is empty.
+      end
+      
+      if self.isEmpty()
+      then throw StackUnderflow(self)
+      else elements.ref(first)
+      end
+    end
+    
+    @Operation topIndex():Integer
+      first
+    end
+    
+  end
+      

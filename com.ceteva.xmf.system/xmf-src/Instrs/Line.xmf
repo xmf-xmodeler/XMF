@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Set the Current Line Number                       *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  The current stack frame contains a field for the current line number. The *
+ *  line number information is emitted by the compiler and originally comes   *
+ *  from the parser. Debuggers use the current source line number information *
+ *  to find the current position in source files. The compiler has a switch   *
+ *  that suppresses LINE instructions in order to optimize the code. The      *
+ *  instruction operand is the current line number.                           *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Line extends Instr
+  
+    @Attribute line : Integer end
+    
+    @Constructor(line) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      line
+    end
+    
+    @Operation toString():String
+      "<Line " + line + ">"
+    end
+    
+  end
+  

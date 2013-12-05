@@ -1,0 +1,29 @@
+/******************************************************************************
+ *                                                                            *
+ *                                 Type Error                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Thrown when a value is not of the correct type.                         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+parserImport XOCL;
+
+import Exceptions;
+
+context Exceptions
+
+  @Class ResultTypeError extends TypeError
+     
+    @Attribute opName : Element    end
+    
+    @Constructor(opName,value,type) !
+      self.setBacktrace();
+      self.message := 
+        "Operation " + opName + " expects to return a value of type " + self.typePath() + 
+        " but returned " + value.toString() + " of type " + value.of().path()
+    end
+    
+  end
+      
+    

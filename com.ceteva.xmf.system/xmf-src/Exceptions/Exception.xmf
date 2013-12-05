@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+import Exceptions;
+
+context Exception
+
+  @Operation stackFrames():Seq(StackFrame)
+  
+    // Transforms the VM supplied stack frames into instances
+    // of the class StackFrame...
+    
+    backtrace->collect(frame |
+        StackFrame[
+          codeBox   = frame->at(CODEBOX),
+          codeIndex = frame->at(CODEINDEX),
+          globals   = frame->at(GLOBALS),
+          dynamics  = frame->at(DYNAMICS),
+          locals    = frame->at(LOCALS),
+          target    = frame->at(TARGET),
+          supers    = frame->at(SUPERS),
+          handler   = frame->at(HANDLER),
+          values    = frame->at(VALUES),
+          line      = frame->at(LINE)
+        ]
+      )
+ end

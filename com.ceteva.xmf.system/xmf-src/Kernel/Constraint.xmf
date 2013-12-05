@@ -1,0 +1,85 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Constraints                                 *
+ *                              ---------------                               *
+ *                                                                            *
+ *   Constraints are used to check whether a given value (referenced as self) *
+ *   satisfies a condition. A constraint also has a reason that is used to    *
+ *   explain what goes wrong when the condition is not satisfied.             *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+context Constraint
+  @Constructor(name,body,reason) 
+    body.owner := self;
+    reason.owner := self;
+    self
+  end
+  
+context Constraint
+  @Constructor()
+    self.init(Seq{"A Constraint",
+                  @Operation(classifier) true end,
+                  @Operation(classifier) "" end
+              })
+  end
+
+context Constraint
+  @Operation body()
+    body
+  end
+
+context Constraint
+  @Operation reason()
+    reason
+  end
+
+context Constraint
+  @Operation invoke(target,Seq{candidate,classifier})
+  
+    // Constraints are invoked with respect to a target (not important) and
+    // supplied with arguments - the candidate to classifier and the classifier
+    // that is being used to classify the candidate. The constraint body runs
+    // with self = candidate. Whether the body succeeds or fails, the constraint
+    // invocation returns a constraint report. If it fails then the report
+    // contails a reason that is constructed by calling the reason operation...
+    
+    if body.invoke(candidate,Seq{classifier})
+    then ConstraintReport(candidate,self,true)
+    else ConstraintReport(candidate,self,false,reason.invoke(candidate,Seq{classifier}))
+    end
+  end
+  
+context Constraint  
+  @Operation init()
+  
+    // The body and reason are operations; the names defined
+    // in owner and its owners are scoped over the bodies of
+    // the operations. Import these name spaces.
+    
+    self.initBody();
+    self.initReason();
+    super()
+  end
+  
+context Constraint
+  @Operation initBody()
+    if owner <> null
+    then
+      body.importNameSpace(owner);
+      body.importNameSpaces(owner.allOwners())
+    end;
+    self
+  end
+  
+context Constraint
+  @Operation initReason()
+    if owner <> null
+    then
+      reason.importNameSpace(owner);
+      reason.importNameSpaces(owner.allOwners())
+    end;
+    self
+  end

@@ -1,0 +1,83 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Machine Exceptions                              *
+ *                            ------------------                              *
+ *                                                                            *
+ *    A machine exception is raised by the VM when something goes wrong. The  *
+ *    VM tags the exception with an id to describe the type of error. Any     *
+ *    values relating to the error are supplied in the data slot.             *
+ *                                                                            *
+ *    When a machine exception is processed it is better to translate it to   *
+ *    an appropriate exception type.                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Exceptions;
+
+context MachineException
+
+  @Operation dataItem(index:Integer):Element
+    if data->size > index
+    then data->at(index)
+    else "?"
+    end
+  end
+
+context MachineException
+
+  @Operation printBacktraceHeader(out)
+  
+    // A machine exception is raised by the VM...
+    
+    import MachineException in
+    
+      @Case id of
+      
+        [ARGCOUNT] do
+          let proxy = ArityError(self.dataItem(0),self.dataItem(1))
+          in proxy.backtrace := backtrace;
+             proxy.resourceName := resourceName;
+             proxy.printBacktraceHeader(out)
+          end
+        end
+        
+        [TYPE] do
+          let proxy = TypeError(self.dataItem(0),self.dataItem(1))
+          in proxy.message := message + "\n" + proxy.message;
+             proxy.backtrace := backtrace;
+             proxy.resourceName := resourceName;
+             proxy.printBacktraceHeader(out)
+          end
+        end
+      
+        [UNBOUNDVAR] do
+          let proxy = UnboundVar(self.dataItem(0),lineCount)
+          in proxy.backtrace := backtrace;
+             proxy.resourceName := resourceName;
+             proxy.printBacktraceHeader(out)
+          end
+        end
+        
+        [NOKEY] do
+          let proxy = NoKeyInTable(self.dataItem(1),self.dataItem(0))
+          in proxy.backtrace := backtrace;
+             proxy.resourceName := resourceName;
+             proxy.printBacktraceHeader(out)
+          end
+        end
+        
+        else 
+        
+          // Something wrong with calling super() at this point.
+          // Perhaps due to machine not supplying supers when an
+          // exception is thrown?
+          
+          Exception::printBacktraceHeader.invoke(self,Seq{out})
+        
+      end
+      
+    end
+    
+  end

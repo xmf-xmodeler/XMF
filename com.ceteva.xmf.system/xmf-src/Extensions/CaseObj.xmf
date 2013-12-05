@@ -1,0 +1,136 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Object Dispatch                                *
+ *                           -------------------                              *
+ *                                                                            *
+ *   Dispatch on an object in terms of its type. The object-dispatch exp has  *
+ *   a number of clauses each of which specifies a type name and some slots.  *
+ *   If the classifier of the object exactly matches the type then the slots  *
+ *   are bound from the object and the associated expression is performed.    *
+ *   Note that CaseObj does not allow objects to match in terms of            *
+ *   classification in terms of super-classes - the type must match exactly.  *
+ *   This makes CaseObj an efficient alternative to Case, which is much more  *
+ *   expressive, but consequently less efficient.                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import OCL;
+ 
+context XOCL
+
+  @Class CaseObj
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      CaseObj ::= 
+      
+        // A case-obj has an expression that evaluates to
+        // an object...
+      
+        o = Exp 'of' 
+        
+        // A sequence of arms consist of classifier
+        // paths, slot names and expressions...
+        
+        arms = CaseObjArm*
+
+        // The optional default is performed if the
+        // object does not match all of the arms...
+        
+        default = Default 
+        
+        'end' 
+        
+        { 
+        
+          // Produce the replacement expression directly
+          // from the grammar...
+      
+          [| 
+          
+             // Introduce the variable 'caseObj' for
+             // the object that is the basis for dispatch
+             // and 'caseObjType' for the type of the
+             // object...
+             
+             let  caseObj = <o> then
+                  caseObjType = caseObj.of()
+             in <arms->iterate(arm e = default |
+                  let  type = arm->at(0);
+                       slots = arm->at(1);
+                       body = arm->at(2)
+                  in 
+                     // For each arm produce an if-expression
+                     // that checks the direct type of the
+                     // object and compares it against the type
+                     // in the arm...
+                     
+                     [| if caseObjType = <type>
+                        then 
+                        
+                          // If the type matches then bind the slots
+                          // from the object to the names and perform
+                          // the arm-body...
+                          
+                          <slots->iterate(slot b = body |
+                            [| let <slot> = caseObj.<slot> in <b> end |])>
+                        else <e>
+                        end
+                     |]
+                  end)>
+             end
+          |]
+      }.
+      
+      CaseObjArm ::= 
+      
+        // A case-arm is a path expression that
+        // designates a class...
+      
+        type = PathExp 
+        
+        // The slot names...
+        
+        '[' slots = CaseObjSlots ']' 
+        
+        'do' 
+        
+        // The body can reference the slot names...
+        
+        body = Exp 
+        
+        'end' 
+        
+        { Seq{type,slots,body} }.
+      
+      CaseObjSlots ::= 
+      
+        // The slots are names separated with commas...
+      
+        slot = Name 
+        
+        slots = (',' Name)* 
+        
+        { Seq{slot | slots } } 
+        
+      | { Seq{} }.
+      
+      Default ::= 
+      
+        // The default is optional, if not specified
+        // then the case-obj expression raises an error
+        // if no arms match...
+      
+        'else' Exp 
+        
+      | { [| caseObj.error("No type matched in CaseObj.") |] }.
+      
+    end
+    
+  end   
+    
+    

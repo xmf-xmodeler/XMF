@@ -1,0 +1,44 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      XML Text                              *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    A node in an XML tree that represents unformatted text.                 *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import XML;
+
+context XML
+
+  @Class Text extends Node
+  
+    @Attribute text : String (!,?) end
+    
+    @Constructor(text) ! end
+    
+    @Operation isWhiteSpace():Boolean
+      let isWhiteSpace = true
+      in @Count i from 0 to text->size - 1 do
+           isWhiteSpace := isWhiteSpace and text->at(i).isWhiteSpaceChar()
+         end;
+         isWhiteSpace
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,text)
+    end
+    
+    @Operation print(out)
+      format(out,text)
+    end
+    
+    @Operation stripWhiteSpace()
+      self
+    end
+    
+  end

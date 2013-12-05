@@ -1,0 +1,16 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Newline extends Doc
+
+    @Constructor() ! end
+    
+    @Operation pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+      emit("\n" + spaces(i),b,pt);
+      s(pt+1+i,i,0,f,cut)
+    end
+
+  end

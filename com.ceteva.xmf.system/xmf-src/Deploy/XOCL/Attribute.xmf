@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+import IO;
+
+context XCore::Attribute
+  @Operation deployXOCL(out:OutputChannel)
+  
+    // Writes out the text that can be used to reconstruct
+    // the element.
+    
+    format(out,"    @Attribute ~S : ",Seq{name});
+    @CaseObj type of
+      Seq[ ] do
+        format(out,"Seq(~S) (?,!,+,-) end",Seq{self.underlyingType().name()})
+      end
+      Set[ ] do
+        format(out,"Set(~S) (?,!,+,-) end",Seq{self.underlyingType().name()})
+      end
+      else format(out,"~S (?,!) end",Seq{self.underlyingType().name()})
+    end
+  end

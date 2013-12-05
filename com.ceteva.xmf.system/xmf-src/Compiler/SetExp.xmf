@@ -1,0 +1,47 @@
+/******************************************************************************
+ *                                                                            *
+ *                      Compilation of Sets and Sequences                     *
+ *                      ---------------------------------                     *
+ *                                                                            *
+ *  Sets and sequences are both compiled by compiling all the elements and    *
+ *  then performing an appropriate collection creation instruction.           *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import Compiler;
+import OCL;
+import Instrs;
+
+context SetExp
+  @Operation FV():Element
+    elements->collect(e |
+      e.FV()->asSeq)->flatten->asSet
+  end
+
+context SetExp
+  @Operation maxLocals():Element
+    elements->collect(e |
+      e.maxLocals())->max
+  end
+
+context SetExp
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    let elCode = elements->collect(e | e.compile(env,frame,false,saveSource))->flatten
+    in if sourcePos and line > 0
+       then Seq{Line(line)}
+       else Seq{}
+       end 
+       +
+       if collType = "Set"
+       then elCode + Seq{MkSet(elements->size)}
+       else elCode + Seq{MkSeq(elements->size)}
+       end
+    end
+  end
+  
+context SetExp
+  @Operation lift()
+    Apply(self.typeExp(),Seq{IntExp(line),StrExp(collType),SetExp("Seq",elements->collect(element | element.lift()))})
+  end

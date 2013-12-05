@@ -1,0 +1,302 @@
+parserImport XOCL;
+
+import DocTables;
+import Basic;
+import Forms;
+import IO; 
+
+context Root
+  @Operation testPage()
+      Page("Test",Seq{
+        Form(Seq{
+          CheckBox("isTrue",true),
+          ComboBox("choice",Seq{1,2,3},Seq{1,2,3}),
+          Button(
+            "Button1",
+            @Operation(isTrue,choice)
+              Page("",Seq{
+                Text("Button 1: choice = " + choice),
+                Form("action",Seq{
+                  Button(
+                    "Back",
+                    @Operation()
+                      testPage()
+                    end
+                  )
+                })
+                
+              })
+            end
+          ),
+          Button(
+            "Button2",
+            @Operation(choice)
+              Page("",Seq{
+                Text("Button 2: choice = " + choice),
+                Form("action",Seq{
+                  Button(
+                    "Back",
+                    @Operation()
+                      testPage()
+                    end
+                  )
+                })
+                
+              })
+            end
+          )
+        })
+      })
+  end
+  
+context Root
+
+  @Package Drinks
+  
+    @Class DrinksClub
+    
+      @Attribute adminPassword : String (?) end
+      @Attribute members : Seq(Member) (+) end
+      @Attribute drinks : Seq(Drink) (+) end
+      @Attribute transactions : Seq(Transaction) (+) end
+      
+      @Constructor(adminPassword) ! end
+      
+      @Operation report():Page
+        Page("Report",Seq{
+          Table("",transactions->collect(t | t.report()))
+        })
+      end
+      
+      @Operation run()
+      
+        @Letrec
+        
+          login() =
+            Page("Login",Seq{
+              Text("Drinks Club"),
+              Form("/DrinksClub/login",Seq{
+                PasswordField("password",20),
+                Button("Member Login",memberLogin),
+                Button("Admin Login",adminLogin)
+              })
+            });
+            
+          memberLogin(password) = 
+            @Find(member,members)
+              when member.password() = password
+              do Page("Member Login",Seq{
+              
+                   // Tell the member how many credits they have...
+                   
+                   Text("Hello " + member.name() + " you have " + member.credits() + " credits."),
+                   Form("/DrinksClub/login",
+                   
+                     // Create a button for each drink that can be bought...
+                     
+                     drinks->collect(drink | 
+                       drink.buyButton(member,
+                         @Operation(transaction) 
+                           if transaction <> null 
+                           then self.addToTransactions(transaction) 
+                           end; 
+                           memberLogin(password) 
+                         end)) +
+                         
+                     // Add a button for logging out...
+                     
+                     Seq{Button("Logout",login)}
+                   )
+                 })
+                 
+              // If the password was not recognized then loop
+              // pack to the login page...
+              
+              else login()
+            end;
+          
+          adminLogin(password) = 
+            if password = adminPassword
+            then 
+              Page("Admin",Seq{
+                Text("Admin Functions"),
+                Form("/DrinksClub/login",Seq{
+                  Button("Report",report),
+                  Button("Deposit",deposit),
+                  Button("Add Member",addMember),
+                  Button("Add Drink",addDrink),
+                  Button("Logout",login)
+                })
+            })
+                 
+            // If the password was not recognized then loop
+            // pack to the login page...
+            
+            else login()
+            end;
+            
+          report() = 
+            Page("Report",Seq{
+              Text("Transactions:"),
+              Table("", transactions->collect(transaction | transaction.report())),
+              Form("/DrinksClub/login",Seq{Button("OK",@Operation() adminLogin(adminPassword) end)})
+            });
+          
+          deposit()= 
+            Page(Seq{
+              Text("Deposit"),
+              Form("/DrinksClub/login",Seq{
+                Table("",
+                  members->collect(member |
+                    Row(Seq{
+                      Col(Text(member.name())),
+                      Col(TextField(member.name(),20,member.credits()))
+                    })
+                  )
+                ),
+                Button("OK",
+                  @Operation(env) 
+                    @For member in members do
+                      let amount = env.lookup(member.name())
+                      in member.setCredits(amount.asInt())
+                      end
+                    end;
+                    adminLogin(adminPassword) 
+                  end)
+              })
+            });
+          
+          addMember() = 
+            Page("Add Member",Seq{
+              Text("Add Member"),
+              Form("/DrinksClub/login",Seq{
+                Table("",Seq{
+                  Row(Seq{
+                    Col(Text("Name")),
+                    Col(TextField("name",20))
+                  }),
+                  Row(Seq{
+                    Col(Text("Password")),
+                    Col(TextField("password",20))
+                  }),
+                  Row(Seq{
+                    Col(Text("Amount")),
+                    Col(TextField("amount",20))
+                  })
+                }),
+                Button("Add",registerMember)
+              })
+            });
+            
+          registerMember(name,password,amount) =
+            (self.addToMembers(Member(name,password,amount.asInt()));
+             adminLogin(adminPassword));
+          
+          addDrink() = 
+            Page("Add Drink",Seq{
+              Text("Add Drink"),
+              Form("/DrinksClub/login",Seq{
+                Table("",Seq{
+                  Row(Seq{
+                    Col(Text("Name")),
+                    Col(TextField("name",20))
+                  }),
+                  Row(Seq{
+                    Col(Text("Cost")),
+                    Col(TextField("cost",20))
+                  })
+                }),
+                Button("Add",registerDrink)
+              })
+            });
+            
+          registerDrink(name,cost) =
+            (self.addToDrinks(Drink(name,cost.asInt()));
+             adminLogin(adminPassword))
+          
+            
+         in login()
+         end
+      end
+      
+      @Operation deposit(member,amount)
+        @Find(m,members)
+          when m.name() = member
+          do member.deposit(amount)
+        end
+      end
+      
+      @Operation addMember(name,password,amount)
+        self.addToMembers(Member(name,password,amount))
+      end
+      
+      @Operation addDrink(name,cost)
+        self.addToDrinks(Drink(name,cost))
+      end
+      
+      
+      
+    end
+    
+    @Class Member
+    
+      @Attribute name : String (?) end
+      @Attribute password : String (?) end
+      @Attribute credits : Integer (?,!) end
+      
+      @Constructor(name,password,credits) ! end
+      
+      @Operation buy(drink,cont)
+        if credits > drink.cost()
+        then
+          self.credits := credits - drink.cost();
+          Page("OK",Seq{
+            Text("You bought a " + drink.name() + " for " + drink.cost() + "p"),
+            Form("/DrinksClub/login",Seq{
+              Button("OK",@Operation() cont(Transaction(self,drink,xmf.date())) end)
+            })
+          })
+        else
+          Page("Insufficient Funds",Seq{
+            Form("/DrinksClub/login",Seq{
+              Button("OK",@Operation() cont(null) end)
+            })
+          })
+        end
+      end
+      
+    end
+    
+    @Class Drink
+    
+      @Attribute name : String (?) end
+      @Attribute cost : Integer (?) end
+      
+      @Constructor(name,cost) ! end
+      
+      @Operation buyButton(member:Member,cont:Operation)
+        Button("Buy " + name,
+          @Operation()
+            member.buy(self,cont)
+          end
+        )
+      end
+      
+    end
+    
+    @Class Transaction
+    
+      @Attribute member : Member (?) end
+      @Attribute drink : Drink (?) end
+      @Attribute date : String     end
+      
+      @Constructor(member,drink,date) ! end
+      
+      @Operation report()
+        Row(Seq{Col(Text(member.name())),Col(Text(member.credits())),Col(Text(drink.name())),Col(Text(date))})
+      end
+      
+    end
+    
+  end
+              

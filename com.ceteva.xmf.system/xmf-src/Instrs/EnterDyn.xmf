@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Call the Value of a Dynamic Variable                  *
+ *                      ------------------------------------                  *
+ *                                                                            *
+ *  This is the same as ENTER, but corresponds to the common case where the   *
+ *  operator of a call is a global variable.                                  *    
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class EnterDyn extends Instr
+ 
+    @Attribute arity : Integer end
+    @Attribute name : Symbol end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name,arity) end
+    
+    @Operation toString():String
+      "<EnterDyn " + arity + "," + name.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(nameOffset.byte(2),arity,nameOffset.byte(1))
+    end
+    
+  end
+  

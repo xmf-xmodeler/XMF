@@ -1,0 +1,35 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+import PPrint;
+  
+@Handler XCore::Vector in PPrint(vector,depth,encountered) 
+  let just = self.mark(vector) 
+  in if encountered
+     then self.ref(vector)
+     else
+       let K = 0.to(vector->size-1)->select(i | vector->at(i) <> null) then
+           indices = K->take(length.min(K->size)) then
+           docs = if indices->isEmpty
+                  then Seq{}
+                  else indices->butLast->collect(i | Order(self.dispatch(vector->at(i),depth+1),Just(","))) +
+                       Seq{self.dispatch(vector->at(indices->last),depth+1)}
+                  end then
+           pairs = indices.zip(docs) then
+           horizontal = pairs->collect(pair | Order(Just(pair->head + " = "),pair->tail));
+           vertical = pairs->collect(pair | Block(Indent(2,above(Seq{Just(pair->head + " = "),pair->tail})))) then
+           hDoc = horizontal->iterate(d doc = NOTHING | Order(doc,d))
+       in Mark(
+            Order(
+              Order(just,VECTOR),
+                Block(
+                  Order(
+                    Alt(hDoc,above(vertical)),
+                    Cut(Just(if K->size <> indices->size then ",...]" else "]" end))))))
+       end
+     end
+   end
+ end;
+          

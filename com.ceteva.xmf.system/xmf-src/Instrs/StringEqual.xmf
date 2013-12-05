@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            String Comparison                               *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops two strings from the stack and compares them character-by-character. *
+ *  Pushes true when the strings are equivalent and false otherwise.          *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class StringEqual extends Instr
+    
+  end

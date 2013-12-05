@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+
+context XCore::Package
+   @Derived toType()
+     let sig = Signature(self.path())
+     in @For class in classes do
+          sig.bind(class.name().toString(),Class(Delayed(@Operation() class.toType() end)))
+        end;
+        @For package in packages do
+          sig.bind(package.name().toString(),Package(Delayed(@Operation() package.toType() end)))
+        end;
+        sig
+     end
+   end

@@ -1,0 +1,83 @@
+parserImport XOCL;
+parserImport Manifests;
+
+/******************************************************************************
+ *                                                                            *
+ *                                XMF Kernel                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   This file defines the Kernel of XMF. The kernel defines the XCore        *
+ *   package that contains the classes that define the basic features of the  *
+ *   XMF system including themselves. Because the Kernel is self describing   *
+ *   it must be built in a special way. The file Kernel.xmf uses very basic   *
+ *   mechanisms to set up all the essential classes with their attributes and *
+ *   operations. Once this is set up there is sufficient life-support systems *
+ *   in place to define further operations for the essential classes. Once    *
+ *   the essential classes are defined then the rest of XCore can be defined  *
+ *   using standard class definitions.                                        *
+ *                                                                            *
+ *   You can modify the Kernel classes and add new classes. Be careful when   *
+ *   removing anything or changing the build order. Adding new XCore classes  *
+ *   or adding new features to the existing XCore classes is safe towards the *
+ *   end of the Kernel build. See Kernel.xmf for more details.                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+@Manifest XCore
+  @File ^None Boot                end
+  @File ^Kernel Kernel            end
+  @File ^Kernel Doc               end
+  @File ^Kernel Attribute         end
+  @File ^Kernel Bind              end
+  @File ^Kernel Boolean           end
+  @File ^Kernel Boot              end
+  @File ^Kernel Buffer            end
+  @File ^Kernel Class             end
+  @File ^Kernel Classifier        end
+  @File ^Kernel CodeBox           end
+  @File ^Kernel Collection        end
+  @File ^Kernel Constructor       end
+  @File ^Kernel Constraint        end
+  @File ^Kernel Container         end
+  @File ^Kernel Contained         end
+  @File ^Kernel DocumentedElement end
+  @File ^Kernel Element           end
+  @File ^Kernel Exception         end
+  @File ^Kernel MachineException  end
+  @File ^Kernel Float             end
+  @File ^Kernel ForeignOperation  end
+  @File ^Kernel ForwardRef        end
+  @File ^Kernel IndexedContainer  end
+  @File ^Kernel Integer           end
+  @File ^Kernel NamedElement      end
+  @File ^Kernel NameSpace         end
+  @File ^Kernel Object            end
+  @File ^Kernel Operation         end
+  @File ^Kernel Package           end
+  @File ^Kernel Parameter         end
+  @File ^Kernel Performable       end
+  @File ^Kernel Resource          end
+  @File ^Kernel Set               end
+  @File ^Kernel Seq               end
+  @File ^Kernel SeqOfElement      end
+  @File ^Kernel SetOfElement      end
+  @File ^Kernel CompiledOperation end
+  @File ^Kernel String            end
+  @File Symbol                    end
+  @File Table                     end
+  @File Thread                    end
+  @File Vector                    end
+  @File Null                      end
+  @File Array                     end
+  @File Enum                      end
+  @File EnumChoice                end
+  @File InitialisedAttribute      end
+  @File ConstraintReport          end
+  @File OpType                    end
+  @File OrderedContainer          end
+  @File UnorderedContainer        end
+  @File Snapshot                  end
+  @File Daemon                    end
+  @File ForeignObject             end
+end;
+  

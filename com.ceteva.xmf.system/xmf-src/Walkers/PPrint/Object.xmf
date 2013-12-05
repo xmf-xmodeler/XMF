@@ -1,0 +1,42 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+  
+@Handler XCore::Object in PPrint(object,isComponent,encountered)
+  let printObject =
+    @Operation()
+      self.print(object.of().name().toString());
+      self.print("[");
+      self.indent();
+      self.newline();
+      self.indent();
+      @For a in object.of().allAttributes() do
+        self.print(a.name().toString());
+        self.print(" = ");
+        self.indent();
+        self.dispatch(object.get(a.name()),true);
+        self.undent();
+        if not isLast
+        then self.print(",")
+        else self.print("]")
+        end
+      end;
+      self.undent()
+    end
+  in if isComponent
+     then self.newline()
+     end;
+     if encountered
+     then self.printRefTo(object)
+     elseif self.refCount(object) > 1
+     then 
+       self.printLabelTo(object);
+       printObject()
+     else
+       self.label(object);
+       printObject()
+     end
+   end
+end;
+          

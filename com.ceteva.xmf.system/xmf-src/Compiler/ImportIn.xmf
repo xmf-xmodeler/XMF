@@ -1,0 +1,41 @@
+/******************************************************************************
+ *                                                                            *
+ *                           Locally Importing                                *
+ *                      ------------------------------                        *
+ *                                                                            *
+ *  Imports affect the imported dynamics in the current call-frame. Global    *
+ *  imports at the top of a file, just affect the call-frame for the          *
+ *  definitions in the file. Local imports affect the current call-frame for  *
+ *  the scope of the body of the local-import.                                *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import Compiler; 
+import OCL;
+
+context ImportIn
+  @Operation compile(env,frame,isLast,saveSource)
+    self.desugar().compile(env,frame,isLast,saveSource)
+  end
+
+context ImportIn
+  @Operation desugar():Performable
+    [| let importOp = @Operation() <Import(nameSpace)>; <body> end 
+       in importOp() 
+       end |]
+  end
+  
+context ImportIn
+  @Operation FV():Set(String)
+    self.desugar().FV()
+  end
+  
+context ImportIn
+  @Operation lift()
+    Apply(self.typeExp(),Seq{nameSpace.lift(),body.lift()})
+  end
+  
+context ImportIn
+  @Operation maxLocals():Integer
+    self.desugar().maxLocals()
+  end

@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Comprehensions;
+
+context Comprehensions
+
+  @Class Filter extends Clause
+  
+    // A filter clause has the form ? EXP and is
+    // ised as a guard on bindings that are in scope.
+    // Clauses to the right are only processed when
+    // the filter predicate is satisfied...
+    
+    @Attribute test : Performable end
+    
+    @Constructor(test) ! end
+    
+  end

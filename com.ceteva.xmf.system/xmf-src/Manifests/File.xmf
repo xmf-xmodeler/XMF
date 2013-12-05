@@ -1,0 +1,355 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+import Manifests;
+import LoadTime;
+import Exceptions;
+import Env;
+import Compiler;
+import IO;
+
+context Manifests
+
+  @Class File extends ManifestAction
+  
+    // A file describes a manifest element that is required to build the
+    // resource. The file specifies a path relative to the current directory
+    // during a build or load.
+    
+    @Attribute stale : Boolean = false (?,!) end
+  
+    @Grammar extends ManifestAction.grammar
+    
+      File ::= guard = ActionGuard compilerDirectives = CompilerDirective* loadTime = LoadTime path = MPath loadAction = LoadAction 'end' {
+      
+        File(path,guard,compilerDirectives,loadTime,loadAction)
+        
+      }.
+       
+    end
+    
+    @Operation binFile(dir:String):String
+      if path.hasPrefix("HOME")
+      then path.subst(IO::File(xmf.homeDir(),".").absolutePath(),"HOME",true) + ".o"
+      else dir.subst(IO::File(xmf.homeDir(),".").absolutePath(),"HOME",true) + "/" + path + ".o" 
+      end
+    end
+    
+    @Operation buildAfterCompilerDirectives(dir:String,doAll:Boolean,results:Table)
+    
+      // Build the file. This involves compiling the source
+      // file if it is out of date with respect to the binary.
+      // If doAll is false then a compilation error causes
+      // building to be aborted. The compilation results are
+      // placed in the results table that maps the complete
+      // path to the file to a sequence of records:
+      //    Seq{charStart,charEnd,message}
+      // If the file is successfully built then the results
+      // table contains an empty sequence against the file.
+      
+      let sourceFile = self.sourceFile(dir)
+      in if sourceFile.fileExists()
+         then 
+           resetCompilationErrors();
+           compileFile(sourceFile,true,true);
+           self.processBuildErrors(sourceFile,results);
+           if not errors->isEmpty and not doAll
+           then self.throwBuildError(sourceFile)
+           end; 
+           @Case loadTime of
+             [CompileTime] do 
+               self.loadBinary(dir)
+             end
+             [Both] do
+               self.loadBinary(dir)
+             end
+             else null
+           end
+         else throw FileNotFound(sourceFile)
+         end
+      end
+    end
+    
+    @Operation buildError(sourceFile,results,charStart,charEnd,message)
+      if results.hasKey(sourceFile)
+      then results.put(sourceFile,results.get(sourceFile)->including(Seq{charStart,charEnd,message}))
+      else results.put(sourceFile,Seq{Seq{charStart,charEnd,message}})
+      end
+    end
+    
+    @Operation deleteBinary(dir:String)
+      self.binFile(dir).deleteFile()
+    end
+    
+    @Operation deref(dir) 
+      self 
+    end
+    
+    @Operation display(out:OutputChannel)
+      @Case loadTime of
+        [RunTime] do
+          format(out,"@File ~S end",Seq{path})
+        end
+        else format(out,"@File ^~S ~S end",Seq{loadTime.name,path})
+      end
+    end
+        
+    @Operation getChildren()
+      Seq{}
+    end
+    
+    @Operation labelString()
+    
+      // Browser label...
+      
+      path
+      
+    end
+    
+    @Operation load(dir:String,loadSource:Boolean)
+      @Case loadTime of
+        [RunTime] do
+          self.loadFile(dir,loadSource)
+        end
+        [Both] do
+          self.loadFile(dir,loadSource)
+        end
+        else null
+      end
+    end
+    
+    @Operation loadFile(dir,loadSource)
+      if loadSource
+      then self.loadSource(dir)
+      else self.loadBinary(dir)
+      end
+    end
+    
+    @Operation loadBinary(dir:String)
+      if guard.perform(self,Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},Seq{})
+      then 
+        let binFile = self.binFile(dir)
+        in if binFile.fileExists()
+           then 
+             let value = binFile.loadBin(true)
+             in if loadAction <> null
+                then loadAction.perform(self,Exp::mkEnv(Seq{"dir"},Seq{dir}),Seq{})
+                else null
+                end;
+                value
+             end
+           else throw FileNotFound(binFile)
+           end
+        end
+      end
+    end
+    
+    @Operation loadSource(dir:String)
+      if guard.perform(self,Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},Seq{})
+      then 
+        Evaluator::loadFile(self.sourceFile(dir),self,NullEnv(),Seq{XCore,Root})
+      end
+    end
+    
+    @Operation module(dir:String):CompilationUnit
+      let sourceFile = self.sourceFile(dir)
+      in if sourceFile.fileExists()
+         then parseCompilationUnit(sourceFile,OCL::OCL)
+         else self.error("Cannot file sourceFile")
+         end
+      end
+    end
+    
+    @Operation parse(dir:String,doAll:Boolean,results:Table):Boolean
+    
+      // Parse the file. 
+      // If doAll is false then a parse error causes
+      // parsing to be aborted. The parse results are
+      // placed in the results table that maps the complete
+      // path to the file to a sequence of records:
+      //    Seq{charStart,charEnd,message}
+      // If the file is successfully built then the results
+      // table contains an empty sequence against the file.
+      // Returns true when the parse was successful (but may
+      // throw an exception and not return anything)...
+      
+      let sourceFile = self.sourceFile(dir)
+      in if sourceFile.fileExists() 
+         then 
+           let exception = self.parseCompilationUnit(sourceFile,OCL::OCL)
+           in results.put(sourceFile,Seq{});
+              if exception <> null
+              then 
+                if doAll
+                then 
+                  self.processBuildException(sourceFile,exception,results);
+                  false
+                else throw exception
+                end
+              else true
+              end
+            end
+          else true
+          end
+      end 
+    end   
+    
+    @Operation parseCompilationUnit(file:String,language:Classifier)
+  
+      // Use this operation to parse a compilation unit from the 
+      // supplied file. Deals with parse errors by recording them
+      // as compiler errors. Returns null if the parse succeeds.
+     
+      try
+        let unit = language.grammar.parseFile(file,"CompilationUnit",Seq{})
+        in null
+        end
+      catch(x)
+        @TypeCase(x)
+          Parser::ParseError do
+            x
+          end
+          else throw x
+        end
+      end
+    end
+    
+    @Operation processBuildErrors(sourceFile:String,results:Table)
+    
+      // Add the entries into the results table for each
+      // compilation error. Ensure that the table has an entry
+      // for the file...
+      
+      results.put(sourceFile,Seq{});
+      @For error in errors do
+        self.processBuildError(sourceFile,error,results)
+      end
+    end
+    
+    @Operation processBuildError(sourceFile,error,results)
+    
+      // Some exceptions are known and can usefully be translated into
+      // messages that higher level tools can use. Others are unknown
+      // and are treated generically...
+      
+      let exception = error.exception 
+      in if exception = null
+         then self.addBuildError(sourceFile,results,0,0,error.message)
+         else self.processBuildException(sourceFile,exception,results)
+         end
+      end
+    end
+    
+    @Operation processBuildException(sourceFile,exception,results)
+           
+      // Handles some exception types specially. Adds the
+      // information into the results table...
+      
+      @TypeCase(exception)
+        Parser::TokenExpected do 
+          let token = exception.token;
+              tokens = exception.tokens then
+              charStart = exception.errorPos - token->size;
+              charEnd = exception.errorPos;
+              message = formats("Found ~S but expecting ~{,~;~S~}",Seq{token,tokens})
+          in self.buildError(sourceFile,results,charStart,charEnd,message)
+          end
+        end
+        Parser::ParseError do
+          self.buildError(sourceFile,results,exception.errorPos,exception.errorPos,exception.toString())
+        end
+        else self.buildError(sourceFile,results,0,0,exception.toString())
+      end
+    end
+    
+    @Operation processChangedFiles(dir:String,changedFiles:Seq(String),parse:Boolean,compile:Boolean,load:Boolean,results:Table)
+      let sourceFile = self.sourceFile(dir);
+          binaryFile = self.binFile(dir);
+          parseOK = true
+      in if changedFiles->includes(sourceFile)
+         then
+           if sourceFile.fileExists()
+           then 
+             if parse 
+             then parseOK := self.parse(dir,true,results)
+             end;
+             if parseOK and compile
+             then compileFile(sourceFile,true,true)
+             end;
+             if load and binaryFile.fileExists()
+             then binaryFile.loadBin(true)
+             end
+           end
+         end
+      end
+    end
+    
+    @Operation refresh(dir)
+      let source = self.sourceFile(dir);
+          binary = self.binFile(dir)
+      in if not binary.fileExists() orelse 
+            binary.isOlder(source)
+         then self.setStale(true)
+         else self.setStale(false)
+         end
+      end
+    end
+    
+    @Operation sourceFile(dir:String):String
+      if path.hasPrefix("HOME")
+      then path.subst(IO::File(xmf.homeDir(),".").absolutePath(),"HOME",true) + ".xmf"
+      else dir.subst(IO::File(xmf.homeDir(),".").absolutePath(),"HOME",true) + "/" + path + ".xmf" 
+      end
+    end
+    
+    @Operation throwBuildError(sourceFile:String)
+      let message = sourceFile + " compile failed.\n" then
+          text = ""
+      in @For error in errors do
+           text := text + error.message
+         end;
+         throw BuildError(message,text)
+      end
+    end
+    
+    @Operation touch(dir:String,source:Boolean)
+      if source
+      then self.sourceFile(dir).setFileLastModified(Time())
+      else self.binFile(dir).setFileLastModified(Time())
+      end
+    end
+    
+    @Operation unxip(zipFile:ZipFile,prefix:String)
+      let inch = zipFile.inputChannel(prefix + "/" + path) then
+          binch = BinaryInputChannel(inch)
+      in binch.readBinary()
+      end
+    end
+    
+    @Operation writeBoot(out:OutputChannel,dir:String,indent:Integer)
+      @Case loadTime of
+        [RunTime] do
+          format(out,"~V\"~S\".loadBin(true);~%",Seq{indent,self.binFile(dir)})
+        end
+        [Both] do
+          format(out,"~V\"~S\".loadBin(true);~%",Seq{indent,self.binFile(dir)})
+        end
+        [Kernel] do
+          format(out,"~VKernel_loadBin(\"~S\");~%",Seq{indent,self.binFile(dir)})
+        end
+        else format(out,"~V// Ignoring \"~S\"~%",Seq{indent,self.binFile(dir)})
+      end
+    end
+    
+    @Operation xip(dir:String,prefix:String,zout:ZipOutputChannel)
+      zout.newEntry(prefix + "/" + path);
+      @WithOpenFile(fin <- self.binFile(dir))
+        @While not fin.eof() do
+          zout.write(fin.read())
+        end
+      end
+    end
+  
+  end

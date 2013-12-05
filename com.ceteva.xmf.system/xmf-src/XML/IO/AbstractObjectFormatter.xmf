@@ -1,0 +1,29 @@
+parserImport XML::PrintXML;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Formatting Objects                            *
+ *                            ----------------------                          *
+ *                                                                            *
+ *  An XML output channel encodes elements as XML and writes the XML to an    *
+ *  output channel. When objects are encountered they are translated to XML on*
+ *  a case-by-case basis using an object formatter supplied to the output     *
+ *  channel. All object formatters are instances of AbstractObjectFormatter.  *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class AbstractObjectFormatter isabstract
+  
+    @AbstractOp write(object:Object,out:ElementOutputChannel)
+    
+      // Encodes the object to the output channel
+      // in a suitable way...
+      
+    end
+    
+  end

@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Drop Expressions                             *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  A drop expression can occur within a list expression [| ... |]. A lift    *
+ *  exp returns the abstract syntax for the enclosed expression except where  *
+ *  a sub-expression has been dropped. The dropped expression is evaluated    *
+ *  and its result is syntax that is used in place of the dropped expression. *
+ *                                                                            *
+ *  Example: [| x + y |] produces BinOp(Var(x),"x",Var(y)) whereas, if the    *
+ *  value of y is [| 1 + 2 |] then [| x + <y> |] 'drops' y into the exp and   *
+ *  is equivalent to [| x + (1 + 2) |].                                       *
+ *                                                                            *
+ *  Instances of Drop can be created explicitly, but usually they are created *
+ *  via < and > inside [| and |].                                             *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Drop extends OCL::OCL
+    
+    @Attribute exp : OCL::OCL end
+    
+    @Constructor(exp) ! end
+     
+    @Operation pprint(out,indent)
+      format(out,"<~S>",Seq{exp.pprint(indent)})
+    end
+    
+  end

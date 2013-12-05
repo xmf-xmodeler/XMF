@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Optional Patterns                               *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  This pattern always matches. It greedily consumes the pattern and         *
+ *  continues if it is successful with the result of the match. If the match  *
+ *  fails then the optional pattern succeeds with no bindings or result.      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Opt extends Pattern
+  
+    @Attribute pattern : Pattern end
+    
+    @Constructor(pattern) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      Or(pattern,Empty()).match(chars,env,stack,succ,fail)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver.
+      // Cannot bind in an optional pattern...
+      
+      Set{}
+    end
+    
+  end

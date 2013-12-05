@@ -1,0 +1,103 @@
+parserImport XOCL;
+
+import IO;
+import Import;
+import Ecore;
+import Stacks;
+
+context Ecore
+
+  @Class EcoreInputChannel extends SAXInputChannel
+  
+    @Attribute dir : String end
+    @Attribute file : String end
+    @Attribute importer : EcoreImporter end
+    @Attribute stack : Stack = Stack() end
+    
+    @Constructor(dir,file,importer,input)
+      self.init(Seq{input})
+    end
+    
+    @Operation characters(chars:Buffer)
+      null
+    end
+    
+    @Operation endClass()
+      let class = stack.pop()
+      in stack.top().add(class)
+      end
+    end
+    
+    @Operation endFeature()
+      let attribute = stack.pop()
+      in stack.top().add(attribute)
+      end
+    end
+  
+    @Operation endElement(tag:Buffer)
+      if tag.stringEqual("ecore:EPackage")
+      then null
+      elseif tag.stringEqual("eClassifiers")
+      then self.endClass()
+      elseif tag.stringEqual("eStructuralFeatures")
+      then self.endFeature()
+      else format(stdout,"Unknown ecore tag: ~S~%",Seq{tag})
+      end
+    end
+    
+    @Operation isLocalType(type:String):Boolean
+      type.hasPrefix("#//")
+    end
+    
+    @Operation isImportedType(type:String):Boolean
+      type.hasPrefix("ecore:EClass")
+    end
+    
+    @Operation parse()
+      super();
+      stack.pop()
+    end
+    
+    @Operation startElement(tag:Buffer,atts:Buffer)
+      if tag.stringEqual("ecore:EPackage")
+      then self.startPackage()
+      elseif tag.stringEqual("eClassifiers")
+      then self.startClass()
+      elseif tag.stringEqual("eStructuralFeatures")
+      then self.startFeature()
+      else format(stdout,"Unknown ecore tag: ~S~%",Seq{tag})
+      end
+    end
+    
+    @Operation startPackage()
+      let name = self.attribute("name").value()
+      in stack.push(Package(name))
+      end
+    end
+    
+    @Operation startClass()
+      let name = self.attribute("name").value();
+          parent = self.attribute("eSuperTypes")
+      in if parent = null
+         then stack.push(Class(name))
+         else 
+           let class = Class(name);
+               type = Ecore.grammar.parseString(parent.value(),"EType",Seq{dir,file,importer,true},Seq{})
+           in class.parents := @Operation() Set{type()} end;
+              stack.push(class)
+           end
+         end
+      end
+    end
+    
+    @Operation startFeature()
+      let name = self.attribute("name").value();
+          upperBound = self.attribute("upperBound") then
+          isAtom = (upperBound = null) orelse (upperBound.value().asInt() >= 0);
+          typeString = self.attribute("eType").value() then
+          type = Ecore.grammar.parseString(typeString,"EType",Seq{dir,file,importer,isAtom},Seq{})
+      in stack.push(Attribute(name,type))
+      end
+    end
+  
+  end

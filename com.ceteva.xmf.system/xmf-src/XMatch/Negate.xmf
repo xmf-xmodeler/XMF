@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Negation                                    *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Matches when the supplied pattern fails to match. Note that no binding    *
+ *  can be produced as result of a successful outcome. The result is always   *
+ *  the empty sequence of characters.                                         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Negate extends Pattern
+    
+    @Attribute pattern : Pattern end
+    
+    @Constructor(pattern) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      pattern.match(chars,env,stack,
+        @Operation(notChars,notEnv,notStack,notFail)
+          fail()
+        end,
+        @Operation()
+          succ(chars,env,Seq{Seq{} | stack},fail)
+        end)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver.
+      // Cannot bind in a netation...
+      
+      Set{}
+    end
+    
+  end

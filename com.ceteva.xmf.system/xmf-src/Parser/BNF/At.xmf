@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                      At                                    *
+ *                             -------------------                            *
+ *                                                                            *
+ *  The At parsing instruction performs a grammar switch in the parsing       *
+ *  machine. It expects to be followed in the input channel by a sequence of  *
+ *  '::' separated names that reference a classifier. The classifier should   *
+ *  define a grammar. The parsing machine will change to use the grammar and  *
+ *  start parsing from the clause with the same name as the classifier. When  *
+ *  the grammar is satisfied then the parsing machine reverts back to the     *
+ *  grammar that was current before the At instruction.                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+ 
+   @Class At extends Recognizer
+   
+     @Operation code(out)
+       format(out,"At")
+     end
+   
+     @Operation FV():Set(String)
+       Set{}
+     end
+     
+     @Operation toExp(FV:Set(String))
+       [| Root::Parser::BNF::At() |]
+     end
+     
+     @Operation transform(FV,grammar)
+       self
+     end
+     
+   end

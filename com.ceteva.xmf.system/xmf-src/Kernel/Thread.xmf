@@ -1,0 +1,105 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Threads                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   The XMF VM is multi-threaded. At any given time a single thread has      *
+ *   control of the VM and may be forced or choose to yield control to a      *
+ *   pending thread. A thread is forced to yield when it performs a READ      *
+ *   operation on an input channel which would cause blocking. Otherwise,     *
+ *   a thread yields explicitly by calling Element::yield on any data value.  *
+ *                                                                            *
+ *   Threads are created by forking an operation with 0 arguments. When the   *
+ *   new thread becomes scheduled, the operation is called and starts to      *
+ *   execute. If the operation ever returns then the thread dies and is       *
+ *   removed from the system.                                                 *
+ *                                                                            *
+ *   You can find out the current thread by xmf.thread() and find out all the *
+ *   threads by xmf.threads().                                                * 
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Thread
+  @Operation asSeq():Seq(Thread)
+    @Doc 
+      Returns all the threads in the system by chaining down
+      the linked list of threads from the receiver.
+    end
+    let t = self;
+        seq = Seq{self}
+    in t := t.next();
+       @While t <> self do
+         seq := seq + Seq{t};
+         t := t.next()
+       end;
+       seq
+    end
+  end
+
+context Thread
+  @Operation id():Integer
+    Kernel_threadId(self)
+  end
+  
+context Thread 
+  @Operation kill()
+    @Doc 
+      A thread can commit suicide by calling this operation on itself.
+    end
+    Kernel_threadKill(self)
+  end
+  
+context Thread
+  @Operation next():Thread
+    @Doc
+      Returns the thread that will be scheduled next.
+    end
+    Kernel_threadNext(self)
+  end
+  
+context Thread
+  @Operation sleep()
+    @Doc
+      Sets the live-status of the receiver to SLEEP. The receiver
+      cannot be rescheduled until it has been woken up.
+    end
+    Kernel_sleep(self)
+  end
+  
+context Thread
+  @Operation state():Integer
+    @Doc
+      Returns the live-status of the receiver.
+    end
+    Kernel_threadState(self)
+  end
+  
+context Thread
+  @Operation stateString():String
+    @Doc
+      Returns the live-status of the receiver as a symbolic string.
+    end
+    @Case self.state() of 
+      0 do "ACTIVE"        end
+      1 do "BLOCK_READ"    end
+      2 do "BLOCK_CONNECT" end
+      3 do "SLEEPING"      end
+      else "DEAD"
+    end
+  end
+  
+context Thread 
+  @Operation toString():String
+    "Thread[id=" + self.id() + ",state=" + self.stateString() + "]"
+  end
+  
+context Thread
+  @Operation wake(result)
+    @Doc
+      Changes the live-status of the receiver to be ACTIVE
+      and therefore ready for rescheduling.
+    end
+    Kernel_wake(self,result)
+  end

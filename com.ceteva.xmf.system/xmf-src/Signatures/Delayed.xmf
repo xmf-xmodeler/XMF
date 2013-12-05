@@ -1,0 +1,25 @@
+parserImport XOCL;
+
+import Signatures;
+
+context Signatures
+
+  @Class Delayed extends Type 
+
+    @Attribute thunk : Operation (?,!) end
+    @Attribute value : Type (?,!) end
+    
+    @Constructor(thunk) ! end
+    
+    @Operation force():Type
+      if value = null
+      then self.value := thunk()
+      end;
+      value.force()
+    end
+    
+    @Operation pprint(out)
+      self.force().pprint(out)
+    end
+
+  end

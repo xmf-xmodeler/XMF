@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Keyword Arguments                             *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  Classes can be instantiated using constructs in two ways: BOA-constructors*
+ *  where the class is used as an operator with conventional arguments and    *
+ *  keyword-arguments where the class is used as an operator in an expression *
+ *  of the form C[x = M, y = N, ...]. In this case the x = M parts are called *
+ *  keyword arguments. They represent the slot name x of a new instance and   *
+ *  the corresponding value M. A keyword instantiation is an instance of the  *
+ *  class Instantiate which contains a collection of key args.                *                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class KeyArg
+    
+    @Attribute name : String end
+    @Attribute value : Performable end
+    
+    @Constructor(name,value) ! end
+    
+    @Operation lift():Performable
+      [| OCL::KeyArg(<StrExp(name)>,<value.lift()>) |]
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S = ",Seq{name});
+      value.pprint(out,indent)
+    end
+    
+  end

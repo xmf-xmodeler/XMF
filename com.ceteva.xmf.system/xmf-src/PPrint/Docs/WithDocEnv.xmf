@@ -1,0 +1,24 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+context Root
+  @Class WithDocEnv
+    @Grammar extends OCL::OCL.grammar
+      WithDocEnv ::= e = Exp 'end' {
+        [| let PREV_FRAME = 0;
+               INDENT = 1;
+               CODE = 2;
+               CUT = 3;
+               TEXT_POSITION = 4; 
+               LINE_POSITION = 5;
+               RIBBON_POSITION = 6;
+               FAIL = 7;
+               FRAME_SIZE = 4;
+               FAIL_FRAME_SIZE = 8 
+           in <e>
+           end |]
+      }.
+    end
+  end
+      
+

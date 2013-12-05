@@ -1,0 +1,16 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+import CodeContext;
+
+context CodeContext
+
+  @Class Binding extends Context
+  
+    @Attribute name     : String                        (?,!)     end
+    @Attribute type     : Seq(String)                   (?,!,+,-) end
+    
+    @Constructor(name,type,next) ! end
+    
+  end

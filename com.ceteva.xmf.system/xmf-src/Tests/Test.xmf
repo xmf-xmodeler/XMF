@@ -1,0 +1,32 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import IO;
+
+context Tests
+
+  @Class Test extends NamedElement, Sugar
+  
+    @Attribute test : Performable end
+    
+    @Constructor(name,test) 
+      self.setName(name)
+    end
+    
+    @Grammar extends OCL::OCL.grammar
+      Test ::= name = Name test = Exp 'end' {
+        Test(name,test)
+      }.
+    end
+    
+    @Operation desugar() [| 
+      @Operation <name>(testOut:OutputChannel .TESTDATA)
+        let time = Time()
+        in format(testOut,"Start test ~S at ~S...~%",Seq{<OCL::StrExp(name)>,xmf.date()});
+           try <test> catch(x) format(testOut,"  error: ~S~%",Seq{x.toString()}) end;
+           format(testOut,"End test ~S (~S).~%",Seq{<OCL::StrExp(name)>, (Time() - time).pprint()})
+        end
+      end.setProperty("isTest",true) |]
+    end
+  end

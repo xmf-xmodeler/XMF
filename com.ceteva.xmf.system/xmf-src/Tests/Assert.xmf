@@ -1,0 +1,29 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import IO;
+
+context Tests
+
+  @Class Assert extends Sugar
+  
+    @Attribute name : String end
+    @Attribute condition : Performable end
+    
+    @Constructor(name,condition) end
+    
+    @Grammar extends OCL::OCL.grammar
+      Assert ::= name = Name condition = Exp 'end' {
+        Assert(name,condition)
+      }.
+    end
+    
+    @Operation desugar() [|
+      format(testOut,"~<80>S",Seq{formats("  Checking assertion for ~S ..... ",Seq{<name.lift()>})});
+      if <condition>
+      then format(testOut,"Success.~%")
+      else format(testOut,"Failure.~%")
+      end |]
+    end
+  end

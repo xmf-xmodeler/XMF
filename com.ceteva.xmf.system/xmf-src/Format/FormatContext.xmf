@@ -1,0 +1,214 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Format Context                                *
+ *                              ---------------                               *
+ *                                                                            *
+ *    When format runs through the control string, it requires a context that *
+ *    contains the supplied format argument data. the control characters in a *
+ *    format control string consume argument data and replace argument data.  *
+ *    The context is supplied to the individual control character handlers so *
+ *    that they can modify the context as required.                           *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+
+context IO
+
+  @Class FormatContext
+    
+    @Attribute control : String       end // The control string.
+    @Attribute values  : Seq(Element) end // The values used by the control string.
+    @Attribute used    : Seq(Element) end // Used values as a stack.
+    @Attribute index   : Integer      end // The index into the control string.
+    @Attribute args    : Seq(Element) end // The args set after ~ between < and >.
+    
+    @Constructor(control,values,index) ! end
+    
+    @Operation appendControl(control)
+      self.control := self.control.subString(index,control->size);
+      self.control := control + self.control;
+      self.index := 0
+    end
+    
+    @Operation appendValues(values) 
+      self.values := values + self.values
+    end
+    
+    @Operation at()
+      // Flatten the next value at the head of the control.
+      if values->isEmpty
+      then self.error("~@ no args left.")
+      else
+        let value = values->head
+        in if value.isKindOf(Seq(Element))
+           then self.values := value + values->tail
+           else self.error("~@ expects a sequence: " + value.toString())
+           end
+        end
+      end
+    end
+    
+    @Operation backup()
+      if not used->isEmpty
+      then
+        self.values := Seq{used->head | values};
+        self.used := used->tail
+      end
+    end
+    
+    @Operation controlTo(char):String
+    
+      // Returns the string up to and including the supplied control
+      // char. Removes the control chars from the head of the control 
+      // string. Note that this does not take into account nested
+      // control strings.
+         
+      let string = Seq{};
+          found = false
+      in @While not(self.complete() or found) do
+           let c = self.nextChar()
+           in if c = "~"->at(0)
+              then 
+                if not(self.complete())
+                then let c = self.nextChar()
+                     in if char = c
+                        then found := true
+                        else string := string + Seq{"~"->at(0),c}
+                        end
+                     end
+                else string := string + Seq{c}
+                end
+              else string := string + Seq{c}
+              end
+           end
+         end;
+         string->asString
+      end
+    end
+    
+    @Operation complete():Boolean
+    
+      // Returns true when the control has been
+      // consumed in the context...
+      
+      control->size <= index
+    end
+    
+    @Operation nextChar():Integer
+    
+      // Returns the next char and advances the control index...
+      
+      let char = control->at(index)
+      in self.index := index + 1;
+         char
+      end
+    end
+    
+    @Operation nextValue():Element
+    
+      // Consumes and returns the next value. The value is
+      // added to the used stack so that we can rewind the
+      // values.
+      
+      if values->isEmpty
+      then "Format: ran out of values at: " + index + " in: " + control
+      else 
+        let next = values->head
+        in self.values := values->tail;
+           self.used := Seq{next | used};
+           next
+        end
+      end
+    end
+    
+    @Operation nextValueToString():String
+      let value = self.nextValue()
+      in try
+           value.toString()
+         catch(exception)
+           Root.putElement("xxValue",value);
+           "Format error: Variable Root::xxValue has been set to the offending element."
+         end
+      end
+    end
+    
+    @Operation parseArg()
+      if not self.complete()
+      then
+        let char = self.nextChar()
+        in if char.isNumericChar()
+           then self.parseNumeric(char - "0"->at(0))
+           else 
+             if char = "?"->at(0)
+             then 
+               self.nextValue()
+             else self.parseString(Seq{char}->asString)
+             end
+           end
+        end
+      end
+    end
+    
+    @Operation parseArgs()
+    
+      // After a ~ we may encounter < args > before the
+      // dispatch character *** don't use < as a dispatch 
+      // character ***. Within the < and > we may have literal 
+      // values or ? which means that the arg is supplied in the
+      // control values. The args set the sequence of values
+      // used by the dispatch handler.
+      
+      self.args := Seq{};
+      let c = self.peekChar()
+      in if c = "<"->at(0)
+         then 
+           self.nextChar();
+           @While self.peekChar() <> ">"->at(0) and not self.complete() do
+             self.args := self.args + Seq{self.parseArg()};
+             if self.peekChar() = ","->at(0)
+             then self.nextChar()
+             end
+           end;
+           if self.complete()
+           then self.error("Control exhausted.")
+           else 
+             self.nextChar()
+           end
+         end
+      end
+    end
+    
+    @Operation parseNumeric(value)
+      if self.complete()
+      then value
+      else 
+        let c = self.peekChar()
+        in if c.isNumericChar()
+           then self.parseNumeric((value * 10) + (self.nextChar() - "0"->at(0)))
+           else value
+           end
+        end
+      end
+    end
+    
+    @Operation parseString(value)
+      if self.complete()
+      then value
+      else 
+        let c = self.peekChar()
+        in if c = ","->at(0) or c = ">"->at(0)
+           then value
+           else self.parseString(value + Seq{self.nextChar()}->asString)
+           end
+        end
+      end
+    end
+    
+    @Operation peekChar():Integer
+      control->at(index)
+    end
+    
+  end

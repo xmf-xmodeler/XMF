@@ -1,0 +1,51 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Derived Attributes                                *
+ *                          ------------------                                *
+ *                                                                            *
+ *   A derived attribute is an operation that caches the result so that it is *
+ *   performed at most once for any sequence of argument values.              *                                                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XOCL
+
+  @Class Derived
+     
+     @Grammar extends Operation.grammar
+     
+       Derived ::= o = Operation { 
+         [| let cache = XCore::Table(10);
+                operation = <o>
+            in @Operation <o.name>(.args)
+                 operation.getDerivedValue(cache,self,args)
+               end
+            end
+         |]
+       }.
+     end
+   end   
+   
+context Operation
+  @Operation getDerivedValue(cache:Table,this,args)
+    // Check the cache, if the value is set in
+    // the cache then return it otherwise set the
+    // value in the table against the arguments and
+    // then return it...
+    if not cache.hasKey(this)
+    then cache.put(this,Seq{})
+    end;
+    @Find(entry,cache.get(this))
+      when entry->head->size = args->size andthen
+           entry->head.zip(args)->forAll(pair | pair->head = pair->tail)
+      do entry->tail
+      else 
+        let value = self.invoke(this,args)
+        in cache.put(this,Seq{Seq{args|value} | cache.get(this)});
+           value
+        end
+    end
+  end

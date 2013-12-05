@@ -1,0 +1,144 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Class
+  @Operation toXMLClause()
+    let attributes = self.allAttributes()->asSeq->sortNamedElements then
+        simpleAttributes = attributes->select(a | a.underlyingType().isKindOf(DataType)) then
+        A = simpleAttributes->collect(a | BindAtt(a.name()))->asSeq;
+        children = Case(Seq{},self.matchXMLComplexAttributes(attributes)) then
+        element = Element("Object",A->including(BindAtt("id")),children) then
+        commands = Seq{Event("new" + name,attributes->collect(a | CommandVar(a.name().toString())),true)} then
+        main = And(element,Update("id",Commands(commands)));
+        classesInContext = owner.allContentsOf(Class) then
+        subTypes = classesInContext->select(c | c.inheritsFrom(self))->excluding(self) then
+        calls = subTypes->collect(c | Call(c.name().toString()))->asSeq
+    in Clause(name,calls->including(main))
+    end
+  end
+  
+context Class
+  @Operation matchXMLComplexAttributes(attributes:Seq(Attribute))
+    let complexAttributes = attributes->select(a | not a.underlyingType().isKindOf(DataType))->asSeq 
+    in complexAttributes->iterate(a p = Empty() |
+         let type = a.underlyingType();
+             ref = Element("Ref",Seq{BindAtt("id")},Case(Seq{},Commands(Seq{Event("Ref",Seq{CommandVar("id")},true)})));
+             Null = Element("Null",Seq{},Case(Seq{},Commands(Seq{Event("Null",Seq{},true)}))) then
+             disjunction = Or(Call(type.name().toString()),Or(Null,ref)) then
+             bind = Bind(Seq{a.name()},
+               @CaseObj a.type of
+                 Seq[ ] do
+                   Element("List",Seq{},Case(Seq{},Star(disjunction)))
+                 end
+                 Set[ ] do
+                   Element("Set",Seq{},Case(Seq{},Star(disjunction)))
+                 end
+                 else disjunction
+               end)
+          in And(p,Element("Slot",Seq{},Case(Seq{},bind)))
+          end)
+    end
+  end
+        
+context Class
+  @Operation writeXMLFactoryMethod(out:OutputChannel)
+    format(out,"  public ~S new~S",Seq{name,name});
+    self.writeXMLFactoryMethodArgs(out);
+    self.writeXMLFactoryMethodBody(out)
+  end
+  
+context Class
+  @Operation writeXMLFactoryMethodArgs(out:OutputChannel)
+    format(out,"(");
+    @For attribute in self.allAttributes()->asSeq->sortNamedElements do
+      if attribute.type.isKindOf(Seq) or
+         attribute.type.isKindOf(Set)
+      then format(out,"~S ~S",Seq{attribute.type.javaTypeName(owner),attribute.name()})
+      elseif attribute.type.isKindOf(DataType)
+      then format(out,"String ~S",Seq{attribute.name()})
+      else format(out,"Object ~S",Seq{attribute.name()})
+      end;
+      if not isLast then format(out,",") end
+    end;
+    format(out,")")
+  end
+  
+context Class
+  @Operation writeXMLFactoryMethodBody(out:OutputChannel)
+    format(out," {~%");
+    format(out,"    ~S new~S = new ~S();~%",Seq{name,name,name});
+    self.writeXMLFactoryMethodBodyUpdates(out);
+    format(out,"    return new~S;~%",Seq{name});
+    format(out,"  }~%")
+  end
+  
+context Class 
+  @Operation writeXMLFactoryMethodBodyUpdates(out:OutputChannel)
+    @For attribute in self.allAttributes() do
+      @CaseObj attribute.type of
+        Seq[ ] do
+          self.writeXMLFactoryMethodBodyUpdateCollection(out,attribute)
+        end
+        Set[ ] do
+          self.writeXMLFactoryMethodBodyUpdateCollection(out,attribute)
+        end
+        else
+          if attribute.type.isKindOf(DataType)
+          then self.writeXMLFactoryMethodBodyUpdateDataTypeSlot(out,attribute)
+          else self.writeXMLFactoryMethodBodyUpdatePossibleRef(out,attribute)
+          end
+      end
+    end
+  end
+        
+context Class
+  @Operation writeXMLFactoryMethodBodyUpdateCollection(out:OutputChannel,attribute:Attribute)
+    format(out,"    for(int i = 0; i < ~S.size(); i++) {~%",Seq{attribute.name()});
+    format(out,"      Object temp = ~S.elementAt(i);~%",Seq{attribute.name()});
+    format(out,"      if(temp instanceof Ref) {~%");
+    format(out,"        Ref ref = (Ref)temp;~%");
+    format(out,"        elementPending(~S,i,ref);~%",Seq{attribute.name()});
+    format(out,"      }~%");
+    format(out,"    }~%");
+    format(out,"    new~S.set~S(~S);~%",Seq{name,attribute.name().upperCaseInitialLetter(),attribute.name()})
+  end
+  
+context Class
+  @Operation writeXMLFactoryMethodBodyUpdateDataTypeSlot(out:OutputChannel,attribute:Attribute)
+    @Case attribute.type of
+      [Integer] do
+        format(out,"    new~S.set~S(Integer.parseInt(~S.substring(2)));~%",Seq{
+          name,attribute.name().upperCaseInitialLetter(),
+          attribute.name()})
+      end
+      [Boolean] do
+        format(out,"    new~S.set~S(Boolean.parseBoolean(~S.substring(2)));~%",Seq{
+          name,attribute.name().upperCaseInitialLetter(),
+          attribute.name()})
+      end
+      [String] do
+        format(out,"    new~S.set~S(~S.substring(2));~%",Seq{
+          name,attribute.name().upperCaseInitialLetter(),
+          attribute.name()})
+      end
+      else 
+        format(out,"    new~S.set~S(~S);~%",Seq{
+          name,attribute.name().upperCaseInitialLetter(),
+          attribute.name()})
+    end
+  end
+  
+context Class
+  @Operation writeXMLFactoryMethodBodyUpdatePossibleRef(out:OutputChannel,attribute:Attribute)
+    format(out,"    if(~S instanceof Ref) {~%",Seq{attribute.name()});
+    format(out,"      Ref ref = (Ref)~S;~%",Seq{attribute.name()});
+    format(out,"      pendingSlot(new~S,\"~S\",ref);~%",Seq{name,attribute.name()});
+    format(out,"    } else new~S.set~S((~S)~S);~%",Seq{
+      name,
+      attribute.name().upperCaseInitialLetter(),
+      attribute.type.name(),
+      attribute.name()})
+  end
+  

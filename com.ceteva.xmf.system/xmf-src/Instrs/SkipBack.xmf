@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Skip Back a Few Instructions                         *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as SKP except the VM moves back a number of instructions in the      *
+ *  current code vector.                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SkipBack extends Instr
+  
+    @Attribute offset : Integer (?,!) end
+    @Attribute targetLabel : String (?,!) end
+    
+    @Constructor(targetLabel) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+    @Operation toString():String
+      "<SkipBack " + targetLabel + ">"
+    end
+    
+  end
+
+ 

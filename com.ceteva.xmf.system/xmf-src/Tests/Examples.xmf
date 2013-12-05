@@ -1,0 +1,118 @@
+parserImport XOCL;
+parserImport Tests;
+
+import Tests;
+
+context Root
+  @Class TestClass 
+    @Attribute x : Integer (?,!) end
+    @Constructor(x) ! end
+  end
+
+context Root 
+  @TestScripts ExampleTests 
+    @Test ExampleTest
+      let o = TestClass(100)
+      in  @Assert CheckInitialised 
+            o.x() = 100
+          end;
+          o.setX(200);
+          @Assert CheckSet
+            o.x() = 200 
+          end;
+          @Assert CheckFails
+            o.x() = 300
+          end 
+      end
+    end
+  end 
+  
+context Root
+  @Class Test
+    @OpSpec test(x,y)
+  
+      // Only works when x = y... 
+    
+      pre
+        x <= y  
+      body
+       x := x + y
+      post
+        x = prex * 2 
+    end 
+    @Operation call(x,y)
+      self.test(x,y)
+    end
+  end
+
+context Root
+  @Package EmailClient
+    @Class Tool
+      @Attribute displayed : Seq(Message) end
+      @Attribute current : Message end
+      @Attribute sent : Seq(Outgoing) end
+      @Attribute received : Seq(Incoming) end
+      
+      @OpSpec sendMessage(message)
+        pre message.title <> "" 
+        body self.sent := sent->including(message)
+        post self.sent->size = preSelf.sent->size + 1
+      end
+      
+      @OpSpec receive(message)
+        pre not message.read
+        body self.received := received->including(message)
+        post self.received->size = preSelf.received->size + 1
+      end
+      
+      @OpSpec read(message)
+        pre true
+        body message.read := true
+        post message.read
+      end
+      
+      @OpSpec search(predicate)
+        pre true
+        body self.displayed := received->select(m | predicate(m))
+        post displayed->forAll(m | predicate(m)) and
+             not (received - displayed)->exists(m | predicate(m))
+      end
+      
+      @OpSpec reset()
+      
+        pre received->isEmpty
+        body self.displayed := received;
+             self.current := null
+        post displayed = received and
+             current = null
+        
+        pre not received->isEmpty
+        body self.displayed := received;
+             self.current := received->last
+        post displayed = received and
+             current = received->last
+             
+      end
+        
+    end
+    @Class Message isabstract
+      @Attribute title : String end
+      @Attribute address : String end
+      @Constructor(title,address) ! end
+    end
+    @Class Incoming extends Message
+      @Attribute read : Boolean end
+    end
+    @Class Outgoing extends Message
+    end
+  end
+  
+context Root
+  @Filmstrip testStrip
+    @Step o1.sendMessage(m) -> null and o2 end
+    where
+      m  = EmailClient::Incoming("xxx","x@y.com");
+      o1 = EmailClient::Tool();
+      o2 = EmailClient::Tool[received=Seq{m}];
+  end
+  

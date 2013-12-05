@@ -1,0 +1,85 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+import Tests;
+
+context Tests
+
+  @Class OpSpec extends Syntax, XCore::Operation
+  
+    @Attribute name  : String       end
+    @Attribute args  : Seq(String)  end
+    @Attribute type  : OCL::TypeExp end
+    @Attribute specs : Seq(Spec)    end
+    @Attribute arity : Integer      end // Required for compiled code adding OpSpec to a class.
+    
+    @Constructor(name,args,type,specs) ! 
+      self.setName(name);
+      self.arity := args->size
+    end
+    
+    @Grammar extends XCore::Operation.grammar
+     
+      OpSpec ::= name = Name '(' args = OpSpecArgs ')'
+        type = ReturnType
+        specs = Spec^(name,args)*
+        'end'
+        { OpSpec(name,args,type,specs) }.
+        
+      OpSpecArgs ::=
+        n = Name ns = (',' Name)* { Seq{n | ns} }
+      | { Seq{} }.
+      
+      Spec(n,as) ::= pre = Pre^(n,as) body = Body^(n,as) post = Post^(n,as) { Spec(Drop(pre),Drop(body),Drop(post)) }.
+      
+      Pre(n,as) ::= 'pre' e = Exp { pre(n,as,e) }.
+      
+      Post(n,as) ::= 'post' e = Exp { post(n,as,e) }.
+      
+      Body(n,as) ::= 'body' e = Exp { body(n,as,e) }.
+      
+    end
+    
+    @Operation arity()
+      // Required for interpreted calling...
+      args->size
+    end
+    
+    @Operation invoke(target,args)
+      @Find(spec,specs)
+        when spec.pre().invoke(target,args)
+        do spec.body().invoke(target,args + Seq{spec.post()})
+        else throw PreFails(name,args)
+      end
+    end
+    
+    @Operation isVarArgs()
+      // Required for  calling...
+      false
+    end 
+    
+    @Operation setSupers(supers)
+      // Required for calling...
+      null
+    end
+    
+    @Operation target()
+      // Required for calling...
+      null
+    end
+    
+    @Operation trace()
+      @For spec in specs do
+        spec.trace()
+      end
+    end
+    
+    @Operation untrace()
+      @For spec in specs do
+        spec.untrace()
+      end
+    end
+    
+  end

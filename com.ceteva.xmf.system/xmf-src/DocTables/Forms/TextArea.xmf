@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Text Area Boxes                               *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class TextArea extends Entry
+
+    @Attribute label : String (?,!) end
+    @Attribute cols  : Integer (?,!) end
+    @Attribute rows  : Integer (?,!) end
+    @Attribute value : String = "" (?,!) end
+
+    @Constructor(label,rows,cols) ! end
+    
+    @Constructor(label,rows,cols,value) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

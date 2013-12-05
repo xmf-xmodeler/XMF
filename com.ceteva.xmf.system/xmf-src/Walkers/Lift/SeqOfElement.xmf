@@ -1,0 +1,24 @@
+parserImport Walkers;
+
+import OCL;
+import Walkers;
+
+@Handler SeqOfElement in Lift(s,arg,encountered)
+  if s->isEmpty
+  then [| Seq{} |]
+  elseif encountered
+  then [| <arg>.ref(<IntExp(stack.indexOf(s))>) |]
+  else 
+    stack.push(s);
+    let var = Var(self.newVar())
+    in [| let <var.name> = Seq{null|null}
+          in <arg>.push(<var>);
+             <var> ->head := <self.dispatch(s->head,arg)>;
+             <var> ->tail := <self.dispatch(s->tail,arg)>;
+             <var>
+          end
+       |]
+    end
+    //[| Seq{<self.dispatch(s->head,arg)> | <self.dispatch(s->tail,arg)>} |]
+  end
+end;

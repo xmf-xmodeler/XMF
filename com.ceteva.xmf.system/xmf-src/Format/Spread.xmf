@@ -1,0 +1,21 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~$                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg should be a sequence that is appended to the head   *
+ *    of the format args.                                                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleSpread =
+      @Operation(char,output,formatContext)
+        let values = formatContext.nextValue()
+        in if values.isKindOf(SeqOfElement)
+           then formatContext.appendValues(values)
+           else formatContext.error("~$ expects a sequence of values: " + values.toString())
+           end
+        end
+      end
+in format.defineHandler("$"->at(0),handleSpread)
+end;

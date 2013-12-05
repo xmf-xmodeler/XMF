@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Code Generation Stacks                            *
+ *                          ----------------------                            *
+ *                                                                            *
+ *    Stacks are used in the code generation mapping. Stacks are extended     *
+ *    as appropriate.                                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Stacks;
+
+context CodeGen 
+  @Class Stack extends Stack
+    @Operation toString()
+      self.asSeq().toString()
+    end
+  end

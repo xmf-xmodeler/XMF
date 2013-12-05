@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+context NameSpace
+  @Operation writeEcore(path:String)
+  
+    // Deploy EMF for all the packages in the name-space...
+    
+    @For package in self.allContentsOf(Package) do
+      package.writeEcore(path)
+    end
+  end

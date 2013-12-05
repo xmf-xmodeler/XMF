@@ -1,0 +1,76 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Binding                                   *
+ *                            -------------------                             *
+ *                                                                            *
+ *   A binding associates a name with a value in an environment. You should   *
+ *   use the Env::bind(n,v) operation to bind into an environment and so need *
+ *   not reference this class directly.                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Env
+
+  @Class Binding extends Env
+  
+    @Attribute name  : String  end
+    @Attribute value : Element end
+    
+    @Constructor(name,value) end
+    
+    @Operation binding(key)
+    
+      @Doc
+        Find the binding with the given name.
+      end
+      
+      if key = name
+      then self
+      else null
+      end
+    end
+    
+    @Operation dom():Set(String)
+    
+      @Doc
+        Return the set of names in the environment.
+      end
+      
+      Set{name}
+    end
+    
+    @Operation binds(name:String):Boolean
+    
+      @Doc 
+        Return true if the receiver binds the supplied name.
+      end
+      
+      name = self.name
+    end
+    
+    @Operation lookup(name:String):Element
+    
+      @Doc
+        Return the value of the supplied name in the
+        receiver or a special value if the name is not
+        bound.
+      end
+      
+      if name = self.name
+      then value
+      else "Binding::lookup"
+      end
+    end
+    
+    @Operation setValue(value)
+    
+      @Doc
+        Update the value in the binding.
+      end
+      
+      self.value := value
+    end
+    
+  end

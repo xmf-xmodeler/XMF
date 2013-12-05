@@ -1,0 +1,67 @@
+parserImport XOCL;
+
+import Walkers;
+import Stacks;
+
+context Walkers
+
+  @Class Refs extends Walker
+  
+    // Counts refs...
+
+    @Attribute refs : Table = Table(100) end
+     
+    @Operation defaultWalk(e:Element,arg:Element):Element
+      null
+    end
+    
+    @Operation ref(e)
+      if refs.hasKey(e)
+      then refs.put(e,refs.get(e) + 1)
+      else refs.put(e,1)
+      end
+    end
+    
+    @Operation refCount(e)
+      if refs.hasKey(e)
+      then refs.get(e)
+      else 0
+      end
+    end
+     
+    @Operation walkBuffer(buffer,arg)
+      self.ref(buffer);
+      super(buffer,arg)
+    end
+    
+    @Operation walkFun(fun,arg) 
+      self.ref(fun);
+      super(fun,arg)
+    end
+     
+     @Operation walkObject(o:Object,arg:Element):Element 
+       self.ref(o);
+       super(o,arg)
+     end
+     
+     @Operation walkSeq(s:SeqOfElement,arg:Element):Element 
+       self.ref(s);
+       super(s,arg)
+     end
+     
+     @Operation walkSlot(o,s,v,a) 
+       self.walk(v,a)
+     end
+     
+     @Operation walkTable(t:Table,arg:Element):Element 
+       self.ref(t);
+       super(t,arg)
+     end
+     
+     @Operation walkVector(v:Vector,arg:Element):Element 
+       self.ref(v);
+       super(v,arg)
+     end
+     
+   end
+               

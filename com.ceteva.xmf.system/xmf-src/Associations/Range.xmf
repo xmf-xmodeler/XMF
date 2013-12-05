@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+import Associations;
+
+context Associations
+
+  @Class Range extends Multiplicity
+  
+    //  An end with multiplicity n .. m requires that the attribute
+    //  is associated with a minimum of n and a maximum of m instances 
+    //  of the appropriate class.
+    
+    @Attribute lower : Integer end
+    @Attribute upper : Integer end
+    
+    @Constructor(lower,upper) ! end
+    
+    @Operation typeExp(type)
+      [| Set(<type>) |]
+    end
+    
+  end

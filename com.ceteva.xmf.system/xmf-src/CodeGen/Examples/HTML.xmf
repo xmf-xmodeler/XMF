@@ -1,0 +1,69 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import CodeGen;
+  
+context CodeGen
+
+  @Class HTML extends Generator
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      HTML ::= 
+      
+        '('
+        
+        // Get the output channel... 
+        
+        out = Exp 
+        
+        // get the current level of indent...
+        
+        ',' indent = Int 
+        
+        ')' 
+        
+        // Get the raw text...
+        
+         s = Char* 
+         
+         'end'
+                   
+         { let // The control tokens for the code generator...
+         
+               startLift = "[";
+               endLift = "]";
+               startDrop = "{";
+               endDrop = "}";
+               startExtract = "#$";
+               endExtract = "$#";
+               
+               // All references to 'end' are protected...
+               
+               protectEnd = s.asString().subst("end","e_nd",true) then
+               
+               // All references to newline characters are protected...
+               
+               protectNewline = protectEnd.subst("\n","\\n",true) then
+               
+               // Create the mapping to a code element...
+               
+               mapping = Mapping(startLift + protectNewline + endLift,startLift,endLift,startDrop,endDrop,startExtract,endExtract) then
+               
+               // Perform the mapping...
+               
+               lift = mapping.processLift(indent,indent)
+               
+           in 
+              // Translate the code element to abstract syntax and return...
+              
+              format(stdout,"~<10,10,80,80,0>P~%",Seq{lift});
+              let commands = lift.desugar("CodeGen::HTML",startLift,endLift,startDrop,endDrop,startExtract,endExtract,out,0) 
+              in commands
+              end
+           end
+       }.
+                
+    end
+    
+  end

@@ -1,0 +1,165 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Integer Dispatch                               *
+ *                           -------------------                              *
+ *                                                                            *
+ *   A case-int-expression is supplied with an integer and uses the value to  *
+ *   dispatch to an expression. The case-int populates a dispatching table    *
+ *   which is then compiled to VM labels and jumps. The case-int-expression   *
+ *   is then evaluated by the VM very efficiently simply by jumping to the    *
+ *   appropriate clause.                                                      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XOCL;
+
+context XOCL
+
+  @Class CaseInt extends Performable 
+  
+    // The limit of the case-int specifies the size 
+    // of the dispatching table....
+  
+    @Attribute limit     : Integer            end
+    
+    // The expression produces the integer from 0 up
+    // to the specified limit...
+    
+    @Attribute exp       : Performable        end
+    
+    // Each clause specifies a range of integers. 
+    // The integers must be available at compile-time
+    // so that the compiler can populate the dispatch
+    // table...
+    
+    @Attribute clauses   : Seq(CaseIntClause) end
+    
+    // The otherwise-exp is performed if the supplied
+    // integer does not match any of the clauses...
+    
+    @Attribute otherwise : Performable        end
+    
+    @Constructor(limit,exp,clauses,otherwise) ! end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      CaseInt ::= 
+      
+        // A case-int starts with a literal limit...
+      
+        '[' limit = Int ']' 
+        
+        // The integer to dispatch on...
+        
+         exp = Exp 
+         
+         'of' 
+         
+         // The clauses with integer ranges...
+         
+         clauses = Clause* 
+         
+         // An optional otherwise expression...
+         
+         otherwise = OptOtherwise 
+         
+         'end' 
+         
+         { CaseInt(limit,exp,clauses,otherwise) }.
+      
+      Clause ::= 
+      
+        // A clause specifies a range of values...
+      
+        values = Values 'do' 
+        
+        // and an action...
+        
+        exp = Exp 
+        
+        'end' 
+        
+        { CaseIntClause(values,exp) }.
+      
+      Values ::= 
+      
+        // The clause values are separated by
+        // commas...
+      
+        v = Value 
+        
+        vs = (',' Value)* 
+        
+        { Seq{ v | vs } }.
+      
+      Value ::= 
+      
+        // A clause value must be a constant
+        // at compile-time...
+        
+        Constant | Range.
+      
+      Constant ::= 
+      
+        // A constant is an expression that *must* be
+        // evaluable at compile-time...
+      
+        exp = Exp 
+        
+        { CaseIntConst(exp) }.
+      
+      Range ::= 
+      
+        // A range has a lower expression and an
+        // upper expression. The expressions must be
+        // evaluable at compiler-time...
+      
+        lower = Exp 
+        
+        'to' 
+        
+        upper = Exp 
+        
+        { CaseIntRange(lower,upper) }.
+      
+      OptOtherwise ::= 
+      
+        'else' Exp 
+        
+      | { null }.
+      
+    end
+    
+    @Operation eval(target,env,imports)
+    
+      // This should be completed...
+      
+      self.error("Eval not implemented for CaseInt.")
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@CaseInt[~S] ",Seq{limit});
+      exp.pprint(out,indent);
+      format(out," of~%~V",Seq{indent+2});
+      @For clause in clauses do
+        clause.pprint(out,indent+2);
+        if not isLast
+        then format(out,"~%~V",Seq{indent+2})
+        end
+      end;
+      if otherwise <> null
+      then 
+        format(out,"~%~Velse ",Seq{indent+2});
+        otherwise.pprint(out,indent+2)
+      end;
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+    @Operation rangeSizeLimit():Integer
+      1024
+    end
+      
+  end

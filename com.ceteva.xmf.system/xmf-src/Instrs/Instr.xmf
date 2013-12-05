@@ -1,0 +1,56 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XMF VM Instructions                           *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  In general an instruction is of the form CODE OP1 OP2 OP3 where the code  *
+ *  describes the instruction followed by from 0 to 3 operands. Often the     *
+ *  operands are encoded in a byte, but they may take 2 or 3 bytes.           *
+ *  Rarely, an instruction spans more than one machine word.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Root::Instrs;
+
+context Root::Instrs 
+
+  @Class Instr isabstract
+    
+    @Attribute label : String (!,?) end
+    
+    @Operation assemble(codeBox)
+      
+        // The target adds itself to the code box. The operands of the instruction
+        // may require calculation in the context of the code box. This operation
+        // performs calculations such as working out offsets into the code box
+        // constant area...
+        
+        codeBox.addInstr(self)
+    end
+     
+    @Operation code():Integer
+    
+      // Return the VM byte code for the instruction...
+      
+      let name = self.of().name.name
+      in CODES.get(name)
+      end
+    end
+    
+    @Operation operands():Integer
+      
+        // Return the operands of the instruction encoded as a 24 bit integer.
+        // The assembler uses this operation to translate an instruction object
+        // to a 32 bit integer...
+        
+      0
+    end
+      
+     
+    @Operation toString():String
+      "<" + self.of().name().toString() + ">"
+    end 
+    
+  end

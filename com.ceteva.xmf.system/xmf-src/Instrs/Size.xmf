@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Find the Size of a Collection                        *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pops a value from the stack and pushes its size. The VM knows how to take *
+ *  the size of collections, vectors, buffers and strings.                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Size extends Instr
+    
+  end

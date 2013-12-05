@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+import Signatures;
+
+context TypeChecker
+
+  @Class TypeAnnotation  
+
+    @Attribute exp  : Performable             (?) end
+    @Attribute type : Type = Element.toType() (?) end
+    
+    @Constructor(exp) end
+    
+    @Constructor(exp,type) ! end
+    
+  end

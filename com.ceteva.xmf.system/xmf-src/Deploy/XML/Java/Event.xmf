@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Event
+  @Operation toJava(out:OutputChannel)
+    format(out,"    event = new Event();~%");
+    format(out,"    event.setName(\"~S\");~%",Seq{name});
+    format(out,"    eventArgs = new java.util.Vector();~%");
+    @For arg in args do
+      arg.toJava(out);
+      format(out,"    eventArgs.addElement(stack.pop());~%")
+    end;
+    format(out,"    event.setArgs(eventArgs);~%");
+    format(out,"    event.setResult(~S);~%",Seq{result});
+    format(out,"    stack.push(event);~%")
+  end

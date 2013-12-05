@@ -1,0 +1,88 @@
+@echo off
+
+set XMFHOME=%1%
+set PORT=100
+set XMFIMAGE=%XMFHOME%/../xmf-img/xmf.img
+set HEAPSIZE=10000
+set MAXJAVAHEAP=-Xmx200m
+set LIB=%XMFHOME%;%XMFHOME%/../../com.ceteva.xmf.machine/bin
+set BOOTFILE=Boot/BootEval.o
+set LOCALE=-Duser.country=UK
+
+set BUILD_COMMS=true
+set BUILD_CONSTRAINTS=true
+set BUILD_JAVA=true
+set BUILD_FORMAT=true
+set BUILD_ENV=true
+set BUILD_ARRAYS=true
+set BUILD_GRAPHS=true
+set BUILD_STACKS=true
+set BUILD_OCL=true
+set BUILD_PARSER=true
+set BUILD_INSTRS=true
+set BUILD_ASSEMBLER=true
+set BUILD_SIGNATURES=true
+set BUILD_COMPILER=true
+set BUILD_GRAMMAR=true
+set BUILD_EXTENSIONS=true
+set BUILD_EXTENSIONS_COMPILER=true
+set BUILD_UNDO=true
+set BUILD_ASPECTS=true
+set BUILD_DOCTABLES=true
+set BUILD_DOC=true
+set BUILD_EVAL=true
+set BUILD_XMATCH=true
+set BUILD_TOPLEVEL=true
+set BUILD_WALKERS=true
+set BUILD_XML=true
+set BUILD_XMAP=true
+set BUILD_MANIFESTS=true
+set BUILD_LANGUAGES=true
+set BUILD_ASSOCIATIONS=true
+set BUILD_DEPLOY=true
+set BUILD_DEBUG=true
+set BUILD_XRULES=true
+set BUILD_CODEGEN=true
+set BUILD_PPRINT=true
+set BUILD_COMPREHENSIONS=true
+set BUILD_IMPORT=true
+
+java %LOCALE% %MAXJAVAHEAP% -cp %LIB% xos.OperatingSystem -image %XMFIMAGE% -heapSize %HEAPSIZE% -arg filename:%BOOTFILE% -arg user:"%USERNAME%" -arg home:%XMFHOME%^
+ -arg Comms:%BUILD_COMMS%^
+ -arg Constraints:%BUILD_CONSTRAINTS%^
+ -arg Java:%BUILD_JAVA%^
+ -arg Format:%BUILD_FORMAT%^
+ -arg Env:%BUILD_ENV%^
+ -arg Arrays:%BUILD_ARRAYS%^
+ -arg Graphs:%BUILD_GRAPHS%^
+ -arg Stacks:%BUILD_STACKS%^
+ -arg OCL:%BUILD_OCL%^
+ -arg Parser:%BUILD_PARSER%^
+ -arg Instrs:%BUILD_INSTRS%^
+ -arg Assembler:%BUILD_ASSEMBLER%^
+ -arg Signatures:%BUILD_SIGNATURES%^
+ -arg Compiler:%BUILD_COMPILER%^
+ -arg Grammar:%BUILD_GRAMMAR%^
+ -arg Extensions:%BUILD_EXTENSIONS%^
+ -arg Extensions/Compiler:%BUILD_EXTENSIONS_COMPILER%^
+ -arg Undo:%BUILD_UNDO%^
+ -arg Aspects:%BUILD_ASPECTS%^
+ -arg DocTables:%BUILD_DOCTABLES%^
+ -arg Doc:%BUILD_DOC%^
+ -arg Eval:%BUILD_EVAL%^
+ -arg XMatch:%BUILD_XMATCH%^
+ -arg TopLevel:%BUILD_TOPLEVEL%^
+ -arg Walkers:%BUILD_WALKERS%^
+ -arg XML:%BUILD_XML%^
+ -arg XMap:%BUILD_XMAP%^
+ -arg Manifests:%BUILD_MANIFESTS%^
+ -arg Languages:%BUILD_LANGUAGES%^
+ -arg Associations:%BUILD_ASSOCIATIONS%^
+ -arg Deploy:%BUILD_DEPLOY%^
+ -arg Debug:%BUILD_DEBUG%^
+ -arg XRules:%BUILD_XRULES%^
+ -arg CodeGen:%BUILD_CODEGEN%^
+ -arg PPrint:%BUILD_PPRINT%^
+ -arg Comprehensions:%BUILD_COMPREHENSIONS%^
+ -arg Import:%BUILD_IMPORT%^
+ -arg image:%XMFHOME%/../xmf-img/compiler.img

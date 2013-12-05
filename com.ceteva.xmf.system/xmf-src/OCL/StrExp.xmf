@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                String Literals                             *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A string in source code.                                                  *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class StrExp extends OCL::OCL
+  
+    @Attribute value : String end
+    
+    @Constructor(value) ! end
+    
+    @Constructor(line,value) end
+    
+    @Operation pprint(out,indent)
+      format(out,"\"~S\"",Seq{value})
+    end
+    
+  end

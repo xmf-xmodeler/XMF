@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Indent extends Doc
+
+    @Attribute doc : Doc (?,!) end
+    @Attribute cols : Root::XCore::Integer (?,!) end
+    
+    @Constructor(cols,doc) ! 
+      if not doc.isKindOf(Doc) then self.error("Not doc") end
+    end
+    
+    @Operation pprint(w,r,i,b,pt,pl,pr,s,f,cut)
+      doc.pprint(w,r,i+cols,b,pt,pl,pr,s,f,cut)
+    end
+
+  end

@@ -1,0 +1,35 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+import PPrint;
+  
+@Handler XCore::Table in PPrint(table,depth,encountered) 
+  if encountered
+  then HASH
+  else
+    let K = table.keys() then
+        keys = K->take(length.min(K->size)) then
+        keyDocs = keys->collect(k | self.dispatch(k,indent+1));
+        values = if keys->isEmpty
+                 then Seq{}
+                 else
+                   keys->butLast->collect(k | Order(self.dispatch(table.get(k),indent+1),COMMA)) + 
+                   Seq{self.dispatch(table.get(keys->last),indent+1)}
+                 end then
+        pairs = keyDocs.zip(values) then
+        horizontal = pairs->collect(pair | Order(pair->head,Order(EQUALS,pair->tail)));
+        vertical = pairs->collect(pair | Block(Indent(2,above(Seq{Order(pair->head,EQUALS),pair->tail})))) then
+        hDoc = horizontal->iterate(d doc = Just("") | Order(doc,d))
+    in Mark(
+         Order(
+           TABLE,
+             Block(
+               Order(
+                 Alt(hDoc,above(vertical)),
+                 Cut(Just(if K->size <> keys->size then ",...]" else "]" end))))))
+    end
+  end
+end;
+          

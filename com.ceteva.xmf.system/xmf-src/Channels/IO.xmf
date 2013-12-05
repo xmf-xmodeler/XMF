@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              The IO Package                                *
+ *                              --------------                                *
+ *                                                                            *
+ *     The IO package defines a collection of channel classes that are used   *
+ *     for input and output within XMF. Typically, an IO channel is used to   *
+ *     write and read characters (encoded as ASCII code). Various channels    *
+ *     offer specialized services such as writing the characters to a file or *
+ *     to a string.                                                           *
+ *                                                                            *
+ *     Typically an IO channel is a wrapper for an identifier at the VM level *
+ *     of a machine maintained entity. Operations at the XOCL level often just*
+ *     inform the VM to perform the appropriate operation on the machine      *
+ *     entity.                                                                *
+ *                                                                            *
+ *     Low-level writing can be performed at the character and string level   *
+ *     but is usually more appropriate using 'format'.                        *
+ *                                                                            *
+ *     Note that reading can block. If there are other threads waiting on a   *
+ *     blocked read then the blocking thread with yield. Note also that the   *
+ *     read operation on a channel may be open-coded by the compiler.         *
+ *                                                                            *
+ *     A couple of channels are provided as standard Root::stdin and          *
+ *     Root::stdout being bound to the standard input and standard output     *
+ *     respectively.                                                          *
+ *                                                                            *
+ ******************************************************************************/
+
+context Root
+ 
+  @Package IO
+     
+  end

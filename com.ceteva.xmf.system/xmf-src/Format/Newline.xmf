@@ -1,0 +1,25 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~%                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    A newline is printed to the output channel.                             *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+let handleNewLine =
+      @Operation(char,output,formatContext)
+        output.write("\n"->at(0));
+        output.flush()
+      end
+in format.defineHandler("%"->at(0),handleNewLine)
+end;
+
+let compileNewLine =
+  @Operation compileNewLine(control,args,format)
+    [| formatOut.write("\n"->at(0));
+       <format.compileControl(control,args)> |]
+  end
+in format.defineCompiler("%"->at(0),compileNewLine)
+end;
+     

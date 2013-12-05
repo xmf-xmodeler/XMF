@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Initialised Attributes                          *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   The class Attribute does not support specification of an initial value   *
+ *   for a slot. This sub-class of Attribute adds in the value attribute that *
+ *   should contain an operation. When the attribute is used to create a slot *
+ *   the operation is called, with 0 arguments, and the return value is used  *
+ *   as the initial value of the slot. The target of the operation invocation *
+ *   is the new instance.                                                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XCore
+
+  @Class InitialisedAttribute extends Attribute
+  
+    @Attribute value : Performable end
+    
+  end

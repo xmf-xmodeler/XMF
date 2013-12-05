@@ -1,0 +1,97 @@
+#!/bin/sh
+
+XMFHOME=$1
+XMFLIB="$XMFHOME:$XMFHOME/../../com.ceteva.xmf.machine/bin"
+PORT=10101
+EVALUATOR="$XMFHOME/../xmf-img/compiler.img"
+HEAPSIZE=5000
+STACKSIZE=50
+FREEHEAP=20
+FILENAME=$2
+MAXJAVAHEAP="-Xmx200m"
+MAXJAVASTACK="-Xss5m"
+VERSION=2.0
+JAVA=java
+LOCALE="-Duser.country=UK"
+USERNAME=`whoami`
+BOOTFILE="Boot/BootEval.o"
+XMFIMAGE="$XMFHOME/../xmf-img/xmf.img"
+
+BUILD_COMMS=true
+BUILD_CONSTRAINTS=true
+BUILD_JAVA=true
+BUILD_FORMAT=true
+BUILD_ENV=true
+BUILD_ARRAYS=true
+BUILD_GRAPHS=true
+BUILD_STACKS=true
+BUILD_OCL=true
+BUILD_PARSER=true
+BUILD_INSTRS=true
+BUILD_ASSEMBLER=true
+BUILD_SIGNATURES=true
+BUILD_COMPILER=true
+BUILD_GRAMMAR=true
+BUILD_EXTENSIONS=true
+BUILD_EXTENSIONS_COMPILER=true
+BUILD_UNDO=true
+BUILD_ASPECTS=true
+BUILD_DOCTABLES=true
+BUILD_DOC=true
+BUILD_EVAL=true
+BUILD_XMATCH=true
+BUILD_TOPLEVEL=true
+BUILD_WALKERS=true
+BUILD_XML=true
+BUILD_XMAP=true
+BUILD_MANIFESTS=true
+BUILD_LANGUAGES=true
+BUILD_ASSOCIATIONS=true
+BUILD_DEPLOY=true
+BUILD_DEBUG=true
+BUILD_XRULES=true
+BUILD_CODEGEN=true
+BUILD_PPRINT=true
+BUILD_COMPREHENSIONS=true
+BUILD_IMPORT=true
+
+java $LOCALE $MAXJAVAHEAP -cp $XMFLIB xos.OperatingSystem -port $PORT -image $XMFIMAGE -heapSize $HEAPSIZE -arg filename:$BOOTFILE -arg user:$USERNAME -arg home:$XMFHOME^
+-arg Comms:$BUILD_COMMS^
+-arg Constraints:$BUILD_CONSTRAINTS^
+-arg Java:$BUILD_JAVA^
+-arg Format:$BUILD_FORMAT^
+-arg Env:$BUILD_ENV^
+-arg Arrays:$BUILD_ARRAYS^
+-arg Graphs:$BUILD_GRAPHS^
+-arg Stacks:$BUILD_STACKS^
+-arg OCL:$BUILD_OCL^
+-arg Parser:$BUILD_PARSER^
+-arg Instrs:$BUILD_INSTRS^
+-arg Assembler:$BUILD_ASSEMBLER^
+-arg Signatures:$BUILD_SIGNATURES^
+-arg Compiler:$BUILD_COMPILER^
+-arg Grammar:$BUILD_GRAMMAR^
+-arg Extensions:$BUILD_EXTENSIONS^
+-arg Extensions/Compiler:$BUILD_EXTENSIONS_COMPILER^
+-arg Undo:$BUILD_UNDO^
+-arg Aspects:$BUILD_ASPECTS^
+-arg DocTables:$BUILD_DOCTABLES^
+-arg Doc:$BUILD_DOC^
+-arg Eval:$BUILD_EVAL^
+-arg XMatch:$BUILD_XMATCH^
+-arg TopLevel:$BUILD_TOPLEVEL^
+-arg Walkers:$BUILD_WALKERS^
+-arg XML:$BUILD_XML^
+-arg XMap:$BUILD_XMAP^
+-arg Manifests:$BUILD_MANIFESTS^
+-arg Languages:$BUILD_LANGUAGES^
+-arg Associations:$BUILD_ASSOCIATIONS^
+-arg Deploy:$BUILD_DEPLOY^
+-arg Debug:$BUILD_DEBUG^
+-arg XRules:$BUILD_XRULES^
+-arg CodeGen:$BUILD_CODEGEN^
+-arg PPrint:$BUILD_PPRINT^
+-arg Comprehensions:$BUILD_COMPREHENSIONS^
+-arg Import:$BUILD_IMPORT^
+-arg image:"$XMFHOME/../xmf-img/compiler.img"
+

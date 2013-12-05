@@ -1,0 +1,38 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+   
+Command::handlers.put("o",
+  @Operation(args,target,env,imports) 
+     @Doc 
+       ?o                   Print out the current options.
+       ?o saveSource bool   Toggle compiler saving source code.
+       ?o sourcePos  bool   Toggle compiler saving source positions.
+       ?o localNames bool   Toggle compiler saving local names.
+       ?o checkTypes bool   Toggle compiler type checking code.
+     end
+     @Case args of
+       Seq{} do
+         format(stdout,"Current option settings:~%");
+         format(stdout,"  saveSource = ~S~%",Seq{Compiler::saveSource});
+         format(stdout,"  sourcePos  = ~S~%",Seq{Compiler::sourcePos});
+         format(stdout,"  localNames = ~S~%",Seq{Compiler::localNames});
+         format(stdout,"  checkTypes = ~S~%",Seq{Compiler::checkTypes})
+       end
+       Seq{"saveSource",b} do
+         Compiler::saveSource := b.asBool()
+       end
+       Seq{"sourcePos",b} do
+         Compiler::sourcePos := b.asBool()
+       end
+       Seq{"localNames",b} do
+         Compiler::localNames := b.asBool()
+       end
+       Seq{"checkTypes",b} do
+         Compiler::checkTypes := b.asBool()
+       end
+       else null
+     end
+   end);
+   

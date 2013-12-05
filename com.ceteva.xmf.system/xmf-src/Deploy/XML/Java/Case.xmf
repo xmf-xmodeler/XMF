@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Case
+  @Operation toJava(out:OutputChannel)
+    format(out,"    kase = new Case();~%");
+    format(out,"    caseClauses = new java.util.Vector();~%");
+    @For clause in clauses do
+      clause.toJava(out);
+      format(out,"    caseClauses.addElement(stack.pop());~%")
+    end;
+    format(out,"    kase.setClauses(caseClauses);~%");
+    otherwise.toJava(out);
+    format(out,"    kase.setOtherwise((Pattern)stack.pop());~%");
+    format(out,"    stack.push(kase);~%")
+  end

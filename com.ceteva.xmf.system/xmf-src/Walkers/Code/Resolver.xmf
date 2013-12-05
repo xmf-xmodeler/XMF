@@ -1,0 +1,153 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+
+context Code
+
+  @Class Resolver extends CompilerWalker
+  
+    // Second part of the binary operator transformation post-parsing.
+    // Deals mostly with getting ., ; and :: in the right places...
+  
+    @Operation walkApply(args,operator,arg)
+      @CaseObj operator of
+        BinExp[left,binOp,right] do
+          if binOp = "." and right.isKindOf(Var)
+          then Send(self.walk(left,arg),right.name,args->collect(a | self.walk(a,arg)))
+          elseif binOp = "." and right.isKindOf(Drop)
+          then Send(self.walk(left,arg),Drop(self.walk(right.exp,arg)),args->collect(a | self.walk(a,arg)))
+          else super(args,operator,arg)
+          end
+        end
+        else super(args,operator,arg)
+      end
+    end
+
+    @Operation walkBinExp(op,left,right,arg)
+      @Case op of
+        "." do
+          @CaseObj right of
+            Var[name] do
+              Dot(self.walk(left,arg),name)
+            end
+            Drop[exp] do
+              Dot(self.walk(left,arg),Drop(self.walk(exp,arg)))
+            end
+            DropPattern[pattern] do
+              Dot(self.walk(left,arg),DropPattern(self.walk(pattern,arg)))
+            end
+            else super(op,left,right,arg)
+          end
+        end
+        "::" do
+          let left1 = left;
+              binOp1 = op;
+              right1 = right
+          in @CaseObj right of 
+               Var[name] do
+                 resolvePath(left,Seq{name})
+               end
+               Drop[exp] do
+                 resolvePath(self.walk(left,arg),Seq{Drop(self.walk(exp,arg))})
+               end
+               CollExp[args,collOp,collection] do
+                 if collection.isKindOf(Var)
+                 then self.walk(CollExp(resolvePath(left,Seq{collection.name}),collOp,args),arg)
+                 else self.walk(CollExp(BinExp(left,"::",collection),collOp,args),arg)
+                 end
+               end
+               BinExp[left,binOp,right] do
+                 @Case binOp of
+                   "." do
+                     self.walk(BinExp(BinExp(left1,"::",left),".",right),arg)
+                   end
+                   else super(op,left,right)
+                 end
+               end
+               Send[target,message,args] do
+                 self.walk(Send(BinExp(left,"::",target),message,args),arg)
+               end
+               else super(op,left,right,arg)
+             end
+           end
+        end
+        ";" do
+          Order(self.walk(left,arg),self.walk(right,arg))
+        end
+        ":=" do
+          let left1 = left;
+              binOp1 = op;
+              right1 = right
+          in @CaseObj left of
+                Var[name] do
+                  VarUpdate(left.name,self.walk(right,arg))
+                end
+                BinExp[left,binOp,right] do
+                  @CaseObj right of
+                    Var[name] do
+                      if binOp = "."
+                      then SlotUpdate(self.walk(left,arg),name,self.walk(right1,arg))
+                      else self.walk(update(self.walk(left1,arg),self.walk(right1,arg)),arg)
+                      end
+                    end
+                    Drop[exp] do
+                      if binOp = "."
+                      then SlotUpdate(self.walk(left,arg),Drop(self.walk(exp,arg)),self.walk(right1,arg))
+                      else self.walk(update(self.walk(left1,arg),self.walk(right1,arg)),arg)
+                      end
+                    end
+                    DropPattern[pattern] do
+                      if binOp = "."
+                      then SlotUpdate(self.walk(left,arg),DropPattern(self.walk(pattern,arg)),self.walk(right1,arg))
+                      else self.walk(update(self.walk(left1,arg),self.walk(right1,arg)),arg)
+                      end
+                    end
+                    else self.walk(update(self.walk(left1,arg),self.walk(right1,arg)),arg)
+                  end 
+                end
+                Path[root,names] do
+                  PathUpdate(Path(root,names),self.walk(right,arg))
+                end
+                else self.walk(update(self.walk(left,arg),self.walk(right,arg)),arg)
+              end
+          end
+        end
+        else super(op,left,right,arg)
+      end
+        
+    end
+    
+    @Operation walkNegate(exp,arg)
+      @CaseObj exp of
+        BinExp[left,binOp,right] do
+          @Case binOp of
+            ";" do
+              self.walk(BinExp(Negate(left),";",right),arg)
+            end
+            "and" do
+              self.walk(BinExp(Negate(left),"and",right),arg)
+            end
+            "andthen" do
+              self.walk(BinExp(Negate(left),"andthen",right),arg)
+            end
+            "or" do
+              self.walk(BinExp(Negate(left),"or",right),arg)
+            end
+            "orelse" do
+              self.walk(BinExp(Negate(left),"orelse",right),arg)
+            end
+          else super(exp,arg)
+          end
+        end
+        else super(exp,arg)
+      end
+    end
+
+  end 
+   
+context Root
+  @Operation resolve(exp)
+     Resolver().walk(exp,null)
+  end

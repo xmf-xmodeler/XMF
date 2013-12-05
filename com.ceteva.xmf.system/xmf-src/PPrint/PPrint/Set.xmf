@@ -1,0 +1,68 @@
+parserImport XOCL;
+parserImport Walkers;
+
+import Walkers;
+import Docs;
+import PPrint;
+  
+@Handler XCore::SetOfElement in PPrint(set,depth,encountered) 
+
+  // Try to print the elements of the set on a single line.
+  // If that fails then indent and print the elements on
+  // separate lines.
+  
+  // Sets do not have state therefore we can ignore encountered...
+  
+  let seq = set->asSeq then
+  
+      // Get the documents for each of the elements, truncate to the 
+      // current value of length if necessary...
+      
+      docs = seq->take(length.min(seq->size))->collect(e | self.dispatch(e,depth+1)) then
+      
+      // Add a comma after each of the documents as a separator...
+      
+      docs = if docs->isEmpty then Seq{} else docs->butLast->collect(d | Order(d,COMMA)) + Seq{docs->last} end then
+      
+      // The single line option...
+      
+      singleLine = docs->iterate(d l = NOTHING | Order(l,d));
+      
+      // The separate lines option - add newlines after each element (and comma)...
+      
+      nestedLine = Indent(2,docs->iterate(d l = Just("") | Order(l,Order(Newline(),d))))
+  in 
+     // Record the current level of indentation (newlines will auto-tab)...
+  
+     Mark(
+     
+       // Record the choice points for cut...
+       
+       Block(
+       
+         Order(
+         
+           // Display the Set{ token...
+           
+           SET,
+           
+           Order(
+           
+             // Try a single line, and fail to separate lines if necessary...
+             
+             Alt(singleLine,nestedLine),
+             
+             // However we get here, accept the output and throw away any
+             // choice points up to the recent Block...
+             
+             Cut(
+             
+               // If we truncated then print out '...' ...
+             
+               Just(if seq->size <> docs->size 
+                    then ",...}" 
+                    else "}" 
+                    end))))))
+  end     
+end;
+          

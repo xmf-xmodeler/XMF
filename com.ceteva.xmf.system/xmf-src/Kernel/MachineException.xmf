@@ -1,0 +1,68 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Machine Exceptions                              *
+ *                            ------------------                              *
+ *                                                                            *
+ *   A machine exception is thrown when the VM encounters an error. Ideally   *
+ *   the VM would throw an exception of an appropriate type when an error     *
+ *   occurs, but thos would require the VM to know about a whole host of      *
+ *   different types of exception. In stead the VM exceptions are encoded     *
+ *   using integers identifiers and the upper levels are left to translate    *
+ *   the id and VM data into exceptions of the appropriate type.              *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ // The VM encodes exceptions using the following identifiers...
+ 
+context MachineException
+   @Bind ERROR = 0 end
+   
+context MachineException
+   @Bind TYPE  = 1 end
+   
+context MachineException
+   @Bind UNBOUNDVAR = 2 end
+   
+context MachineException
+   @Bind INSTR = 3 end
+   
+context MachineException
+   @Bind MISSINGSLOT = 4 end
+   
+context MachineException
+   @Bind NAMESPACEERR = 5 end
+   
+context MachineException
+   @Bind ARGCOUNT = 6 end
+   
+context MachineException
+   @Bind GCERROR = 7 end
+   
+context MachineException
+   @Bind SAVEERR = 8 end
+   
+context MachineException
+   @Bind LOADERR = 9 end
+   
+context MachineException
+   @Bind NOKEY = 10 end
+   
+context MachineException
+   @Bind NOOPERATIONFOUND = 11 end
+   
+context MachineException
+   @Bind FOREIGNFUNERR = 12 end
+   
+context MachineException
+   @Bind INTERRUPT = 13 end
+   
+context MachineException
+   @Bind HASHTABLEGET = 14 end
+   
+context MachineException
+   @Bind ARRAYACCESS = 15 end
+   
+context MachineException
+   @Bind ALLOCERROR = 16 end

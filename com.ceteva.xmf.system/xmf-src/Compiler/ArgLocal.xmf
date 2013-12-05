@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                Local Variables that are Arguments                          *
+ *                ----------------------------------                          *
+ *                                                                            *
+ *  A specialization of Local that tags the entry in the compiler's variable  *
+ *  table as having arisen because the variable is an operation argument.     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+import Instrs;
+
+context Compiler
+
+  @Class ArgLocal extends Local
+      
+  end

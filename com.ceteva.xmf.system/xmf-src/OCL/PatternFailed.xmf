@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Pattern Failure                              *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  An exception that is raised when a pattern fails to match a value and when*
+ *  there are no alternative patterns to try.                                 *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context Exceptions
+
+  @Class PatternFailed extends Exception
+     
+    @Attribute pattern : Pattern end
+    @Attribute value   : Element end
+     
+    @Constructor(pattern,value) !
+       self.setBacktrace();
+       self.message := 
+         "The pattern " + pattern.pprint() + 
+         " failed to match " + value.toString()
+    end
+    
+  end

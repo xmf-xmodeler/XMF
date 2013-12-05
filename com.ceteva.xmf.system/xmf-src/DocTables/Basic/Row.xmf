@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Table Rows                                 *
+ *                            -------------------                             *
+ * A table contains a sequence of rows. Rows are just sequences of columns.   *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Row extends Entry
+
+    @Attribute cols : Seq(Entry) (?,!,+,-) end
+
+    @Constructor(cols) ! end
+    
+    @Operation contents()
+      cols
+    end
+
+  end

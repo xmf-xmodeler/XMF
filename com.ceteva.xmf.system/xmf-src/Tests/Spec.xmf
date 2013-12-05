@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+import XOCL;
+
+context Tests
+  @Class Spec extends Syntax
+    @Attribute pre : Operation (?) end
+    @Attribute body : Operation (?) end
+    @Attribute post : Operation (?) end
+    @Constructor(pre,body,post) ! end
+    
+    @Operation trace()
+      pre.trace();
+      body.trace();
+      post.trace()
+    end
+    
+    @Operation untrace()
+      pre.untrace();
+      body.untrace();
+      post.untrace()
+    end
+   
+  end

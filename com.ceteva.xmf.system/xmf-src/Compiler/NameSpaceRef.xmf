@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                  Variables Occurring as Name Space References              *
+ *                  --------------------------------------------              *
+ *                                                                            *
+ *  A bit arcane this one... When a variable occurs that can be resolved as a *
+ *  name-space reference via a parent name-space (for example one class       *
+ *  has an attribute type that is a class in the enclosing package) then the  *
+ *  reference can be resolved directly in the VM using the NAMESPACEREF       *
+ *  instruction. The instruction encodes the name to be referenced and the    *
+ *  number of enclosing owning name-spaces to be 'backed-up' through to get   *
+ *  to the owning name-space.                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+
+context Compiler
+
+  @Class NameSpaceRef extends Var
+      
+      @Attribute contour : Integer end
+    
+      @Constructor(name,contour) end
+      
+      @Operation inc():Var
+        NameSpaceRef(name,contour+1)
+      end
+       
+      @Operation ref()
+        Seq{Instrs::NameSpaceRef(Symbol(name),contour)}
+      end
+      
+    end  

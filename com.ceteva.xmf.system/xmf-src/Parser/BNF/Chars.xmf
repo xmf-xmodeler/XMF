@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Sequences of Characters                         *
+ *                            -----------------------                         *
+ *                                                                            *
+ *  This is a builtin non-terminal that is equivalent to Char*. It processes  *
+ *  all the remaining chars from the input until either EOF is encountered or *
+ *  the 'end' terminal is reached. The characters are reurned as a string.    *
+ *  Note, you might really mean Line which reads the rest of the line.        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser;
+import BNF;
+
+context BNF
+
+  @Class Chars extends Char
+	
+	@Operation toExp(FV:Set(String))
+	  [| Root::Parser::BNF::Chars() |]
+	end
+	
+  end

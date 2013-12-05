@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Walkers                                   *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  A Walker is an object that crawls over an XMF structure and dispatches to *
+ *  operations based on the type of the elements that are encountered. The    *
+ *  Walker package defines a basic class Walker that is used to define all the*
+ *  system walkers and that can be used as the basis for your own walkers. The*
+ *  dispatching performed by a walker is fairly efficient and is designed to  *
+ *  deal with cycles in the structure being walked. The Walkers package also  *
+ *  defines a variation called a dispatcher which is like a walker but        *
+ *  dispatches using a less efficient (but more extensible) mechanism.        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Package Walkers
+     
+  end 

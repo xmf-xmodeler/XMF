@@ -1,0 +1,101 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+context Attribute
+  @Operation deployEcore(out:OutputChannel,package:Package,path:String)
+  
+    // If the attribute has a simple type then an EAttribute is created
+    // otherwise an EReference is created...
+    
+    if self.isEAttribute()
+    then self.deployEAttribute(out,package,path)
+    else self.deployEReference(out,package,path)
+    end
+  end
+  
+context Attribute
+  @Operation deployEReference(out:OutputChannel,package:Package,path:String)
+  
+    // An EReference may have multiplicity 1 or -1 depending on whether
+    // it is atomic or not. The type may be local to the package or imported.
+    // If it is imported then the imported package may need to be
+    // deployed...
+    
+    @XML(out)
+      <eStructuralFeatures 
+        xsi:type="ecore:EReference"
+        name=name 
+        upperBound=(if self.hasAtomicType() then "1" else "-1" end)
+        eType=(self.ecoreEType(package,path))
+        containment="true"/>
+    end
+  end
+  
+context Attribute
+  @Operation deployEAttribute(out:OutputChannel,package:Package,path:String)
+    @XML(out)
+      <eStructuralFeatures 
+        xsi:type="ecore:EAttribute"
+        name=name 
+        eType=(self.ecoreEType(package,path))/>
+    end
+  end
+  
+context Attribute
+  @Operation isEAttribute():Boolean
+  
+    // True of the attribute has a simple type and false otherwise...
+    
+    @Case self.underlyingType() of
+      [String] do
+        true
+      end
+      [Symbol] do
+        true
+      end
+      [Integer] do
+        true
+      end
+      [Boolean] do
+        true
+      end
+      [Float] do
+        true
+      end
+      else false
+    end
+  end
+  
+context Attribute
+  @Operation ecoreEType(package:Package,path:String):String
+  
+    // Generate a string for the type of the attribute. If the type
+    // is simple then it is encoded in an EMF specific way. Otherwise
+    // the type is either local to the package or imported. Local
+    // types are encoded as #//NAME, imported types are generated
+    // via eCoreRef (which may cause the imported package to be deployed)...
+    
+    @Case self.underlyingType() of
+      [String] do
+        "ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+      end
+      [Symbol] do
+        "ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+      end
+      [Integer] do
+        "ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+      end
+      [Boolean] do
+        "ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+      end
+      [Float] do
+        "ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+      end
+      type do
+        if package.classes->includes(type)
+        then "#//" + type.name()
+        else type.eCoreRef(path)
+        end
+      end
+    end
+  end

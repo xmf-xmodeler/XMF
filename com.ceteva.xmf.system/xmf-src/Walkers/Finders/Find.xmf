@@ -1,0 +1,101 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+
+import Walkers;
+
+context Walkers
+
+  @Class Find extends Walker
+  
+    @Doc
+      An instance of this class can be used to find all element in a given XMF
+      value that satisfy the supplied predicate. To use this, construct with a 
+      single argument predicate and supply the root of the walk to the 'walk'
+      operation. The second argument to 'walk' may be an integer to limit the depth
+      of the walk or null for no limit.
+    end
+  
+    @Attribute predicate : Operation end      // An operation.
+    @Attribute results : Seq(Element) (+) end // The values that satisfy the predicate.
+    
+    @Constructor(predicate) !
+    end
+    
+    @Grammar extends OCL::OCL.grammar
+      Find ::= n = Name 'in' v = Exp 'when' p = Exp 'limit' l = (Exp | { [| 0-1 |] }) b = ('do' Exp | { OCL::Var(n) }) 'end' {
+        [| let walker = Walkers::Find(@Operation(<n>) <p> end) 
+           in walker.walk(<v>,<l>);
+              walker.results->collect(<n> | <b>)
+           end |] 
+      }.
+    end
+  
+    @Operation defaultWalk(e:Element,limit:Element):Element
+      null
+    end
+    
+    @Operation results()
+      results
+    end
+    
+    @Operation reWalk(v:Element,limit:Element):Element
+      null
+    end
+    
+    @Operation walk(element:Element,limit:Element):Element
+      if limit <> 0 and element <> self
+      then
+        if predicate(element)
+        then self.results := Seq{element|results}
+        end;
+        super(element,limit)
+      end
+    end
+    
+    @Operation walkBoolean(b:Boolean,limit:Element):Element 
+      null
+    end
+    
+    @Operation walkBuffer(b:Buffer,limit:Element):Element 
+      super(b,limit-1)
+    end
+     
+    @Operation walkInteger(i:Integer,limit:Element):Element 
+      null
+    end
+    
+    @Operation walkNull(limit:Element):Element 
+      null
+    end
+    
+    @Operation walkSeq(s:SeqOfElement,limit:Element):Element 
+      super(s,limit-1)
+    end
+     
+    @Operation walkSet(s:SetOfElement,limit:Element):Element 
+      super(s,limit-1)
+    end
+     
+    @Operation walkSlot(o:Object,s:String,value,limit:Element)
+      super(o,s,value,limit-1)
+    end
+    
+    @Operation walkString(s:String,limit:Element):Element 
+      null
+    end
+    
+    @Operation walkSymbol(s:Symbol,limit:Element):Element 
+      null
+    end
+    
+    @Operation walkTable(t:Table,limit:Element):Element
+      super(t,limit-1)
+    end
+    
+    @Operation walkVector(v:Vector,limit:Element):Element
+      super(v,limit-1)
+    end
+     
+  end
+     

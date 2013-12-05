@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                ZipFile Channels                            *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    A file that has been written using a ZipOutputChannel can be accessed   *
+ *    using a ZipFile. The input channel to the entries is created by         *
+ *   supplying the appropriate index into the zipped output.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class ZipFile
+  
+    @Attribute path : String (?) end
+    
+    @Constructor(path) ! end
+    
+    @Operation close()
+      Kernel_closeZipInputChannel(path)
+    end
+    
+    @Operation inputChannel(label:String):InputChannel
+      @Doc
+        Returns an input channel to the entry indexed by the
+        supplied label. The same entry may be indexed many
+        times in the same zip file.
+      end
+      let channel = Kernel_zipInputChannel(path,label)
+      in StandardInputChannel(channel)
+      end
+    end
+    
+  end

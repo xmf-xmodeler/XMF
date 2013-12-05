@@ -1,0 +1,431 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Attribute Definitions                           *
+ *                            ---------------------                           *
+ *                                                                            *
+ *   An attribute definition is represented as an instance of this class. The *
+ *   attribute definition contains all the information necessary to produce a *
+ *   run-time attribute. The attribute definition class provides the ops that *
+ *   produce the operation definitions corresponding to the modifiers. Note   *
+ *   that the modifier operations have properties that tag them as having     *
+ *   arisen from an attribute definition, this allows other tools to process  *
+ *   these operations specially if required.                                  *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context XOCL 
+
+  @Class Attribute extends Def
+   
+     // This class represents an attribute definition. Performing an
+     // attribute definition produces an attribute. An attribute definition
+     // consists of a name, the attribute type expression, some modifiers 
+     // and a documentation expression. Note that this is NOT an attribute
+     // an instance of this class is an attribute definition that desugars
+     // to code that produces an attribute...
+      
+      @Attribute meta       : Performable        end  // The metaclass (usually XCore::Attribute)
+      @Attribute type       : Performable        end  // The attribute type (as an expression)
+      @Attribute init       : Performable        end  // Any initialisation value.
+      @Attribute modifiers  : AttributeModifiers end  // The ?, !, +, -, ^ stuff.
+      @Attribute doc        : Performable        end  // Evaluates to a documentation instance.
+      @Attribute mult       : String = ""        end  // Ugly multiplicity string.
+      @Attribute properties : Seq(Element)       end  // Sequence of name/exp pairs.
+      
+      @Constructor(name,mult,type,modifiers,init,doc,meta,properties) end
+      
+      @Constructor(name,mult,type,modifiers,init,doc) ! end
+      
+      @Constructor(name,mult,type,init,modifiers) end
+      
+      @Constructor(name,type,modifiers) end
+      
+      @Constructor(name,type,doc) end
+      
+      @Constructor(name,type)
+        self.modifiers := AttributeModifiers(false,false,false,false)
+      end
+      
+      @Operation accessor():Seq(Operation) 
+      
+        // Produces a sequence of operations (either empty or
+        // a singleton) that implement the accessor operations.
+        // Note that an accessor has the same name as the attribute
+        // (instead of getA() which might have been preferrable)...
+        
+        if modifiers.accessor
+        then
+          if modifiers.guard
+          then
+            Seq{[|
+              @Operation <name>[ACCESSOR=true]()
+                if self.hasStructuralFeature(<StrExp(name)>)
+                then
+                  self.<name>
+                else
+                  <self.guardExp()>
+                end
+              end
+            |]}
+          else
+            Seq{[|
+              @Operation <name>[ACCESSOR=true]()
+                self.<name>
+              end
+            |]}
+          end
+        else Seq{}
+        end
+      end 
+      
+      @Operation add(element)
+        @TypeCase(element)
+          XCore::Doc do
+            format(stdout,"Use XOCL::Doc instead of XCore::Doc.~%")
+          end
+          XOCL::Doc do
+            self.doc := element
+          end
+          Seq(Element) do
+            @For e in element do
+              self.add(e)
+            end;
+            self
+          end
+          else self.error("I don't know how to add " + element.toString() + " to an attribute definition.")
+        end
+      end
+       
+      @Operation compile(env,frame,isLast,saveSource)
+      
+        // An attribute definition is translated to code that creates and
+        // initialises a new attribute object. The type must be delayed
+        // by translating it into an operation...
+        
+        self.desugar().setLine(line).compile(env.incNameSpaceRefs(),frame,isLast,saveSource)
+      end
+      
+      @Operation desugar()
+      
+        // Produce some code that will construct an XCore attribute at run-time.
+        // Although we are just creating an attribute, various factors make
+        // this complex: the class to instantiate may be a sub-class of Attribute,
+        // the type needs to be delayed in case it is a forward reference and
+        // error checking is placed around the type reference. Delaying a type
+        // reference is achieved by wrapping the reference in an operation and
+        // then calling the operation later on when the attribute is initialized...
+        
+        [| let type = 
+                 @Operation() 
+                   try
+                     <self.typeExp()> 
+                   catch(exception)
+                     throw Exceptions::AttributeTypeException(<name.lift()>,<self.typeExp().pprint().lift()>,exception)
+                   end
+                 end;
+               newAtt = <self.metaExp()>.new()
+           in type.owner := newAtt;
+              newAtt.set("name",XCore::Symbol(<StrExp(name)>));
+              newAtt.set("type",type);
+              newAtt.set("documentation",<self.doc()>);
+              newAtt.set("init",<self.initExp([| newAtt |])>);
+              <self.setIsComposite([| newAtt |])>;
+              <self.setProperties([| newAtt |])>;
+              <self.initSlotsExp([| newAtt |])>
+           end
+        |]
+      end   
+      
+      @Operation doc()
+        if doc = null
+        then [| null |]
+        else doc
+        end
+      end 
+      
+      @Operation eval(target,env,imports)
+      
+        // Evaluation should behave the same as compilation.
+        // The type of an attribute is delayed until the class
+        // is initialised...
+        
+        let class = self.metaExp().eval(target,env,imports) then
+            a = class(name,@Operation() type.eval(target,env,imports) end);
+            init = init
+        in a.setDoc(self.doc().eval(target,env,imports));
+           if init <> null
+           then a.init := @Operation() init.eval(a,env,imports) end
+           end;
+           @For property in properties do
+             a.setProperty(property->at(0),property->at(1).eval(target,env,imports))
+           end;
+           a
+        end
+      end
+
+      @Operation extender():Seq(Operation)
+      
+        // Produce extender operations if defined in the attribute
+        // modifiers...
+        
+        if modifiers.extender
+        then
+          if modifiers.guard
+          then
+            if modifiers.setOwner
+            then
+              Seq{[|
+                @Operation <"addTo" + name.upperCaseInitialLetter()>[EXTENDER=true](v)
+                
+                  // This operation sets the owner slot of a contained
+                  // element when it is added to the collection...
+                  
+                  if self.hasStructuralFeature(<StrExp(name)>)
+                  then
+                    if v.isReallyKindOf(XCore::Contained) then v.setOwner(self) end; 
+                    self.<name> := self.<name> ->including(v)
+                  else self
+                  end
+                end
+              |]}
+            else
+              Seq{[|
+                @Operation <"addTo" + name.upperCaseInitialLetter()>[EXTENDER=true](v)
+                
+                  // No ^ was specified in the modifiers...
+                  
+                  if self.hasStructuralFeature(<StrExp(name)>)
+                  then self.<name> := self.<name> ->including(v)
+                  else self
+                  end
+                end
+              |]}
+            end
+          else
+            if modifiers.setOwner
+            then
+              Seq{[|
+                @Operation <"addTo" + name.upperCaseInitialLetter()>[EXTENDER=true](v)
+                  if v.isReallyKindOf(XCore::Contained) then v.setOwner(self) end; 
+                  self.<name> := self.<name> ->including(v)
+                end
+              |]}
+            else
+              Seq{[|
+                @Operation <"addTo" + name.upperCaseInitialLetter()>[EXTENDER=true](v)
+                  self.<name> := self.<name> ->including(v)
+                end
+              |]}
+            end
+          end
+        else Seq{}
+        end 
+      end
+      
+      @Operation FV()
+        self.desugar().FV()
+      end
+
+      @Operation guardExp():Performable
+
+        // Returns the expression whose evaluation is returned by the accessor
+        // if the slot value does not exist. If a guard expression has been
+        // specified in the modifiers instance, then that is used, otherwise
+        // the initial value for the attribute is used...
+
+        if modifiers.guardExp = null
+        then
+          if init = null
+          then [| null |]
+          else init
+          end
+        else
+          modifiers.guardExp
+        end
+      end
+      
+      @Operation initExp(newAtt):Performable
+      
+        // Ensure that the init operation is owned by the attribute so
+        // that any name space references are resolved correctly...
+        
+        if init = null
+        then [| null |]
+        elseif self.isStatic()
+        then [| let value = <self.initValue()> then
+                    init = @Operation[value=value]() value end
+                in init.setOwner(<newAtt>);
+                   init
+                end
+             |]
+        else [| let init = @Operation() <init> end 
+                in init.setOwner(<newAtt>); 
+                   init
+                end 
+             |]
+        end
+      end
+      
+      @Operation isStatic():Boolean
+      
+        // The static keyword can be used when specifying the initial
+        // value of a slot. If used, it means that the value is created
+        // once and then shared between all slots arising from the
+        // attribute definition (like static in Java)...
+        
+        init.isKindOf(IntExp) or
+        init.isKindOf(BoolExp) or
+        (init.isKindOf(BinExp) andthen init.left.isKindOf(IntExp) and init.right.isKindOf(IntExp)) or
+        init.isKindOf(StrExp) or
+        (init.isKindOf(Apply) andthen (init.operator.isKindOf(Var) andthen init.operator.name = "static"))
+      end
+      
+      @Operation initSlotsExp(newAtt:Performable):Performable
+        newAtt
+      end
+      
+      @Operation initValue()
+        if init.isKindOf(Apply) andthen (init.operator.isKindOf(Var) andthen init.operator.name = "static")
+        then init.args->at(0)
+        else init
+        end
+      end
+      
+      @Operation lift():Performable
+        Element::lift.invoke(self,Seq{})
+      end
+      
+      @Operation maxLocals():Integer
+        self.desugar().maxLocals()
+      end
+      
+      @Operation metaExp():Performable
+      
+        // the attribute may have been declared to be an instance of
+        // something other than XCore::Attribute...
+        
+        if meta = null
+        then [| XCore::Attribute |]
+        else meta
+        end
+      end
+      
+      @Operation operations():Seq(Operation)
+      
+        // get all the operations that arise from the attribute
+        // definition and its modifiers...
+        
+        self.accessor() + 
+        self.updater() + 
+        self.extender() + 
+        self.reducer()
+      end
+
+      @Operation pprint(out,indent)
+        format(out,"@Attribute ~S : ",Seq{name});
+        type.pprint(out,indent);
+        modifiers.pprint(out);
+        format(out," end")
+      end
+
+      @Operation reducer():Seq(Operation)
+        if modifiers.reducer
+        then
+          if modifiers.guard
+          then
+            Seq{[|
+              @Operation <"deleteFrom" + name.upperCaseInitialLetter()>[REDUCER=true](v)
+                if self.hasStructuralFeature(<StrExp(name)>)
+                then
+                  self.<name> := self.<name> ->excluding(v)
+                else
+                  self
+                end
+              end
+            |]}
+          else
+            Seq{[|
+              @Operation <"deleteFrom" + name.upperCaseInitialLetter()>[REDUCER=true](v)
+                self.<name> := self.<name> ->excluding(v)
+              end
+            |]}
+          end
+        else Seq{}
+        end 
+      end
+      
+      @Operation setIsComposite(newAtt)
+        if modifiers.setOwner
+        then [| <newAtt>.isComposite := true |]
+        else [| null |]
+        end
+      end
+      
+      @Operation setProperties(newAtt)
+        properties->iterate(pair exp = newAtt  | 
+          [| <exp>.setProperty(<pair->at(0).lift()>,<pair->at(1)>) |])
+      end
+      
+      @Operation typeExp():Performable
+        if mult = "" or mult = "!"
+        then type
+        elseif mult = "*" or mult->asSeq->includes("."->at(0))
+        then [| Set(<type>) |]
+        else [| Seq(<type>) |]
+        end
+      end
+
+      @Operation updater():Seq(Operation)
+        if modifiers.updater
+        then
+          if modifiers.guard
+          then
+            if modifiers.setOwner
+            then
+              Seq{[|
+                @Operation <"set" + name.upperCaseInitialLetter()>[UPDATER=true](v)
+                  if self.hasStructuralFeature(<StrExp(name)>)
+                  then
+                    if v.isReallyKindOf(XCore::Contained) then v.setOwner(self) end; 
+                    self.<name> := v
+                  else self
+                  end
+                end
+              |]}
+            else
+              Seq{[|
+                @Operation <"set" + name.upperCaseInitialLetter()>[UPDATER=true](v)
+                  if self.hasStructuralFeature(<StrExp(name)>)
+                  then self.<name> := v
+                  else self
+                  end
+                end
+              |]}
+            end
+          else
+            if modifiers.setOwner
+            then
+              Seq{[|
+                @Operation <"set" + name.upperCaseInitialLetter()>[UPDATER=true](v)
+                  if v.isReallyKindOf(XCore::Contained) then v.setOwner(self) end; 
+                  self.<name> := v
+                end
+              |]}
+            else
+              Seq{[|
+                @Operation <"set" + name.upperCaseInitialLetter()>[UPDATER=true](v)
+                  self.<name> := v
+                end
+              |]}
+            end
+          end
+        else Seq{}
+        end 
+      end
+      
+    end 

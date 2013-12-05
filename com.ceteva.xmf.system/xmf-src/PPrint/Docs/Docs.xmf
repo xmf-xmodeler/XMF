@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+context Root
+
+@Package Docs
+
+  @Operation above(docs)
+    if docs->isEmpty
+    then Just("")
+    elseif docs->tail->isEmpty
+    then docs->head
+    else 
+      Order(docs->head,Order(Newline(),above(docs->tail)))
+    end
+  end
+  
+  @Operation canPrint(text,w,r,pl,pr)
+    pl + text->size < w and
+    pr + text->size < r
+  end
+  
+  @Operation emit(s,b,i)
+    @Count x from i to i + s->size do
+      b.put(x,s->at(x - i))
+    end
+  end
+  
+  @Operation emitSpaces(spaces,buffer,index)
+    @Count x from index to index + spaces do
+      buffer.put(x," "->at(0))
+    end
+  end
+  
+  @Operation newline(tab,buffer,index)
+    buffer.put(index,"\n"->at(0));
+    emitSpaces(tab,buffer,index+1)
+  end
+  
+  @Operation spaces(n)
+    formats("~V",Seq{n})
+  end
+  
+end

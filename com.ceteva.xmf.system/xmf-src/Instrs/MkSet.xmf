@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Creating a Set                                 *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Same as MKSEQ except that the values on the stack are popped and turned   *
+ *  into a set that is pushed back on the stack.                              *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class MkSet extends Instr
+  
+    @Attribute size : Integer end
+    
+    @Constructor(size) end
+    
+    @Operation toString():String
+      "<MkSet " + size + ">"
+    end
+    
+    @Operation operands():Integer
+      size
+    end
+    
+  end

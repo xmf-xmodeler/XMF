@@ -1,0 +1,71 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         The Object Command Language                        *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  The OCL package contains the abstract syntax classes for the OCL language *
+ *  which is based on the OMG standard Object Constraint language.            *
+ *  The Object Command Language is the core language used to implement the    *
+ *  XMF system and to compile onto the XMF machine. It is not the only        *
+ *  language that can do so but the VM instructions have been designed to     *
+ *  support it.                                                               *
+ *                                                                            *
+ *  The Object Command Language is implemented in itself using the XCore      *
+ *  classes and a compiler/interpreter written in XOCL. The difference        *
+ *  between XOCL and OCL on XMF is that XOCL contains many syntax definitions *
+ *  that are just sugar over the OCL constructs. For example, it is not       *
+ *  necessary to define classes using @Class ... end as provided by XOCL, but *
+ *  it is more convenient.                                                    *
+ *                                                                            *
+ *  XMF OCL borrows many constructs from the OMG OCL language. Particularly,  *
+ *  the collection processing language constructs, select, collect etc.       *
+ *  XMF OCL differs in that it is an imperative language (with side effects)  *
+ *  and has many more language constructs than OMG OCL.                       *
+ *                                                                            *
+ *  The concrete syntax of XMF OCL is defined elsewhere.                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context Root
+
+  @Package OCL
+   
+    @Class OCL isabstract extends Performable
+    
+      // The OCL class is the root of the OCL AST class hierarchy. Note
+      // that this class is not the root of the XMF class hierarchy for
+      // abstract syntax constructs (i.e. things that can be performed).
+      // That class is XCore::Performable; OCL is a sub-class of Performable.
+    
+      @Operation pprint()
+        self.pprint(0)
+      end
+    
+      @Operation pprint(indent)
+      
+        // Pretty prints the receiver to a string.
+        
+        let out = StringOutputChannel()
+        in self.pprint(out,indent);
+           out.getString()
+        end
+      end
+    
+      @AbstractOp pprint(out,indent):Element
+      
+        @Doc
+          To pprint an OCL expression produces its concrete source code representation
+          in the output channel. The indent argument is used to control the current 
+          level of indentation. It is the column to tab to after a newline while
+          pprinting the receiver.
+        end
+        
+      end
+      
+    end
+    
+  end

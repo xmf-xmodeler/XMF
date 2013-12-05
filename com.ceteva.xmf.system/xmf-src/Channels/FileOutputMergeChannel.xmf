@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          File Output Merge Channels                        *
+ *                          --------------------------                        *
+ *                                                                            *
+ *      A FileOutputMergeChannel remembers the contents of the                *
+ *      original file (if the file already existed).  This is                 *
+ *      useful for merging the contents of a file with new                    *
+ *      data                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class FileOutputMergeChannel extends FileOutputChannel
+  
+    @Attribute oldcontents : String end
+    
+    @Operation init(args)
+      let file = args->at(0)
+      in
+        self.readFile(file);
+        super(args)
+      end
+    end
+     
+    @Operation readFile(file:String)
+      if file.fileExists()
+      then
+        let inch = FileInputChannel(file)
+        in
+          self.oldcontents := inch.asString();
+          inch.close()
+        end
+      end
+    end  
+  
+  end

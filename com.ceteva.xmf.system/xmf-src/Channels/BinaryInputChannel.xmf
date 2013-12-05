@@ -1,0 +1,59 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Binary Input Channels                         *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    Compiled XMF code is generally saved in a .o file and loaded using      *
+ *    the String::loadBin operation. However, it is possible to read the      *
+ *    binary data from a source other than a file. This input channel         *
+ *    connects to any input source via an underlying input channel, reads the *
+ *    binary data and then executes the binary (just as loadBin does).        *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class BinaryInputChannel extends InputChannel
+  
+    @Doc
+      Allows binary code to come from a variety of sources.
+    end
+  
+    @Attribute input : InputChannel end
+    
+    @Constructor(input) ! 
+    end
+    
+    @Operation channel()
+      input.channel()
+    end
+    
+    @Operation close()
+      input.close()
+    end
+    
+    @Operation eof() 
+      input.close()
+    end
+    
+    @Operation peek():Integer
+      input.peek()
+    end
+    
+    @Operation read():Integer
+       input.read()
+    end
+    
+    @Operation readBinary()
+      Kernel_loadbin(self.channel())
+    end
+    
+    @Operation setChannel(channel)
+      input.setChannel(channel)
+    end
+    
+  end

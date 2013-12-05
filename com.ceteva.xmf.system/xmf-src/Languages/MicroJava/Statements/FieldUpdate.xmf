@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Statements;
+import Expressions;
+
+context Statements
+
+  @Class FieldUpdate extends Statement
+  
+    @Attribute object : JExp    (?) end
+    @Attribute name   : String  (?) end
+    @Attribute value  : JExp    (?) end
+    
+    @Constructor(object,name,value) ! end
+  
+    @Operation pprint(out,indent)
+      object.pprint(out);
+      format(out,".~S = ",Seq{name});
+      value.pprint(out);
+      format(out,";") 
+    end
+    
+    @Operation toXOCL():Operation
+      @Operation(next:Performable):Performable
+        [| <object.toXOCL()>.<name> := <value.toXOCL()>;
+           <next>
+        |]
+      end
+    end
+    
+  end

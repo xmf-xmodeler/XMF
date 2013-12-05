@@ -1,0 +1,118 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class Type extends Enum
+  
+    // A type definition is essentially an enumerated type
+    // with some modifications. A type may be parametric
+    // whereas an enumerated type may not. A type cannot have
+    // atomic name member instances whereas an enumerated type 
+    // can.
+    
+    @Attribute args : Seq(String) (!) end
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      Type ::= 
+      
+        // A name...
+      
+        n = Name e = { Type(n) } 
+        
+        // The arguments...
+        
+        as = (Args | { Seq{} })
+        
+        // ... followed by elements that define the
+        // enumerated type...
+        
+        TypeElements^(e)
+        
+        // Followed by anything that a class can have...
+        
+        'end' 
+        
+        { e.setArgs(as) }.
+        
+        TypeElements(e) ::=
+        
+          TypeElement^(e) ('|' TypeElement^(e))*
+          
+        | { null }.
+
+      TypeElement(e) ::= 
+      
+        // Each element is named...
+        
+        n = Name AddTypeElement^(e,n).
+        
+      AddTypeElement(e,n) ::= 
+        
+        '(' ps = OptTypePaths ')' { e.addToClasses(Seq{n|ps}) }
+        
+      | { e.addToClasses(Seq{n}) }.
+        
+      OptTypePaths ::=
+      
+        TypePaths 
+        
+      | { Seq{} }.
+
+      TypePaths ::= 
+      
+        p = TypeExp
+        
+        ps = (',' TypeExp)* 
+        
+        { Seq{p|ps} }.
+      
+    end
+    
+    @Operation desugar() 
+    
+      // If the type is parametric then construct an operation 
+      // with the appropriate name that consistently produces
+      // the same enumerated type for the supplied argument types.
+      // Otherwise just produce the enumerated type as before...
+      
+      if args->isEmpty
+      then super()
+      else
+        [| let types = Seq{}
+           in @Letrec <name> =
+                 @Operation<name>(.typeArgs:Seq(Classifier))
+                   if typeArgs->size = <args->size.lift()>
+                   then 
+                     <(0.to(args->size - 1))->iterate(index x = 
+                       [| @Find(type,types)
+                            when type->head.zip(typeArgs)->forAll(pair | pair->head = pair->tail)
+                            do type->tail
+                            else 
+                              let type = XCore::Enum(<name.lift()>)
+                              in types := types->including(Seq{typeArgs | type});
+                                 <exps->iterate(e x = 
+                                   self.classes()->iterate(c x =
+                                     names->iterate(n x = [| type |] | 
+                                       [| <x>.addName(<n.lift()>) |]) |
+                                         [| <x>.addClass(<c->head.lift()>,<self.desugarTypeArgs(c->tail)>) |]) |
+                                            [| <x>.add(<e>) |])>
+                              end
+                          end
+                        |] | [| let <args->at(index).name> = typeArgs->at(<index.lift()>)
+                                in <x>
+                                end
+                             |])>
+                   end
+                 end
+              in <Var(name)>
+              end
+           end
+         |]
+       end
+     end
+    end

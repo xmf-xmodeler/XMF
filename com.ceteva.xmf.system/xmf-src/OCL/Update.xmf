@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                     Update                                 *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  Given a location and a value, work out how to represent the update.       *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+  @Operation update(location:Performable,value:Performable):Performable
+  
+    // This is a utility operation that can be used to create the right
+    // type of update expression based on a location and a value...
+    
+    @TypeCase(location)
+      Var         do VarUpdate(location.name,value) end
+      Dot         do SlotUpdate(location.target,location.name,value) end
+      Path        do PathUpdate(location,value) end
+      Drop        do VarUpdate(location,value) end
+      DropPattern do VarUpdate(location,value) end
+      CollExp     do
+        @Case location.collOp of 
+          "head" do HeadUpdate(location.collection,value) end
+          "tail" do TailUpdate(location.collection,value) end
+          else throw UpdateLocationError(location,value)
+        end
+      end
+      else throw UpdateLocationError(location,value)
+    end
+  end 

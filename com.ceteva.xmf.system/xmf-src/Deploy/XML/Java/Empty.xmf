@@ -1,0 +1,10 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Empty
+  @Operation toJava(out:OutputChannel)
+    format(out,"    empty = new Empty();~%");
+    format(out,"    stack.push(empty);~%")
+  end

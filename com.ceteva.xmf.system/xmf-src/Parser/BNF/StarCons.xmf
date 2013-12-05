@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Repetition - Zero or More                         *
+ *                          -------------------------                         *
+ *                                                                            *
+ *  A Star recognizer has a parser that recognizes input tokens. When the     *
+ *  Star is processed by the parsing machine, the parser can succeed 0 or more*
+ *  times. The parser will be greedy and try to consume the input as many     *
+ *  times as possible. The sequence of synthesized values is returned. So if  *
+ *  this succeeds 0 times the value returned is Seq{}.                        *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class StarCons extends Recognizer
+   	
+   	@Attribute parser : Recognizer end
+   	@Attribute values : Seq(Element) end
+    
+    @Constructor(parser) end
+   	
+   	@Operation code(outputChannel)
+      parser.code(outputChannel);
+      format(outputChannel,"* ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+	
+	@Operation setOwner(owner)
+      parser.setOwner(owner)
+    end
+	
+	@Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::StarCons(<parser.toExp(FV)>) |]
+    end
+	
+	@Operation transform(FV:Set(String),grammar):Recognizer
+      self.parser := parser.transform(FV,grammar)
+    end
+	
+  end

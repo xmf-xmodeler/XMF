@@ -1,0 +1,95 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import Languages;
+import MicroJava;
+import Expressions;
+
+context Expressions
+ 
+   @Class JExp isabstract extends Syntax
+   
+     @Grammar 
+     
+       JExp ::= JAssign.
+       
+       JAssign ::= n = Name '=' e = JBool { Update(n,e) } | JBool.
+       
+       JBool ::= e = JBit JBoolTail^(e).
+       
+       JBoolTail(e) ::= op = BoolOp e2 = JBit e = { BinExp(e,op,e2) } JBoolTail^(e) | { e }.
+       
+       BoolOp ::= '&&' { "&&" } | '||' { "||" }.
+       
+       JBit ::= e = JEql JBitTail^(e).
+       
+       JBitTail(e) ::= op = BitOp e2 = JEql e = { BinExp(e,op,e2) } JBitTail^(e) | { e }. 
+       
+       BitOp ::= '&' {"&" } | '|' { "|" }.
+       
+       JEql ::= e = JCmp JEqlTail^(e).
+       
+       JEqlTail(e) ::= op = EqlOp e2 = JCmp e = { BinExp(e,op,e2) } JEqlTail^(e) | { e }.
+       
+       EqlOp ::= '==' { "==" }| '!=' { "!=" }.
+       
+       JCmp ::= e = JArith JCmpTail^(e).
+       
+       JCmpTail(e) ::= op = CmpOp e2 = JArith e = { BinExp(e,op,e2) } JCmpTail^(e) | { e }.
+       
+       CmpOp ::= '>' { ">" } | '>=' { ">=" } | '<' { "<" } | '<=' { "<=" }.  
+       
+       JArith ::= e = JDot JArithTail^(e).
+       
+       JArithTail(e) ::= op = ArithOp e2 = JDot e = { BinExp(e,op,e2) } JArithTail^(e) | { e }.
+       
+       ArithOp ::= '+' { "+" } | '-' { "-" } | '*' { "*" } | '/' { "/" }.
+       
+       JNavigate ::= e = JCast JNavigateTail^(e).
+       
+       JNavigateTail(e) ::= '.' n = Name e = { FieldRef(e,n) } JNavigateTail^(e) | { e }.
+       
+       JDot ::= e = JCast JDotTail^(e).
+       
+       JDotTail(e) ::= '.' n = Name JDotNameTail^(e,n) | {e}.
+       
+       JDotNameTail(e,n) ::= a = JArgs e = { Send(e,n,a) } JDotTail^(e) | e = { FieldRef(e,n) } JDotTail^(e).
+       
+       JArgs ::= '(' es = (JExps | { Seq{} }) ')' { es }.
+       
+       JExps ::= e = JExp es = (',' JExp)* { Seq{e | es} }.
+       
+       JCast ::= '(' p = JPath ')' a = JAtom { Cast(p,a) } | JAtom.
+       
+       JAtom ::= JBoolean | JInt | JFloat | JString | JNew | JVar | JSend | JThis | '(' JExp ')'.
+       
+       JBoolean ::= 'true' { Boolean(true) } | 'false' { Boolean(false) }.
+       
+       JInt ::= i = Int { (Expressions.getElement("Int"))(i) }.
+       
+       JFloat ::= f = Float { (Expressions.getElement("Int"))(f) }.
+       
+       JString ::= s = Str { JString(s) }.
+       
+       JNew ::= 'new' p = JPath (as = JArgs { New(p,as) } | '[' e = JExp ']' { New(p,Seq{}) }).
+       
+       JThis ::= 'this' { This() }. 
+       
+       JPath ::= n = Name ns = ('.' Name)* { Seq{n | ns} }.
+       
+       JVar ::= name = Name { Var(name) }.
+       
+       JSend ::= name = Name args = JArgs { Send(null,name,args) }.
+       
+     end
+     
+     @AbstractOp pprint(out) end
+     
+     @Operation pprint(out,indent)
+       self.pprint(out)
+     end
+     
+   end
+   
+   

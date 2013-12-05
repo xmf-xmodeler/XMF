@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Local Variable References                        *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Local variables are referenced with respect to the current stack frame.   *
+ *  The grammar compilation process replaces names with indices. This         *
+ *  instruction represents a clause action that consists of a single local    *
+ *  variable reference.                                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class VarRef extends Recognizer
+  
+    @Attribute name  : String  end
+    @Attribute index : Integer end
+    
+    @Constructor(name,index) end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp()
+      self.lift()
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

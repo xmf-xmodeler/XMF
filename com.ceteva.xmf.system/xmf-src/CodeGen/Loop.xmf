@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Code Generation Loops                             *
+ *                          ----------------------                            *
+ *                                                                            *
+ *    Code dropped into a code generator returns null if it does not want the *
+ *    return result to be emitted as code. @For-loops return true so this     *
+ *    definition can be used to force a null return.                          *
+ *                                                                            *
+ ******************************************************************************/
+
+import XOCL;
+
+context CodeGen 
+  @Class Loop extends For
+    @Grammar extends For.grammar
+      Loop ::= f = For { [| <f>; null |] }.
+    end
+  end

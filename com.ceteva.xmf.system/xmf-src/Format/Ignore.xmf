@@ -1,0 +1,16 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~]                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    This control character is ignored.                                      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleIgnore =
+     @Operation(char,output,formatContext)
+       output
+     end
+in format.defineHandler("]"->at(0),handleIgnore)
+end;
+     

@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Division                                *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  Pops n2 and then n1 and pushes n1/n2. The VM handles numbers. Other data  *
+ *  types call the div/1 operation on n1.                                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Div extends Instr
+    
+  end

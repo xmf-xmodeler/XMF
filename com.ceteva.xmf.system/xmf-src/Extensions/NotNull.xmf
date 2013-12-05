@@ -1,0 +1,63 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+import XOCL;
+
+context XOCL
+
+  @Class NotNull extends Sugar
+  
+    // This class implements a simple construct guards against 
+    // a null reference in a message send or a slot reference.
+    // Place [ and ] around a leading expression that might be
+    // null follows by . and a slot reference or a message. The
+    // construct includes an error action for the situation when
+    // the expression is null...
+    
+    @Attribute exp       : String (?,!)      end
+    @Attribute name      : String (?,!)      end
+    @Attribute isMessage : Boolean (?,!)     end
+    @Attribute args      : Seq(Performable)  end
+    @Attribute error     : Performable (?,!) end
+    
+    @Constructor(exp,name,error) ! end
+    
+    @Constructor(exp,name,args,error) 
+      self.isMessage := true
+    end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      NotNull ::= '[' e = Exp ']' '.' n = Name NotNullTail^(e,n) 'end'.
+      
+      NotNullTail(e,n) ::= 
+        '(' as = NotNullArgs ')' x = NotNullElse { NotNull(e,n,as,x) }
+      | x = NotNullElse { NotNull(e,n,x) }.
+      
+      NotNullArgs ::=
+        e = Exp es = (',' Exp)* { Seq{e|es} }
+      | { Seq{} }.
+      
+      NotNullElse ::=
+        'else' Exp 
+      | { [| null |] }.
+      
+    end
+    
+    @Operation desugar():Performable
+      [| let notNullValue = <exp>
+         in if notNullValue = null
+            then <error>
+            else <if isMessage
+                  then Send([| notNullValue |],name,args)
+                  else [| notNullValue.<name> |]
+                  end>
+            end
+         end
+      |]
+    end
+    
+  end
+      
+        

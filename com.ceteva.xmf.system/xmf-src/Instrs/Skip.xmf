@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Skip a Few Instructions                           *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Skips forward a number of instructions. The compiler uses labels to       *
+ *  establish markers in the compiled code. The assembler then replaces the   *
+ *  label names with numeric offsets. This instruction encodes the offset as  *
+ *  an operand. Executable code in the VM is held in code vectors and the     *
+ *  current call frame contains a code pointer into the current code vector.  *
+ *  This instruction updates the code pointer in the current call frame.      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Skip extends Instr
+  
+    @Attribute offset : Integer (?,!) end
+    @Attribute targetLabel : String (?,!) end
+    
+    @Constructor(targetLabel) end
+    
+    @Operation toString():String
+      "<Skip " + targetLabel + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end

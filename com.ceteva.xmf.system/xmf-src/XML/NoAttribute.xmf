@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Cannot Find Attribute                         *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    An attribute is requested during the parse of an XML input source where *
+ *    the attribute does not exist in the input.                              *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context XML
+
+  @Class NoAttribute extends Exception
+  
+    @Operation init(Seq{element,name})
+      self.message := element.toString() + " has no attribute named " + name
+    end
+    
+  end

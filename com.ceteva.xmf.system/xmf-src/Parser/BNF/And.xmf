@@ -1,0 +1,65 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Conjunctions                                *
+ *                               -------------                                *
+ *                                                                            *
+ *  A conjunction is processed by the parsing machine by first processing the *
+ *  left and then the right. Grammar compilation translates out all And's by  *
+ *  flattening them into a sequence.                                          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class And extends Recognizer
+    
+    @Attribute left  : Recognizer end
+    @Attribute right : Recognizer end
+    
+    @Constructor(left,right) end
+    
+    @Operation cnf(grammar):Seq(Seq(Recognizer))
+    
+      // Produce the cross-product of the two normal
+      // forms from the left and right recognizers...
+      
+      let lefts = left.cnf(grammar);
+          rights = right.cnf(grammar)
+      in lefts->iterate(left C = Seq{} | 
+         rights->iterate(right C = C | C->including(left + right)))
+      end
+    end
+    
+    @Operation code(outputChannel)
+      left.code(outputChannel);
+      format(outputChannel," ");
+      right.code(outputChannel)
+    end
+    
+    @Operation FV():Set(String)
+      left.FV()->union(right.FV())
+    end
+    
+    @Operation setOwner(owner)
+      left.setOwner(owner);
+      right.setOwner(owner)
+    end
+    
+    @Operation terminals():Set(String)
+      left.terminals()->union(right.terminals())
+    end
+    
+    @Operation toExp(FV:Set(String)):Performable
+      [| Root::Parser::BNF::And(<left.toExp(FV)>,<right.toExp(FV->union(left.FV()))>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      And(left.transform(FV,grammar),right.transform(FV->union(left.FV()),grammar))
+    end
+    
+  end

@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Throwing Exceptions                          *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  An exception is thrown to the most recently established try using a throw *
+ *  expression. The expression should evaluate to an exception object. The    *
+ *  call chain in the VM is unbound to the most recently established try-     *
+ *  expression. The catch clause in the try expression is then performed with *
+ *  the argument of the catch bound to the thrown exception.                  *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Throw extends OCL::OCL
+     
+     @Attribute exp : Performable end
+     
+     @Constructor(exp) ! end
+     
+     @Constructor(line,exp) end
+    
+     @Operation pprint(out,indent)
+       format(out,"throw ");
+       exp.pprint(out,indent)
+     end
+     
+   end

@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Variable Updates                            *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A variable update causes the location denoted by the name to be modified  *
+ *  to contain a new value. Local variables and closed-in variables can be    *
+ *  modified in this way. Dynamic variables must be modified with respect to  *
+ *  a specified name-space.                                                   *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class VarUpdate extends OCL::OCL
+    
+    @Attribute name  : String      end
+    @Attribute value : Performable end
+    
+    @Constructor(name,value) ! end
+    
+    @Operation pprint(out,indent)
+      let nameString = if name.isKindOf(Drop) or name.isKindOf(DropPattern) then name.pprint() else name end
+      in format(out,"~S := ~S",Seq{nameString,value.pprint(indent + nameString->size + 4)})
+      end
+    end
+    
+  end

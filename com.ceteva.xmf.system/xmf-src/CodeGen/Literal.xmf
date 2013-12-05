@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+import CodeGen;
+
+context CodeGen
+
+  @Class Literal extends CodeElement
+  
+    @Attribute chars : String (?) end
+    
+    @Constructor(chars) ! end
+    
+    @Operation desugar(path:String,lstart,lend,dstart,dend,estart,eend,out:Performable,level):Performable
+      [| format(<out>,"~S",Seq{<OCL::StrExp(chars)>}) |]
+    end
+    
+    @Operation dropString(path:String,out,lstart,lend,dstart,dend,estart,eend,level):String
+      if level = 0
+      then chars.subst("end","e_nd",true)
+      else chars.subst("e_nd","end",true)
+      end
+    end
+  
+  end

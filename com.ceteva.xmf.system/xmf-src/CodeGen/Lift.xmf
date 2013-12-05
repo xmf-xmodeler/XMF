@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+import CodeGen;
+
+context CodeGen
+
+  @Class Lift extends CodeElement
+  
+    @Attribute margin : Integer end
+    
+    @Constructor(margin,elements) ! end
+  
+    @Operation desugar(path:String,lstart:String,lend:String,dstart:String,dend:String,estart:String,eend:String,out:Performable,level):Performable
+      
+      // Desugar the lifted elements. Lifting an element produces code,
+      // each code element will produce some string output when it is
+      // executed...
+      
+      elements->iterate(e code = [| null |] |
+          [| <code>; 
+          
+             // Add 1 to the level of nesting...
+             
+             <e.desugar(path,lstart,lend,dstart,dend,estart,eend,out,level+1)> 
+          |])
+    end
+    
+    @Operation dropString(path:String,out,lstart,lend,dstart,dend,estart,eend,level):String
+    
+      // Dropping a lift with respect to the level of nesting. If the
+      // level is 0 then the lift and drop cancel out and we produce the
+      // code as a string (ready to splice into surrounding code)...
+      
+      if level = 0  
+      then
+        "@"+path+"(" + out.pprint() + "," + margin + ") " + elements->iterate(e s = "" | s + e.dropString(path,out,lstart,lend,dstart,dend,estart,eend,level+1)) + " end"
+      else 
+        lstart + elements->iterate(e s = "" | s + e.dropString(path,out,lstart,lend,dstart,dend,estart,eend,level+1)) + lend
+      end
+    end
+  
+  end

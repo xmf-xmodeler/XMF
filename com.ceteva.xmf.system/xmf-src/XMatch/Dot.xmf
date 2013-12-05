@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Match a Single Character                           *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  A '.' matches asingle character in the input string and fails if the end  *
+ *  of the input has been reached. Use .* to match any number of input        *
+ *  characters.                                                               *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Dot extends Pattern
+  
+    @Operation match(chars,env,stack,succ,fail)
+      if chars->isEmpty
+      then fail()
+      else succ(chars->tail,env,Seq{Seq{chars->at(0)} | stack},fail)
+      end
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver...
+      
+      Set{}
+    end
+    
+  end

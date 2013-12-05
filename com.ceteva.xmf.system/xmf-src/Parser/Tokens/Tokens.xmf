@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Tokenizing                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   The XMF tokenizer consumes input from an input channel and returns       *
+ *   tokens of predefined types. The Tokenizer class is not programmable:     *
+ *   you cannot give it a model of tokens that it processes against the input.*
+ *   However, you can extend this class and generate your own token types if  *
+ *   you wish.                                                                *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Parser
+
+  @Package Tokens
+  
+  end

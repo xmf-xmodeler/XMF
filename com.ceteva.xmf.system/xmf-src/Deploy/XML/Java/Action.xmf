@@ -1,0 +1,9 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+
+context Action
+  @Operation toJava(out:OutputChannel)
+    self.error("Cannot deploy an action to Java - use commands.")
+  end          

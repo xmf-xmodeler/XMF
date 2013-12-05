@@ -1,0 +1,101 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Units of Compilation                             *
+ *                           --------------------                             *
+ *                                                                            *
+ *  A unit of compilation is a file that contains source code. The unit of    *
+ *  compilation is created by parsing the file and results in some imports    *
+ *  and a sequence of expressions (mostly definitions). A unit of compilation *
+ *  is translated to a sequence of machine instructions wrapped up in a code  *
+ *  box. The resulting code box can then be serialized to a file or translated*
+ *  directly to a VM code box and executed. Essentially a binary file is an   *
+ *  operation that is called when the file is loaded. The body of the         *
+ *  operation is the contents of the file.                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Assembler;
+import IO;
+import Compiler; 
+
+context CompilationUnit
+  @Operation compileFile(fileName:String,saveSource:Boolean)
+    self.compileFile(fileName,saveSource,false)
+  end
+  
+context CompilationUnit    
+  @Operation compileFile(fileName:String,saveSource:Boolean,verbose:Boolean)
+  
+    // The main entry point for compilation of a compilation unit.
+    // The verbose flag is used to print out information describing
+    // the time taken for the various compiler phases...
+    
+    let objectFile = fileName + ".o";
+        orderedExps = self.foldExps(); 
+        env = self.env(); 
+        time1 = Time() then
+        instrs = orderedExps.compile(env,0,true,saveSource) + Seq{Instrs::Return()} then
+        time2 = Time();
+        locals = orderedExps.maxLocals() then
+        codeBox = assemble(instrs,locals,"") then
+        time3 = Time();
+        nameSpaces = Root.allContentsOf(NameSpace)->asSeq->including(Root)
+    in codeBox.setResourceName(fileName + ".xmf");
+       codeBox.toMachineCodeBox().save2(objectFile,nameSpaces);
+       if verbose
+       then
+         format(stdout,"(");
+         (time2-time1).pprint(stdout);
+          format(stdout,",~S)(",Seq{instrs->size});
+         (time3-time2).pprint(stdout);
+         format(stdout,")(");
+         (Time()-time3).pprint(stdout);
+         format(stdout,")")
+       end;
+       codeBox
+    end
+  end
+    
+context CompilationUnit    
+
+   @Operation compileToFun(name:String,args:Seq(String),dynamics:Seq(Element),saveSource:Boolean)
+    
+    // Used to compile a compilation unit directly to core. Returns an operation that
+    // runs the defs in the compilation when it is called. The Operation is named
+    // has the supplied arguments and the supplied dynamics (for simple cases these
+    // should be supplied as empty sequences).
+      
+    let exp = self.foldExps() then
+        instrs = Compiler::compileExp(exp,args,true) + Seq{Instrs::Return()};
+        maxLocals = exp.maxLocals() + args->size;
+        dynamics = 
+          if dynamics->isEmpty 
+          then Seq{Seq{2|Root.contents},Seq{2|XCore.contents}} 
+          else dynamics 
+          end
+    in let codeBox = Assembler::assemble(instrs,maxLocals,"") then
+           operation = codeBox.toMachineFun(args->size,dynamics)
+       in if saveSource and Compiler::saveSource
+          then 
+            let params = args->collect(a | OCL::Varp(a));
+                type = OCL::NamedType() then
+                opExp = OCL::Operation(name,params,type,exp)
+            in operation.setSource(opExp.pprint())
+            end
+          end;
+          operation.setName(name);
+          operation
+       end
+    end
+  end
+      
+context CompilationUnit    
+  @Operation env():Env
+  
+    // Create the initial environment for the compiler...
+    
+    Env(Seq{})
+  end

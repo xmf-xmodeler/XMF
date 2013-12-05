@@ -1,0 +1,47 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Send a Message                                *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Send a message to a target. The message consists of a target element, a   *
+ *  name and a sequence of arguments. A call frame has been opened at this    *
+ *  point and the targets and arguments of the message have been pushed. The  *
+ *  send instruction gets the type of the target and looks up the message     *
+ *  name. If this results in finding an operation then the most specific      *
+ *  operation is invoked (same as ENTER). Various reasons for why this might  *
+ *  not be straightforward. There may be no operation in which case a         *
+ *  noOperationFound message is sent to the target. If the class of the target*
+ *  implements its own MOP via sendInstance then the class is sent this       *
+ *  message in order to handle the send in a special way.                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+ @Class Send extends Instr
+ 
+    @Attribute arity : Integer end
+    @Attribute message : Symbol end
+    @Attribute messageOffset : Integer end
+    
+    @Constructor(message,arity) end
+    
+    @Operation toString():String
+      "<Send " + arity + "," + message.toString() + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.messageOffset := codeBox.constOffset(message);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(messageOffset.byte(2),arity,messageOffset.byte(1))
+    end
+    
+  end
+  

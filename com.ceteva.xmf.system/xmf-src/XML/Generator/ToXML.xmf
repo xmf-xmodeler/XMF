@@ -1,0 +1,196 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Generating XML                            *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    The XML Generator package provides a small declarative language that    *
+ *    defines how to translate elements into XML. The idea is that classes    *
+ *    are provided with a @ToXML ... end definition which writes an operation *
+ *    called toXML(idTable:IdTable) for the class. The body of ToXML supports *
+ *    forms that make it easy to write the output in a way that ignores the   *
+ *    details of how the XML text gets generated.                             *
+ *                                                                            *
+ ******************************************************************************/
+
+import XML;
+import XOCL;
+import OCL;
+import Generator;
+import Root::Parser::BNF;
+
+context Generator
+
+  @Class ToXML extends Sugar
+  
+    // The name of the operation to generate...
+  
+    @Attribute name        : String end
+    
+    // An attribute that names the unique id for this class..
+    
+    @Attribute id          : String end
+    
+    // The XML tag...
+    
+    @Attribute tag         : String end
+    
+    // The tag to use if this is a reference. Referances are
+    // generated when the element is generated for the
+    // second time to support sharing of the element...
+    
+    @Attribute refTag      : String end
+    
+    // Mapping attribute names to values. The mapping associates
+    // the XML attribute name with the XMF slot name...
+    
+    @Attribute attMaps     : Seq(AttributeMap) end
+    
+    // Mappings that define the children to generate for
+    // this type of element...
+    
+    @Attribute elementMaps : Seq(ElementMap) end
+    
+    @Constructor(name,tag,refTag,id,attMaps,elementMaps) 
+      @For map in elementMaps do
+        map.setMapName(name)
+      end
+    end
+    
+    @Grammar extends OCL::OCL.grammar
+    
+      ToXML ::= 
+      
+        // The name of the operation...
+        
+        name = OptionalName 
+        
+        // The tag, id attribute, tag to use when referencing ...
+        
+        '(' tag = Name id = OptionalId refTag = OptRefTag ')' 
+        
+        // Mapping XML attribute names to XMF slot names...
+        
+        attMaps = AttMaps 
+        
+        // Which children to generate...
+        
+        elementMaps = WrappedMap* 
+        
+        'end'
+      
+        { ToXML(name,tag,refTag,id,attMaps,elementMaps) }.
+        
+      AttMaps ::= 
+      
+        '[' attMap = AttMap attMaps = (',' AttMap)* { Seq{attMap | attMaps} }  ']' 
+        
+      | '[' ']' { Seq{} }.
+      
+      AttMap ::= 
+        
+        test = AttMapTest name = Name { AttributeMap(test,name,Var(name)) } |
+        
+        test = AttMapTest XMLName = Name '=' exp = Exp { AttributeMap(test,XMLName,exp) }.
+      
+      AttMapTest ::= 
+      
+        // A guard on the attribute...
+        
+        '?' Exp | { [| true |] }.
+      
+      OptionalName ::= 
+      
+        Name 
+        
+      | { "toXML" }.
+      
+      OptionalId ::=
+      
+        ',' Name
+        
+      | { "" }.
+      
+      OptRefTag ::= ',' Name | { "" }.
+      
+      WrappedMap ::= startTag = StartTag map = WrappedMap endTag = EndTag { WrappedMap(startTag,map,endTag) } | ElementMap.
+      
+      StartTag ::= '<' n = Name '>' { n }.
+      
+      EndTag ::= '</' n = Name '>' { n }.
+      
+      ElementMap ::= map = (Just | Ref) ('*' map = { Map(map) } ('*' map = { Join(map) })* { map } | { map }).
+      
+      Just ::= name = Name { Just(name) }.
+        
+      Ref ::= 'Ref' '(' tag = Name ',' ref = Name ',' att = Name ')' { Ref(tag,ref,att) }.
+      
+    end
+    
+    @Operation desugar()
+    
+      // Called to generate the operation definition...
+      
+      if refTag = ""
+      then self.desugarNoRef()
+      else self.desugarRef()
+      end
+    end
+    
+    @Operation desugarNoRef()
+    
+      // No difference between element and a ref...
+      
+      [| @Operation <name>(idTable)
+           idTable.ref(self);
+           XML::Element(<StrExp(tag)>,<self.desugarAttributeMaps()>,<self.desugarElementMaps()>)
+         end
+      |]
+    end
+    
+    @Operation desugarRef()
+    
+      // Use the ref tag if seen before...
+      
+      [| @Operation <name>(idTable)
+           if idTable.hasId(self)
+           then XML::Element(<StrExp(refTag)>,Set{XML::Attribute("id",idTable.ref(self))})
+           else 
+             idTable.ref(self);
+             XML::Element(<StrExp(tag)>,<self.desugarAttributeMaps()>,<self.desugarElementMaps()>)
+           end
+         end
+      |]
+    end
+    
+    @Operation desugarAttributeMaps()
+    
+      // If an id attribute name has been defined then 
+      // generate an XML attribute with the generated id ...
+      
+      let initialExp =
+        if id = ""
+        then [| Set{} |]
+        else [| Set{idTable.idAttribute(self,<StrExp(id)>)} |]
+        end
+      in 
+         // Generate all the slots as XML attributes...
+      
+         attMaps->iterate(map exp = initialExp | 
+           [| <exp> + <map.desugar()> |]) 
+      end
+    end
+    
+    @Operation desugarElementMaps()
+    
+      // Generate all the children...
+      
+      elementMaps->iterate(map exp = [| Seq{} |] |
+        [| <exp> + <map.desugar()> |])
+    end
+    
+  end
+  
+    

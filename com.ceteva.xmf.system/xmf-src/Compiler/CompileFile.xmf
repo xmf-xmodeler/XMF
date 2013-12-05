@@ -1,0 +1,94 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Compiling Files                                *
+ *                      -----------------------------                         *
+ *                                                                            *
+ *  The compiler's main job is to transform source files containing XOCL code *
+ *  to binary .o files. The compileFile operation defined in this file can be *
+ *  used to do this transformation.                                           * 
+ *                                                                            *
+ ******************************************************************************/
+
+import Compiler;
+import IO;
+import Parser;
+import Machine;
+import Exceptions;
+
+context Compiler
+
+  @Operation compileFile(name:String,isLast:Boolean,saveSource:Boolean):Element
+  
+    // Used to compile a file. If the compilation succeeds then the
+    // source file is translated to machine code in an object file.
+    // The object file is actually a code box in XAR format. When the
+    // binary file is loaded, the code box is created and called,
+    // thereby performing the contents of the file. The compileFile
+    // operation catches errors and adds them to the compilers errors
+    // list. This allows multiple files to be compiled without the
+    // intermediate errors causing the compilation process to stop...
+    
+    try
+    
+      // The compiler uses relatively large amounts of memory to compile a 
+      // file (particularly the current parser). Check that there is at least
+      // 10MB of heap and extend the heap if necessary.
+      
+      xmf.ensureHeap(10000 * 1024);
+      
+      let fileStem = if name->hasSuffix(".xmf") then name.reverse().drop(4).reverse() else name end then
+          sourceFile = fileStem + ".xmf";
+          binaryFile = fileStem + ".o"
+      in if not sourceFile.fileExists()
+         then throw FileNotFound(sourceFile)
+         else
+           if (sourceFile).isOlder(binaryFile) and (not compileAll)
+           then format(stdout,"[ ~<46,.>S is up to date. ]~%",Seq{binaryFile})
+           else 
+             format(stdout,"[ Compile ~<38,.>S...",Seq{fileStem+".xmf"});
+             stdout.flush(); 
+             let time1 = Time() then
+                 unit = parseCompilationUnit(sourceFile,OCL::OCL) then
+                 time2 = Time() 
+             in if unit <> null
+                then
+                  format(stdout,"(");
+                  (time2-time1).pprint(stdout);
+                  format(stdout,")");
+                  unit.compileFile(fileStem,saveSource,true);
+                  format(stdout," ]~%")
+                end
+             end
+           end
+         end
+      end 
+    catch(exception)
+      Compiler::compilationError(exception.message,name,exception)
+    end
+  end
+  
+context Compiler
+
+  @Operation parseCompilationUnit(file:String,language:Classifier):CompilationUnit
+  
+     // Use this operation to parse a compilation unit from the 
+     // supplied file. Deals with parse errors by recording them
+     // as compiler errors. Returns null if the parse failed...
+     
+     try
+       let unit = language.grammar.parseFile(file,"CompilationUnit",Seq{})
+       in unit.setResource(file);
+          unit
+       end
+     catch(x)
+       @TypeCase(x)
+         ParseError do
+           compilationError(x.pprint(),file,x);
+           null
+         end
+         else throw x
+       end
+     end
+   end

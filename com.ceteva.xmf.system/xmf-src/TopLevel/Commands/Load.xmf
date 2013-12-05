@@ -1,0 +1,51 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XMatch::Pattern;
+import TopLevel;
+  
+Command::handlers.put("l",
+  let fileName = ""
+  in @Operation(args,target,env,imports) 
+       @Doc
+         ?l <FILE>            Load the binary file.
+         ?l                   Load the most recently loaded binary.
+       end
+       @Case args of
+         Seq{} do
+           if fileName <> ""
+           then fileName.loadBin(true)
+           end
+         end
+         Seq{s | moreArgs} do
+           let env = matchValue("name = ('../' | './' | not('.o' EOI) not('.xmf' EOI) .)* type = ('.' .* | E) EOI",s) then
+               name = env.lookup("name");
+               type = env.lookup("type")
+           in if type = ""
+              then 
+                if (name+".o").fileExists()
+                then 
+                  fileName := (name+".o");
+                  fileName.loadBin(true)
+                elseif (name+".xmf").fileExists()
+                then
+                  fileName := (name+".xmf");
+                  Evaluator::loadFile(fileName,self,Root::Env::NullEnv(),Seq{XCore,Root})
+                else format(stdout,"The file ~S does not exist.~%",Seq{s})
+                end
+              else
+               if s.fileExists()
+               then 
+                 fileName := s;
+                 if type = ".o"
+                 then fileName.loadBin(true)
+                 else Evaluator::loadFile(fileName,self,Root::Env::NullEnv(),Seq{XCore,Root})
+                 end
+               else format(stdout,"The file ~S does not exist.~%",Seq{s})
+               end
+              end
+            end
+         end
+       end
+     end
+  end);

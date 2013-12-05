@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import XML::Parser;
+
+context XML::Parser
+
+  @Class Command isabstract extends Syntax
+  
+    // A command is used when creating a deployed grammar for 
+    // running on a stand-alone Java engine. Not normally required 
+    // for internal XMF XML processing...
+  
+    @Grammar
+    
+      Args ::= NoArgs | SomeArgs.
+      
+      NoArgs ::= '(' ')' { Seq{} }.
+      
+      SomeArgs ::= '(' arg = Arg args = (',' Arg)* ')' { Seq{arg | args} }.
+      
+      Arg ::= n = Name { CommandVar(n) } | s = Str { CommandConst(s) }.
+      
+    end
+  
+  end

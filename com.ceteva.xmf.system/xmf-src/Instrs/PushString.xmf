@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Push a String Onto The Stack                         *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Operand is an index into the constant vector of the current frame. The    *
+ *  constant is a string that is pushed onto the stack.                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class PushString extends Instr
+  
+    @Attribute value : String end
+    @Attribute valueOffset : Integer end
+    
+    @Constructor(value) end
+    
+    @Operation toString():String
+      "<PushString " + value + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      self.valueOffset := codeBox.constOffset(value);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      valueOffset
+    end
+    
+  end
+  

@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+import Languages;
+import XOCL;
+import MicroJava;
+import OCL;
+import Structure;
+import Statements;
+
+context Structure
+
+  @Class Constructor extends Feature
+  
+    @Attribute visibility : String      end
+    @Attribute name       : String      end
+    @Attribute formals    : Seq(Formal) end
+    @Attribute body       : Block       end
+    
+    @Constructor(visibility,name,formals,body) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S ~S(",Seq{visibility,name});
+      @For formal in formals do
+        formal.pprint(out);
+        if not isLast
+        then format(out,",")
+        end
+      end;
+      format(out,") ");
+      body.pprint(out,indent+2)
+    end
+    
+    @Operation toXOCL():Performable
+    
+      // The constructor is a bit of a cheat since the names
+      // of the Java constructor formals must match the names
+      // of the fields. The body is ignored...
+      
+      XOCL::Constructor(formals.name,false)
+    end
+    
+  end

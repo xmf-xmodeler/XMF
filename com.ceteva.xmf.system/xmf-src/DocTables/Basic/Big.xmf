@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Big Text                                  *
+ *                            -------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Big extends Entry
+
+    @Attribute entry : Entry (?,!,+,-) end
+    
+    @Constructor(entry) ! end
+    
+    @Operation contents()
+      Seq{entry}
+    end
+
+  end

@@ -1,0 +1,44 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Strings                                  *
+ *                               ---------------                              *
+ *                                                                            *
+ *  Str is a builtin non-terminal of XBNF. The next grammar token must be a   *
+ *  string token. The string is returned by the parser.                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Str extends Recognizer
+	
+	@Operation code(outputChannel)
+      format(outputChannel," Str ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+
+    @Operation first(grammar)
+      Set{"Builtin(Str)"}
+    end
+    
+    @Operation nullable(grammar):Boolean
+       false
+    end
+	  
+	@Operation toExp(FV:Set(String))
+	   [| Root::Parser::BNF::Str() |] 
+    end
+	  
+	@Operation transform(FV:Set(String),grammar):Recognizer
+	  self
+	end
+	   
+end

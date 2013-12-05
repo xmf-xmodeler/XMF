@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Remove The Name Of A Local                          *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  A debugging instruction that is used to record the names of local vars.   *
+ *  When a new local variable is bound, LOCALNAME can be used to set the name *
+ *  in the locals area of the current call frame. When the variable goes out  *
+ *  of scope, this instruction sets the name to null. The instruction operand *
+ *  is the index of the local to be unset. Note that the locals area of the   *
+ *  current call frame contains ARG + LOCALS + LOCALNAMES where the local     *
+ *  names do not contain the arg names since these are available via the      *
+ *  signature of the currently executing operation.                           *           
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class UnsetLocal extends Instr
+  
+    @Attribute index : Integer end
+    
+    @Constructor(index) end
+    
+    @Operation operands():Integer
+      index
+    end
+    
+    @Operation toString():String
+      "<UnsetLocal " + index +">"
+    end
+    
+  end

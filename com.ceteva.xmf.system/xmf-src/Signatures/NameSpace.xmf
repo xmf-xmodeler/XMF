@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+
+context XCore::NameSpace
+ 
+   @Operation toType()
+     let sig = Signature(self.path())
+     in @For name inTableKeys contents do
+          let element = contents.get(name)
+          in @TypeCase(element)
+               XCore::Package do
+                 sig.bind(name.toString(),Package(Delayed(@Operation() element.toType() end)))
+               end
+               XCore::Class do
+                 sig.bind(name.toString(),Class(Delayed(@Operation() element.toType() end)))
+               end
+               XCore::NameSpace do
+                 sig.bind(name.toString(),NameSpace(Delayed(@Operation() element.toType() end)))
+               end
+               XCore::ForeignOperation do
+                 sig.bind(name.toString(),Value(Delayed(@Operation() element.of().toType() end)))
+               end
+               XCore::Operation do
+                 sig.bind(element.name().toString(),element.toNamedElement())
+               end
+               XCore::Attribute do
+                 sig.bind(name.toString(),Field(Delayed(@Operation() element.toType() end)))
+               end
+               else sig.bind(name.toString(),Value(Delayed(@Operation() element.of().toType() end)))
+             end
+           end
+        end;
+        sig
+     end
+   end

@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Get The Value Of A Symbol                         *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Symbols have values. This instruction looks up the value of a symbol and  *
+ *  pushes the value on the stack. The instruction operand is a constant index*
+ *  for the name of the symbol.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SymbolValue extends Instr
+  
+    @Attribute name : Symbol end
+    @Attribute nameOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation assemble(codeBox)
+      self.nameOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation toString():String
+      "<SymbolValue " + name.toString() + ">"
+    end
+    
+    @Operation operands():Integer
+      nameOffset
+    end
+    
+  end
+  

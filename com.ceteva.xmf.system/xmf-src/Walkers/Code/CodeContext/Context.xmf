@@ -1,0 +1,13 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+
+context CodeContext
+
+  @Class Context isabstract
+  
+    @Attribute next : Context (?,!) end
+  
+  end
+    

@@ -1,0 +1,180 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Class Definitions                               *
+ *                           -------------------                              *
+ *                                                                            *
+ *   A class definition has a simple form:                                    *
+ *                                                                            *
+ *     @Class Name extends Parent1, Parent2, ...                              *
+ *       Def1                                                                 *
+ *       Def2                                                                 *
+ *       ...                                                                  *
+ *     end                                                                    *
+ *                                                                            *
+ *   where each Def is a constructor, constraint, attribute or operation.     *
+ *   The result of the definition is an instance of XCore::Class containing   *
+ *   all of the definition-instances. The complications come from the         *
+ *   variations on the construction of the class, the handling of delaying    *
+ *   references to types (e.g. in the super-classes and the attribute types). *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Exceptions;
+import OCL;
+import XOCL; 
+
+context XOCL 
+
+  @Class Class extends Def 
+  
+     // Specified via the metaclass keyword, the metaClass
+     // slot contains the expression that is the sub-class
+     // of XCore::Class that is to be instantiated...
+     
+     @Attribute metaClass  : Performable      end
+     
+     // True when the class is to be abstract...
+     
+     @Attribute isAbstract : Boolean          end
+     
+     // The sequence of parent expressions...
+     
+     @Attribute parents    : Seq(Performable) end
+     
+     // All the definitions...
+     
+     @Attribute defs       : Seq(Performable) end
+     
+     @Constructor(name,isAbstract,parents,defs) 
+     
+       // By default we are creating an instance
+       // of XCore::Class...
+       
+       self.metaClass := [| XCore::Class |]
+     end
+     
+     @Constructor(name,metaClass,isAbstract,parents,defs) end
+     
+     @Operation allDefs()
+       
+       // Computes a sequence of definitions that are performed
+       // and added to the new class when the class definition is performed.
+       // Extensions of XOCL::Class may wish to extend this operation
+       // to add new types of automatically defined definition...
+       
+       let ops = self.foldDefs(defs->select(d | d.isKindOf(Operation)));
+           nonOps = defs->reject(d | d.isKindOf(Operation)) then
+           modifiers = self.attributes()->iterate(a aops = Seq{} | aops + a.operations()->asSeq);
+           cOps = self.constructors()->iterate(c ops = Seq{} | ops + c.operations(name)->asSeq)
+       in modifiers + nonOps + cOps + ops
+       end
+     end
+     
+     @Operation attributes():Set(Attribute) 
+       defs->select(def | def.isKindOf(Attribute))
+     end
+     
+     @Operation constructors():Seq(Constructor)
+       defs->select(d | d.isKindOf(Constructor))
+     end
+     
+     @Operation desugar()
+     
+       // A simple-minded desugaring of the class-definition...
+       
+       defs->iterate(def 
+         class = parents->iterate(parent 
+           class = [| <metaClass>(<StrExp(name.toString())>) |] |
+             [| <class>.addParent(<parent>) |]) |
+         [| <class>.add(<def>) |])
+     end
+     
+     @Operation eval(target,env,imports)
+       let class = self.metaExp().eval(target,env,imports).new(Seq{})
+       in class.name := XCore::Symbol(name);
+          class.parents := parents->iterate(p P = class.defaultParents() | P->including(p.eval(target,env,imports)));
+          class.isAbstract := isAbstract;
+          class.imports := imports;
+          self.initExp([| self |]).eval(class,env,imports);
+          @For def in self.allDefs() do
+            class.add(def.eval(target,env,imports))
+          end;
+          class
+       end
+     end
+     
+     @Operation foldDefs(ops:Seq(Operation)):Seq(Operation)
+     
+       // A class may be specified with multiple operations
+       // with the same signature, but different patterns. 
+       // The meaning of this is that the operations are 
+       // folded into a single definition that uses pattern
+       // matching to dispatch to the correct definition...
+       
+       if ops->isEmpty
+       then Seq{}
+       else 
+         let op = ops->head;
+             sameName = ops->tail->select(o | o.name = ops->head.name and o.arity() = ops->head.arity());
+             rest = ops->tail->reject(o | o.name = ops->head.name)
+         in if sameName->isEmpty
+            then Seq{ op | self.foldDefs(ops->tail) }
+            else Seq{ Compiler::Operations(op.name,Seq{ op | sameName }) | self.foldDefs(rest) }
+            end
+         end
+       end
+     end
+     
+     @Operation initExp(class:Performable):Performable
+       
+       // This operation returns initialisation actions that are to be
+       // performed on the new class. the argument is an expression that
+       // evaluates to the newly constructed class. Ensure that the final
+       // result produced by the return value is the class... 
+       
+       class
+     end
+      
+     @Operation lift():Performable
+       Element::lift.invoke(self,Seq{})
+     end
+     
+     @Operation metaExp():Performable
+       
+       // Returns an expression that evaluates to produce the class
+       // which is instantiated. Useful in sub-classes of this class...
+       
+       metaClass
+     end
+     
+     @Operation pprint(out,indent)
+       format(out,"@Class ~S metaclass ",Seq{name});
+       metaClass.pprint(out,indent);
+       format(out," ~[isabstract~;~]",Seq{isAbstract});
+       if not parents->isEmpty
+       then 
+         format(out," extends ");
+         @For parent in parents do
+           parent.pprint(out,indent);
+           if not isLast
+           then format(out,",")
+           end
+         end
+       end;
+       format(out,"~%~V",Seq{indent+2});
+       if defs.isKindOf(Seq(Element))
+       then
+         @For def in defs do
+           def.pprint(out,indent + 2);
+           if not isLast
+           then format(out,"~%~V",Seq{indent+2})
+           end
+         end
+       else defs.pprint(out,indent)
+       end;
+       format(out,"~%~Vend",Seq{indent})
+     end
+     
+   end

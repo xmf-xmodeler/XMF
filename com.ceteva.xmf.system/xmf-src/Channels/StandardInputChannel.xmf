@@ -1,0 +1,83 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Standard Input Channel                          *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Used to represent a basic input channel (such as stdin). Most channels   *
+ *   at the XOCL level are wrappers for VM-level elements that implement the  *
+ *   channel mechanisms. The channel attribute is a VM-level structure.       *
+ *                                                                            *
+ *   Standard input channels are intended to outlive the lifetime of the XMF  *
+ *   machine and therefore eof() always returns false.                        *                                                 *
+ *                                                                            *
+ ******************************************************************************/
+
+
+import IO;
+
+context IO
+
+   @Class StandardInputChannel extends InputChannel
+    
+      @Attribute channel : Element end
+      
+      @Constructor(channel) ! end
+      
+      @Operation asString():String
+          Kernel_readString(channel)
+      end
+      
+      @Operation channel()
+        channel
+      end
+        
+      @Operation close()
+        null 
+      end
+      
+      @Operation eof():Boolean
+        false 
+      end 
+      
+      @Operation peek():Integer
+        Kernel_peek(channel)
+      end
+      
+      @Operation read():Integer
+         Kernel_read(channel)
+      end
+      
+      @Operation read(buffer):Integer
+      
+        @Doc
+          Reads input into a buffer and returns the number
+          of characters that have been read.
+        end
+        
+        let char = 0;
+            chars = 0
+        in @Repeat 
+             char := self.read();
+             chars := chars + 1;
+             @TypeCase(buffer)
+               Vector do
+                 buffer.put(0,char)
+               end
+               Buffer do
+                 buffer.add(char)
+               end
+               else self.error("Unknown type of buffer for a StandardInput::read: " + buffer.toString())
+             end
+           until char = "\n"->at(0) orelse char = "\r"->at(0) 
+           end;
+           chars
+        end
+      end
+      
+      @Operation setChannel(channel)
+        self.channel := channel
+      end
+     
+    end

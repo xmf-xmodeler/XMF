@@ -1,0 +1,650 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Tokenizer                                 *
+ *                              ----------------                              *
+ *                                                                            *
+ *   A tokenizer takes characters from an input source and returns a sequence *
+ *   of tokens. Each token is a sequence of 0 or more characters from the     *
+ *   input and a token type. The token types are predefined for the tokenizer *
+ *   but you can extend this class to add token types of your own.            *
+ *                                                                            *
+ *   The tokenizer works hard to try to minimise consing if at all possible.  *
+ *   Therefore it reuses buffers to represent the input and the current token *
+ *   Be careful when using the values in the buffers as they can change.      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import IO;
+import Parser;
+
+context Tokens
+
+  @Class Tokenizer
+  
+    // The tokenizer takes characters from an input channel 
+    // and turns them into a sequence of tokens...
+    
+    @Attribute input   : InputChannel               (?,!) end
+    
+    // The input characters are maintained in a character
+    // buffer so that we do not repeatedly perform input
+    // requests on the channel...
+    
+    @Attribute buffer  : Buffer = Buffer(1024,true) (?,!) end
+    
+    // When new characters are added to the buffer, the chars 
+    // are pre-processed to find out where the line breaks are
+    // This makes queries for line positions efficient...
+    
+    @Attribute lines   : Buffer = Buffer(1024,false)(?,!) end
+    
+    // The buffer is read character-by-character and the charPos
+    // points to the next available character...
+    
+    @Attribute charPos : Integer                    (?,!) end
+    
+    // When reading a token the last character position is 
+    // retained for backtracking...
+    
+    @Attribute lastCharPos : Integer                (?,!) end
+    
+    // When a token is recognized it is held in the token buffer
+    // for consumption by the parser. Subsequent requests for 
+    // tokens will overwrite this buffer...
+    
+    @Attribute token   : Buffer = Buffer(100,true)  (?,!) end
+    
+    // Each token has a type that is used by the parser to
+    // check whether the token is expected or not...
+    
+    @Attribute type    : Integer                    (?,!) end
+    
+    // If an error occurs then the following string is set to a
+    // diagnostic...
+    
+    @Attribute message : String                     (?,!) end
+    
+    @Constructor(input) end
+    
+    @Operation eof():Boolean
+      charPos = buffer->size and input.eof()
+    end
+    
+    @Operation charCount():Integer
+    
+      // Number of chars on the last line. Builtin because the
+      // behaviour is exponential as the size of the source buffer
+      // increases...
+      
+      Kernel_charCount(buffer,charPos)
+    end
+    
+    @Operation lineCount():Integer
+    
+      // Number of lines. Builtin because the
+      // behaviour is exponential as the size of the source buffer
+      // increases...
+      
+      lines->at(charPos-1)
+    end
+    
+    @Operation nextToken()
+    
+      // Called in order to consume the next token. Will leave
+      // the next token in the token buffer and set the type
+      // of the token appropriately...
+      
+      self.lastCharPos := charPos;
+      
+      // Tokens ignore any leading whitespace...
+      
+      self.skipWhiteSpace();
+      
+      // Reset the token buffer...
+      
+      token.setSize(0);
+      
+      // Get the next input char and set up the token types.
+      // The tokenizer tries to be as fast as possible and
+      // local reference is faster than reference to global
+      // variables...
+      
+      let char    = self.readChar();
+      
+          // The token types...
+          
+          EOF     = 1;
+          TERM    = 2;
+          FLOAT   = 4;
+          STRING  = 5;
+          NAME    = 6;
+          INT     = 7;
+          SPECIAL = 8
+      in 
+         // Dispatch on the next character...
+         
+         @CaseInt[257] char of
+         
+           "\'"->at(0) do
+           
+             // Tokens that start and end with ' are of type
+             // TERM. In basic XOCL such a token only occurs in
+             // a grammar definition...
+             
+             let seenToken = false
+             in @While not seenToken do
+                  char := self.readChar();
+                  @CaseInt[257] char of
+                    "\'"->at(0) do
+                      seenToken := true
+                    end
+                    "\\"->at(0) do
+                      char := self.readChar();
+                      token.add(char)
+                    end
+                    256 do
+                      self.error("EOF in token ")
+                    end
+                    else token.add(char)
+                  end
+                end
+             end;
+             self.type := TERM
+           end
+           
+           "0"->at(0) to "9"->at(0) do 
+           
+             // This must be the start of a number...
+             
+             token.add(char);
+             let isNumber = true
+             in 
+                // Continually read numeric characters
+                // and add them to the token...
+                
+                @While isNumber do
+                
+                  char := self.readChar();
+                  
+                  @CaseInt[257] char of
+                  
+                    "0"->at(0) to "9"->at(0) do
+                      token.add(char)
+                    end
+                    
+                    256 do
+                      // 256 occurs when EOF is reached...
+                      isNumber := false;
+                      self.type := INT
+                    end
+                    
+                    "."->at(0) do
+                    
+                      // OK we have a float so read the
+                      // number past the decimal point...
+                      
+                      let isFloat = false
+                      in @While isNumber do
+                      
+                           char := self.readChar();
+                           
+                           @CaseInt[257] char of
+                           
+                             "0"->at(0) to "9"->at(0) do
+                               if isFloat
+                               then token.add(char)
+                               else
+                                 isFloat := true;
+                                 token.add("."->at(0));
+                                 token.add(char)
+                               end
+                             end
+                             
+                             256 do
+                               isNumber := false;
+                               if not isFloat
+                               then 
+                                 self.charPos := charPos - 1;
+                                 self.type := INT
+                               else self.type := FLOAT
+                               end
+                             end
+                             
+                             else
+                               if isFloat
+                               then 
+                                 self.charPos := charPos - 1;
+                                 self.type := FLOAT
+                               else 
+                                 self.charPos := charPos - 2;
+                                 self.type := INT
+                               end;
+                               isNumber := false
+                           end
+                         end
+                      end
+                    end
+                    else 
+                      self.charPos := charPos - 1;
+                      isNumber := false;
+                      self.type := INT
+                  end
+                end
+             end
+           end
+           
+           // Tokens of type NAME start with alpha-chars
+           // and then have alpha-number-underscore chars.
+           // Other sequences are of type SPECIAL...
+            
+           "a"->at(0) to "z"->at(0),
+           "A"->at(0) to "Z"->at(0) do
+           
+             token.add(char);
+             
+             let isName = true
+             in @While isName do
+             
+                  char := self.readChar();
+                  
+                  @CaseInt[257] char of
+                  
+                    "a"->at(0) to "z"->at(0),
+                    "A"->at(0) to "Z"->at(0),
+                    "_"->at(0),
+                    "0"->at(0) to "9"->at(0) do
+                      token.add(char)
+                    end
+                    
+                    // Handle Set{ and Seq{ specially for
+                    // XOCL...
+                    
+                    "{"->at(0) do
+                      if token.stringEqual("Set")
+                      then 
+                        token.add(char);
+                        isName := false;
+                        self.type := SPECIAL
+                      elseif token.stringEqual("Seq")
+                      then
+                        token.add(char);
+                        isName := false;
+                        self.type := SPECIAL
+                      else
+                        isName := false;
+                        self.charPos := charPos - 1;
+                        self.type := NAME
+                      end
+                    end
+                    
+                    256 do
+                      isName := false;
+                      self.type := NAME
+                    end
+                    
+                    else
+                      isName := false;
+                      self.charPos := charPos - 1;
+                      self.type := NAME
+                  end
+                end
+             end
+           end
+           
+           // Strings start with "...
+           
+           "\""->at(0) do // "
+             let isString = true
+             in @While isString do
+             
+                  char := self.readChar();
+                  
+                  @CaseInt[257] char of
+                  
+                    "\""->at(0) do // "
+                      isString := false
+                    end
+                    
+                    "\\"->at(0) do
+                      char := self.readChar();
+                      @CaseInt[257] char of
+                        "n"->at(0) do
+                          token.add("\n"->at(0))
+                        end
+                        "r"->at(0) do
+                          token.add("\r"->at(0))
+                        end
+                        "t"->at(0) do
+                          token.add("\t"->at(0))
+                        end
+                        256 do
+                          null
+                        end
+                        else token.add(char)
+                      end
+                    end
+                    
+                    256 do
+                      self.error("EOF found in string.")
+                    end
+                    
+                    else token.add(char)
+                  end
+                end;
+                self.type := STRING
+             end
+           end
+           
+           // Certain characters can only exist by themselves.
+           // These are designated as SPECIAL...
+           
+           "("->at(0),
+           ")"->at(0),
+           "]"->at(0),
+           "{"->at(0),
+           "}"->at(0),
+           ";"->at(0),
+           "."->at(0),
+           ","->at(0) do
+             token.add(char);
+             self.type := SPECIAL
+           end
+           
+           // Handle [ specially because of [|...
+           
+           "["->at(0) do
+             token.add("["->at(0));
+             self.type := SPECIAL;
+             let char = self.readChar()
+             in @CaseInt[256] char of
+                  "|"->at(0) do
+                     token.add(char)
+                   end
+                   256 do
+                     null
+                   end
+                   else self.charPos := charPos - 1
+                 end
+             end
+           end 
+           
+           // Handle / specially because of // and /*...
+           "/"->at(0) do
+             let char = self.readChar()
+             in @CaseInt[256] char of
+             
+                  "/"->at(0) do
+                  
+                    // The sequence // means we have a single line comment...
+                    
+                    self.readCommentLine();
+                    self.nextToken()
+                  end
+                  
+                  "*"->at(0) do
+                  
+                    // The sequence /* means we have a multi-line comment...
+                    
+                    self.readMultilineComment();
+                    self.nextToken()
+                  end
+                  
+                  else 
+                    token.add("/"->at(0));
+                    let isSpecial = true
+                    in @While isSpecial do
+                         @CaseInt[257] char of
+                           " "->at(0),"\n"->at(0),"\t"->at(0),"\r"->at(0) do
+                             isSpecial := false
+                           end
+                           256 do
+                             isSpecial := false
+                           end
+                           "A"->at(0) to "Z"->at(0),
+                           "a"->at(0) to "z"->at(0),
+                           "0"->at(0) to "9"->at(0),
+                           "\""->at(0), //"
+                           "("->at(0),
+                           ")"->at(0),
+                           "{"->at(0),
+                           "}"->at(0),
+                           ";"->at(0),
+                           "."->at(0),
+                           ","->at(0) do
+                             isSpecial := false;
+                             self.charPos := charPos - 1
+                           end
+                           else 
+                             token.add(char);
+                             char := self.readChar()
+                         end
+                       end;
+                       self.type := SPECIAL
+                    end
+                end
+             end
+           end
+           
+           256 do 
+           
+             // If the first char is EOF then record that because the
+             // grammar may require EOF...
+             
+             self.type := EOF
+           end
+           
+           else
+           
+             // Anything else is a special token...
+             
+             token.add(char);
+             let isSpecial = true
+             in @While isSpecial do
+                  char := self.readChar();
+                  @CaseInt[257] char of
+                    " "->at(0),"\n"->at(0),"\t"->at(0),"\r"->at(0) do
+                      isSpecial := false
+                    end
+                    256 do
+                      isSpecial := false
+                    end
+                    "A"->at(0) to "Z"->at(0),
+                    "a"->at(0) to "z"->at(0),
+                    "0"->at(0) to "9"->at(0),
+                    "\""->at(0), //"
+                    "("->at(0),
+                    ")"->at(0),
+                    "{"->at(0),
+                    "}"->at(0),
+                    "["->at(0),
+                    ";"->at(0),
+                    "."->at(0),
+                    "\'"->at(0),
+                    ","->at(0) do
+                      isSpecial := false;
+                      self.charPos := charPos - 1
+                    end
+                    else token.add(char)
+                 end
+               end;
+               self.type := SPECIAL
+           end
+         end
+      end
+    end
+    
+    @Operation peek(chars:String):Boolean
+    
+      // Peek at the next few chars and compare them
+      // with the supplied string. Returns true when 
+      // the next chars match those supplied and
+      // false otherwise. Does not consume any chars...
+      
+      let peeking = true;
+          i = 0;
+          pos = charPos
+      in @While (i < chars->size) and peeking do
+           let char = self.readChar()
+           in if char = chars->at(i)
+              then i := i + 1
+              else peeking := false
+              end
+           end
+         end;
+         self.charPos := pos;
+         peeking
+      end
+    end
+    
+    @Operation readBuffer():Integer
+    
+      // Fill the buffer with more chars and record
+      // the number of newlines. Returns the number
+      // of chars read...
+      
+      let chars = input.read(buffer)
+      in self.recordLines();
+         chars
+      end
+    end 
+    
+    @Operation readChar()
+    
+      // The tokenizer must use this operation to get the
+      // next character. It guarantees that the input buffer
+      // is used appropriately...
+
+      if self.charPos >= self.buffer->size
+      then
+        let chars = self.readBuffer() 
+        in if chars > 0
+           then
+             self.charPos := self.charPos + 1;
+             self.buffer->at(self.charPos-1)
+           else 256
+           end
+        end
+      else 
+        self.charPos := self.charPos + 1;
+        self.buffer->at(self.charPos-1)
+      end
+    end
+    
+    @Operation readCommentLine()
+    
+      // Read the next line because it starts with //...
+      
+      let isComment = true
+      in @While isComment do
+           @CaseInt[257] self.readChar() of
+             "\n"->at(0),"\r"->at(0) do
+               isComment := false
+             end
+             256 do
+               isComment := false
+             end
+             else null
+           end
+         end
+      end
+    end
+    
+    @Operation readMultilineComment()
+    
+      // Read and discard lines until we reach the
+      // end of comment block */ chars...
+      
+      let isComment = true
+      in @While isComment do
+           @CaseInt[257] self.readChar() of
+             "*"->at(0) do
+               @CaseInt[257] self.readChar() of
+                 256 do
+                   self.error("EOF in comment")
+                 end
+                 "/"->at(0) do
+                   isComment := false
+                 end
+                 else self.charPos := charPos - 1
+               end
+             end
+             256 do
+               self.error("EOF in comment")
+             end
+             else null
+           end
+         end
+      end
+    end
+    
+    @Operation recordLines()
+    
+      // Record the number of newlines for each 
+      // character position...
+      
+      let line = 1
+      in @Count i from 0 to self.buffer->size do
+           lines.put(i,line);
+           let char = self.buffer->at(i)
+           in if char = "\n"->at(0)
+              then line := line + 1
+              end
+           end
+         end
+      end
+    end
+    
+    @Operation skipWhiteSpace()
+    
+      // Tokens cannot start with whitespace. This
+      // operation discards whitespace...
+      
+      let whiteSpace = true
+      in @While whiteSpace do
+           let char = self.readChar()
+           in @CaseInt[257] char of
+                " "->at(0),"\n"->at(0),"\r"->at(0),"\t"->at(0) do
+                  null
+                end
+                256 do
+                  whiteSpace := false
+                end
+                else
+                  self.charPos := charPos - 1; 
+                  whiteSpace := false
+              end
+           end
+         end
+      end
+    end
+    
+    @Operation textTo(s:String)
+      let b = Buffer(100,true);
+          c = self.readChar();
+          terminatorIndex = 0;
+          reading = true
+      in @While reading do
+           if c = 256
+           then reading := false
+           else
+             if c = s->at(terminatorIndex)
+             then terminatorIndex := terminatorIndex + 1
+             end;
+             if terminatorIndex = s->size
+             then 
+               self.charIndex := charIndex - s->size;
+               reading := false
+             else b.add(c)
+             end;
+             c := self.readChar()
+           end
+         end;
+         b.toString()
+      end
+    end
+           
+    
+  end
+    

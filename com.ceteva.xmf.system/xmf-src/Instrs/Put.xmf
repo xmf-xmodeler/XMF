@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                   Update a Table With A Key and Value                      *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Pop a table, then a value and a key. Modify the table by updating the     *
+ *  association for the key to be the value. The instruction is overloaded    *
+ *  for hash tables, vectors and buffers. In the case of vectors and buffers  *
+ *  the index is an integer.                                                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Put extends Instr
+    
+  end

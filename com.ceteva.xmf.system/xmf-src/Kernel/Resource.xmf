@@ -1,0 +1,21 @@
+/******************************************************************************
+ *                                                                            *
+ *                                Resources                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *   Resources are elements that have a resourceName. The class Resource is   *
+ *   abstract and defines the slot, accessor and updater. There is no         *
+ *   assumption regarding the type of resource (e.g. file, URL etc) and the   *
+ *   resourceName can be anything.                                            *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+ context Resource
+  @Operation resourceName():String
+    resourceName
+  end
+  
+context Resource
+  @Operation setResourceName(name:String)
+    self.resourceName := name
+  end

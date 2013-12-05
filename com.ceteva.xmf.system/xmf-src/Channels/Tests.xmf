@@ -1,0 +1,106 @@
+parserImport XOCL;
+
+import IO;
+
+context Root
+  @Package P
+    @Class X
+      @Attribute n : Integer end
+      @Attribute x : X end
+      @Constructor(n,x) ! end
+    end
+    @Operation chain(n)
+      if n > 0
+      then X(n,chain(n-1))
+      else null
+      end
+    end
+  end
+
+context Root
+  @Operation ioTest1()
+    let data = 0.to(1000);
+        file = File::tempFile("tmp",".tmp",null) 
+    in @Count i from 0 to 100 do
+         @WithOpenFile(fout -> file)
+           ElementOutputChannel(fout).write(data,Seq{})
+         end;
+         @WithOpenFile(fin <- file)
+           ElementInputChannel(fin).read()
+         end
+       end
+    end
+  end
+  
+context Root
+  @Operation ioTest2()
+    let data = P::chain(1000);
+        file = File::tempFile("tmp",".tmp",null) 
+    in @WithOpenFile(fout -> file)
+         ElementOutputChannel(fout).write(data)
+       end;
+       @WithOpenFile(fin <- file)
+         ElementInputChannel(fin).read()
+       end
+    end
+  end
+  
+context Root
+  @Operation ioTest3()
+    let file = xmf.homeDir() + "/Channels/Tests.o"
+    in @WithOpenFile(fin <- file)
+         BinaryInputChannel(fin).readBinary()
+       end
+    end
+  end
+  
+context Root
+  @Operation ioTest4()
+    let data = 0.to(1000);
+        file = File::tempFile("tmp",".tmp",null) 
+    in @WithOpenFile(fout -> file)
+         let out = ElementOutputChannel(GZipOutputChannel(fout))
+         in out.write(data,Seq{});
+            // Very important to close the top-level channel...
+            out.close()
+         end
+       end;
+       @WithOpenFile(fin <- file)
+         ElementInputChannel(GZipInputChannel(fin)).read()
+       end
+    end
+  end
+  
+context Root
+  @Operation ioTest5()
+    let data1 = 0.to(1000);
+        data2 = 1001.to(2000);
+        file = File::tempFile("tmp",".tmp",null) 
+    in @WithOpenFile(fout -> file)
+         let zout = ZipOutputChannel(fout)
+         in zout.newEntry("entry1");
+            ElementOutputChannel(zout).write(data1,Seq{});
+            zout.newEntry("entry2");
+            ElementOutputChannel(zout).write(data2,Seq{});
+            zout.close()
+         end
+       end;
+       let zin = ZipFile(file) then
+           in1 = zin.inputChannel("entry1");
+           in2 = zin.inputChannel("entry2");
+           in3 = zin.inputChannel("entry1")
+       in ElementInputChannel(in1).read().println();
+          ElementInputChannel(in2).read().println();
+          ElementInputChannel(in3).read().println()
+       end
+    end
+  end
+  
+context Root
+  @Operation ioTest6()
+    @WithOpenFile(fin <- xmf.homeDir() + "/Channels/Test.xml")
+      let xin = SAXInputChannel(fin)
+      in xin.parse()
+      end
+    end
+  end

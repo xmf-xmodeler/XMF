@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                  Skip Forward If The Head Of Stack is False                *
+ *                  -------------------------------------------               *
+ *                                                                            *
+ *  Pops the boolean from the stack. If the value is false then the code      *
+ *  pointer in the current call frame is advanced by the amount given by the  *
+ *  instruction operand.                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SkipFalse extends Instr
+  
+    @Attribute offset : Integer (?,!) end
+    @Attribute targetLabel : String (?,!) end
+    
+    @Constructor(targetLabel) end
+    
+    @Operation toString():String
+      "<SkipFalse " + targetLabel + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end

@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Add 1 To A Local Variable                       *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Local variables are indexed in the current stack frame. This instruction  *
+ *  has a local variable index as an operand. The value of the variable should*
+ *  be an integer that is increased by 1.                                     *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class IncLocal extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<IncLocal " + name + "," + offset + ">"
+    end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

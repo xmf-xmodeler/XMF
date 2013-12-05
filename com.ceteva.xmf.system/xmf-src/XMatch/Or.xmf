@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Alternative Patterns                             *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Matches when the left or the right pattern matches. Tries the left pattern*
+ *  first. The bindings and result are those produced by the matching pattern.*
+ *  If neither match then the whole pattern fails.                            *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Or extends Pattern
+  
+    @Attribute left : Pattern end
+    @Attribute right : Pattern end
+    
+    @Constructor(left,right) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      left.match(chars,env,stack,succ,
+        @Operation()
+          right.match(chars,env,stack,succ,fail)
+        end)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver.
+      // Cannot bind in an or pattern...
+      
+      Set{}
+    end
+    
+  end

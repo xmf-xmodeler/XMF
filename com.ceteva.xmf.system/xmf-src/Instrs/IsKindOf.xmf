@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                         Checking the Type of a Value                       *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Pops a value and then a classifier and pushes a boolean determining       *
+ *  whether the value is of the given classifier. This is performed by the VM *
+ *  in a specific way: either the value is directly of the given type or the  *
+ *  parents of the direct type of the value leads directly or indirectly to   *
+ *  the classifier via the parents slot.                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class IsKindOf extends Instr
+    
+  end

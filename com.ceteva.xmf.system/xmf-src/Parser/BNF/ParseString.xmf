@@ -1,0 +1,53 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Parsing From Strings                           *
+ *                             --------------------                           *
+ *                                                                            *
+ *  Parsing can take the input characters from any source that implements the *
+ *  InputChannel interface. A convenient extension to Grammar is the ability  *
+ *  to parse from a supplied string.                                          *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser;
+import Tokens;
+import BNF; 
+import IO;
+
+context Grammar
+  @Operation parseString(s:String,startNT:String,imports:Seq(NameSpace)):Element
+  
+    // Supplying no arguments...
+    
+    self.parseString(s,startNT,Seq{},imports)
+  end
+  
+context Grammar
+  @Operation parseString(s:String,startNT:String,args:Seq(Element),imports:Seq(NameSpace)):Element
+  
+    // The arguments are supplied to the clause named startNT.
+    // Note that a Call has a sequence of argument names (not
+    // really used at this stage - used in the grammar compiler
+    // which is not called here) and an argMap which is a 
+    // sequence of locals indices describing how to map the
+    // frame locals (in this case the sequence args) to the
+    // actual parameters in the call...
+    
+    let e =  Machine::Engine();
+        sin = StringInputChannel(s);
+        argNames = Seq{};
+        argMap = 0.to(args->size - 1)
+    in e.parse(args,null,self,Seq{Call(startNT,argNames,argMap)},Tokenizer(sin),imports + Seq{XCore,Root})
+    end
+  end
+  
+context Grammar
+  @Operation parseString(s:String):Element
+  
+    // No args, to imports and using the default staring
+    // non-terminal...
+    
+    self.parseString(s,startingSymbol,Seq{})
+  end

@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Message Channels                             *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   Used to read and write messages to clients. The channel is created for   *
+ *   a named client and then messages can be sent to the client. A message is *
+ *   a structured data element containing a message name and a collection of  *
+ *   data elements. This is more efficient that communicating with the client *
+ *   using basic character i/o.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+context IO
+
+  @Class MessageChannel
+  
+    @Attribute clientName : String end
+    
+    @Constructor(clientName) ! end
+    
+    @Operation readMessage():Vector
+      Kernel_read(clientName)
+    end
+    
+    @Operation writeMessage(v:Vector)
+      Kernel_write(clientName,v)
+    end
+    
+  end

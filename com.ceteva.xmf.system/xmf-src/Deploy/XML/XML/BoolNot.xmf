@@ -1,0 +1,14 @@
+parserImport XOCL;
+parserImport XML::PrintXML;
+
+import XML::Parser;
+import IO;
+  
+context BoolNot
+  @Operation toXML(out:OutputChannel)
+    @XML(out)
+      <BoolNot>
+        guard.toXML(out)
+      </BoolNot>
+    end
+  end

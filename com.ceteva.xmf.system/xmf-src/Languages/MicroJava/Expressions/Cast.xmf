@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Expressions;
+
+context Expressions
+
+  @Class Cast extends JExp
+  
+    @Attribute path : Seq(String) (?) end
+    @Attribute exp  : JExp (?) end
+    
+    @Constructor(path,exp) ! end
+    
+    @Operation pprint(out)
+      if path.isKindOf(SeqOfElement)
+      then format(out,"(~{.~;~S~})",Seq{path})
+      else path.pprint(out,0)
+      end;
+      exp.pprint(out)
+    end
+    
+    @Operation toXOCL():Performable
+      [| if <exp.toXOCL()>.isKindOf(<Structure::NamedType(path).toXOCL()>)
+         then <exp.toXOCL()>
+         else throw Exceptions::TypeError(<exp.toXOCL()>,<Structure::NamedType(path).toXOCL()>)
+         end
+      |]
+    end
+    
+  end

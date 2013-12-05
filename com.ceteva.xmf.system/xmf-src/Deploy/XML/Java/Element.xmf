@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Element
+  @Operation toJava(out:OutputChannel)
+    format(out,"    element = new Element();~%");
+    format(out,"    element.setTag(\"~S\");~%",Seq{tag});
+    format(out,"    attributes = new java.util.Vector();~%");
+    @For a in attributes do
+      a.toJava(out);
+      format(out,"    attributes.addElement(stack.pop());~%")
+    end;
+    format(out,"    element.setAttributes(attributes);~%");
+    children.toJava(out);
+    format(out,"    element.setChildren((Case)stack.pop());~%");
+    format(out,"    stack.push(element);~%")
+  end

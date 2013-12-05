@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import Walkers;
+import Code;
+import CodeContext;
+
+context CodeContext
+
+  @Class Line extends Context
+    
+    @Attribute line : Integer (?,!) end
+    
+    @Constructor(line,next) ! end
+    
+  end

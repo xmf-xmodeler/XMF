@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Equals
+  @Operation toJava(out:OutputChannel)
+    format(out,"    equals = new Equals();~%");
+    left.toJava(out);
+    format(out,"    equals.setLeft((GuardExp)stack.pop());~%");
+    right.toJava(out);
+    format(out,"    equals.setRight((GuardExp)stack.pop());~%");
+    format(out,"    stack.push(equals);~%")
+  end

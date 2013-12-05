@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Binary Expressions                           *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  Binary infix operators such as * and +. For the most part these are       *
+ *  handled by the VM and the compiler produces specific instructions for each*
+ *  operator. However, all the operators are overloaded and the VM will call  *
+ *  an appropriate operation if either of the operands are not of a type it   *
+ *  can handle natively.                                                      *
+ *                                                                            *
+ *  Note that it is not possible to add new binary operators via a declaration*
+ *  or somesuch. However, it should not be too dificult to add a new operator *
+ *  to the grammar and then handle it in the compiler/interpreter via an      *
+ *  appropriate desugaring.                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class BinExp extends OCL::OCL
+  
+    @Attribute left : OCL::OCL end
+    @Attribute binOp : String end
+    @Attribute right : OCL::OCL end
+    
+    @Constructor(left,binOp,right) ! end
+    
+    @Operation pprint(out,indent)
+      left.pprint(out,indent);
+      if binOp.isKindOf(String)
+      then format(out," "+ binOp + " ")
+      else binOp.pprint(out,indent)
+      end;
+      right.pprint(out,indent)
+    end
+    
+  end

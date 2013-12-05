@@ -1,0 +1,31 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~P                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg is pretty-printed to the output channel. Optionally *
+ *    the display width, ribbon width, print-length and print-depth can be    *
+ *    supplied as control arguments: ~<W,R,L,D>P. Otherwise defaults are used *
+ *    for these values.                                                       *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+let handlePPrint =
+      @Operation(char,output,formatContext)
+        if not Root.hasElement("Walkers") orelse not Walkers.hasElement("PPrint")
+        then output.writeString(formatContext.nextValueToString())
+        elseif formatContext.args->isEmpty
+        then output.writeString(formatContext.nextValue().pprint(100,40,10,3))
+        else
+          let width = formatContext.args->at(0);
+              ribbon = formatContext.args->at(1);
+              length = formatContext.args->at(2);
+              depth = formatContext.args->at(3);
+              linePosition = formatContext.args->at(4)
+          in output.writeString(formatContext.nextValue().pprint(width,ribbon,length,depth,linePosition))
+          end
+        end
+       end
+in format.defineHandler("P"->at(0),handlePPrint)
+end;
+     

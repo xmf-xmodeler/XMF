@@ -1,0 +1,90 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Let Expressions                             *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *  Let expressions introduce local variables. The variables are scoped over  *
+ *  the body of the let. The local variables are established in parallel      *
+ *  which in practice means they you cannot rely on the ordering of evaluation*
+ *  The variables can be updated using := within the body of the let.         *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Let extends OCL::OCL
+  
+    @Attribute bindings : Seq(ValueBinding) end
+    @Attribute body     : OCL::OCL          end
+    
+    @Constructor(bindings,body) ! end
+    
+    @Constructor(line,bindings,body) end
+
+    @Operation isDeclaration(body:Performable):Boolean
+    
+      // Returns true when the body of the let is
+      // headed by a declaration of the form
+      // declare(var,property)
+    
+      @Case body of
+        Order(Apply(Var("declare"),args),next) do
+          true 
+        end
+        else false
+      end
+    end
+
+    @Operation dropDeclarations(body:Performable):Performable
+    
+      // Returns the supplied body stripped of
+      // the declarations...
+    
+      @While self.isDeclaration(body) do
+        body := body.second
+      end;
+      body
+    end
+
+    @Operation hiddenLocals(body:Performable):Seq(String)
+    
+      // Returns a sequence of local names that
+      // have been declared as hidden...
+    
+      @Case body of
+        Order(Apply(Var("declare"),Seq{Var("hidden"),Var(local)}),next) do
+          Seq{local | self.hiddenLocals(next)}
+        end
+        else 
+          if self.isDeclaration(body)
+          then self.hiddenLocals(body.second)
+          else Seq{}
+          end
+      end
+    end
+
+    @Operation pprint(out,indent)
+      format(out,"let ");
+      if bindings.isKindOf(Seq(Element))
+      then
+        @For b in bindings do
+          b.pprint(out,indent + 4);
+          if not isLast 
+          then format(out,";~%~V",Seq{indent + 4})
+          else format(out,"~%~V",Seq{indent})
+          end
+        end
+      else 
+        // Assume that this is a dropped element....
+        bindings.pprint(out)
+      end;
+      format(out,"in ");
+      body.pprint(out,indent + 3);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

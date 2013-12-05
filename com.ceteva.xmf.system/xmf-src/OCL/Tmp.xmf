@@ -1,0 +1,57 @@
+parserImport XOCL;
+
+import OCL;
+
+context BoolExp
+  @Constructor(line,value) end
+  
+context FloatExp
+  @Constructor(line,prePoint,postPoint) end
+  
+context IntExp
+  @Constructor(line,value) end
+    
+context Let
+  @Constructor(line,bindings,body) end
+  
+context Lift
+  @Constructor(line,exp) end
+    
+context Self
+  @Constructor(line) end
+  
+context SetExp
+  @Constructor(line,collType,elements) end
+    
+context StrExp
+  @Constructor(line,value) end
+    
+context Throw
+  @Constructor(line,exp) end
+    
+context Try
+  @Constructor(line,body,name,handler) end
+     
+context If
+    @Operation init(args):Element 
+      if args->size = 2
+      then 
+        self.test := args->at(0);
+        self.set("then",args->at(1));
+        self.set("else",BoolExp(false))
+      elseif args->size = 3
+      then
+        self.test := args->at(0);
+        self.set("then",args->at(1));
+        self.set("else",args->at(2))
+      elseif args->size = 4
+      then
+        self.line := args->at(0);
+        self.test := args->at(1);
+        self.set("then",args->at(2));
+        self.set("else",args->at(3))
+      else self
+      end
+    end
+    
+    

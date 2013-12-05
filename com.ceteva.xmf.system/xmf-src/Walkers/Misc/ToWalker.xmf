@@ -1,0 +1,55 @@
+parserImport XOCL;
+
+import IO;
+
+context Package
+  @Operation writeWalker(file:String)
+  
+    // Writes a walker definition to the file...
+    
+    @WithOpenFile(fout -> file)
+      self.toWalker(fout)
+    end
+  end
+
+context Package
+  @Operation toWalker(out:OutputChannel)
+  
+    // Writes a walker definition for the classes in the
+    // supplied package. The code then provides a shell 
+    // definition that can be edited...
+    
+    format(out,"parserImport XOCL;~%~%");
+    format(out,"import Walkers;~%~%");
+    format(out,"context Root~%~%");
+    format(out,"  @Class ~SWalker extends Walker~%~%",Seq{name});
+    @For class in self.allContentsOf(Class)->asSeq->sortNamedElements when not class.isAbstract do
+      format(out,"    @Operation walk~S(",Seq{class.name()});
+      @For a in class.allAttributes()->asSeq->sortNamedElements do
+        format(out,"~S:~S,",Seq{a.name(),a.type.name()})
+      end;
+      format(out,"arg)~%");
+      format(out,"      ~S[",Seq{class.name()});
+      @For a in class.allAttributes()->asSeq->sortNamedElements do
+        if isFirst then format(out,"~%        ") end;
+        if a.hasAtomicType()
+        then format(out,"~S=~^self.walk(~S,arg)",Seq{a.name()})
+        else format(out,"~S=~^~S->collect(x | self.walk(x,arg))",Seq{a.name()})
+        end;
+        if not isLast then format(out,",~%        ") else format(out,"~%") end
+      end;
+      format(out,"      ]~%");
+      format(out,"    end~%~%")
+    end;
+    format(out,"    @Operation walkObject(o,arg)~%");
+    format(out,"      @CaseObj o of~%");
+    @For class in self.allContentsOf(Class)->asSeq->sortNamedElements when not class.isAbstract do
+      format(out,"        ~S[~{,~;~S~}] do~%",Seq{class.name(),class.allAttributes()->asSeq->sortNamedElements.name});
+      format(out,"          self.walk~S(~{~S,~}arg)~%",Seq{class.name(),class.allAttributes()->asSeq->sortNamedElements.name});
+      format(out,"        end~%")
+    end;
+    format(out,"          else super(o,arg)~%");
+    format(out,"      end~%");
+    format(out,"    end~%");
+    format(out,"  end~%")
+  end

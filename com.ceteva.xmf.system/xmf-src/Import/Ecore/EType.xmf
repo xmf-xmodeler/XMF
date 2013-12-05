@@ -1,0 +1,49 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import Import;
+
+context Ecore
+
+  @Grammar
+  
+    EType(dir,file,importer,isAtom) ::= 
+      Local^(file,importer,isAtom)
+    | DataType^(importer,isAtom)
+    | Imported^(dir,importer,isAtom).
+    
+    Local(file,importer,isAtom) ::= 
+      Tag n = Name
+      { @Operation() importer.getClass(file,n,isAtom) end }.
+      
+    DataType(importer,isAtom) ::=
+      'ecore' ':' 'EDataType' Path Tag t = BasicType
+      { if isAtom 
+        then t
+        else Seq(t)
+        end
+      }.
+      
+    Path ::= 'http' '://' (Name | '/' | Int | '.')*.
+    
+    Tag ::= '#//'.
+    
+    EcoreFile ::= n = Name '.' 'ecore' { n + ".ecore" }.
+      
+    BasicType ::=
+      'EString' { String }
+    | 'EInt' { Integer}
+    | 'EDate' { String }
+    | 'EBoolean' { Boolean}
+    | 'EFloat' { XCore.getElement("Float") }
+    | 'EDouble' { XCore.getElement("Float") }
+    | 'EJavaObject' { Object }.
+      
+    Imported(dir,importer,isAtom) ::= 
+      'ecore' ':' 'EClass' f = EcoreFile Tag n = Name
+      { @Operation() 
+          importer.importFile(dir,f);
+          importer.getClass(f,n,isAtom) 
+        end }.
+  
+  end

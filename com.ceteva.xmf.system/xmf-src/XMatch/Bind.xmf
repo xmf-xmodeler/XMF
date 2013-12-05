@@ -1,0 +1,40 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                       Binding Variables to Values                          *
+ *                       ---------------------------                          *
+ *                                                                            *
+ *  Matches the pattern which produces a value if it succeeds. The value is   *
+ *  bound to the variable name in the current environment passed to the       *
+ *  continuation.                                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XMatch;
+
+context XMatch
+
+  @Class Bind extends Pattern
+  
+    @Attribute name : String end
+    @Attribute pattern : Pattern end
+    
+    @Constructor(name,pattern) ! end
+    
+    @Operation match(chars,env,stack,succ,fail)
+      pattern.match(chars,env,stack,
+        @Operation(chars,env,stack,fail)
+          succ(chars,env.bind(name,stack->at(0)),stack,fail)
+        end,
+        fail)
+    end
+    
+    @Operation vars():Set(String)
+    
+      // Returns the set of vars bound in the receiver...
+      
+      pattern->vars()->including(name)
+    end
+    
+  end

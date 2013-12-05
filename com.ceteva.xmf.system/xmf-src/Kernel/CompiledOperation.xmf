@@ -1,0 +1,676 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Compiled Operations                             *
+ *                            -------------------                             *
+ *                                                                            *
+ * Compiled operations are invocable things that are implemented by the XMF   *
+ * VM. When an operation @Operation o(a,b,c..) e end is compiled, the static  *
+ * part (code and constants) becomes a code-box within the compiled operation *
+ * and the non-static part (the closed in variables and the properties) are   *
+ * implemented as state in the compiled operation.                            *
+ *                                                                            *
+ * You can treat compiled operations as objects via the properties. These act *
+ * like object-slots. In addition, compiled operations have daemons that fire *
+ * when any of the operation's state is changed.                              *                                                        *
+ *                                                                            *
+ * Closed-in variables (those referenced in the body of the operation but     *
+ * defined in the surrounding lexical scope) are referred to as 'globals' in  *
+ * the operations below (for historical reasons).                             *
+ *                                                                            *
+ * The imported name-spaces are referred to as 'dynamics' by the operations   *
+ * defined below. The dynamics of an operation can be modified and are used   *
+ * by the VM to resolve global-variable references at run-time. The dynamics  *
+ * field of a compiled-operation should be a sequence of pairs. A pair        *
+ * of the form Seq{2 | TABLE} where the table maps symbols to elements causes *
+ * references to global variables whose names are symbols in the table to     *
+ * produce the element as the value.                                          *
+ *                                                                            *
+ * You can access the source code of a compiled operation (unless the code was*
+ * not dumped as part of the compilation process). However, changing the      *
+ * source in a compiled operation will have no effect on its behaviour.       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context CompiledOperation
+  @Operation properties()
+    @Doc
+      Get the properties of the operation. The properties
+      are pairs of the form Seq{NAME | VALUE}.
+    end
+    Kernel_funProperties(self)
+  end
+  
+context CompiledOperation
+  @Operation setProperties(properties)
+    @Doc
+      Set the properties of the operation. The properties
+      are pairs of the form Seq{NAME | VALUE}.
+    end
+    Kernel_funSetProperties(self,properties)
+  end
+
+context CompiledOperation
+  @Operation setProperty(property,value)
+    @Doc
+      Set the property value. The property is created if
+      necessary.
+    end
+    self.setProperties(self.properties()->set(property,value))
+  end
+
+context CompiledOperation
+  @Operation addDaemon(daemon)
+    @Doc
+      Add a daemon to the operation. Any state changes to
+      the operation causes the daemon to fire.
+    end
+    self.setDaemons(self.daemons() + Seq{daemon})
+  end
+  
+context CompiledOperation
+
+  @Operation addNameChangedDaemon(d,actionSource)
+    @Doc
+      Use this operation to add a daemon that monitors the name of
+      a compiled operation for changes. The args for the daemon are
+      the new name and the old name.
+    end  
+    self.addDaemon(
+      @Operation(slot,newValue,oldValue)
+        if slot.name.toString() = "name" and newValue <> oldValue then
+          d.invoke(actionSource,Seq{newValue,oldValue})
+        end
+      end)
+   end 
+  
+context CompiledOperation 
+  @Operation arity():Integer
+    @Doc
+      Returns the number of arguments expected by the operation.
+    end
+    Kernel_funArity(self)
+  end
+  
+context CompiledOperation
+  @Operation break()
+    @Doc
+      Causes the operation to enter a break-loop when it is called.
+    end
+    if self.name().toString() <> "toString" and
+       self.name().toString() <> "name" and
+       not self.traced()
+    then Kernel_funSetTraced(self,self.breakFun(self))
+    end;
+    self
+  end
+  
+context CompiledOperation
+  @Operation codeBox()
+    @Doc
+      Returns the code-box for the operation. The code-box
+      contains the static part of the operation.
+    end
+    Kernel_funCodeBox(self)
+  end
+  
+context CompiledOperation
+  @Operation daemons():Seq(Operation)
+    @Doc
+      Return all the daemons for the operation.
+    end
+    if not self.hasProperty("daemons")
+    then Seq{} //self.setProperty("daemons",Seq{})
+    else self.property("daemons")
+    end
+  end
+  
+context CompiledOperation
+  @Operation dependencies():Set(Element) 
+    @Doc
+      Calculate the set of name-spaces tht this operation relies on.
+    end
+    self.imports()->asSet + 
+    self.globalValues()->asSet
+  end
+  
+context CompiledOperation 
+  @Operation doc()
+    self.ensureDoc(Kernel_funDoc(self))
+  end
+  
+context CompiledOperation 
+  @Operation dynamics()
+    @Doc
+      Returns the imported name-spaces and gobl variables for this
+      operation. The dynamics are a sequence of pairs where the
+      head of each pair is a tag (1 or 2) and the tail is either 
+      a binding or a table of bindings. Usually, a table of bindings
+      will be the contents table of a name-space.
+    end
+    Kernel_funDynamics(self)
+  end
+  
+context CompiledOperation
+  @Operation fire(slot,newValue,oldValue)
+    @For daemon in self.daemons() do
+      daemon.invoke(self,Seq{slot,newValue,oldValue})
+    end;
+    self
+  end
+  
+context CompiledOperation
+  @Operation get(name:String)
+    @Doc
+      Handles access to the state of a compiled-operation as
+      though the operation is an object.
+    end
+    @Case name.toString() of 
+      "arity"         do self.arity()      end
+      "codeBox"       do self.codeBox()    end
+      "documentation" do self.doc()        end
+      "dynamics"      do self.dynamics()   end
+      "globals"       do self.globals()    end
+      "isVarArgs"     do self.isVarArgs()  end
+      "name"          do self.name()       end
+      "owner"         do self.owner()      end
+      "properties"    do self.properties() end
+      "target"        do self.target()     end
+      "sig"           do self.sig()        end
+      "source"        do self.source()     end
+      "supers"        do self.supers()     end
+      "traced"        do self.traced()     end
+      "type"          do Element           end
+      else self.error("No slot named " + name.toString())
+    end
+  end
+  
+context CompiledOperation
+  @Operation getStructuralFeatureNames():Set(String)
+    Set{"arity",
+        "codeBox",
+        "documentation",
+        "dynamics",
+        "globals",
+        "isVarArgs",
+        "name",
+        "owner",
+        "properties",
+        "target",
+        "sig",
+        "supers",
+        "traced",
+        "type"}
+  end
+  
+context CompiledOperation
+  @Operation globals()
+    @Doc
+      Returns the closed-in variable storage for the operation.
+      The storage is a linked-list of vectors. The first vector
+      is local to the operation. The rest of the vectors are the
+      storage for lexically enclosing operations. The linked list
+      is implemented as vector pairs.
+    end
+    Kernel_funGlobals(self)
+  end
+  
+context CompiledOperation
+  @Operation globalValues():Seq(Element)
+    let globals = self.globals();
+        globalValues = Seq{}
+    in @While globals <> null do
+         let values = globals.ref(0)
+         in @Count i from 0 to values->size do
+              let value = values.ref(i)
+              in if value.isKindOf(NamedElement)
+                 then 
+                   if not globalValues->includes(value)
+                   then globalValues := globalValues + Seq{value}
+                   end
+                 end
+              end
+            end;
+            globals := globals.ref(1)
+         end
+       end;
+       globalValues
+    end
+  end
+  
+context CompiledOperation
+  @Operation hasProperty(property):Boolean
+    self.properties()->binds(property)
+  end
+  
+context CompiledOperation 
+  @Operation hasSlot(name:String):Boolean
+    self.getStructuralFeatureNames()->includes(name->toString)
+  end
+  
+context CompiledOperation
+  @Operation imports():Seq(Element)
+    @Doc
+      Returns all of the name-spaces that the operation
+      imports in most-specific to least-specific order.
+    end
+    let imports = Seq{};
+        globals = self.globals()
+    in @For dynamic in self.dynamics() do
+         if dynamic->head = 2 and 
+            dynamic->tail <> Root.contents and
+            dynamic->tail <> XCore.contents
+         then
+           let table = dynamic->tail
+           in @For value inTableValues table do
+                if value.isKindOf(XCore::Contained) and
+                   not value.isKindOf(XCore::Operation)
+                then 
+                  if value.owner <> null andthen
+                     not imports->includes(value.owner)
+                  then imports := imports + Seq{value.owner}
+                  end
+                end
+              end
+           end
+         end
+       end;
+       imports + Seq{XCore,Root}
+     end
+   end
+   
+context CompiledOperation 
+  @Operation importNameSpace(n:NameSpace)
+    @Doc
+      Imports the supplied name space and its contents to the
+      receiver. If the name space is already imported then no
+      change is made. Otherwise the name space is added as the
+      most specific imported name space.
+    end
+    if not self.imports(n)
+    then self.setDynamics(Seq{Seq{2 | n.contents} | self.dynamics()})
+    else self
+    end
+  end
+  
+context CompiledOperation
+  @Operation importNameSpaces(N:Seq(NameSpace))
+    @Doc
+      Import all the supplied name-spaces into the
+      operation.
+    end
+    @For nameSpace in N->reverse do
+      self.importNameSpace(nameSpace)
+    end
+  end
+  
+context CompiledOperation
+  @Operation imports(n:NameSpace):Boolean
+    @Doc
+      Returns true when the receiver imports the supplied
+      name space.
+    end
+    self.dynamics()->exists(pair | pair->head = 2 and pair->tail = n.contents)
+  end
+  
+context CompiledOperation 
+  @Operation init()
+    if self.dynamics().isKindOf(Operation)
+    then self.setDynamics((self.dynamics())())
+    else self
+    end
+  end
+  
+context CompiledOperation
+  @Operation isVarArgs():Boolean
+    @Doc
+      If a compiled operation has variable arguments then it may
+      be supplied with more than the required positional args. The
+      rest of the arguments are processed by building a sequence
+      from them and supplying the sequence as the value of the 
+      last argument.
+    end
+    Kernel_funIsVarArgs(self) 
+  end
+  
+context CompiledOperation 
+  @Operation locals():Integer
+    @Doc 
+      The number of locals required when the compiled operation
+      is called. Does not include the arguments.
+    end
+    self.codeBox().locals()
+  end
+  
+context CompiledOperation
+  @Operation name():Symbol
+    Kernel_codeBoxName(Kernel_funCodeBox(self))
+  end
+  
+context CompiledOperation
+  @Operation newListenerFor(class:Classifier)
+    let table = Kernel_newListeners()
+    in if self.hasProperty(Symbol("newListener"))
+       then 
+         let classes = self.property(Symbol("newListener"))
+         in self.setProperty(Symbol("newListener"),Seq{class | classes})
+         end
+       else self.setProperty(Symbol("newListener"),Seq{class})
+       end;
+       if table.hasKey(class)
+       then table.put(class,Seq{self | table.get(class)})
+       else table.put(class,Seq{self})
+       end
+     end
+  end
+  
+context CompiledOperation
+  @Operation owner()
+    Kernel_funOwner(self)
+  end
+  
+context CompiledOperation
+  @Operation paramNames():Seq(String)
+    @Doc
+      Returns the sequence of parameter names for the
+      operation.
+    end
+    let sig = Kernel_funSig(self)
+    in if sig <> null and sig <> Seq{}
+       then 
+         let args = sig->butLast
+         in args->collect(arg | arg->head)
+         end
+       else Seq{}
+       end
+    end
+  end
+  
+context CompiledOperation
+  @Operation paramTypes():Seq(Classifier)
+    @Doc 
+      Returns the sequence of parameter types that
+      were declared for the operation.
+    end
+    let sig = Kernel_funSig(self)
+    in if sig <> null and sig <> Seq{}
+       then 
+         let args = sig->butLast
+         in args->collect(arg | 
+             // In case that the type is not defined...
+             try Classifier::mapType(arg->at(1),self.imports())
+             catch(x) 
+               XCore::Element
+             end)
+         end
+       else Seq{}
+       end
+    end
+  end
+  
+context CompiledOperation
+  @Operation parserImports():Seq(NameSpace)
+  
+    // Many system operations just import XOCL, XCore and Root.
+    // This is used as the default so that we don't have the
+    // overhead of needing to retain this information.
+    
+    if not self.hasProperty(Symbol("parserImports"))
+    then Seq{XOCL,XCore,Root}
+    else
+      let paths = self.property(Symbol("parserImports"))
+      in // Careful some name spaces may no longer exist...
+         paths->collect(path |
+           try
+             path->ref(Seq{Root})
+           catch(x)
+             Root
+           end) + Seq{XCore,Root}
+      end
+    end
+  end
+  
+context CompiledOperation
+  @Operation property(property)
+    @Doc
+      Returns the value of the supplied property or
+      null if no property is defined.
+    end
+    self.properties()->lookup(property)
+  end
+  
+context CompiledOperation
+  @Operation removeDaemon(daemon,target)
+    self.setDaemons(self.daemons()->excluding(daemon))
+  end
+  
+context CompiledOperation
+  @Operation removeNameSpace(n:NameSpace)
+    @Doc
+      Removes the supplied name space from the receiver so that
+      it no longer imports all the names defined by the name
+      space.
+    end
+    @Find(pair,self.dynamics())
+      when pair->head = 2 and pair->tail = n.contents
+      do self.setDynamics(self.dynamics()->excluding(pair,false))
+    end
+  end
+  
+context CompiledOperation
+  @Operation set(name:String,value:Element)
+    @Doc
+      Use set to treat the state of the compiled operation as
+      an object.
+    end
+    @Case name.toString() of
+      "arity"         do self.setArity(value)           end
+      "codeBox"       do self.setCodeBox(value)         end
+      "documentation" do self.setDoc(value)             end
+      "dynamics"      do self.setDynamics(value)        end
+      "globals"       do self.setGlobals(value)         end
+      "isVarArgs"     do self.setIsVarArgs(value)       end
+      "properties"    do self.setProperties(value)      end
+      "name"          do self.setName(value.toString()) end
+      "owner"         do self.setOwner(value)           end
+      "sig"           do self.setSig(value)             end
+      "source"        do self.setSource(value)          end
+      "supers"        do self.setSupers(value)          end
+      "target"        do self.setTarget(value)          end
+      "traced"        do self.setTraced(value)          end
+      else self.error("No slot named " + name.toString())
+    end
+  end
+  
+context CompiledOperation
+  @Operation setArity(arity)
+    let oldArity = self.arity()
+    in Kernel_funSetArity(self,arity);
+       self.fire(Symbol("arity"),arity,oldArity)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setCodeBox(codeBox) 
+    let oldCodeBox = self.codeBox()
+    in Kernel_funSetCodeBox(self,codeBox);
+       self.fire(Symbol("codeBox"),codeBox,oldCodeBox)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setDaemons(daemons)
+    let oldDaemons = self.daemons()
+    in self.setProperty("daemons",daemons);
+       self.fire(Symbol("daemons"),daemons,oldDaemons)
+    end
+  end
+  
+context CompiledOperation 
+  @Operation setDoc(doc)
+    let oldDoc = self.doc();
+        newDoc = self.ensureDoc(doc)
+    in Kernel_funSetDoc(self,newDoc);
+       self.fire(Symbol("documentation"),newDoc,oldDoc)
+    end
+  end 
+  
+context CompiledOperation
+  @Operation setDynamics(dynamics)
+    let oldDynamics = self.dynamics()
+    in Kernel_funSetDynamics(self,dynamics);
+       self.fire(Symbol("dynamics"),dynamics,oldDynamics)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setGlobals(globals)
+    let oldGlobals = self.globals()
+    in Kernel_funSetGlobals(self,globals);
+       self.fire(Symbol("globals"),globals,oldGlobals)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setName(name)
+    let oldName = self.name()
+    in
+       Kernel_funSetCodeBox(self,Kernel_funCodeBox(self).copy());
+       Kernel_funSetName(self,Symbol(name.toString()));
+       self.fire(Symbol("name"),name,oldName);
+       if self.owner() <> null and self.owner().isKindOf(NameSpace)
+       then
+         self.owner().nameChanged(self,Symbol(name.toString()),oldName)
+       end;
+       self
+    end
+  end
+  
+context CompiledOperation
+  @Operation setOwner(owner)
+    let oldOwner = self.owner()
+    in Kernel_funSetOwner(self,owner);
+       self.fire(Symbol("owner"),owner,oldOwner)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setProperties(properties)
+    let oldProperties = self.properties()
+    in Kernel_funSetProperties(self,properties);
+       self.fire(Symbol("properties"),properties,oldProperties)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setSig(sig)
+    let oldSig = self.sig()
+    in Kernel_funSetSig(self,sig);
+       self.fire(Symbol("sig"),sig,oldSig)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setSource(source:String)
+    let oldSource = self.source()
+    in Kernel_funSetCodeBox(self,Kernel_funCodeBox(self).copy());
+       Kernel_codeBoxSetSource(Kernel_funCodeBox(self),source);
+       self.fire(Symbol("source"),source,oldSource)
+    end
+  end
+
+context CompiledOperation
+  @Operation setSupers(supers)
+    let oldSupers = self.supers()
+    in Kernel_funSetSupers(self,supers);
+       self.fire(Symbol("supers"),supers,oldSupers)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setTarget(target)
+    let oldTarget = self.target()
+    in Kernel_funSetSelf(self,target);
+       self.fire(Symbol("target"),target,oldTarget)
+    end
+  end
+  
+context CompiledOperation
+  @Operation setTraced(trace)
+    let oldTraced = self.traced()
+    in Kernel_funSetTraced(self,trace);
+       self.fire(Symbol("traced"),traced,oldTraced)
+    end
+  end
+  
+context CompiledOperation
+  @Operation sig()
+    @Doc
+      Returns the signature of the operation. This is a
+      sequence of the parameters and the return type. The
+      parameters are encoded as pairs being the name and
+      the type. The signature types are encoded and can be
+      decoded by Classifier::mapType.
+    end
+    Kernel_funSig(self)
+  end
+  
+context CompiledOperation
+  @Operation source():String
+    Kernel_codeBoxSource(Kernel_funCodeBox(self))
+  end
+  
+context CompiledOperation 
+  @Operation supers()
+    Kernel_funSupers(self)
+  end
+  
+context CompiledOperation
+  @Operation target():Element
+    Kernel_funSelf(self)
+  end
+  
+context CompiledOperation
+  @Operation toString():String
+    // Keep it short...
+    "<Op " + self.name() + ">"
+  end
+  
+context CompiledOperation
+  @Operation trace()
+    @Doc
+      Sets the operation to be traced. The operation prints out
+      debugging information when it is entered and exited. Note
+      that tracing is implemented by setting the traced slot of
+      the operation to a special operation that the VM will call
+      as a proxy.
+    end
+    if self.name().toString() <> "toString" and
+       self.name().toString() <> "name" and
+       not self.traced()
+    then Kernel_funSetTraced(self,self.traceFun(self))
+    end;
+    self
+  end
+  
+context CompiledOperation
+  @Operation traced():Boolean
+    Kernel_funTraced(self) <> null
+  end
+  
+context CompiledOperation
+  @Operation type():Classifier
+    let sig = Kernel_funSig(self)
+    in if sig <> null and sig <> Seq{}
+       then Classifier::mapType(sig->last,self.imports())
+       else Element
+       end
+    end
+  end
+  
+context CompiledOperation
+  @Operation untrace()
+    Kernel_funSetTraced(self,null)
+  end
+

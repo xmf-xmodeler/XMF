@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             BNF and Grammars                               *
+ *                             ----------------                               *
+ *                                                                            *
+ *  The BNF package defines the classes used to construct and compile         *
+ *  grammars. Grammars use an extended form of BNF. The main extensions are:  *
+ *                                                                            *
+ *    o the use of XOCL actions to synthesize values as a parse progresses.   *
+ *    o the ability to bind variables to the values synthesized by actions.   *
+ *      The variables can be referenced in subsequent actions.                *
+ *    o grammar rule parameters.                                              *
+ *                                                                            *
+ *    Grammars are compiled into LL(1) tables which support efficient parsing.*
+ *    Where a grammar is not LL(1) the parsing machinery supports             *
+ *    backtracking.                                                           *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Parser
+
+  @Package BNF
+  	
+  end

@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                      Take the Head of A Local Variable                     *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Optimizes the case when the head of a local variable is to be referenced. *
+ *  The instruction operand is the index of the local variable whose head is  *
+ *  pushed onto the stack.                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class LocalHead extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) ! end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+    @Operation toString():String
+      "<LocalHead " + name + "," + offset + ">"
+    end
+    
+  end
+  

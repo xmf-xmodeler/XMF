@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Star Clauses                               *
+ *                               ---------------                              *
+ *                                                                            *
+ *  A clause that has been created as as side-effect of lifting * out of a    *
+ *  clause body. These are synthetic clauses that will be created again when  *
+ *  the original clause is inherited. Using a sub-class of Clause allows the  *
+ *  synthetic clause to be marked so that it can be removed when the clauses  *
+ *  are inherited.                                                            *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class StarClause extends Clause
+    @Operation copy()
+      StarClause(name,args,body,Seq{})
+    end
+  end

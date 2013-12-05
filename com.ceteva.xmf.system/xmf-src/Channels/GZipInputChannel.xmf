@@ -1,0 +1,51 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                GZip Input Channels                         *
+ *                              -----------------------                       *
+ *                                                                            *
+ *    A file that has been encoded using a GZip Output Channel can be read    *
+ *    using a GZip Input Channel. The source of the GZipped information is    *
+ *    supplied from an underlying channel.                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context IO
+
+  @Class GZipInputChannel extends InputChannel
+  
+    @Attribute input : InputChannel end
+    @Attribute zin   : Element      end
+    
+    @Constructor(input) ! 
+      self.zin := Kernel_gzipInputChannel(input.channel())
+    end
+    
+    @Operation channel()
+      zin
+    end
+    
+    @Operation close()
+      Kernel_close(zin)
+    end
+    
+    @Operation eof() 
+      Kernel_eof(zin)
+    end
+    
+    @Operation peek():Integer
+      Kernel_peek(zin)
+    end
+    
+    @Operation read():Integer
+       Kernel_read(zin)
+    end
+    
+    @Operation setChannel(channel)
+      input.setChannel(channel)
+    end
+    
+  end

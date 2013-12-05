@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Updating NameSpaces                          *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  A named-element in a name-space can be updated using a path-update. The   *
+ *  path part defines the entry in a name-space that is to be changed to      *
+ *  contain the named-element that is produced by value.                      *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class PathUpdate extends OCL::OCL
+    
+    @Attribute path  : Path        end
+    @Attribute value : Performable end
+    
+    @Constructor(path,value) ! end
+    
+    @Operation desugar():Performable
+      let location = path.names->last;
+          nameSpace = Path(path.root,path.names->butLast)
+      in [| <nameSpace>.putElement(<StrExp(location)>,<value>) |]
+      end
+    end 
+    
+    @Operation pprint(out,indent)
+      path.pprint(out,indent);
+      format(out," :=");
+      value.pprint(out,indent)
+    end
+    
+  end

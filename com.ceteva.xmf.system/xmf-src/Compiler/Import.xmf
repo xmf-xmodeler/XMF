@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Imports                                   *
+ *                              ---------------                               *
+ *                                                                            *
+ *    Imports cause the current call frame to be extended with the referenced *
+ *    name-space. Import can actually be done using a basic call to a kernel  *
+ *    primitive. So compilation is just done by desugaring the import.        *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context OCL::Import
+  @Operation compile(env,frame,isLast,saveSource)
+    self.desugar().compile(env,frame,isLast,saveSource)
+  end
+      
+context OCL::Import
+  @Operation FV():Set(String)
+    self.desugar().FV()
+  end
+      
+context OCL::Import
+  @Operation maxLocals():Integer
+    self.desugar().maxLocals()
+  end
+      
+  

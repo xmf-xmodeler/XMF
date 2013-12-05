@@ -1,0 +1,60 @@
+parserImport XOCL;
+
+import OCL;
+
+context OCL
+
+  @Class CompilationUnit extends CompilationModuleElement
+     
+    // A compilation unit is produced by the parser when we load a file for
+    // compiling. Send the compilation unit a 'compile' message to compile
+    // the contents. If the compilation unit originated from a resource
+    // (e.g. a file) then the resource is named. The source code contained
+    // in the resource *may* be contained in the source slot of a unit.
+    // The imports are those packages that are imported at run-time and 
+    // are referenced by the program code. The expressions are evaluated 
+    // in the environment created by the imports.
+      
+    @Attribute imports  : Seq(Import)      (?,!,+,-) end
+    @Attribute exps     : Seq(Performable) (?,!,+,!) end
+    @Attribute source   : String           (?,!)     end
+    
+    @Constructor(resource) ! end
+    
+    @Constructor(imports,exps) end
+    
+    @Constructor(resource,imports,exps) end
+    
+    @Constructor(resource,imports,exps,source) end
+      
+    @Operation foldExps()
+      // Create a single expression to compile. The expression is the
+      // result of folding up the imports and the body expressions.
+      exps->iterate(exp exps = self.foldImports() | [| <exps>; <exp> |])
+    end 
+      
+    @Operation foldImports()
+      // Create a single expression from the imports.
+      imports->iterate(iclause exps = [| 0 |] | [| <exps>; <iclause> |])
+    end
+    
+    @Operation pprint():String
+      let sout = IO::StringOutputChannel()
+      in self.pprint(sout,0);
+         sout.getString()
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      @For i in imports do
+        i.pprint(out,indent);
+        if not isLast then format(out,"~%") end
+      end;
+      format(out,"~%~%");
+      @For exp in exps do
+        exp.pprint(out,indent);
+        format(out,";~%~%")
+      end
+    end
+      
+  end    

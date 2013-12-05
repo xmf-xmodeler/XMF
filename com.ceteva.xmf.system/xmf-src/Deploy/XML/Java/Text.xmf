@@ -1,0 +1,10 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+  
+context Text
+  @Operation toJava(out:OutputChannel)
+    format(out,"    text = new Text();~%");
+    format(out,"    stack.push(text);~%")
+  end

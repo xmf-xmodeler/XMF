@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+import XML::Parser;
+import IO;
+
+context Package
+  @Operation toXMLGrammar()
+    Grammar(name,Seq{},classes->asSeq->collect(class | 
+      class.toXMLClause()))
+  end
+   
+context Package 
+   @Operation deployXMLFactory(dir:String,pname:String,cname:String)
+     @WithOpenFile(fout -> dir + "/" + cname + ".java")
+       self.writeXMLFactory(fout,pname,cname)
+     end
+   end
+   
+context Package
+  @Operation writeXMLFactory(out:OutputChannel,pname:String,cname:String)
+     format(out,"package ~S;~%~%",Seq{pname});
+     format(out,"import engine.*;~%~%");
+     format(out,"public class ~S extends EventManager {~%~%",Seq{cname});
+     @For class in classes do
+       class.writeXMLFactoryMethod(out);
+       format(out,"~%")
+     end;
+     format(out,"~%}~%")
+   end        

@@ -1,0 +1,46 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               HTML Web Server                              *
+ *                            -------------------                             *
+ *                                                                            *
+ *  An instance of this class is created and acts as a server. It is called   *
+ *  via an XMF service from Java to handle the events as they occur.          *
+ ******************************************************************************/ 
+
+import DocTables;
+import Server;
+import Basic;
+
+context Server
+
+  @Class WebServer 
+
+    @Attribute sessions : XCore::Table = XCore::Table(10) end
+    
+    @Operation handle(sessionId:String,args:Seq(Element))
+    
+      // Called when an event occurs
+      // for an existing session...
+      
+      if self.hasSession(sessionId)
+      then sessions.get(sessionId).handle(args)
+      else "Error: no session for " + sessionId
+      end
+    end
+    
+    @Operation hasSession(id:String):Boolean
+      sessions.hasKey(id)
+    end
+    
+    @Operation initSession(sessionId:String,page:Page)
+    
+      // Called by the server the first time a session is
+      // created...
+      
+      sessions.put(sessionId,Session(page));
+      page.html()
+    end
+
+  end

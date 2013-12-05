@@ -1,0 +1,50 @@
+parserImport XOCL;
+
+import Languages;
+import XOCL;
+import MicroJava;
+import Structure;
+import Expressions;
+
+context Structure
+
+  @Class Field extends Feature
+  
+    @Attribute modifiers : Modifiers end
+    @Attribute type      : Type end
+    @Attribute name      : String end
+    @Attribute value     : JExp end
+    
+    @Constructor(name) end
+    
+    @Constructor(modifiers,type,name,value) ! end
+    
+    @Operation pprint(out,indent)
+      modifiers.pprint(out);
+      type.pprint(out);
+      format(out," ~S",Seq{name});
+      if value <> null
+      then 
+        format(out," = ");
+        value.pprint(out)
+      end;
+      format(out,";")
+    end
+    
+    
+    
+    @Operation toXOCL():Performable
+    
+      // Translate the field to an attribute.
+      
+      //if value = null 
+      //then [| @XOCL::Attribute <name> : <type.toXOCL()> end |]
+      //else [| @XOCL::Attribute <name> : <type.toXOCL()> = <value.toXOCL()> end |]
+      //end
+      
+      XOCL::Attribute(name,type.toXOCL())
+    end
+
+
+    
+  end

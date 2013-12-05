@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+import Languages;
+import MicroJava;
+import Statements;
+import Expressions;
+
+context Statements
+
+  @Class While extends Statement
+  
+    @Attribute test : JExp end
+    @Attribute body : Statement end
+    
+    @Constructor(test,body) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"while(");
+      test.pprint(out);
+      format(out,")~%~V",Seq{indent+2});
+      body.pprint(out,indent+2)
+    end
+    
+    @Operation toXOCL():Operation
+      @Operation(next:Performable):Performable
+        [| @While <test.toXOCL()> do <(body.toXOCL())([| null |])> end; <next> |]
+      end
+    end
+    
+  end

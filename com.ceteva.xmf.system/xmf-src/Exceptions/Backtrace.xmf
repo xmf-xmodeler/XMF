@@ -1,0 +1,92 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 Backtrace                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *    An exception is supplied with a copy of the VM stack when it is raised  *
+ *    by the VM. This is in a raw form (sequence of sequences). An exception  *
+ *    translates the raw form into an instance of Backtrace that contains     *
+ *    instances of StackFrame. This allows XMF to define behaviour for a      *
+ *    backtrace such as printing it out.                                      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import Exceptions;
+
+context Exceptions
+
+  @Class Backtrace
+  
+    @Doc
+      A sequence of call stack frames.
+    end
+  
+    @Attribute frames : Seq(StackFrame) end 
+    
+    @Constructor(frames) end
+    
+    @Operation diagnostic(short:Boolean)
+      self.diagnostic(short,stdout)
+    end
+    
+    @Operation diagnostic(short:Boolean,out)
+    
+      // Print diagnostic information about the backtrace.
+      // The argument determines whether or not the 
+      // information should just be the calls or contain
+      // full descriptions of th stack frame contents...
+      
+      if short
+      then self.printCalls(out)
+      else self.printBacktrace(out)
+      end
+    end
+    
+    @Operation printCalls()
+      self.printCalls(stdout)
+    end
+    
+    @Operation printCalls(out)
+    
+      // Print out the calls in the stack frames in 
+      // reverse order. Leaves out any of the internal
+      // stack frame information...
+      
+      @For frame in frames do
+        frame.printCall(out);
+        format(out,"~%")
+      end
+    end
+    
+    @Operation printBacktrace()
+      self.printBacktrace(stdout)
+    end
+    
+    @Operation printBacktrace(out)
+    
+      // Print out the frames. Each frame prints out its
+      // contents including the operation that was called
+      // the args and locals and the target of the message...
+      
+      let frames = frames;
+          index = 0;
+          unlimited = Exception::backtraceLimit < 0
+      in @While not frames->isEmpty and (index < Exception::backtraceLimit or unlimited) do
+           let frame = frames->head
+           in frame.print(out);
+              format(out,"~%----------------------------------~%~%",Seq{});
+              frames := frames->tail;
+              index := index + 1
+           end
+         end;
+         if not frames->isEmpty
+         then format(out,"~%...more frames (increase Exception::backtraceLimit).~%")
+         end
+      end
+    end
+    
+  end
+    
+    

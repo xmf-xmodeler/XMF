@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Perform an Operation Call                        *
+ *                      -----------------------------------                   *
+ *                                                                            *
+ *  The XMF VM implements a push-call policy. When a new call occurs (either  *
+ *  applying an operator or sending a message), a new open frame is created   *
+ *  and the argument values are pushed onto the stack. Once the args have     *
+ *  been pushed, the frame is closed and entered using the ENTER instruction. *
+ *  Entering a frame causes the VM to switch context to the current frame.    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Enter extends Instr
+  
+    @Attribute arity : Integer end
+    
+    @Constructor(arity) end
+    
+    @Operation toString():String
+      "<Enter " + arity + ">"
+    end
+    
+    @Operation operands():Integer
+      arity
+    end
+    
+  end

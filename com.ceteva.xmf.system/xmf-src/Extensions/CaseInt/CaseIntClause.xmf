@@ -1,0 +1,67 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            A Case Int Clause                               *
+ *                           -------------------                              *
+ *                                                                            *
+ *   A case-int-expression clause has a sequence of values that are available *
+ *   at compile-time. The values are used to populate a jump table with labels*
+ *   all of which perform the expression when the case-int dispatch integer   *
+ *   matches any of the values.                                               *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XOCL;
+
+context XOCL
+
+  @Class CaseIntClause
+  
+    @Attribute head : Seq(CaseIntValue) end
+    @Attribute body : Performable       end
+    
+    @Constructor(head,body) ! end
+    
+    @Operation compile(jumpTable,env,frame,isLast,saveSource)
+    
+      // When the case-int clause is compiled, it populates
+      // a jump table with a label that is associated with 
+      // the instructions produced by the compiler for the
+      // body of the clause...
+      
+      let instrs = body.compile(env,frame,isLast,saveSource);
+          label = Compiler::newLabel() then
+          taggedInstrs = Compiler::labelInstrs(instrs,label)
+      in @For value in head do
+           value.addLabel(label,jumpTable)
+         end;
+         taggedInstrs
+      end
+    end
+    
+    @Operation FV():Set(String)
+      body.FV()
+    end
+    
+    @Operation maxLocals():Integer
+      body.maxLocals()
+    end
+    
+    @Operation pprint(out,indent)
+      @For value in head do
+        value.pprint(out,indent);
+        if not isLast
+        then format(out,",")
+        end
+      end;
+      format(out," do~%~V",Seq{indent+2});
+      body.pprint(out,indent+2);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+    @Operation rangeSize():Integer
+      head->iterate(v range = 0 | range.max(v.rangeSize()))
+    end
+    
+  end

@@ -1,0 +1,81 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                           Abstract Operations                              *
+ *                           -------------------                              *
+ *                                                                            *
+ *   Abstract classes often define an interface that is abstract. This places *
+ *   a requirement on concrete sub-classes of the abstract class to implement *
+ *   the abstract interface in an appropriate way. XOCL provides AbstractOp   *
+ *   which is an operation without a body. If the abstract operation is ever  *
+ *   called, then an error is raised. The expectation is that the abstract    *
+ *   definition will be replaced in a sub-class (and not called via super).   *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+import Parser::BNF;
+
+context XOCL
+
+  @Class AbstractOp extends Sugar
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      // The grammar of an abstract operation is really the same as
+      // that for an operation without the body...
+    
+      AbstractOp ::= 
+        name = Name 
+        args = ('(' OpArgs ')')
+        type = AbstractOpType
+        doc = OpDoc
+        'end'
+        { AbstractOp(name,args,type,doc) }.
+      OpArgs ::= arg = Pattern args = (',' Pattern)* { Seq{arg | args } } | { Seq{} }.
+      OpDoc ::= Exp | { [| null |] }.
+      AbstractOpType ::= ':' TypeExp | { NamedType() }.
+      
+    end 
+    
+    @Attribute name : String       end
+    @Attribute args : Seq(Element) end
+    @Attribute type : TypeExp      end
+    @Attribute doc  : Performable  end
+   
+    @Constructor(name,args,type,doc) end
+    
+    @Operation desugar() 
+    
+      // The body of the operation created for an abstract operation
+      // just raises an error...
+      
+      let message = StrExp("I don't know how to perform " + name + " for ")
+      in Operation(Symbol(name),args,type,[| self.error(<message> + self.toString()) |],doc)
+      end
+    end
+    
+    @Operation pprint(out,indent)
+      let index = 0
+      in format(out,"@AbstractOp ~S(",Seq{name});
+         @For p in args do
+           p.pprint(out);
+           index := index + 1;
+           if index < args->size then format(out,",") end
+         end;
+         format(out,"):");
+         type.pprint(out,0);
+         format(out,"~%~V",Seq{indent + 2});
+         if doc <> null and doc.isKindOf(Doc)
+         then
+           doc.pprint(out,indent);
+           format(out,"~%~V",Seq{indent})
+         end;
+         format(out,"~%~Vend",Seq{indent})
+      end
+    end
+    
+  end

@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                 MapFailed                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *    An exception that is raised when a mapping runs out of clauses and has  *
+ *    no else clause.                                                         *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context Exceptions
+
+  @Class MapFailed extends Exception
+     
+    @Attribute map    : Element      end
+    @Attribute values : Seq(Element) end
+    
+    @Constructor(map,values) !
+       self.setBacktrace();
+       self.message := "Map " + map.toString() + " ran out of clauses for: " + (values->map("toString")->separateWith(", "))
+    end
+    
+  end
+      
+    

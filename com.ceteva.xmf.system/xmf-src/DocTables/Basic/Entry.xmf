@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               A Page Entry                                 *
+ *                            -------------------                             *
+ * Each element in a page is an entry. A page is a tree of elements and each  *
+ * entry can return its contents. When an event occurs on a page (such as a   *
+ * button press) the page is send a handle message which is distributed to all*
+ * the contents. If the entry handles the event then it should return a new   *
+ * page. If it does not handle the event then it should return null.          *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Entry isabstract
+  
+    @AbstractOp contents():Seq(Entry)
+    end
+    
+    @Operation handle(args)
+      let page = null
+      in @For entry in self.contents() when page = null do
+           page := entry.handle(args)
+         end;
+         page
+      end
+    end
+    
+  end

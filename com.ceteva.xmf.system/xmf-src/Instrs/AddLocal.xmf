@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Add 1 to a Local                              *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Commands of the form x := x + 1 where x is a local variable are handled   *
+ *  by the IncLocal(n) instruction where n is the index of x in the call      *
+ *  frame.                                                                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class AddLocal extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<AddLocal " + name + "," + offset + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

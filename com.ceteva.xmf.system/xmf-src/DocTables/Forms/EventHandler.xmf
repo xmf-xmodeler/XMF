@@ -1,0 +1,39 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Event Handling Entries                            *
+ *                          ----------------------                            *
+ *                                                                            *
+ *  An entry that is an event handler uses an operation to handle the events. *
+ *  When an event, such as a button press, occurs, it is broadcast to all     *
+ *  entries on the page. Each event handler uses a unique label (generated    *
+ *  by the EventHandler class) to check whether the arguments supplied to the *
+ *  handler operation should be processed by the entry. Event handlers should *
+ *  only occur in forms.                                                      *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class EventHandler isabstract
+  
+    @Bind labelCounter = 0 end
+
+    @Attribute handler : Operation (?,!) end
+
+    @Operation generateLabel()
+    
+      // Used to generate a unique label for
+      // a form.
+      
+      EventHandler::labelCounter := EventHandler::labelCounter + 1;
+      "L" + EventHandler::labelCounter
+    end 
+
+  end

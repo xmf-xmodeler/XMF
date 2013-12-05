@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              XML Output Aspect                             *
+ *                            ----------------------                          *
+ *                                                                            *
+ *  Add an aspect to Element that allows any element to be written out in XML *
+ *  format. This aspects sets a default formatter which you may need to change*
+ *  if you want your own XML encoding. By default, name-spaces are formatted  *
+ *  as atomic elements.                                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+
+context Element
+
+  @Operation writeXML(out:OutputChannel)
+     
+     // Write the receiver in XML format to the supplied 
+     // output channel. All name spaces will be written
+     // as references.
+   
+    let formatter = NameSpaceXMLFormatter(Seq{}) then
+        xmlout = XMLOutputChannel(out,formatter)
+    in xmlout.writeValue(self)
+    end
+  end
+  
+context Element
+
+  @Operation writeXMLFile(file:String)
+    
+    //  Write the receiver in XML format to the supplied 
+    //  file. The file is created if necessary.
+ 
+    @WithOpenFile(fout -> file)
+      self.writeXML(fout)
+    end
+  end
+  

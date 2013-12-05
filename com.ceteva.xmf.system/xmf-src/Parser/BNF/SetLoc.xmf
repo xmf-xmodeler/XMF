@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Set a Local Variable                           *
+ *                             --------------------                           *
+ *                                                                            *
+ *  Grammar local variables are maintained in the stack frame that implements *
+ *  the call to the clause that owns the variables. Name references in a      *
+ *  clause are resolved to be indices into the call frame. When a variable is *
+ *  set, the value is in the RESULT register of the machine and the SetLoc    *
+ *  instruction defines the offset into the current frame.                    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+
+context Parser::BNF
+
+  @Class SetLoc extends Recognizer
+  
+     @Attribute index : Integer (?,!) end
+     
+     @Constructor(index) ! end
+    
+  end

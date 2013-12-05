@@ -1,0 +1,29 @@
+/******************************************************************************
+ *                                                                            *
+ *                                  ~[ ; ]                                    *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg should be a boolean. If it is true then the control *
+ *    to ; is processed otherwise the control from ; to ] is processed.       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleConditional =
+     @Operation(char,output,formatContext)
+       let bool = formatContext.nextValue();
+           controlTrue = formatContext.controlTo(";"->at(0))
+       in let controlFalse = formatContext.controlTo("]"->at(0))
+          in if bool.isKindOf(Boolean)
+             then 
+               if bool
+               then formatContext.appendControl(controlTrue)
+               else formatContext.appendControl(controlFalse)
+               end
+             else formatContext.error("~[ expects a boolean: " + bool.toString())
+             end
+          end
+       end
+     end
+in format.defineHandler("["->at(0),handleConditional)
+end;
+     

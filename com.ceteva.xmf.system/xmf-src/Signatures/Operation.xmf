@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+
+context XCore::Operation
+  @Operation toType()
+    Fun(self.paramTypes()->map("toType"),self.type().toType())
+  end
+  
+context XCore::Operation
+  @Operation toNamedElement()
+    Operation(self.paramTypes()->collect(t | Delayed(@Operation() t.toType() end)),Delayed(@Operation() self.type().toType() end))
+  end

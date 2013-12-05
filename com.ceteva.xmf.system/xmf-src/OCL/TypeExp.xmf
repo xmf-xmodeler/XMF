@@ -1,0 +1,54 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Type Expressions                              *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  Type expressions can occur in a variety of syntax places such as          *
+ *  operation parameters and return values. A type expression is one of three *
+ *  types: named (a path to a classifier), parametric (applied to type args)  *
+ *  or an operation type (domain types and a return type).                    *
+ *                                                                            *
+ *  When an operation is created, it has a signature that encodes the arg     *
+ *  types and the return type. Rather than representing the types as instances*
+ *  of TypeExp, the types are encoded using tags PARAMETRIC, NAMED and OPTYPE *
+ *  as defined below. This is just more space efficient.                      *
+ *                                                                            *
+ *  Note that for historical reasons, not all places where type expressions   *
+ *  occur in syntax use TypeExp instances. This is a shame and probably should*
+ *  be addressed at some stage.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class TypeExp isabstract extends OCL::OCL
+  
+    // The following constants are used to encode a
+    // type in a signature. They are used as tags so
+    // that a signature consists of tagged strings...
+    
+    @Bind PARAMETRIC = 1 end
+    @Bind NAMED      = 2 end
+    @Bind OPTYPE     = 3 end
+    
+    @AbstractOp toSig()
+    
+      // Transforms the receiver into a signature componentof
+      // the form Seq{TYPE,...} where TYPE is one of PARAMETRIC
+      // or NAMED.
+      
+    end
+    
+    @AbstractOp toExp():Performable
+    
+      // Transforms the receiver into an expression
+      // that can be used to construct the type at
+      // run-time...
+      
+    end
+    
+  end

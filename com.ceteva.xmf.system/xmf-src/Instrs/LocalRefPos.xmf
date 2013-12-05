@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *             Reference to Local Variables At A Given Position               *
+ *             ------------------------------------------------               *
+ *                                                                            *
+ *  Optimizes the case when a local variable is to be referenced and when the *
+ *  compiler would normally emit a preceding LINE instruction. If the local   *
+ *  index *and* the line number can fit into the operands of a LOCALREFPOS    *
+ *  instruction then this can be emitted as an optimization.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class LocalRefPos extends Instr
+  
+    @Attribute name      : String end
+    @Attribute offset    : Integer end
+    @Attribute lineCount : Integer end
+    
+    @Constructor(name,offset,lineCount) end
+    
+    @Operation operands():Integer
+      Kernel_mk24bit(offset,lineCount.byte(2),lineCount.byte(1))
+    end
+    
+    @Operation toString():String
+      "<LocalRefPos " + name + "," + offset + " " + lineCount + ">"
+    end
+    
+  end
+  

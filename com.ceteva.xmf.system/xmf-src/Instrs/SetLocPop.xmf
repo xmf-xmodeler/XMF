@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *           Set the Value of a Local Variable and Pop The Stack              *
+ *           ---------------------------------------------------              *
+ *                                                                            *
+ *  Same as SETLOCAL except that the stack is popped.                         *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class SetLocPop extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation toString():String
+      "<SetLocPop " + name + "," + offset + ">"
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+  end
+  

@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Referencing a Slot in Self                        *
+ *                          ---------------------------                       *
+ *                                                                            *
+ *  Like Dot except that the object to be referenced is the target in the     *
+ *  current stack frame.                                                      *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+  
+  @Class DotSelf extends Instr
+  
+    @Attribute name : String end
+    @Attribute constOffset : Integer end
+    
+    @Constructor(name) end
+    
+    @Operation assemble(codeBox)
+      self.constOffset := codeBox.constOffset(name);
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      constOffset
+    end
+    
+    @Operation toString():String
+      "<DotSelf " + name.toString() + ">"
+    end
+    
+  end

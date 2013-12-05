@@ -1,0 +1,132 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Foreign Objects                               *
+ *                              ---------------                               *
+ *                                                                            *
+ *   A foreign object is an object that is implemented in Java. Such objects  *
+ *   are maintained by the VM and exposed to XOCL as instances of the class   *
+ *   ForeignObject. Standard object-based VM instructions such as DOT are     *
+ *   handled at the VM level. Foreign objects need a minimal life-support     *
+ *   structure for XOCL, that structure is defined in this file.              *
+ *                                                                            *
+ *   Referencing the slot of a foreign object causes the slot reference to be *
+ *   handled at the Java level. The VM will do its best to translate the      *
+ *   resulting value into an XOCL value (see below). Similarly, for slot      *
+ *   update, the value to be placed in the slot is traslated by the VM before *
+ *   updating the Java slot.                                                  *
+ *                                                                            *
+ *   A foreign object has a classifier returned by of(). This may be the      *
+ *   ForeignObject or a sub-class. In any case, the classifier of a foreign   *
+ *   object may define XOCL operations that take precedence when sending      *
+ *   messages to the foreign object.                                          *
+ *                                                                            *
+ *   Sending a message to a foreign object occurs at the VM level. The arg    *
+ *   values are translated from XOCL values to Java values and the method is  *
+ *   invoked. The resulting Java value is then translated to an XOCL value    *
+ *   before being returned.                                                   *
+ *                                                                            *
+ *   Note that the rules of overloading in Java can cause problems for the    *
+ *   invocation mechanism. It is not always possible to select the Java       *
+ *   method based on the name and the XOCL values alone.                      *
+ *                                                                            *
+ *   Note that, since Java classes are also Java objects then these are also  *
+ *   treated as foreign objects.                                              *
+ *                                                                            *
+ *   Translation of values is as follows:                                     *
+ *                                                                            *
+ *         XOCL                                         Java                  *
+ *   ---------------------------------------------------------------------    *
+ *      String                                         String                 *
+ *      Symbol                                         String                 *
+ *      Integer                                        int                    *
+ *      Float                                          double                 *
+ *      Boolean                                        boolean                *
+ *      Seq(T)                                         Vector<T>              *
+ *      Seq(T)                                         Array[T]               *
+ *      Set(T)                                         Vector<T>              *
+ *      Set(T)                                         Array[T]               *
+ *      Object                                         --------               *
+ *      ForeignObject                                  Object                 *
+ *      Vector                                         Vector                 *
+ *      Null                                           null                   *
+ *                                                                            *
+ ******************************************************************************/ 
+  
+context ForeignObject
+  @Operation target()
+    self
+  end
+  
+context ForeignObject
+  @Operation toString():String
+    @Find(m,self.getClass().getMethods())
+      when m.getName() = "toString"
+      do Kernel_invokeMethod(m,self,Seq{self,Seq{}})
+      else null
+    end
+  end
+
+context ForeignObject
+
+  @Operation send(message,args):Element
+
+    @Doc
+      When a message is sent to a foreign object, XOCL defined operations
+      are tried before the Java defined operations.
+    end
+    
+    let name = if message.isKindOf(Symbol) then message else Symbol(message) end;
+        operations = self.of().allOperations()->asSeq
+    in let operations = operations->select(o | 
+             o.name = name and 
+             (o.arity() = args->size or 
+              (o.isVarArgs() and (args->size >= (o.arity() - 1)))))
+       in if operations->isEmpty
+          then Kernel_sendForeignInstance(self,message,args)
+          else 
+            let op = operations->head
+            in op.invoke(self,args,operations)
+            end
+          end
+       end
+    end
+  end
+  
+context ForeignObject
+  @Operation invoke(target,args)
+  
+    @Doc
+      Invoking a foreign object might mean that we want to instantiate
+      a Java class. Check whether or not the receiver is a Java class
+      by comparing its class with java.lang.Class. If it is a Java class
+      then search for an appropriate constructor and use that to create
+      a new instance.
+    end
+    
+    if self.getClass().getName() = "java.lang.Class"
+    then 
+      let C = self.getConstructors();
+          c = null
+      in @While c = null and not C->isEmpty do
+           let constructor = C->head then
+               argTypes = constructor.getParameterTypes()
+           in if argTypes->size = args->size andthen
+                 Java::typesMatch(args,argTypes)
+              then 
+                c := constructor;
+                args := args->zip(argTypes)->collect(pair | 
+                  Kernel_toJava(pair->head,pair->tail))
+              else C := C->tail
+              end
+           end
+         end;
+         if c = null
+         then self.newInstance()
+         else c.newInstance(args)
+         end
+      end
+    else super(target,args)
+    end
+  end

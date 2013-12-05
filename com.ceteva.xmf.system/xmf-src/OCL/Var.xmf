@@ -1,0 +1,50 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Variables                                *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  Variables in source code are just names. In most cases the name resolves  *
+ *  to a value (although if the source code is processed, then the name may   *
+ *  represent something altogether more involved).                            *  
+ *                                                                            *
+ *  How the name is resolved will depend on the how the name was bound in the *
+ *  first place. Typical types of binding are: local variables, closed-in     *
+ *  variables and dynamic variables (imported from name-spaces). The          *
+ *  occurrence of a name does not tell you about the type of binding which is *
+ *  resolved by the evaluator or the compiler.                                *  
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Var extends OCL::OCL
+    
+    @Attribute name      : String  end       
+    
+    // The following are deprecated...
+    
+    @Attribute sourceSet : Boolean end  // Set when the line/char info is valid.
+    @Attribute lineCount : Integer end  
+    @Attribute charCount : Integer end  
+    
+    @Constructor(name) 
+      self.sourceSet := false
+    end
+    
+    @Constructor(name,line) ! 
+      self.sourceSet := true
+    end
+    
+    @Constructor(name,lineCount,charCount) 
+      self.sourceSet := true
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"~S",Seq{name})
+    end
+    
+  end

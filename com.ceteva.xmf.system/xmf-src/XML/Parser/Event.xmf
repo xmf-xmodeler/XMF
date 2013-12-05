@@ -1,0 +1,35 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XML::Parser;
+
+context XML::Parser
+
+  @Class Event extends Command
+  
+    // Used when deploying to a stand-alone Java XML parser.
+    // The events are the calls against a Java interface...
+  
+    @Grammar extends Command.grammar
+     
+       Event ::= n = Name result = Result a = Args 'end' {
+       
+         Event(n,a,result)
+         
+       }.
+       
+       Result ::= '->' { false } | '<-' { true }.
+       
+    end
+    
+    @Attribute name   : String          (?) end
+    @Attribute args   : Seq(CommandArg) (?) end
+    @Attribute result : Boolean         (?) end 
+  
+    @Constructor(name,args,result) ! end
+    
+    @Operation pprint(out,indent)
+      format(out,"@Event ~S ~S (~{,~;~S~}) end",Seq{name,if result then "<-" else "->" end,args})
+    end
+    
+  end

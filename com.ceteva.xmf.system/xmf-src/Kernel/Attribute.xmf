@@ -1,0 +1,170 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Attributes                                  *
+ *                              ---------------                               *
+ *                                                                            *
+ *   Attributes are added to classes to describe the slots that the class     *
+ *   instances have. Attributes have names, types and properties. The         *
+ *   properties are used to tag attributes with user name/value pairs.        *
+ *   When you create an instance of a class, all of its local and inherited   *
+ *   attributes are used to create the storage for the new instance whose     *
+ *   slots are initialised to the default value of the attribute type.        *
+ *                                                                            *
+ *   An attribute may have an initialisation value. This is supplied by an    *
+ *   operation that is called once (if the attribute is static) or each time  *
+ *   the attribute is used to create a slot. Static attributes share the same *
+ *   initialisation values between instances (which are different slots).     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Attribute
+  @Operation deleteProperty(name)
+    self.properties := properties->reject(pair | pair->head = name)
+  end
+
+context Attribute 
+  @Operation dependencies():Set(Element)
+    // Dependencies are used to calculate which types a given element
+    // depends on...
+    Set{self.underlyingType()}
+  end
+
+context Attribute
+  @Operation hasAtomicType():Boolean
+    // Use this operation to determine whether the slots described
+    // by this attribute have collections in them or single values...
+    not(self.hasSeqType() or self.hasSetType())
+  end
+  
+context Attribute
+  @Operation hasSeqType():Boolean
+    type.of() = Seq
+  end
+  
+context Attribute
+  @Operation hasSetType():Boolean
+    type.of() = Set
+  end
+  
+context Attribute
+  @Operation init(args)
+  
+    // When a new attribute is initialised it is supplied with
+    // the initialisation args. There is a bit of fiddling around
+    // due to variable length initialisation arguments (legacy)
+    // and then checking that the attribute name is a symbol.
+    // The initialisation args are name, type, init, where init
+    // is an operation that calculates the initialisation value 
+    // for slots created from the attribute...
+    
+    if args->size = 0
+    then 
+      self.name := Symbol("att");
+      self.type := Element
+    elseif args->size = 1
+    then
+      self.name := Symbol(args->at(0).toString());
+      self.type := Element
+    elseif args->size <= 3
+    then
+      self.name := 
+        if args->at(0).isKindOf(Symbol) 
+        then args->at(0) 
+        else Symbol(args->at(0)) 
+        end;
+      self.type := args->at(1);
+      if args->size = 3
+      then self.init := args->at(2)
+      end;
+      self
+    else super(args)
+    end 
+  end
+
+context Attribute
+  @Operation init():Element
+    if type.isKindOf(Operation) and owner <> null
+    then self.type := type(); self
+    else self
+    end
+  end
+  
+context Attribute
+  @Operation  getInitialValue():Element
+  
+    // The initialisation value for a slot created from an 
+    // attribute is either the value returned by calling the
+    // init operation or, if that is null, the default value
+    // of the attribute's type...
+    
+    if init = null
+    then type.default()
+    else init()
+    end
+  end
+  
+context Attribute
+  @Operation getProperty(name,default)
+    if self.hasProperty(name)
+    then properties->lookup(name)
+    else default
+    end
+  end
+  
+context Attribute 
+  @Operation hasProperty(name)
+    properties->binds(name)
+  end
+  
+context Attribute
+  @Operation isStatic():Boolean
+  
+    // A static attribute creates the initialsation value once and
+    // then caches it under the 'value' property of the attribute.
+    // Once created the value is used for each slot created from 
+    // the attribute...
+    
+    init = null orelse
+    init.hasProperty("value")
+  end
+  
+context Attribute 
+  @Operation repopulate(a:Attribute)
+  
+    // Used to copy one attribute into another attribute...
+    
+    self.isComposite := a.isComposite;
+    self.init := a.init;
+    self.name := a.name;
+    self.owner := a.owner;
+    self.type := a.type
+  end
+  
+context Attribute
+  @Operation setProperty(name,value)
+    self.deleteProperty(name);
+    self.properties := properties->bind(name,value)
+  end
+  
+context Attribute
+  @Operation toString()
+    "<Attribute " + name.toString() + " : " + type.name.toString() + ">"
+  end 
+  
+context Attribute
+  @Operation underlyingType():Classifier
+  
+    // The underlying type of an attribute is the type as
+    //  would appear at the target of a directed association on
+    //  a class diagram. All occurrences of Set(..) and Seq(..) 
+    //  are stripped off.
+      
+    let t = type
+    in @While t.isKindOf(Seq) or t.isKindOf(Set) do
+         t := t.elementType
+       end;
+       t
+    end
+  end

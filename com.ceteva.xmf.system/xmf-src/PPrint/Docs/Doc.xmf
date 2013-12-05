@@ -1,0 +1,31 @@
+parserImport XOCL;
+
+import Docs;
+
+context Docs
+
+  @Class Doc isabstract
+  
+    @AbstractOp pprint(w,r,i,b,pt,pl,pr,s,f,cut) end
+    
+    @Operation pprint(w,r)
+      let m = Machine(w,r)
+      in m.load(Seq{self});
+         m.run();
+         m.text()
+      end
+    end
+
+  
+    @Operation pprint1(w,r)
+      let b = Buffer(100,true)
+      in self.pprint(w,r,0,b,0,0,0,
+           @Operation(pt,pl,pr,f,cut)
+             b.toString().subString(0,pt)
+           end,
+           null,
+           null)
+      end
+    end
+     
+  end

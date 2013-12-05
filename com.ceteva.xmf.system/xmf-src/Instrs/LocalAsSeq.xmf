@@ -1,0 +1,38 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Transform a Local Variable to a Sequence                *
+ *                    ----------------------------------------                *
+ *                                                                            *
+ *  Optimizes the ASSEQ instruction for the case where the value is local.    *
+ *  The instruction operand is the index of the local variable in the current *
+ *  stack frame.                                                              *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class LocalAsSeq extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+    @Operation toString():String
+      "<LocalAsSeq " + name + "," + offset + ">"
+    end
+    
+  end
+  

@@ -1,0 +1,13 @@
+parserImport XOCL;
+
+import OCL;
+
+context OCL
+
+  @Class CompilationModuleElement isabstract 
+     
+    // An element in a compilation module.
+    
+    @Attribute resource : String (?,!) end
+      
+  end    

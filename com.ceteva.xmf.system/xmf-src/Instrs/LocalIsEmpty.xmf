@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                    Checking Whether a Local Variable is Empty              *
+ *                    ------------------------------------------              *
+ *                                                                            *
+ *  Optimizes the ISEMPTY instruction when the value is local. The instruction*
+ *  operand is the index of the local variable in the current stack frame.    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class LocalIsEmpty extends Instr
+  
+    @Attribute name : String end
+    @Attribute offset : Integer end
+    
+    @Constructor(name,offset) end
+    
+    @Operation assemble(codeBox)
+      codeBox.addInstr(self)
+    end
+    
+    @Operation operands():Integer
+      offset
+    end
+    
+    @Operation toString():String
+      "<LocalIsEmpty " + name + "," + offset + ">"
+    end
+    
+  end
+  

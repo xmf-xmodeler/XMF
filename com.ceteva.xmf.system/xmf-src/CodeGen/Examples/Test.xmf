@@ -1,0 +1,49 @@
+parserImport XOCL;
+parserImport CodeGen;
+
+context Class 
+  @Operation code() 
+    @Java(stdout,7)
+      class <$name$> { 
+        <$ 
+          @For a in attributes do 
+            [| <$a.underlyingType().name()$> <$a.name()$>; 
+            |] 
+          e_nd
+        $>
+        <$
+          @For o in operations do 
+            [| <$o.name()$> () {
+               }
+            |]
+          e_nd
+        $> 
+      }
+    end
+  end
+  
+context Root
+  @Operation classToTable(c)
+    @Table(stdout,7)
+      table <c.name> {
+        // Table for <c.path()>
+        <@For a in c.attributes do
+          [ field <a.name> : <a.type.name.toString()>;
+          ]
+         e_nd> 
+      }
+    end
+  end
+  
+context Root
+  @Operation classToHTML(c)
+    @HTML(stdout,0) 
+      <html>
+        <table>
+          <tr>
+            <td> { c.name } <td>
+          </tr>
+        </table>
+      </html>
+    end
+  end

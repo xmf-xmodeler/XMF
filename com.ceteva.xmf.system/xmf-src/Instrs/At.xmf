@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Indexing Into a Collection                        *
+ *                          --------------------------                        *
+ *                                                                            *
+ *  Pops a collection and then pops an index. Pushes the value at the supplied*
+ *  index. This instruction is overloaded for a variety of collection types.  *
+ *  If the VM cannot handle the supplied collection then the at/1 operation is*
+ *  called.                                                                   *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class At extends Instr
+    
+  end

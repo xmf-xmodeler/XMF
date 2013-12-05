@@ -1,0 +1,23 @@
+parserImport XOCL;
+
+import Associations;
+
+context Associations
+
+  @Class Star extends Multiplicity
+  
+    //  An end with multiplicity * requires that the attribute
+    //  is associated with 0 or more instances of the appropriate 
+    //  class.
+    
+    @Constructor() end
+    
+    @Operation typeExp(type)
+      [| Set(<type>) |]
+    end
+
+    @Operation labelString():String
+      "*"
+    end
+
+  end

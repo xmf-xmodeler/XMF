@@ -1,0 +1,54 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import TopLevel;
+  
+Command::handlers.put("pp",
+  @Operation(args,target,env,imports) 
+     @Doc
+       ?pp                  Display the current pretty-printing settings.
+       ?pp (d|l,p,r) <INT>  Set the pretty print depth, length, page or ribbon.
+       ?pp (on|off)         Toggle pretty printing at the top level.
+       ?pp x                Display the most recent exception in full.
+     end
+     if args->size = 0
+     then
+       let topLevel = xmf.property("topLevel") 
+       in format(stdout,"Current pretty-print settings:~%~%");
+          format(stdout,"  printDepth = ~S~%",Seq{topLevel.printDepth});
+          format(stdout,"  printLength = ~S~%",Seq{topLevel.printLength});
+          format(stdout,"  pageWidth = ~S~%",Seq{topLevel.pageWidth});
+          format(stdout,"  ribbonWidth = ~S~%",Seq{topLevel.ribbonWidth});
+          format(stdout,"  printPrettily = ~S~%~%",Seq{topLevel.printPrettily})
+       end
+     elseif args->size >= 1
+     then
+       let mod = args->at(0);
+           topLevel = xmf.property("topLevel")
+       in @Case mod of
+            "d" do
+               topLevel.printDepth := args->at(1).asInt()
+             end
+            "l" do
+              topLevel.printLength := args->at(1).asInt()
+            end
+            "p" do
+              topLevel.pageWidth := args->at(1).asInt()
+            end
+            "r" do
+              topLevel.ribbonWidth := args->at(1).asInt()
+            end
+            "on" do
+              topLevel.printPrettily := true
+            end
+            "off" do
+              topLevel.printPrettily := false
+            end
+            "x" do
+              xmf.exception.printBacktrace(false)
+            end
+            else self.error("Unknown pp modifier: " + mod)
+          end
+       end
+     end
+  end);

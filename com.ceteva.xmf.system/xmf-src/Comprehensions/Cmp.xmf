@@ -1,0 +1,85 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import XOCL;
+import Comprehensions;
+
+context Comprehensions
+
+  @Class Cmp extends Sugar
+  
+    // A comprehension is like a standard set-comprehension from
+    // mathematics (except it works on XMF sequences). For example
+    // a comprehension of the form...
+    // @Cmp x + 1 where x <- S, ? odd(x) end
+    // filters the collection S and adds 1 to each odd number.
+    
+    @Attribute body     : Performable    end
+    @Attribute clauses  : Seq(Clause)    end
+    @Attribute modifier : String = "Seq" end
+    
+    @Constructor(modifier,body,clauses) ! end
+    
+    @Constructor(body,clauses) end
+    
+    @Grammar extends OCL::OCL.grammar
+      Cmp ::= modifier = Modifier body = Exp cs = Clauses 'end' { Cmp(modifier,body,cs) }.
+      Clauses ::= 'where' c = Clause cs = (',' Clause)* { Seq{c|cs} } | { Seq{} }.
+      Clause ::= Bind | Filter.
+      Bind ::= n = Name t = BindType '<-' e = Exp { Bind(n,t,e) }.
+      BindType ::= ':' Exp | { [| Element |] }.
+      Filter ::= '?' e = Exp { Filter(e) }.
+      Modifier ::= '[' Name ']' | { "Seq" }.
+    end
+    
+    @Operation desugar()
+    
+      // Use the modifier to determine the underlying
+      // datatype for the comprehension...
+      
+      @Case modifier of
+        "Seq" do
+          self.desugarSeq()
+        end
+        "Set" do
+          self.desugarSet()
+        end
+        else self.error("Unknown Cmp modifier " + modifier)
+      end
+    end
+    
+    @Operation desugarSeq()
+      @Case self of
+        Cmp(body,Seq{}) do
+          [| Seq{<body>} |]
+        end
+        Cmp(body,Seq{Bind(n,t,v)}) do
+          [| <v> ->select(x | x.isKindOf(<t>))->asSeq ->collect(<n> | <body>) |]
+        end
+        Cmp(body,Seq{Bind(n,t,v)|clauses}) do
+          [| <Cmp(Cmp(body,clauses),Seq{Bind(n,t,v)})>.flatten() |]
+        end
+        Cmp(body,Seq{Filter(e)|clauses}) do
+          [| if <e> then <Cmp(body,clauses)> else Seq{} end |]
+        end
+      end
+    end
+    
+    @Operation desugarSet()
+      @Case self of
+        Cmp(body,Seq{}) do
+          [| Set{<body>} |]
+        end
+        Cmp(body,Seq{Bind(n,t,v)}) do
+          [| <v> ->select(x | x.isKindOf(<t>))->asSet ->collect(<n> | <body>) |]
+        end
+        Cmp(body,Seq{Bind(n,t,v)|clauses}) do
+          [| <Cmp("Set",Cmp("Set",body,clauses),Seq{Bind(n,t,v)})>.flatten() |]
+        end
+        Cmp(body,Seq{Filter(e)|clauses}) do
+          [| if <e> then <Cmp("Set",body,clauses)> else Set{} end |]
+        end
+      end
+    end
+    
+  end

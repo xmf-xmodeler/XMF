@@ -1,0 +1,50 @@
+/******************************************************************************
+ *                                                                            *
+ *                                    ~S                                      *
+ *                              ---------------                               *
+ *                                                                            *
+ *    The next format arg is consulted, translated to a string via toString() *
+ *    and printed on the output channel. Optionally, an output width can be   *
+ *    supplied as a control arg: ~<W>S in which case the string is padded     *
+ *    spaces or truncated to fit to width W as necessary. Further, optionally *
+ *    a pad character can be supplied as a control argument: ~<W,P>S where    *
+ *    the character P is used to pad the string to fit width W where          *
+ *    necessary.                                                              *
+ *                                                                            *
+ ******************************************************************************/ 
+
+let handleToString =
+      @Operation(char,output,formatContext)
+        if formatContext.args->isEmpty
+        then output.writeString(formatContext.nextValueToString())
+        else 
+          let width = formatContext.args->at(0);
+              padChar = if formatContext.args->size < 2 then " "->at(0) else formatContext.args->at(1)->at(0) end
+          in if width.isKindOf(Integer)
+             then 
+               let string = formatContext.nextValueToString()
+               in if string->size > width
+                  then output.writeString(string)
+                  else output.writeString(string->padTo(width,padChar))
+                  end
+               end
+             else self.error("~S expects first argument to be an integer: " + width)
+             end
+          end
+        end
+      end
+in format.defineHandler("S"->at(0),handleToString)
+end;
+
+let compileToString =
+  @Operation compileToString(control,args,format):Performable
+    if args->isEmpty
+    then self.error("Ran out of control arguments when compiling ~S")
+    else
+      [| formatOut.writeString(<args->head>.toString());
+         <format.compileControl(control,args->tail)> |]
+    end
+  end
+in format.defineCompiler("S"->at(0),compileToString)
+end;
+     

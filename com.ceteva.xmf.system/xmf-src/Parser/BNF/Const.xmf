@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Constant Actions                             *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  Actions that just return a constant value can be handled directly in the  *
+ *  parsing machine. The clause compiler will translate constant actions to   *
+ *  these instructions.                                                       *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class Const extends Recognizer
+    
+    @Attribute value : Element end
+    
+    @Constructor(value) end
+    
+    @Operation code(outputChannel)
+      format(outputChannel," ~S ",Seq{value})
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp()
+      [| Root::Parser::BNF::Const(<value.lift()>) |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

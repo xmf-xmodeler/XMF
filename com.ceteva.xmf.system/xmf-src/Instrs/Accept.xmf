@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                          Accept a Socket Connection                        *
+ *                          --------------------------                        *
+ *                                                                            *
+ *  Pops a string that names a client. Waits for the client to connect and    *
+ *  then returns. Causes the current thread to block until the client has     *
+ *  connected.                                                                *
+ *                                                                            *
+ ******************************************************************************/
+
+import Instrs;
+
+context Instrs
+
+  @Class Accept extends Instr
+    
+  end

@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                Environments                                *
+ *                            -------------------                             *
+ *                                                                            *
+ *   A package that implements collections of bindings and associated ops.    *
+ *   In general, create a new environment with NullEnv() and then go through  *
+ *   the interface operations such as binds() and lookup() to use it. Extend  *
+ *   the environment through bind().                                          *
+ *                                                                            *
+ *   Note that environments are intended to be state-less. When you extend an *
+ *   environment with a new binding e.bind(n,v) then a new environment is     *
+ *   returned. This makes environments suitable for backtracking or for       *
+ *   implementing binding scopes.                                             *
+ *                                                                            *
+ *   Note that although it is discouraged, environments do support update of  *
+ *   binding values by side-effect. Occasionally this is useful. In most cases*
+ *   you should add a new binding for an existing name simply through the use *
+ *   of bind(n,v). New bindings always shadow old bindings.                   *
+ *                                                                            *
+ *   Note that environments are also implemented in XOCL via the Seq(Element) *
+ *   type. This implementation is faster since the operations are supported   *
+ *   by the VM and some are open-coded. The difference between Env and        *
+ *   sequence environments is that the Env classes can be extended with new   *
+ *   operations whereas Seq(Element) is final.                                *
+ *                                                                            *
+ *   Note that the package Env has the same name as a class that it contains. *
+ *   This is bad practice since 'import' places the named-elements from a     *
+ *   name-space into scope before the name-space itself. This means that the  *
+ *   package Env shadows the class Env::Env after import Env. Unfortunately   *
+ *   that's just the way it is!                                               *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context Root
+
+  @Package Env 
+    
+  end
+    

@@ -1,0 +1,22 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Unknown Tag                              *
+ *                              ----------------------                        *
+ *                                                                            *
+ *    An exception that is thrown when an XML input source is parsed and a    *
+ *    tag is encountered that is not defined in the grammar.                  *
+ *                                                                            *
+ ******************************************************************************/
+
+
+context XML
+
+  @Class UnknownTag extends Exception
+  
+    @Operation init(Seq{tag})
+      self.message := "Not expecting " + tag + " at this point."
+    end
+    
+  end

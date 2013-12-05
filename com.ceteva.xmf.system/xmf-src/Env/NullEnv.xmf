@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                            Empty Environments                              *
+ *                            ------------------                              *
+ *                                                                            *
+ *   An empty environment. Use the constructor NullEnv() to create a new      *
+ *   environment.                                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+
+context Env
+  
+  @Class NullEnv extends Env::Env 
+    
+    @Constructor() end
+     
+    @Operation binding(key) 
+      null
+    end
+  
+    @Operation binds(name:String):Boolean
+      false
+    end
+    
+    @Operation dom()
+      Set{}
+    end
+    
+  end
+  

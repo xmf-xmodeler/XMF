@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    Self                                    *
+ *                           ---------------------------                      *
+ *                                                                            *  
+ *  Messages are sent to elements which are referred to as the target of the  *
+ *  message. In the body of an operation that implements the message, the     *
+ *  target can be referenced as 'self'.                                       * 
+ *                                                                            *
+ *  When an operation is created, it closes-in the current value of self. When*
+ *  the operation is invoked, the closed-in value of self can be referenced.  *
+ *  It is possible to set the value of the target in an operation.            *
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+
+context OCL
+
+  @Class Self extends OCL::OCL
+  
+    @Constructor(line) end
+  
+    @Operation pprint(out,indent)
+      format(out,"self")
+    end
+
+  end

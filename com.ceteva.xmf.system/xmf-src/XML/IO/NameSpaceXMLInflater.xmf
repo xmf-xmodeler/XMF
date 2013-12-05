@@ -1,0 +1,61 @@
+parserImport XML::PrintXML;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Inflating NameSpaces                           *
+ *                            ----------------------                          *
+ *                                                                            *
+ *   XML sources that have been encoded with NameSpaceXMLFormatter can be     *
+ *   read back in and inflated using the corresponding NameSpaceXMLInflater.  *
+ *   The encoded name-spaces are assumed to be present and are looked up using*
+ *   their path.                                                              *
+ *                                                                            *
+ ******************************************************************************/
+
+import IO;
+import XML::Parser;
+
+context IO
+  @Class NameSpaceXMLInflater extends ObjectXMLInflater
+    
+    @Operation endObject(tag:Buffer,inch:XMLInputChannel)
+      if tag.stringEqual("NameSpace")
+      then null
+      else super(tag,inch)
+      end
+    end
+    
+    @Operation result(value,idTable)
+    
+      // Perform any processing on the result of inflating the
+      // XML source file. A name space is resolved providing
+      // that is was created and registered as part of the XML
+      // file...
+      
+      let walker = 
+        ResolveRefs(idTable,
+          @Operation(value) 
+            not value.isKindOf(XCore::NameSpace) or
+            idTable.hasValue(value)
+          end)
+      in walker.walk(value,null)
+      end
+    end
+  
+    @Operation startObject(tag:Buffer,atts:Buffer,inch:XMLInputChannel)
+    
+      // If the element is a name-space then the path has been
+      // written as an attribute value. Look the path up since it
+      // is expected to be present...
+      
+      if tag.stringEqual("NameSpace")
+      then 
+        let nameSpace = inch.attValue(atts,"path").toString().lookupPath(Root)
+        in inch.push(nameSpace)
+        end
+      else super(tag,atts,inch)
+      end
+    end
+    
+  end
