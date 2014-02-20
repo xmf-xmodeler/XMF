@@ -511,7 +511,7 @@ context Object
       end;
       let
         property = Seq{name,value}; 
-        properties = self.get(slot)
+        properties = self.get(slot)->reject(pair | pair->head = name)
       in
         self.set(slot,properties->including(property))
       end
