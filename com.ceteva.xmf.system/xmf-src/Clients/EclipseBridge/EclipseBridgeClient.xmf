@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Clients;
+import IO;
+
+context EclipseBridge
+
+  @Class EclipseBridgeClient extends Client
+  
+    @Constructor(name)
+      self.setCommandInterpreter(EclipseBridgeCommandInterpreter())
+    end
+    
+    @Operation printActions()
+      self.commandInterpreter().printActions()
+    end
+    
+  end

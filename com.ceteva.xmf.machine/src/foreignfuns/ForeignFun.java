@@ -90,6 +90,7 @@ public class ForeignFun implements Serializable {
 			args[0] = machine;
 			method.invoke(null, args);
 		} catch (InvocationTargetException ite) {
+			ite.printStackTrace();
 			throw new Error(ite.getTargetException().getMessage());
 		} catch (IllegalAccessException iae) {
 			if (machine.stackDump)
