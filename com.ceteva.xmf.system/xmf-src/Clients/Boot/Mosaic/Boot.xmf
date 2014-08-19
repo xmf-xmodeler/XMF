@@ -78,15 +78,24 @@ try
           then
             xmf.setProperty("initFile",getArg("initFile"))
           end;
-       
+          
+          format(stdout,"[ Booting Mosaic.... ]~%");
           xmf.bootMosaic();
+          format(stdout,"[ Booting Menus.... ]~%");
           xmf.bootMenus();
+          format(stdout,"[ Booting Console.... ]~%");
           xmf.bootConsole();
+          format(stdout,"[ Booting Undo.... ]~%");
           xmf.bootUndo();
+          format(stdout,"[ Booting Property Editor.... ]~%");
           xmf.bootPropertyEditor();
+          format(stdout,"[ Booting Browser.... ]~%");
           xmf.bootBrowser();
+          format(stdout,"[ Booting Diagrams.... ]~%");
           xmf.bootDiagrams();
+          format(stdout,"[ Booting Dialogs.... ]~%");
           xmf.bootDialogs();
+          format(stdout,"[ Booting Text Editor.... ]~%");
           xmf.bootTextEditor();
           // xmf.bootOleBridge();
           // xmf.bootEclipseBridge();
@@ -135,8 +144,11 @@ try
         xmf.projectManager("MyProjects").selectModelBrowserNode(true);
         
         // boot patches
-
-		xmf.bootPatches()
+        format(stdout,"[ Booting Patches.... ]~%");
+          
+		xmf.bootPatches();
+		
+		format(stdout,"[ Boot Completed. ]~%")
        
      end
   end  
