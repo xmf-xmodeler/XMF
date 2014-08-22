@@ -79,6 +79,7 @@ try
             xmf.setProperty("initFile",getArg("initFile"))
           end;
           
+          xmf.debug(true);
           format(stdout,"[ Booting Mosaic.... ]~%");
           xmf.bootMosaic();
           format(stdout,"[ Booting Menus.... ]~%");
@@ -102,7 +103,7 @@ try
 		  
 		  // boot tool interface
           
-          // (xmf.homeDir() + "/Boot/Mosaic/ToolInterface.o").loadBin(false);
+          (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
           
           // Do this here so that we can give the user a warning if anything goes wrong.
           // Use xmf.message to inform the user of any problems with the init file. Client
