@@ -5,22 +5,22 @@ import Clients::ExtensionPoints;
 
 // setup the development perspective
 
-@Perspective("Development","development.gif")
-
-  @PlaceHolder Topleft(left,26)
-    @GraphicalTool "com.ceteva.browser" end
-  end
-  
-  @PlaceHolder BottomLeft(bottom,66,Topleft)
-    @GraphicalTool "com.ceteva.outline" end
-  end
-  
-  @PlaceHolder BottomRight(bottom,66)
-    @GraphicalTool "com.ceteva.form" end
-    @GraphicalTool "com.ceteva.console" end
-  end
-  
-end;
+//@Perspective("Development","development.gif")
+//
+//  @PlaceHolder Topleft(left,26)
+//    @GraphicalTool "com.ceteva.browser" end
+//  end
+//  
+//  @PlaceHolder BottomLeft(bottom,66,Topleft)
+//    @GraphicalTool "com.ceteva.outline" end
+//  end
+//  
+//  @PlaceHolder BottomRight(bottom,66)
+//    @GraphicalTool "com.ceteva.form" end
+//    @GraphicalTool "com.ceteva.console" end
+//  end
+//  
+//end;
 
 // create the welcome page
 
@@ -143,14 +143,14 @@ in
     )
   );
 
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&Browse","XTools","&XTools Manager"},
-        Tools::Basic::showXToolsBrowser
-      }
-    )
-  );
+  //registry.addContribution(id,
+  //  TypeLessContribution(
+  //    Seq{
+  //      Seq{"&Browse","XTools","&XTools Manager"},
+  //      Tools::Basic::showXToolsBrowser
+  //    }
+  //  )
+  //);
 
   registry.addContribution(id,
     TypeLessContribution(
