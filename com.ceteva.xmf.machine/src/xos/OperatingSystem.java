@@ -1,10 +1,12 @@
 package xos; 
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +20,8 @@ import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -618,6 +622,60 @@ public final class OperatingSystem implements EventHandler {
 			run();
 		else
 			System.exit(0);
+	}
+
+	public void init() {
+		String[] ini = null;
+		ini = getIni();
+
+		parseArgs(ini);
+		System.out.println("[ Starting XOS ]");
+		parseXOSargs();
+		initStandardChannels();
+		initConnectionMonitor(port);
+		initInternalClients();
+		initMessageClients();
+		initXVM(ini);
+		System.out.println("[ Running XOS ]");
+		if (XVM.checkoutLicense())
+			run();
+		else
+			System.exit(0);
+	}
+
+	private String[] getIni() {
+		ArrayList<String> ini = new ArrayList<String>();
+		File file = new File("ini.txt");
+
+		StringBuilder contents = new StringBuilder();
+		BufferedReader reader = null;
+
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String text = null;
+
+			// repeat until all lines is read
+			while ((text = reader.readLine()) != null) {
+				contents.append(text).append(
+						System.getProperty("line.separator"));
+				ini.add(text);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		String[] values = new String[ini.size()];
+		values = ini.toArray(values);
+
+		return values;
 	}
 
 	public void initConnectionMonitor(int port) {

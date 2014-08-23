@@ -9873,8 +9873,8 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
         // If an image file has been specified then load the image.
         // We may have specified an arg to return as the result of
         // the original save image call.
-
-        if (imageFile != null) {
+    	
+    	if (imageFile != null) {
             load(imageFile);
             setDynamicValue(mkSymbol("Kernel_stdout"), mkImmediate(INPUT_CHANNEL, 0));
             setDynamicValue(mkSymbol("Kernel_stdin"), mkImmediate(OUTPUT_CHANNEL, 0));
