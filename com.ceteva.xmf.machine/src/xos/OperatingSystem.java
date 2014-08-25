@@ -1427,10 +1427,11 @@ public final class OperatingSystem implements EventHandler {
 
 		// Returns true when the indexed input channel is ready for input.
 
-		debug("Ready(" + index + ")");
 		XInputStream in = inputChannel(index);
 		if (in != null) {
-			return in.ready();
+			boolean ready = in.ready();
+			debug("Ready(" + index + ") = " + ready);
+			return ready;
 		} else
 			throw new Error("XOS.ready: illegal index: " + index);
 	}
