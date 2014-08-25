@@ -93,6 +93,10 @@ try
             xmf.setProperty("initFile",getArg("initFile"))
           end;
           
+		  // boot tool interface
+          
+          (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
+          
           format(stdout,"[ Booting Mosaic.... ]~%");
           xmf.bootMosaic();
           format(stdout,"[ Booting Menus.... ]~%");
@@ -113,10 +117,6 @@ try
           xmf.bootTextEditor();
           // xmf.bootOleBridge();
           // xmf.bootEclipseBridge();
-          
-		  // boot tool interface
-          
-          (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
           
           // create the welcome page
 
