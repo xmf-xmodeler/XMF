@@ -16,7 +16,11 @@ context XMF
         mosaicClient.setFilenameRedirect("C:/Documents and Settings/Tony Clark/workspace/",xmf.homeDir() + "/../");
         
         @Fork(Mosaic)
-          mosaicClient.start()
+          try 
+            mosaicClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
         end
       end
     catch(exception)

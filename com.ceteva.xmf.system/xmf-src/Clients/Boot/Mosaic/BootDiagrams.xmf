@@ -16,7 +16,11 @@ context XMF
            xmf.clientManager().add(mapClient);
            xmf.clientManager().add(snapClient);
            @Fork(Diagrams)
-             diagramClient.start()
+             try
+               diagramClient.start()
+             catch(exception)
+                format(stdout,"~S~%",Seq{exception})
+             end
            end
         end
     catch(exception)

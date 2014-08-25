@@ -13,7 +13,11 @@ context XMF
         xmf.clientManager().add(modelBrowserClient);
         xmf.clientManager().add(xcoreMappingClient);
         @Fork(Browser)
-          modelBrowserClient.start()
+          try 
+            modelBrowserClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
         end
       end
     catch(exception)

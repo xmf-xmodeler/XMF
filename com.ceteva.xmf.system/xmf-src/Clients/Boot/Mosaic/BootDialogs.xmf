@@ -9,7 +9,11 @@ context XMF
       let dialogClient = Clients::DialogBoxes::DialogBoxClient("com.ceteva.dialogs")
       in xmf.clientManager().add(dialogClient);
          @Fork(Dialogs)
-           dialogClient.start()
+           try
+             dialogClient.start()
+           catch(exception)
+             format(stdout,"~S~%",Seq{exception})
+           end
          end
       end
     catch(exception)

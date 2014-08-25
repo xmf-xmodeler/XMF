@@ -14,6 +14,20 @@ try
        
   xmf.setProjectManager((xmf.homeDir() + "/Boot/SystemProjects.o").loadBin(true).load(xmf.homeDir()));
   
+  (xmf.homeDir() + "/Clients/MiscOps.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Point.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Registry.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Preferences.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/BootClients.o").loadBin(true);
+  //(xmf.homeDir() + "/DocTables/HTML/InternalBrowser/Boot.o").loadBin(true);
+  
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/Registry.o").loadBin();
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/RegistryExtensionPoints.o").loadBin(false);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/MenuManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/DiagramManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/FileEditorManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/RegistryContributions.o").loadBin(false);
+  
   format(stdout,"[ Project Manager Completed. ]~%");
 
   // Add XTools shapes directory
@@ -79,7 +93,6 @@ try
             xmf.setProperty("initFile",getArg("initFile"))
           end;
           
-          xmf.debug(true);
           format(stdout,"[ Booting Mosaic.... ]~%");
           xmf.bootMosaic();
           format(stdout,"[ Booting Menus.... ]~%");
@@ -100,10 +113,24 @@ try
           xmf.bootTextEditor();
           // xmf.bootOleBridge();
           // xmf.bootEclipseBridge();
-		  
+          
 		  // boot tool interface
           
           (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
+          
+          // create the welcome page
+
+          let textClient = xmf.findClient(Clients::TextEditor::TextEditorClient)
+          in textClient.showWelcomePage()
+          end;
+          
+          // create a project browser
+
+          let client = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
+              userProjectManager = xmf.projectManager("MyProjects")
+          in client.add(userProjectManager);
+             client.setClosable(userProjectManager,false)
+          end;
           
           // Do this here so that we can give the user a warning if anything goes wrong.
           // Use xmf.message to inform the user of any problems with the init file. Client

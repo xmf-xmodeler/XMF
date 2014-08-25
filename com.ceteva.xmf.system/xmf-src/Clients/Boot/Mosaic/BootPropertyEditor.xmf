@@ -13,7 +13,11 @@ context XMF
         xmf.clientManager().add(formClient);
         xmf.clientManager().add(mappingClient);
       	@Fork(Forms)
-          formClient.start()
+          try 
+            formClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
         end
       end
     catch(exception)

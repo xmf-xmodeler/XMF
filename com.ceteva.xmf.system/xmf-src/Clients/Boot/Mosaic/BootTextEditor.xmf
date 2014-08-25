@@ -17,7 +17,11 @@ context XMF
         // textClient.showWelcomePage();
            
         @Fork(Text)
-          textClient.start()
+          try 
+            textClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
         end
       end
     catch(exception)

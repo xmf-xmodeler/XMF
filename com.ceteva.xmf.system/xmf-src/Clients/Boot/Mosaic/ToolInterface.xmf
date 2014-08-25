@@ -1,5 +1,5 @@
 parserImport XOCL;
-parserImport Clients::Mosaic;
+//parserImport Clients::Mosaic;
 
 import Clients::ExtensionPoints;
 
@@ -21,22 +21,6 @@ import Clients::ExtensionPoints;
 //  end
 //  
 //end;
-
-// create the welcome page
-
-let textClient = xmf.findClient(Clients::TextEditor::TextEditorClient)
-in textClient.showWelcomePage()
-end;
-
-// create a project browser
-
-let 
-  client = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
-  userProjectManager = xmf.projectManager("MyProjects")
-in
-  client.add(userProjectManager);
-  client.setClosable(userProjectManager,false)
-end;
 
 // drop down menus
 

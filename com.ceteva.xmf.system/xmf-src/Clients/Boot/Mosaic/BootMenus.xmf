@@ -14,7 +14,11 @@ context XMF
         xmf.clientManager().add(dropDownMenusClient);
         dropDownMenusClient.buildMenus();    
         @Fork(Browser)
-          menusClient.start()
+          try
+            menusClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
         end
       end
     catch(exception)
