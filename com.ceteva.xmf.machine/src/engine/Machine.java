@@ -444,7 +444,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     // Where to save a panic dump...
 
-    private String               backtraceDumpFile         = "C:/XMFDump";
+    private String               backtraceDumpFile         = "XMFDump";
 
     // Updates to data structures in the machine can be undone within an
     // undoable transaction. When the transaction is active, the heap modifications
