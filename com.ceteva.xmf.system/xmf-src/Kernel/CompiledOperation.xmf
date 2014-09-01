@@ -499,11 +499,23 @@ context CompiledOperation
     end
   end
   
+//
+// There appears to be a bug in Mosaic that originates from a compiled
+// operation firing daemons when the daemons slot is updated. It is
+// questionable whether this should occur at all.
+//
+// context CompiledOperation
+//  @Operation setDaemons(daemons)
+//    let oldDaemons = self.daemons()
+//    in self.setProperty("daemons",daemons);
+//       self.fire(Symbol("daemons"),daemons,oldDaemons)
+//    end
+//  end
+  
 context CompiledOperation
   @Operation setDaemons(daemons)
     let oldDaemons = self.daemons()
-    in self.setProperty("daemons",daemons);
-       self.fire(Symbol("daemons"),daemons,oldDaemons)
+    in self.setProperty("daemons",daemons)
     end
   end
   
@@ -555,11 +567,23 @@ context CompiledOperation
     end
   end
   
+// Should the meta-slot 'properties' be amenable to daemons?
+// This seems to cause problems in the Mosaic Browser. It is
+// commented out. Probably setProperty should fire the daemons
+// (not sure whether this is happening).
+//
+// context CompiledOperation
+//   @Operation setProperties(properties)
+//     let oldProperties = self.properties()
+//     in Kernel_funSetProperties(self,properties);
+//        self.fire(Symbol("properties"),properties,oldProperties)
+//     end
+//   end
+  
 context CompiledOperation
   @Operation setProperties(properties)
     let oldProperties = self.properties()
-    in Kernel_funSetProperties(self,properties);
-       self.fire(Symbol("properties"),properties,oldProperties)
+    in Kernel_funSetProperties(self,properties)
     end
   end
   

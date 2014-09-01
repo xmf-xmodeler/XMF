@@ -112,6 +112,15 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
+        Seq{"&File","System","&Browse","File","Open &File Browser ..."},
+        Root::createFileBrowser
+      }
+    )
+  );
+
+  registry.addContribution(id,
+    TypeLessContribution(
+      Seq{
         Seq{"&Browse","Projects","&My Projects"},
         Clients::ProjectBrowser::showUserBrowser
       }
