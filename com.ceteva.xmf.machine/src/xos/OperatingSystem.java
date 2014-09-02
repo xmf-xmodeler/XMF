@@ -1,10 +1,12 @@
-package xos; 
+package xos;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +20,7 @@ import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -28,7 +31,6 @@ import threads.Thread;
 import xjava.XJ;
 import engine.ArgParser;
 import engine.Machine;
-
 
 public final class OperatingSystem implements EventHandler {
 
@@ -151,8 +153,8 @@ public final class OperatingSystem implements EventHandler {
 	// threads.
 
 	private Machine XVM = new Machine(this);
-	
-	// Files may need to be made reslative and resolved against 
+
+	// Files may need to be made reslative and resolved against
 	// a position that changed from run to run. The resolution
 	// is performed by fileResolver...
 
@@ -160,14 +162,15 @@ public final class OperatingSystem implements EventHandler {
 
 	// The following string array is populated with the command line
 	// arguments appropriate for XOS. Population is performed in parseArgs.
-	
+
 	private String[] XOSargs;
 
 	// The following two string arrays specify the command line arguments
 	// appropriate for XOS and XVM. Each element is the name of the arg
 	// and a definition of the parameters.
 
-	private String[] XOSargSpecs = { "-port:1", "-debug:0", "-internal:1", "-message:1", "-eclipse:0", "-workspace:1" };
+	private String[] XOSargSpecs = { "-port:1", "-debug:0", "-internal:1",
+			"-message:1", "-eclipse:0", "-workspace:1" };
 
 	private UserPassword auth;
 
@@ -328,7 +331,8 @@ public final class OperatingSystem implements EventHandler {
 		// block on read and remembers the input channel. The thread
 		// will be restarted by XOS if input becomes available.
 
-		debug("Thread " + XVM.currentThread() + " is blocking because " + inputChannel(index) + " is not ready");
+		debug("Thread " + XVM.currentThread() + " is blocking because "
+				+ inputChannel(index) + " is not ready");
 
 		XVM.currentThread().blockOnRead(index);
 	}
@@ -337,7 +341,8 @@ public final class OperatingSystem implements EventHandler {
 
 		// The name should be a message client.
 
-		debug("Thread " + XVM.currentThread() + " is blocking because " + name + " is not ready");
+		debug("Thread " + XVM.currentThread() + " is blocking because " + name
+				+ " is not ready");
 
 		XVM.currentThread().blockOnRead(name);
 	}
@@ -394,7 +399,9 @@ public final class OperatingSystem implements EventHandler {
 
 		String[] strings = clientSpec.split(":");
 		if (strings.length < 1)
-			throw new Error("A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> " + clientSpec);
+			throw new Error(
+					"A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> "
+							+ clientSpec);
 		else
 			return strings[0];
 	}
@@ -405,7 +412,9 @@ public final class OperatingSystem implements EventHandler {
 
 		String[] strings = clientSpec.split(":");
 		if (strings.length < 2)
-			throw new Error("A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> " + clientSpec);
+			throw new Error(
+					"A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> "
+							+ clientSpec);
 		else
 			return strings[1];
 	}
@@ -416,7 +425,9 @@ public final class OperatingSystem implements EventHandler {
 
 		String[] strings = clientSpec.split(":");
 		if (strings.length < 2)
-			throw new Error("A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> " + clientSpec);
+			throw new Error(
+					"A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> "
+							+ clientSpec);
 		else {
 			String[] args = new String[strings.length - 2];
 			for (int i = 2; i < strings.length; i++)
@@ -485,7 +496,9 @@ public final class OperatingSystem implements EventHandler {
 				newMessageClient(clientName, handler);
 				handler.registerEventHandler(this);
 			} else {
-				System.out.println("Clients must be instances of XOS.MessageHandler: " + className);
+				System.out
+						.println("Clients must be instances of XOS.MessageHandler: "
+								+ className);
 				System.exit(0);
 			}
 		} catch (ClassNotFoundException e) {
@@ -532,7 +545,8 @@ public final class OperatingSystem implements EventHandler {
 
 	public void debug(String message) {
 		if (debug) {
-			System.err.println(java.lang.Thread.currentThread() + ": " + message);
+			System.err.println(java.lang.Thread.currentThread() + ": "
+					+ message);
 			System.err.flush();
 		}
 	}
@@ -620,6 +634,60 @@ public final class OperatingSystem implements EventHandler {
 			System.exit(0);
 	}
 
+	public void init() {
+		String[] ini = null;
+		ini = getIni();
+
+		parseArgs(ini);
+		System.out.println("[ Starting XOS ]");
+		parseXOSargs();
+		initStandardChannels();
+		initConnectionMonitor(port);
+		initInternalClients();
+		initMessageClients();
+		initXVM(ini);
+		System.out.println("[ Running XOS ]");
+		if (XVM.checkoutLicense())
+			run();
+		else
+			System.exit(0);
+	}
+
+	private String[] getIni() {
+		ArrayList<String> ini = new ArrayList<String>();
+		File file = new File("ini.txt");
+
+		StringBuilder contents = new StringBuilder();
+		BufferedReader reader = null;
+
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String text = null;
+
+			// repeat until all lines is read
+			while ((text = reader.readLine()) != null) {
+				contents.append(text).append(
+						System.getProperty("line.separator"));
+				ini.add(text);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		String[] values = new String[ini.size()];
+		values = ini.toArray(values);
+
+		return values;
+	}
+
 	public void initConnectionMonitor(int port) {
 
 		// Start up a connection monitor for clients trying to connect to XMF.
@@ -654,8 +722,9 @@ public final class OperatingSystem implements EventHandler {
 	public void initInternalClient(String className, String clientName) {
 		try {
 			Class<?> clientClass = Class.forName(className);
-			Constructor<?> constructor = clientClass.getDeclaredConstructor(new Class<?>[] { InputStream.class,
-					OutputStream.class });
+			Constructor<?> constructor = clientClass
+					.getDeclaredConstructor(new Class<?>[] { InputStream.class,
+							OutputStream.class });
 			PipedInputStream in = new PipedInputStream();
 			PipedOutputStream out = new PipedOutputStream();
 			Object client = constructor.newInstance(new Object[] { in, out });
@@ -665,7 +734,9 @@ public final class OperatingSystem implements EventHandler {
 				debug("Starting " + clientName);
 				thread.start();
 			} else {
-				System.out.println("Clients must be instances of java.lang.Thread: " + className);
+				System.out
+						.println("Clients must be instances of java.lang.Thread: "
+								+ className);
 				System.exit(0);
 			}
 		} catch (ClassNotFoundException e) {
@@ -681,7 +752,9 @@ public final class OperatingSystem implements EventHandler {
 			System.out.println(e);
 			System.exit(0);
 		} catch (NoSuchMethodException e) {
-			System.out.println(e + ": Internal clients must implement a 2-place constructor(InputStream,OUtputStream)");
+			System.out
+					.println(e
+							+ ": Internal clients must implement a 2-place constructor(InputStream,OUtputStream)");
 			System.exit(0);
 		} catch (IllegalArgumentException e) {
 			System.out.println(e);
@@ -716,14 +789,16 @@ public final class OperatingSystem implements EventHandler {
 			}
 	}
 
-	public void initMessageClient(String className, String clientName, String[] args) {
+	public void initMessageClient(String className, String clientName,
+			String[] args) {
 		if (args.length == 0 || args[0].equals("create"))
 			createNewMessageClient(className, clientName);
 		else if (args[0].equals("wait")) {
 			if (client(clientName) == null)
 				waitForMessageClient(className, clientName);
 		} else
-			throw new Error("Illegal argument supplied to message client: " + args[0]);
+			throw new Error("Illegal argument supplied to message client: "
+					+ args[0]);
 	}
 
 	public void initStandardChannels() {
@@ -812,7 +887,7 @@ public final class OperatingSystem implements EventHandler {
 		try {
 			OperatingSystem XOS = new OperatingSystem();
 			XOS.init(args);
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 	}
@@ -871,14 +946,16 @@ public final class OperatingSystem implements EventHandler {
 
 		try {
 			InputStream in = socket.getInputStream();
-			OutputStream out = new BufferedOutputStream(socket.getOutputStream());
+			OutputStream out = new BufferedOutputStream(
+					socket.getOutputStream());
 			String name = readExternalClientName(in);
 			if (client(name) != null) {
 				StreamClient client = asyncClient(name);
 				client.write(ExternalClient.NAME_FAIL);
 			} else {
 				XChannel channel = new XChannel(in);
-				ExternalClient client = new ExternalClient(name, this, channel, out);
+				ExternalClient client = new ExternalClient(name, this, channel,
+						out);
 				debug("Registering new external client named " + name);
 				newInputChannel(client.in());
 				newOutputChannel(client.out());
@@ -983,7 +1060,8 @@ public final class OperatingSystem implements EventHandler {
 		return inputChannel;
 	}
 
-	public boolean newInternalClient(String name, PipedInputStream in, PipedOutputStream out) {
+	public boolean newInternalClient(String name, PipedInputStream in,
+			PipedOutputStream out) {
 
 		// Create a new internal client that produces data on 'in' and
 		// consumes data from 'out'.
@@ -1004,7 +1082,8 @@ public final class OperatingSystem implements EventHandler {
 		return newClient;
 	}
 
-	public synchronized boolean newMessageClient(String name, MessageHandler handler) {
+	public synchronized boolean newMessageClient(String name,
+			MessageHandler handler) {
 
 		// Creates and registers a new message client.
 
@@ -1124,11 +1203,14 @@ public final class OperatingSystem implements EventHandler {
 				// Get data from user password dialog...
 				try {
 					Object[] inputData = { hostString, promptString };
-					Object[] valueData = Client.getIOHandler().dialog("UserPassword", inputData);
-					if (valueData.length == 1 && valueData[0] instanceof UserPassword) {
+					Object[] valueData = Client.getIOHandler().dialog(
+							"UserPassword", inputData);
+					if (valueData.length == 1
+							&& valueData[0] instanceof UserPassword) {
 						UserPassword auth = (UserPassword) valueData[0];
 						if (auth != null)
-							return new PasswordAuthentication(auth.getUser(), auth.getPassword().toCharArray());
+							return new PasswordAuthentication(auth.getUser(),
+									auth.getPassword().toCharArray());
 						else
 							return null;
 					} else
@@ -1187,7 +1269,8 @@ public final class OperatingSystem implements EventHandler {
 		if (in != null) {
 			in.reset();
 			in.nextToken();
-			debug("NextToken(" + index + ") returned token = '" + in.token() + "' rawChars = '" + in.rawChars() + "'");
+			debug("NextToken(" + index + ") returned token = '" + in.token()
+					+ "' rawChars = '" + in.rawChars() + "'");
 			return 0;
 		} else
 			return -1;
@@ -1246,7 +1329,7 @@ public final class OperatingSystem implements EventHandler {
 				messageClientNames.addElement(XOSargs[index++]);
 			else if (arg.equals("-eclipse"))
 				eclipse = true;
-			else if(arg.equals("-workspace"))
+			else if (arg.equals("-workspace"))
 				fileResolver = new WorkspaceResolver(XOSargs[index++]);
 			else
 				index++;
@@ -1286,7 +1369,8 @@ public final class OperatingSystem implements EventHandler {
 			debug("Thread " + thread + " has been selected as it is active.");
 			break;
 		case Thread.BLOCK_READ:
-			debug("Thread " + thread + " has been selected as it is ready for input.");
+			debug("Thread " + thread
+					+ " has been selected as it is ready for input.");
 			thread.setState(Thread.ACTIVE);
 
 			// The block might be on a message client or a stream client...
@@ -1299,11 +1383,13 @@ public final class OperatingSystem implements EventHandler {
 			}
 			break;
 		case Thread.BLOCK_ACCEPT:
-			debug("Thread " + thread + " has been selected as it is ready to connect.");
+			debug("Thread " + thread
+					+ " has been selected as it is ready to connect.");
 			XVM.pushStack(Machine.trueValue);
 			break;
 		default:
-			System.out.println("Unknown state for thread preparation: " + state);
+			System.out
+					.println("Unknown state for thread preparation: " + state);
 			System.exit(0);
 		}
 	}
@@ -1486,11 +1572,12 @@ public final class OperatingSystem implements EventHandler {
 			XVM.saveCurrentThread();
 			break;
 		case Thread.BREAKPOINT:
-		    debug("Thread " + thread + " hit breakpoint.");
-		    XVM.saveCurrentThread();
-		    break;
+			debug("Thread " + thread + " hit breakpoint.");
+			XVM.saveCurrentThread();
+			break;
 		default:
-			System.out.println("Thread " + thread + " unknown state: " + thread.state());
+			System.out.println("Thread " + thread + " unknown state: "
+					+ thread.state());
 		}
 
 		debug("Returning from reschedule thread");
@@ -1538,7 +1625,8 @@ public final class OperatingSystem implements EventHandler {
 		// Perform the selected thread, remove the thread if it becomes
 		// terminated and shut the system down if all threads become terminated.
 
-		debug("Loading " + XVM.currentThread() + " onto the machine and starting run...");
+		debug("Loading " + XVM.currentThread()
+				+ " onto the machine and starting run...");
 
 		XJ.setLoader(XVM.currentThread().getClassLoader());
 		XVM.currentThread().getInitiator().start(XVM);
@@ -1553,7 +1641,7 @@ public final class OperatingSystem implements EventHandler {
 		} else
 			rescheduleThread(XVM.currentThread());
 	}
-	
+
 	public synchronized void setFileResolver(FileResolver fileResolver) {
 		this.fileResolver = fileResolver;
 	}
@@ -1565,7 +1653,7 @@ public final class OperatingSystem implements EventHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-    public synchronized void scheduleClientThreads(String name) {
+	public synchronized void scheduleClientThreads(String name) {
 
 		// A client with the supplied name has just connected. Any threads
 		// in clientThreads that are currently blocking on this client can
@@ -1920,34 +2008,34 @@ public final class OperatingSystem implements EventHandler {
 		return XVM;
 	}
 
-    public synchronized void resume(String threadId) {
+	public synchronized void resume(String threadId) {
 
-        // Called by a client (e.g. debugger) in order to
-        // restart a thread that is in a breakpoint state...
-        
-        Thread thread = XVM.currentThread();
-        do {
-            
-            // Thread ids are not implemented by the debugger yet so
-            // just wake up any thread that is in BREAKPOINT mode.
-            // There should only be one anyway...
-            
-            if(thread.state() == Thread.BREAKPOINT) {
-                thread.setState(Thread.ACTIVE);
-                debug("Resuming from breakpoint on " + thread);
-                schedule(thread);
-            }
-            thread = thread.next();
-        } while(thread != XVM.currentThread());
-        
-        // Wake up the operating system if it is
-        // waiting...
-        
-        notifyAll();
-    }
-    
-    public File getFile(String path) {
-    	return fileResolver.getFile(path);
-    }
+		// Called by a client (e.g. debugger) in order to
+		// restart a thread that is in a breakpoint state...
+
+		Thread thread = XVM.currentThread();
+		do {
+
+			// Thread ids are not implemented by the debugger yet so
+			// just wake up any thread that is in BREAKPOINT mode.
+			// There should only be one anyway...
+
+			if (thread.state() == Thread.BREAKPOINT) {
+				thread.setState(Thread.ACTIVE);
+				debug("Resuming from breakpoint on " + thread);
+				schedule(thread);
+			}
+			thread = thread.next();
+		} while (thread != XVM.currentThread());
+
+		// Wake up the operating system if it is
+		// waiting...
+
+		notifyAll();
+	}
+
+	public File getFile(String path) {
+		return fileResolver.getFile(path);
+	}
 
 }
