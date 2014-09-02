@@ -23,16 +23,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 
-import engine.Machine;
-import foreignfuns.*;
-
 import threads.Thread;
 import values.ValueStack;
+import engine.Machine;
+import foreignfuns.ForeignFun;
 
 public class ImageSerializer {
     
@@ -62,6 +62,11 @@ public class ImageSerializer {
     private byte[] image;
     
     private int index = 0;
+    
+    // Date format...
+    
+    private String dateFormat = "E MMM dd hh:mm:ss Z yyyy";
+    private SimpleDateFormat sdf=new SimpleDateFormat(dateFormat);
 
     public ImageSerializer(Machine machine) {
         this.machine = machine;
@@ -71,9 +76,10 @@ public class ImageSerializer {
         Header header = machine.getHeader();
         Date date = header.getCreationDate();
         Hashtable<String, String> properties = header.getProperties();
-        long time = date.getTime();
-        String timeString = "" + time;
-        int size = stringSize(timeString);
+        //long time = date.getTime();
+        //String timeString = "" + time;
+        //int size = stringSize(timeString);
+        int size = sdf.format(date).length();
         Enumeration<String> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
@@ -198,7 +204,8 @@ public class ImageSerializer {
     private void inflateHeader() {
         Date date = null;
         try {
-            date = DateFormat.getDateInstance().parse(readString());
+        	String s = readString();
+            date = sdf.parse(s);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -401,7 +408,7 @@ public class ImageSerializer {
     private void serializeHeader() {
         Header header = machine.getHeader();
         Date date = header.getCreationDate();
-        String dateString = DateFormat.getDateInstance().format(date);
+        String dateString = sdf.format(date);
         Hashtable<String, String> properties = header.getProperties();
         Enumeration<String> keys = properties.keys();
         writeString(dateString);
