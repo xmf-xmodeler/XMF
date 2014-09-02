@@ -20,6 +20,45 @@ parserImport XOCL;
  ******************************************************************************/ 
 
 context Attribute
+  @Operation attString()
+    name.toString() + " : " + self.mult() + self.underlyingType().name.toString()
+  end
+
+context Attribute
+  @Operation decodeMultString(multString:String)
+    try
+      if multString = "" or multString = "1" or multString = null
+      then SingleMult(false)
+      elseif multString = "!"
+      then SingleMult(true)
+      else
+        if multString = "*"
+        then CollectionMult(false,false,0,0)
+        elseif multString = "$" or multString = "$*"
+        then CollectionMult(true,false,0,0)
+        else
+          let ordered = multString.hasPrefix("$") then
+              rangeSeq = if ordered
+                         then multString.subString(1,multString.size()).splitBy(".",0,0)
+                         else multString.splitBy(".",0,0)
+                         end then
+              lowerBound = rangeSeq->head->asInt;
+              hasUpperBound = not (rangeSeq->at(2) = "*") then
+              upperBound = if hasUpperBound then rangeSeq->at(2)->asInt else 0 end
+          in
+            if hasUpperBound andthen upperBound < lowerBound
+            then throw Exception("Invalid multiplicity '"+multString.toString() + "': upper bound is less than lower bound")
+            else CollectionMult(ordered,hasUpperBound,lowerBound,upperBound)
+            end
+          end
+        end
+      end
+    catch(exception)
+      throw Exception("Invalid multiplicity '"+multString.toString() + "'")
+    end    
+  end
+  
+context Attribute
   @Operation deleteProperty(name)
     self.properties := properties->reject(pair | pair->head = name)
   end
@@ -130,6 +169,11 @@ context Attribute
     init.hasProperty("value")
   end
   
+context Attribute
+  @Operation mult()
+    self.getProperty("mult","")
+  end
+  
 context Attribute 
   @Operation repopulate(a:Attribute)
   
@@ -146,6 +190,11 @@ context Attribute
   @Operation setProperty(name,value)
     self.deleteProperty(name);
     self.properties := properties->bind(name,value)
+  end
+  
+context Attribute
+  @Operation setMult(mult)
+    self.setProperty("mult",mult)
   end
   
 context Attribute
@@ -166,5 +215,30 @@ context Attribute
          t := t.elementType
        end;
        t
+    end
+  end
+
+context Attribute
+  @Operation updateMultFromType()
+    if self.type.isKindOf(Set)
+    then self.setMult(self.decodeMultString("*"))
+    elseif self.type.isKindOf(Seq)
+    then self.setMult(self.decodeMultString("$"))
+    end
+  end
+
+context Attribute
+  @Operation updateTypeFromMult()
+    let mult = self.mult()
+    in
+      if mult.isKindOf(SingleMult)
+      then self.type := self.underlyingType()
+      else if mult.isKindOf(CollectionMult)
+           then if mult.isOrdered
+                then self.type := Seq(self.underlyingType())
+                else self.type := Set(self.underlyingType())
+                end
+           end
+      end
     end
   end
