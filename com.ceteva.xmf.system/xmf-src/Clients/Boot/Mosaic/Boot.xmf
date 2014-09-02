@@ -1,0 +1,187 @@
+parserImport XOCL;
+
+import Projects;
+import Comms;
+import TopLevel;
+import IO;
+
+// Load all packages that Mosaic depends on.
+// Assume that the base level XMFE and XMFS images are running.
+ 
+try 
+
+  // Set up the project manager from the manifests...
+       
+  xmf.setProjectManager((xmf.homeDir() + "/Boot/SystemProjects.o").loadBin(true).load(xmf.homeDir()));
+  
+  (xmf.homeDir() + "/Clients/MiscOps.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Point.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Registry.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Preferences.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/BootClients.o").loadBin(true);
+  //(xmf.homeDir() + "/DocTables/HTML/InternalBrowser/Boot.o").loadBin(true);
+  
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/Registry.o").loadBin();
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/RegistryExtensionPoints.o").loadBin(false);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/MenuManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/DiagramManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/FileEditorManager.o").loadBin(true);
+  (xmf.homeDir() + "/Clients/Boot/Mosaic/RegistryContributions.o").loadBin(false);
+  
+  format(stdout,"[ Project Manager Completed. ]~%");
+
+  // Add XTools shapes directory
+
+  // MDC::shapeDir(xmf.homeDir() + "/MDC/Shapes");
+  
+  // Save the system.
+  
+  gc();
+
+  let startup = saveMachineState(xmf.homeDir() + "/../xmf-img/mosaic.img")
+  in if startup = true
+     then format(stdout,"[ Mosaic Build Completed. ]~%")
+     else 
+     
+       // When the image restarts the command line -arg name:value arguments are passed
+       // as a sequence of name-value pairs as the value of startup.
+     
+       let hasArg = @Operation(name) startup->exists(pair | pair->head = name) end;
+           getArg = @Operation(name) startup->select(pair | pair->head = name)->head->tail end
+       in 
+          if hasArg("user")
+          then xmf.setUser(getArg("user"))
+          else xmf.setUser("Unknown User")
+          end;
+          if hasArg("projects")
+          then 
+            let projects = getArg("projects")
+            in xmf.setProperty("projDir",projects);
+               XMF.add(@Operation projDir() self.property("projDir") end)
+            end
+          end;
+          if hasArg("demos")
+          then 
+            let demos = getArg("demos")
+            in xmf.setProperty("demoDir",demos);
+               XMF.add(@Operation demoDir() self.property("demoDir") end)
+            end
+          end;
+          if hasArg("home")
+          then 
+            let home = getArg("home")
+            in xmf.setHomeDir(home)
+            end
+          end;
+          if hasArg("images")
+          then
+            let images = getArg("images")
+            in xmf.setImageDir(images)
+            end
+          end;
+          if hasArg("version")
+          then 
+            xmf.setVersion(getArg("version"))
+          end;
+          if hasArg("stdout")
+          then xmf.setStandardOutput(getArg("stdout"))
+          end;
+          xmf.projectManager().add(ProjectManager("MyProjects",xmf.projDir(),null));
+          
+          if hasArg("initFile")
+          then
+            xmf.setProperty("initFile",getArg("initFile"))
+          end;
+          
+		  // boot tool interface
+          
+          (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
+          
+          format(stdout,"[ Booting Mosaic.... ]~%");
+          xmf.bootMosaic();
+          format(stdout,"[ Booting Menus.... ]~%");
+          xmf.bootMenus();
+          format(stdout,"[ Booting Console.... ]~%");
+          xmf.bootConsole();
+          format(stdout,"[ Booting Undo.... ]~%");
+          xmf.bootUndo();
+          format(stdout,"[ Booting Property Editor.... ]~%");
+          xmf.bootPropertyEditor();
+          format(stdout,"[ Booting Browser.... ]~%");
+          xmf.bootBrowser();
+          format(stdout,"[ Booting Diagrams.... ]~%");
+          xmf.bootDiagrams();
+          format(stdout,"[ Booting Dialogs.... ]~%");
+          xmf.bootDialogs();
+          format(stdout,"[ Booting Text Editor.... ]~%");
+          xmf.bootTextEditor();
+          // xmf.bootOleBridge();
+          // xmf.bootEclipseBridge();
+          
+          // create the welcome page
+
+          let textClient = xmf.findClient(Clients::TextEditor::TextEditorClient)
+          in textClient.showWelcomePage()
+          end;
+          
+          // create a project browser
+
+          let client = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
+              userProjectManager = xmf.projectManager("MyProjects")
+          in client.add(userProjectManager);
+             client.setClosable(userProjectManager,false)
+          end;
+          
+          // Do this here so that we can give the user a warning if anything goes wrong.
+          // Use xmf.message to inform the user of any problems with the init file. Client
+          // connections are initiated in separate threads that must have connected properly
+          // before we can create dialogs etc. The following yield allows other threads to
+          // run - this works OK, but really we should also check that the dialog client is
+          // connected...
+          
+          self.yield(); 
+          
+          if hasArg("prefs")
+          then
+            let prefStrings = getArg("prefs").splitBy(",",0,0)
+            in
+              @For prefString in prefStrings do
+                let prefPair = prefString.splitBy("=",0,0) then
+                    pref = prefPair.at(0);
+                    value = prefPair.at(1)
+                in
+                  xmf.setPreference(pref,value)
+                end
+              end
+            end
+          end
+
+          /* if hasArg("initFile")
+          then
+            let initFile = getArg("initFile")
+            in xmf.setInitFile(initFile.subString(0,initFile->size - 2) + ".xmf");
+               if initFile.fileExists() and initFile.hasSuffix(".o")
+               then initFile.loadBin(false)
+               else xmf.warning("Cannot find Mosaic init file " + initFile)
+               end
+            end
+          end */
+          
+        end;
+
+        xmf.projectManager("MyProjects").selectModelBrowserNode(true);
+        
+        // boot patches
+        format(stdout,"[ Booting Patches.... ]~%");
+          
+		xmf.bootPatches();
+		
+		format(stdout,"[ Boot Completed. ]~%")
+       
+     end
+  end  
+  
+catch(exception)
+  exception.printBacktrace()
+end;  
+

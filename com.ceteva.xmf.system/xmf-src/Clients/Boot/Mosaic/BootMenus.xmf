@@ -1,0 +1,27 @@
+parserImport XOCL;
+
+import Comms;
+import IO;
+
+context XMF
+  @Operation bootMenus()
+    try 
+      let
+        menusClient = Clients::Menus::MenuClient("com.ceteva.menus") then
+        dropDownMenusClient = Clients::DropDownMenus::DropDownMenuClient("com.ceteva.menus:dropDownMenus",menusClient)
+      in 
+        xmf.clientManager().add(menusClient);
+        xmf.clientManager().add(dropDownMenusClient);
+        dropDownMenusClient.buildMenus();    
+        @Fork(Browser)
+          try
+            menusClient.start()
+          catch(exception)
+            format(stdout,"~S~%",Seq{exception})
+          end
+        end
+      end
+    catch(exception)
+      format(stdout,"~S~%",Seq{exception})
+    end
+  end

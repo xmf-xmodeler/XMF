@@ -1,0 +1,81 @@
+/******************************************************************************
+ *                                                                            *
+ *                               Booting Mosaic                               *
+ *                            ---------------------                           *
+ *                                                                            *
+ *     Create an image that contains all the development facilities including *
+ *     the compiler, evaluator, and Mosaic. Do not start a top-level loop.    *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+@Operation(bootArgs)
+
+  try
+
+    // Load all packages that the evaluator depends on.
+    // Assume that the base level XMF image is running.
+  
+    let hasArg = @Operation(name) bootArgs->exists(pair | pair->head = name) end;
+        getArg = @Operation(name) bootArgs->select(pair | pair->head = name)->head->tail end then
+        boot = 
+          @Operation(packageName) 
+            if (hasArg(packageName) andthen getArg(packageName).asBool()) or not hasArg(packageName)
+            then (packageName + "/Boot.o").loadBin(false)
+            end
+          end;
+        bootManifest = 
+          @Operation(packageName) 
+            if (hasArg(packageName) andthen getArg(packageName).asBool()) or not hasArg(packageName)
+            then (packageName + "/Manifest.o").loadBin(true).load(packageName)
+            end
+          end
+    in 
+    
+       // Each of the following calls to boot checks to see of the appropriate
+       // command line argument has been supplied and whether the value is true.
+       // If true then the appropriate boot file is loaded...
+       
+       boot("Comms");
+       boot("Constraints");
+       boot("Java");
+       boot("Format");
+       boot("Env");
+       boot("Arrays");
+       boot("Graphs");
+       boot("Stacks");
+       boot("OCL");
+       boot("Parser");
+       boot("Instrs");
+       boot("Assembler");
+       boot("Compiler");
+       boot("Grammar");
+       boot("Extensions");
+       boot("Extensions/Compiler");
+       boot("Undo");  
+       boot("Aspects");
+       boot("Doc");
+       boot("Eval");
+       boot("XMatch");
+       boot("TopLevel");
+       boot("Walkers");
+       boot("XML");
+       boot("XMap");
+       boot("Manifests");
+       boot("Associations");
+       bootManifest("Projects");
+       bootManifest("Deploy");
+       bootManifest("Signatures");
+       bootManifest("Languages");
+       bootManifest("DocTables");
+       bootManifest("Debug");
+       bootManifest("XRules");
+       bootManifest("CodeGen");
+       bootManifest("PPrint");
+       bootManifest("Comprehensions");
+       bootManifest("Import");
+       "Clients/Boot/Mosaic/Boot.o".loadBin(true)
+    end
+  catch(exception)
+    exception.message.println()
+  end
+end;
