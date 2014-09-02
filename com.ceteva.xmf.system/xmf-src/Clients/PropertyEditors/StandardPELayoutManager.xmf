@@ -53,26 +53,26 @@ context PropertyEditors
 
           Seq(CodeboxDisplay) do
             self.x := xGap;
-            //self.x := (2*xGap) + self.singletonColumns*(labelWidth + singletonWidth + 2*xGap);
+            //self.x := (2*xGap) + (self.singletonColumns*(labelWidth + singletonWidth + (2*xGap)));
             self.y := maxY;
             //if not yReset then self.resetY() end;
             self.setY(self.layoutCodeboxes(displays,x,y))
           end          
 
           Seq(CollectionDisplay) do
-            self.x := (2*xGap) + self.singletonColumns*(labelWidth + singletonWidth + 2*xGap);
+            self.x := (2*xGap) + (self.singletonColumns*(labelWidth + singletonWidth + (2*xGap)));
             if not yReset then self.resetY() end;
             self.setY(self.layoutCollections(displays,x,y))
           end
 
           Seq(CollectionButtonDisplay) do
-            self.x := (2*xGap) + self.singletonColumns*(labelWidth + singletonWidth + 2*xGap);
+            self.x := (2*xGap) + (self.singletonColumns*(labelWidth + singletonWidth + (2*xGap)));
             if not yReset then self.resetY() end;
             self.setY(self.layoutCollectionButtonDisplays(displays,x,y))
           end
 
           Seq(CollectionComboBoxDisplay) do
-            self.x := (2*xGap) + self.singletonColumns*(labelWidth + singletonWidth + 2*xGap);
+            self.x := (2*xGap) + (self.singletonColumns*(labelWidth + singletonWidth + (2*xGap)));
             if not yReset then self.resetY() end;
             self.setY(self.layoutCollectionComboBoxDisplays(displays,x,y))
           end
@@ -99,15 +99,15 @@ context PropertyEditors
       if not displays->isEmpty then
         let displayCount = displays->size()
         then rows = displayCount.div(singletonColumns) + displayCount.mod(singletonColumns)
-        then finalY = startY + rows*(singletonHeight + yGap)
+        then finalY = startY + (rows*(singletonHeight + yGap))
         in
           @For loop in 0.to(displayCount-1) do
             let
               col = loop.div(rows);
               row = loop.mod(rows)
             then
-              x = startX + col*(singletonWidth + labelWidth + xGap);
-              y = startY + row*(singletonHeight + yGap)
+              x = startX + (col*(singletonWidth + labelWidth + xGap));
+              y = startY + (row*(singletonHeight + yGap))
             in
               displays.at(loop).addToForm(owner,x,y,labelWidth,singletonWidth,singletonHeight)
             end
@@ -123,15 +123,15 @@ context PropertyEditors
       if not displays->isEmpty then
         let displayCount = displays->size()
         then rows = displayCount.div(singletonColumns) + displayCount.mod(singletonColumns)
-        then finalY = startY + rows*(enumerationHeight + yGap)
+        then finalY = startY + (rows*(enumerationHeight + yGap))
         in
           @For loop in 0.to(displayCount-1) do
             let
               col = loop.div(rows);
               row = loop.mod(rows)
             then
-              x = startX + col*(singletonWidth + labelWidth + xGap);
-              y = startY + row*(enumerationHeight + yGap)
+              x = startX + (col*(singletonWidth + labelWidth + xGap));
+              y = startY + (row*(enumerationHeight + yGap))
             in
               displays.at(loop).addToForm(owner,x,y,labelWidth,singletonWidth,enumerationHeight)
             end
@@ -147,15 +147,15 @@ context PropertyEditors
       if not displays->isEmpty then
         let displayCount = displays->size()
         then rows = displayCount.div(singletonColumns) + displayCount.mod(singletonColumns)
-        then finalY = startY + rows*(singletonHeight + yGap)
+        then finalY = startY + (rows*(singletonHeight + yGap))
         in
           @For loop in 0.to(displayCount-1) do
             let
               col = loop.div(rows);
               row = loop.mod(rows)
             then
-              x = startX + col*(singletonWidth + labelWidth + xGap);
-              y = startY + row*(singletonHeight + yGap)
+              x = startX + (col*(singletonWidth + labelWidth + xGap));
+              y = startY + (row*(singletonHeight + yGap))
             in
               displays.at(loop).addToForm(owner,x,y,labelWidth)
             end
@@ -179,10 +179,10 @@ context PropertyEditors
               actualCodeboxHeight = if disp.label.text.toString() = "documentation" then documentationHeight else codeboxHeight end then
               x = startX;
               y = finalY
-              //y = startY + loop*(actualCodeboxHeight + singletonHeight + yGap)
+              //y = startY + (loop*(actualCodeboxHeight + singletonHeight + yGap))
             in
               disp.addToForm(owner,x,y,singletonHeight,yGap,codeboxWidth,actualCodeboxHeight);
-              finalY := finalY + actualCodeboxHeight + singletonHeight + 4*yGap
+              finalY := finalY + actualCodeboxHeight + singletonHeight + (4*yGap)
             end
           end;
           finalY
@@ -196,15 +196,15 @@ context PropertyEditors
       if not displays->isEmpty then
         let displayCount = displays->size() then
             rows = displayCount.div(collectionColumns) + displayCount.mod(collectionColumns) then
-            finalY = startY + rows*(collectionHeight + singletonHeight + yGap)
+            finalY = startY + (rows*(collectionHeight + singletonHeight + yGap))
         in
           @For loop in 0.to(displayCount-1) do
             let
               col = loop.mod(collectionColumns);
               row = loop.div(collectionColumns)
             then
-              x = startX + col*(collectionWidth + xGap);
-              y = startY + row*(collectionHeight + singletonHeight + yGap)
+              x = startX + (col*(collectionWidth + xGap));
+              y = startY + (row*(collectionHeight + singletonHeight + yGap))
             in
               displays.at(loop).addToForm(owner,x,y,singletonHeight,collectionWidth,collectionHeight)
             end
@@ -235,10 +235,12 @@ context PropertyEditors
                 let
                   button = displays.buttons.at(loop);
                   x = startX;
-                  y = startY + labelOffset + loop*(buttonHeight + buttonGap)
+                  y = startY + labelOffset + (loop*(buttonHeight + buttonGap))
                 in
-                  button.setX(x); button.setY(y);
-                  button.setWidth(buttonWidth); button.setHeight(buttonHeight);
+                  button.setX(x); 
+                  button.setY(y);
+                  button.setWidth(buttonWidth); 
+                  button.setHeight(buttonHeight);
                   owner.addElement(button)
                 end
               end;
@@ -267,7 +269,7 @@ context PropertyEditors
               y = finalY
             in
               disp.addToForm(owner,x,y,singletonHeight,collectionWidth,collectionHeight,comboHeight,yGap);
-              finalY := finalY + collectionHeight + 2*singletonHeight + 3*yGap
+              finalY := finalY + collectionHeight + (2*singletonHeight) + (3*yGap)
             end
           end;
           finalY
@@ -290,7 +292,7 @@ context PropertyEditors
               y = finalY
             in
               disp.addToForm(owner,x,y,singletonHeight,codeboxWidth,codeboxHeight,comboHeight,yGap);
-              finalY := finalY + codeboxHeight + 2*singletonHeight + 3*yGap
+              finalY := finalY + codeboxHeight + (2*singletonHeight) + (3*yGap)
             end
           end;
           finalY
