@@ -137,7 +137,7 @@ context Daemon
          then self.target.get(object)
          else null
          end
-    else self.target
+    else Kernel_daemonTarget(self)
     end
   end
 
@@ -154,7 +154,7 @@ context Daemon
   
 context Daemon
   @Operation id()
-    self.id
+    Kernel_daemonId(self)
   end
 
 context Daemon
@@ -332,15 +332,15 @@ context Daemon
   
     // Operations that use the name of the daemon use the
     // unique identifier for the daemon. The name may be
-    // the same as the action name ormay be supplied as 
+    // the same as the action name or may be supplied as 
     // an arbitrary value.
     
-    self.id
+    Kernel_daemonId(self)
   end
   
 context Daemon
   @Operation persistent()
-    self.persistent
+    Kernel_daemonPersistent(self)
   end
 
 context Daemon
@@ -389,12 +389,12 @@ context Daemon
   
 context Daemon
   @Operation slot()
-    self.slot
+    Kernel_daemonSlot(self) 
   end
   
 context Daemon
   @Operation target()
-    self.target
+    Kernel_daemonTarget(self) 
   end
   
 context Daemon
@@ -409,7 +409,7 @@ context Daemon
   
 context Daemon
   @Operation traced()
-    self.traced
+    Kernel_daemonTraced(self) 
   end
   
 context Daemon
@@ -426,7 +426,7 @@ context Daemon
   
 context Daemon
   @Operation type()
-    self.type
+    Kernel_daemonType(self) 
   end
   
 context Daemon
