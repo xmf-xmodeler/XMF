@@ -50,7 +50,7 @@ context ClassMapping
     end
     
     @Operation attributeMultChangedDaemon(attribute,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(XCore::Multiplicity)
+      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
       then edge.setMult(self.calcMultLabelString(newMult))
       end
     end
@@ -82,23 +82,40 @@ context ClassMapping
       @SlotValueChanged multi once AttributeXAttributeEdge::attributeTargetChangedDaemon(edge,"target") end
     end
     
+    //@Operation checkMult()
+    //  if not attribute.mult.isReallyKindOf(Associations::Multiplicity)
+    //  then
+    //    let multLabelString = edge.mult.text
+    //    in
+    //      @Case multLabelString of
+    //        "{ordered}" do
+    //          edge.setMult("* <<ordered>>");
+    //          attribute.setMultString("$")
+    //        end
+    //        "Mandatory 1" do
+    //          edge.setMult("1 <<mandatory>>");
+    //          attribute.setMultString("!")
+    //        end
+    //      else
+    //          attribute.setMultString(multLabelString)
+    //      end
+    //    end
+    //  end
+    //end
+    
     @Operation checkMult()
-      if not attribute.mult.isReallyKindOf(XCore::Multiplicity)
-      then
-        let multLabelString = edge.mult.text
-        in
-          @Case multLabelString of
-            "{ordered}" do
-              edge.setMult("* <<ordered>>");
-              attribute.setMultString("$")
-            end
-            "Mandatory 1" do
-              edge.setMult("1 <<mandatory>>");
-              attribute.setMultString("!")
-            end
-          else
-              attribute.setMultString(multLabelString)
+      let multLabelString = edge.mult.text
+      in
+        @Case multLabelString of
+          "{ordered}" do
+            edge.setMult("* <<ordered>>");
+            attribute.setMult("$")
           end
+          "Mandatory 1" do
+            edge.setMult("1 <<mandatory>>");
+            attribute.setMult("!")
+          end
+        else attribute.setMult(multLabelString)
         end
       end
     end

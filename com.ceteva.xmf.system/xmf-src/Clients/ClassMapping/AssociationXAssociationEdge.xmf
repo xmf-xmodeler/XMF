@@ -100,13 +100,13 @@ context ClassMapping
     end
 
     @Operation end1MultChanged_classDiagramDaemon(assocEnd,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(XCore::Multiplicity)
+      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
       then edge.end1.setMult(self.calcMultLabelString(newMult))
       end
     end
 
     @Operation end2MultChanged_classDiagramDaemon(assocEnd,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(XCore::Multiplicity)
+      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
       then edge.end2.setMult(self.calcMultLabelString(newMult))
       end
     end
