@@ -9,12 +9,22 @@ end;
 
 context XCore::Class
   @Operation lift():Performable
-    let metaExp = Path::toPath(self.of().pathSeq());
-        parentExps = parents->asSeq->collect(p | Path::toPath(p.pathSeq()));
-        cnstrExps = constructors->asSeq->collect(c | c.lift());
-        attExps = attributes->asSeq->collect(a | a.lift());
-        opExps = operations->asSeq->collect(o | o.lift());
-        conExps = constraints->reject(c | c.isKindOf(Associations::End))->asSeq->collect(c | c.lift())
-    in XOCL::Class(name,metaExp,isAbstract,parentExps,cnstrExps + attExps + opExps + conExps)
+    // Lifting a class is unlikely to work unless the class is simple
+    // or it can be referenced by name. The path to a class is not always 
+    // going to be available when the lift expression is evaluated,
+    // however this is probably the best shot.
+    let path = self.pathSeq()
+    in if path->size > 1 andthen path->head = "Root"
+       then [| <SetExp("Seq",path->collect(s | s.lift()))>.lookup() |]
+       else
+         let metaExp = Path::toPath(self.of().pathSeq());
+             parentExps = parents->asSeq->collect(p | Path::toPath(p.pathSeq()));
+             cnstrExps = constructors->asSeq->collect(c | c.lift());
+             attExps = attributes->asSeq->collect(a | a.lift());
+             opExps = operations->asSeq->collect(o | o.lift());
+             conExps = constraints->reject(c | c.isKindOf(Associations::End))->asSeq->collect(c | c.lift())
+         in XOCL::Class(name,metaExp,isAbstract,parentExps,cnstrExps + attExps + opExps + conExps)
+         end
+       end
     end
   end

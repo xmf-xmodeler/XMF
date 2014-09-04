@@ -32,7 +32,7 @@ context Statements
     end
     
     @Operation toXOCL():Operation
-      @Operation(next:Peformable)
+      @Operation(next:Performable)
         [| <cases->reverse->iterate(case e = self.defaultCaseToXOCL() |
              case.toExp(exp.toXOCL(),e))>;
            <next>

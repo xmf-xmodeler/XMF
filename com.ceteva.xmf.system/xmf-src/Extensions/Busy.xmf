@@ -28,7 +28,7 @@ context XOCL
     
     @Constructor(label,minimize,body) end
     
-    @Operation desugar():Peformable
+    @Operation desugar():Performable
       [| let dialog = xmf.busy(<label>,<minimize>)
          in try 
               let result = <body> 

@@ -21,6 +21,7 @@ import java.net.PasswordAuthentication;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -637,7 +638,7 @@ public final class OperatingSystem implements EventHandler {
 	public void init() {
 		String[] ini = null;
 		ini = getIni();
-
+System.out.println("args = " + Arrays.toString(ini));
 		parseArgs(ini);
 		System.out.println("[ Starting XOS ]");
 		parseXOSargs();
