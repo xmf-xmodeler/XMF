@@ -53,7 +53,7 @@ end;
 end;
 
 @Menu "Manifest":"Touch":"Sources" on Clients::XmfFileTree::XmfManifest notUndoable
-  Clients::XmfFileTree::XmfManifest::touch
+  Clients::XmfFileTree::XmfManifest::touchSources
 end;
 
 @Menu "Manifest":"Browse":"Contents" on Clients::XmfFileTree::XmfManifest
@@ -65,7 +65,7 @@ end;
 end;
 
 @Menu "Manifest":"Touch":"Binaries" on Clients::XmfFileTree::XmfManifest notUndoable
-  Clients::XmfFileTree::XmfManifest::touch
+  Clients::XmfFileTree::XmfManifest::touchBinaries
 end;
 
 @Menu "Manifest":"Xip" on Clients::XmfFileTree::XmfManifest notUndoable

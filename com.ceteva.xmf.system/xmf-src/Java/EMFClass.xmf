@@ -44,6 +44,8 @@ context Java
       self.eclipseReset(emfObject);
       self.eclipseReport(self.classify(emfObject))
     end
+
+  /*
     
     @Operation eclipseReport(ConstraintReport(o,c,b,"",C))
     
@@ -72,6 +74,8 @@ context Java
         self.eclipseReport(report)
       end
     end
+
+  */
     
     @Operation eclipseReset(emfObject)
     
@@ -137,7 +141,7 @@ context Java
       end
     end
     
-    @Operation reportError(emfObject:ForeignObject,message:String)
+    @Operation reportError(emfObject:ForeignObject,message:String) 
       
       // Reports an error in Eclipse using the EMF interface.
       

@@ -360,6 +360,16 @@ context XmfManifest
    end
    
 context XmfManifest
+  @Operation touchBinaries()
+    self.touch(false)
+  end
+  
+context XmfManifest
+  @Operation touchSources()
+    self.touch(true)
+  end
+   
+context XmfManifest
  @Operation xip()
    let file = xmf.saveFile(xmf.projDir(),"*.xip")
    in if file <> ""
