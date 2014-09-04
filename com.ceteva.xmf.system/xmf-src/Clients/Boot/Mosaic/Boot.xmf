@@ -97,23 +97,14 @@ try
           
           (xmf.homeDir() + "/Clients/Boot/Mosaic/ToolInterface.o").loadBin(false);
           
-          format(stdout,"[ Booting Mosaic.... ]~%");
-          xmf.bootMosaic();
-          format(stdout,"[ Booting Menus.... ]~%");
+         xmf.bootMosaic();
           xmf.bootMenus();
-          format(stdout,"[ Booting Console.... ]~%");
           xmf.bootConsole();
-          format(stdout,"[ Booting Undo.... ]~%");
           xmf.bootUndo();
-          format(stdout,"[ Booting Property Editor.... ]~%");
           xmf.bootPropertyEditor();
-          format(stdout,"[ Booting Browser.... ]~%");
           xmf.bootBrowser();
-          format(stdout,"[ Booting Diagrams.... ]~%");
           xmf.bootDiagrams();
-          format(stdout,"[ Booting Dialogs.... ]~%");
           xmf.bootDialogs();
-          format(stdout,"[ Booting Text Editor.... ]~%");
           xmf.bootTextEditor();
           // xmf.bootOleBridge();
           // xmf.bootEclipseBridge();
@@ -172,11 +163,7 @@ try
         xmf.projectManager("MyProjects").selectModelBrowserNode(true);
         
         // boot patches
-        format(stdout,"[ Booting Patches.... ]~%");
-          
-		xmf.bootPatches();
-		
-		format(stdout,"[ Boot Completed. ]~%")
+        xmf.bootPatches()
        
      end
   end  
