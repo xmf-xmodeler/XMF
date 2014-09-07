@@ -221,6 +221,11 @@ context Class
     Kernel_setDefaultGetMOP(object.of(),true);
     Kernel_getSlotValue(object,name)
   end
+
+context Class
+  @Operation getResourceName():String
+    resourceName
+  end
   
 context Class 
   @Operation hasAttribute(name:String):Boolean
@@ -356,6 +361,11 @@ context Class
     end
     Kernel_setDefaultSetMOP(object.of(),true);
     Kernel_setSlotValue(object,name,value)
+  end
+
+context Class
+  @Operation setResourceName(name:String)
+    self.resourceName := name
   end
 
 context Class

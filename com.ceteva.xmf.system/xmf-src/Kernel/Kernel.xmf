@@ -160,6 +160,7 @@ let
          Kernel_addAtt(class,"constructors",Seq{});
          Kernel_addAtt(class,"imports",Seq{});
          Kernel_addAtt(class,"isFinal",false);
+         Kernel_addAtt(class,"resourceName","");
          class
       end;
       
@@ -557,6 +558,7 @@ let
              false,
              Set{mkAtt("attributes",mkSetType(Attribute),Class,true),
                  mkAtt("isAbstract",Boolean,Class,false),
+                 mkAtt("resourceName",String,Class,false),
                  mkAtt("constructors",mkSeqType(Constructor),Class,true)},
              "Class",
              Set{},

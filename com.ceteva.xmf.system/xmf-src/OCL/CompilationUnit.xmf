@@ -27,10 +27,12 @@ context OCL
     
     @Constructor(resource,imports,exps,source) end
       
-    @Operation foldExps()
+    @Operation foldExps(resourceName:String):Performable
       // Create a single expression to compile. The expression is the
       // result of folding up the imports and the body expressions.
-      exps->iterate(exp exps = self.foldImports() | [| <exps>; <exp> |])
+      let exps = self.transformExps(resourceName)
+      in exps->iterate(exp exps = self.foldImports() | [| <exps>; <exp> |])
+      end
     end 
       
     @Operation foldImports()
@@ -48,7 +50,7 @@ context OCL
     @Operation pprint(out,indent)
       @For i in imports do
         i.pprint(out,indent);
-        if not isLast then format(out,"~%") end
+        if not isLast then format(out,"~%") end 
       end;
       format(out,"~%~%");
       @For exp in exps do

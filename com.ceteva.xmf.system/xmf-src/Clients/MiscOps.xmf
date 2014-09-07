@@ -116,6 +116,16 @@ context XCore::Element
   @Operation doubleClick()
     self.edit()
   end
+  
+context XCore::Class
+  @Operation doubleClick()
+    if resourceName <> ""
+    then 
+      xmf.editHomeFile(resourceName);
+      super()
+    else super()
+    end
+  end
 
 context XCore::ConstraintReport
   @Operation doubleClick()

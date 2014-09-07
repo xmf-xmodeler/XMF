@@ -25,11 +25,11 @@ context Java
       let s = Seq{}
       in @Count x from 0 to self.size() do
            s := s + Seq{self.basicGet(x)}
-         end;
+         end; 
          s
       end
     end
-    
+   
     @Operation excluding(element)
       self.remove(element)
     end

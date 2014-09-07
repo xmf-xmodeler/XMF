@@ -34,7 +34,7 @@ context CompilationUnit
     // the time taken for the various compiler phases...
     
     let objectFile = fileName + ".o";
-        orderedExps = self.foldExps(); 
+        orderedExps = self.foldExps(fileName+".xmf"); 
         env = self.env(); 
         time1 = Time() then
         instrs = orderedExps.compile(env,0,true,saveSource) + Seq{Instrs::Return()} then
@@ -68,7 +68,7 @@ context CompilationUnit
     // has the supplied arguments and the supplied dynamics (for simple cases these
     // should be supplied as empty sequences).
       
-    let exp = self.foldExps() then
+    let exp = self.foldExps(name) then
         instrs = Compiler::compileExp(exp,args,true) + Seq{Instrs::Return()};
         maxLocals = exp.maxLocals() + args->size;
         dynamics = 
@@ -98,4 +98,35 @@ context CompilationUnit
     // Create the initial environment for the compiler...
     
     Env(Seq{})
+  end
+  
+context CompilationUnit
+  @Operation transformExps(resourceName:String):Seq(Performable)
+    // Perform any transformations on the expressions in the
+    // compilation unit.
+    self.transformClassDefinitions(resourceName)
+  end
+  
+context CompilationUnit
+  @Operation transformClassDefinitions(resourceName:String):Seq(Performable)
+    // A class should reference the name of the
+    // source file that contains its definition.
+    // The compilation unit references the file
+    // at compile time. Make the update here.
+    exps->collect(exp | self.transformClassDefinition(exp,resourceName))
+  end
+  
+context CompilationUnit 
+  @Operation transformClassDefinition(exp:Performable,resourceName:String):Performable
+    // Check that we have a class definition before inserting
+    // code to update the file name.
+    if exp.isKindOf(ContextDef) andthen exp.element.isKindOf(XOCL::Class)
+    then 
+      let class = exp.element then
+          path = xmf.pathRelativeToHome(resourceName) then
+          saveSource = [| <class>.setResourceName(<path.lift()>) |]
+      in ContextDef(exp.path,saveSource,exp.isForward)
+      end
+    else exp
+    end
   end

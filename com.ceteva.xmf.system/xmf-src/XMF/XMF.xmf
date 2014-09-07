@@ -10,6 +10,9 @@ parserImport XOCL;
  *    provides operations to interrogate and control the system.              *
  *                                                                            *
  ******************************************************************************/ 
+ 
+import Exceptions;
+import IO;
 
 context Root
 
@@ -103,6 +106,21 @@ context Root
       null
     end
     
+    @Operation canonicalPath(path:String):String
+      // Returns the canonical path to the file.
+      let File = self.javaClass("java.io.File") then
+          file = File(path)
+      in if file.exists()
+         then file.getCanonicalPath()
+         else throw FileNotFound(path)
+         end
+      end
+    end
+    
+    @Operation canonicalHomeDir():String
+      self.canonicalPath(homeDir)
+    end
+    
     @Operation canUndo():Boolean
     
       // returns true when there is comething to undo...
@@ -172,6 +190,10 @@ context Root
       // Return the Java class that implements dialogs...
       
       self.javaClass("com.ceteva.dialogs.DialogsClient")
+    end
+    
+    @Operation editHomeFile(relativePath:String)
+      File(Directory(self.homeDir()),relativePath).editText()
     end
     
     @Operation endUndoable()
@@ -270,7 +292,7 @@ context Root
       let fullPath = homeDir + "/" + path
       in if fullPath.fileExists()
          then fullPath.loadBin(true)
-         else throw FileDoesNotExist(fullPath)
+         else throw FileNotFound(fullPath)
          end
       end
     end
@@ -387,6 +409,16 @@ context Root
          then
            self.error("Cannot create dialog to open a file.")
          else DialogsClient.fileDialog("open",path,type,initial)
+         end
+      end
+    end
+    
+    @Operation pathRelativeToHome(path:String):String
+      let path = self.canonicalPath(path);
+          home = self.canonicalHomeDir()
+      in if path.hasPrefix(home)
+         then path.drop(home->size)
+         else path
          end
       end
     end

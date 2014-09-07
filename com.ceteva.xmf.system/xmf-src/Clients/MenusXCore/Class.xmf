@@ -3,6 +3,17 @@ parserImport XOCL;
 import XCore;
 import Clients::Menus;
 
+// Operations used by menus.
+
+context Class
+  @Operation editDefinition()
+    // If the class defines a resource then edit the source file.
+    if self.getResourceName() = ""
+    then format(stdout,"No recorded resource for ~S~%",Seq{self})
+    else xmf.editHomeFile(self.getResourceName())
+    end
+  end
+
 context Class
   @Operation newAttributeHandler(type)
     @Operation newAttribute()
