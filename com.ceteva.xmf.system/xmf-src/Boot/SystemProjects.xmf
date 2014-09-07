@@ -70,7 +70,7 @@ import Projects;
           XMatch = Project(Root::XMatch,xmf.homeDir() + "/XMatch",XMatch);
           TopLevel = Project(Root::TopLevel,xmf.homeDir() + "/TopLevel",TopLevel);
           Walkers = Project(Root::Walkers,xmf.homeDir() + "/Walkers",Walkers);
-          // XRules = Project(Root::XRules,xmf.homeDir() + "/XRules",XRules);
+          XRules = Project(Root::XRules,xmf.homeDir() + "/XRules",XRules);
           XML = Project(Root::XML,xmf.homeDir() + "/XML",XML);
           XMap = Project(Root::XMap,xmf.homeDir() + "/XMap",XMap);
           Manifests = Project(Root::Manifests,xmf.homeDir() + "/Manifests",Manifests);
@@ -82,7 +82,7 @@ import Projects;
          XMF.add(XMatch);
          XMF.add(TopLevel);
          XMF.add(Walkers);
-         // XMF.add(XRules);
+         XMF.add(XRules);
          XMF.add(XML);
          XMF.add(XMap);
          XMF.add(Manifests);
@@ -103,12 +103,14 @@ import Projects;
   //     end
   //  end
 do
-  let Projects = ProjectManagerContainer("Projects",xmf.homeDir(),self) then
-      System = ProjectManagerContainer("System",xmf.homeDir(),self)
+  let Projects = ProjectManagerContainer("Projects",xmf.homeDir(),self);
+      System = ProjectManagerContainer("System",xmf.homeDir(),self);
+      Clients = Project(Root::Clients,xmf.homeDir() + "/Clients",Mosaic)
   in Projects.add(System);
      System.add(kernel);
      System.add(Compiler);
      System.add(XMF);
+     System.add(Clients);
      // System.add(Languages);
      // The Clients Manifest should return a ProjectManagerContainer for this to work.
      // Needs a re-think...
