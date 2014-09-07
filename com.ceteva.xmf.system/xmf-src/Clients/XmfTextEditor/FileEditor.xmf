@@ -66,6 +66,11 @@ context XmfTextEditor
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         rules->iterate(rule S="" | self.addWordRule(rule,Clients::TextEditor::Editor::blue))
       end;
+      let classes = Root.syntaxClasses()
+      in @For class in classes do
+            self.addWordRule(class.name.toString(),Clients::TextEditor::Editor::blue)
+         end
+      end;
       self.addMultilineRule("/*","*/",Editor::red);
       self.addMultilineRule("@Doc","end",Editor::red);
       self.addMultilineRule("\"","\"",Editor::green)

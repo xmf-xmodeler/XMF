@@ -247,3 +247,19 @@ context NameSpace
     end;
     self
   end
+
+
+context NameSpace
+  @Operation syntaxClasses():Set(Class)
+    let classes = Seq{}
+    in @For x inTableValues contents do
+         if x <> null andthen x.isKindOf(Class) andthen x.grammar <> null
+         then classes := Seq{x|classes}
+         end;
+         if x <> null andthen x.isKindOf(NameSpace) and x <> self
+         then classes := classes + x.syntaxClasses()
+         end
+       end;
+       classes
+     end
+   end
