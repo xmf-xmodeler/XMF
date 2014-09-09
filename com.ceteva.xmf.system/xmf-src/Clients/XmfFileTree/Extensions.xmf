@@ -190,7 +190,7 @@ context XmfFile
       xmf.message("Loaded " + self.fullPath())
     catch(exception)
       @TypeCase(exception)
-        Parser::BNF::ParseError do
+        Parser::ParseError do
           let dialog = xmf.findClient(DialogBoxes::DialogBoxClient)
           in dialog.newTextAreaDialog(
                DialogBoxes::TextAreaDialog::error,

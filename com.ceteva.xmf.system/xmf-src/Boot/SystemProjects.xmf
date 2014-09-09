@@ -92,16 +92,16 @@ import Projects;
     end
   Languages = @Ref Languages       end
   Mosaic    = @Ref Clients         end
-  //XTools =
-  //  @Manifest XTools
-  //    Tools     = @Ref Tools end
-  //    MDC       = @Ref MDC end
-  //  do let XTools = ProjectManager("XTools",dir,self)
-  //     in XTools.add(Tools);
-  //       XTools.add(MDC);
-  //        XTools
-  //     end
-  //  end
+  XTools =
+    @Manifest XTools
+      Tools     = @Ref Tools end
+      MDC       = @Ref MDC end
+    do let XTools = ProjectManager("XTools",dir,self)
+       in XTools.add(Tools);
+          XTools.add(MDC);
+          XTools
+       end
+    end
 do
   let Projects = ProjectManagerContainer("Projects",xmf.homeDir(),self);
       System = ProjectManagerContainer("System",xmf.homeDir(),self);
@@ -112,10 +112,7 @@ do
      System.add(XMF);
      System.add(Clients);
      // System.add(Languages);
-     // The Clients Manifest should return a ProjectManagerContainer for this to work.
-     // Needs a re-think...
-     // System.add(Mosaic);
-     //System.add(XTools);
+     System.add(XTools);
      Projects
   end
 end;

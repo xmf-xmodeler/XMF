@@ -489,7 +489,7 @@ context XMF
            OCL::OCL.grammar.parseString(string,"Exp1",Seq{XOCL})
          catch(exception)
            @TypeCase(exception)
-             Parser::BNF::ParseError do
+             Parser::ParseError do
                let dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient)
                in dialog.newTextAreaDialog(
                   Clients::DialogBoxes::TextAreaDialog::error,

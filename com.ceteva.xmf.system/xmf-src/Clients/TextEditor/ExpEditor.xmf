@@ -57,7 +57,7 @@ context IO
                 ExpEditor.grammar.parseString(text,"TextExp",Seq{XOCL})
               catch(exception)
                 @TypeCase(exception)
-                  Parser::BNF::ParseError do
+                  Parser::ParseError do
                     xmf.warning("Parse error. Commit failed.");
                     null
                   end

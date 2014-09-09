@@ -26,24 +26,25 @@ context Evaluator
        end
     end
   end
-  
+   
 context Evaluator
 
   @Operation parseEvaluationUnit(file:String):EvaluationUnit
   
-     @WithOpenFile(input <- file)
-       let state = State(OCL::OCL.grammar,input) then
-           unit = state.run("EvaluationUnit") 
-       in if state.failed
-          then 
-            let consumed = state.getConsumedChars() then
-                exception = Parser::BNF::ParseError(file)
-            in exception.consumed := consumed;
-               throw exception
-            end
-          else unit
-          end
+     // Use this operation to parse an evaluation unit from the 
+     // supplied file. Deals with parse errors by recording them
+     // as compiler errors. Returns null if the parse failed...
+     
+     try
+       OCL::OCL.grammar.parseFile(file,"EvaluationUnit",Seq{})
+     catch(x)
+       @TypeCase(x)
+         ParseError do
+           // This should be an evaluator error.
+           Compiler::compilationError(x.pprint(),file,x);
+           null
+         end
+         else throw x
        end
      end
-     
    end

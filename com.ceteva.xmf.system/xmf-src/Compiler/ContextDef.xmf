@@ -26,7 +26,12 @@ context ContextDef
   
 context ContextDef
   @Operation desugar()
-    [| XCore::NameSpace::define(<element>,<Path::toPath(path)>,<BoolExp(isForward)>) |]
+    // Some code might statically specify the path. Other code might dynamically
+    // compute the path. Cter for both.
+    if path.isKindOf(Performable)
+    then [| XCore::NameSpace::define(<element>,<path>,<BoolExp(isForward)>) |]
+    else [| XCore::NameSpace::define(<element>,<Path::toPath(path)>,<BoolExp(isForward)>) |]
+    end
   end
     
 context ContextDef
