@@ -43,7 +43,7 @@ context CompilationUnit
         codeBox = assemble(instrs,locals,"") then
         time3 = Time();
         nameSpaces = Root.allContentsOf(NameSpace)->asSeq->including(Root)
-    in codeBox.setResourceName(fileName + ".xmf");
+    in codeBox.setResourceName(xmf.pathRelativeToHome(fileName + ".xmf"));
        codeBox.toMachineCodeBox().save2(objectFile,nameSpaces);
        if verbose
        then
