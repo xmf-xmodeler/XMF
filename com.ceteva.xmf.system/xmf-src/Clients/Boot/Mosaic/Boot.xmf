@@ -8,7 +8,7 @@ import IO;
 // Load all packages that Mosaic depends on.
 // Assume that the base level XMFE and XMFS images are running.
  
-try 
+try
 
   // Set up the project manager from the manifests...
        
@@ -28,8 +28,11 @@ try
   (xmf.homeDir() + "/Clients/Boot/Mosaic/FileEditorManager.o").loadBin(true);
   (xmf.homeDir() + "/Clients/Boot/Mosaic/RegistryContributions.o").loadBin(false);
   
-  format(stdout,"[ Project Manager Completed. ]~%");
-
+  // A test: does MDX and Tools/RegistryContributions need to be loaded after Clients/RegistryContributions?
+  (xmf.homeDir() + "/Tools/Basic/RegistryContributions.o").loadBin(false);
+  (xmf.homeDir() + "/Tools/DiagramTools/Structure/RegistryContributions.o").loadBin(false);
+  (xmf.homeDir() + "/MDC/RegistryContributions.o").loadBin(false);
+  
   // Add XTools shapes directory
 
   // MDC::shapeDir(xmf.homeDir() + "/MDC/Shapes");
