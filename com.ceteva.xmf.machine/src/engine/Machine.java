@@ -637,11 +637,12 @@ public final class Machine implements Words, Constants, ObjectProperties,
 		// is successful and false otherwise.
 
 		try {
-			int[] newWords = new int[words.length + amount];
+			int newAmount = Math.min(MAXINT,words.length + amount);
+			int[] newWords = new int[newAmount];
 			for (int i = 0; i < words.length; i++)
 				newWords[i] = words[i];
 			words = newWords;
-			gcWords = new int[words.length + amount];
+			gcWords = new int[newAmount];
 			heapSize = words.length;
 			gcLimit = heapSize - freeHeap;
 			return true;
@@ -3861,7 +3862,7 @@ public final class Machine implements Words, Constants, ObjectProperties,
 
 	public int hashTableGet(int table, int key) {
 
-		// Get the valueof the key in the table. Return -1 if
+		// Get the value of the key in the table. Return -1 if
 		// the key does not exist...
 
 		int cell = hashTableGetCell(table, key);
@@ -5031,8 +5032,7 @@ public final class Machine implements Words, Constants, ObjectProperties,
 				break;
 			case RETDOTSELF:
 				// Return the value of a slot via self...
-				dot(frameConstant(instr & DATA),
-						valueStack.elements[currentFrame + FRAMESELF]);
+				dot(frameConstant(instr & DATA),valueStack.elements[currentFrame + FRAMESELF]);
 				popFrame();
 				break;
 			case TOSTRING:
@@ -11612,8 +11612,12 @@ public final class Machine implements Words, Constants, ObjectProperties,
 
 		int index = 0;
 		while (index < args.length) {
-			if (args[index].equals("-heapSize"))
-				heapSize = Integer.parseInt(args[++index]) * K;
+			if (args[index].equals("-heapSize")) {
+				int size = Integer.parseInt(args[++index]) * K;
+				if(size > MAXINT)
+					System.out.println("-heapSize must be <= " + MAXINT);
+				heapSize = Math.min(MAXINT,size);
+			}
 			else if (args[index].equals("-stackSize"))
 				stackSize = Integer.parseInt(args[++index]) * K;
 			else if (args[index].equals("-initFile"))

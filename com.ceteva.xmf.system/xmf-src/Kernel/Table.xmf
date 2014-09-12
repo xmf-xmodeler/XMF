@@ -325,6 +325,26 @@ context Table
     end
     Kernel_tablePut(self,key,value)
   end
+
+context Table
+  @Operation rehash()
+    let size = self.size()
+    in @Letrec hashBuckets(n) =
+         if n = size
+         then self.clear()
+         else
+           let bucket = Kernel_arrayRef(self,n)
+           in hashBuckets(n+1);
+              @For cell in  bucket do
+                self.put(cell->head,cell->tail)
+              end
+           end
+         end
+       in hashBuckets(0); self
+       end
+    end
+  end
+    
   
 context Table
  @Operation remove(key:Element)
