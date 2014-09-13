@@ -30,19 +30,19 @@ try
   
   // XTools and MDC go after all registry and extensions are defined...
   
-  (xmf.homeDir() + "/Tools/Manifest.o").loadBin(false).load(xmf.homeDir() + "/Tools");
-  (xmf.homeDir() + "/MDC/Manifest.o").loadBin(false).load(xmf.homeDir() + "/MDC");
+  //(xmf.homeDir() + "/Tools/Manifest.o").loadBin(false).load(xmf.homeDir() + "/Tools");
+  //(xmf.homeDir() + "/MDC/Manifest.o").loadBin(false).load(xmf.homeDir() + "/MDC");
   
   // A test: does MDX and Tools/RegistryContributions need to be loaded after Clients/RegistryContributions?
   // If the above works then the registry contributions can be included in the manifests for Tools and MDC...
   
-  (xmf.homeDir() + "/Tools/Basic/RegistryContributions.o").loadBin(false);
-  (xmf.homeDir() + "/Tools/DiagramTools/Structure/RegistryContributions.o").loadBin(false);
-  (xmf.homeDir() + "/MDC/RegistryContributions.o").loadBin(false);
+  //(xmf.homeDir() + "/Tools/Basic/RegistryContributions.o").loadBin(false);
+  //(xmf.homeDir() + "/Tools/DiagramTools/Structure/RegistryContributions.o").loadBin(false);
+  //(xmf.homeDir() + "/MDC/RegistryContributions.o").loadBin(false);
   
   // Add XTools shapes directory
 
-  MDC::shapeDir(xmf.homeDir() + "/MDC/Shapes");
+  //MDC::shapeDir(xmf.homeDir() + "/MDC/Shapes");
   
   // Save the system.
   
