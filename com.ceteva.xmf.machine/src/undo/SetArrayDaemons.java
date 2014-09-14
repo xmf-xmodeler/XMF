@@ -24,7 +24,7 @@ public class SetArrayDaemons extends Command {
     }
 
     public void gc(Machine machine) {
-        array = machine.gcArray(array);
+        array = machine.gcCopy(array);
         newDaemons = machine.gcCopy(newDaemons);
         oldDaemons = machine.gcCopy(oldDaemons);
     }

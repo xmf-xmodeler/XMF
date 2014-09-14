@@ -26,7 +26,7 @@ public class SetSlot extends Command {
     }
     
     public void gc(Machine machine) {
-        object = machine.gcObj(object);
+        object = machine.gcCopy(object);
         slot = machine.gcCopy(slot);
         newValue = machine.gcCopy(newValue);
         oldValue = machine.gcCopy(oldValue);

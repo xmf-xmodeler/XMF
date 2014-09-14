@@ -26,7 +26,7 @@ public class SetArray extends Command {
     }
     
     public void gc(Machine machine) {
-        array = machine.gcArray(array);
+        array = machine.gcCopy(array);
         newValue = machine.gcCopy(newValue);
         oldValue = machine.gcCopy(oldValue);
     }

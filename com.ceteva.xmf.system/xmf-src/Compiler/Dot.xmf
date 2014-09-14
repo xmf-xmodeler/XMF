@@ -29,7 +29,10 @@ context Dot
     then Seq{Instrs::DotLocal(target.name,self.dotLocalIndex(env),Symbol(name))}
     elseif self.isSelfDot()
     then 
-      if isLast
+      // RETDOTSELF needs more thought in the VM. The current implementation
+      // assumes that the instruction will not involve an operation call. This
+      // is not always the case....
+      if isLast and false
       then Seq{Instrs::RetDotSelf(Symbol(name))}
       else Seq{Instrs::DotSelf(Symbol(name))}
       end

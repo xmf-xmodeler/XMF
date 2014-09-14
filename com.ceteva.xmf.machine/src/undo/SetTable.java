@@ -26,7 +26,7 @@ public class SetTable extends Command {
     }
     
     public void gc(Machine machine) {
-        table = machine.gcHashTable(table);
+        table = machine.gcCopy(table);
         newValue = machine.gcCopy(newValue);
         oldValue = machine.gcCopy(oldValue);
     }

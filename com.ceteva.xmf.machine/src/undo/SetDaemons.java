@@ -25,7 +25,7 @@ public class SetDaemons extends Command {
     }
 
     public void gc(Machine machine) {
-        object = machine.gcObj(object);
+        object = machine.gcCopy(object);
         newDaemons = machine.gcCopy(newDaemons);
         oldDaemons = machine.gcCopy(oldDaemons);
     }
