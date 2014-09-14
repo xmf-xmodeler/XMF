@@ -36,39 +36,45 @@ context XMF
   
 context XMF
   @Operation browse(url:String)
-    let textClient = self.textClient() in
-      if textClient <> null
-      then
-        let browser = Clients::TextEditor::HTMLViewer(url) in
-          textClient.newBrowser(browser)
-        end
-      end
+    self.browseUsing(url,Clients::TextEditor::HTMLViewer)
+  end
+  
+context XMF
+  @Operation browseUsing(url:String,htmlViewerClass:Class)
+    let textClient = self.textClient() 
+    in if textClient <> null
+       then
+         let browser = htmlViewerClass(url) 
+         in textClient.newBrowser(browser)
+         end
+       end
     end
   end
   
 context XMF
   @Operation browse(url:String,title:String)
+    self.browseUsing(url,title,Clients::TextEditor::HTMLViewer)
+  end
+  
+context XMF
+  @Operation browseUsing(url:String,title:String,htmlViewerClass:Class)
     let textClient = self.textClient()
-    in
-      if textClient <> null
-      then
-        if textClient.hasBrowserForName(title)
-        then
-          let browser = textClient.getBrowserForName(title)
-          in
-            browser.setURL(url);
-            browser.setFocus()
-          end
-        else
-          let browser = self.browse(url)
-          in
-            if browser <> null
-            then
-              browser.setName(title)
-            end;
-            browser
-          end
-        end
-      end
+    in if textClient <> null
+       then
+         if textClient.hasBrowserForName(title)
+         then
+           let browser = textClient.getBrowserForName(title)
+           in browser.setURL(url);
+              browser.setFocus()
+           end
+         else
+           let browser = self.browseUsing(url,htmlViewerClass)
+           in if browser <> null
+              then browser.setName(title)
+              end;
+              browser
+           end
+         end
+       end
     end
   end
