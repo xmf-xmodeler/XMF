@@ -71,6 +71,9 @@ context XmfTextEditor
             self.addWordRule(class.name.toString(),Clients::TextEditor::Editor::blue)
          end
       end;
+      self.addWordRule("@",Editor::blue);
+      // A cheat since OCL does not define 'do' as a terminal...
+      self.addWordRule("do",Editor::blue);
       self.addMultilineRule("/*","*/",Editor::red);
       self.addMultilineRule("@Doc","end",Editor::red);
       self.addMultilineRule("\"","\"",Editor::green)
