@@ -232,4 +232,84 @@ then
     end
   end
 end;
+
+context Root
+  @Bind XModelerStateRestorer =
+    @XML::Parser::Grammar Test
+      XModeler ::= <XModeler date=savedAt saver=user> Browser </XModeler>.
+      Browser  ::= <Browser> BrowserElement* </Browser>.
+      BrowserElement ::= <Directory p=path/> { 
+        xmf.browseDirectory(p) 
+      }.
+    end
+  end
+
+context XMF
+  @Operation loadXModelerState():Boolean
+    if xmf.projDir().isKindOf(String) andthen xmf.projDir().fileExists()
+    then self.loadXModelerState(xmf.projDir() + "/xmodeler.xml")
+    else false
+    end
+  end
+    
+context XMF
+  @Operation loadXModelerState(file:String):Boolean
+    if file.fileExists()
+    then 
+      try
+        @WithOpenFile(fin <- file)
+          let xin = XML::Parser::ParserChannel(fin,XModelerStateRestorer)
+          in xin.parse("XModeler")
+          end
+        end;
+        true
+      catch(exception)
+        false
+      end
+    else false
+    end
+  end
+  
+context XMF
+  @Operation saveXModelerState():Boolean    
+    if self.projDir().isKindOf(String) andthen self.projDir().fileExists()
+    then self.saveXModelerState(self.projDir() + "/xmodeler.xml")
+    else false
+    end
+  end
+  
+context XMF
+  @Operation saveXModelerState(file:String):Boolean   
+    try
+      @WithOpenFile(out -> file)
+        @XML::PrintXML::XML(out)
+          <XModeler savedAt=xmf.date() user=xmf.user()>
+            <Browser>
+              @For dir in xmf.browsedDirectories() do
+                @XML::PrintXML::XML(out)
+                  <Directory path=dir.name/>
+                end
+              end
+            </Browser>
+          </XModeler>
+        end
+      end;
+      true
+    catch(exception) 
+      false
+    end
+  end
+  
+context XMF
+  @Operation browseDirectory(path:String):Boolean
+    if path.fileExists()
+    then 
+      let fileMappingClient = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
+          dir = IO::Directory(path,Seq{".*.txt",".*.xmf",".*.xml",".*.java",".*.adb",".*.html"},0) 
+      in fileMappingClient.add(dir);
+         true    
+      end
+    else false
+    end
+  end
   

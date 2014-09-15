@@ -167,9 +167,12 @@ try
                 end
               end
             end
-          end
+          end;
 
-          /* if hasArg("initFile")
+          // The init file provides an opportunity for the user to configure the system to
+          // reflect their own needs. 
+
+          if hasArg("initFile")
           then
             let initFile = getArg("initFile")
             in xmf.setInitFile(initFile.subString(0,initFile->size - 2) + ".xmf");
@@ -178,14 +181,17 @@ try
                else xmf.warning("Cannot find Mosaic init file " + initFile)
                end
             end
-          end */
+          end
           
         end;
 
         xmf.projectManager("MyProjects").selectModelBrowserNode(true);
         
         // boot patches
-        xmf.bootPatches()
+        xmf.bootPatches();
+
+        // If there was a saved state for XModeler, now is the time to load it...
+        xmf.loadXModelerState()
        
      end
   end  

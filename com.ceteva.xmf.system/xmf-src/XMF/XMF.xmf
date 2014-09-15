@@ -101,6 +101,14 @@ context Root
       end
     end
     
+    @Operation browsedDirectories():Seq(Directory)
+      // Find out what is currently being browsed...
+      self.clientNamed("com.ceteva.modelBrowser")
+        .allModelBrowsersByRootType(Directory)
+        ->collect(browser | browser.element)
+        ->asSeq
+    end
+    
     @Operation busy(label:String)
       // Mosaic defines this to display an appropriate dialog.
       null

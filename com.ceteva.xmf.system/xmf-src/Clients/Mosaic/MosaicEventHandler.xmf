@@ -17,6 +17,7 @@ context Mosaic
       self.debug("shutdown",Seq{});
       if xmf.question("Are you sure you want to quit? All unsaved changes will be lost.")
       then
+        xmf.saveXModelerState();
         self.owner().commandInterpreter().shutdown()
       end
     end
