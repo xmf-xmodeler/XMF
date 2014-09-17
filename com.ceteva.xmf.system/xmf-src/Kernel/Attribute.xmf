@@ -21,21 +21,21 @@ parserImport XOCL;
 
 context Attribute
   @Operation attString()
-    name.toString() + " : " + self.mult() + self.underlyingType().name.toString()
+    name.toString() + " : " + self.mult().multString() + self.underlyingType().name.toString()
   end
 
 context Attribute
   @Operation decodeMultString(multString:String)
     try
       if multString = "" or multString = "1" or multString = null
-      then SingleMult(false)
+      then Multiplicities::SingleMult(false)
       elseif multString = "!"
-      then SingleMult(true)
+      then Multiplicities::SingleMult(true)
       else
         if multString = "*"
-        then CollectionMult(false,false,0,0)
+        then Multiplicities::CollectionMult(false,false,0,0)
         elseif multString = "$" or multString = "$*"
-        then CollectionMult(true,false,0,0)
+        then Multiplicities::CollectionMult(true,false,0,0)
         else
           let ordered = multString.hasPrefix("$") then
               rangeSeq = if ordered
@@ -48,7 +48,7 @@ context Attribute
           in
             if hasUpperBound andthen upperBound < lowerBound
             then throw Exception("Invalid multiplicity '"+multString.toString() + "': upper bound is less than lower bound")
-            else CollectionMult(ordered,hasUpperBound,lowerBound,upperBound)
+            else Multiplicities::CollectionMult(ordered,hasUpperBound,lowerBound,upperBound)
             end
           end
         end
@@ -171,7 +171,14 @@ context Attribute
   
 context Attribute
   @Operation mult()
-    self.getProperty("mult","")
+    let m = self.getProperty("mult",null)
+    in if m = null
+       then 
+         self.updateMultFromType();
+         self.mult()
+       else m
+       end
+    end
   end
   
 context Attribute 
@@ -224,6 +231,7 @@ context Attribute
     then self.setMult(self.decodeMultString("*"))
     elseif self.type.isKindOf(Seq)
     then self.setMult(self.decodeMultString("$"))
+    else self.setMult(Multiplicities::SingleMult(false))
     end
   end
 
@@ -231,9 +239,9 @@ context Attribute
   @Operation updateTypeFromMult()
     let mult = self.mult()
     in
-      if mult.isKindOf(SingleMult)
+      if mult.isKindOf(Multiplicities::SingleMult)
       then self.type := self.underlyingType()
-      else if mult.isKindOf(CollectionMult)
+      else if mult.isKindOf(Multiplicities::CollectionMult)
            then if mult.isOrdered
                 then self.type := Seq(self.underlyingType())
                 else self.type := Set(self.underlyingType())

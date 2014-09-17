@@ -538,6 +538,6 @@ context Object
 
 context Object
   @Operation slots():Seq(Slot)
-    self.of().allAttributes()->collect(a | Slot(a.name,a,self.get(a.name)))
+    self.of().allAttributes()->asSeq->collect(a | Slot(a.name,a,self.get(a.name)))
   end
   

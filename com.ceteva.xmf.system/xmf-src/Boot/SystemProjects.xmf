@@ -50,18 +50,19 @@ import Projects;
     end
   XMF =
     @Manifest XMF
-      OCL          = @File OCL/Manifest        end
-      Parser       = @File Parser/Manifest     end
-      Extensions   = @File Extensions/Manifest end
-      XMatch       = @File XMatch/Manifest     end
-      TopLevel     = @File TopLevel/Manifest   end
-      Walkers      = @File Walkers/Manifest    end
-      XRules       = @File XRules/Manifest    end
-      XML          = @File XML/Manifest        end
-      XMap         = @File XMap/Manifest       end
-      Manifests    = @File Manifests/Manifest  end
-      Projects     = @File Projects/Manifest   end
-      Associations = @File Associations/Manifest end
+      OCL            = @File OCL/Manifest            end
+      Parser         = @File Parser/Manifest         end
+      Extensions     = @File Extensions/Manifest     end
+      XMatch         = @File XMatch/Manifest         end
+      TopLevel       = @File TopLevel/Manifest       end
+      Walkers        = @File Walkers/Manifest        end
+      XRules         = @File XRules/Manifest         end
+      XML            = @File XML/Manifest            end
+      XMap           = @File XMap/Manifest           end
+      Manifests      = @File Manifests/Manifest      end
+      Projects       = @File Projects/Manifest       end
+      Associations   = @File Associations/Manifest   end
+      Multiplicities = @File Multiplicities/Manifest end
     do
       let XMF = ProjectManager("XMF",xmf.homeDir(),self);
           OCL = Project(Root::OCL,xmf.homeDir() + "/OCL",OCL);
