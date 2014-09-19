@@ -1,0 +1,1088 @@
+
+\chapter{Grammars}
+
+Computer based languages are used as communication media; either system
+to system or human to system. In either case, a computer must be able
+to recognise phrases expressed in the language. When phrases are presented
+to a computer they must be interpreted in some way. Typically, phrases
+may be interpreted directly, as they are recognized, or some internal
+representation for the phrases may be synthesized (abstract syntax)
+and subsequently passed on to an internal module for processing.
+
+There are a variety of formats by which language may be conveyed to
+a computer; a common mechanism is by text. A standard way of defining
+how to recognize and process text-based languages is by supplying
+a \emph{grammar}. A grammar is a collection of rules that define the
+legal sequences of text strings in a language. In addition to recognising
+language phrases, a grammar may include actions that are to be performed
+as sub-phrases are processed.
+
+In order to use grammars to process language phrases we must supply
+the grammar to a program called a \emph{parser}. The medium used to
+express the grammar is usually text. BNF (and the extended version
+EBNF) is a text-based collection of grammar formation rules. BNF defines
+how to express a grammar and what the grammar means in terms of processing
+languages. 
+
+This chapter describes the XMF version of EBNF, called XBNF. XBNF
+integrates EBNF with XOCL (and any language defined by XBNF). XMF
+provides an XBNF parser that is supplied with an XBNF grammar and
+will then parse and synthesize XMF-defined languages. XMF is a super-language
+because (amongst other features) it supports the definition of new
+language constructs that can be weaved into XOCL or used stand-alone.
+
+Grammars (and therefore languages) in XMF are associated with classes.
+Typically an XBNF grammar defines how to recognize legal sequences
+of characters in a language and to syntheisize an instance of the
+associated class (and populate the instance with instances of the
+class's attribute types).
+
+
+\section{Parsing and Syntheisizing}
+
+This section describes the basics of using XBNF to define simple grammars
+that recognize languages and synthesize XMF data values. A grammar
+is an instance of the XMF class Parser::BNF::Grammar. A grammar consists
+of a collection of \emph{clauses} each of which is a rule that defines
+a non-terminal of the grammar. A non-terminal is a name (by convention
+a non-terminal name starts with an upper case letter).
+
+A clause has the following form:
+\begin{lstlisting}
+NAME ::= RULE .
+\end{lstlisting}
+where the RULE part defines how to recognize a sequence of input characters.
+To illustrate the essential elements of a grammar definition we will
+build a simple caculator that recognises arithmetic expressions and
+executes (synthesizes) the expressions (integers) as the parse proceeds.
+
+The grammar is constructed incrementally, the clauses are defined
+in the context of an @Grammar:
+\begin{lstlisting}
+@Grammar
+  CLAUSES
+end
+\end{lstlisting}Typically, a grammar has a starting non-terminal; this is the clause
+that is used as the starting point of a parse. There is nothing special
+about the starting non-terminal in the definition. In the case of
+the calculator the starting non-terminal is Calc:
+
+\begin{lstlisting}
+Calc ::= Mult '=' 'end'.
+\end{lstlisting}The clause for Calc defines that to recognize this non-terminal a
+parse must recognize an Mult (defined below) followed by a \emph{terminal}
+'='. A terminal is a sequences of characters in quotes; a terminal
+successfully matches an input when the input corresponds to exactly
+the characters, possibly preceded by whitespace. Therefore, a Calc
+is recognized when a Mult is recognized followed by a =.
+
+A Mult is a multiplicative expression, possibly involving the operators
+{*} and /. We use a standard method of defining operator precedence
+in the grammar, where addition operators bind tighter than multiplicative
+operators. This is achieved using two different non-terminals:
+
+\begin{lstlisting}
+Mult ::= n1 = Add ( 
+    '*' n2 = Mult { n1 * n2 } 
+  | '/' n2 = Mult { n1 / n2 } 
+  | { n1 } 
+). 
+\end{lstlisting}The clause for Mult shows a number of typical grammar features. A
+Mult is successfully recognized when a Add is recognized followed
+by an optional {*} or / operator.
+
+Each non-terminal synthesizes a value when it successfully recognizes
+some input. When one non-terminal \emph{calls} another (for example
+Add is called by Mult) the value synthesized by the called non-terminal
+may be optionally named in the definition of the calling non-terminal.
+Once named, the syntheized value may be referenced in the rest of
+the rule. Naming occurs a number of times in the definition of Mult
+where the names n1 and n2 are used to refer to syntheisized numbers.
+
+A clause may include optional parts separated by |. In general, if
+a clause contains an optional component of the form A | B where A
+and B are arbitrary components, then a parse is successful when either
+A or B is successful. 
+
+The clause for Mult contains three optional components that occur
+after the initial Add is successful (hence the need for parentheses
+around the optional components to force the Add to occur). Once the
+Add is successful then the parse is successful when one of the following
+occurs:
+
+\begin{itemize}
+\item a {*} is encountered followed by a Mult.
+\item a + is encountered followed by a Mult
+\item no further input is processed (this option must occur last since it
+subsumes the previous two options -- options are tried in turn).
+\end{itemize}
+Clauses may contain \emph{actions}. A action is used to synthesize
+arbitrary values and can refer to values that have been named previously
+in the clause. An action is an XOCL expression enclosed in \{ and
+\}. Just like calls to non-terminals in the body of a clause, an action
+returns a value that may be named. If the last component performed
+by the successful execution of a clause is an action then the value
+produced by the action is the value returned by the clause.
+
+The clause for Mult contains a number of actions that are used to
+synthesize values (in this case evaluate numeric expressions). The
+clause for Add is the same as that for Mult except that the clause
+recognizes and synthesises addition expressions:
+
+\begin{lstlisting}
+Add ::= n1 = Int ( 
+    '+' n2 = Add { n1 + n2 }
+  | '-' n2 = Add { n1 - n2 }
+  | { n1 } 
+). 
+\end{lstlisting}The complete grammar definition is given below:
+
+\begin{lstlisting}
+@Grammar
+  Calc ::= Mult '=' 'end'.
+  Mult ::= n1 = Add (
+      '*' n2 = Mult { n1 * n2 }
+    | '/' n2 = Mult { n1 / n2 }
+    | { n1 }
+  ).
+   Add ::= n1 = Int (
+       '+' n2 = Add { n1 + n2 }
+    |  '-' n2 = Add { n1 - n2 }
+    | { n1 }
+  ). 
+end
+\end{lstlisting}
+\section{Sequences of Elements}
+
+A grammar rule may want to specify that, at a given position in the
+parse, a sequence of character strings can occur. For example, this
+occurs when parsing XML elements, where a composite element can have
+any number of children elements each of which is another element.
+
+XBNF provides the postfix operators {*} and + that apply to a clause
+component X and define that the parse may recognize sequences of occurrences
+of X. In the case of {*}, there may be 0 or more occurrences of X
+and in the case of + there may be 1 or more occurrences of X. If X
+synthesizes a value each time it is used in a parse then the use of
+{*} and + synthesizes sequences of values, each value in the sequence
+is a value syntheisized by X.
+
+The following gramar shows an example of the use of {*}. XML elements
+are trees; each node in the tree has a label. The following grammar
+recognizes XML (without attributes and text elements) trees and synthesizes
+an XMF sequence representation for the XML tree. The grammar shows
+the use of the builtin non-terminal Name that parses XMF names and
+synthesizes the name as a string:
+
+\begin{lstlisting}
+@Grammar
+  Element ::= 
+      SingleElement 
+    | CompositeElement. 
+  SingleElement ::= 
+    '<' tag = Name '/>' 
+    { Seq{tag} }.
+  CompositeElement ::= 
+    '<' tag = Name '>' 
+      children = Element* 
+    '<' Name '/>' 
+    { Seq{tag | children} }. 
+end
+\end{lstlisting}
+\section{Specializing Grammars}
+
+Grammars may be specialized by adding extra clauses or extending existing
+clauses. A grammar has an \emph{extends} clause that is followed by
+comma separated references to parent grammars. The newly defined grammar
+is the merge of the parent grammars and the newly defined clauses.
+Any clauses in the parents or in the body of the new definition that
+have the same names are merged into a single clause using the | operator.
+
+For example, suppose we want to extend the grammar for XML given in
+the previous section with the ability to recognize text elements. A
+text element is supplied as a string within string-quotes. XBNF provides
+a built-in non-terminal Str for strings. The new grammar is defined
+as follows:
+
+\begin{lstlisting}
+@Grammar extends XML 
+  Element ::= Str. 
+end
+\end{lstlisting}This is equivalent to the following grammar definition:
+
+\begin{lstlisting}
+@Grammar
+  Element ::= 
+      SingleElement 
+    | CompositeElement
+    | Str. 
+  SingleElement ::= 
+    '<' tag = Name '/>' 
+    { Seq{tag} }.
+  CompositeElement ::= 
+    '<' tag = Name '>' 
+      children = Element* 
+    '<' Name '/>' 
+    { Seq{tag | children} }. 
+end
+\end{lstlisting}
+\section{Synthesizing Syntax}
+
+Super-languages must support extensibility through language definition.
+When a grammar defines a new language we will often want to synthesize
+syntax values that are then passed to a compiler or an interpreter.
+An XMF language definition often consists of a grammar that synthesizes
+XOCL. Suppose we want to modify the calculator language defined above
+to produce the arithmetic expression rather than execute the expressions
+directly. Assuming that the OCL package is imported:
+
+\begin{lstlisting}
+@Grammar
+  Calc ::= Mult '=' 'end'.
+  Mult ::= n1 = Add (
+      '*' n2 = Mult { BinExp(n1,"*",n2) }
+    | '/' n2 = Mult { BinExp(n1,"/",n2) }
+    | { n1 }
+  ).
+  Add ::= n1 = IntExp (
+      '+' n2 = Add { BinExp(n1,"+",n2) }
+    | '-' n2 = Add { BinExp(n1,"-",n2) }
+    | { n1 }
+  ). 
+  IntExp :: n = Int { IntExp(n) }.
+end
+\end{lstlisting}Alternatively we might choose to use quasi-quotes:
+
+\begin{lstlisting}
+@Grammar
+  Calc ::= Mult '=' 'end'.
+  Mult ::= n1 = Add (
+      '*' n2 = Mult { [| <n1> * <n2> |] }
+    | '/' n2 = Mult { [| <n1> / <n2> |] }
+    | { n1 }
+  ).
+  Add ::= n1 = IntExp (
+      '+' n2 = Add { [| <n1> + <n2> |] }
+    | '-' n2 = Add { [| <n1> - <n2> |] }
+    | { n1 }
+  ). 
+  IntExp ::= n = Int { n.lift() }.
+end
+\end{lstlisting}
+\section{Simple Language Constructs}
+
+Language driven development involves working with and developing high-level
+languages that allow us to focus on the the \emph{what}, rather than
+the \emph{how} of applications. Languages can be defined in terms
+of abstract syntax models or concrete syntax models. Grammars support
+the definition of concrete syntax models and are used extensively
+throughout the rest of this book.
+
+A grammar for a language construct synthesizes instances of an abstract
+syntax model. So long as the model has an execution engine then the
+synthesized data can be executed. The syntax model and engine may
+be provided, such as XOCL, or may be one that has been defined specially
+for the application; the latter case is referred to as a \emph{domain
+specific language}. 
+
+This section provides many examples of new language constructs that
+are defined using grammars. All of the syntax constructs are provided
+as part of the XMF system and implemented as extensions to the basic
+XOCL language. In most cases the grammars synthesize instances of
+the XOCL model and can therefore be viewed as \emph{syntactic sugar}.
+All of the language constructs are general purpose and should not
+really be viewed as domain specific; however the techniques can be
+used when defining domain specific constructs.
+
+
+\subsection{When}
+
+When is a simple language construct that behaves as sugar for an if-expression:
+
+\begin{lstlisting}
+@When guard do
+  action
+end
+\end{lstlisting}It emphasizes that there is a guarded action and there is no alternative
+action. Although there is no semantic difference between a when and
+an if, it can be useful when reading code to see what was in the mind
+of the developer. The grammar is as follows:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  When ::= guard = Exp 'do' action = Exp {
+    [| if <guard> 
+       then <action> 
+       else "GUARD FAILS" 
+       end 
+    |]
+  }.
+end
+
+\end{lstlisting}
+\subsection{Cond}
+
+Sometimes, if-expressions can become deeply nested and difficult to
+read. A cond-expression is equivalent to a nested if-then-else, but
+promotes all of the if-then parts to the top level:
+
+\begin{lstlisting}
+@Cond
+  test1 do exp1 end
+  test2 do exp2 end
+  ...
+  testn do expn end
+  else exp
+end
+\end{lstlisting}The implementation of this construct provides an example of using
+syntactic sugar. A class that inherits from XOCL::Sugar must implement
+an operation desugar that is used to transform the receiver into a
+performable element. These classes are often useful when the transformation
+is complex and is better done as a separate step after the abstract
+syntax synthesis. The grammar for the cond-expression is as follows:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  Cond ::= clauses = Clause* otherwise = Otherwise 'end' {
+    Cond(clauses,otherwise)
+  }.
+  Clause ::= guard = Exp 'do' body = Exp 'end' {
+    CondClause(guard,body)
+  }.
+  Otherwise ::= 'else' Exp | 
+    { [| self.error("No else clause.") |] }.
+end
+\end{lstlisting}Cond inherits from XOCL::Sugar. A Cond has attributes, clauses (of
+type Seq(CondClause)) and otherwise (of type Performable) and has
+a desugar operation as follows:
+
+\begin{lstlisting}
+@Operation desugar():Performable
+  clauses->reverse->iterate(clause exp = otherwise |
+    [| if <clause.guard()>
+       then <clause.body()>
+       else <exp>
+       end
+    |])
+end
+\end{lstlisting}
+\subsection{Classes and Packages}
+
+Classes and packages are name spaces: they both contain named elements.
+Although name spaces can contain any type of named element, packages
+and classes are examples of name spaces that know about particular
+types of named element. Packages know about sub-packages and classes.
+Classes know about attributes, operations and constraints. 
+
+To allow extensibility, name space definitions contain sequences of
+element definitions. An element is added to a name space through the
+add operation. Packages and classes are examples of name spaces that
+hijack the add operation in order to manage particular types of known
+named elements. The rest of this section defined package and class
+definition language features. 
+
+A second feature of name spaces is mutual-reference. Definitions within
+a name space may refer to each other and the references must be resolved.
+For example, this occurs when attribute types refer to classes in
+the same package and when classes inherit from each other in a package
+definition. One way to achieve resolution is via two-passes. The named
+elements are added to the name space but all references are left unresolved.
+A second pass then replaces all references with direct references
+to the appropriate named elements. This section shows how this two-pass
+system can be implemented.
+
+Firstly, consider a package definition:
+
+\begin{lstlisting}
+@Package P
+  @Class A
+    @Attribute b : B end
+  end
+  @Class B extends A
+    @Attribute a : A end
+  end
+end
+\end{lstlisting}This definition is equivalent to the following expression (ignoring
+the translation of the classes):
+
+\begin{lstlisting}
+  Package("P")
+    .add(@Class A ... end)
+    .add(@Class B ... end)
+\end{lstlisting}The grammar for package definition is as follows:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  Package ::= n = Name defs = Exp* 'end' {
+    defs->iterate(def package = [| Package(<n.lift()>) |] |
+      [| <package>.add(<def>) |])
+  }.
+end
+\end{lstlisting}Both class and attribute definitions contain references to named elements
+that may be defined at the same time. For example in the package definition
+P above, class A refers to B and vice versa. References are delayed
+until all the definitions are created. Since they have been delayed,
+the references must be resolved. But references cannot be resolved
+until the outermost definition has been completed. An outermost definition
+is introduced by a 'context' clause, therefore this is the point at
+which resolution can be initiated. All elements have an init operation
+that is used to initialise elements; name spaces hijack the init operation
+so that delayed references can be resolved.
+
+For example, attributes are defined by the following grammar (simplified
+so that types are just names):
+
+\begin{lstlisting}
+@Grammar
+  Attribute::= n = Name ':' t = Name 'end' {
+    [| Attribute(<n.lift()>).type := <t.lift()> |]
+  }.
+end
+\end{lstlisting}
+The init operation defined for attributes is:
+
+\begin{lstlisting}
+@Operation init()
+  if type.isKindOf(String)
+  then self.type := owner.resolveRef(type)
+  end;
+  super()
+end
+\end{lstlisting}
+Classes are created as follows:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  Class ::= n = Name ps = Parents defs = Exp* 'end' {
+    ps->iterate(p classDef = 
+      defs->iterate(def classDef = [| Class(<n.lift>) |] 
+      | [| <classDef>.add(<def>) |]) 
+    | [| <classDef>.addParent(<p.lift>) |])
+  }.
+  Parents ::=
+    'extends' n = Name ns = (',' Name)* { Seq{n|ns} }
+  | { Seq{"Object"}.
+end
+\end{lstlisting}
+The context rule is as follows:
+
+\begin{lstlisting}
+  Context ::= 'context' nameSpace = Exp def = Exp {
+    [| let namedElement = <def>;
+           nameSpace = <nameSpace>
+       in nameSpace.add(namedElement);
+          namedElement.init()
+       end |]
+  }.
+\end{lstlisting}Attributes in XOCL, usually occor inside class definitions and have
+the following syntax:
+
+\begin{lstlisting}
+@Attribute <NAME> : <TYPE> [ = <INITEXP> ] [ <MODIFIERS> ] end
+\end{lstlisting}The type of an attribute is an expression that references a classifier.
+Usually this is done by name (if the classifier is in scope) or by
+supplying a name-space path to the classifier. If the type is a collection
+(set or a sequence) then it has the form Set(T) or Seq(T) for some
+type T. When the attribute is instantiated to produce a slot, the
+slot must be initialised. The initial value for classes is null. Each
+basic type (String, Integer, Boolean, Float) has a predefined default
+value ({}``'', 0, false, 0.0). The default value for a collection
+type is the empty collection of the appropriate type. A specific attribute
+may override the default value by supplying an initialisation expression
+after the type.
+
+An attribute within a class definition may supply modifiers. The modifiers
+cause the slot to have properties and create operations within the
+class. Attribute modifiers have the following form:
+
+\begin{lstlisting}
+'(' <ATTMOD> (',' <ATTMOD>)* ')'
+\end{lstlisting}where an attribute modifier may be one of: ?, !, +, -, \textasciicircum{}.
+The meaning of these modifiers is given below:
+
+\begin{itemize}
+\item ? defines an accesor operation for the attribute. For an attribute
+named n, an operation named n() is created that returns the value
+of the slot in an instance of the class.
+\item ! defines an updater operation for the attribute. For an attribute
+named n, an operation named setN(value) is created that sets the value
+of the slot named n to value in an instance of the class.
+\item + defines an extender operation for the attribute providing that the
+type is a collection. For an attribute named n, an operation named
+addToN(value) is created that extends the collection in the slot of
+an instance of the class. If the type of the attribute is a sequence
+type then the new value is added to the end of the sequence.
+\item - defines a reducer operation for the attribute providing that the
+type is a collection. For an attribute named n, an operation named
+deleteFromN(value) is created that extends the collection in the slot
+of an instance of the class.
+\item \textasciicircum{} makes the slot a container providing that the type
+inherits from XCore::Contained. In this case values in the slot will
+be contained objects with a slot named owner. Using the updater and
+extender operations to update the slot defined by this attribute will
+modify the owner slot when the value is added. It is often desirable
+to maintain linkage between a contained value and its owner, this
+attribute modifier manages this relationship automatically providing
+that the slot is always modified through the updater and extender.
+\end{itemize}
+The grammar for attribute definitions is given below. The grammar
+synthesizes an instance of the syntax class XOCL::Attribute that is
+then expanded to produce an expression that creates a new attribute
+in addition to being used by a class definition to add in attribute
+modifier operations:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  Attribute ::= 
+    name = AttName       // Name may be a string.
+    meta = MetaClass     // Defaults to XCore::Attribute
+    ':' type = AttType   // An expression.
+    init = AttInit       // Optional init value.
+    mods = AttMods       // Optional modifiers.
+   'end' { Attribute(name,mult,type,init,mods,meta) }.
+  AttInit ::= 
+    // Init values may be dynamic or static. A
+    // dynamic init value is evaluated each time
+    // a slot is created. A static init value is
+    // evaluated once when the attribute is
+    // created and used for all slots.
+    '=' Exp 
+  | '=' 'static' e = Exp { [| static(<e>) |] } 
+  | { null }.
+  AttMods ::= 
+    mods = { AttributeModifiers() } 
+    [ '(' AttModifier^(mods) (',' AttModifier^(mods))* ')' ] 
+    { mods }.
+  AttModifier(mods) ::= 
+    mod = AttMod { mods.defineModifier(mod) }.
+  AttMod ::= 
+    '?' { "?" } 
+  | '!' { "!" } 
+  | '+' { "+" } 
+  | '-' { "-" } 
+  | '^' { "^" }.
+  AttType ::= n = AttTypeName AttTypeTail^(n).
+  AttTypeName ::= 
+    n = Name ns = ('::' Name)* { Path(Var(n),ns) }.
+  AttTypeTail(n) ::= 
+    '(' args = CommaSepExps ')' { Apply(n,args) } 
+  | { n }.
+  AttName ::= Name | Str.
+  MetaClass ::= 'metaclass' Exp | { null }.
+end 
+\end{lstlisting}
+\subsection{Operations}
+
+An operation has a basic form of:
+
+\begin{lstlisting}
+@Operation [ <NAME> ] <ARGS> <BODY> end
+\end{lstlisting}The operation name may be optional and defaults to anonymous. The
+following extensions to the form of basic operation definition are
+noted:
+
+\begin{itemize}
+\item Operations have properties (allowing them to behave like objects with
+slots). The properties are optional and specified between the operation
+named and its arguments.
+\item Arguments have optional types, specified as : <EXP> following the
+argument name.
+\item Argument names may be specified as XOCL patterns. The pattern matches
+the supplied argument value.
+\item Arguments are positional except in the case of an optional multiargs
+specification as the last argument position. A multiargs specification
+follows the special designator '.'. This is a mechanism that allows
+operations to take any number of arguments. Arguments are matched
+positionally and it is an error to supply less than the number of
+declared positional arguments to an operation. If more than the expected
+positional arguments are supplied and if the operation has a multiargs
+designator then all the remaining supplied argument values are supplied
+as a sequence and matched to the multiargs pattern.
+\end{itemize}
+The grammar for operation definition is shown below. the grammar synthesizes
+an instance of XOCL::Operation (via mkOpDef) that is then analysed
+and expanded to an operation creation expression:
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar     
+  Operation ::=        
+    name = OpName 
+    properties = Properties        
+    '(' args = OpArgs multi = OpMulti ')'       
+    type = ReturnType       
+    body = Exp+        
+    'end'       
+    { mkOpDef(name,properties,args,multi,type,body) } .
+  OpName ::= 
+    Name 
+  | { Symbol("anonymous") }.     
+  OpArgs ::= 
+    arg = Pattern args = (',' Pattern)* { Seq{arg | args } } 
+  | { Seq{} }.     
+  OpMulti ::= 
+    '.' multi = Pattern { Seq{multi} } 
+  | { Seq{} }.     
+  ReturnType ::= 
+    ':' TypeExp 
+  | { NamedType() }.     
+  Properties ::= 
+    '[' p = Property ps = (',' Property)* ']' { Seq{p|ps} } 
+  | { Seq{} }.     
+  Property ::= n = Name '=' e = Exp { Seq{n,e} }.
+\end{lstlisting}
+\subsection{Enum}
+
+Enumerated types occur frequently in models. An enumerated type consists
+of a collection of predefined values; each value is classified by
+the enumerated type and is different from all other values of the
+type and different from all values of any other type. Examples include
+Colour with values Red, Green and Blue. Another example is Directions
+with values North, East, West and South. Here is an example of an
+enumerated type and its usage:
+
+\begin{lstlisting}
+context Root
+  @Enum Colour(Red,Green,Amber) end
+
+context Root
+  @Enum Position(North,South,East,West) end
+
+context Root
+  @Class TrafficLight
+    @Attribute colour : Colour (?,!) end
+    @Attribute position : Position (?,!) end
+    @Constructor(colour,position) ! end
+  end
+
+context Root
+  @Class RoadCrossing
+    @Attribute light1 : TrafficLight 
+      = TrafficLight(Colour::Red,Position::North) 
+    end
+    @Attribute light2 : TrafficLight 
+      = TrafficLight(Colour::Red,Position::South) 
+    end
+    @Attribute light3 : TrafficLight 
+      = TrafficLight(Colour::Green,Position::East) 
+    end
+    @Attribute light4 : TrafficLight 
+      = TrafficLight(Colour::Green,Position::West) 
+    end
+    @Operation cycle()
+      // Cycle the traffic lights...
+    end
+  end
+\end{lstlisting}Many systems implement enumerated types as strings or integers. This
+is an approximation to the above specification for enumerated types
+since, if Red = 0 and West = 0 then both Colour and Direction are
+really Integer and Red can easily be confused with West. An enumerated
+type should be a classifier, and values of the type should be classified
+by it. 
+
+This is a good example of the use of meta-classes to implement new
+types. The following class definition declares a class Enum; its definition
+shows a number of useful features when declaring new meta-classes.
+Firstly the definition:
+
+\begin{lstlisting}
+context XCore
+  @Class Enum extends Class
+    @Attribute names : Seq(String) (?) end
+    @Constructor(name,names) ! 
+      @For name in names do
+        self.addName(name)
+      end
+    end
+    @Operation default()
+      self.getElement(names->head)
+    end
+    @Operation defaultParents():Set(Classifier)
+      Set{NamedElement}
+    end
+    @Operation add(n)
+      if n.isKindOf(String)
+      then self.addName(n)
+      else super(n)
+      end
+    end
+    @Operation addName(name:String)
+      self.names := names->including(name);
+      self.add(self(name))
+    end
+  end
+\end{lstlisting}Enum is a sub-class of XCore::Class. this means that instances of
+Enum are classes that have their own instances - the values of the
+enumerated type. Therefore, Colour is an instance of Enum and Red
+is an instance of Colour. The class Enum has an attribute names that
+is used to hold the declared names of its instances. When a new instance
+of Enum is created, it is supplied with a name (Colour) and a collection
+of names (Red,Green,Amber). 
+
+In addition to the names being recorded as the value of the slot names,
+each name gives rise to an instance of the enumerated type. Each instance
+of the enumerated type is a new value that has a name, therefore Colour
+must inherit from NamedElement. When a meta-class is defined it may
+redefine the operation inherited from Class called defaultParents.
+This must return a set of classifiers that instances of the meta-class
+will inherit from by default. In the case of Enum, any instance of
+Enum is declared to inherit from NamedElement, therefore the following
+creates two named elements that are instances of the class Colour:
+Colour({}``Red'') and Colour({}``Green'').
+
+The operation Enum::addName is called for each of the names declared
+for the enumerated type. An instance of Enum is a class therefore
+it is a name-space and can contain named elements. the operation addName
+created an instance of the enumerated type self(name) and then adds
+it to itself. Each name declared for the enumerated type gives rise
+to a new instance which is named and is guaranteed to be different
+(when compared with =) to any other value.
+
+A grammar for Enum completes the definition of enumerated types. Notice
+that, since an enumerated type is a class it can contain attributes
+and operations in its body:
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+  Enum ::= n = Name ns = Names es = Exp* 'end' {
+    exps->iterate(e x = [| Enum(<name.lift()>,<names.lift()>) |] | 
+      [| <x>.add(<e>) |])
+  }.
+  Names ::= '(' n = EnumName ns = (',' EnumName)* ')' { 
+    Seq{n | ns} 
+  }.
+  EnumName ::= 
+    Name
+  | Str.
+end
+\end{lstlisting}
+
+\section{Looping Constructs}
+
+A @For-loop has a syntax construct defined by XOCL::For. 
+When you define a @For-loop, the system creates an instance 
+of XOCL::For and then desugars it. The @For-loop is a good 
+example of a fairly extensive syntax transformation since 
+the construct has many different forms controlled by a number 
+of keywords. This section defines the syntax of a @For-loop 
+and provides the definition of one of the syntax transformations.
+
+The class XOCL::For has the following attribites:
+\begin{lstlisting}
+// The controlled variables...
+@Attribute names     : Seq(String)      end  
+// The type of for loop...
+@Attribute directive : String           end  
+// A guard on the bound element (null = true)...
+@Attribute guard     : Performable      end  
+// The collections...
+@Attribute colls     : Seq(Performable) end  
+// The body performed in the scope of 'name'...
+@Attribute body      : Performable      end  
+// Returns a value...
+@Attribute isExp     : Boolean          end  
+\end{lstlisting}
+The @For-expression has the following grammar:
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar 
+   For ::=  
+     // A for-loop may bind a sequence of names...
+     names = ForNames     
+     // The directive defines how to interpret the
+     // collections...    
+     dir = ForDirective     
+     // A collection for each of the names...    
+     colls = ForColls     
+     // An optional boolean expression that
+     // must be true in order to process
+     // the names...    
+     guard = ('when' Exp | { null })    
+     // We are either performing commands or
+     // producing a sequence of values...     
+     isExp = ForType     
+     // The body - either a command or an 
+     // expression..   
+     body = Exp    
+     'end'     
+     { For(names,dir,colls,guard,body,isExp) }. 
+       
+   ForColls ::= exp = Exp exps = (',' Exp)* { Seq{exp | exps} }.
+    
+   ForDirective ::= 
+     // The directive controls how the collections
+     // are processed...  
+     // A walker produces instances of named types...   
+     'classifiedBy'  { "classifiedBy" }     
+     // Select elements from the collections...       
+   | 'in'            { "in" }           
+     // Reverse the collections...                 
+   | 'inReverse'     { "inReverse" }         
+     // Get keys from a table...           
+   | 'inTableKeys'   { "inTableKeys" }         
+     // Get values from a table...         
+   | 'inTableValues' { "inTableValues" }       
+     // Call ->asSeq...        
+   | 'inSeq'         { "inSeq" }.
+         
+   ForNames ::=      
+     name = AName       
+     names = (',' AName)*        
+     { Seq{name | names} }.
+         
+   ForType ::=      
+     'do' { false }        
+   | 'produce' { true }.
+    
+ end 
+\end{lstlisting}
+Each of the different @For-directives defines a different desugar 
+operation for the components of a @For-expression abstract syntax 
+construct. The following shows how a basic @For-loop using the 'in' 
+directive is desugared:
+\begin{lstlisting}
+context XOCL::For
+  @Operation desugarInAction():Performable
+     [| let <self.collBindings()>
+        in let isFirst = true
+           in @While not <self.emptyCollCheck()> do
+                let <self.bindNames()>
+                in <self.takeTails()>;
+                   let isLast = <self.emptyCollCheck()>
+                   in <self.protect(body)>;
+                      isFirst := false
+                   end
+                end
+              end
+           end
+        end
+     |]
+  end
+\end{lstlisting}
+The operations used by desugarInAction are defined below:
+\begin{lstlisting}
+context XOCL::For
+  @Operation bindNames():Seq(ValueBinding)       
+     // Bind each of the controlled variables to the head of the
+     // corresponding collection.      
+     0.to(names->size-1)->collect(i |
+       ValueBinding(names->at(i),[| <Var("forColl" + i)> ->head |]))        
+   end
+
+context XOCL::For
+  @Operation collBindings():Seq(ValueBinding)     
+     // Returns a sequence of bindings that guarantee the collections
+     // are all sequences...       
+     0.to(colls->size-1)->collect(i |
+       ValueBinding("forColl" + i,[| <colls->at(i)> ->asSeq |]))
+   end
+
+context XOCL::For
+  @Operation emptyCollCheck():Performable     
+    // Check that any of the collection variables is empty...     
+    1.to(colls->size-1)->iterate(i test = [| <Var("forColl0")> ->isEmpty |] |
+      [| <test> or <Var("forColl" + i)> ->isEmpty |])       
+  end
+
+context XOCL::For
+  @Operation protect(exp:Performable)  
+    // If the guard is defined then check it before performing
+    // the expression. Otherwise perform the expression. If
+    // we are an expression then add the result of the expression
+    // to the for results; these will be returned at the end of
+    // the evaluation.    
+    if guard = null
+    then 
+      if isExp
+      then [| forResults := Seq{<exp> | forResults} |]
+      else exp 
+      end
+    else 
+      if isExp
+      then [| if <guard> 
+              then forResults := Seq{<exp> | forResults} 
+              end |]
+      else [| if <guard> 
+              then <exp> 
+              end |]
+      end
+    end
+  end
+
+context XOCL::For
+  @Operation takeTails():Performable
+    1.to(colls->size-1)->iterate(i updates = [| <Var("forColl0")> := <Var("forColl0")> ->tail |] |
+      [| <updates>; <Var("forColl" + i)> := <Var("forColl" + i)> ->tail |])
+  end
+\end{lstlisting}
+
+\section{XBNF}
+
+This section describes the syntax for defining XBNF grammars. Since
+XMF is a super-language, it can be used to define languages. XBNF
+is just a language and can therefore be defined in XMF. One of the
+goals of a super-language is meta-circularity. If you look at the
+source code of XMF you will find a definition of the XBNF grammar
+written in the XBNF language as follows (start reading at the clause
+called Grammar):
+
+\begin{lstlisting}
+@Grammar extends OCL::OCL.grammar
+    XBNF_Action ::=   
+      // An action is either an expression in { and } 
+      // which synthesizes a value or is a predicate that
+      // must be true for the parse to proceed...     
+      '{' exp = Exp '}' 
+      { PreAction(exp) } 
+    | '?' boolExp = Exp
+      { PrePredicate(boolExp) }.
+    
+    XBNF_Atom ::=    
+      // An atom is the basic unit of a clause...     
+      XBNF_Action    
+    | XBNF_Literal   
+    | XBNF_Call      
+    | '(' XBNF_Disjunction ')'.
+  
+    XBNF_Binding ::=    
+      // A clause binding performs a grammar action and
+      // associates the value produced with a named 
+      // local...     
+      name = Name '=' atom = XBNF_Sequence { 
+        And(atom,Bind(name)) 
+      }.
+    
+    XBNF_Call ::=    
+      // Call a clause. The arguments are optional...     
+      name = Name args = XBNF_CallArgs { Call(name,args) }.
+      
+    XBNF_CallArgs ::=     
+      // Arguments supplied to a clause are optional.
+      // The args must be preceded by a ^ to distinguish
+      // the args from a pair of calls with 0 args...   
+      '^' '(' n = Name ns = (',' Name)* ')' { Seq{n|ns} } 
+    | { Seq{} }.
+  
+    XBNF_Clause ::= 
+      // A clause is a named rule for parsing...   
+      name = Name args = XBNF_ClauseArgs '::=' 
+      body = XBNF_Disjunction '.' 
+      { Clause(name,args,body) }. 
+  
+    XBNF_ClauseArgs ::=    
+      '(' n = Name ns = (',' Name)* ')' { Seq{n|ns} } 
+    | { Seq{} }.
+    
+    XBNF_Conjunction ::=    
+      // Conjunction is just a sequence of 1 or more
+      // clause elements...    
+      elements = XBNF_Element+ { 
+       elements->tail->iterate(e conj = elements->head | 
+         And(conj,e)) 
+    }. 
+  
+    XBNF_Disjunction ::=    
+      // A disjunction is a sequence of elements
+      // separated by | ...   
+      element = XBNF_Conjunction (
+        '|' rest = XBNF_Disjunction { Or(element,rest) } 
+      | { element }).
+   
+    XBNF_Element ::=     
+      XBNF_Optional    
+    | XBNF_Binding   
+    | XBNF_Sequence.
+  
+    Grammar ::=     
+      parents = XBNF_GrammarParents
+      imports = XBNF_GrammarImports
+      clauses = XBNF_Clause* 
+      'end'
+      { Grammar(parents,clauses->asSet,"",imports) }.
+  
+    XBNF_GrammarImports ::=    
+      // The imports of a grammar affect the grammars that are
+      // available via @...    
+      'import' class = Exp classes = (',' Exp)* { Seq{class | classes} } 
+    | { Seq{} }.
+  
+    XBNF_GrammarParents ::=     
+      // A grammar may inherit from 0 or more parent grammars.
+      // The parent clauses are added to the child...   
+      'extends' parent = Exp parents = (',' Exp)* 
+      { parents->asSet->including(parent) } 
+    | { Set{} }.
+ 
+    XBNF_Literal ::=     
+      // The following literals are built-in non-terminals of a
+      // grammar. The action uses getElement to reference the
+      // classes (and therefore the constructors) because a grammar
+      // cannot reference a variable with the same name as a terminal
+      // in an action...     
+      // Get the next character...
+    
+      'Char'       { (Parser::BNF.getElement("Char"))() }          
+      // Get the next line...       
+    | 'Line'       { (Parser::BNF.getElement("Line"))() }         
+      // Get a string...      
+    | 'Str'        { (Parser::BNF.getElement("Str"))() }          
+      // Get a terminal (in ' and ')...      
+    | 'Terminal'   { (Parser::BNF.getElement("Term"))() }         
+      // Return the current token...     
+    | 'Token'      { (Parser::BNF.getElement("Tok"))() }     
+      // Get an integer...           
+    | 'Int'        { (Parser::BNF.getElement("Int"))() }         
+      // Get a float...      
+    | 'Float'      { (Parser::BNF.getElement("Float"))() }       
+      // Get a name...     
+    | 'Name'       { (Parser::BNF.getElement("Name"))() }    
+      // Expect end-of-file...         
+    | 'EOF'        { (Parser::BNF.getElement("EOF"))() }         
+      // Throw away all choice points created since starting
+      // the current clause...      
+    | '!'          { (Parser::BNF.getElement("Cut"))() }       
+      // Dispatch to the grammar on the most recently
+      // synthesized value which should be a sequence of
+      // names the represent a path to a classifier with
+      // respect to the currently imported name-spaces...         
+    | '@'          { (Parser::BNF.getElement("At"))() }          
+      // Add a name-space to the currently imported 
+      // name-spaces...       
+    | 'ImportAt'   { (Parser::BNF.getElement("ImportAt"))() }     
+      // Get the current state of the parsing engine...      
+    | 'pState'     { (Parser::BNF.getElement("PState"))() }      
+      // Get the current line position...     
+    | 'LinePos'    { (Parser::BNF.getElement("LinePos"))() }     
+      // Define a new terminal in the form NewToken(NAME,ID)...     
+    | XBNF_NewToken                                   
+      // Get a terminal name...                      
+    | terminal = Terminal { (Parser::BNF.getElement("Terminal"))(terminal) }.
+    
+    XBNF_NewToken ::=    
+      // A new token is defined as a name and an integer id.
+      // The tokenizer used to parse the grammar is responsible
+      // for returning a token with the type set to the id...   
+      'NewToken' '(' n = Name ',' t = Int ')' {
+        (Parser::BNF.getElement("NewToken"))(n,t) 
+    }.
+ 
+    XBNF_Optional ::=     
+      // An optional clause element is tried and ignored if it fails...      
+      '[' opt = XBNF_Disjunction ']'
+      { Opt(opt) }.
+  
+    XBNF_Path ::= name = Name names = ('::' Name)* { Seq{name | names} }.
+    
+    XBNF_TypeCheck ::=    
+      // An element that checks the type of the synthesized value...    
+      element = XBNF_Atom (':' type = XBNF_Path { And(element,TypeCheck(type)) } 
+    | { element }).
+  
+    XBNF_Sequence ::=    
+      // An element an be followed by a * or a + for 0
+      // or more and 1 or more repetitions...    
+      element = XBNF_TypeCheck ( 
+        '*' { StarCons(element) } 
+      | '+' { PlusCons(element) } 
+      | { element }
+      ).
+    
+end
+\end{lstlisting}

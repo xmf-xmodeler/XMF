@@ -1,0 +1,424 @@
+\chapter{Language Emulation}
+
+Super-languages provide support for syntax extension and for weaving new language
+constructs into the base super-language. In addition they must allow new 
+external languages to be defined so that applications can be constructed
+by combining components that are written in mixtures of languages.
+
+In addition to inventing new language constructs that capture programming
+idioms and that provide domain specific abstractions, a super-language
+should allow constructs from existing conventional languages to be used.
+Ultimately, a super-language should provide support for complete emulation
+of an existing conventional language or some sub-set of it.
+
+A super-language must be able to assimilate conventional languages because
+most projects do not start with a clean sheet. Existing code must be weaved
+into a new application and a super-language should be able to accommodate
+legacy code whilst providing scope for DSLs and new language features.
+
+This chapter describes how XMF can be used to support features from existing
+conventional languages.
+
+\section{MicroJava}
+
+XMF is shipped with an implementation of Java. The definition is found in 
+the package Languages::MicroJava. MicroJava is a sub-set of the Java language
+that supports classes, fields and methods. The MicroJava grammar supports
+most Java features and is a useful starting point for designing Java-like
+languages.
+
+The MicroJava language does not support direct execution of programs. There
+is no MicroJava compiler or interpreter. MicroJava is intended as a starting 
+point for experimentation with Java or as a mechanism for exporting Java
+code from XMF. MicroJava supports:
+\begin{itemize}
+\item A grammar that translates MicroJava concrete syntax into an instance
+of the MicroJava model.
+\item A pretty-printer that exports a textual representation of MicroJava
+source code (a Java export mechanism).
+\item A translation from MicroJava abstract syntax to XOCL abstract syntax.
+\end{itemize}
+Therefore, to execute MicroJava you can: pretty-print it and use a Java
+compiler on the result; translate it to XOCL and execute that; write your
+own MicroJava compiler or interpreter.
+
+The grammar for MicroJava is defined by the class Java in the Languages::MicroJava
+package. The following shows an example MicroJava program defined in a standard
+XMF source file:
+\begin{lstlisting}
+parserImport XOCL;
+parserImport Languages::MicroJava;
+ 
+context Root
+ 
+@Java
+ 
+  public class Printer {
+ 
+    private int copies;
+    private String string;
+ 
+    public Test(int copies,String string) {
+    }
+ 
+    private boolean printCount() {
+      while(copies > 0) {
+        this.write(string);
+	    this.copies = this.copies - 1;
+      }
+      return true;
+    }
+ 
+    // Embedded XOCL
+ 
+    with JOCL {
+      @Operation write(string:String)
+        format(stdout,"~S~%",Seq{string})
+      end 
+    }
+  }
+ 
+end
+\end{lstlisting}
+The @Java construct will cause the MicroJava program text to be parsed,
+an instance of the MicroJava abstract syntax model to be created and then 
+the translator to XOCL to be performed. The result of the parse is XOCL
+abstract syntax which is then compiled or interpreted by the XOCL
+execution system as normal.
+
+You could use MicroJava to experiment with interesting language
+extensions to Java. Each new construct can be added to the MicroJava
+abstract syntax model. If you add a toXOCL operation to the new
+abstract syntax class then the new MicroJava construct can be executed
+via a translation to XOCL. See the source code for MicroJava for more
+details about how the toXOCL operation works for each abstract syntax
+class.
+
+Notice in the MicroJava program shown above the use of a non-Java 
+construct: {\tt with}. The {\tt with} keyword is followed by the
+name of a class (that must be in-scope) that defines (via a grammar) 
+a language. The source code between {\tt \{} and {\tt \}} in the {\tt with}
+is written in the language.
+
+The {\tt with} construct allows arbitrary languages to be nested
+in MicroJava. In the example above, XOCL has been nested in MicroJava using
+the following class definition for JOCL:
+\begin{lstlisting}
+context Root
+  @Class JOCL
+    @Grammar extends OCL::OCL.grammar
+      // A grammar invoked using @X must be defined
+      // by a class named X and have a clause named X.
+      // The JOCL clause just proxies the SimpleExp
+      // clause defined by OCL...
+      JOCL ::= SimpleExp.
+    end
+  end
+\end{lstlisting}
+
+\section{Lisp}
+
+Lisp is an interesting language because its syntax is very unconventional.
+Lisp has a very small meta-syntax (just lists and atoms). The language is
+built around this syntax in two ways:
+\begin{itemize}
+\item By adding builtin operators. The more orthogonal builtin operators are
+added to a Lisp engine, the more applications can be built. 
+\item By adding special forms. A special form is a Lisp list that
+is recognized by the Lisp interpreter or compiler and treated specially.
+\end{itemize}
+This section provides a complete mini-Lisp system including a package of
+builtin operators that you can extend. Execution of the Lisp system is
+performed by a translation to XOCL. The translator is called from the grammar
+rules - so there is no abstract syntax representation of Lisp in this example
+(but you could add one in if you wanted to manipulate the Lisp expressions).
+The translator, shows how Lisp special forms are handled.
+
+Here is an example Lisp program:
+\begin{lstlisting}
+parserImport XOCL;
+
+import LispOps;
+
+context Root
+  @Operation testFact(n:Integer):Integer
+    // Define a factorial function and supply the 
+    // integer n...
+    @Lisp
+      (let ((fact (Y (lambda(fact)
+                       (lambda(n)
+                         (if (eql n 0)
+                             1
+                             (mult n (fact (sub n 1)))))))))
+           (fact n))
+    end
+  end
+\end{lstlisting}
+The builtin operators are defined in the package LispOps. A Lisp
+program is executed in the current scope so that Lisp variables 
+are the same as XOCL variables.
+
+Note that recursive definitions are handled using a Y operator
+that is defined in LispOps. It is beyond the scope of this book
+to go into the detailed semantics of Lisp and Y - you'll just have
+to trust us that Y is the fixed point operator for which:
+\begin{lstlisting}
+((Y f) x) = x
+\end{lstlisting}
+The grammar for Lisp parses the text and construct a sequence
+containing the Lisp program. The program is then passed to an
+operator eval that is defined in the package LispAux which
+translates the sequence to XOCL code. The grammar is defined
+below:
+\begin{lstlisting}
+parserImport XOCL;
+parserImport Parser::BNF;
+ 
+import OCL;
+import LispAux;
+ 
+context Root 
+  @Class Lisp 
+    @Grammar  
+      Lisp ::=  e = Exp  'end' { eval(e) }.
+        
+      Exp ::= 
+        Atom      // A basic syntax element.
+      | List      // A sequence of expressions.
+      | Const     // A (back)quoted element.
+      | Comma.    // An unquoted element.
+      
+      Atom ::= 
+        Int       // Integers.
+      | Str       // Strings.
+      | Float     // Floats
+      | n = Name  // Names are turned into variables for syntax.
+        { Var(n) }.
+      
+      List ::= '(' es = Exp* ListTail^(es).
+        
+      ListTail(es) ::=       
+        // A list tail may be a '.' followed by an element then ')'
+        // or may just be a ')'...        
+        '.' e = Exp ')' 
+        { es->butLast + Seq{es->last | e} }
+        
+      | ')' { es }.
+      
+      Const ::=        
+        // A constant is a quoted expression. Use backquote
+        // which allows comma to be used to unquote within
+        // the scope of a constant...       
+        '`' e = Exp 
+        { Seq{Var("BackQuote"),e} }.
+        
+      Comma ::=        
+        // A comma can be used within the scope of a
+        // backquote to unquote the next expression...       
+        ',' e = Exp 
+        { Seq{Var("Comma"),e} }.        
+    end
+  end
+\end{lstlisting}
+The auxiliary definition {\tt eval} and {\tt quote} perform opposite
+translation duties. The {\tt eval} operation translates Lisp source
+code that is to be evaluated into XOCL code. The {\tt quote} operation
+translates Lisp source code that is protected by a quote (actually
+a backquote character here which allows comma to be used). The 
+function of these two operations is given below:
+\begin{lstlisting}
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import OCL;
+  
+context Root
+  @Package LispAux  
+    // Operations that are used by the Lisp language when
+    // translating the parsed syntax into XOCL...    
+    @Operation eval(e):Performable    
+      // This operation takes a single value produced by the Lisp
+      // parser and produces an XOCL performable element...      
+      @TypeCase(e)      
+        // Atoms all produce the XOCL equivalent syntax...       
+        Integer do
+          e.lift()
+        end        
+        Float do
+          e.lift()
+        end        
+        Var do        
+          // Variables are evaluated in the surrounding lexical
+          // environment...         
+          e
+        end        
+        String do
+          e.lift()
+        end        
+        Seq(Element) do        
+          // Sequences may start with special names which are
+          // evaluated specially...         
+          @Case e of          
+            Seq{Var("BackQuote"),e} do           
+              // Suppress the evaluation of the expression e in the
+              // XOCL code that is produced...             
+              quote(e)
+            end           
+            Seq{Var("Comma"),e} do          
+              // Only legal within the scope of a backquote and 
+              // therefore can only be processed by the quote
+              // operation defined below...              
+              self.error("Comma found without backquote")
+            end            
+            Seq{Var("lambda"),args,body} do             
+              // Create a lexical closure....             
+              lambda(args,eval(body))
+            end           
+            Seq{Var("if"),test,e1,e2} do           
+              // Choose which of the two expressions e1 and e2
+              // to evaluate based on the result of the test...             
+              [| if <eval(test)> then <eval(e1)> else <eval(e2)> end |]
+            end           
+            Seq{Var("let"),bindings,body} do           
+              // A let-expression introduces identifier bindings into
+              // the current lexical environment. This can be viewed
+              // as simple sugar for the equivalent lambda-application...              
+              let formals = bindings->collect(b | b->head);
+                  actuals = bindings->collect(b | b->at(1))
+              in eval(Seq{Seq{Var("lambda"),formals,body} | actuals})
+              end
+            end           
+            Seq{op | args} do           
+              // Evaluate the argument expressions...             
+              [| let A = <SetExp("Seq",args->collect(arg | eval(arg)))>
+                 in 
+                    // Then invoke the operation...                   
+                    <eval(op)>.invoke(self,A)
+                 end
+              |]
+            end           
+            Seq{} do             
+              // nil is self evaluating...             
+              [| Seq{} |]
+            end
+          end
+        end
+      end
+    end
+    
+    @Operation quote(e):Performable   
+      // This operation takes a singlelisp expression produced by the
+      // grammar and returns an XOCL expression that protects the
+      // evaluation (similar to lifting the value represented by the
+      // expression)...      
+      @Case e of     
+        Seq{Var("Comma"),e} do       
+          // Comma undoes the effect of backquote...          
+          eval(e)
+        end        
+        Seq{h | t} do        
+          // Create a pair...          
+          [| Seq{ <quote(h)> | <quote(t)> } |]
+        end        
+        Seq{} do         
+          // The empty sequence (nil in Lisp)...         
+          [| Seq{} |] 
+        end        
+        Var(n) do        
+          // Protected names are just strings (symbols in Lisp)...          
+          n.lift()
+        end        
+        else         
+          // Otherwise just return an XOCL expression
+          // that recreates the atomic value...          
+          e.lift()
+      end
+    end
+    
+    @Operation lambda(A,body:Performable):Operation     
+      // Returns an XOCL operation expression that
+      // expects the arguments represented vy the sequence
+      // A...     
+      Operation("lambda",args(A),NamedType(),body)
+    end
+    
+    @Operation args(A)     
+      // Turn a sequence of OCL::Var into a sequence of
+      // OCL::Varp (because operation expressions in XOCL use
+      // Varp as the class of simple named arguments)...      
+      @Case A of      
+        Seq{} do
+          A
+        end        
+        Seq{Var(n) | A} do
+          Seq{Varp(n) | args(A)} 
+        end       
+      end
+    end
+  end
+\end{lstlisting}
+You can see from the definition of {\tt eval} that the translation must
+handle a number of special forms. These are all sequences whose head is
+a variable with a special name. These are:
+\begin{description}
+\item{\tt lambda} A function. This must create a closure and can be
+directly translated to an XOCL operation.
+\item{\tt Quote} A protected sequence. The rest of the sequence is
+handed to {\tt quote} which translates the elements to the equivalent
+XOCl constant builting expressions. Note that {\tt quote} must detect
+the occurrence of {\tt comma} which un-quotes the a Lisp expression.
+Unquoting is handled by calling {\tt eval} again.
+\item{\tt if} An is-expression just translates directly onto an XOCL
+if-expression.
+\item{\tt let} A let-expression performs parallel binding. This can be
+achieved by a translation to a Lisp expression that creates local
+variables by applying a lambda-function.
+\end{description}
+The builtin operators of Lisp are all defined in the LispOps package
+which is imported for the scope of any Lisp program. You can add any
+operation definitions you like into this package. Here are some
+examples including the infamous Y operator:
+\begin{lstlisting}
+parserImport XOCL;
+parserImport Parser::BNF;
+ 
+import OCL;
+    
+context Root 
+  @Package LispOps  
+    // A package of basic Lisp operations. Think of these
+    // as the builtin operations and make sure you import
+    // them before referencing them...  
+    @Operation add():Integer    
+      // Adding up integers...      
+      args->iterate(arg n = 0 | n + arg)
+    end
+    
+    @Operation mult(.args:Seq(Integer)):Integer    
+      // Multiplying integers...      
+      args->iterate(arg n = 1 | n * arg)
+    end
+    
+    @Operation sub(x:Integer,y:Integer):Integer    
+      // Subtracting...      
+      x - y
+    end
+    
+    @Operation list(.args):Seq(Element)    
+      // Creating a list from some elements...     
+      args
+    end
+    
+    @Operation Y(f)    
+      // The infamous Y combinator for finding a fixed point...      
+      let op = @Operation(x) f(@Operation(.y) (x(x)).invoke(null,y) end) end
+      in op(op)
+      end
+    end
+    
+    @Operation eql(x,y):Boolean   
+      // Comparing two elements...      
+      x = y
+    end    
+  end
+\end{lstlisting}

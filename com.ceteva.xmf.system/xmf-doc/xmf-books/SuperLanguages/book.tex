@@ -1,0 +1,143 @@
+\documentclass[a4paper,pdftex,12pt]{scrbook}
+\usepackage{a4wide}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{subfigure}
+\usepackage{placeins}
+\usepackage{palatino}
+\usepackage{fancyhdr}
+\usepackage{appendix}
+\usepackage[Conny]{fncychap}
+
+\ChNameUpperCase
+\ChTitleUpperCase
+\ChNameVar{\Huge\rm\bfseries}
+\ChNumVar{\Huge}
+\ChTitleVar{\Huge\rm}
+
+\pagestyle{fancyplain}
+
+\lhead[\fancyplain{}{\bf\thepage}]{\fancyplain{}{\bf\nobreak\rightmark}}
+\rhead[\fancyplain{}{\bf\nobreak\leftmark}]{\fancyplain{}{\bf\thepage}}
+
+
+\begin{document}
+
+\makeatletter
+\gdef\lst@PrintOtherKeyword#1\@empty{%
+    \lst@XPrintToken
+    \begingroup
+      \lst@modetrue \lsthk@TextStyle
+      \let\lst@ProcessDigit\lst@ProcessLetter
+      \let\lst@ProcessOther\lst@ProcessLetter
+      \lst@lettertrue
+      #1%
+      \lst@SaveToken
+    \endgroup
+        \lst@RestoreToken
+        \global\let\lst@savedcurrstyle\lst@currstyle
+        \let\lst@currstyle\lst@gkeywords@sty
+    \lst@Output
+        \let\lst@currstyle\lst@savedcurrstyle}
+\makeatother
+
+\lstdefinelanguage{XOCL}{
+        morekeywords={context,self,throw,try,catch,let,then,
+                      if,else,elseif,and,or,implies,
+                      parserImport,in,end,import,not,true,false,when,do},
+        otherkeywords={@,|>,<|,<,>,|,::=,{,},[|,|],[,],;,:,
+                       .,*,-,+,->,=,<>,>=,<=},
+        sensitive=false,
+        comment=[l]//,
+        morecomment=[s]{/*}{*/},
+        basicstyle=\ttfamily\small,
+        stringstyle=\ttfamily\small,
+        frame=lines,
+        aboveskip=20pt,
+        belowskip=20pt,
+        breaklines=true,
+        showspaces=false,
+        showtabs=false
+}
+
+\lstset{language=XOCL}
+
+\frontmatter
+
+%\maketitle
+
+\begin{titlepage}
+ 
+\begin{center}
+ 
+ 
+% Upper part of the page
+ 
+\textsc{}\\[2cm] 
+ 
+\textsc{\LARGE \textsf{Super-Languages}}\\[0.5cm]
+ 
+\textsc{\Large \textsf{Developing Languages and Applications with XMF}}\\[1.0cm]
+\textsc{\Large \textsf{Second Edition}}\\[2cm]
+
+\includegraphics[width=0.3\textwidth]{SuperXMF.pdf}\\[2cm]
+ 
+\large
+\textsf{Tony Clark, Paul Sammut, James Willans}\\[0.7cm]
+ 
+\vfill
+ 
+% Bottom of the page
+ 
+\end{center}
+ 
+\end{titlepage}
+
+\tableofcontents
+
+\mainmatter
+
+\include{Introduction/Introduction}
+
+\part{XMF}
+
+\include{XMF/Languages/Languages}
+\include{XMF/XOCL/XOCL}
+\include{XMF/Grammar/Grammars}
+
+\part{Programming Examples}
+
+\include{Programming/Simulation/Simulation}
+\include{Programming/PrettyPrint/PrettyPrint}
+\include{Programming/Teams/Teams}
+
+\part{Language Engineering}
+
+\include{LanguageEngineering/DSLs/DSLs}
+\include{LanguageEngineering/DataModelling/DataModelling}
+\include{LanguageEngineering/Graphs/Graphs}
+\include{LanguageEngineering/Comprehensions/Comprehensions}
+\include{LanguageEngineering/Conventional/Conventional}
+\include{LanguageEngineering/BizRules/BizRules}
+\include{LanguageEngineering/MVC/MVC}
+\include{LanguageEngineering/TextFromModels/TextFromModels}
+\include{LanguageEngineering/DocComposition/DocComposition}
+\include{LanguageEngineering/SECD/SECD}
+\include{LanguageEngineering/XML/XML}
+\include{LanguageEngineering/Interactive/Interactive}
+\include{LanguageEngineering/Choice/Choice}
+\include{LanguageEngineering/Commands/Commands}
+
+\appendices
+\addcontentsline{toc}{part}{Appendix}
+
+\include{Appendix/Implementation/Implementation}
+
+\backmatter
+%GATHER{bib_willans.bib}
+%GATHER{bib_sammut.bib}
+%GATHER{bib_andy.bib}
+%\bibliographystyle{alpha}
+%\bibliography{bib_willans,bib_sammut,bib_andy}
+\end{document}

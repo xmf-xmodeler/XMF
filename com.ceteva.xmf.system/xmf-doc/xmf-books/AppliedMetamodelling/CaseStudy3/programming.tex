@@ -1,0 +1,1163 @@
+\chapter{Case Study 3: A Simple Programming Language}
+
+\section{Introduction}
+\label{Intro} This chapter describes how XMF can be used to define
+the syntax and semantics of a simple action based programming
+language called XAction. It begins by presenting the XAction
+language and then define a concrete grammar for it. Next a variety
+of approaches, including operational and translational approaches
+are used to define an executable semantics for the language. Note,
+this chapter provides an in depth technical treatment of
+semantics.
+
+\section{XAction}
+
+{\em XAction} is a simple action language with values that are
+either records or are atomic. An atomic data value is a string,
+integer or boolean. A record is a collection of named values.
+XAction is block-structured where blocks contain type definitions
+and value definitions. XAction has simple control structures:
+conditional statements and loops. The following is a simple
+example XAction program that builds a list of even numbers from 2
+to 100:
+
+\small
+\begin{verbatim}
+begin
+  type Pair is head tail end
+  type Nil is end
+  value length is 100 end
+  value list is new Nil end
+  while length > 0 do
+    begin
+      if length % 2 = 0
+      then
+        begin
+          value pair is new Pair end
+          pair.head := length;
+          pair.tail := list;
+          list := pair;
+        end
+      end;
+      length := length - 1;
+    end
+end
+\end{verbatim}
+\normalsize
+
+The definition of XAction is structured as a collection of XMF
+packages. The {\tt Values} package defines the semantic domain for
+XAction; it contains classes for each type of program value.
+Executable program phrases in XAction are divided into two
+categories: {\tt Expressions} and {\tt Statements}. Expressions
+evaluate to produce XAction values. Statements are used to control
+the flow of execution and to update values.
+\begin{lstlisting}
+@Package XAction
+  @Package Values end
+  @Package Expressions end
+  @Package Statements end
+end
+\end{lstlisting}
+The rest of this section defines the syntax of XAction by giving
+the basic class definitions and the XBNF grammar rules for the
+language constructs.
+
+\subsection{XAction Values}
+
+XAction expressions evaluate to produce XAction values. Values are
+defined in the {\tt Values} package and which is the {\em semantic
+domain} for XAction. Values are either atomic: integers and
+booleans, or are records. We use a simple representation for
+records: a sequence of values indexed by names.
+
+XAction records are created by instantiating XAction record types.
+A record type is a sequence of names. Types raise an interesting
+design issue: should the types be included as part of the semantic
+domain since evaluation of certain XAction program phrases give
+rise to types that are used later in the execution to produce
+records. The answer to the question involves the phase distinction
+that occurs between {\em static} analysis (or execution) and {\em
+dynamic} execution. Types are often viewed as occurring only
+during static analysis; although this is not always the case. We
+will show how the semantics of XAction can be defined with and
+without dynamic types.
+
+All values are instances of sub-classes of the class {\tt Value}:
+\begin{lstlisting}
+context Values
+ @Class Value
+   @Attribute value : Element end
+   @Constructor(value) ! end
+ end
+\end{lstlisting}
+Atomic values are either booleans or integers. Each class defines
+operations that the semantic domain provides for manipulating
+XAction values. The classes below show the structure and a
+representative sample of operations:
+\begin{lstlisting}
+context Values
+  @Class Bool extends Value
+    @Operation binAnd(Bool(b))
+      Bool(value and b)
+    end
+    @Operation binOr(Bool(b))
+      Bool(value or b)
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context Values
+  @Class Int extends Value
+    @Operation binAdd(Int(n))
+      Int(value + n)
+    end
+  end
+\end{lstlisting}
+Record types are sequences of names. A type provides a {\tt new}
+operation that instantiates the type to produce a new record. This
+operation is only meaningful if we have dynamic types:
+\begin{lstlisting}
+context Values
+  @Class Type extends Value
+    @Attribute names : Seq(String) end
+    @Constructor(names) ! end
+    @Operation new()
+      Record(self,names->collect(n | Seq{n | null}))
+    end
+  end
+\end{lstlisting}
+Records are sequences of values indexed by names; the names are
+found by navigating to the type of the record:
+\begin{lstlisting}
+context Values
+  @Class Record extends Value
+    @Attribute type : Type end
+    @Attribute fields : Seq(Element) end
+    @Constructor(type,fields) ! end
+    @Operation lookup(name:String)
+      fields->at(type.names->indexOf(name))
+    end
+    @Operation update(name:String,value:Element)
+      fields->setAt(type.names->indexOf(name),value)
+    end
+  end
+\end{lstlisting}\subsection{XAction Expressions}
+
+XAction expressions are program phrases that evaluate to produce
+XAction values. The following classes define the expression types:
+\begin{lstlisting}
+context Expressions
+  @Class Exp
+  end
+end
+\end{lstlisting}
+A binary expression has a left and right sub-expression and an
+operation. The name of the operation is represented as a string:
+\begin{lstlisting}
+context Expressions
+  @Class BinExp extends Exp
+    @Attribute op : String end
+    @Attribute left : Exp end
+    @Attribute right : Exp end
+    @Constructor(op,left,right) ! end
+  end
+\end{lstlisting}
+An atomic constant expression is either an integer or a boolean:
+\begin{lstlisting}
+context Expressions
+  @Class Const extends Exp
+    @Attribute value : Element end
+    @Constructor(value) ! end
+  end
+end
+\end{lstlisting}
+A new record is produced by performing a {\tt new} expression. The
+type to instantiate is given as a string. An alternative
+representation for types in {\tt new} expressions would be to
+permit an arbitrary expression that {\em evaluates} to produce a
+type. This design choice would rule out static typing and force
+the language to have dynamic types. We wish to use XAction to
+illustrate the difference between dynamic and static types in
+semantic definitions so we use strings to name types in {\tt new}
+expressions:
+\begin{lstlisting}
+context Expressions
+  @Class New extends Exp
+    @Attribute type : String end
+    @Constructor(type) ! end
+  end
+end
+\end{lstlisting}
+A variable is just a name:
+\begin{lstlisting}
+context Expressions
+  @Class Var extends Exp
+    @Attribute name : String end
+    @Constructor(name) ! end
+  end
+\end{lstlisting}
+A record field ref is:
+\begin{lstlisting}
+context Expressions
+  @Class FieldRef extends Exp
+    @Attribute value : Exp end
+    @Attribute name : String end
+    @Constructor(value,name) ! end
+  end
+\end{lstlisting}
+The concrete syntax of expressions is defined by the XBNF grammar
+for the class {\tt Exp}. The grammar parses the expression syntax
+and synthesizes instances of the expression classes:
+\begin{lstlisting}
+context Exp
+ @Grammar
+   // Start at Exp. Logical operators bind weakest.
+   Exp ::= e = ArithExp [ op = LogicalOp l = Exp { BinExp(op,e,l) } ].
+   LogicalOp ::= 'and' { "and" } | 'or' { "or" }.
+   // The '.' for field ref binds tighter than '+' etc.
+   ArithExp ::= e = FieldRef [ op = ArithOp a = FieldRef { BinExp(op,e,a) } ].
+   ArithOp ::= '+' { "+" }.
+   // A field reference '.' optionally follows an atomic expression.
+   FieldRef ::= e = Atom ('.' n = Name { FieldRef(e,n) } | { e }).
+   // Atomic expressions can be arbitrary exps if in ( and ).
+   Atom ::= Const | Var | New | '(' Exp ')'.
+   Const ::= IntConst | BoolConst.
+   IntConst ::= i = Int { Const(i) }.
+   BoolConst ::= 'true' { Const(true) } | 'false' { Const(false) }.
+   Var ::= n = Name { Var(n) }.
+   New ::= 'new' n = Name { New(n) }.
+ end
+\end{lstlisting}\subsection{XAction Statements}
+
+XAction statements are used to:
+\begin{itemize}
+\item Introduce new names associated with either types or values.
+\item Control the flow of execution. \item Perform side effects on
+records.
+\end{itemize}
+The following classes define the statement types for XAction:
+\begin{lstlisting}
+context Statements
+  @Class Statement
+  end
+end
+\end{lstlisting}
+A block (as in Pascal or C) contains local definitions. Names
+introduced in a block are available for the rest of the statements
+in the block (including sub-blocks) but are not available when
+control exits from the block:
+\begin{lstlisting}
+context Statements
+  @Class Block extends Statement
+    @Attribute statements : Seq(Statement) end
+    @Constructor(statements) ! end
+  end
+end
+\end{lstlisting}
+A declaration introduces either a type or a value binding:
+\begin{lstlisting}
+context Statements
+  @Class Declaration isabstract extends Statement
+    @Attribute name : String end
+  end
+end
+\end{lstlisting}
+A type declaration associates a type name with a sequence of field
+names. To keep things simple we don't associate fields with types:
+\begin{lstlisting}
+context Statements
+  @Class TypeDeclaration extends Declaration
+    @Attribute names : Seq(String) end
+    @Constructor(name,names) ! end
+  end
+end
+\end{lstlisting}
+A value declaration associates a name with a new value. The value
+is produced by performing an expression at run-time:
+\begin{lstlisting}
+context Statements
+  @Class ValueDeclaration extends Declaration
+    @Attribute value : Exp end
+    @Constructor(name,value) ! end
+  end
+end
+\end{lstlisting}
+A while statement involves a test and a body:
+\begin{lstlisting}
+context Statements
+  @Class While extends Declaration
+    @Attribute test : Exp end
+    @Attribute body : Statement end
+    @Constructor(test,body) ! end
+  end
+end
+\end{lstlisting}
+An if statement involves a test, a then-part and an else-part:
+\begin{lstlisting}
+context Statements
+  @Class If extends Declaration
+    @Attribute test : Exp end
+    @Attribute thenPart : Statement end
+    @Attribute elsePart : Statement end
+    @Constructor(test,elsePart) ! end
+  end
+end
+\end{lstlisting}\begin{lstlisting}
+context Statements
+  @Class FieldUpdate extends Declaration
+    @Attribute record : Exp end
+    @Attribute name : Exp end
+    @Attribute value : Exp end
+    @Constructor(record,name,value) ! end
+  end
+end
+\end{lstlisting}\begin{lstlisting}
+context Statements
+  @Class Update extends Declaration
+    @Attribute name : String end
+    @Attribute value : Exp end
+    @Constructor(name,value) ! end
+  end
+end
+\end{lstlisting}\begin{lstlisting}
+context Statement
+  @Grammar extends Exp.grammar
+    Statement ::= Block | Declaration | While | If | Update | FieldUpdate.
+    Block ::= 'begin' s = Statement* 'end' { Block(s) }.
+    Declaration ::= TypeDeclaration | ValueDeclaration.
+    TypeDeclaration ::= 'type' n = Name 'is' ns = Name* 'end' {
+      TypeDeclaration(n,ns) }.
+    ValueDeclaration ::= 'value' n = Name 'is' e = Exp 'end' {
+      ValueDeclaration(n,e) }.
+    FieldUpdate ::= e = Exp '.' n = Name ':=' v = Exp ';' {
+      FieldUpdate(e,n,v) }.
+    While ::= 'while' e = Exp 'do' s = Statement 'end' {
+      While(e,s) }.
+    If ::= 'if' e = Exp 'then' s1 = Statement 'else' s2 = Statement 'end' {
+      If(e,s1,s2) }.
+    Update ::= n = Name ':=' e = Exp ';' {
+      Update(n,e) }.
+  end
+\end{lstlisting}\section{An Evaluator for XAction}
+
+As described in the introducion we are interested in defining
+XAction operational semantics. We will do this in a number of
+different ways in the rest of this note. The first, and possibly
+most straightforward, approach is to define an {\em interpreter}
+for XAction in the XOCL language. This involves writing an {\tt
+eval} operation for each of the XAction syntax classes. The {\tt
+eval} operation must be parameterized with respect to any context
+information that is required to perform the evaluation. An XAction
+program {\tt p} is then evaluated in a context {\tt e} by: {\tt
+p.eval(e)}.
+
+\subsection{Evaluating Expressions}
+Expression evaluation is defined by adding {\tt eval} operations
+to each class in {\tt Expressions} as follows:
+\begin{lstlisting}
+context Exp
+  @AbstractOp eval(env:Env):Value
+  end
+\end{lstlisting}
+Evaluation of a constant produces the appropriate semantic domain
+value:
+\begin{lstlisting}
+context Const
+  @Operation eval(env)
+    @TypeCase(value)
+      Boolean do Bool(value) end
+      Integer do Int(value) end
+    end
+  end
+\end{lstlisting}
+Evaluation of a variable involves looking up the current value.
+The value is found in the current context of evaluation: this must
+contain associations between variable names and their values. This
+is the only thing required of the XAction evaluation context and
+therefore we represent the context as an {\em environment} of
+variable bindings:
+\begin{lstlisting}
+context Var
+  @Operation eval(env)
+    env.lookup(name)
+  end
+\end{lstlisting}
+Evaluation of a binary expression involves evaluation of the
+sub-expressions and then selecting an operation based on the
+operation name. The following shows how XAction semantics is
+completely based on XOCl semantics since {\tt +} in XAction is
+performed by {\tt +} in XOCL.
+\begin{lstlisting}
+context BinExp
+  @Operation eval(env)
+    @Case op of
+      "and" do left.eval(env).binAnd(right.eval(env)) end
+      "or"  do left.eval(env).binOr(right.eval(env)) end
+      "+"   do left.eval(env).binAdd(right.eval(env)) end
+    end
+  end
+\end{lstlisting}
+Creation of new records is performed by evaluaing a {\tt new}
+expression. The interpreter has dynamic types so the type to
+instantiate is found by looking up the type name in the current
+environment:
+\begin{lstlisting}
+context New
+  @Operation eval(env)
+    env.lookup(type).new()
+  end
+\end{lstlisting}
+Field reference is defined as follows:
+\begin{lstlisting}
+context FieldRef
+  @Operation eval(env)
+    value.eval(env).lookup(name)
+  end
+\end{lstlisting}\subsection{Evaluating Statements}
+
+XAction statements are performed in order to introduce new names,
+control flow or to update a record field. Statements are defined
+to evaluate in a context and must observe the rules of scope that
+require variables are local to the block that introduces them. The
+context of execution is an environment; evaluation of a statement
+may update the supplied environment, so statement evaluation
+returns an environment:
+\begin{lstlisting}
+context Statement
+  @AbstractOp eval(env):Env
+  end
+\end{lstlisting}
+A value declaration evaluates the expression part and then extends
+the supplied environment with a new binding:
+\begin{lstlisting}
+context ValueDeclaration
+  @Operation eval(env)
+    env.bind(name,value.eval(env))
+  end
+\end{lstlisting}
+A type declaration extends the supplied environment with a new
+type:
+\begin{lstlisting}
+context TypeDeclaration
+  @Operation eval(env)
+    env.bind(name,Type(names))
+  end
+\end{lstlisting}
+A block must preserve the supplied environment when its evaluation
+is complete. Each statement in the block is performed in turn and
+may update the current environment:
+\begin{lstlisting}
+context Block
+  @Operation eval(originalEnv)
+    let env = originalEnv
+    in @For statement in statements do
+         env := statement.eval(env)
+       end
+    end;
+    originalEnv
+    end
+\end{lstlisting}
+A {\tt while} statement continually performs the body while the
+test expression returns {\tt true}. A while body is equivalent to
+a block; so any updates to the supplied environment that are
+performed by the while body are discarded on exit:
+\begin{lstlisting}
+context While
+  @Operation eval(originalEnv)
+    let env = orginalEnv
+    in @While test.eval(env).value do
+          env := body.eval(env)
+       end;
+       originalEnv
+    end
+  end
+\end{lstlisting}
+An {\tt if} statement conditionally performs one of its
+sub-statements:
+\begin{lstlisting}
+context If
+  @Operation eval(env)
+    if test.eval(env).value
+    then thenPart.eval(env)
+    else elsePart.eval(env)
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context FieldUpdate
+  @Operation eval(env)
+    record.eval(env).update(name,value.eval(env))
+  end
+\end{lstlisting}\begin{lstlisting}
+context Update
+  @Operation eval(env)
+    env.update(name,value.eval(env))
+  end
+\end{lstlisting}\section{A Translator for XAction with Run-Time Types}
+
+The previous section defines an interpreter for XAction. This is
+an appealing way to define the operational semantics of a language
+because the rules of evaluation work directly on the abstract
+syntax structures. However the resulting interpreter can often be
+very inefficient. Furthermore, an interpreter can lead to an {\em
+evaluation phase distinction}. Suppose that XAction is to be
+embedded in XOCL. XOCL has its own interpretive mechanism (the XMF
+VM); at the boundary between XOCL and XAction the XOCL
+interpretive mechanism must hand over to the XAction interpreter
+-- the XAction code that is performed is a data structure, a
+completely alien format to the VM. This phase distinction can lead
+to problems when using standard tools, such as save and load
+mechanisms, with respect to the new language. For example a
+mechanism that can save XOCL code to disk cannot be used to save
+XAction code to disk (it can, however, be used to save the XAction
+interpreter to disk).
+
+An alternative strategy is to translate the source code of XAction
+to a language for which we have an efficient implementation.  No
+new interpretive mechanism is required and no phase distinction
+arises. Translation provides the opportunity for static analysis
+(since translation is performed prior to executing the program).
+As we mentioned earlier, static analysis can translate out any
+type information from XAction programs; the resulting program does
+not require run-time types. Since static analysis requires a
+little more work, this section describes a simple translation from
+XAction to XOCL that results in run-time types; the subsequent
+section shows how this can be extended to analyse types statically
+and remove them from the semantic domain.
+
+\subsection{Translating Expressions}
+
+Translation is defined by adding a new operation {\tt desugar1} to
+each sbatract syntax class. There is no static analysis, so the
+operation does not require any arguments. The result of the
+operation is a value of type {\tt Performable} which is the type
+of elements that can be executed by the XMF execution engine.
+\begin{lstlisting}
+context Exp
+  @AbstractOp desugar1():Performable
+  end
+\end{lstlisting}
+An XAction constant is translated to an XOCL constant:
+\begin{lstlisting}
+context Const
+  @Operation desugar1():Performable
+    @TypeCase(value)
+      Boolean do BoolExp(value) end
+      Integer do IntExp(value) end
+    end
+  end
+\end{lstlisting}
+An XAction binary expression is translated to an XOCL binary
+expression. Note that the sub-expressions are also translated:
+\begin{lstlisting}
+context BinExp
+  @Operation desugar1():Performable
+    @Case op of
+      "and" do [| <left.desugar1()> and <right.desugar1()> |] end
+      "or"  do [| <left.desugar1()> and <right.desugar1()> |] end
+      "+"   do [| <left.desugar1()> + <right.desugar1()> |] end
+    end
+  end
+\end{lstlisting}
+An XAction {\tt new} expression involves a type name. Types will
+be bound to the appropriate variable name in the resulting XOCL
+program; so the result of translation is just a message {\tt new}
+sent to the value of the variable whose name is the type name:
+\begin{lstlisting}
+context New
+  @Operation desugar1():Performable
+    [| <OCL::Var(type)>.new() |]
+  end
+\end{lstlisting}
+XAction variables are translated to XOCL variables:
+\begin{lstlisting}
+context Var
+  @Operation desugar1():Performable
+    OCL::Var(name)
+  end
+\end{lstlisting}
+XAction field references are translated to the appropriate call on
+a record:
+\begin{lstlisting}
+context FieldRef
+  @Operation desugar1():Performable
+    [| <value.desugar1()>.ref(<StrExp(name)>) |]
+  end
+\end{lstlisting}\subsection{Translating Statements}
+
+An XAction statement can involve local blocks. The equivalent XOCL
+expression that provides local definitions is {\tt let}. A {\tt
+let} expression consists of a name, a value expression and a body
+expression. Thus, in order to translate an XAction declaration to
+an XOCL {\tt let} we need to be passed the body of the {\tt let}.
+This leads to a translational style for XAction actions called
+{\em continuation passing} where each {\tt desugar1} operation is
+supplied with the XOCL action that will be performed next:
+\begin{lstlisting}
+context Statement
+  @AbstractOp desugar1(next:Performable):Performable
+  end
+\end{lstlisting}
+A type declaration is translated to a local definition for the
+type name. Note that the expression {\tt names.lift()} translates
+the sequence of names to an expression that, when performed,
+produces the same sequence of names: {\tt list} is a means of
+performing evaluation in reverse:
+\begin{lstlisting}
+context TypeDeclaration
+  @Operation desugar1(next:Performable):Performable
+    [| let <name> = Type(<names.lift()>)
+       in <next>
+       end
+    |]
+  end
+\end{lstlisting}
+A value declaration is translated to a local decinition:
+\begin{lstlisting}
+context ValueDeclaration
+  @Operation desugar1(next:Performable):Performable
+    [| let <name> = <value.desugar1()>
+       in <next>
+       end
+    |]
+  end
+\end{lstlisting}
+A block requires each sub-statement to be translated in turn.
+Continuation passing allows us to chain together the sequence of
+statements and nest the local definitions appropriately. The
+following auxiliary operation is used to implement
+block-translation:
+\begin{lstlisting}
+context Statements
+  @Operation desugar1(statements,next:Performable):Performable
+    @Case statements of
+      Seq{} do
+        next
+      end
+      Seq{statement | statements} do
+        statement.desugar1(Statements::desugar1(statements,next))
+      end
+    end
+  end
+\end{lstlisting}
+Translation of a block requires that the XOCL local definitions
+are kept local. Therefore, the sub-statements are translated by
+chaining them together and with a final continuation of {\tt
+null}. Placing the result in sequence with {\tt next} ensures that
+any definitions are local to the block.
+\begin{lstlisting}
+context Block
+  @Operation desugar1(next:Performable):Performable
+    [| <Statements::desugar1(statements,[| null |])> ;
+       <next>
+    |]
+  end
+\end{lstlisting}
+A {\tt while} statement is translated to the equivalent expression
+in XOCL:
+\begin{lstlisting}
+context While
+  @Operation desugar1(next:Performable):Performable
+    [| @While <test.desugar1()>.value do
+         <body.desugar1([|null|])>
+       end;
+       <next>
+    |]
+  end
+\end{lstlisting}
+An {\tt if} statement is translated to an equivalent expression in
+XOCL:
+\begin{lstlisting}
+context If
+  @Operation desugar1(next:Performable):Performable
+    [| if <test.desugar1()>.value
+       then <thenPart.desugar1(next)>
+       else <elsePart.desugar1(next)>
+       end
+    |]
+  end
+\end{lstlisting}\begin{lstlisting}
+context FieldUpdate
+  @Operation desugar1(next:Performable):Performable
+    [| <record.desugar1()>.update(<StrExp(name)>,<value.desugar1()>);
+       <next>
+    |]
+  end
+\end{lstlisting}\begin{lstlisting}
+context Update
+  @Operation desugar1(next:Performable):Performable
+    [| <name> := <value.desugar1()>;
+       <next>
+    |]
+  end
+\end{lstlisting}\section{A Translator for XAction without Run-Time Types}
+
+It is usual for languages to have a static (or {\em compile time})
+phase and a dynamic (or {\em run time}) phase. Many operational
+features of the language can be performed statically. This
+includes type analysis: checking that types are defined before
+they are used and allocating appropriate structures when instances
+of types are created. This section shows how the translator for
+XAction to XOCL from the previous section can be modified so that
+type analysis is performed and so that types do not occur at
+run-time.
+
+\subsection{Translating Expressions}
+
+Since types will no longer occur at run-time we will simplify the
+semantic domain slightly and represent records as {\em a-lists}.
+An a-list is a sequence of pairs, the first element of each pair
+is a ket and the second element is a value. In this case a record
+is an a-list where the keys are field name strings. XOCL provides
+operations defined on sequences that are to be used as a-lists:
+{\tt l->lookup(key)} and {\tt l->set(key,value)}.
+
+The context for static analysis is a type environment. Types now
+occur at translation time instead of run-time therefore that
+portion of the run-time context that would contain associations
+between type names and types occurs during translation:
+\begin{lstlisting}
+context Exp
+  @AbstractOp desugar2(typeEnv:Env):Performable
+  end
+\end{lstlisting}
+Translation of a constant is as for {\tt desugar1}:
+\begin{lstlisting}
+context Const
+  @Operation desugar2(typeEnv:Env):Performable
+    self.desugar1()
+  end
+\end{lstlisting}
+Translation of binary expressions is as for {\tt desugar1} except
+that all translation is performed by {\tt desugar2}:
+\begin{lstlisting}
+context BinExp
+  @Operation desugar2(typeEnv:Env):Performable
+    @Case op of
+      "and" do [| <left.desugar2(typeEnv)> and
+                  <right.desugar2(typeEnv)> |] end
+      "or"  do [| <left.desugar2(typeEnv)> and
+                  <right.desugar2(typeEnv)> |] end
+      "+"   do [| <left.desugar2(typeEnv)> +
+                  <right.desugar2(typeEnv)> |] end
+    end
+  end
+\end{lstlisting}
+Translation of a variable is as before:
+\begin{lstlisting}
+context Var
+  @Operation desugar2(typeEnv:Env):Performable
+    self.desugar1()
+  end
+\end{lstlisting}
+A {\tt new} expression involves a reference to a type name. The
+types occur at translation time and therefore part of the
+evaluation of {\tt new} can occur during translation. The type
+should occur in the supplied type environment; the type contains
+the sequence of field names. The result of translation is an XOCL
+expression that constructs an a-list based on the names of the
+fields in the type. The initial value for each field is {\tt
+null}:
+\begin{lstlisting}
+context New
+  @Operation desugar2(typeEnv:Env):Performable
+    if typeEnv.binds(type)
+    then
+      let type = typeEnv.lookup(type)
+      in type.names->iterate(name exp = [| Seq{} |] |
+           [| <exp>->bind(<StrExp(name)>,null) |])
+      end
+    else self.error("Unknown type " + type)
+    end
+  end
+\end{lstlisting}
+A field reference expression is translated to an a-list lookup
+expression:
+\begin{lstlisting}
+context FieldRef
+  @Operation desugar2(typeEnv:Env):Performable
+    [| <value.desugar2(typeEnv)>->lookup(<StrExp(name)>) |]
+  end
+\end{lstlisting}\subsection{Translating Statements}
+
+A statement may contain a local type definition. We have already
+discussed continuation passing with respect to {\tt desugar1}
+where the context for translation includes the next XOCL
+expression to perform. The {\tt desugar2} operation cannot be
+supplied with the next XOCL expression because this will depend on
+whether or not the current statement extends the type environment.
+Therefore, in {\tt desugar2} the continuation is an operation that
+is awaiting a type environment and produces the next XOCL
+expression:
+\begin{lstlisting}
+context Statement
+  @AbstractOp desugar2(typeExp:Env,next:Operation):Performable
+  end
+\end{lstlisting}
+A type declaration binds the type at translation time and supplies
+the extended type environment to the continuation:
+\begin{lstlisting}
+context TypeDeclaration
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    next(typeEnv.bind(name,Type(names)))
+  end
+\end{lstlisting}
+A value declaration introduces a new local definition; the body is
+created by supplying the unchanged type environment to the
+continuation:
+\begin{lstlisting}
+context ValueDeclaration
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| let <name> = <value.desugar2(typeEnv)>
+       in <next(typeEnv)>
+       end
+    |]
+  end
+\end{lstlisting}
+Translation of a block involves translation of a sequence of
+sub-statements. The following auxiliary operation ensures that the
+continuations are chained together correctly:
+\begin{lstlisting}
+context Statements
+  @Operation desugar2(statements,typeEnv,next):Performable
+      @Case statements of
+        Seq{} do
+          next(typeEnv)
+        end
+        Seq{statement | statements} do
+          statement.desugar2(
+            typeEnv,
+            @Operation(typeEnv)
+              Statements::desugar2(statements,typeEnv,next)
+            end)
+        end
+      end
+    end
+\end{lstlisting}
+A block is translated to a sequence of statements where local
+definitions are implemented using nested {\tt let} expressions in
+XOCL. The locality of the definitions is maintained by sequencing
+the block statements and the continuation expression:
+\begin{lstlisting}
+context Block
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| <Statements::desugar2(
+         statements,
+         typeEnv,
+         @Operation(ignore)
+           [| null |]
+         end)>;
+       <next(typeEnv)>
+    |]
+  end
+\end{lstlisting}
+A {\tt while} statement is translated so that the XOCL expression
+is in sequence with the expression produced by the contintuation:
+\begin{lstlisting}
+context While
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| @While <test.desugar2(typeEnv)>.value do
+         <body.desugar2(typeEnv,@Operation(typeEnv) [| null |] end)>
+         end;
+         <next(typeEnv)>
+       end
+    |]
+  end
+\end{lstlisting}
+The {\tt if} statement is translated to an equivalent XOCL
+expression:
+\begin{lstlisting}
+context If
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| if <test.desugar2(typeEnv)>.value
+       then <thenPart.desugar2(typeEnv,next)>
+       else <elsePart.desugar2(typeEnv,next)>
+       end
+    |]
+  end
+\end{lstlisting}\begin{lstlisting}
+context FieldUpdate
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| <record.desugar2(typeEnv)>.update(
+          <StrExp(name)>,
+          <value.desugar2(typeEnv)>);
+       <next(typeEnv)>
+    |]
+  end
+\end{lstlisting}\begin{lstlisting}
+context Update
+  @Operation desugar2(typeEnv:Env,next:Operation):Performable
+    [| <name> := <value.desugar2(typeEnv)>;
+       <next(typeEnv)>
+    |]
+  end
+\end{lstlisting}\section{Compiling XAction}
+
+The previous section shows how to perform static type anslysis
+while translating XAction to XOCL. XOCL is then translated to XMF
+VM instructions by the XOCL compiler (another translation
+process). The result is that XAction cannot to anything that XOCL
+cannot do. Whilst this is not a serious restriction, there may be
+times where a new language wishes to translate directly to the XMF
+VM without going through an existing XMF language. This may be in
+order to produce highly efficient code, or because the language
+has some unusual control constructs that XOCL does not support.
+This section shows how XAction can be translated directly to XMF
+VM instructions.
+
+\subsection{Compiling Expressions}
+
+\begin{lstlisting}
+context Exp
+  @AbstractOp compile(typeEnv:Env,valueEnv:Seq(String)):Seq(Instr)
+  end
+\end{lstlisting}\begin{lstlisting}
+context Const
+  @Operation compile(typeEnv,valueEnv)
+    @TypeCase(value)
+      Boolean do
+        if value
+        then Seq{PushTrue()}
+        else Seq{PushFalse()}
+        end
+      end
+      Integer do
+        Seq{PushInteger(value)}
+      end
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context Var
+  @Operation compile(typeEnv,valueEnv)
+    let index = valueEnv->indexOf(name)
+    in if index < 0
+       then self.error("Unbound variable " + name)
+       else Seq{LocalRef(index)}
+       end
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context BinExp
+  @Operation compile(typeEnv,valueEnv):Seq(Instr)
+    left.compile(typeEnv,valueEnv) +
+    right.compile(typeEnv,valueEnv) +
+    @Case op of
+      "and" do Seq{And()} end
+      "or"  do Seq{Or()} end
+      "+"   do Seq{Add()} end
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context New
+  @Operation compile(typeEnv,valueEnv):Seq(Instr)
+    self.desugar2(typeEnv).compile()
+  end
+\end{lstlisting}\begin{lstlisting}
+context FieldRef
+  @Operation compile(typeEnv,valueEnv):Seq(Instr)
+    Seq{StartCall(),
+        PushStr(name)}
+    value.compile(typeExp,valueExp) +
+    Seq{Send("lookup",1)}
+  end
+\end{lstlisting}\subsection{Compiling Statements}
+
+\begin{lstlisting}
+context Statement
+  @AbstractOp compile(typeEnv:Env,varEnv:Seq(String),next:Operation):Seq(Instr)
+  end
+\end{lstlisting}\begin{lstlisting}
+context TypeDeclaration
+  @Operation compile(typeEnv,varEnv,next)
+    next(typeEnv.bind(name,Type(names)),varEnv)
+  end
+\end{lstlisting}\begin{lstlisting}
+context ValueDeclaration
+  @Operation compile(typeEnv,varEnv,next)
+    value.compile(typeEnv,varEnv) +
+    Seq{SetLocal(name,varEnv->size),
+        Pop()} +
+    next(typeEnv,varEnv + Seq{name})
+  end
+\end{lstlisting}\begin{lstlisting}
+context Statements
+  @Operation compile(statements,typeEnv,varEnv,next)
+    @Case statements of
+      Seq{} do
+        next(typeEnv,varEnv)
+      end
+      Seq{statement | statements} do
+        statement.compile(
+          typeEnv,
+          varEnv,
+          @Operation(typeEnv,varEnv)
+            Statements::compile(statements,typeEnv,varEnv,next)
+          end)
+      end
+    end
+  end
+\end{lstlisting}\begin{lstlisting}
+context Block
+  @Operation compile(typeEnv,varEnv,next)
+    Statements::compile(
+      statements,
+      typeEnv,
+      varEnv,
+      @Operation(localTypeEnv,localVarEnv)
+        next(typeEnv,varEnv)
+        end)
+  end
+\end{lstlisting}\begin{lstlisting}
+context While
+  @Operation compile(typeEnv,varEnv,next)
+     Seq{Noop("START")} +
+     test.compile(typeEnv,varEnv) +
+     Seq{SkipFalse("END")} +
+     body.compile(typeEnv,varEnv,
+       @Operation(typeEnv,varEnv)
+         Seq{}
+       end) +
+     Seq{Skip("START")} +
+     Seq{Noop("END")} +
+     next(typeEnv,varEnv)
+  end
+\end{lstlisting}\begin{lstlisting}
+context If
+  @Operation compile(typeEnv,varEnv,next)
+     test.compile(typeEnv,varEnv) +
+     Seq{SkipFalse("ELSE")} +
+     thenPart.compile(typeEnv,varEnv,
+       @Operation(typeEnv,varEnv)
+         Seq{Skip("END")}
+       end) +
+     Seq{Noop("ELSE")} +
+     elsePart.compile(typeEnv,varEnv,
+       @Operation(typeEnv,varEnv)
+         Seq{Skip("END")}
+       end) +
+     Seq{Noop("END")} +
+     next(typeEnv,varEnv)
+  end
+\end{lstlisting}\section{Abstract Syntax to Concrete Syntax}
+
+We have shown how XAction is translated from concrete syntax to
+abstract syntax by defining an XBNF grammar. It is often useful to
+be able to translate in the opposite direction and produce
+concrete syntax from abstract syntax. This can be done with or
+without formatting. The latter is useful only when the concrete
+syntax is to be consumed by a machine or when it can be supplied
+to a pretty-printing tool.
+
+Formatting of code can be performed in fairly sophisticated ways,
+for example allowing the width of the page to be supplied as a
+parameter to the formatter. This section shows how a simple code
+formatter for XAction can be defined by attaching {\tt pprint}
+operations to the abstract syntax classes.
+
+An expression is formatted by supplying it with an output channel,
+it is assumed that the channel is in the correct output column:
+\begin{lstlisting}
+@AbstractOp pprint(out:OutputChannel) end
+\end{lstlisting}
+A variable is pretty-printed by printing its name:
+\begin{lstlisting}
+context Var
+  @Operation pprint(out)
+    format(out,"~S",Seq{name})
+  end
+\end{lstlisting}
+A constant is pretty-printed by printing its value:
+\begin{lstlisting}
+context Const
+  @Operation pprint(out)
+    format(out,"~S",Seq{value})
+  end
+\end{lstlisting}
+A {\tt new} expression prepends the type with the keyword:
+\begin{lstlisting}
+context New
+  @Operation pprint(out)
+    format(out,"new ~S",Seq{type})
+  end
+\end{lstlisting}
+A binary expression pretty-prints the left sub-expression, the
+operator name and then the right sub-expression:
+\begin{lstlisting}
+context BinExp
+  @Operation pprint(out)
+    left.pprint(out);
+    format(out," ~S ",Seq{op});
+    right.pprint(out)
+  end
+\end{lstlisting}
+A statement is pretty-printed by supplying it with the output
+channel and the current level of indentation. The indentation
+controls how many tab-stops must be output after each newline.
+This is necessary because statements can be nested and indentation
+is used to visualise the level of nesting.
+\begin{lstlisting}
+context Statement
+  @AbstractOp pprint(out:OutputChannel,indent:Integer) end
+\end{lstlisting}
+A block is pretty-printed by incrementing the indentation for each
+nested statement:
+\begin{lstlisting}
+context Block
+  @Operation pprint(out,indent)
+    format(out,"begin");
+    @For s in statements do
+      format(out,"~%~V",Seq{indent + 2});
+      s.pprint(out,indent + 2)
+    end;
+    format(out,"~%~Vend",Seq{indent})
+  end
+\end{lstlisting}
+An {\tt if} statement is pretty-printed as follows:
+\begin{lstlisting}
+context If
+  @Operation pprint(out,indent)
+    format(out,"if ");
+    test.pprint(out);
+    format(out,"~%~Vthen~%~V",Seq{indent,indent + 2});
+    thenPart.pprint(out,indent+2);
+    format(out,"~%~Velse~%~V",Seq{indent,indent + 2});
+    elsePart.pprint(out,indent+2);
+    format(out,"~%~Vend",Seq{indent})
+  end
+\end{lstlisting}
+A type declaration is pretty-printed as follows, note the use of
+{\tt ~\{} to iterate through the sequence of field names in the
+{\tt format} control string:
+\begin{lstlisting}
+context TypeDeclaration
+  @Operation pprint(out,indent)
+    format(out,"type ~S is ~{,~;~S~} end",Seq{name,names})
+  end
+\end{lstlisting}
+A value declaration:
+\begin{lstlisting}
+context ValueDeclaration
+  @Operation pprint(out,indent)
+    format(out,"value ~S is ",Seq{name});
+    value.pprint(out);
+    format(out," end")
+  end
+\end{lstlisting}
+A {\tt while} statement:
+\begin{lstlisting}
+context While
+  @Operation pprint(out,indent)
+    format(out,"while ");
+    test.pprint(out);
+    format(out," do~%~V",Seq{indent+2});
+    body.pprint(out,indent+2);
+    format(out,"~%~Vend",Seq{indent})
+  end
+\end{lstlisting}\section{Conclusion}
+
+This chapter has shown how XMF can be used to define the
+operational semantics of languages. We have shown how to implement
+an interpreter for a simple language and how to translate the
+language to existing XMF languages. We have discussed a number of
+different issues relating to language translation, in particular
+how much work is performed statically and how much is left to
+run-time.

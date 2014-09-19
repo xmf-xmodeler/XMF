@@ -77,6 +77,13 @@ try
                XMF.add(@Operation demoDir() self.property("demoDir") end)
             end
           end;
+          if hasArg("docs")
+          then 
+            let docs = getArg("docs")
+            in xmf.setProperty("docDir",docs);
+               XMF.add(@Operation docDir() self.property("docDir") end)
+            end
+          end;
           if hasArg("home")
           then 
             let home = getArg("home")

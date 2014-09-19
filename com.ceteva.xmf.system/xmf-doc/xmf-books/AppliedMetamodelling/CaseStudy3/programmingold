@@ -1,0 +1,102 @@
+\chapter{Case Study 3: A Programming Language}
+
+\subsection{Language Definition Example}
+
+The following example illustrates how XOCL it can be used to write
+a small interpreter for an expression language that supports
+constants, boolean expressions and variables.
+
+A model of the expression classes is shown in figure
+\ref{expressions}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=7cm]{Programming/figures/Expressions.pdf}
+\caption{Expression language classes} \label{expressions}
+\end{center}
+\end{figure}
+
+The result of evaluating an expression is a value. Three types of
+values are supported: Integer, Boolean and String values as shown
+in figure \ref{values}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=6cm]{Programming/figures/Values.pdf}
+\caption{Value classes} \label{values}
+\end{center}
+\end{figure}
+
+Boolean values support two operations: boolean `and' and boolean
+`or', which return the result of and'ing or or'ing the boolean b
+with the boolean value:
+
+
+\begin{lstlisting}
+@Operation binAnd(b)
+  Bool(value and b)
+end
+
+@Operation binOr(b)
+  Bool(value or b)
+end
+\end{lstlisting}
+
+
+Integers support the operation `+', which returns the result of
+adding the integer i to the integer value:
+
+
+\begin{lstlisting}
+@Operation binAdd(n)
+  Int(value + n)
+end
+\end{lstlisting}
+
+
+A small interpreter is constructed by defining an eval() operation
+on each expression. An eval() expression takes an environment,
+env, which is a table of names and values that correspond to the
+bound variables in scope when the expression is evaluated.
+
+The eval() operation for boolean expressions evaluates the left
+hand boolean expressions with the right hand boolean expression:
+
+
+\begin{lstlisting}
+context BoolExp
+  @Operation eval(env)
+    @Case op of
+      "and" do left.eval(env).binAnd(right.eval(env)) end
+      "or"  do left.eval(env).binOr(right.eval(env)) end
+      "+"   do left.eval(env).binAdd(right.eval(env)) end
+    end
+  end
+\end{lstlisting}
+
+
+Evaluating a constant expression will create an instance of the
+appropriate value depending on the type of the expression's value:
+
+
+\begin{lstlisting}
+context Const
+  @Operation eval(env)
+    @TypeCase(value)
+      Boolean do Bool(value) end
+      Integer do Int(value) end
+      String  do Str(value) end
+    end
+  end
+\end{lstlisting}
+
+
+Finally, evaluating a variable expression simply looks up the
+value of the bound variable:
+
+
+\begin{lstlisting}
+@Operation eval(env)
+  env.lookup(name)
+end
+\end{lstlisting}

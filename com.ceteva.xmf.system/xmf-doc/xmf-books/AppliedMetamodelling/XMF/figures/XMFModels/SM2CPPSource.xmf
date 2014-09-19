@@ -1,0 +1,33 @@
+let table = Stacks::Stack()
+in @Package SM2CPP metapackage Root::EMOF::Package
+     @Package Mapping metapackage Root::EMOF::Package
+       @Class SM2Class metaclass Root::XMap::Map  extends Root::XMap::Mapping
+         @Operation invoke(target : EMOF::Element,args : EMOF::Element):EMOF::Element
+           @Case args->at(0) of
+             StateMachines::StateMachine[states = S : EMOF::Element,transitions = TS : EMOF::Element] do
+               let T = CPP::EnumerationType[name = "STATE",values = S->collect(s |
+                           s.name)];
+                   O = TS->collect(t |
+                         Transition2Op()(t))
+               in CPP::CPPClass[attributes = Set{CPP::CPPAtt[name = "state",type = T]},operations = O]
+               end
+             end
+             else self.error("Mapping failed.")
+           end
+         end
+       end
+       @Class Transition2Op metaclass Root::XMap::Map  extends Root::XMap::Mapping
+         @Operation invoke(target : EMOF::Element,args : EMOF::Element):EMOF::Element
+           @Case args->at(0) of
+             StateMachines::Transition[sourceName = S : EMOF::Element,targetName = T : EMOF::Element] do
+               let B = "state = " + T
+               in CPP::CPPOp[name = S + T,body = B]
+               end
+             end
+             else self.error("Mapping failed.")
+           end
+         end
+       end
+     end
+   end
+end

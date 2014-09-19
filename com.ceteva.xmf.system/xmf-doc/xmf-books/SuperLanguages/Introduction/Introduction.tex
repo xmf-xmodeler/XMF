@@ -1,0 +1,451 @@
+\chapter{Introduction}
+
+The days of monolithic languages are over. The idea that one size
+fits all is dead. Long live diversity! 
+
+Applications should not, and indeed cannot, be written in a single
+language these days. We have lots of technologies that are specific
+to different aspects of complete application. We have SQL for databases,
+we have JSP for web presentation, we have XML everywhere, we have
+Java and J2EE, we have frameworks and libraries. So everything is
+great - just map you application to an appropriate technology and
+away you go! \normalsize
+
+\begin{quotation}
+{\em But wait a minute, perhaps this diversity is not such a good
+thing. Representing our application in these technologies can be quite
+hard. I understand how the application breaks down into aspects, but
+those aspects don't seem to map down onto different aspects of the
+technology very well. OK, so, I'll put a bit of each application feature
+into the appropriate technologies. It takes a bit of translation,
+but our guys are experts in the technologies so there should be no
+problem. Great - the system works, everyone is happy.
+
+Uh, oh - the requirements have changed. No matter - we'll just
+talk it through with the customer and modify the implementation accordingly.
+It will take a bit of time to trace the requirements through to the
+implementation on all those different bits of technology, er how did
+we implement that customer transaction again? Never mind, we can put
+that other project on hold while the original developers are brought
+back to reverse engineer the code.
+
+Yikes! the original developers have left. Just great, now I
+have to pick through all those technologies and try to do it myself.
+Crikey - I don't really understand this stuff, it talks about accrual
+periods and debentures. I know, I'll show it to the customer, surely
+they can extract some meaning from this mess. Aargh - the customer
+won't touch it and the new development team just wants to rewrite
+it!}
+\end{quotation}
+
+\normalsize
+
+
+\section{The Representation Chasm}
+
+We are drowning in implementation technology. Software language engineers
+have been very busy over the last 10 years inventing languages that
+control the new frontiers of technology. In particular there are a
+huge number of languages that provide control over distributed applications,
+databases and web-content. Basic technology issues are very well provided
+for. This can be seen in the rise of open-source technologies and
+the standardisation of architectures for information processing applications. 
+
+And yet there are still problems. Little attention has been paid to
+closing the gap between the languages and the applications that they
+implement: the \textbf{representation chasm}. The chasm is bridged
+by highly skilled developers who take designs and produce the application.
+But what if your developers are not as highly skilled as you would
+like? This leads to errors and delays arising from misunderstandings.
+Iterative development is compromised by the representation chasm since
+various project stakeholders become disenfranchised depending on which
+side of the chasm they live. Maintenance become difficult: the customers,
+architects and designers shout new requirements from one side of the
+chasm only for the development team to mis-hear them on the other.
+
+How do we bridge the representation chasm? The answer is in moving
+towards a new breed of language technology: \textbf{super-languages}.
+A super-language provides a number of technical features that are
+specifically designed to close the gap between the concepts in the
+application domain and the technologies that are used to implement
+the application. Super-languages can be used to empower development
+teams by increasing the sophistication of the tools they use to implement
+the application. 
+
+Super-languages can be used to de-skill various aspects of the implementation
+by offering restricted languages suitable for the application. Super-languages
+can be made accessible to project stakeholders that would usually
+be unable to engage with implementation technologies. Super-languages
+can radically increase the efficiency of the development team and
+can radically increase the quality of the delivered products, derisk
+the development process, and increase the ability of the supplier
+to maintain the products.
+
+
+\section{Super-Languages}
+
+What is a super-language and how does it differ from the current breed
+of implementation technologies? An idealised super-language provides
+control over all aspects of representation and execution. A super-language
+can be extended with new features that make it easy to represent concepts
+from the application that a customer would understand. These new concepts
+can be weaved into the existing features of a super-language or may
+be kept separate (as a different aspect for example). Existing execution
+mechanisms in the super-language can be changed to reflect the needs
+of each new application. Each new feature that is added to a super-language
+has a description of how it should execute and how it integrates with
+other features (where that is appropriate). 
+
+A super-language must provide super-features that address: \emph{usability;
+expressiveness; extensibility}. These are described in more detail
+in the following sections.
+
+
+\subsection{Usability}
+
+A super-language must be fit for purpose. It should support the developer
+in capturing features of the application and place no unnecessary
+barriers in the way of development. The following features contribute
+to the usability of a super-language:
+
+\begin{description}
+\item [{interactive}] A super-language cannot be a batch execution language.
+Some form of top-level command interpreter is essential. Developers
+want to interact with their programs and to deny them this pleasure
+is cruel. Interactivity aids development and debugging, increases
+developer productivity, and facilitates a deep understanding of execution
+mechanisms. If a super-language is used for language engineering then
+the developer will be implementing execution mechanisms which will
+require a good understanding of how languages tick.
+\item [{dynamic}] A super-language must be dynamic. It must be possible
+to load new definitions into the language at any stage during execution.
+Why wait to recompile and restart an application when it is not necessary?
+A super-language may be used as the glue that binds an application
+made up of many different modules written in a variety of languages.
+In order to be glue, the super-language must provide mechanisms for
+dynamically loading and processing the modules. This is closely related
+to the idea of aspects.
+\item [{reflection}] A super-language must be able to reflect on its own
+structure and behaviour. It should be possible for the language to
+query its own state and to represent and manipulate its own syntax.
+Many of the domain specific languages that are represented by super-languages
+will ultimately be represented in a basic core language (an alternative
+is to be translated to some external language). Syntax translations
+rely on having a complete representation of the super-language syntax
+available to the language engineer.
+\item [{interfaces}] Super-languages must not be closed worlds. It is unrealistic
+to expect mainstream programming languages to become super-languages
+overnight. In addition there are practical reasons why certain aspects
+of a system may need to be implemented using conventional technology.
+Therefore, until standard languages become super-languages, a super-language
+should support interfaces to conventional technology. Super-languages
+should support provision for running as embedded applications.
+\end{description}
+
+\subsection{Expressiveness}
+
+Where possible, a super-language should abstract away from implementation
+details in programs. It should be possible to quickly and efficiently
+use a super-language for prototyping an application in addition to
+product development. Key features are:
+
+\begin{description}
+\item [{high-level}] There is no excuse for a language which does not provide
+features that make representation and computation easy to achieve.
+These include things like heterogeneous lists; closures; pattern matching;
+symbolic data; rich type systems etc. High-level features make a language
+a pleasure to use and contribute to the readability of the code. Closures
+are particularly important since they can be used to engineer applications
+that would be complex and difficult to understand without them (particularly
+search related applications).
+\item [{dynamic(duck)typing}] Languages that are limited to static type
+systems are too restrictive to be super-languages. It is difficult
+to achieve interaction and meta-features with exclusively statically
+typed languages. Trust the developer - they really do know what they
+are doing! The type-system of a super-language should be extensible
+just like all other aspects of the language. A super-language may
+optionally impose static typing (static typing is a good thing), but
+should not mandate it.
+\item [{garbage-collection}] The days of direct pointer manipulation and
+user defined memory management are surely behind us. All but the very
+specialized real-time or hardware related applications cannot justify
+the exposure of raw machine-level details in this way. 
+\end{description}
+
+\subsection{Extensibility}
+
+A super-language must be extensible. In principle, all aspects of
+the language from the syntax to the execution engine should be available
+to the developer. Extensibility features must be fullsome and integrated
+with the rest ofthe language. It \textbf{does not} count if you provide
+a couple of system calls that changes the mode of the execution engine.
+It \textbf{does} count if you can write a complete new execution algorithm
+and plug it in. It \textbf{does not} count if you write a pre-processor
+for your language. It \textbf{does} count if you can write a source
+code translator and integrate it into the language compiler using
+all of the context that the compiler manipulates. Key features are:
+
+\begin{description}
+\item [{aspects}] A super-language must support the idea of aspects whereby
+new definitions can be added to existing language components. Ideally
+the super-language will be written in itself and must be extensible
+so that it can be tailored through extension to suit different application
+domains. Groups of definitions added to existing components are grouped
+into logically related packages or \emph{aspects}. It should be possible
+to manipulate aspects as a unit, minimally in terms of addition, deletion
+and debugging.
+\item [{reflexive}] A super-language should be reflexive. This is related
+to reflection, but differs in that the language \emph{can affect}
+its own behaviour. Debuggers for languages rely on the ability to
+be reflexive since they have to change the trace state of the operations
+that they are tracing. An ideal super-language will be meta-circular
+since this is the best way of ensuring (given the characteristic features
+listed here) that the language will be sufficiently expressive.
+\item [{meta-protocols}] Execution engines for languages are like software
+frameworks. To plug into the framework you supply program code written
+in a language that the framework understands. The framework executes
+and processes the program code. The key steps in execution forms an
+execution procotol for the framework. The execution protocol for a
+super-language must be clearly defined. A \emph{meta-protocol }is
+a collection of features that can be used to extend or redefine the
+execution protocol. A super-language should offer a meta-protocol
+that allows new languages to hook into the existing execution framework,
+but which allows them to change it. A typical excample is the protocol
+for an object-oriented language that includes: send; setSlot; getSlot
+etc. A \emph{meta-object-protocol} (or MOP) allows you to replace
+the definition of these features for specific types of object. 
+\item [{lightweight-extensible-syntax}] The syntax of a super-language
+must be extensible and ultimately replaceable. In order to be a power-tool
+for developers, the super-language must allow new language features
+to be added and weaved into the existing language. New language features
+must be able to take full advantage of the execution framework for
+the super-language including accesing context information such as
+local variables etc. Super-languages should support the definition
+of new language features that support standard programming idioms
+and also support the publication of such definitions for others to
+reuse.
+\item [{heavyweight-extensible-syntax}] A super-language should provide
+features that support the definition of complete external languages.
+Such language should support a development method that allows different
+aspects of a system to be represented by DSLs that are accessible
+to external stakeholders and which may also deskill the development
+process. These languages are not necessarily weaved into the main
+super-language, instead they are used externally to the main language
+and loaded on demand.
+\end{description}
+
+\section{The Pros and Cons of Super-Languages}
+
+The benefits of super-languages have been outlined above. They empower
+the developer to be more productive by raising the abstraction level
+of the programming language and inventing standard representations
+for common idioms. This technique has been used in many programming
+languages from the C-preprocessor through to Lisp. New language constructs
+can be standardized and shared.
+
+Super-languages also provide an unprecedented degree of control over
+the language engine via meta-features. Access to meta-features provides
+a way of tailoring a language in a modular way without polluting programs.
+This separation of concerns is very powerful and can be used to support
+a mixed paradigm application on the same language platform without
+compromising the readability or maintainability of the application.
+
+If used to implement multiple heavyweight or external languages within
+the same application, super-languages provide the basis for addressing
+some of the significant concerns raised at the beginning of the chapter
+relating to current implementation technology and the representation
+chasm. This can lead to significant commercial benefits arising from
+the ability to engage more stakeholders will all aspects of an application
+and the ability to control and deskill aspects of the application
+development.
+
+Super-languages are not without their problems. Since they offer advanced
+features they can be used inappropriately and can be challenging for
+the novice programmer. The techniques used to implement super-languages
+are not as mature as those for more conventional languages and therefore
+efficiency and useability issues can be an issue. It is important
+to put these issues in perspective. Super-languages represent a technology
+goal for current generation programming languages to aim for. The
+software industry must embrace super-languages and help to develop
+the technologies and methods since they represent a very significant
+step forward in software application development. Existing mainstream
+languages should strive to adopt super-features and thereby move forward.
+
+
+\section{Related Concepts}
+
+The concept of super-languages is related to several other terms used
+by the software industry. These are:
+
+\begin{description}
+\item [{LOP}] Language Oriented Programming is a term that is used to mean
+the process of defining new programming concepts in order to address
+a given application. A super-language supports LOP although not all
+systems that support LOP need be super-languages. It is not necessary
+to be a programming language in the first place to support LOP - you
+just need to be a system that allows the definition of programming
+languages. It is certainly not necessary to be meta-circular to provide
+LOP.
+\item [{DSL}] Domain Specific Languages is a term that is used to mean
+a language that has been specifically designed to represent concepts
+from an application domain. A super-language supports DSLs, however
+the term DSL can mean languages that do not involve programming in
+any way. The term includes graphical languages, such as profiles in
+UML, that are used to express designs in terms of concepts and relationships.
+\item [{LDD}] Language Driven Development is a method that can be used
+to produce software applications. LDD involves the use of DSLs at
+various points in the development life-cycle. If LDD is used as part
+of the implementation phase of the project then the use of super-languages
+is almost essential.
+\item [{MDA}] Model Driven Architecture is a term used to mean the generation
+of program code from UML models, possibly involving the use of DSLs
+or UML profiles. Super-languages are not specifically required for
+this process (although they may help in the transformation process
+- see QVT).
+\item [{Software-Factories}] Software factories is a term used to mean
+the application of standard industry practices to software development.
+More specifically it has been used to refer to an approach supported
+by Visual Studio to develop languages that support the construction
+of software components. This is similar in many ways to MDA, but is
+not limited to using UML.
+\item [{Language-Workbenches}] The term language workbench was proposed
+by Martin Fowler in http://martinfowler.com/articles/languageWorkbench.html
+to mean the IDE support for language oriented programming. Examples
+of language workbenches include Intentional Software, the Meta programming
+System from JetBrains and the Visual Studio provision for Software
+Factories. A super-language is \emph{not} an IDE. Programming and
+development processes that are based on super-languages do not require
+IDE support. However, given that super-languages are by nature more
+sophisticated than conventional languages, IDE support and language
+workbenches are an important tool.
+\end{description}
+
+\section{Examples of Super-Languages}
+
+The perfect super-language does not exist. Such a language would be
+arbitrarily extensible, as efficient and usable as current languages,
+have IDE support for all aspects of the language and would integrate
+with anything. The perfect super-language is an ideal that should
+motivate current language developers to strive for better features
+that can address the representation chasm.
+
+Languages with super-features do exist and have done so for quite
+a while. Smalltalk and Lisp offer a significant number of super-features
+although both frighten the horses in terms of scary syntax. 
+
+C\# and Java offer a degree of reflection, but offer no support for
+language extension and high-level programming features. It would be
+very interesting to chart out a course of language evolution for these
+languages which incrementally adds super-features.
+
+Languages such as Ruby and Python offer a range of super-features,
+including dynamic typing and meta-features, but are generally fixed
+in their syntax. It is interesting to note that this style of language
+(often referred to as \emph{scripting languages}) are generally popular
+with technology lead programmers. This is a good indicator that languages
+with super-features are likely to find their way into the mainstream.
+
+
+\section{The Super-language XMF}
+
+This book is about a language system called XMF. XMF has been designed
+as a super-language and offers a full range of super-features. XMF
+is not the perfect super-language, but it claims to be the language
+that exhibits more super-features than any other language currently
+available. XMF has been in development since around 2000 and has gone
+through a number of development cycles. Its roots are in the Object
+Management Group initiative to define the UML 2.0 standard when an
+early version of XMF was developed in order to process fragments of
+UML language definition. In case anyone is wondering, this explains
+the terms OCL and XOCL that occur in XMF and also explains some of
+the syntax used in XMF. The relationship between XMF and UML/OCL was
+dropped many moons ago, leaving some of the features that contribute
+to being a super-language and dropping all others.
+
+Since 2003, XMF has been actively developed as a commercial product
+and used by real paying customers as part of a larger product called
+XMF-Mosaic. The Mosaic component was a large library of XMF code (over
+100K lines of XOCL) that implemented diagram tools and property editors
+generated from XMF meta-descriptions. Mosaic allowed XMF to run inside
+Eclipse. At the time, Mosaic was ahead of the game, but since we started
+development on Mosaic, systems like EMF/GMF and Software Factories
+have caught up and overtaken Mosaic in terms of development effort.
+In any case, Mosaic was a sophisticated working example of a fairly
+large XMF application and shook most of the bugs out of the system.
+
+The key super-strengths of XMF:
+
+\begin{itemize}
+\item it is written in itself and therefore it is highly self consistent.
+Since extensibility is part of the language, this makes XMF completely
+extensible.
+\item it provides extensive support for working with syntax, both concrete
+and abstract. XMF is a true LOP engine.
+\item it provides very high-level programming features including pattern
+matching, undoability, daemons, heterogeneous lists.
+\item it implements a MOP and is truly meta-circular. The meta-language
+is called XCore which defines all the data types and behaviour for
+the rest of the system. There is no fudging of meta-classes as occurs
+in some language systems.
+\item it is interactive, dynamic and multi-threaded.
+\item it can be embedded in Java both calling out to Java and being called
+from Java.
+\end{itemize}
+The weaknesses of XMF as a super-language are:
+
+\begin{itemize}
+\item it is not as fast as a mainstream language. For many super-applications
+this will not be a problem.
+\item error handling is adequate, but no special support is provided for
+new languages engineered with XMF.
+\item there is no static typing (although this is planned for the next major
+release).
+\end{itemize}
+
+\section{Guide to Book}
+
+The aim of this book is to introduce you to the super-language XMF.
+This will be done by defining the language, providing some examples of
+applications that can be written directly in the XOCL language that
+comes with XMF, and then by showing how you can use XMF for language
+engineering.
+
+The main focus of this book is on language engineering by example.
+Although we introduce the XOCL language in general terms, we quickly focus
+on the features that make XMF good for writing new languages and then
+give lots of examples.
+
+There are many super-features of XMF that we do not cover. These features include:
+Java interface; daemons; undo. We don't spend very much time on the
+MOP and the meta-interfaces of XMF. 
+
+XMF is open-source technology. You can get a copy of XMF from {\tt www.ceteva.com}.
+Since XMF is written in itself, it is one of the best examples of 
+how to write XMF programs. In addition to the material in this book
+we would encourage you to check out the XMF source code for examples
+of how to write languages and how to program in XMF. 
+
+This book is divided into the following parts:
+
+\begin{description}
+\item [{XOCL}] The XMF programming system consists of a
+language called XOCL that runs on the XMF VM. In order to program
+in the XMF system you will need to learn XOCL. This part includes
+a tutorial on XOCL and the main data that runs on the XMF VM.
+\item [{Programming}] This part of the book describes a number of
+applications written in XOCL. None of the applications involve language
+engineering, just using XOCL to produce a program that runs on XMF.
+\item [{Language-Engineering}] Super-languages allow new language constructs
+and even complete languages to be defined. This part of the book provides
+a number of examples of how you can use XMF to engineer languages.
+\end{description}
+
+\section{References:}
+
+\begin{itemize}
+\item http://www.cse.dmu.ac.uk/\textasciitilde{}mward/martin/papers/middle-out-t.pdf
+\item http://www.onboard.jetbrains.com/articles/04/10/lop/
+\item http://martinfowler.com/articles/languageWorkbench.html
+\item http://www.infoq.com/presentations/domain-specific-languages
+\item http://www.martinfowler.com/
+\end{itemize}

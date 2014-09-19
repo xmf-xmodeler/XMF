@@ -1,0 +1,18 @@
+let table = Stacks::Stack()
+in @Package StateMachines metapackage Root::EMOF::Package
+     @Class State metaclass Root::EMOF::Class  extends Root::StateMachines::Named
+       
+     end
+     @Class Named metaclass Root::EMOF::Class isabstract extends Root::EMOF::Object
+       @Attribute name : Root::EMOF::String end
+     end
+     @Class Transition metaclass Root::EMOF::Class  extends Root::EMOF::Object
+       @Attribute sourceName : Root::EMOF::String end
+       @Attribute targetName : Root::EMOF::String end
+     end
+     @Class StateMachine metaclass Root::EMOF::Class  extends Root::StateMachines::Named
+       @Attribute states : Set(Root::StateMachines::State) end
+       @Attribute transitions : Set(Root::StateMachines::Transition) end
+     end
+   end
+end
