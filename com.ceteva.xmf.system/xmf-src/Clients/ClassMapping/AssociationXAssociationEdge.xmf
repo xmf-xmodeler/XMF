@@ -113,13 +113,13 @@ context ClassMapping
 
     @Operation calcMultLabelString(mult):String
       @TypeCase(mult)
-        Multiplicities::SingleMult do
+        SingleMult do
           if mult.isMandatory
           then "1 <<mandatory>>"
           else ""
           end
         end
-        Multiplicities::CollectionMult do
+        CollectionMult do
           if mult.isOrdered
           then mult.simpleMultString() + " <<ordered>>"
           else mult.simpleMultString()

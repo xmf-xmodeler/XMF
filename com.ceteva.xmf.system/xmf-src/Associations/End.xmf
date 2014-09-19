@@ -47,7 +47,7 @@ context Associations
       
     end
   
-    @Attribute mult        : Multiplicity = One()     end
+    @Attribute mult        : Multiplicity = One() (?) end
     @Attribute association : Element              (!) end
     
     @Constructor(name,type,mult) ! end 
@@ -221,6 +221,12 @@ context Associations
         end
         Ordered() do
           self.type := Seq(self.underlyingType())
+        end
+        Multiplicities::SingleMult(b) do 
+          self.type := self.underlyingType()
+        end
+        Multiplicities::CollectionMust(a,b,c,d) do
+          self.type := Set(self.underlyingType())
         end
       end
     end
