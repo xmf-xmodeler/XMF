@@ -201,7 +201,17 @@ context Attribute
   
 context Attribute
   @Operation setMult(mult)
-    self.setProperty("mult",mult)
+    if mult.isKindOf(String)
+    then self.setMultString(mult)
+    else self.setProperty("mult",mult)
+    end
+  end
+
+context Attribute
+  @Operation setMultString(multString:String)
+    // This needs to be refactored take into account the possibility of nested collection types, e.g. Set(Set(Element))
+    self.setMult(self.decodeMultString(multString));
+    self.updateTypeFromMult()
   end
   
 context Attribute
