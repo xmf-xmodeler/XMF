@@ -172,7 +172,7 @@ context Attribute
 context Attribute
   @Operation mult()
     let m = self.getProperty("mult",null)
-    in if m = null
+    in if m = null or m = ""
        then 
          self.updateMultFromType();
          self.mult()
