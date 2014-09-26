@@ -225,7 +225,7 @@ context Associations
         Multiplicities::SingleMult(b) do 
           self.type := self.underlyingType()
         end
-        Multiplicities::CollectionMust(a,b,c,d) do
+        Multiplicities::CollectionMult(a,b,c,d) do
           self.type := Set(self.underlyingType())
         end
       end

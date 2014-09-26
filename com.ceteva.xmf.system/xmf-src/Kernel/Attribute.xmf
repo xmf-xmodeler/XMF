@@ -181,6 +181,11 @@ context Attribute
     end
   end
   
+context Attribute
+  @Operation multString():String
+    self.mult().multString()
+  end
+  
 context Attribute 
   @Operation repopulate(a:Attribute)
   
@@ -210,8 +215,11 @@ context Attribute
 context Attribute
   @Operation setMultString(multString:String)
     // This needs to be refactored take into account the possibility of nested collection types, e.g. Set(Set(Element))
-    self.setMult(self.decodeMultString(multString));
-    self.updateTypeFromMult()
+    if self.mult().multString() <> multString
+    then 
+      self.setMult(self.decodeMultString(multString));
+      self.updateTypeFromMult()
+    end
   end
   
 context Attribute
