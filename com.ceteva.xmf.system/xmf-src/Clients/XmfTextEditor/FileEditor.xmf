@@ -41,7 +41,7 @@ context XmfTextEditor
                xmfFileType = dir.getFileTypeForFileName("xmf") then
                newFile = xmfFileType(dir,newFileName)
            in
-             if file.fullPath().toLower() <> newFile.fullPath().toLower() andthen
+             if file.fullPath().normalizeFilename() <> newFile.fullPath().normalizeFilename() andthen
                 xmf.fileEditorManager().hasOpenEditorFor(newFile)
              then xmf.warning("There is already an editor open for this file. " +
                               "This editor needs to be closed before saving into the chosen file.")
