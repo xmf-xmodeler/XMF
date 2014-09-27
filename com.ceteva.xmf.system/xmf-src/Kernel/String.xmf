@@ -754,6 +754,15 @@ context String
   end
   
 context String
+  @Operation normalizeFilename():String
+    @Doc
+      Returns a platform-specific internal representation of a filename.
+      (Unimplemented for now, may behave according to a 'platform' configuration parameter.)
+    end
+    self
+  end
+  
+context String
   @Operation toFilePath()
     let path = self.splitBy("/",0,0)
     in

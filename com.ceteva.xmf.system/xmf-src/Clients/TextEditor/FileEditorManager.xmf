@@ -15,12 +15,12 @@ context TextEditor
     end
     
     @Operation changeEditorFile(editor,oldFile,newFile)
-      fileEditorTable.remove(oldFile.fullPath().toLower());
-      fileEditorTable.put(newFile.fullPath().toLower(),editor)
+      fileEditorTable.remove(oldFile.fullPath().normalizeFilename());
+      fileEditorTable.put(newFile.fullPath().normalizeFilename(),editor)
     end
     
     @Operation edit(file:File,editable:Boolean)
-      let filename = file.fullPath().toLower()
+      let filename = file.fullPath().normalizeFilename()
       in
         if filename.fileExists()
         then
@@ -48,7 +48,7 @@ context TextEditor
           if handler <> null then
             let editor = handler(file,name,filename,editable)
             in
-              self.addFileEditor(filename.toLower(),editor);
+              self.addFileEditor(filename.normalizeFilename(),editor);
               client.newTextEditor(editor);
               editor.setText(filename.readFile());
               editor.addListener(self);
@@ -66,7 +66,7 @@ context TextEditor
         newfilename = file.fullPath()
       in
         self.removeFileEditor(editor);
-        self.addFileEditor(newfilename.toLower(),editor);
+        self.addFileEditor(newfilename.normalizeFilename(),editor);
         editor.setName(file.name());
         editor.setTooltip(newfilename)
       end
@@ -102,7 +102,7 @@ context TextEditor
     end
     
     @Operation hasOpenEditorFor(file)
-      fileEditorTable.hasKey(file.fullPath().toLower())
+      fileEditorTable.hasKey(file.fullPath().normalizeFilename())
     end
     
     @Operation noEditorWarning(extension)
@@ -117,7 +117,7 @@ context TextEditor
     end
         
     @Operation showEditorForFile(file:File)
-      let filename = file.fullPath().toLower()
+      let filename = file.fullPath().normalizeFilename()
       in
         if fileEditorTable.hasKey(filename)
         then
