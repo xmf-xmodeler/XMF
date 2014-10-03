@@ -1459,7 +1459,7 @@ context ClassMapping
               @For metaclass in metaclasses do
                 diagram.defineNewHandler(
                   "Meta Elements",
-                  metaclass.name.toString(),
+                  "<<meta>>"+metaclass.name.toString(),
                   false,
                   "XCore/Class.gif",
                   @Operation(x,y) self.newClassNode(x,y,metaclass.pathSeq()) end)
