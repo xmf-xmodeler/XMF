@@ -1,0 +1,80 @@
+parserImport XOCL;
+parserImport XRules;
+
+import IO;
+import XRules;
+
+// A Simple example that shows how rules run over a snapshot.
+
+context Root
+  // Set up a simple model. We can use this to deduce 
+  // relationships between people...
+  
+  @Package ExampleModel
+    @Class Person
+      @Attribute name : String end
+      @Attribute parents : Seq(Person) end
+      @Attribute children : Seq(Person) end
+      @Constructor (name) ! end
+    end
+  end
+
+context Root
+  // Create a snapshot of the model.
+  @Bind x =
+    @Snapshot S(ExampleModel)
+      p1 = ExampleModel::Person[
+        name="p1";
+        parents=Seq{};
+        children=Seq{p2,p3}
+      ]
+      p2 = ExampleModel::Person[
+        name="p2";
+        parents=Seq{p1};
+        children=Seq{p4}
+      ]
+      p3 = ExampleModel::Person[
+        name="p3";
+        parents=Seq{p1};
+        children=Seq{p5}
+      ]
+      p4 = ExampleModel::Person[
+        name="p4";
+        parents=Seq{p2}
+      ]
+      p5 = ExampleModel::Person[
+        name="p5";
+        parents=Seq{p3}
+      ]
+    end
+  end
+
+context Root
+ // Define some rules that deduce a relationship on the model.
+ // The relationship cousin holds between two people when
+ // any of their parents are siblings...
+ @Rules Model import ExampleModel
+   @Rule Cousin(Person[parents=P],Person[parents=Q])
+     AnySiblings(P,Q)
+   end
+   @Rule AnySiblings(Seq{p | P},Q)
+     AnySiblingOf(p,Q)
+   end
+   @Rule AnySiblings(Seq{p | P},Q)
+     AnySiblings(P,Q)
+   end
+   @Rule AnySiblingOf(Person[parents=P],Seq{Person[parents=P] | Q})
+   end
+   @Rule AnySiblingOf(p,Seq{q | Q})
+     AnySiblingOf(p,Q)
+   end
+  end
+
+context Root
+  @Operation cousin(p,q)
+    // Supply two people to deduce whether they are cousins.
+    @WithRules(Model)
+      Cousin(<p>,<q>)
+      return true
+    end
+  end
