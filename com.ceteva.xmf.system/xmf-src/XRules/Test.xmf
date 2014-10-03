@@ -481,11 +481,11 @@ context Test
     succ(env,fail)
   end
   
-context Test
-  @Coerce Seq_x_String
-     S1:Seq(Element) = S2.asSeq()
-     S2:String = S1.asString()
-  end
+//context Test
+//  @Coerce Seq_x_String
+//     S1:Seq(Element) = S2.asSeq()
+//     S2:String = S1.asString()
+//  end
   
 context Test
   @Rule TryBuiltin(Sequence,String)

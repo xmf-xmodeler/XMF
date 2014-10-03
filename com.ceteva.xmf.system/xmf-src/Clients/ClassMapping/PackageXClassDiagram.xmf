@@ -1444,6 +1444,29 @@ context ClassMapping
              end
            end
          end;
+
+         // If the package is a meta-package then we want to allow instances of
+         // the meta-classes to be created on the diagam...
+
+         if package.isMetaPackage()
+         then 
+           let parents = package.allParents() then
+               contents = parents->iterate(p O=Set{} | O + p.contents()) then
+               classes = contents->select(o | o <> null and o.isKindOf(Class)) then
+               classes = classes->including(Class) then 
+               metaclasses = classes->select(c | c.isMetaClass())
+           in diagram.defineToolGroup("Meta Elements");
+              @For metaclass in metaclasses do
+                diagram.defineNewHandler(
+                  "Meta Elements",
+                  metaclass.name.toString(),
+                  false,
+                  "XCore/Class.gif",
+                  @Operation(x,y) self.newClassNode(x,y,metaclass.pathSeq()) end)
+              end
+           end
+         end;
+         
      
          // If there are any sub-classes of the standard model elements for a class
          // diagram then we need a stereotypes node group to create them...

@@ -252,6 +252,11 @@ context Class
     self.attributes->iterate(a ignore = null | a.init());
     super()
   end
+  
+context Class
+  @Operation isMetaClass():Boolean
+    self.inheritsFrom(Class)
+  end
 
 context Class
   @Operation new():Object
