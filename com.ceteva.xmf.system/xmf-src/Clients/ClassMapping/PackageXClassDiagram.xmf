@@ -1453,16 +1453,25 @@ context ClassMapping
            let parents = package.allParents() then
                contents = parents->iterate(p O=Set{} | O + p.contents()) then
                classes = contents->select(o | o <> null and o.isKindOf(Class)) then
-               classes = classes->including(Class) then 
-               metaclasses = classes->select(c | c.isMetaClass())
+               classes = classes->including(Class)->excluding(Package) then 
+               metaclasses = classes->select(c | c.isMetaClass());
+               thePackage = package
            in diagram.defineToolGroup("Meta Elements");
               @For metaclass in metaclasses do
                 diagram.defineNewHandler(
                   "Meta Elements",
-                  "<<meta>>"+metaclass.name.toString(),
+                  "["+metaclass.name.toString()+"]",
                   false,
                   "XCore/Class.gif",
-                  @Operation(x,y) self.newClassNode(x,y,metaclass.pathSeq()) end)
+                  @Operation(x,y) 
+                    // Create a new instance of the meta-class and make it inherit 
+                    // from Class (actually this should be selectable). Then get
+                    // the node and move it...
+                    let class = metaclass(thePackage.newName(metaclass.name.toString()))
+                    in class.addParent(Class);
+                       thePackage.add(class)
+                    end
+                  end)
               end
            end
          end;
