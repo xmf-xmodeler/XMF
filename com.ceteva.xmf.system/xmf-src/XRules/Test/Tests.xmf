@@ -68,6 +68,14 @@ context Root
   end
   
 context Root
+  @Operation test4a()
+    @WithRules(Test)
+      SerializePackage(<XML>,data)
+      return data
+    end
+  end
+  
+context Root
   @Operation test5()
     @WithRules(Test)
       SerializePackage(P,Seq{
