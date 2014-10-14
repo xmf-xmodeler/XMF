@@ -7,7 +7,7 @@ To compile all .xmf files, do the following ONCE:
 - Right-click the top-most Manifest.xmf -> Manifest / Build
 
 - Refresh the project com.ceteva.xmf.system in Eclipse (select and hit F5) to
-see the newly created .o files. They will be local files not be part of the
+see the newly created .o files. They will be local files and not part of the
 repository due to the .gitignore configuration.   
 
 - To build new system images in xmf-img/, invoke "bin/makexmf ." and 
