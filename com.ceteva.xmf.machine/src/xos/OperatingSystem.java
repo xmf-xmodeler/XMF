@@ -293,8 +293,7 @@ public final class OperatingSystem implements EventHandler {
     Client client = client(name);
     if (client instanceof StreamClient && client != null)
       return (StreamClient) client;
-    else
-      return null;
+    else return null;
 
   }
 
@@ -307,8 +306,7 @@ public final class OperatingSystem implements EventHandler {
     XInputStream in = inputChannel(channelIndex);
     int available = -1;
     try {
-      if (in != null)
-        available = in.available();
+      if (in != null) available = in.available();
     } catch (IOException ioe) {
       System.out.println(ioe);
       System.exit(0);
@@ -349,8 +347,7 @@ public final class OperatingSystem implements EventHandler {
     MessageClient client = messageClient(name);
     if (client != null)
       return client.call(message);
-    else
-      throw new Error("Unknown client " + name);
+    else throw new Error("Unknown client " + name);
   }
 
   public int charCount(int index) {
@@ -368,11 +365,9 @@ public final class OperatingSystem implements EventHandler {
       if (client.name.length() == name.length()) {
         boolean match = true;
         for (int j = 0; j < name.length() && match; j++) {
-          if (client.name.charAt(j) != name.charAt(j))
-            match = false;
+          if (client.name.charAt(j) != name.charAt(j)) match = false;
         }
-        if (match)
-          return client;
+        if (match) return client;
       }
     }
     return null;
@@ -385,8 +380,7 @@ public final class OperatingSystem implements EventHandler {
 
     for (int i = 0; i < clients.size(); i++) {
       Client client = (Client) clients.elementAt(i);
-      if (client.name.equals(name))
-        return client;
+      if (client.name.equals(name)) return client;
     }
     return null;
   }
@@ -398,8 +392,7 @@ public final class OperatingSystem implements EventHandler {
     String[] strings = clientSpec.split(":");
     if (strings.length < 1)
       throw new Error("A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> " + clientSpec);
-    else
-      return strings[0];
+    else return strings[0];
   }
 
   public String clientSpecClientName(String clientSpec) {
@@ -409,8 +402,7 @@ public final class OperatingSystem implements EventHandler {
     String[] strings = clientSpec.split(":");
     if (strings.length < 2)
       throw new Error("A client spec should take the form <CLASS>:<CLIENT>:<OPTARGS> " + clientSpec);
-    else
-      return strings[1];
+    else return strings[1];
   }
 
   public String[] clientSpecClientArgs(String clientSpec) {
@@ -450,8 +442,7 @@ public final class OperatingSystem implements EventHandler {
         e.printStackTrace(System.err);
       }
     }
-    if (connectionMonitor != null)
-      connectionMonitor.close();
+    if (connectionMonitor != null) connectionMonitor.close();
   }
 
   public void closeInputChannel(int index) {
@@ -463,8 +454,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal input channel index: " + index);
+    else throw new Error("Illegal input channel index: " + index);
   }
 
   public void closeOutputChannel(int index) {
@@ -475,8 +465,7 @@ public final class OperatingSystem implements EventHandler {
       } catch (IOException ioe) {
         System.out.println(ioe);
       }
-    else
-      throw new Error("Illegal output channel index: " + index);
+    else throw new Error("Illegal output channel index: " + index);
   }
 
   public void createNewMessageClient(String className, String clientName) {
@@ -517,8 +506,7 @@ public final class OperatingSystem implements EventHandler {
     InputStream in = inputChannel(index);
     if (in instanceof DChannel)
       return (DChannel) in;
-    else
-      return null;
+    else return null;
   }
 
   public DataOutputStream dataOutputStream(int index) {
@@ -529,8 +517,7 @@ public final class OperatingSystem implements EventHandler {
     OutputStream out = outputChannel(index);
     if (out instanceof DataOutputStream)
       return (DataOutputStream) out;
-    else
-      return null;
+    else return null;
   }
 
   public void debug(String message) {
@@ -588,9 +575,8 @@ public final class OperatingSystem implements EventHandler {
 
     // Called when we can free up a value for future use...
 
-    if (value.type == XData.VECTOR)
-      for (int i = 0; i < value.values.length; i++)
-        freeValue(value.values[i]);
+    if (value.type == XData.VECTOR) for (int i = 0; i < value.values.length; i++)
+      freeValue(value.values[i]);
     valuePool.push(value);
   }
 
@@ -619,31 +605,16 @@ public final class OperatingSystem implements EventHandler {
     initXVM(args);
     if (XVM.checkoutLicense())
       run();
-    else
-      System.exit(0);
+    else System.exit(0);
   }
 
   public void init() {
-    String[] ini = null;
-    ini = getIni();
-    parseArgs(ini);
-    System.out.println("[ Starting XOS ]");
-    parseXOSargs();
-    initStandardChannels();
-    initConnectionMonitor(port);
-    initInternalClients();
-    initMessageClients();
-    initXVM(ini);
-    System.out.println("[ Running XOS ]");
-    if (XVM.checkoutLicense())
-      run();
-    else
-      System.exit(0);
+    init(getInitArgs("ini.txt"));
   }
 
-  private String[] getIni() {
+  public String[] getInitArgs(String initFile) {
     ArrayList<String> ini = new ArrayList<String>();
-    File file = new File("ini.txt");
+    File file = new File(initFile);
 
     StringBuilder contents = new StringBuilder();
     BufferedReader reader = null;
@@ -762,22 +733,19 @@ public final class OperatingSystem implements EventHandler {
       initMessageClient(className, clientName, args);
     }
 
-    if (!waitingMessageClients.isEmpty())
-      try {
-        wait();
-      } catch (InterruptedException e) {
-        System.out.println(e);
-      }
+    if (!waitingMessageClients.isEmpty()) try {
+      wait();
+    } catch (InterruptedException e) {
+      System.out.println(e);
+    }
   }
 
   public void initMessageClient(String className, String clientName, String[] args) {
     if (args.length == 0 || args[0].equals("create"))
       createNewMessageClient(className, clientName);
     else if (args[0].equals("wait")) {
-      if (client(clientName) == null)
-        waitForMessageClient(className, clientName);
-    } else
-      throw new Error("Illegal argument supplied to message client: " + args[0]);
+      if (client(clientName) == null) waitForMessageClient(className, clientName);
+    } else throw new Error("Illegal argument supplied to message client: " + args[0]);
   }
 
   public void initStandardChannels() {
@@ -805,8 +773,7 @@ public final class OperatingSystem implements EventHandler {
 
     if (index >= 0 && index < inputChannels.size())
       return (XInputStream) inputChannels.elementAt(index);
-    else
-      return null;
+    else return null;
   }
 
   public int inputChannel(String name) {
@@ -818,8 +785,7 @@ public final class OperatingSystem implements EventHandler {
     StreamClient client = asyncClient(name);
     if (client != null)
       return inputIndex(client.in());
-    else
-      return -1;
+    else return -1;
   }
 
   public int inputIndex(XInputStream in) {
@@ -875,16 +841,14 @@ public final class OperatingSystem implements EventHandler {
     Client client = client(name);
     if (client instanceof MessageClient && client != null)
       return (MessageClient) client;
-    else
-      return null;
+    else return null;
   }
 
   public MessageClient messageClient(StringBuffer name) {
     Client client = client(name);
     if (client instanceof MessageClient && client != null)
       return (MessageClient) client;
-    else
-      return null;
+    else return null;
   }
 
   public int newDataInputChannel(int index) {
@@ -896,8 +860,7 @@ public final class OperatingSystem implements EventHandler {
     if (in != null) {
       DChannel din = new DChannel(in);
       return newInputChannel(din);
-    } else
-      return -1;
+    } else return -1;
   }
 
   public int newDataOutputChannel(int index) {
@@ -909,8 +872,7 @@ public final class OperatingSystem implements EventHandler {
     if (out != null) {
       DataOutputStream dout = new DataOutputStream(out);
       return newOutputChannel(dout);
-    } else
-      return -1;
+    } else return -1;
 
   }
 
@@ -996,8 +958,7 @@ public final class OperatingSystem implements EventHandler {
         GZIPInputStream gin = new GZIPInputStream(in);
         XChannel xgin = new XChannel(gin, true);
         return newInputChannel(xgin);
-      } else
-        return -1;
+      } else return -1;
     } catch (IOException ioe) {
       System.out.println(ioe);
       return -1;
@@ -1015,8 +976,7 @@ public final class OperatingSystem implements EventHandler {
       if (out != null) {
         GZIPOutputStream gout = new GZIPOutputStream(out);
         return newOutputChannel(gout);
-      } else
-        return -1;
+      } else return -1;
     } catch (IOException ioe) {
       System.out.println(ioe);
       return -1;
@@ -1043,18 +1003,17 @@ public final class OperatingSystem implements EventHandler {
     // consumes data from 'out'.
 
     boolean newClient = false;
-    if (client(name) == null)
-      try {
-        debug("Registering new internal client " + name);
-        StreamClient client = new InternalClient(this, name, in, out);
-        clients.addElement(client);
-        newInputChannel(client.in());
-        newOutputChannel(client.out());
-        newClient = true;
-      } catch (IOException ioe) {
-        System.out.println(ioe);
-        System.exit(0);
-      }
+    if (client(name) == null) try {
+      debug("Registering new internal client " + name);
+      StreamClient client = new InternalClient(this, name, in, out);
+      clients.addElement(client);
+      newInputChannel(client.in());
+      newOutputChannel(client.out());
+      newClient = true;
+    } catch (IOException ioe) {
+      System.out.println(ioe);
+      System.exit(0);
+    }
     return newClient;
   }
 
@@ -1070,8 +1029,7 @@ public final class OperatingSystem implements EventHandler {
       clients.addElement(new MessageClient(this, name, handler));
       removeWaitingMessageClient(name);
       return true;
-    } else
-      return false;
+    } else return false;
   }
 
   public int newOutputChannel(OutputStream out) {
@@ -1121,8 +1079,7 @@ public final class OperatingSystem implements EventHandler {
     if (in != null) {
       TChannel tin = new TChannel(in);
       return newTokenChannel(tin);
-    } else
-      return -1;
+    } else return -1;
   }
 
   public int newSAXInputChannel(int index) {
@@ -1140,8 +1097,7 @@ public final class OperatingSystem implements EventHandler {
         XMLReader reader = new XMLReader(xmlSource, out);
         reader.startProcess();
         return newInputChannel(in);
-      } else
-        return -1;
+      } else return -1;
     } catch (IOException ioe) {
       System.out.println(ioe);
       return -1;
@@ -1166,14 +1122,11 @@ public final class OperatingSystem implements EventHandler {
         // can be null
 
         String hostString = host;
-        if (hostString == null && address != null)
-          address.getHostName();
-        if (hostString == null)
-          hostString = "";
+        if (hostString == null && address != null) address.getHostName();
+        if (hostString == null) hostString = "";
 
         String promptString = prompt;
-        if (prompt == null)
-          promptString = "";
+        if (prompt == null) promptString = "";
 
         // Get data from user password dialog...
         try {
@@ -1183,10 +1136,8 @@ public final class OperatingSystem implements EventHandler {
             UserPassword auth = (UserPassword) valueData[0];
             if (auth != null)
               return new PasswordAuthentication(auth.getUser(), auth.getPassword().toCharArray());
-            else
-              return null;
-          } else
-            return null;
+            else return null;
+          } else return null;
         } catch (XmfIOException bioe) {
           System.out.println(bioe);
           return null;
@@ -1225,8 +1176,7 @@ public final class OperatingSystem implements EventHandler {
     if (out != null) {
       ZipOutputStream gout = new ZipOutputStream(out);
       return newOutputChannel(gout);
-    } else
-      return -1;
+    } else return -1;
   }
 
   public int nextToken(int index) {
@@ -1243,8 +1193,7 @@ public final class OperatingSystem implements EventHandler {
       in.nextToken();
       debug("NextToken(" + index + ") returned token = '" + in.token() + "' rawChars = '" + in.rawChars() + "'");
       return 0;
-    } else
-      return -1;
+    } else return -1;
   }
 
   public OutputStream outputChannel(int index) {
@@ -1254,8 +1203,7 @@ public final class OperatingSystem implements EventHandler {
 
     if (index >= 0 && index < outputChannels.size())
       return (OutputStream) outputChannels.elementAt(index);
-    else
-      return null;
+    else return null;
   }
 
   public int outputChannel(String name) {
@@ -1267,8 +1215,7 @@ public final class OperatingSystem implements EventHandler {
     StreamClient client = asyncClient(name);
     if (client != null)
       return outputIndex(client.out());
-    else
-      return -1;
+    else return -1;
   }
 
   public int outputIndex(OutputStream out) {
@@ -1302,8 +1249,7 @@ public final class OperatingSystem implements EventHandler {
         eclipse = true;
       else if (arg.equals("-workspace"))
         fileResolver = new WorkspaceResolver(XOSargs[index++]);
-      else
-        index++;
+      else index++;
     }
   }
 
@@ -1316,8 +1262,7 @@ public final class OperatingSystem implements EventHandler {
     XInputStream in = inputChannel(index);
     if (in != null)
       return in.peek();
-    else
-      throw new Error("Illegal input channel index: " + index);
+    else throw new Error("Illegal input channel index: " + index);
   }
 
   public int posValue(int index) {
@@ -1390,8 +1335,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.rawChars();
-    else
-      return null;
+    else return null;
   }
 
   public int read(int index) {
@@ -1415,8 +1359,7 @@ public final class OperatingSystem implements EventHandler {
     MessageClient client = messageClient(name);
     if (client != null)
       return client.readMessage();
-    else
-      return null;
+    else return null;
   }
 
   public boolean ready(int index) {
@@ -1427,8 +1370,7 @@ public final class OperatingSystem implements EventHandler {
     XInputStream in = inputChannel(index);
     if (in != null) {
       return in.ready();
-    } else
-      throw new Error("XOS.ready: illegal index: " + index);
+    } else throw new Error("XOS.ready: illegal index: " + index);
   }
 
   public boolean ready(String name) {
@@ -1439,8 +1381,7 @@ public final class OperatingSystem implements EventHandler {
     Client client = client(name);
     if (client != null)
       return client.ready();
-    else
-      return false;
+    else return false;
   }
 
   public String readExternalClientName(InputStream in) {
@@ -1488,8 +1429,7 @@ public final class OperatingSystem implements EventHandler {
 
     if (!waitingMessageClients.isEmpty()) {
       waitingMessageClients.remove(name);
-      if (waitingMessageClients.isEmpty())
-        notifyAll();
+      if (waitingMessageClients.isEmpty()) notifyAll();
     }
   }
 
@@ -1506,10 +1446,8 @@ public final class OperatingSystem implements EventHandler {
     String client = thread.client();
     if (inch != -1) {
       XInputStream in = inputChannel(thread.inputChannel());
-      if (in != null)
-        startInputMonitor(in, thread);
-    } else
-      startMessageMonitor(client, thread);
+      if (in != null) startInputMonitor(in, thread);
+    } else startMessageMonitor(client, thread);
   }
 
   public synchronized void rescheduleThread(Thread thread) {
@@ -1562,8 +1500,7 @@ public final class OperatingSystem implements EventHandler {
       while (!XVM.terminated()) {
         printDebugState();
         waitForMonitor();
-        if (!scheduledThreads.isEmpty())
-          runReadyThread();
+        if (!scheduledThreads.isEmpty()) runReadyThread();
       }
       debug("XVM has terminated normally.");
     } catch (Throwable t) {
@@ -1604,8 +1541,7 @@ public final class OperatingSystem implements EventHandler {
     if (XVM.terminatedThread()) {
       debug("Killing " + XVM.currentThread());
       XVM.killCurrentThread();
-    } else
-      rescheduleThread(XVM.currentThread());
+    } else rescheduleThread(XVM.currentThread());
   }
 
   public synchronized void setFileResolver(FileResolver fileResolver) {
@@ -1657,15 +1593,13 @@ public final class OperatingSystem implements EventHandler {
     StreamMonitor monitor = null;
     for (int i = 0; i < inputMonitors.size() && monitor == null; i++) {
       StreamMonitor m = (StreamMonitor) inputMonitors.elementAt(i);
-      if (m.in() == in)
-        monitor = m;
+      if (m.in() == in) monitor = m;
     }
     if (monitor == null) {
       monitor = new StreamMonitor(in, thread, this);
       addInputMonitor(monitor);
       monitor.start();
-    } else
-      monitor.setThread(thread);
+    } else monitor.setThread(thread);
   }
 
   public void startMessageMonitor(MessageClient client, Thread thread) {
@@ -1677,23 +1611,20 @@ public final class OperatingSystem implements EventHandler {
     MessageMonitor monitor = null;
     for (int i = 0; i < messageMonitors.size() && monitor == null; i++) {
       MessageMonitor m = (MessageMonitor) messageMonitors.elementAt(i);
-      if (m.client() == client)
-        monitor = m;
+      if (m.client() == client) monitor = m;
     }
     if (monitor == null) {
       monitor = new MessageMonitor(client, thread, this);
       addMessageMonitor(monitor);
       monitor.start();
-    } else
-      monitor.setThread(thread);
+    } else monitor.setThread(thread);
   }
 
   public void startMessageMonitor(String name, Thread thread) {
     MessageClient client = messageClient(name);
     if (client != null)
       startMessageMonitor(client, thread);
-    else
-      throw new Error("Cannot find message client for " + name);
+    else throw new Error("Cannot find message client for " + name);
   }
 
   public void startString(int index, int length) {
@@ -1709,8 +1640,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal index for data output stream: " + index);
+    else throw new Error("Illegal index for data output stream: " + index);
   }
 
   public String textTo(int index, int position) {
@@ -1721,8 +1651,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.textTo(position);
-    else
-      return null;
+    else return null;
   }
 
   public boolean threadReady(Thread thread) {
@@ -1750,8 +1679,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.token();
-    else
-      return null;
+    else return null;
   }
 
   public TChannel tokenInputChannel(int index) {
@@ -1773,10 +1701,8 @@ public final class OperatingSystem implements EventHandler {
       Object in = inputChannels.elementAt(index);
       if (in instanceof TChannel)
         return (TChannel) in;
-      else
-        return null;
-    } else
-      return null;
+      else return null;
+    } else return null;
   }
 
   public boolean tokenError(int index) {
@@ -1787,8 +1713,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.error();
-    else
-      return true;
+    else return true;
   }
 
   public String tokenErrorMessage(int index) {
@@ -1799,8 +1724,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.errorMessage();
-    else
-      return null;
+    else return null;
   }
 
   public int tokenType(int index) {
@@ -1811,8 +1735,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.type();
-    else
-      return -1;
+    else return -1;
   }
 
   public int tokenValue(int index) {
@@ -1822,8 +1745,7 @@ public final class OperatingSystem implements EventHandler {
     TChannel in = tokenInputChannel(index);
     if (in != null)
       return in.value();
-    else
-      return -1;
+    else return -1;
   }
 
   public static void usage() {
@@ -1864,14 +1786,12 @@ public final class OperatingSystem implements EventHandler {
       try {
         // debug("XOS.write('" + (char) c + "') on " + out);
         out.write(c);
-        if (c == '\n')
-          out.flush();
+        if (c == '\n') out.flush();
         // debug("XOS.written('" + (char) c + "')");
       } catch (IOException ioe) {
         System.out.println(ioe);
       }
-    else
-      throw new Error("Illegal output channel index " + index);
+    else throw new Error("Illegal output channel index " + index);
   }
 
   public void writeBool(int index, boolean b) {
@@ -1886,8 +1806,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal data output channel index " + index);
+    else throw new Error("Illegal data output channel index " + index);
   }
 
   public void writeByte(int index, int b) {
@@ -1902,8 +1821,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal data output channel index " + index);
+    else throw new Error("Illegal data output channel index " + index);
   }
 
   public void writeInt(int index, int i) {
@@ -1918,8 +1836,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal data output channel index " + index);
+    else throw new Error("Illegal data output channel index " + index);
   }
 
   public void writeFloat(int index, float f) {
@@ -1934,16 +1851,14 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal data output channel index " + index);
+    else throw new Error("Illegal data output channel index " + index);
   }
 
   public void writeMessage(String name, Message message) {
     MessageClient client = messageClient(name);
     if (client != null)
       client.sendMessage(message);
-    else
-      throw new Error("Unknown client " + name);
+    else throw new Error("Unknown client " + name);
   }
 
   public void writeString(int index, String s) {
@@ -1958,8 +1873,7 @@ public final class OperatingSystem implements EventHandler {
         System.out.println(ioe);
         System.exit(0);
       }
-    else
-      throw new Error("Illegal data output channel index " + index);
+    else throw new Error("Illegal data output channel index " + index);
   }
 
   protected UserPassword getUserPassword() {
