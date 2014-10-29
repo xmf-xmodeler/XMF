@@ -588,7 +588,7 @@ public final class OperatingSystem implements EventHandler {
     Thread thread = XVM.currentThread();
     do {
       if (thread.state() == Thread.BLOCK_READ) {
-        // Create an imput monitor for the thread....
+        // Create an input monitor for the thread....
         rescheduleBlockRead(thread);
       }
       thread = thread.next();
@@ -1290,7 +1290,7 @@ public final class OperatingSystem implements EventHandler {
 
       // The block might be on a message client or a stream client...
 
-      if (thread.inputChannel() == -1)
+      if (thread.inputChannel() == -1 || (thread.client() != null && !thread.client().equals("")))
         XVM.readMessageClient(thread.client());
       else {
         int index = thread.inputChannel();
@@ -1444,7 +1444,8 @@ public final class OperatingSystem implements EventHandler {
   public void rescheduleBlockRead(Thread thread) {
     int inch = thread.inputChannel();
     String client = thread.client();
-    if (inch != -1) {
+    debug("Reschedule Block Read for " + thread + " for client " + client + " with channel " + inch);
+    if (inch != -1 && (client == null || client.equals(""))) {
       XInputStream in = inputChannel(thread.inputChannel());
       if (in != null) startInputMonitor(in, thread);
     } else startMessageMonitor(client, thread);
@@ -1599,7 +1600,9 @@ public final class OperatingSystem implements EventHandler {
       monitor = new StreamMonitor(in, thread, this);
       addInputMonitor(monitor);
       monitor.start();
-    } else monitor.setThread(thread);
+    } else {
+      monitor.setThread(thread);
+    }
   }
 
   public void startMessageMonitor(MessageClient client, Thread thread) {

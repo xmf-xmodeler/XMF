@@ -10,15 +10,26 @@ context Mosaic
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
         "shutdownRequest" do self.shutdown() end
+        "shutDownAndSave" do self.shutDownAndSave(parameters) end
       end
     end
     
     @Operation shutdown()
       self.debug("shutdown",Seq{});
       if xmf.question("Are you sure you want to quit? All unsaved changes will be lost.")
-      then
-        xmf.saveXModelerState();
-        self.owner().commandInterpreter().shutdown()
+      then self.owner().commandInterpreter().shutdown()
+      end
+    end
+    
+    @Operation shutDownAndSave(parameters)
+      self.debug("shutDownAndSave",parameters);
+      let imagePath = parameters.at(0);
+          inflationPath = parameters.at(1)
+      in self.owner().commandInterpreter().saveInflater(inflationPath);
+         if xmf.saveImage(imagePath)
+         then self.shutdown()
+         else self.owner().commandInterpreter().inflate(inflationPath)
+         end
       end
     end
     

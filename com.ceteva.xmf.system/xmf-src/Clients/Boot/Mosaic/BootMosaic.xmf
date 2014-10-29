@@ -30,37 +30,35 @@ context XMF
 
 context XMF
   @Operation saveImage()
-    let file = xmf.saveFile(xmf.imageDir(),"*.img")
-    in
-      if file <> ""
-      then 
-        if @Busy("Saving Image") saveMachineState(file) end <> true
-        then
-          let input = Kernel_clientInputChannel("com.ceteva.console");
-              output = Kernel_clientOutputChannel("com.ceteva.console");
-              grammar = xmf.topLevel().grammar
-          in
-            Root::stdin.setChannel(input);
-            Root::stdout.setChannel(output);
-            Kernel_rebindStdin(input);
-            Kernel_rebindStdout(output);
-            xmf.menuManager().reset();
+    xmf.saveImage(xmf.imageDir(),"*.img")
+  end
+  
+context XMF
+  @Operation saveImage(path):Boolean
+    if @Busy("Saving Image") saveMachineState(path) end <> true
+    then
+      let input = Kernel_clientInputChannel("com.ceteva.console");
+          output = Kernel_clientOutputChannel("com.ceteva.console");
+          grammar = xmf.topLevel().grammar
+      in Root::stdin.setChannel(input);
+         Root::stdout.setChannel(output);
+         Kernel_rebindStdin(input);
+         Kernel_rebindStdout(output);
+         xmf.menuManager().reset();
             
-            (xmf.homeDir() + "/Boot/Mosaic/ToolInterface.o").loadBin(false);
+         // Why do we need to do this?
+         // (xmf.homeDir() + "/Boot/Mosaic/ToolInterface.o").loadBin(false);
             
-            @For client in xmf.getAllClients() do
-              client.renew()
-            end;
-            @Fork xmf.topLevel().loop() end
-            // xmf.thread().kill()
-            // When loading a saved system image, the old top level (console) thread
-            // needs to be killed - this needs to be explicitly referred to, just
-            // calling xmf.thread().kill() is Russian roulette!
-          end
-        else
-          xmf.message("Image saved successfully")
-        end
+         // the following should be done through reinflation...
+         // @For client in xmf.getAllClients() do
+         //   client.renew()
+         // end;
+         // The following is expected to override the current thread
+         // defined for Console...
+         @Fork(Console) xmf.topLevel().loop() end;
+         false
       end
+    else true
     end
   end
 

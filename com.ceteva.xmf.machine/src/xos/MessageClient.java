@@ -19,7 +19,6 @@ public class MessageClient extends Client {
     try {
       value = handler.callMessage(message);
     } catch (RuntimeException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return value;
@@ -42,8 +41,7 @@ public class MessageClient extends Client {
   public Message readMessage() {
     if (messages.isEmpty())
       return null;
-    else
-      return messages.next();
+    else return messages.next();
   }
 
   public synchronized boolean ready() {

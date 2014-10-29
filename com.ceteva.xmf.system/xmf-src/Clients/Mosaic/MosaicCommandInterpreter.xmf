@@ -43,6 +43,24 @@ context Mosaic
       end
     end
   
+    @Operation inflate(inflationPath)
+      @SendCommand(self)
+        inflate(inflationPath)
+      end
+    end
+  
+    @Operation saveInflater(inflationPath)
+      @SendCommand(self)
+        saveInflater(inflationPath)
+      end
+    end
+  
+    @Operation inflate(inflationPath)
+      @SendCommand(self)
+        inflate(inflationPath)
+      end
+    end
+  
     @Operation shutdown()
       @SendCommand(self)
         shutdown()
