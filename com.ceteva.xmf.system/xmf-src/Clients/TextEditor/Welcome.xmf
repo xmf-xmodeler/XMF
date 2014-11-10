@@ -1,0 +1,88 @@
+parserImport XOCL;
+
+import Clients;
+import TextEditor;
+import IO;
+import Menus;
+
+context TextEditor
+
+  @Class Welcome extends HTMLViewer
+  
+    @Operation requestDoc()
+      let doc = xmf.choose("Documentation","Select Documentation",Seq{"Applied Metamodelling","Superlanguages"})
+      in @Case doc of
+           Seq{"Applied Metamodelling"} do 
+             xmf.browse(xmf.docDir()+"/xmf-books/AppliedMetamodelling/book.pdf")
+           end
+           Seq{"Superlanguages"} do
+             xmf.browse(xmf.docDir()+"/xmf-books/Superlanguages/book.pdf") 
+           end
+         end
+      end
+    end
+
+    @Operation requestURL(url)
+      let path = self.getPath(url)
+      in if path.hasSuffix("xmodeler_search")
+         then 
+           let pattern = self.lookupQueryArg("pattern",url,"");
+               type = self.lookupQueryArg("type",url,"Web")
+           in self.search(pattern,type)
+           end
+         elseif path.hasSuffix("xmodeler_doc")
+         then self.requestDoc()
+         else super(url)
+         end
+      end
+    end
+
+    @Operation search(pattern:String,type:String)
+      @Case type of
+        "Web" do
+          self.searchWeb(pattern)
+        end
+        "Projects" do
+          self.searchProjects(pattern)
+        end
+        "System" do
+          self.searchSystem(pattern)
+        end
+        else ("unknown type of search: " + type).println()
+      end
+    end
+    
+    @Operation searchProjects(pattern:String)
+      let dir = Directory(xmf.projDir(),Seq{".*xmf"})
+      in dir.build(0);
+         self.search(pattern,dir)
+      end
+    end
+    
+    @Operation searchSystem(pattern:String)
+      let dir = Directory(xmf.homeDir(),Seq{".*xmf"})
+      in dir.build(0);
+         self.search(pattern,dir)
+      end
+    end
+    
+    @Operation search(pattern:String,dir:Directory)
+      Root::dir := dir;
+      let dialog = xmf.busy("Searching") then
+          position = dir.search(pattern)
+      in if position <> null
+         then 
+           Clients::XmfFileTree::mapResourcePosition(position).edit(pattern);
+           dialog.finished()
+         else 
+           dialog.finished();
+           xmf.message("No results found for \"" + pattern + "\"")
+        end
+      end
+    end
+
+    @Operation searchWeb(query:String)
+      self.requestURL("http://www.google.com/search?as_q="+query)
+    end
+
+  end
