@@ -28,6 +28,26 @@ context TextEditor
       self.commandInterpreter().delete(self)
     end
     
+    @Operation getPath(url:String):String
+      self.URL(url).getPath()
+    end
+    
+    @Operation getQuery(url:String):String
+      let query = self.URL(url).getQuery()
+      in if query = null
+         then ""
+         else query
+         end
+      end
+    end
+    
+    @Operation getQueryArgs(url:String):String
+      let query = self.getQuery(url) then
+          split = query.splitBy("&",0,0)
+      in split->collect(bind | bind.splitBy("=",0,0))
+      end
+    end
+    
     @Operation loadBinary(url:String)
       // The selected URL claims to point to a binary
       // file. Try to load it.
@@ -168,6 +188,18 @@ context TextEditor
          xmf.message("Loaded XTO at " + url)
       end
     end
+
+    @Operation lookupQueryArg(arg:String,url:String,default:String):String
+      let query = self.getQueryArgs(url) then
+          pairs = query.assoc(arg)
+      in if pairs = null or pairs = Seq{}
+         then default
+         elseif pairs->head->size = 1
+         then default
+         else pairs->head->tail->head
+         end
+      end
+    end
     
     @Operation new()
       self.commandInterpreter().newBrowser(self);
@@ -229,6 +261,12 @@ context TextEditor
     @Operation setTooltip(tooltip)
       self.tooltip := tooltip;
       self.commandInterpreter().setTooltip(self,tooltip)
+    end
+    
+    @Operation URL(url:String)
+      let URL = xmf.javaClass("java.net.URL") 
+      in URL(url)
+      end
     end
     
   end

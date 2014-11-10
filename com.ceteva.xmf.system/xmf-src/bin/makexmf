@@ -10,9 +10,9 @@ FREEHEAP=20
 FILENAME=$2
 MAXJAVAHEAP="-Xmx200m"
 MAXJAVASTACK="-Xss5m"
-VERSION=2.0
+VERSION=3.0.1
 JAVA=java
 LOCALE="-Duser.country=UK"
 USERNAME=`whoami`
 
-java $LOCALE $MAXJAVAHEAP -cp $XMFLIB xos.OperatingSystem -port $PORT -initFile $XMFHOME/Boot/Boot.o -heapSize $HEAPSIZE -arg home:$XMFHOME -arg license:license.lic 
+java $LOCALE $MAXJAVAHEAP -cp $XMFLIB xos.OperatingSystem -port $PORT -initFile $XMFHOME/Boot/Boot.o -heapSize $HEAPSIZE -arg version:$VERSION -arg home:$XMFHOME -arg license:license.lic 

@@ -21,6 +21,14 @@ context Mosaic
       perspective.new();
       perspective.show()
     end
+  
+    @Operation inflate(inflationPath)
+      commandInterpreter.inflate(inflationPath)
+    end
+  
+    @Operation saveInflater(inflationPath)
+      commandInterpreter.saveInflater(inflationPath)
+    end
     
     @Operation setFilenameRedirect(source,target)
       commandInterpreter.setFilenameRedirect(source,target)

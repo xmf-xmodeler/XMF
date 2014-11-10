@@ -9,8 +9,7 @@ context DropDownMenus
   
     @Attribute action   : DropDownMenuAction end
     
-    @Constructor(name,action)
-    end
+    @Constructor(name,action) ! end
 
     @Operation delete()
       owner.remove(self);

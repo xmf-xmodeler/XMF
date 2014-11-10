@@ -61,17 +61,37 @@ context XMF
     else true
     end
   end
-
-/* let 
-  registry = xmf.registry() then
-  id = "com.ceteva.xmf.dropMenus"
-in
-  registry.addContribution(id,
-    Clients::ExtensionPoints::TypeLessContribution(
-      Seq{
-        Seq{"&File","Image","Save &Image ..."},
-        XMF::saveImage
-      }
-    )
-  )
-end; */
+  
+context XMF
+  @Operation saveImageAndInflater():Boolean
+    let path = xmf.saveFile(xmf.projDir(),"*.img","XModeler")
+    in if path <> ""
+       then 
+         let ok = true
+         in if path.fileExists()
+            then ok := xmf.question("Overwrite " + path)
+            end;
+            if ok 
+            then 
+              let inflationPath = (path->asSeq->reverse->drop(4)->reverse->asString + ".xml")
+              in if not(xmf.saveImage(path))
+                 then xmf.inflate(inflationPath)
+                 else 
+                   if inflationPath.fileExists()
+                   then ok := xmf.question("Overwrite " + inflationPath)
+                   end;
+                   if ok 
+                   then 
+                     xmf.findClientByName("com.ceteva.mosaic").saveInflater(inflationPath);
+                     true
+                   else false
+                   end
+                end
+              end
+            else false
+            end
+         end
+       else false
+       end
+    end
+  end

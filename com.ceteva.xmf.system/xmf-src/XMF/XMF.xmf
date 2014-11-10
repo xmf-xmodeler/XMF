@@ -197,7 +197,7 @@ context Root
     
       // Return the Java class that implements dialogs...
       
-      self.javaClass("com.ceteva.dialogs.DialogsClient")
+      self.javaClass("tool.clients.dialogs.DialogsClient")
     end
     
     @Operation editHomeFile(relativePath:String)
@@ -321,6 +321,10 @@ context Root
     
     @Operation heapSize():Integer
       Kernel_heapSize()
+    end
+    
+    @Operation inflate(file:String)
+      self.findClientByName("com.ceteva.mosaic").inflate(file)
     end
     
     @Operation info(title:String,warning:String)
@@ -525,6 +529,10 @@ context Root
          else DialogsClient.fileDialog("save",path,type,initial)
          end
       end
+    end
+    
+    @Operation saveInflater(file:String)
+      self.findClientByName("com.ceteva.mosaic").saveInflater(file)
     end
     
     @Operation saveState(file:String,restart:Operation):Boolean
