@@ -291,6 +291,14 @@ context String
       end
     end
   end
+
+context String
+  @Operation isBoundDynamic():Boolean
+    @Doc
+      Returns true if the receiver is dynamically bound.
+    end
+    Kernel_hasVar(self)
+  end
   
 context String
   @Operation isDir():Boolean

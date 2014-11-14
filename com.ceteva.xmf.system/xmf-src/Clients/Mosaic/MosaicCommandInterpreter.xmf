@@ -7,6 +7,18 @@ context Mosaic
 
   @Class MosaicCommandInterpreter extends CommandInterpreter
   
+    @Operation consoleDot(options)
+      @SendCommand(self)
+        consoleDot(options)
+      end
+    end
+  
+    @Operation namespace(names)
+      @SendCommand(self)
+        namespace(names)
+      end
+    end
+  
     @Operation newPerspective(perspective:Perspective)
       let id = self.allocateId(perspective) 
       in

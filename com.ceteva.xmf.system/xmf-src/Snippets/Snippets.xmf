@@ -1,0 +1,70 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import IO;
+import Clients;
+import TextEditor;
+
+context Root
+
+  @Package Snippets
+
+    @XOCL::Bind snippet = "" end
+
+    @Operation list(out,root,prefix,indent)
+      let path = root + "/" + prefix then
+          dir = Directory(path,Seq{".*xmf"})
+      in dir.build(1);
+         if prefix <> ""
+         then format(out,"~V<li> ~S~%",Seq{indent,dir.name.splitBy("/",0,0)->last})
+         end;
+         format(out,"~V<ul>~%",Seq{indent+2});
+         @For x in dir.contents() do
+           let name = x.name.splitBy("/",0,0)->last
+           in if not Set{".svn","META-INF","Snippets.xmf","Manifest.xmf"}->includes(name)
+              then
+                if x.isKindOf(Directory)
+                then list(out,root,prefix + "/" + name ,indent+2)
+                else 
+                  let ignore = OCL::OCL.grammar.parseFile(path + "/" + x.name,"CompilationUnit",Seq{})
+                  in format(out,"~V<li class='item'><a href='snippet:~S'>~S</a></li>~%",Seq{indent+2,prefix+"/"+name,snippet})
+                  end
+                end
+              end
+           end
+         end
+      end;
+      format(out,"~V</ul>~%",Seq{indent+2});
+      if prefix <> ""
+      then format(out,"~V</li>~%",Seq{indent}) 
+      end   
+    end
+
+    @Class SnippetBrowser extends HTMLViewer
+      @Operation requestURL(url:String)
+        if url.hasPrefix("snippet:")
+        then File(xmf.homeDir()+"/Snippets"+url.drop(8)).editText()
+        else super(url)
+        end
+      end
+    end
+  
+    @Operation getHTML():String
+      let sout = StringOutputChannel()
+      in format(sout,"<html><center><h1>Snippets</h1></center>");
+         Snippets::list(sout,xmf.homeDir()+"/Snippets","",0);
+         format(sout,"</html>");
+         sout.getString()
+      end
+    end
+  
+    @Operation displaySnippets()
+      xmf.browseUsing(self.getHTML(),SnippetBrowser)
+    end
+
+    @Class Snippet
+      @Grammar
+        Snippet ::= s=Str { Snippets::snippet := s; [| null |] }.
+      end
+    end
+ end

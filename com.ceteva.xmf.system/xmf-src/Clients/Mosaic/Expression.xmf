@@ -1,0 +1,82 @@
+parserImport XOCL;
+
+import Clients;
+import Mosaic;
+
+context Mosaic
+  @Bind 
+    ExpressionGrammar =
+    let p = TypeParser::Parser(Seq{Root,XCore}) then
+        parseKey(k:String) = p.parseSeq(p.skipWhiteSpace(),p.parseLit(k));
+        parseName(c:Operation) = p.parseSeq(p.skipWhiteSpace(),p.parseName(c));
+        parseVar = p.parseSeq(p.skipWhiteSpace(),p.parseVar()) then
+        parseConst = p.parseOr(p.parseInt(),p.parseOr(p.parseStr(),p.parseBool()));
+        parseParen = p.parseFail();
+        parseLet = p.parseSeq(parseKey("let"),
+                              parseName(
+                                @Operation(n) 
+                                  p.parseSeq(
+                                    parseKey("="),
+                                    p.parseSeq(
+                                      p.parseCall("exp"),
+                                      p.getType(
+                                        @Operation(t)
+                                          p.bind(n,t,
+                                            p.parseSeq(
+                                             parseKey("in"),
+                                             p.parseCall("exp"))) 
+                                        end)))
+                                end));
+        parseDot = p.parseSeq(
+                     p.parseCall("atom"),
+                     p.getType(
+                       @Operation(t) 
+                         p.parseSeq(
+                           parseKey("."),
+                           parseName(
+                             @Operation(n) 
+                               if t.isKindOf(Class) 
+                               then 
+                                 @Find(a,t.allAttributes())
+                                   when a.name.toString() = n
+                                   do p.setType(a.type,p.parseSucc())
+                                   else p.setType(Null,p.parseSucc())
+                                 end
+                               else p.setType(Null,p.parseSucc())
+                               end
+                             end)) 
+                         end));
+        parseSend = p.parseSeq(
+                     p.parseCall("atom"),
+                     p.getType(
+                       @Operation(t) 
+                         p.parseSeq(
+                           parseKey("."),
+                           parseName(
+                             @Operation(n) 
+                               p.parseSeq(
+                                 parseKey("("),
+                                 p.parseSeq(
+                                   p.parseOpt(
+                                     p.parseSeq(
+                                       p.parseCall("exp"),
+                                       p.parseStar(p.parseSeq(parseKey(","),p.parseCall("exp"))))),
+                                   p.parseSeq(
+                                     parseKey(")"),
+                                     p.parseAction(
+                                       @Operation()
+                                         @Find(o,t.allOperations())
+                                           when o.name.toString() = n
+                                           do p.setType(o.type(),p.parseSucc())
+                                           else p.setType(Null,p.parseSucc())
+                                         end
+                                       end))))
+                             end)) 
+                         end));
+        parseApply = p.parseFail();
+        parseBin = p.parseFail() then
+        parseAtom = p.parseSeq(p.skipWhiteSpace(),p.parseOr(parseConst,p.parseOr(parseVar,parseParen)))
+    in p.addRule("atom",parseAtom);
+       p.addRule("exp",p.parseOr(parseAtom,p.parseOr(parseLet,p.parseOr(parseDot,p.parseOr(parseSend,p.parseOr(parseApply,parseBin)))))); p
+    end
+  end

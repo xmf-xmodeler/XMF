@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to create a browser and process URLs.";
+
+// Dynamically adds a new menu item (overriding where necessary)...
+
+xmf.addDropDownMenuItem(
+  // A path from the tool menu...
+  Seq{"RootName","PartitionName","SubMenuName","SubPartitionName","ActionName"},
+  // A 0-arity operation to call when the menu item is selected...
+  @Operation() "ACTION".println() end);

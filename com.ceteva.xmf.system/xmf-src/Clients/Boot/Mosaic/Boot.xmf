@@ -43,10 +43,15 @@ try
   // Add XTools shapes directory
 
   MDC::shapeDir(xmf.homeDir() + "/MDC/Shapes");
+
+  // Get the snippets
+
+  (xmf.homeDir() + "/Snippets/Snippets.o").loadBin(true);
   
   // Save the system.
   
   gc();
+  stdout.flush();
 
   let startup = saveMachineState(xmf.homeDir() + "/../xmf-img/mosaic.img")
   in if startup = true

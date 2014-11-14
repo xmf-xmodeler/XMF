@@ -619,10 +619,6 @@ context SeqOfElement
   end
 
 context SeqOfElement
-  // Lookup is a message which when sent to a sequence of
-  // strings will lookup the element at the path given by the
-  // strings in order. If no element exists then an error
-  // is raised.
   @Operation lookup():Element
     @Doc
        Lookup is a message which when sent to a sequence of

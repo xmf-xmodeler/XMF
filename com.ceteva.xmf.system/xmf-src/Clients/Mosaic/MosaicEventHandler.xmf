@@ -9,8 +9,10 @@ context Mosaic
 
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
-        "shutdownRequest" do self.shutdown() end
+        "shutdownRequest" do self.shutdown()                  end
         "shutDownAndSave" do self.shutDownAndSave(parameters) end
+        "consoleDot"      do self.consoleDot(parameters)      end
+        "nameLookup"      do self.nameLookup(parameters)      end
       end
     end
     
@@ -33,4 +35,53 @@ context Mosaic
       end
     end
     
+    @Operation consoleDot(parameters)
+      self.debug("consoleDot",parameters);
+      let text = parameters.at(0) then
+          type = ExpressionGrammar.parse(text,"exp")
+      in if type = Null
+         then self.owner().commandInterpreter().consoleDot(Seq{})
+         else 
+           @TypeCase(type)
+              Class do
+                let atts = type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
+                    ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
+                in self.owner().commandInterpreter().consoleDot(atts + ops)
+                end
+              end
+              Classifier do
+                let ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
+                in self.owner().commandInterpreter().consoleDot(ops)
+                end
+              end
+           end
+         end
+      end
+    end
+
+    @Operation nameLookup(parameters)
+      self.debug("nameLookup",parameters);
+      let possiblePath = parameters.at(0) then
+          path = possiblePath->splitBy(":",0,0)->reject(x | x = "")
+      in if path->forAll(x | x.isKindOf(String)) and path->size > 0
+         then 
+           let root = path->head
+           in if root.isBoundDynamic()
+              then 
+                let value = root.lookup()
+                in if value.isKindOf(NameSpace)
+                   then 
+                     let element = value.lookupPath(path->tail,null)
+                     in if element <> null and element.isKindOf(NameSpace)
+                        then self.owner().commandInterpreter().namespace(element.names()->asSeq)
+                        end
+                     end
+                   else self.owner().commandInterpreter().namespace(Seq{})
+                   end
+                end
+              end
+           end
+         end
+      end
+    end
   end

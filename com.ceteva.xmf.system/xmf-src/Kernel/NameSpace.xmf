@@ -185,6 +185,25 @@ context NameSpace
        self
     end
   end
+  
+context NameSpace
+  @Operation lookupPath(path:Seq(String),default)
+    if path->isEmpty
+    then self
+    else 
+      if self.hasElement(path->head)
+      then
+        let value = self.getElement(path->head)
+        in if value.isKindOf(NameSpace)
+           then value.lookupPath(path->tail,default)
+           elseif path->tail->isEmpty
+           then value
+           else default
+           end
+        end
+      end
+    end
+  end
 
 context NameSpace
   @Operation nameChanged(namedElement,newName,oldName)

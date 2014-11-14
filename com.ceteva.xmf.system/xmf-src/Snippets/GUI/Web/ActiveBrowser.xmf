@@ -1,0 +1,28 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Clients;
+import TextEditor;
+
+@Snippet "How to create a browser and process URLs.";
+
+context Root
+  @Class ExampleBrowser extends HTMLViewer
+    @Operation requestURL(url:String)
+      if url.hasPrefix("label:")
+      then 
+        xmf.message("I can do some processing for\n"+url);
+        super(url.drop(6))
+      else super(url)
+      end
+    end
+  end
+  
+xmf.browseUsing(
+  "<html>
+    <body> 
+      <a href='label:http://google.co.uk'>I get caught.</a> 
+      <br>
+      <a href='http://google.co.uk'>I go straight through.</a>
+    </body>
+  </html>",ExampleBrowser);

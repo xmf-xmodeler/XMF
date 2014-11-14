@@ -1,0 +1,174 @@
+parserImport XOCL; 
+
+import Clients;
+
+context Mosaic
+ @Package TypeParser
+  @Class Parser
+    @Attribute text    : String            end
+    @Attribute globals : Seq(NameSpace)    end
+    @Attribute rules   : Seq(Rule)     (+) end
+    @Constructor(globals) end
+    @Operation addRule(name:String,op:Operation)
+      self.addToRules(Rule(name,op))
+    end
+    @Operation parse(text:String,name:String):Classifier
+      let env = Seq{};
+          type = Null;
+          succ(text,type,fail) = if text->size = 0 then type else fail() end;
+          fail() = Null;
+          call = self.parseCall(name)
+      in call(text.asSeq(),Seq{},Null,succ,fail)
+      end
+    end
+    @Operation parseCall(name:String)
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        @Find(rule,rules)
+          when rule.name = name
+          do (rule.op)(text,env,Null,succ,fail)
+          else self.error("cannot find rule: " + name)
+        end
+      end
+    end
+    @Operation parseLit(literal:String)
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        if text.hasPrefix(literal.asSeq())
+        then succ(text.drop(literal.size()),Null,fail)
+        else fail()
+        end
+      end
+    end
+    @Operation parseSeq(p1:Operation,p2:Operation):Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        p1(text,env,type,@Operation(text,type,fail) p2(text,env,type,succ,fail) end,fail)
+      end
+    end
+    @Operation parseOr(p1:Operation,p2:Operation):Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        p1(text,env,type,succ,@Operation() p2(text,env,type,succ,fail) end)
+      end
+    end
+    @Operation parseVar():Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail) 
+        if text->isEmpty
+        then fail()
+        elseif text->head.isAlphaChar()
+        then 
+          let name = text.takeWhile(@Operation(n) n.isAlphaChar() or n.isNumericChar() end)
+          in @Find(b,env)
+               when b.name = name.asString()
+               do succ(text->drop(name->size),b.type,fail)
+               else 
+                 @Find(g,globals)
+                   when g.hasElement(name.asString())
+                   do succ(text->drop(name->size),g.getElement(name.asString()).of(),fail)
+                   else succ(text->drop(name->size),Null,fail)
+                 end
+             end
+          end
+        else fail()
+        end
+      end
+    end
+    @Operation parseName(c:Operation):Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        if text->isEmpty
+        then fail()
+        elseif text->head.isAlphaChar()
+        then 
+          let name = text.takeWhile(@Operation(n) n.isAlphaChar() or n.isNumericChar() end)
+          in (c(name.asString()))(text->drop(name->size),env,type,succ,fail)
+          end
+        else fail()
+        end
+      end
+    end
+    @Operation getType(c:Operation):Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        (c(type))(text,env,type,succ,fail)
+      end
+    end
+    @Operation bind(n:String,t:Classifier,c:Operation):Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        c(text,Seq{Binding(n,t) | env},type,succ,fail)
+      end
+    end
+    @Operation parseFail():Operation
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        fail()
+      end
+    end
+    @Operation parseBool()
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        if text.hasPrefix("true".asSeq()) 
+        then succ(text.drop(4),Boolean,fail)
+        elseif text.hasPrefix("false".asSeq())
+        then succ(text.drop(5),Boolean,fail)
+        else fail()
+        end
+      end
+    end
+    @Operation parseStr()
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        if text.hasPrefix("\"".asSeq())
+        then 
+          let text2 = text->tail.dropWhile(@Operation(n) n <> "\""->at(0) end)
+          in if text2->size = 0
+             then fail()
+             else succ(text2->tail,String,fail)
+             end
+          end
+        else fail()
+        end
+      end
+    end
+    @Operation setType(t:Classifier,c:Operation)
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        c(text,env,t,succ,fail)
+      end
+    end
+    @Operation parseSucc()
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        succ(text,type,fail)
+      end
+    end
+    @Operation parseOpt(c:Operation)
+      self.parseOr(c,self.parseSucc())
+    end
+    @Operation parseAction(c:Operation)
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        (c())(text,env,type,succ,fail)
+      end
+    end
+    @Operation parseStar(c:Operation)
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        c(text,env,type,@Operation(text,type,fail) (self.parseStar(c))(text,env,type,succ,fail) end,@Operation() succ(text,type,fail) end)
+      end
+    end
+    @Operation parseInt()
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail)
+        let text2 = text.dropWhile(@Operation(n) n.isNumericChar() end)
+        in if text = text2
+           then fail()
+           else succ(text2,Integer,fail)
+           end
+        end
+      end
+    end
+    @Operation skipWhiteSpace()
+      @Operation(text:Seq(Integer),env:Seq(Binding),type,succ,fail) 
+        succ(text.dropWhile(@Operation(n) n.isWhiteSpaceChar() end),type,fail)
+      end
+    end
+  end
+  @Class Binding 
+    @Attribute name : String end
+    @Attribute type : Classifier end
+    @Constructor(name,type) ! end
+  end
+  @Class Rule 
+    @Attribute name : String end
+    @Attribute op   : Operation end
+    @Constructor(name,op) ! end
+  end
+ end
