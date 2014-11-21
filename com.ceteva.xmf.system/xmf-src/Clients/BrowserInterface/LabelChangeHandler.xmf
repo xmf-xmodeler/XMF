@@ -11,7 +11,7 @@ context BrowserInterface
   @Class LabelChangeHandler extends OperationRefSyntax
 
     @Grammar extends OperationRefSyntax.grammar
-      LabelChangeHandler ::= opRef = Path { LabelChangeHandler(opRef) }.
+      LabelChangeHandler ::= opRef = Path 'end' { LabelChangeHandler(opRef) }.
     end
 
     @Operation register(class:Class)

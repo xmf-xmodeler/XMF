@@ -44,7 +44,7 @@ context XMF
          Root::stdout.setChannel(output);
          Kernel_rebindStdin(input);
          Kernel_rebindStdout(output);
-         xmf.menuManager().reset();
+         //xmf.menuManager().reset();
             
          // Why do we need to do this?
          // (xmf.homeDir() + "/Boot/Mosaic/ToolInterface.o").loadBin(false);
@@ -64,6 +64,7 @@ context XMF
   
 context XMF
   @Operation saveImageAndInflater():Boolean
+    // Returns true when saving and false when restoring...
     let path = xmf.saveFile(xmf.projDir(),"*.img","XModeler")
     in if path <> ""
        then 
@@ -75,7 +76,9 @@ context XMF
             then 
               let inflationPath = (path->asSeq->reverse->drop(4)->reverse->asString + ".xml")
               in if not(xmf.saveImage(path))
-                 then xmf.inflate(inflationPath)
+                 then 
+                   xmf.inflate(inflationPath);
+                   false
                  else 
                    if inflationPath.fileExists()
                    then ok := xmf.question("Overwrite " + inflationPath)
@@ -84,14 +87,14 @@ context XMF
                    then 
                      xmf.findClientByName("com.ceteva.mosaic").saveInflater(inflationPath);
                      true
-                   else false
+                   else true
                    end
                 end
               end
-            else false
+            else true
             end
          end
-       else false
+       else true
        end
     end
   end

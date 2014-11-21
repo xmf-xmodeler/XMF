@@ -15,7 +15,7 @@ context BrowserInterface
     
     @Grammar 
     
-      ChildSortMode ::= mode = SortType { ChildSortMode(mode) }.
+      ChildSortMode ::= mode = SortType 'end' { ChildSortMode(mode) }.
       
       SortType ::= 'none' { "none" } | 'alpha' { "alpha" } | 'type' { "type" } | 'alphaType' { "alphaType" }.
       

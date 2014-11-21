@@ -13,7 +13,7 @@ context BrowserInterface
     
     @Grammar 
     
-      Remove ::= path = Path name = Dots  { Remove(path,name) }.
+      Remove ::= path = Path name = Dots  'end' { Remove(path,name) }.
       
       Dots ::= n = Name ns = ('.' Name)* { Seq{n|ns} }.
       

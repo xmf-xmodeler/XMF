@@ -21,7 +21,7 @@ context BrowserInterface
     
     @Grammar extends OCL::OCL.grammar import BrowserInterface
     
-      Interface ::= es = (Exp : InterfaceElement)* { es->iterate(e i = Interface() | i.add(e)) }.
+      Interface ::= es = (Exp : InterfaceElement)* 'end' { es->iterate(e i = Interface() | i.add(e)) }.
       
     end
     

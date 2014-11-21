@@ -15,7 +15,7 @@ context BrowserInterface
     
     @Grammar 
     
-      Select ::= path = Path name = Dots 'from' source = Source* { Select(path,name,source) }.
+      Select ::= path = Path name = Dots 'from' source = Source* 'end' { Select(path,name,source) }.
       
       Source ::= '[' Dots ']'.
       

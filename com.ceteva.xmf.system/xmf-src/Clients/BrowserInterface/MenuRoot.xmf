@@ -15,7 +15,7 @@ context BrowserInterface
     
     @Grammar 
     
-      MenuRoot ::= rootPath = Path { MenuRoot(rootPath.separateWith("::")) }.
+      MenuRoot ::= rootPath = Path 'end' { MenuRoot(rootPath.separateWith("::")) }.
       
       Path ::= n = Name ns = ('::' Name)* { Seq{n|ns} }.
       

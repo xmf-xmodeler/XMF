@@ -17,7 +17,7 @@ context BrowserInterface
   
     @Grammar 
     
-      Delete ::= name = Name locations = Location* { 
+      Delete ::= name = Name locations = Location* 'end' { 
         Delete(Seq{name},locations) 
       }.
       

@@ -13,7 +13,7 @@ context BrowserInterface
     
     @Grammar 
     
-      Property ::= path = Path name = Dots  { Property(path,name) }.
+      Property ::= path = Path name = Dots  'end' { Property(path,name) }.
       
       Dots ::= n = Name ns = ('.' Name)* { Seq{n|ns} }.
       

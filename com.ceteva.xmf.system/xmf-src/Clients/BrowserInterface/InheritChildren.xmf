@@ -15,7 +15,7 @@ context BrowserInterface
     
     @Grammar 
     
-      InheritChildren ::= inherits = Inherits { InheritChildren(inherits) }.
+      InheritChildren ::= inherits = Inherits 'end' { InheritChildren(inherits) }.
       
       Inherits ::= 'true' {true} | 'false' {false} | {true}.
       

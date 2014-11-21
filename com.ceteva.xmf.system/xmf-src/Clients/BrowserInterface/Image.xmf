@@ -15,7 +15,7 @@ context BrowserInterface
     
     @Grammar 
     
-      Image ::= path = Str { Image(path) }.
+      Image ::= path = Str 'end' { Image(path) }.
       
     end
     

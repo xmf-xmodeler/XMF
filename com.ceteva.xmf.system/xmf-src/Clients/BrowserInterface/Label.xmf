@@ -18,7 +18,7 @@ context BrowserInterface
     
     @Grammar extends OCL::OCL.grammar import BrowserInterface
     
-      Label ::= isEditable = IsEditable es = (Exp : Element)* {
+      Label ::= isEditable = IsEditable es = (Exp : Element)* 'end' {
       
         es->iterate(e lh = Label().isEditable := isEditable | lh.add(e))
       

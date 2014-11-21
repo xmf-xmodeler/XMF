@@ -18,19 +18,33 @@ context Mosaic
     
     @Operation shutdown()
       self.debug("shutdown",Seq{});
-      if xmf.question("Are you sure you want to quit? All unsaved changes will be lost.")
-      then self.owner().commandInterpreter().shutdown()
+      if xmf.question("Are you sure you want to quit?")
+      then 
+        if xmf.saveImageAndInflater() = true
+        then self.owner().commandInterpreter().shutdown()
+        end
       end
     end
     
     @Operation shutDownAndSave(parameters)
       self.debug("shutDownAndSave",parameters);
       let imagePath = parameters.at(0);
-          inflationPath = parameters.at(1)
-      in self.owner().commandInterpreter().saveInflater(inflationPath);
-         if xmf.saveImage(imagePath)
-         then self.shutdown()
-         else self.owner().commandInterpreter().inflate(inflationPath)
+          inflationPath = parameters.at(1);
+          ok = true
+      in if imagePath.fileExists()
+         then ok := xmf.question("Overwrite " + imagePath)
+         end;
+         if ok and inflationPath.fileExists()
+         then ok := xmf.question("Overwrite " + inflationPath)
+         end;
+         if ok
+         then 
+           self.owner().commandInterpreter().saveInflater(inflationPath);
+           if xmf.saveImage(imagePath)
+           then self.owner().commandInterpreter().shutdown()
+           else self.owner().commandInterpreter().inflate(inflationPath)
+           end
+         else self.owner().commandInterpreter().shutdown()
          end
       end
     end

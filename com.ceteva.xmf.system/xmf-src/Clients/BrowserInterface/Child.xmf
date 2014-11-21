@@ -20,7 +20,7 @@ context BrowserInterface
     
     @Grammar 
       
-      Child ::= display = Display { Child(display) }.
+      Child ::= display = Display 'end' { Child(display) }.
     
       Display ::= left = Atom ('+' right = Display { Add(left,right) } | { left }).
       

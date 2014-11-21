@@ -18,7 +18,7 @@ context BrowserInterface
     
     @Grammar //extends OCL::OCL.grammar
 
-      EditableTextOp ::= opRef = Path { EditableTextOp(opRef) }.
+      EditableTextOp ::= opRef = Path 'end' { EditableTextOp(opRef) }.
       
       Path ::= n = Name ns = ('::' Name)* { Seq{n|ns} }.
 

@@ -12,7 +12,30 @@ context Root
       @Menu a::b::c f end
     end
     @Attribute x : String = "spam" end
-    @Attribute y : Integer = 100 end
-    @Attribute z : Integer = 100 end
+    @Attribute y : Integer = 100   end
+    @Attribute z : Set(C)          end
     @Operation f() "hooray".println() end
+  end
+  
+context Root
+  @Class Reader metaclass BrowsedClass
+    @Interface
+      @Child name end
+    end
+    @Attribute name : String end
+    @Constructor(name) ! end
+  end
+  
+context Root
+  @Class Library metaclass BrowsedClass
+    @Interface
+      @Child name end
+      @Child readers end
+      @Menu Add::Reader addReader end
+    end
+    @Attribute name : String end
+    @Attribute readers : Set(Reader) (+) end
+    @Operation addReader()
+      self.addToReaders(Reader(xmf.getString("Reader Name","Type a name","Fred")))
+    end
   end
