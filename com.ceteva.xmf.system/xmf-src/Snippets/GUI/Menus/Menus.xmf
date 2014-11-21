@@ -1,0 +1,10 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to define a menu on a class.";
+
+@Menu "New Operation" on XCore::Class
+  @Operation()
+    xmf.message("Hi from " + self)
+  end
+end;
