@@ -12,10 +12,13 @@ context XOCL
       When the instance is performed it creates a new kernel package.
     end
      
-     @Attribute meta        : Performable end      // Null if not specified.
-     @Attribute metaPackage : Performable end      // Null if not specified.
+     @Attribute meta        : Performable      end      // Null if not specified.
+     @Attribute metaPackage : Performable      end      // Null if not specified.
      @Attribute parents     : Seq(Performable) end
      @Attribute defs        : Seq(Performable) end
+     @Attribute defImports  : Seq(Performable) end      // The imports listed in the def.
+     
+     @Constructor(name,meta,metaPackage,parents,defImports,defs) end
      
      @Constructor(name,meta,metaPackage,parents,defs) end
      
@@ -28,20 +31,31 @@ context XOCL
        end
      end
      
-     @Operation desugar():Performable
+     @Operation desugar():Performable 
        let parents = 
              if parents->isEmpty
              then [| @Operation() newPackage.defaultParents() end |]
              else [| @Operation() <parents->iterate(p e = [| Set{} |] | [| <e> ->including(<p>) |])> end |]
              end
-       in [| let newPackage = <defs->iterate(e exp = self.newPackageExp() | [| <exp>.add(<e>) |])> then
+       in [| let definedImports = <defImports->iterate(e exp = [| Seq{} |] | [| Seq{<e> | <exp>} |])> then
+                 newPackage = <self.desugarDefinedImports(defs->iterate(e exp = self.newPackageExp() | [| <exp>.add(<e>) |]))> then
                  parents = <parents>
              in parents.setOwner(newPackage);
                 newPackage.parents := parents;
+                @For nameSpace in definedImports do
+                  newPackage.addImport(nameSpace)
+                end;
                 newPackage
              end
           |]
        end 
+     end
+     
+     @Operation desugarDefinedImports(body)
+       [| @Operation()
+            <defImports->iterate(ns exp = body | 
+              [| if <ns>.isReallyKindOf(XCore::NameSpace) then Kernel_import(<ns>.contents); <exp> else <ns>.error("not a namespace") end |])>
+          end() |]
      end
      
      @Operation eval(target,env,imports)
@@ -51,6 +65,9 @@ context XOCL
           end;
           @For parent in parents do
             package.addParent(parent.eval(target,env,imports))
+          end;
+          @For nameSpace in defImports do
+            package.addImport(nameSpace.eval(target,env,imports))
           end;
           package
        end

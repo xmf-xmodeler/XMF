@@ -30,8 +30,7 @@ context DiagramsMapping
       in
         self.theme := theme;
         if self.applyTheme()
-        then
-          self.owner.refreshThemeExcludingElementMap(self)
+        then self.owner.refreshThemeExcludingElementMap(self)
         end
       end
     end

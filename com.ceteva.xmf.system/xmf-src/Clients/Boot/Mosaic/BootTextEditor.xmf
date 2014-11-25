@@ -40,13 +40,18 @@ context XMF
   end
   
 context XMF
-  @Operation browseUsing(url:String,htmlViewerClass:Class)
+  @Operation browseUsing(url:String,browserClass:Class)
+    self.browseUsingInstance("",url,browserClass())
+  end
+  
+context XMF
+  @Operation browseUsingInstance(title:String,url:String,browser:HTMLViewer)
     let textClient = self.textClient() 
     in if textClient <> null
-       then
-         let browser = htmlViewerClass(url) 
-         in textClient.newBrowser(browser)
-         end
+       then 
+         textClient.newBrowser(browser);
+         browser.setURL(url);
+         browser.setName(title)
        end
     end
   end

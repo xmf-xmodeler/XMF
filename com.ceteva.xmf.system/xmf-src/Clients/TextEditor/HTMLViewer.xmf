@@ -48,6 +48,11 @@ context TextEditor
       end
     end
     
+    @Operation isURL(data:String)
+      data.hasPrefix("http://") or
+      data.hasPrefix("file://")
+    end
+    
     @Operation loadBinary(url:String)
       // The selected URL claims to point to a binary
       // file. Try to load it.

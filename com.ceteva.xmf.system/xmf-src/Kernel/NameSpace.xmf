@@ -61,6 +61,37 @@ context NameSpace
   end
   
 context NameSpace
+  @Operation addImport(n:NameSpace)
+    if not(imports->contains(n))
+    then self.imports := Seq{n|imports}
+    end
+  end
+  
+context NameSpace
+  @Operation allImports():Seq(NameSpace)
+    let allImports = Seq{};
+        pending = Seq{self};
+        visited = Seq{}
+    in @While not(pending->isEmpty) do
+         let n = pending->head
+         in pending := pending->tail;
+            if not(visited.includes(n))
+            then 
+              visited := Seq{n | visited};
+              @For i in n.imports do
+                if not(allImports.contains(i))
+                then allImports := Seq{i|allImports}
+                end;
+                pending := Seq{i|pending}
+              end
+            end
+          end
+        end;
+        allImports
+     end
+   end
+  
+context NameSpace
   @Operation hasBinding(name:String):Boolean
     bindings->exists(binding | binding.name.toString() = name.toString())
   end
@@ -257,6 +288,11 @@ context NameSpace
     else super(element)
     end
   end
+  
+context NameSpace
+  @Operation removeImport(n:NameSpace)
+    self.imports := imports.excluding(n)
+  end
 
 context NameSpace
   @Operation resolveNameClash(name,collection)
@@ -266,7 +302,6 @@ context NameSpace
     end;
     self
   end
-
 
 context NameSpace
   @Operation syntaxClasses():Set(Class)

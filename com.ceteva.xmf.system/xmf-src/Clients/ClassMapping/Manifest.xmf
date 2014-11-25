@@ -5,24 +5,26 @@ import Projects;
 
 @Manifest ClassMapping
   ClassMapping = @File ClassMapping end
-  @File AttributeXText end
-  @File OperationXText end
-  @File MetaslotXText end
-  @File DocXNote end
-  @File ClassXNode end
-  @File ElementXNode end
-  @File PackageXNode end
+  @File AttributeXText              end
+  @File OperationXText              end
+  @File MetaslotXText               end
+  @File SlotXText                   end
+  @File DocXNote                    end
+  @File ClassXNode                  end
+  @File ElementXNode                end
+  @File ObjectXNode                 end
+  @File PackageXNode                end
   @File AssociationXAssociationEdge end
-  @File AttributeXAttributeEdge end
-  @File ClassifierXInheritanceEdge end
-  @File ClassXInheritanceEdge end
-  @File ContainerXContainsEdge end
-  @File DependencyNameXText end
-  @File DependencyXDependencyEdge end
-  @File PackageXInheritanceEdge end
-  @File PackageXClassDiagram end
-  @File MappingClient end
-  @File NamedElementXNode end
-  @File ^None Boot end
+  @File AttributeXAttributeEdge     end
+  @File ClassifierXInheritanceEdge  end
+  @File ClassXInheritanceEdge       end
+  @File ContainerXContainsEdge      end
+  @File DependencyNameXText         end
+  @File DependencyXDependencyEdge   end
+  @File PackageXInheritanceEdge     end
+  @File PackageXClassDiagram        end
+  @File MappingClient               end
+  @File NamedElementXNode           end
+  @File ^None Boot                  end
 do Project(ClassMapping,dir,self)
 end;

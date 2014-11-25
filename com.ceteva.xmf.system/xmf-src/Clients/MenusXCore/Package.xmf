@@ -7,7 +7,7 @@ import Menus;
 import IO;
 
 context Package
-  @Operation getAvailableMetaPackages():Seq(Element)
+  @Operation getAvailableMetaPackages():Seq(Package)
     let nameSpaces = Seq{Root};
         metaPackages = Seq{}
     in  @While not nameSpaces->isEmpty do
@@ -26,6 +26,27 @@ context Package
           end
         end;
         metaPackages
+    end
+  end
+
+context Package
+  @Operation getAvailablePackages():Seq(Package)
+    let nameSpaces = Seq{Root};
+        packages = Seq{}
+    in  @While not nameSpaces->isEmpty do
+          let nameSpace = nameSpaces->head in
+            nameSpaces := nameSpaces->tail;
+            @For element inTableValues nameSpace.contents do
+              if element.isKindOf(XCore::NameSpace) and element <> null and element <> nameSpace then
+                nameSpaces := Seq{element | nameSpaces}
+              end;
+              if element.isKindOf(Package) and element <> null 
+              then packages := packages->prepend(element)
+              end
+            end
+          end
+        end;
+        packages
     end
   end
 
@@ -101,6 +122,17 @@ context Package
       then
         self.metaPackage := mp
       end
+    end
+  end
+  
+context Package
+  @Operation setImports_client()
+    let 
+      available = self.getAvailablePackages()->asSeq.sortNamedElements_CaseIndependent() then
+      selected = xmf.choose("Set Imports","Choose imported package to add:",available)
+    in if selected <> 0-1
+       then self.imports := selected
+       end
     end
   end
 

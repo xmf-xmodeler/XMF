@@ -17,21 +17,21 @@ context Package
       
       parents = Parents 
       
+      imports = PImports
+      
       defs = Defs 
       
       'end'
       
-      { 
-      
-        Package(name,meta,metaPackage,parents,defs) 
-        
-    }.
+      { Package(name,meta,metaPackage,parents,imports,defs) }.
     
     MetaPackage ::= 'metapackage' Exp | { null }.
     
     MetaClass ::= 'metaclass' Exp | { null }.
     
     Parents ::= 'extends' p = Exp ps = (',' Exp)* { Seq{p|ps} } | { Seq{} }.
+    
+    PImports ::= 'import' p = Exp ps = (',' Exp)* { Seq{p|ps} } | { Seq{} }.
     
     Defs ::= 
     

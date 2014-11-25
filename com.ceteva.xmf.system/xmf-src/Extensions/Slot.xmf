@@ -1,0 +1,19 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Slot Definitions                               *
+ *                            -------------------                             *
+ *                                                                            *
+ *   A Slot Definition refers to an attribute of a class and can be used      *
+ *   to initialise a container via the addTo operation.                       *
+ *                                                                            *
+ ******************************************************************************/ 
+
+context XCore::Slot
+  @Grammar extends OCL::OCL.grammar
+    Slot ::= path=PathExp '=' value=Exp 'end' {
+      [| let a = <path> in Slot(a.name,a,<value>) end |]
+    }.
+  end

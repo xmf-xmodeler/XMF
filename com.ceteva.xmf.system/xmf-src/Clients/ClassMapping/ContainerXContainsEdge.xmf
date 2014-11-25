@@ -296,17 +296,15 @@ context ClassMapping
     @Operation selectSlot()
       let allAttributes = container.of().allAttributes() then
           validAttributes = allAttributes->select(a | contained.isKindOf(a.underlyingType()) or a.type.inheritsFrom(Table))
-      in
-        if validAttributes->isEmpty
-        then
-          xmf.warning(
-            "Cannot add a slot value edge between these two elements as there is no attribute in " + container.of().name() +
-            " whose type matches " + contained.name() + "." );
-          edge.delete();
-          self.owner.remove(self)
-        else
-          self.selectSlotDialog(validAttributes)
-        end
+      in if validAttributes->isEmpty
+         then
+           xmf.warning(
+             "Cannot add a slot value edge between these two elements as there is no attribute in " + container.of().name() +
+             " whose type matches " + contained.name() + "." );
+           edge.delete();
+           self.owner.remove(self)
+         else self.selectSlotDialog(validAttributes)
+         end
       end
     end
     
@@ -316,11 +314,14 @@ context ClassMapping
             @Operation(attribute)
               attribute.name() + " from " + attribute.owner.name()
             end then
-          att = xmf.select("Choose Slot",
+          att = if validAttributes->size = 1
+                then validAttributes->asSeq->head
+                else xmf.select("Choose Slot",
                                 "Select a slot to connect "+container.nameString()+" to "+contained.nameString(),
                                 attributeSeq,
                                 null,
                                 stringOp)
+                end
       in
         if att <> null
         then

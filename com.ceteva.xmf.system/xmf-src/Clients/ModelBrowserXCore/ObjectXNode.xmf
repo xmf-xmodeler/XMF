@@ -97,11 +97,15 @@ context ModelBrowserXCore
 
     @Operation daemons_stateChanged(e,slot,newValue,oldValue)
     
-      // This update node label text...
-      self.updateOwnNodeText(slot,newValue,oldValue);
+      if newValue <> oldValue
+      then 
+    
+        // This update node label text...
+        self.updateOwnNodeText(slot,newValue,oldValue);
 
-      // This updates child nodes...
-      self.updateChildNodes(slot,newValue,oldValue)
+        // This updates child nodes...
+        self.updateChildNodes(slot,newValue,oldValue)
+      end
 
     end
 

@@ -14,6 +14,7 @@ context ClassDiagrams
     
     @Attribute classNodes         : Seq(ClassNode)       end
     @Attribute elementNodes       : Seq(ElementNode)     end
+    @Attribute objectNodes 		  : Seq(ObjectNode)      end
     @Attribute packageNodes       : Seq(PackageNode)     end
     @Attribute noteNodes          : Seq(NoteNode)	     end
     @Attribute inheritanceEdges   : Seq(InheritanceEdge) end
@@ -69,6 +70,10 @@ context ClassDiagrams
           self.addElementNode(node);
           super(node)
         end
+        ObjectNode do
+          self.addElementNode(node);
+          super(node)
+        end
         DiagramNode do
           self.addDiagramNode(node);
           super(node)
@@ -107,6 +112,10 @@ context ClassDiagrams
     
     @Operation addNoteNode(noteNode)
       self.noteNodes := self.noteNodes->prepend(noteNode)
+    end
+    
+    @Operation addObjectNode(objectNode)
+      self.objectNodes := self.objectNodes->prepend(objectNode)
     end
     
     @Operation addPackageNode(packageNode)
@@ -540,6 +549,10 @@ context ClassDiagrams
       self.dependencyEdges := dependencyEdges.excluding(dependencyEdge)
     end
     
+    @Operation removeObjectNode(objectNode)
+      self.objectNodes := self.objectNodes->excluding(objectNode)
+    end
+    
     @Operation removePackageNode(packageNode)
       self.packageNodes := packageNodes.excluding(packageNode)
     end 
@@ -550,6 +563,7 @@ context ClassDiagrams
         ClassNode   do self.removeClassNode(node)   end
         PackageNode do self.removePackageNode(node) end
         ElementNode do self.removeElementNode(node) end
+        ObjectNode  do self.removeObjectNode(node)  end
         else self
       end
     end

@@ -29,9 +29,7 @@ context ClassMapping
       let globalMenu = rightClickable.globalMenu(false);
           type = element.of();
           clientType = rightClickable.of()
-      in
-        xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,
-                                                  ElementXNode::proxyElementTarget);
+      in xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,ElementXNode::proxyElementTarget);
         globalMenu.add(MenuAction("Delete from Diagram Only",RightClickableProxy::proxyTarget,Seq{},DiagramsMapping::ElementXNode::deleteNodeFromDiagram));
         globalMenu.new();
         globalMenu

@@ -891,30 +891,48 @@ context ClassMapping
     end
 
     @Operation elementAdded(element,x,y)
+      if element <> null and element.isKindOf(Object)
+      then self.objectAdded(element,x,y)
+      else self.nonObjectAdded(element,x,y)
+      end
+    end
+    
+    @Operation objectAdded(element,x,y)
+      
+      // An object displays its simply-typed slot-values...
+          
+      let node = ObjectNode(element.of(),x,y) then
+          map = ObjectXNode(element,node,self) 
+      in @WithoutRendering(self.diagram)
+           self.add(map);
+           diagram.add(node);
+           node.new(diagram);
+           map.createSlotText();
+           map.elementChanged()
+         end
+      end
+    end
+    
+    @Operation nonObjectAdded(element,x,y)
       
       // A general element whose type is unknown to us is added to
       // the diagram. Use a generic representation for the element.
-      
-      // if not elementMaps->exists(map | map.element = element)
-      // then 
           
-          let label = @TypeCase(element)
-                         NamedElement do element.name().toString() end
-                         else element.toString()
-                       end then
-               node = ElementNode(element.of().pathSeq(),label,x,y) then
-               map = @TypeCase(element)
-                       NamedElement do NamedElementXNode(element,node) end
-                       else ElementXNode(element,node) 
-                     end
-           in 
-             @WithoutRendering(self.diagram)
-               self.add(map);
-               diagram.add(node);
-               node.new(diagram)
-             end
-           end
-      // end
+      let label = @TypeCase(element)
+                    NamedElement do element.name().toString() end
+                  else element.toString()
+                  end then
+          node = ElementNode(element.of().pathSeq(),label,x,y) then
+          map = @TypeCase(element)
+                   NamedElement do NamedElementXNode(element,node) end
+                else ElementXNode(element,node) 
+                end
+      in @WithoutRendering(self.diagram)
+           self.add(map);
+           diagram.add(node);
+           node.new(diagram)
+         end
+      end
     end
 
     @Operation elementNodeRemoved(elementNode)
@@ -1396,6 +1414,14 @@ context ClassMapping
       end
               
     end
+    
+    @Operation slotValueChanged(object,slot,newValue)
+      // Called when an object changes value. The simple
+      // valued slots in objects handle themselves via
+      // ObjectXNode. However this will get called when
+      // an edge between objects changes.
+      object
+    end
 
     @Operation toolGroups()
     
@@ -1486,6 +1512,24 @@ context ClassMapping
                  attributeToolGroups->isEmpty)
          then 
            diagram.defineToolGroup(languageName)
+         end;
+         
+         
+         @For i in package.imports when i.isReallyKindOf(Package) and not Seq{XCore,Root}->includes(i) do
+         
+            // The imports of a package are available as buttons in the palette
+            // to create objects on the diagram. This allows type and instance
+            // to be mixed on a single diagram...
+            
+            let name = i.name.toString();
+                map = self
+            in diagram.defineToolGroup(name);
+               @For class in i.classes when not(class.isAbstract) do
+                 let handler = @Operation(x,y) map.elementAdded(class(),x,y) end
+                 in diagram.defineNewHandler(name,class.name.toString(),false,"XCore/Object.gif",handler)
+                 end
+               end
+            end
          end;
 
          // Add in a catch all element creator that will offer all model element

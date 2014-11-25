@@ -246,8 +246,12 @@ end;
   XCore::Package::newEnum
 end;
 
-@Menu "Set Meta Package" on XCore::Package
+@Menu "Set":"Meta Package" on XCore::Package
   XCore::Package::setMetaPackage_redirect
+end;
+
+@Menu "Set":"Imports" on XCore::Package
+  XCore::Package::setImports_client
 end;
 
 @Menu "Add Element":"Choice" on XCore::Enum

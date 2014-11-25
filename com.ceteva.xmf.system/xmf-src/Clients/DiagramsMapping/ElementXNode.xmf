@@ -14,7 +14,7 @@ context DiagramsMapping
     end
 
     @Operation deleteNodeFromDiagram()
-      // Without daemons to avoid the edge deletion propogating to the model
+      // Without daemons to avoid the edge deletion propagating to the model
       let node = self.node();
           diagramMapping = self.owner then
           connectedEdges = diagramMapping.diagram.graph.edgesConnectedTo(node)
@@ -25,8 +25,7 @@ context DiagramsMapping
         end;
         @For map in diagramMapping.subMaps() do
           if map.isKindOf(ElementXEdge) andthen connectedEdges->includes(map.edge())
-          then
-            diagramMapping.remove(map)
+          then diagramMapping.remove(map)
           end
         end
       end

@@ -26,19 +26,23 @@ context TextEditor
       if url.hasPrefix("snippet:")
       then File(xmf.homeDir()+"/Snippets"+url.drop(8)).editText()
       else 
-        let path = self.getPath(url)
-        in if path.hasSuffix("xmodeler_search")
-           then 
-             let pattern = self.lookupQueryArg("pattern",url,"");
-                 type = self.lookupQueryArg("type",url,"Web")
-             in self.search(pattern,type)
+        if HTMLViewer::isURL(url)
+        then
+          let path = self.getPath(url)
+          in if path.hasSuffix("xmodeler_search")
+             then 
+               let pattern = self.lookupQueryArg("pattern",url,"");
+                   type = self.lookupQueryArg("type",url,"Web")
+               in self.search(pattern,type)
+               end
+             elseif path.hasSuffix("xmodeler_doc")
+             then self.requestDoc()
+             elseif path.hasSuffix("xmodeler_snippets")
+             then self.snippets()
+             else super(url)
              end
-           elseif path.hasSuffix("xmodeler_doc")
-           then self.requestDoc()
-           elseif path.hasSuffix("xmodeler_snippets")
-           then self.snippets()
-           else super(url)
-           end
+          end
+        else super(url)
         end
       end
     end

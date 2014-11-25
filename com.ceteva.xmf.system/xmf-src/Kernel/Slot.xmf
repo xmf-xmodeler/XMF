@@ -22,8 +22,24 @@ context XCore
       then name := Symbol(name)
       end
     end
-   @Operation toString() 
-     "Slot(" + name + "," + type.type + "," + value + ")"
-   end
+    @Operation setOwner(owner)
+      // Ignore this.
+      self
+    end
+    @Operation addTo(object)
+      let class = object.of()
+      in if class.isReallyKindOf(Class) 
+         then 
+           if class.allAttributes()->includes(type) 
+           then object.set(name,value)
+           else object
+           end
+         else object
+         end
+      end
+    end
+    @Operation toString() 
+      "Slot(" + name + "," + type.type + "," + value + ")"
+    end
   end
   
