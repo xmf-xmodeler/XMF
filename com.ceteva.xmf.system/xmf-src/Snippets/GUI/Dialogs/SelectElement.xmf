@@ -1,0 +1,12 @@
+parserImport Snippets;
+
+@Snippet "How to select a single element.";
+
+xmf.select(
+  "Which Class",          // Title.
+  "Select a class",       // Instruction.
+  XCore.classes->asSeq,   // Sequence of values.
+  Class,                  // Default.
+  @Operation(c)           // Turn a value to a string.
+    c.name.toString() 
+  end);

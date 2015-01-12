@@ -13,6 +13,22 @@ context Mosaic
         "shutDownAndSave" do self.shutDownAndSave(parameters) end
         "consoleDot"      do self.consoleDot(parameters)      end
         "nameLookup"      do self.nameLookup(parameters)      end
+        "send"            do self.sendEvent(parameters)       end
+      end
+    end
+    
+    @Operation sendEvent(parameters)
+      self.debug("send",parameters);
+      let target = parameters.at(0);
+          name = parameters.at(1);
+          args = parameters.at(2).asSeq()
+      in if xmf.handles().hasKey(target) 
+         then 
+           let element = xmf.handles().get(target)
+           in element.send(name,args)
+           end
+         else xmf.message("Cannot find target for handle: " + target)
+         end
       end
     end
     

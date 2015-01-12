@@ -10,7 +10,22 @@ context DiagramsMapping
   @Class ElementXNode extends ThemableMap
     
     @Operation checkDaemons()
-      @SlotValueChanged multi once ElementXNode::selectedChangedDaemon(self.node(),"selected") end
+      @SlotValueChanged multi once ElementXNode::selectedChangedDaemon(self.node(),"selected") end;
+      if self.element().isReallyKindOf(Object)
+      then 
+        @SlotValueChanged multi once ElementXNode::diagramElementStateChangedDaemon(self.element(),"*") end;
+        self.node().addListener(ElementXNode::nodeListener(self))
+      end
+    end
+    
+    @Operation nodeListener(map:ElementXNode)
+      @Operation(event:NodeEvent)
+        let diagramMapping = map.owner
+        in if diagramMapping <> null
+           then diagramMapping.nodeEvent(map,event)
+           end
+        end
+      end
     end
 
     @Operation deleteNodeFromDiagram()
@@ -33,6 +48,19 @@ context DiagramsMapping
 
     @Operation diagramElement()
       self.node()
+    end
+    
+    @Operation diagramElementStateChangedDaemon(object,slot,newValue,oldValue)
+    
+      // This is called when the element in an element mapping is an object that
+      // has just changed state. The diagram mapping is informed so that diagram-wide
+      // actions may take place as a result...
+      
+      let diagramMapping = self.owner
+      in if diagramMapping <> null
+         then diagramMapping.elementXNodeChangedState(self,ElementChangedEvent(object,slot,newValue,oldValue))
+         end
+      end
     end
     
     // sub classes should ensure that when the state of the element being mapped

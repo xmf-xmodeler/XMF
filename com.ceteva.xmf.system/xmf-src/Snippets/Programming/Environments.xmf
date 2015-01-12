@@ -1,0 +1,17 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Env;
+
+@Snippet "Working with environments.";
+
+// An environment maps keys (usually strings) to values.
+
+Root::e := NullEnv();
+
+Root::e := e.bind("x",10);
+
+Root::e := e.bind("y",20);
+
+e.lookup("x").println();
+e.lookup("y").println();

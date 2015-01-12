@@ -1,0 +1,21 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+
+@Snippet "How to control node movement on a diagram.";
+
+// Reset all listeners on classes...
+Class.removeDiagramListeners();
+
+Class.addDiagramListener(
+  DiagramNodeInstanceListener("NotPast400",
+    // A pre move listener returns a boolean that determines whether or not the node should move.
+    // This example keeps class nodes in the range([0,400],[0,400])...
+    @Operation(diagramMap:PackageXClassDiagram,elementMap:ClassXClassNode,event:DiagramEvent):Boolean
+      @When event.isKindOf(PreNodeMoveEvent) do 
+        event.doIt := event.x <= 400 and event.y <= 400
+      end
+    end));

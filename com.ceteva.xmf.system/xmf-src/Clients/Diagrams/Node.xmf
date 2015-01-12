@@ -11,16 +11,17 @@ context Diagrams
   
     @Bind defaultIcon = "logo.jpg" end
   
-    @Attribute icon		  : Image			(?)   end
-    @Attribute ports      : Seq(Port)       (+,?) end
-    @Attribute x          : Integer         (!,?) end
-    @Attribute y          : Integer         (!,?) end
-    @Attribute width      : Integer         (!,?) end
-    @Attribute height     : Integer         (!,?) end
-    @Attribute iconised   : Boolean = false (?)   end
-    @Attribute hidden     : Boolean = false (?)   end
-    @Attribute selected   : Boolean = false (?,!) end
-    @Attribute selectable : Boolean = true  (?,!) end
+    @Attribute icon		           : Image			(?)   end
+    @Attribute ports               : Seq(Port)       (+,?) end
+    @Attribute x                   : Integer         (!,?) end
+    @Attribute y                   : Integer         (!,?) end
+    @Attribute width               : Integer         (!,?) end
+    @Attribute height              : Integer         (!,?) end
+    @Attribute iconised            : Boolean = false (?)   end
+    @Attribute hidden              : Boolean = false (?)   end
+    @Attribute selected            : Boolean = false (?,!) end
+    @Attribute selectable          : Boolean = true  (?,!) end
+    @Attribute listeners           : Seq(Operation)        end
     
     @Constructor(x,y,width,height) 
     end
@@ -34,6 +35,15 @@ context Diagrams
          Display do self.addToDisplays(element) end
          Port    do self.addToPorts(element) end
       end
+    end
+    
+    @Operation addListener(o:Operation)
+      // The operation is supplied with an event.
+      self.listeners := listeners->including(o)
+    end
+    
+    @Operation removeListener(o:Operation)
+      self.listeners := listeners->excluding(o)
     end
     
     @Operation addPorts()
@@ -298,19 +308,42 @@ context Diagrams
     
       // Move the node and inform any incident edges
       // that the source or target of the edge has
-      // moved.
+      // moved. The pre-move listeners can prevent the
+      // move taking place by returning false. Note that
+      // The GUI may have moved the node already in the 
+      // client so we must issue a command to that effect
+      // to ensure that XModeler and the client are in sync.
+      
       @When newx <> x or newy <> y do
         let oldx = x;
-            oldy = y
-        in self.x := newx;
-           self.y := newy;
-           @Command(self) moveCommand(self,newx,newy) end;
-           @For edge in self.diagram().edges()do
-             if edge.sourceNode() = self 
-             then edge.sourceMoved(self,newx,newy,oldx,oldy)
-             elseif edge.targetNode() = self
-             then edge.targetMoved(self,newx,newy,oldx,oldy)
+            oldy = y;
+            doMove = true
+        in @For l in listeners do
+             let event = PreNodeMoveEvent(self,newx,newy,true)
+             in l(event);
+                doMove := event.doIt;
+                newx   := event.x;
+                newy   := event.y
              end
+           end;
+           if doMove
+           then 
+             self.x := newx;
+             self.y := newy;
+             @Command(self) moveCommand(self,newx,newy) end;
+             @For edge in self.diagram().edges() do
+               if edge.sourceNode() = self 
+               then edge.sourceMoved(self,newx,newy,oldx,oldy)
+               elseif edge.targetNode() = self
+               then edge.targetMoved(self,newx,newy,oldx,oldy)
+               end
+             end;
+             @For l in listeners do 
+               let event = PostNodeMoveEvent(self)
+               in l(event) 
+               end
+             end
+           else @Command(self) moveCommand(self,oldx,oldy) end
            end
         end
       end
@@ -485,18 +518,36 @@ context Diagrams
       // the contents of the node. Sub-classes of
       // node should handle their contents appropriately.
       
-      // if width <> self.width or height <> self.height()
-      // then
-        let width = width.max(self.minWidth());
-            height = height.max(self.minHeight())
-        in @When self.width <> width or self.height <> height do
-             @Command(self) resizeCommand(self,width,height) end;
-             self.width := width;
-             self.height := height
+      let oldWidth = self.width;
+          oldHeight = self.height;
+          width = width.max(self.minWidth());
+          height = height.max(self.minHeight()) then
+          doResize = true
+      in @For l in listeners do
+           let event = PreNodeResizeEvent(self,width,height,true)
+           in l(event);
+              doResize := event.doIt;
+              width    := event.width;
+              height   := event.height
            end
-        end
-      // end
-      
+         end;
+         @When self.width <> width or self.height <> height do
+           if doResize
+           then 
+             @Command(self) resizeCommand(self,width,height) end;             
+             self.width := width;
+             self.height := height;
+             @For l in listeners do 
+               let event = PostNodeResizeEvent(self)
+               in l(event)
+               end
+             end
+           else 
+             // Make sure the GUI client is in sync...
+             @Command(self) resizeCommand(self,self.width,self.height) end
+           end
+         end
+      end
     end
     
     @Operation resized(display)

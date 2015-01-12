@@ -4,50 +4,6 @@ import DocTables;
 import Basic;
 import Forms;
 import IO; 
-
-context Root
-  @Operation testPage()
-      Page("Test",Seq{
-        Form(Seq{
-          CheckBox("isTrue",true),
-          ComboBox("choice",Seq{1,2,3},Seq{1,2,3}),
-          Button(
-            "Button1",
-            @Operation(isTrue,choice)
-              Page("",Seq{
-                Text("Button 1: choice = " + choice),
-                Form("action",Seq{
-                  Button(
-                    "Back",
-                    @Operation()
-                      testPage()
-                    end
-                  )
-                })
-                
-              })
-            end
-          ),
-          Button(
-            "Button2",
-            @Operation(choice)
-              Page("",Seq{
-                Text("Button 2: choice = " + choice),
-                Form("action",Seq{
-                  Button(
-                    "Back",
-                    @Operation()
-                      testPage()
-                    end
-                  )
-                })
-                
-              })
-            end
-          )
-        })
-      })
-  end
   
 context Root
 
@@ -55,37 +11,84 @@ context Root
   
     @Class DrinksClub
     
+      // A drinks club manages a collection of people that share some drinks that
+      // are used and paid for via credits. An administrator adds members and types
+      // of drink. Each member has a number of credits that are depleted each time
+      // they make a drink.
+    
       @Attribute adminPassword : String (?) end
-      @Attribute members : Seq(Member) (+) end
-      @Attribute drinks : Seq(Drink) (+) end
-      @Attribute transactions : Seq(Transaction) (+) end
+      @Attribute members       : Seq(Member) (+) end
+      @Attribute drinks        : Seq(Drink) (+) end
+      @Attribute transactions  : Seq(Transaction) (+) end
       
-      @Constructor(adminPassword) ! end
+      @Constructor(adminPassword) ! 
+        // Always create a drinks club with an admin password. Otherwise
+        // you cannot add members or create drinks.
+      end
       
       @Operation report():Page
-        Page("Report",Seq{
-          Table("",transactions->collect(t | t.report()))
-        })
+        Page("Report",[Table("",transactions->collect(t | t.report()))])
       end
       
       @Operation run()
       
         @Letrec
         
+          // The mutually recursive operations are used to handle
+          // events, to update the instances of the drinks club, and
+          // to create GUI pages. They are mutually recursive in order
+          // to allow handlers in one page to refer to any other page.
+        
           login() =
-            Page("Login",Seq{
-              Text("Drinks Club"),
-              Form("/DrinksClub/login",Seq{
+            // A page has an identifier and a sequence of entries.
+            // The starting operation and all event handlers must produce
+            // pages...
+            Page("Login",[
+              // A divider has style information and a sequence of
+              // entries. The style declarations apply to all entries...
+              Div("font-size:300%;",[Text("Drinks Club")]),
+              Form("/DrinksClub/login",[
+                Break(),
+                // The following division creates a dashed border around some instructive text
+                // with a coloured background...
+                Div("border-color:blue;border-style:dashed;border-width:1px;background-color:lightsteelblue;font-size:120%;",[
+                  Text("Welcome to the drinks club. This system manages your drinks account.
+                        Type your password to login as a member or as an administrator If you
+                        do not have an account, contact your administrator who will set one
+                        up.")]),
+                Break(),
+                // A password field must occur in a form and has an identifier. Any event
+                // handler in the form can reference the password by looking the value up
+                // using the identifier in the environment supplied to the handler.
                 PasswordField("password",20),
+                Break(),
+                // A button has a label and a handler. The handler should be an operation
+                // whose arguments have names that are identifiers of data (fields etc) on
+                // the containing form. The handler will be supplied with the values of
+                // the fields...
                 Button("Member Login",memberLogin),
+                Break(),
                 Button("Admin Login",adminLogin)
-              })
-            });
+              ])
+            ]);
             
           memberLogin(password) = 
+          
+            // This is called when the user pressed the Member Login button.
+            // It is supplied with the value of the input field whose identifier
+            // is "password". It must return a page...
+            
             @Find(member,members)
               when member.password() = password
-              do Page("Member Login",Seq{
+              do Page("Member Login",[
+                   Div("font-size:300%;",[Text("Drinks Club")]),
+                   Break(),
+                   Div("background-color:lightsteelblue;font-size:120%;",[
+                     Text("This screen allows you to purchase a drink.
+                           Choose from the list of available drinks below.
+                           You will be informed if you do not have sufficient funds.
+                           Otherwise your account will be debited with the price of the drink.")]),
+                     Break(),
               
                    // Tell the member how many credits they have...
                    
@@ -96,6 +99,9 @@ context Root
                      
                      drinks->collect(drink | 
                        drink.buyButton(member,
+                         // Note that each drink creates a button that is supplied with 
+                         // a continuation that will be responsible for handling the
+                         // button-push and returning a new page...
                          @Operation(transaction) 
                            if transaction <> null 
                            then self.addToTransactions(transaction) 
@@ -105,9 +111,9 @@ context Root
                          
                      // Add a button for logging out...
                      
-                     Seq{Button("Logout",login)}
+                     [Button("Logout",login)]
                    )
-                 })
+                 ])
                  
               // If the password was not recognized then loop
               // pack to the login page...
@@ -118,16 +124,20 @@ context Root
           adminLogin(password) = 
             if password = adminPassword
             then 
-              Page("Admin",Seq{
-                Text("Admin Functions"),
-                Form("/DrinksClub/login",Seq{
-                  Button("Report",report),
-                  Button("Deposit",deposit),
-                  Button("Add Member",addMember),
-                  Button("Add Drink",addDrink),
+              Page("Admin",[
+                Div("font-size:300%;",[Text("Administration")]),
+                Break(),
+                Div("background-color:lightsteelblue;font-size:120%;",[
+                  Text("Use the following functions to manage the drinks club.")]),
+                Break(),
+                Form("/DrinksClub/login",[
+                  Button("Report",report),Text("Show all Drink Club activity."),Break(),
+                  Button("Deposit",deposit),Text("Change the balance of a member."),Break(),
+                  Button("Add Member",addMember),Text("Create a new member."),Break(),
+                  Button("Add Drink",addDrink),Text("Create a new type of drink."),Break(),
                   Button("Logout",login)
-                })
-            })
+                ])
+            ])
                  
             // If the password was not recognized then loop
             // pack to the login page...
@@ -136,25 +146,30 @@ context Root
             end;
             
           report() = 
-            Page("Report",Seq{
-              Text("Transactions:"),
+            Page("Report",[
+              Div("font-size:300%;",[Text("Transactions")]),
+              Break(),
               Table("", transactions->collect(transaction | transaction.report())),
-              Form("/DrinksClub/login",Seq{Button("OK",@Operation() adminLogin(adminPassword) end)})
-            });
+              Form("/DrinksClub/login",[Button("OK",@Operation() adminLogin(adminPassword) end)])
+            ]);
           
           deposit()= 
-            Page(Seq{
-              Text("Deposit"),
-              Form("/DrinksClub/login",Seq{
+            Page([
+              Div("font-size:300%;",[Text("Deposit")]),
+              Break(),
+              Form("/DrinksClub/login",[
                 Table("",
                   members->collect(member |
-                    Row(Seq{
+                    Row([
                       Col(Text(member.name())),
                       Col(TextField(member.name(),20,member.credits()))
-                    })
+                    ])
                   )
                 ),
                 Button("OK",
+                  // The complete environment binding the identifiers and their values
+                  // on the current form is supplied as the value of the special variable
+                  // 'env',...
                   @Operation(env) 
                     @For member in members do
                       let amount = env.lookup(member.name())
@@ -163,52 +178,39 @@ context Root
                     end;
                     adminLogin(adminPassword) 
                   end)
-              })
-            });
+              ])
+            ]);
           
           addMember() = 
-            Page("Add Member",Seq{
-              Text("Add Member"),
-              Form("/DrinksClub/login",Seq{
-                Table("",Seq{
-                  Row(Seq{
-                    Col(Text("Name")),
-                    Col(TextField("name",20))
-                  }),
-                  Row(Seq{
-                    Col(Text("Password")),
-                    Col(TextField("password",20))
-                  }),
-                  Row(Seq{
-                    Col(Text("Amount")),
-                    Col(TextField("amount",20))
-                  })
-                }),
+            Page("Add Member",[
+              Div("font-size:300%;",[Text("Add Member")]),
+              Break(),
+              Form("/DrinksClub/login",[
+                Table("",[
+                  Row([Col(Text("Name")),Col(TextField("name",20))]),
+                  Row([Col(Text("Password")),Col(TextField("password",20))]),
+                  Row([Col(Text("Amount")),Col(TextField("amount",20))])
+                ]),
                 Button("Add",registerMember)
-              })
-            });
+              ])
+            ]);
             
           registerMember(name,password,amount) =
             (self.addToMembers(Member(name,password,amount.asInt()));
              adminLogin(adminPassword));
           
           addDrink() = 
-            Page("Add Drink",Seq{
-              Text("Add Drink"),
-              Form("/DrinksClub/login",Seq{
-                Table("",Seq{
-                  Row(Seq{
-                    Col(Text("Name")),
-                    Col(TextField("name",20))
-                  }),
-                  Row(Seq{
-                    Col(Text("Cost")),
-                    Col(TextField("cost",20))
-                  })
-                }),
+            Page("Add Drink",[
+              Div("font-size:300%;",[Text("Add Drink")]),
+              Break(),
+              Form("/DrinksClub/login",[
+                Table("",[
+                  Row([Col(Text("Name")),Col(TextField("name",20))]),
+                  Row([Col(Text("Cost")),Col(TextField("cost",20))])
+                ]),
                 Button("Add",registerDrink)
-              })
-            });
+              ])
+            ]);
             
           registerDrink(name,cost) =
             (self.addToDrinks(Drink(name,cost.asInt()));
@@ -234,15 +236,13 @@ context Root
         self.addToDrinks(Drink(name,cost))
       end
       
-      
-      
     end
     
     @Class Member
     
-      @Attribute name : String (?) end
+      @Attribute name     : String (?) end
       @Attribute password : String (?) end
-      @Attribute credits : Integer (?,!) end
+      @Attribute credits  : Integer (?,!) end
       
       @Constructor(name,password,credits) ! end
       
@@ -250,18 +250,18 @@ context Root
         if credits > drink.cost()
         then
           self.credits := credits - drink.cost();
-          Page("OK",Seq{
+          Page("OK",[
             Text("You bought a " + drink.name() + " for " + drink.cost() + "p"),
-            Form("/DrinksClub/login",Seq{
+            Form("/DrinksClub/login",[
               Button("OK",@Operation() cont(Transaction(self,drink,xmf.date())) end)
-            })
-          })
+            ])
+          ])
         else
-          Page("Insufficient Funds",Seq{
-            Form("/DrinksClub/login",Seq{
+          Page("Insufficient Funds",[
+            Form("/DrinksClub/login",[
               Button("OK",@Operation() cont(null) end)
-            })
-          })
+            ])
+          ])
         end
       end
       
@@ -293,7 +293,7 @@ context Root
       @Constructor(member,drink,date) ! end
       
       @Operation report()
-        Row(Seq{Col(Text(member.name())),Col(Text(member.credits())),Col(Text(drink.name())),Col(Text(date))})
+        Row([Col(Text(member.name())),Col(Text(member.credits())),Col(Text(drink.name())),Col(Text(date))])
       end
       
     end

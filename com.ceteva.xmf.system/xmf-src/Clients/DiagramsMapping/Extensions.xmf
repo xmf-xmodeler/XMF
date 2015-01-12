@@ -13,11 +13,83 @@ context Diagram
   @Operation toString()
     let fullText = name;
         elements = xmf.diagramManager().elementsFor(self)
-    in
-      if not elements->isEmpty
-      then
-        fullText := elements->head.nameString() + "(" + fullText + ")"
-      end;
-      fullText
+    in if not elements->isEmpty
+       then fullText := elements->head.nameString() + "(" + fullText + ")"
+       end;
+       fullText
     end
   end
+  
+context Object
+  @Operation changedOnDiagram(diagramMap:ElementXDiagram,mapping:ElementXDiagram,event:ElementChangedEvent)
+    // This is called when the receiver is mapped by the diagram and its slot
+    // has just changed. It runs the self listeners and the type listeners.
+    @For l in self.getDiagramListeners() when l.isKindOf(DiagramSelfListener) do
+      l.activate(diagramMap,mapping,event)
+    end;
+    @For l in self.of().getDiagramListeners() when l.isKindOf(DiagramInstanceListener) do
+      l.activate(diagramMap,mapping,event)
+    end
+  end
+  
+context Object
+  @Operation nodeEvent(diagramMap:ElementXDiagram,mapping:ElementXDiagram,event:NodeEvent)
+    // This is called when the receiver is mapped to a node on the diagram and the node
+    // event has just occurred.
+    @For l in self.getDiagramListeners() when l.isKindOf(DiagramNodeSelfListener) do
+      l.activate(diagramMap,mapping,event)
+    end;
+    @For l in self.of().getDiagramListeners() when l.isKindOf(DiagramNodeInstanceListener) do
+      l.activate(diagramMap,mapping,event)
+    end
+  end
+  
+context DiagramsMapping
+  @Class DiagramListener isabstract
+    @Attribute name   : String    end
+    @Attribute action : Operation end
+    @Constructor(name,action) !   end
+    @Operation activate(diagramMap:ElementXDiagram,mapping:ElementXDiagram,event:DiagramEvent)
+      try action(diagramMap,mapping,event)
+      catch(exception)
+        exception.println()
+      end
+    end
+  end
+  
+context DiagramsMapping
+  @Class DiagramInstanceListener extends DiagramListener 
+   // Create instances of these and add them to classes to listen to changes to
+   // the instances of the class on a diagram.
+  end
+  
+context DiagramsMapping
+  @Class DiagramSelfListener extends DiagramListener 
+   // An object is listening to changes on itself.
+  end
+  
+context DiagramsMapping
+  @Class DiagramNodeListener extends DiagramListener 
+    // Listening to changes to nodes.
+  end
+  
+context DiagramsMapping
+  @Class DiagramNodeInstanceListener extends DiagramNodeListener 
+    // Listening to changes to nodes.
+  end
+  
+context DiagramsMapping
+  @Class DiagramNodeSelfListener extends DiagramNodeListener 
+    // Listening to changes to nodes.
+  end
+    
+let listeners = Table(100) then
+    virtualGetListeners(object) = if listeners.hasKey(object) then listeners.get(object) else listeners.put(object,Seq{}); Seq{} end then
+    virtualAddListener(object,listener) = let l = virtualGetListeners(object) in listeners.put(object,l->including(listener)) end;
+    virtualRemListener(object,listener) = let l = virtualGetListeners(object) in listeners.put(object,l->excluding(listener)) end
+in Object.add(@Operation addDiagramListener(l:DiagramListener) virtualAddListener(self,l) end);
+   Object.add(@Operation getDiagramListeners():Seq(DiagramListener) virtualGetListeners(self) end);
+   Object.add(@Operation removeDiagramListener(l:DiagramListener) virtualRemListener(self,l) end);
+   Object.add(@Operation removeDiagramListeners() listeners.put(self,Seq{}) end);
+   Object.add(@Operation getDiagramListenerNamed(n:String) @Find(l,virtualGetListeners(self)) when l.name = n else null end end)
+end;

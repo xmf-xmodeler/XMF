@@ -1,0 +1,32 @@
+parserImport XOCL;
+parserImport Snippets;
+
+// Import the language Grammar...
+parserImport Parser::BNF;
+
+// Import the class XOCL::Sugar...
+import XOCL;
+
+@Snippet "Syntactic Sugar.";
+  
+context Root
+  @Class EnsureList extends Sugar
+    // The syntax class EnsureList provides a new construct @EnsureList[x] where
+    // x is any expression. If x is not a list then the result is Seq{x} otherwise
+    // x is returned...
+    @Attribute exp : Performable end
+    @Grammar extends OCL::OCL.grammar
+      // The grammar imports OCL and references the rule for Exp.
+      // Since EnsureList is a subclass of Sugar, the rule synthesizes an instance...
+      EnsureList ::= '[' e=Exp ']' { EnsureList(e) }.
+    end
+    @Constructor(exp) ! end
+    @Operation desugar():Performable
+      // All instances of Sugar must provide a desugar operation...
+      [| let l = <exp> in if l.isReallyKindOf(Seq(Element)) then l else Seq{l} end end |] 
+    end
+  end
+  
+// Try These after loading the file..
+// @EnsureList[1];
+// @EnsureList[Seq{1,2,3}];

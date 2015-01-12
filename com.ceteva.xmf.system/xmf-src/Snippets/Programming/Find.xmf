@@ -1,0 +1,14 @@
+parserImport XOCL;
+parserImport Snippets;
+parserImport Walkers;
+
+@Snippet "How to find an arbitrary XMF value.";
+
+// Find will bind a name to each element that satisfies a predicate that is encountered by starting 
+// at a supplied root. In the following example, we are looking for all objects contained in the xmf
+// object with slots whose value is 100. This will take a while since the xmf object references the
+// whole XModeler system. Expect a large amount of GC. Duration is about a minute on my machine.
+
+@Find o in xmf when o.isReallyKindOf(Object) andthen o.slots()->exists(s | s.value = 100) limit 100 do
+  o.println()
+end;

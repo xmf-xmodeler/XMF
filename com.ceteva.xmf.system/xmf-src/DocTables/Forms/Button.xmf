@@ -26,9 +26,11 @@ context Forms
     @Attribute label : String (?,!) end
     @Attribute value : String (?,!) end
     
-    @Constructor(value,handler) !
+    @Constructor(value,handler) 
       self.label := self.generateLabel()
     end
+    
+    @Constructor(label,value,handler) ! end
     
     @Operation args()
       handler.sig()->butLast->collect(sigEntry | sigEntry->head.toString())
@@ -43,7 +45,7 @@ context Forms
       then 
         let values = self.args()->collect(a | 
               if env.binds(a)
-              then env.lookup(a)
+              then env.lookup(a)->head
               elseif a = "env"
               then env
               else false

@@ -1,0 +1,13 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Opening name-spaces.";
+
+// A name-space may be imported in a file using the import keyword in the
+// file header. A name-space can also be opened for the scope of an 
+// expression e using @Open n1,n2,...,nk in e end in compiled code.
+
+@Open Graphs in
+  Node.println();
+  Edge.println()
+end;

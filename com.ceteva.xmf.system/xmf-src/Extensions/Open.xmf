@@ -1,0 +1,52 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+import XOCL;
+import Parser::BNF;
+
+context XOCL
+
+  @Class Open extends Sugar
+  
+    @Doc
+      Open a collection of name-spaces for the scope of an expression.
+      Currently this will only work in compiled code.
+    end
+  
+    @Grammar extends OCL::OCL.grammar
+    
+      Open ::= ns = CommaSepExps 'in' e=Exp 'end' { Open(ns,e) }.
+      
+    end 
+    
+    @Attribute namespaces : Seq(Performable) end
+    @Attribute body       : Performable end
+    
+    @Constructor(namespaces,body) end
+    
+    @Operation desugar()
+      [| @Operation() <namespaces->iterate(ns e=body | self.desugarOpenNamespace(ns,e))> end() |]
+    end
+    
+    @Operation desugarOpenNamespace(nameSpace:Performable,exp:Performable):Performable
+      [| let NNN = <nameSpace>
+         in if NNN.isReallyKindOf(XCore::NameSpace)
+            then Kernel_import(NNN.contents); <exp> 
+            else error("cannot open non-namespace: " + NNN)
+            end
+         end |]
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@Record(");
+      class.pprint(out,indent);
+      format(out,")~%~Vend",Seq{indent + 2});
+      @For slot in slots do
+        format(out,"~S = ",Seq{slot->at(0)});
+        slot->at(1).pprint(out,indent+2);
+        if not isLast then format(out,",~%~V",Seq{indent+2}) end
+      end;
+      format(out," end")
+    end
+    
+  end

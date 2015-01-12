@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Clients;
+import ModelClipboard;
+import Diagrams;
+import Menus;
+
+context Diagrams
+
+  @Class PreNodeMoveEvent extends NodeEvent
+  
+    @Attribute x    : Integer (?) end
+    @Attribute y    : Integer (?) end
+    @Attribute doIt : Boolean (?) end
+    
+    @Constructor(target,x,y,doIt) ! end
+   
+  end

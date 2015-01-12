@@ -1,0 +1,59 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to call-back from Java classes.";
+
+// package test;
+// import java.awt.Button;
+// import java.awt.Frame;
+// import java.awt.event.ActionEvent;
+// import java.awt.event.ActionListener;
+// import tool.clients.workbench.WorkbenchClient;
+// import xos.Value;
+// public class CallBackTest extends Frame implements ActionListener {
+//   String title;
+//   int    counter = 0;
+//   int    handler;
+//   public CallBackTest(String title, int x, int y, int width, int height, int handler) {
+//     this.title = title;
+//     this.handler = handler;
+//     Button button = new Button("Increment");
+//     add(button);
+//     button.addActionListener(this);
+//     setTitle(title);
+//     setLocation(x, y);
+//     setSize(width, height);
+//     setVisible(true);
+//   }
+//   public void inc() {
+//     counter++;
+//     setTitle(title + "[" + counter + "]");
+//   }
+//   public void actionPerformed(ActionEvent e) {
+//     inc();
+//     WorkbenchClient.theClient().send(handler, "showCounter", new Value(counter));
+//   }
+// }
+
+context Root
+  @Class BackAndForth
+    @Attribute tool : ForeignObject end
+    @Constructor() 
+      self.createGUI()
+    end
+    @Operation createGUI()
+      // Load the Java class and get a handle for self.
+      // Thehandle can be supplied to a Java object so
+      // that it can be sent a messagevia a call-back...
+      let Tool = xmf.javaClass("test.CallBackTest") then
+          handle = xmf.getHandle(self)
+      in self.tool := Tool("Counter Value",200,200,200,50,handle)
+      end
+    end
+    @Operation showCounter(counter)
+      // Print out the supplied counter value and then send
+      // the Java object an 'inc' message.
+      format(stdout, "counter = ~S~%",Seq{counter});
+      tool.inc()
+    end
+  end

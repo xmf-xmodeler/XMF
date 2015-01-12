@@ -1,0 +1,10 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to filter contents in a name-space.";
+  
+Root::allClasses := Root.allContentsOf(Class);
+
+Root::allDoubleInheritance := Root.allContentsThat(@Operation(x) x.isReallyKindOf(Class) andthen x.parents->size = 2 end);
+
+Root::allTripleInheritance := Root.allContentsThat(@Operation(x) x.isReallyKindOf(Class) andthen x.parents->size = 3 end);

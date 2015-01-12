@@ -161,10 +161,6 @@ context ClassMapping
     
     @Operation checkNodeDaemons()
       @SlotValueChanged multi once   ClassXNode::nameChangedDaemon(node.name.name,"text")               end;
-      // @SlotValueChanged multi once + ClassXNode::attributeAddedDaemon(node.attBox,"displays")           end;
-      // @SlotValueChanged multi once - ClassXNode::attributeRemovedDaemon(node.attBox,"displays")         end;
-      // @SlotValueChanged multi once + ClassXNode::operationAddedDaemon(node.opsBox,"displays")           end;
-      // @SlotValueChanged multi once - ClassXNode::operationRemovedDaemon(node.opsBox,"displays")         end;
       @SlotValueChanged multi once   ClassXNode::attributesShownChangedDaemon(node.attBox,"shown")      end;
       @SlotValueChanged multi once   ClassXNode::opsShownChangedDaemon(node.opsBox,"shown")             end;
       @SlotValueChanged multi once   ClassXNode::metaSlotsShownChangedDaemon(node.metaslotsBox,"shown") end

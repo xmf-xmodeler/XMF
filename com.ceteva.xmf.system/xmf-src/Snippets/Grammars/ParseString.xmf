@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Snippets;
+
+// Import the language Grammar...
+parserImport Parser::BNF;
+
+@Snippet "Parsing Strings.";
+  
+context Root
+  @Class Arithmetic 
+    // Parses an arithmetic expresion and returns a sequence of atoms and
+    // operators in post-fix format...
+    @Grammar 
+      Arithmetic ::= e=Atom Tail^(e).
+      Atom       ::= a=(Name | Int) { Seq{a} } | '(' e=Arithmetic ')' {e}.
+      Tail(left) ::= o=Op right=Arithmetic { left+right+Seq{o} } | { left }.
+      Op         ::= '+' {"+"} | '-' {"-"} | '*' {"*"} | '/' {"/"}.
+    end
+  end
+
+// The parseString operator has 3 formats:
+// (1) Just the string, start at the default rule with the same name as the class...
+Arithmetic.grammar.parseString("10 + x * (y-1)").println();
+// (2) Supply the starting rule and a sequence of name-spaces to import...
+Arithmetic.grammar.parseString("10 + x * (y-1)","Arithmetic",Seq{}).println();
+// (3) As for (2), but supply the arguments to the rule...
+Arithmetic.grammar.parseString("+ x * (y-1)","Tail",Seq{Seq{10}},Seq{}).println();

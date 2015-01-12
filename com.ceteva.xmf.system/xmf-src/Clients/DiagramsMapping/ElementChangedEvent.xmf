@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+
+context DiagramsMapping
+
+  @Class ElementChangedEvent extends DiagramEvent
+    
+    @Attribute name     : Symbol   end
+    @Attribute newValue : Element  end
+    @Attribute oldValue : Element  end
+    
+    @Constructor(target,name,newValue,oldValue) end
+    
+  end

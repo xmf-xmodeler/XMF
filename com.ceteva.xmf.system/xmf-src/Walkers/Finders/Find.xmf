@@ -13,18 +13,19 @@ context Walkers
       value that satisfy the supplied predicate. To use this, construct with a 
       single argument predicate and supply the root of the walk to the 'walk'
       operation. The second argument to 'walk' may be an integer to limit the depth
-      of the walk or null for no limit.
+      of the walk or -1 for no limit.
     end
   
-    @Attribute predicate : Operation end      // An operation.
-    @Attribute results : Seq(Element) (+) end // The values that satisfy the predicate.
+    @Attribute predicate  : Operation        end      // The predicate.
+    @Attribute results    : Seq(Element) (+) end      // The values that satisfy the predicate.
+    @Attribute duplicates : Boolean          end      // Keep duplicates or not.
     
-    @Constructor(predicate) !
-    end
+    @Constructor(predicate)                  end
+    @Constructor(predicate,duplicates)     ! end
     
     @Grammar extends OCL::OCL.grammar
-      Find ::= n = Name 'in' v = Exp 'when' p = Exp 'limit' l = (Exp | { [| 0-1 |] }) b = ('do' Exp | { OCL::Var(n) }) 'end' {
-        [| let walker = Walkers::Find(@Operation(<n>) <p> end) 
+      Find ::= n = Name 'in' v = Exp 'when' p = Exp l = ('limit' Exp | { [| 0-1 |] }) d = ('duplicates' Exp | { [| false |] }) b = ('do' Exp | { OCL::Var(n) }) 'end' {
+        [| let walker = Walkers::Find(@Operation(<n>) <p> end,<d>) 
            in walker.walk(<v>,<l>);
               walker.results->collect(<n> | <b>)
            end |] 
@@ -47,7 +48,12 @@ context Walkers
       if limit <> 0 and element <> self
       then
         if predicate(element)
-        then self.results := Seq{element|results}
+        then 
+          if duplicates 
+          then self.results := Seq{element|results}
+          elseif not(results->includes(element)) 
+          then self.results := Seq{element|results}
+          end
         end;
         super(element,limit)
       end

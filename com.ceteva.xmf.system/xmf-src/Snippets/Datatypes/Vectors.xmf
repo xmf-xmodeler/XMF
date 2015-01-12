@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Vectors.";
+
+// Some key vector operations. Browse XCore::Vector for more details.
+
+Root::v := Vector(5);
+
+v.put(0,10);
+v.put(1,11);
+v.put(2,12);
+v.put(3,13);
+v.put(4,14);
+
+v.println();
+
+v.ref(2).println();
+v.indexOf(12).println();
+v.size().println();
+
+v.asSeq().println();

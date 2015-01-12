@@ -1,0 +1,47 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Integers.";
+
+// Some key integer operations. Browse XCore::Integer for more details.
+
+// Conversions...
+123.asFloat().println();
+123.asSeq().println();
+123.toString().println();
+
+// Comparison...
+123.max(100).println();
+123.min(100).println();
+
+// Modulo...
+123.mod(2).println();
+
+// Square Root...
+123.sqrt().println();
+
+// Sequence...
+0.to(20).println();
+
+// Character codes...
+
+Root::a       := 97;
+Root::A       := 97 - 26;
+Root::one     := 49;
+Root::newline := 10;
+Root::space   := 32;
+
+// Character predicates...
+
+a.isAlphaChar().println();
+a.isLowerCaseChar().println();
+a.isUpperCaseChar().println();
+A.isUpperCaseChar().println();
+one.isNumericChar().println();
+newline.isNewLineChar().println();
+space.isWhiteSpaceChar().println();
+
+// Random number ...
+
+Integer::random(10).println();
+

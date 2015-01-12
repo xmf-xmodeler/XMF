@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+import Menus;
+import UseCaseDiagrams;
+
+context UseCaseDiagrams
+
+  @Class Specialize extends Edge
+  
+    @Constructor(source,target) 
+      self.init(Seq{null,source,target,0,Edge::whiteArrow,Set{},Seq{},Color()});
+      self.setMenuKey(self)
+    end
+
+    @Operation buildGlobalMenu()
+      let globalMenu = super();
+          target = RightClickable::selfTarget
+      in globalMenu.add(MenuAction("Delete","CTRL+D",target,Seq{},Edge::delete));
+         globalMenu
+      end
+    end
+    
+  end
+  

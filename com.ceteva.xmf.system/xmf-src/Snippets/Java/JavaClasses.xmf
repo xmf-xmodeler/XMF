@@ -1,0 +1,24 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to use Java classes.";
+
+context Root
+  @Operation createGUI()
+  
+    // Java classes are loaded by supplying the xmf object
+    // with the full class name. They can be instantiated
+    // by applying them to appropriate constructor arguments.
+    // Java object public fields can be referenced and public
+    // methods can be invoked...
+    
+    let Frame = xmf.javaClass("java.awt.Frame");
+        TextArea = xmf.javaClass("java.awt.TextArea") then
+        f = Frame("I am an example window.");
+        t = TextArea("Hi There!",5,40)
+    in f.add(t);
+       f.setLocation(200,200);
+       f.setSize(500,500);
+       f.setVisible(true)
+    end
+  end

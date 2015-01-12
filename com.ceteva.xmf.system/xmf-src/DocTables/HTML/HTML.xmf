@@ -65,6 +65,22 @@ context Col
     format(out,"</td>")
   end  
   
+context Div    
+  @Operation html(out:OutputChannel)
+    format(out, "<div",Seq{});
+    if id <> "" 
+    then format(out, " id=~S",Seq{id})
+    end;
+    if style <> "" 
+    then format(out, " style=~S",Seq{style})
+    end;
+    format(out, ">",Seq{});
+    @For entry in entries do
+      entry.html(out)
+    end;
+    format(out, "</div>",Seq{})
+  end 
+  
 context Entries    
   @Operation html(out:OutputChannel)
     @For entry in entries do
@@ -262,7 +278,20 @@ context ComboBox
       end
     end;
     format(out,"</select>")
-  end  
+  end    
+  
+context Span    
+  @Operation html(out:OutputChannel)
+    format(out, "<span",Seq{});
+    if style <> "" 
+    then format(out, " style=~S",Seq{style})
+    end;
+    format(out, ">",Seq{});
+    @For entry in entries do
+      entry.html(out)
+    end;
+    format(out, "</span>",Seq{})
+  end 
   
 context TextField    
   @Operation html(out:OutputChannel)

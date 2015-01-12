@@ -90,7 +90,6 @@ public class Value implements XData {
     }
     
     public String strValue() {
-        //System.out.println("StrValue(" + strValue + ")");
         return strValue.toString();
     }
 

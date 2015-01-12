@@ -1,0 +1,14 @@
+parserImport XOCL;parserImport Snippets;import Clients;
+import Diagrams;
+import DiagramsMapping;@Snippet "How to change the appearance if a class on a diagram.";
+
+// Reset all listeners on classes...
+Class.removeDiagramListeners();
+Class.addDiagramListener(  // A diagram instance-listener can be added to any class. It is activated   // when an instance of the class is changed on a diagram.    DiagramInstanceListener("ColorAbstractClasses",      // The operation in an instance listener is supplied with the mapping    // between the diagram and the element that contains the changed object,    // the mapping between the object and the node on the diagram, the slot    // that changed and the values. Use elementMap.element() to get to the     // thing that changed, and elementMap.node() to get to the diagram node.        @Operation name(diagramMap:ElementXDiagram,elementMap:ElementXNode,event:DiagramEvent)      
+      // This operation checks to see if the class is abstract. If
+      // so it changes the colour of the name box to grey, otherwise
+      // to white.
+      
+      @When event.isKindOf(ElementChangedEvent) do
+        if event.target.isAbstract         then elementMap.node().name.setFillColor(Color(200,200,200))        else elementMap.node().name.setFillColor(Color(255,255,255))        end
+      end    end));

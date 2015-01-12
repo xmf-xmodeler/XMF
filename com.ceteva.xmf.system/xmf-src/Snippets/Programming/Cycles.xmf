@@ -1,0 +1,20 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Graphs;
+
+@Snippet "How to create a nested object with mutual dependencies.";
+
+Root::graphWithCycles :=
+  // Snapshots consist of a collection of named
+  // objects. The slot values can refer to any of
+  // the other named objects.
+  @Snapshot example(Graphs)
+    g  = Graph[nodes=Set{n1,n2,n3};edges=Set{e1,e2,e3}]
+    n1 = Node[data=1]
+    n2 = Node[data=2]
+    n3 = Node[data=3]
+    e1 = Edge[source=n1;target=n2]
+    e2 = Edge[source=n2;target=n3]
+    e3 = Edge[source=n3;target=n1]
+  end::g;

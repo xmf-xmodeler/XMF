@@ -25,7 +25,7 @@ context Forms
     
     @Attribute entries : Seq(Entry) (?,!,+,-) end
     
-    @Constructor(action,entries) end
+    @Constructor(action,entries) ! end
     
     @Operation contents()
       entries

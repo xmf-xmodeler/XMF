@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Clients;
+import ModelClipboard;
+import Diagrams;
+import Menus;
+
+context Diagrams
+
+  @Class PreNodeResizeEvent extends NodeEvent
+  
+    @Attribute width     : Integer (?) end
+    @Attribute height    : Integer (?) end
+    @Attribute doIt      : Boolean (?) end
+    
+    @Constructor(target,width,height,doIt) ! end
+   
+  end

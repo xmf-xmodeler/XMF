@@ -64,18 +64,20 @@ context Root
                          "2.1",
                          "2.2"} end           // A sequence of all released versions so we can compare them.
   
-    @Attribute homeDir        : String   (?,!)                          end // Supplied on startup.
-    @Attribute docDir         : String   (?,!)                          end // Not used.
-    @Attribute buildDate      : String   (?)                            end // When the system was created.
-    @Attribute version        : String   (!,?)                          end // The system version.
-    @Attribute user           : String   (!,?)                          end // The name of the user.
+    @Attribute homeDir        : String                      (?,!)       end // Supplied on startup.
+    @Attribute docDir         : String                      (?,!)       end // Reference material.
+    @Attribute buildDate      : String                      (?)         end // When the system was created.
+    @Attribute version        : String                      (!,?)       end // The system version.
+    @Attribute user           : String                      (!,?)       end // The name of the user.
     @Attribute preferences    : PreferenceManager = PreferenceManager() end // Sets preferences.
     @Attribute exception      : Exception                               end // The most recently raised exception.
-    @Attribute standardOutput : String = "CONSOLE" (!,?)                end // Not used.
-    @Attribute initFile       : String   (!,?)                          end // The name of the init file.
-    @Attribute imageDir       : String   (!,?)                          end // Not used.
-    @Attribute startupArgs    : Seq(Element) (!,?)                      end // Command line arguments.
+    @Attribute standardOutput : String = "CONSOLE"          (!,?)       end // Not used.
+    @Attribute initFile       : String                      (!,?)       end // The name of the init file.
+    @Attribute imageDir       : String                      (!,?)       end // Not used.
+    @Attribute startupArgs    : Seq(Element)                (!,?)       end // Command line arguments.
     @Attribute banner         : String = self.basicBanner() (?,!)       end // Banner describing system.
+    @Attribute handles        : Table = Table(50)           (?)         end // Integer handles for external references.
+    @Attribute nextHandle     : Integer                                 end // Netx allocated handle.
     
     @Constructor(homeDir) ! 
       self.buildDate := self.date()
@@ -289,6 +291,16 @@ context Root
       gc();
       resetOperatorTable();
       Kernel_usedHeap()
+    end
+    
+    @Operation getHandle(object):Integer
+      // Allocate an integer for the supplied object. This can be supplied
+      // to foreign code and then referenced in call-backs.
+      let handle = nextHandle
+      in self.nextHandle := nextHandle + 1;
+         handles.put(handle,object);
+         handle
+      end
     end
 
     @Operation killProgressDialogs()

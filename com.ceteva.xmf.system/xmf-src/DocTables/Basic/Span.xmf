@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Inline Attributes                              *
+ *                          ---------------------                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+
+context Basic
+
+  @Class Span extends Entries
+
+    @Attribute style : String end
+    
+    @Constructor(style,entries) end
+    
+  end

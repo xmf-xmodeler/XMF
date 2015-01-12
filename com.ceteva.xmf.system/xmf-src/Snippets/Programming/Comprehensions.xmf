@@ -1,0 +1,28 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to process collections using comprehensions.";
+
+// Comprehensions process collections.
+// They build a collection element by element using binders and filters.
+
+context Root
+  @Operation add1(l:Seq(Integer)):Seq(Integer)
+    [ x + 1 | x <- l ]
+  end
+  
+context Root
+  @Operation odds(l:Seq(Integer)):Seq(Integer)
+    [ x | x <- l, ?(x.mod(2) <> 0) ]
+  end
+  
+context Root
+  @Operation pairs(l1:Seq(Integer),l2:Seq(Integer)):Seq(Seq(Integer))
+    [ [x,y] | x <- l1, y <- l2, ?(x <> y) ]
+  end
+  
+add1([1,2,3,4,5]).println();
+
+odds([1,2,3,4,5]).println();
+
+pairs([1,2,3,4,5],[1,2,3,4,5]).println();

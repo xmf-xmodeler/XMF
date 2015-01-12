@@ -140,6 +140,14 @@ context DiagramsMapping
     
     @AbstractOp element()
     end
+    
+    @Operation elementXNodeChangedState(mapping:ElementXNode,event:DiagramEvent)
+    
+      // Called when the element in the mapping is an object whose state has just changed.
+      // Allows diagram-wide actions to take place...
+      
+      mapping.element().changedOnDiagram(self,mapping,event)
+    end
 
     @Operation eventFiltered(eventName)
       if self.eventFilterTable.hasKey(eventName)
@@ -208,7 +216,12 @@ context DiagramsMapping
 
     @Operation handleDiagramRenewEvent(diagram)
       self
-    end
+    end 
+    
+    @Operation nodeEvent(mapping:ElementXNode,event:NodeEvent)
+      // Called when the event involves the node in the mapping.
+      mapping.element().nodeEvent(self,mapping,event)
+    end 
 
     @Operation partialSyncModeMessage()
       "Model-diagram synchronisation is set to Partial View mode.\n\n" +

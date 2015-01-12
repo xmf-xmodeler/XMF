@@ -1,0 +1,30 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+
+@Snippet "How to take action when a diagram node is resized.";
+
+// Reset all listeners on classes...
+Class.removeDiagramListeners();
+
+Class.addDiagramListener(
+  DiagramNodeInstanceListener("AllTheSameSize",
+    @Operation(diagramMap:ElementXDiagram,elementMap:ElementXNode,event:DiagramEvent) 
+      @When event.isKindOf(PostNodeResizeEvent) do
+      
+        // Find all other nodes on the diagram and request that they are resized to 
+        // the same dimensions as the node tht has just changed...
+        
+        let width = elementMap.node().width;
+            height = elementMap.node().height
+        in @For node in diagramMap.diagram.graph.nodes when node <> elementMap.node() do
+             @When node.width <> width orelse node.height <> height do
+               node.resize(width,height)
+             end
+           end
+        end
+      end
+    end));

@@ -1,0 +1,23 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Floats.";
+
+// Some key float operations. Browse XCore::Float for more details.
+
+// Coversion to integer...
+
+12.3.ceiling().println();
+12.3.floor().println();
+12.7.ceiling().println();
+12.7.floor().println();
+12.7.round().println();
+
+// Trigonometry...
+
+45.0.cos().println();
+45.0.sin().println();
+
+// Creation from integers.
+
+Float(10,5).println();

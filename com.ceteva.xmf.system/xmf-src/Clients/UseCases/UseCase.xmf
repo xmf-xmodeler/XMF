@@ -1,0 +1,64 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import Menus;
+import UseCaseDiagrams;
+
+context UseCaseDiagrams
+
+  @Class UseCase extends Node
+  
+    @Attribute name    : Text    = Text("Use Case",0,0,true) end    @Attribute ellipse : Ellipse = Ellipse(0,0,200,50,true,Color(-1,-1,-1),Color(-1,-1,-1)) end
+    
+    @Constructor(x,y) ! 
+      self.setMenuKey(self)
+    end
+  
+    @Operation addDisplays()
+      self.add(ellipse);
+      self.add(name)
+    end
+    
+    @Operation addPorts()
+      self.add(Port(0,0,width,height))
+    end
+        
+    @Operation buildGlobalMenu()
+      let globalMenu = super();
+          target = RightClickable::selfTarget
+      in globalMenu.add(MenuAction("Delete","CTRL+D",target,Seq{},Node::delete));
+         globalMenu.add(MenuAction("Edit Specification","",target,Seq{},UseCase::editSpec));
+         globalMenu
+      end
+    end
+    
+    @Operation editSpec()
+      self.println()
+    end
+    
+    @Operation moveName(width,height)
+      let w = ((width - name.width)/2).floor();
+          h = ((height - name.height)/2).floor()
+      in name.move(w,h)
+      end
+    end
+    
+    @Operation pack()
+      super();
+      if ellipse.width < name.width + 20 
+      then self.resize(name.width + 20,height)
+      end
+    end
+    
+    @Operation resize(width,height)
+      super(width,height);
+      ellipse.resize(width,height);
+      self.moveName(width,height);
+      @For port in ports do
+        port.resize(width,height)
+      end
+    end
+  
+  end

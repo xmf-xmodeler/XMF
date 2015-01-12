@@ -10,14 +10,18 @@ context TextEditor
   @Class Welcome extends HTMLViewer
   
     @Operation requestDoc()
-      let doc = xmf.choose("Documentation","Select Documentation",Seq{"Applied Metamodelling","Superlanguages"})
+      let doc = xmf.select("Documentation","Select Documentation",Seq{"Applied Metamodelling","Bluebook","Superlanguages"},"",@Operation(s) s end)
       in @Case doc of
-           Seq{"Applied Metamodelling"} do 
+           "Applied Metamodelling" do 
              xmf.browse(xmf.docDir()+"/xmf-books/AppliedMetamodelling/book.pdf")
            end
-           Seq{"Superlanguages"} do
+           "Bluebook" do 
+             xmf.browse(xmf.docDir()+"/xmf-books/Bluebook.pdf")
+           end
+           "Superlanguages" do
              xmf.browse(xmf.docDir()+"/xmf-books/Superlanguages/book.pdf") 
            end
+           else xmf.message("No documentation selected.")
          end
       end
     end

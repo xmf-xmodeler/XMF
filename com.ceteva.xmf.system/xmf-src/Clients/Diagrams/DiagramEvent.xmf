@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+import Clients;
+import ModelClipboard;
+import Diagrams;
+import Menus;
+
+context Diagrams
+
+  @Class DiagramEvent isabstract
+  
+    // Generated when a diagram element does something. Events are raised
+    // via user-supplied listeners...
+    
+    @Attribute target : Element end
+    
+    @Constructor(target) end
+   
+  end

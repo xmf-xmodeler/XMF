@@ -1,0 +1,170 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+import Menus;
+import UseCaseDiagrams;
+import IO;
+
+context UseCaseDiagrams
+ 
+  @Class UseCaseDiagram extends SyncableDiagram, ThemableDiagram
+  
+    @Attribute useCases    : Seq(UseCase)    (+,-) end
+    @Attribute extends     : Seq(Extend)     (+,-) end
+    @Attribute includes    : Seq(Include)    (+,-) end
+    @Attribute uses        : Seq(Uses)       (+,-) end
+    @Attribute specializes : Seq(Specialize) (+,-) end
+    @Attribute actors      : Seq(Actor)      (+,-) end
+    
+    @Operation addEdge(edge)
+      @TypeCase(edge)
+        Extend do
+          self.addToExtends(edge);
+          super(edge)
+        end
+        Include do
+          self.addToIncludes(edge);
+          super(edge)
+        end
+        Specialize do
+          self.addToSpecializes(edge);
+          super(edge)
+        end
+        Uses do
+          self.addToUses(edge);
+          super(edge)
+        end
+        else super(edge)
+      end
+    end
+    
+    @Operation addNode(node)
+      @TypeCase(node)
+        UseCase do
+          self.addToUseCases(node);
+          super(node)
+        end
+        Actor do
+          self.addToActors(node);
+          super(node)
+        end
+        else super(node)
+      end
+    end
+
+    @Operation buildGlobalMenu()
+      let globalMenu = super();
+          target = RightClickable::selfTarget;
+          hideMenu = MenuItems("Hide All");
+          showMenu = MenuItems("Show All")
+      in globalMenu.add(hideMenu);
+         globalMenu.add(showMenu);
+         globalMenu
+      end
+    end
+   
+    @Operation defineEdgeToolGroups()
+      super();
+      self.defineNewHandler("UseCases","Use",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultUses);
+      self.defineNewHandler("UseCases","Extend",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultExtends);
+      self.defineNewHandler("UseCases","Specialize",true,"XCore/Generalization.gif",UseCaseDiagrams::UseCaseDiagram::defaultSpecialize);
+      self.defineNewHandler("UseCases","Include",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultIncludes)
+    end
+    
+    @Operation defineNodeToolGroups()
+      super();
+      self.defineNewHandler("UseCases","Note",false,"XCore/Note.gif",ClassDiagrams::ClassDiagram::defaultNote);
+      self.defineNewHandler("UseCases","UseCase",false,"UseCases/UseCase.gif",UseCaseDiagram::defaultUseCase);
+      self.defineNewHandler("UseCases","Actor",false,"UseCases/Actor.gif",UseCaseDiagram::defaultActor)
+    end
+    
+    @Operation defineToolGroupTypes()
+      self.defineToolGroup("UseCases")
+    end
+    
+    @Operation defaultExtends(sourcePort,targetPort)
+      let sourceNode = sourcePort.owner;
+          targetNode = targetPort.owner
+      in if sourceNode.isKindOf(UseCase) and targetNode.isKindOf(UseCase)
+         then 
+           let edge = Extend(sourcePort,targetPort)
+           in edge.new(self,true);
+              self.addEdge(edge)
+           end
+         end
+      end
+    end
+    
+    @Operation defaultIncludes(sourcePort,targetPort)
+      let sourceNode = sourcePort.owner;
+          targetNode = targetPort.owner
+      in if sourceNode.isKindOf(UseCase) and targetNode.isKindOf(UseCase)
+         then 
+           let edge = Include(sourcePort,targetPort)
+           in edge.new(self,true);
+              self.addEdge(edge)
+           end
+         end
+      end
+    end
+    
+    @Operation defaultSpecialize(sourcePort,targetPort)
+      let sourceNode = sourcePort.owner;
+          targetNode = targetPort.owner
+      in if sourceNode.isKindOf(Actor) and targetNode.isKindOf(Actor)
+         then 
+           let edge = Specialize(sourcePort,targetPort)
+           in edge.new(self,true);
+              self.addEdge(edge)
+           end
+         end
+      end
+    end
+    
+    @Operation defaultUses(sourcePort,targetPort)
+      let sourceNode = sourcePort.owner;
+          targetNode = targetPort.owner
+      in if sourceNode.isKindOf(Actor) and targetNode.isKindOf(UseCase)
+         then 
+           let edge = Uses(sourcePort,targetPort)
+           in edge.new(self,true);
+              self.addEdge(edge)
+           end
+         end
+      end
+    end
+    
+    @Operation defaultUseCase(x,y)
+      @WithoutRendering(self)
+        let useCase = UseCase(x,y)
+        in useCase.new(self,true);
+           self.addNode(useCase)
+        end
+      end
+    end
+    
+    @Operation defaultActor(x,y)
+      @WithoutRendering(self)
+        let actor = Actor(x,y)
+        in self.addNode(actor);
+           actor.new(self,true)
+        end
+      end
+    end
+    
+    @Operation removeNode(node)
+      super(node);
+      @TypeCase(node)
+        else self
+      end
+    end
+    
+    @Operation removeEdge(edge)
+      super(edge);
+      @TypeCase(edge)
+        else self
+      end
+    end
+
+  end

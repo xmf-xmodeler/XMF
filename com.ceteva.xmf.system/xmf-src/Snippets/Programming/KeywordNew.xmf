@@ -1,0 +1,25 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to use keyword class instantiation.";
+
+// Classes can be instantiated using BOA-constructors or Keyword-constructors.
+// A class may define several BOA-constructors. The keyword constructor is provided
+// by default and can include any of the class attributes in any order. Omitted
+// keywords cause the slot to be initialised to the default value of the attribute
+// type.
+
+context Root
+  @Class Point 
+    @Attribute x : Integer = 100 end
+    @Attribute y : Integer = 200 end
+    @Constructor(x,y) ! end
+  end
+  
+Root::p1 := Point();
+Root::p2 := Point(1,2);
+Root::p3 := Point[];
+Root::p4 := Point[x = 10];
+Root::p5 := Point[y = 20];
+Root::p6 := Point[x = 10,y = 20];
+Root::p7 := Point[y = 20,x = 10];

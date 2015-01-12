@@ -213,11 +213,19 @@ context OCL::OCL
     
       'true' { Constp(BoolExp(true)) } 
     | 'false' { Constp(BoolExp(false)) }.
+      
+    CmpClause ::= 
+    
+      n = Name t = OptType '<-' e = Exp { Comprehensions::Bind(n,t.toExp(),e) }
+      
+    | '?' e = Exp { Comprehensions::Filter(e) }.
 
     CollExp ::= 
     
       SetExp! 
-    | SeqExp!.
+    | SeqExp!
+    | SetCmpExp!
+    | SeqCmpExp!.
     
     CollOp(c,n) ::= 
     
@@ -758,10 +766,44 @@ context OCL::OCL
       'Set{' es = CommaSepExps '}' 
       
       { SetExp(l,"Set",es) }.
+      
+    SeqCmpExp ::=
+    
+      // New format for sequences that allows us to phase out
+      // Seq{ ... } and replace it with [ ... ].
+    
+      l = LinePos 
+      
+      '[' es = CommaSepExps ']' !
+      
+      { SetExp(l,"Seq",es) }
+      
+    | l = LinePos
+      
+      '[' e = Exp '|' c=CmpClause cs=(',' CmpClause)* ']'
+      
+      { Comprehensions::Cmp(e,Seq{c|cs}) }.
+      
+    SetCmpExp ::=
+    
+      // New format for sets that allows us to phase out
+      // Set{ ... } and replace it with { ... }.
+    
+      l = LinePos 
+      
+      '{' es = CommaSepExps '}' !
+      
+      { SetExp(l,"Set",es) }
+      
+    | l = LinePos
+      
+      '{' e = Exp '|' c=CmpClause cs=(',' CmpClause)* '}'
+      
+      { Comprehensions::Cmp("Set",e,Seq{c|cs}) }.
     
     SeqExp ::= 
     
-      // A seq-expression starts with a Seq( and then
+      // A seq-expression starts with a Seq{ and then
       // may be empty, a pair, or a proper sequence...
     
       l = LinePos 

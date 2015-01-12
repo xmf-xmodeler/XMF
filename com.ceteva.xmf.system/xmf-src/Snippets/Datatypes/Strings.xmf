@@ -1,0 +1,44 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Strings.";
+
+// Some key string operations. Browse XCore::String for more details.
+
+// Size...
+"a string".size().println();
+
+// Conversion...
+"true".asBool().println();
+"123.45".asFloat().println();
+"123".asInt().println();
+"123".asSeq().println();
+"123".asSet().println();
+"abcdef".asSymbol().println();
+"<x>body</x>".asXML().println();
+"ABCDE".toLower().println();
+"ABCDE".toUpper().println();
+"|".print();"   xyz   ".stripWhiteSpace().print();"|".println();
+"|".print();"   xyz   ".stripLeadingWhiteSpace().print();"|".println();
+"|".print();"   xyz   ".stripTrailingWhiteSpace().print();"|".println();
+"|".print();"*******xyz".stripNonAlphaChars().println();
+"abcabc".subst("xxx","bc",true).println();
+"abcabc".subst("xxx","bc",false).println();
+"a>b>c>d>e>f".splitBy(Seq{">".at(0)},0,0).println();
+"abcdefghijkl".subString(0,5).println();
+"abcdefghijkl".truncate(5).println();
+"abcdefghijkl".upperCaseInitialLetter().println();
+"ABCDEFGHIJKL".lowerCaseInitialLetter().println();
+
+// Indexing...
+"12345".at(3).println();
+"12345".indexOf("2",0).println();
+
+// Files...
+xmf.homeDir().println();
+(xmf.homeDir() + "/XMF/XMF.xmf").fileExists().println();
+(xmf.homeDir() + "/XMF/XMF.xmf").fileSize().println();
+(xmf.homeDir() + "/XMF/XMF.xmf").isDir().println();
+(xmf.homeDir() + "/XMF").isDir().println();
+(xmf.homeDir() + "/XMF/XMF.xmf").isOlder(xmf.homeDir() + "/XMF/XMF.o").println();
+(xmf.homeDir() + "/XMF/XMF.xmf").parentDir().println();

@@ -1,0 +1,26 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "File Format.";
+
+// In general an XOCL file should have the following elements in order...
+//
+// parserImport LanguageNameSpace;
+//
+//   The language name space is typically a package that defines syntax classes.
+//   A syntax class SC has a grammar and can therefore be used as @SC ... in the
+//   body of this file. There can be any number of parser import declarations.
+//
+// import ImportedNameSpace;
+//
+//   The imported name space is typically a package that contains class and operation
+//   definitions that are referenced by name in the body of the file. There can be
+//   any number of import declarations.
+//
+// The body of the file starts here...
+//
+// context NameSpace
+//   NamedElement
+//
+// The named element (for example a class or an operation) is added to the name space
+// when the file is loaded.
