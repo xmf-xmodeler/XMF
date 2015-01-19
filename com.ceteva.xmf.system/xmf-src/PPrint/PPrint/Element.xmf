@@ -6,6 +6,11 @@ import Docs;
 import PPrint;
 
 context Element
+  @Operation pprintln()
+    self.pprint().println()
+  end
+
+context Element
   @Operation pprint()
   
     // Uses defaults defined in PPrint...
