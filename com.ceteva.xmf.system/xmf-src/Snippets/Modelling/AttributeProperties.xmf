@@ -1,0 +1,47 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Attribute properties.";
+
+context Root
+  @Class Reset 
+  
+    // Class Reset allows each slot of its instances to be reset
+    // to a predefined value for those attributes with the property
+    // "reset" set to true.
+    
+    @Operation reset()
+      @For a in self.of().allAttributes() do
+      
+        // Use getProperty(name,default) to get the value of a property.
+        // Attribute::hasProperty(name) can also be used.
+        
+        if a.getProperty("reset",false)
+        then 
+          // Use Attribute::setProperty to change the value...
+          self.set(a.name,a.getProperty("value",0));
+          // Every time the attribute is used to reset a slot, 
+          // increase the counter...
+          a.setProperty("counter",a.getProperty("counter",0) + 1)
+        end
+      end;
+      self
+    end
+  end
+
+context Root
+  @Class X extends Reset
+    @Attribute a [reset=true,value=100,counter=0] : Integer (!) end
+    @Attribute b : Integer (!) end
+    @Constructor(a,b) ! end
+  end
+  
+Root::x := X();
+"".println();
+x.reset().println();
+x.setA(500);
+x.setB(600);
+x.println();
+x.reset().println();
+X::a.getProperty("counter",0).println();
+X::b.getProperty("counter",0).println();

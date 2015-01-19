@@ -1,0 +1,17 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Reading and writing files.";
+
+@WithOpenFile(fin <- xmf.openFile(xmf.homeDir(),"*.xmf",""))
+  let c = fin.read()
+  in @While c <> -1 do
+       format(stdout, "~C",Seq{c});
+       c := fin.read()
+     end
+  end
+end;
+
+@WithOpenFile(fout -> xmf.saveFile(".","*","TMP.txt"))
+  format(fout, "Some text.",Seq{})
+end;

@@ -1,0 +1,8 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Selecting files for open or save.";
+
+xmf.openFile(xmf.homeDir(),"*.xmf","").println();
+
+xmf.saveFile(xmf.homeDir(),"*.xmf","").println();

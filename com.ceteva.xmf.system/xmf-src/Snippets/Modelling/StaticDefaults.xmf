@@ -1,0 +1,27 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Static attribute default values.";
+
+context Root
+  let idCounter = 0
+  in @Operation newInt()
+       idCounter := idCounter + 1;
+       idCounter
+     end
+  end
+
+context Root
+  @Class Point
+  
+    // The keyword 'static' before an attribute initialisation
+    // expression will guarantee that the expression is evaluated
+    // once and the result is cached and used for each instance.
+    
+    @Attribute x : Integer = static newInt() end
+    @Attribute y : Integer = newInt() end
+    @Constructor(x,y) ! end
+  end
+  
+Point().println();
+Point().println();

@@ -1,0 +1,14 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Attribute default values.";
+
+context Root
+  @Class Point
+    @Attribute x : Integer = 100 end
+    @Attribute y : Integer = 200 end
+    @Constructor(x,y) ! end
+  end
+  
+Point().println();
+Point(1,2).println();

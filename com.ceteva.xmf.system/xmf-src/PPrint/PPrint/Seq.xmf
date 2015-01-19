@@ -38,10 +38,10 @@ context PPrint
          in Mark(
               Block(
                 Order(
-                  Order(just,SEQ),
+                  Order(just,LSQUARE),
                   Order(
                     Alt(singleLine,nestedLine),
-                    Cut(Just(if seq->size <> docs->size then ",...}" else "}" end))))))
+                    Cut(Just(if seq->size <> docs->size then ",...]" else "]" end))))))
          end
        end     
      end

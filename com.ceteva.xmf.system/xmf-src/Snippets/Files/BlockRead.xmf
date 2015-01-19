@@ -1,0 +1,12 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Reading a file as a vector of characters.";
+
+@WithOpenFile(fin <- xmf.homeDir() + "/Snippets/Files/BlockRead.xmf")
+  let size = (xmf.homeDir() + "/Snippets/Files/BlockRead.xmf").fileSize() then
+      chars = Vector(size)
+  in fin.read(chars);
+     chars.asString().println()
+  end
+end;

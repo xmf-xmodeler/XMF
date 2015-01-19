@@ -1,0 +1,28 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Adding slots to classes.";
+
+context Root
+  @Class Categorized extends Class
+    // A meta-class that allows classes to have a categrization label...
+    @Attribute category : String (?) end
+  end
+  
+context Root
+  @Class Policy metaclass Categorized
+    @Attribute name : String end
+    // Slots are supplied with the attribute and the value...
+    @Slot Categorized::category = "security" end
+  end
+  
+context Root
+  @Class Activity metaclass Categorized
+    @Attribute name   : String  end
+    @Attribute amount : Integer end
+    // Slots are supplied with the attribute and the value...
+    @Slot Categorized::category = "planning" end
+  end
+  
+Policy().of().category().println();
+Activity().of().category().println();

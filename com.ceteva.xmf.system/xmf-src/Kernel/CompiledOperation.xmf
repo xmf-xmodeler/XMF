@@ -59,6 +59,19 @@ context CompiledOperation
     end
     self.setProperties(self.properties()->set(property,value))
   end
+  
+context CompiledOperation
+  @Operation getProperty(name,default)
+    if self.hasProperty(name)
+    then self.properties()->lookup(name)
+    else default
+    end
+  end
+  
+context CompiledOperation 
+  @Operation hasProperty(name)
+    self.properties()->binds(name)
+  end
 
 context CompiledOperation
   @Operation addDaemon(daemon)

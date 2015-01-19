@@ -1,0 +1,29 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Attribute Extenders and Reducers.";
+
+context Root
+  @Class Storage
+    @Attribute contents : Seq(Element) (?,+,-) end
+  end
+  
+Root::s := Storage();
+
+// The accessor Storage::contents() is automatically generated due to the ? modifier...
+
+s.contents().println();
+
+// The updater Storage::addToContents(x:Element) is automatically generated due to the + modifier...
+
+s.addToContents(10);
+s.contents().println();
+s.addToContents(20);
+s.contents().println();
+
+// The updater Storage::deleteFromContents(x:Element) is automatically generated due to the - modifier...
+
+s.deleteFromContents(10);
+s.contents().println();
+s.deleteFromContents(20);
+s.contents().println();

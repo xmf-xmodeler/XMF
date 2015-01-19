@@ -1,0 +1,11 @@
+parserImport XOCL;parserImport Snippets;@Snippet "Saving images and tool inflaters.";
+
+// An XModeler state is saved in two files: am image file and an inflater.
+// The image contains a snapshot of the VM including the heap with all system
+// and user data. An inflater contains a snapshot of the tool-state. The image
+// is a binary file and the inflater is an XML file. When Xmodeler is started
+// you will be promted for the image file to use. If you select a pre-saved
+// image then there is an expectation that the inflater will be in the same
+// folder. Together the image and inflater allow the exact point at which the
+// system was saved to be recreated. Saving of image and inflater files is
+// intended to be very fast.if not (xmf.saveImage(xmf.projDir()+"/example_image.img"))then xmf.inflate(xmf.projDir()+"/example_image.xml")else xmf.saveInflater(xmf.projDir()+"/example_image.xml")end;

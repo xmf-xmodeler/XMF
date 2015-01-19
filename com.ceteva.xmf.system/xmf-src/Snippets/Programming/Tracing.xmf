@@ -1,0 +1,48 @@
+parserImport XOCL;
+parserImport Snippets;
+
+// Use trace(), untrace(), traceAll(), untraceAll() to toggle tracing.
+// Be careful when tracing operations that are called to print out the
+// receiver of a traced message. Note that some system-level operations
+// are compiled out and therefore cannot be traced.
+
+@Snippet "Tracing operations.";
+
+context Root
+  @Package TestPackage
+    @Class TestClass
+      @Operation test()
+        self.other()
+      end
+      @Operation other()
+        TestPackage::outer()
+      end
+    end
+    @Operation outer()
+      "OK"
+    end
+  end
+
+"\nTest1\n".println();  
+Root::o := TestPackage::TestClass();
+o.test();
+
+"Test2\n".println();  
+TestPackage::TestClass::test.trace();
+o.test();
+
+"Test3\n".println();  
+TestPackage::TestClass::other.trace();
+o.test();
+
+"Test4\n".println();  
+TestPackage::TestClass::test.untrace();
+o.test();
+
+"Test5\n".println();  
+TestPackage::TestClass.untraceAll();
+o.test();
+
+"Test6\n".println();  
+TestPackage.traceAll();
+o.test();

@@ -1,0 +1,21 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Attribute Accessors and Updaters.";
+
+context Root
+  @Class Storage
+    @Attribute contents : Element (?,!) end
+  end
+  
+Root::s := Storage();
+
+// The accessor Storage::contents() is automatically generated due to the ? modifier...
+
+s.contents().println();
+
+// The updater Storage::setContents(x:Element) is automatically generated due to the ! modifider...
+
+s.setContents(10);
+
+s.contents().println();
