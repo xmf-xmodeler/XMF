@@ -1,0 +1,6 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Browse a Directory.";
+
+IO::Directory(xmf.selectDirectory(xmf.projDir()),[".*.xmf"],0).browse();

@@ -1,0 +1,30 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Clients;
+import ExtensionPoints;
+
+@Snippet "Registry extension points.";
+
+// The registry allows us to define named extension points. An extension point has contributions.
+// Each contribution matches a classifier with a sequence of values. Different types of extension
+// point and contribution work in slightly different ways.
+
+// Suppose we want to create a collection of extra functionality that mirrors the
+// inheritance hierarchy.
+
+xmf.registry().addExtensionPoint(InheritanceExtensionPoint("test"));
+xmf.registry().addContribution("test",Contribution(Element,["I inherit from element."]));
+xmf.registry().addContribution("test",Contribution(Object,["I inherit from object."]));
+xmf.registry().addContribution("test",Contribution(Class,["I inherit from class."]));
+
+"".println();
+
+xmf.registry().getExtensionPoint("test").find(String).values.println();
+xmf.registry().getExtensionPoint("test").find(Object).values.println();
+xmf.registry().getExtensionPoint("test").find(Class).values.println();
+xmf.registry().getExtensionPoint("test").find(Operation).values.println();
+xmf.registry().getExtensionPoint("test").find(Package).values.println();
+
+// Typically this mechanism will be used to register type-based information that is needed
+// by an application and which should not be added directly to the types themselves.

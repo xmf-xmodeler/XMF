@@ -1,0 +1,13 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Operation variable arguments.";
+
+context Root
+  @Operation example(arg1, arg2 . rest)
+    ([arg1,arg2] + rest).pprintln()
+  end
+  
+example(1,2);
+example(1,2,3);
+example(1,2,3,4,5,6,7,8,9,10);

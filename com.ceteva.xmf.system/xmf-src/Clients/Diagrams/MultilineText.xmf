@@ -95,6 +95,14 @@ context Diagrams
       self
     end
     
+    @Operation packHeight()
+      self.calculateSize()
+    end
+    
+    @Operation packWidth()
+      self.calculateSize()
+    end
+    
     @Operation renew(parent)
       @Command(self) newMultilineTextCommand(parent,self) end;
       self.renewHidden();

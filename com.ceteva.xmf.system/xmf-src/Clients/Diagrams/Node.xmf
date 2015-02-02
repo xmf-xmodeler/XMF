@@ -520,8 +520,8 @@ context Diagrams
       
       let oldWidth = self.width;
           oldHeight = self.height;
-          width = width.max(self.minWidth());
-          height = height.max(self.minHeight()) then
+          width = width.max(self.maxWidth());
+          height = height.max(self.maxHeight()) then
           doResize = true
       in @For l in listeners do
            let event = PreNodeResizeEvent(self,width,height,true)

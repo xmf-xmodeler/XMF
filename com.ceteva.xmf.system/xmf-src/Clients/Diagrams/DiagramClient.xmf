@@ -128,6 +128,12 @@ context Diagrams
       //diagram.setOwner(null)
     end
     
+    @Operation resized(diagram)
+      // We don't really care that the diagram has resized
+      // since it is at the top-level.
+      diagram
+    end
+    
     @Operation save(diagram,fileName)
       let out = ElementOutputChannel(FileOutputChannel(fileName))
       in try

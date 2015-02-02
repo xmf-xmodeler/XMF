@@ -194,38 +194,44 @@ context ClassDiagrams
           height = height.max(self.minHeight())
       in super(width,height);
       
-         @For port in ports do
-           port.resize(width,height)
-         end;
-      
-         // Resize the container for the class node elements.
-      
-         @For display in displays do
-           display.resize(width,height)
-         end;
-      
-         // Keep the height of the sub-boxes the same but stretch them
-         // to the new width of the node.
+         // Calling super should have performed the resize, but may have
+         // modified the requested width and height. Therefore, get the
+         // current size and use that to adjust the size of the components.
          
-         name.resize(width,name.maxHeight());
-         metaslotsBox.resize(width,metaslotsBox.maxHeight());
+         let width = self.width;
+             height = self.height
+         in @For port in ports do
+              port.resize(width,height)
+            end;
+      
+            // Resize the container for the class node elements.
+      
+            @For display in displays do
+              display.resize(width,height)
+            end;
+      
+            // Keep the height of the sub-boxes the same but stretch them
+            // to the new width of the node.
+         
+            name.resize(width,name.maxHeight());
+            metaslotsBox.resize(width,metaslotsBox.maxHeight());
 
-         if attBox.shown() then
-           if opsBox.shown() then
-             attBox.resize(width,attBox.maxHeight())
-           else
-             attBox.resize(width,height-attBox.y());
-             opsBox.resize(width,opsBox.maxHeight())
-           end
-         end;
-         if opsBox.shown() then
-           if attBox.shown() then
-             opsBox.resize(width,height-opsBox.y())
-           else
-             attBox.resize(width,attBox.maxHeight());
-             opsBox.resize(width,height-opsBox.y())
-           end
-         end
+            if attBox.shown() then
+              if opsBox.shown() then
+                attBox.resize(width,attBox.maxHeight())
+              else
+                attBox.resize(width,height-attBox.y());
+                opsBox.resize(width,opsBox.maxHeight())
+              end
+            end;
+            if opsBox.shown() then
+              if attBox.shown() then
+                opsBox.resize(width,height-opsBox.y())
+              else
+                attBox.resize(width,attBox.maxHeight());
+                opsBox.resize(width,height-opsBox.y())
+              end
+            end
          
 /*         if metaslotsBox.shown() then
            metaslotsBox.resize(width,height-attBox.y()-opsBox.y());
@@ -245,7 +251,8 @@ context ClassDiagrams
            metaslotsBox.resize(width,metaslotsBox.maxHeight())
          end
 */
-       end
+          end
+      end
     end
     
     @Operation setIsAbstract(isAbstract)
