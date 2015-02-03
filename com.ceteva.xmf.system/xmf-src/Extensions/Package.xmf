@@ -109,7 +109,7 @@ context XOCL
        [| @Imports(imports)
             <self.metaExp()>.new()
               .set("name",XCore::Symbol(<StrExp(name)>))
-              .set("imports",imports)
+              .set("imports",[])
               .set("metaPackage",<self.metaPackageExp()>)
           end
        |]

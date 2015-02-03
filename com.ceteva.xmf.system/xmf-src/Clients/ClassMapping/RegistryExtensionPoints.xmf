@@ -2,10 +2,14 @@ parserImport XOCL;
 
 import Clients;
 import ExtensionPoints;
+import ClassMapping;
 
 let 
-  registry = xmf.registry() then
-  layout = "com.ceteva.xmf.classDiagrams.layouts"
+  registry    = xmf.registry() then
+  layout      = "com.ceteva.xmf.classDiagrams.layouts";
+  classMapId  = "com.ceteva.diagrams.class.map"
 in
-  registry.addExtensionPoint(ExtensionPoint(layout))
+  registry.addExtensionPoint(ExtensionPoint(layout));
+  registry.addExtensionPoint(InheritanceExtensionPoint(classMapId));
+  registry.addContribution(classMapId,Contribution(XCore::Class,[ClassXNode]))
 end;

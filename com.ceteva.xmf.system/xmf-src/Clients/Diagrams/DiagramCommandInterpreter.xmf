@@ -82,6 +82,12 @@ context Diagrams
       end
     end
     
+    @Operation deleteGroup(diagram,name)
+      @SendCommand(self)
+        deleteGroup(diagram.id(),name)
+      end
+    end
+    
     @Operation editText(element)
       @SendCommand(self)
         editText(element.id())
@@ -575,6 +581,15 @@ context Diagrams
     @Operation getTextDimensionWithFont(text)
       let result = self.call("getTextDimensionWithFont",Seq{text.text(),text.font()})
       in Seq{result->at(0),result->at(1)}
+      end
+    end
+    
+    @Operation getPalette(diagram):Seq(Seq(String))
+      // Returns a list of lists. Each list is headed by the name of the
+      // group and followed by the names of the buttons...
+      let nestedVectors = self.call("getPalette",[diagram.id]) then
+          lists = nestedVectors.asSeq()
+      in lists->collect(v | let e = v.asSeq() in Seq{e->head | e->tail->collect(p | p.asSeq())} end)
       end
     end
     

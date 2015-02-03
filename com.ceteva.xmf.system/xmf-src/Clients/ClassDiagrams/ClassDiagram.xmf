@@ -462,12 +462,11 @@ context ClassDiagrams
       end
     end
 
-    @Operation newClassNode(x,y,typePath)
-      @WithoutRendering(self)
-        let node = ClassNode("A Class","",false,typePath,x,y,self.showAttributes(),self.showOperations(),self.showMetaslots()) 
-        in node.new(self,true);
-           self.addNode(node)
-        end
+    @Operation newClassNode(x,y,typePath:Seq(String))
+      let class = typePath.lookup();
+          extensionPoint = xmf.registry().getExtensionPoint("com.ceteva.diagrams.class.node") then
+          handler = extensionPoint.find(class).values->head
+      in handler(x,y,typePath,self)
       end
     end
     

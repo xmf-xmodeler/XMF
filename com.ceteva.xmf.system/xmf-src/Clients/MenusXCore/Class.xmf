@@ -32,6 +32,7 @@ context Class
     @Operation newOtherAttribute()
       let 
         metaClasses = self.owner.metaPackage.allContents()->select(c | c.isKindOf(Class) and c <> null) then
+        metaClasses = metaClasses + self.owner.allContents()->select(c | c.isKindOf(Class) and c <> null) then
         attributes = metaClasses->select(a | a.allParents()->includes(Attribute))->asSeq then
         attributeOf = xmf.select("Attribute class","Please choose a metaclass for the attribute",attributes,null,null)
       in

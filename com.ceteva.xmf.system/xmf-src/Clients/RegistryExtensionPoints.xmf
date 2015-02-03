@@ -5,40 +5,38 @@ import ExtensionPoints;
 
 let
 
-  registry    = xmf.registry();
+  registry              = xmf.registry();
   
-  menuId      = "com.ceteva.xmf.menus";
-  menuRootId  = "com.ceteva.xmf.menus.rootType";
-  menuMultiId = "com.ceteva.xmf.menus.multiHandler";
-  updateId    = "com.ceteva.xmf.slotUpdate";
-  addId       = "com.ceteva.xmf.collectionSlotAdd";
-  removeId    = "com.ceteva.xmf.collectionSlotRemove";
+  menuId                = "com.ceteva.xmf.menus";
+  menuRootId            = "com.ceteva.xmf.menus.rootType";
+  menuMultiId           = "com.ceteva.xmf.menus.multiHandler";
+  updateId              = "com.ceteva.xmf.slotUpdate";
+  addId                 = "com.ceteva.xmf.collectionSlotAdd";
+  removeId              = "com.ceteva.xmf.collectionSlotRemove";
   labelsDisplayTextId   = "com.ceteva.xmf.labels.displayText";
   labelsEditableId      = "com.ceteva.xmf.labels.editable";
   labelsEditTextId      = "com.ceteva.xmf.labels.editText";
   labelsChangeGuardId   = "com.ceteva.xmf.labels.changeGuard";
   labelsChangeHandlerId = "com.ceteva.xmf.labels.changeHandler";
   protectViewId         = "com.ceteva.xmf.protect.view";
-  protectDeleteId       = "com.ceteva.xmf.protect.delete"
-
+  protectDeleteId       = "com.ceteva.xmf.protect.delete";
+  classNodeId           = "com.ceteva.diagrams.class.node"
 then 
-
-  menuPoint      = MultipleExtensionPoint(menuId);
-  menuRootPoint  = InheritanceExtensionPoint(menuRootId);
-  menuMultiPoint = TypeLessExtensionPoint(menuMultiId);
-  updatePoint    = MultipleExtensionPoint(updateId);
-  addPoint       = MultipleExtensionPoint(addId);
-  removePoint    = MultipleExtensionPoint(removeId);
+  menuPoint                = MultipleExtensionPoint(menuId);
+  menuRootPoint            = InheritanceExtensionPoint(menuRootId);
+  menuMultiPoint           = TypeLessExtensionPoint(menuMultiId);
+  updatePoint              = MultipleExtensionPoint(updateId);
+  addPoint                 = MultipleExtensionPoint(addId);
+  removePoint              = MultipleExtensionPoint(removeId);
   labelsDisplayTextPoint   = InheritanceExtensionPoint(labelsDisplayTextId);
   labelsEditablePoint      = InheritanceExtensionPoint(labelsEditableId);
   labelsEditTextPoint      = InheritanceExtensionPoint(labelsEditTextId);
   labelsChangeGuardPoint   = InheritanceExtensionPoint(labelsChangeGuardId);
   labelsChangeHandlerPoint = InheritanceExtensionPoint(labelsChangeHandlerId);
   protectViewPoint         = TypeLessExtensionPoint(protectViewId);
-  protectDeletePoint       = TypeLessExtensionPoint(protectDeleteId)
-
+  protectDeletePoint       = TypeLessExtensionPoint(protectDeleteId);
+  classPoint               = InheritanceExtensionPoint(classNodeId)
 in
-
   registry.addExtensionPoint(menuPoint);
   registry.addExtensionPoint(menuRootPoint);
   registry.addExtensionPoint(menuMultiPoint);
@@ -51,6 +49,6 @@ in
   registry.addExtensionPoint(labelsChangeGuardPoint);
   registry.addExtensionPoint(labelsChangeHandlerPoint);
   registry.addExtensionPoint(protectViewPoint);
-  registry.addExtensionPoint(protectDeletePoint)
-
+  registry.addExtensionPoint(protectDeletePoint);
+  registry.addExtensionPoint(classPoint)
 end;

@@ -90,6 +90,32 @@ context ClassMapping
         //else format(stdout,"PackageXClassDiagram::add: unknown element " + element.toString())
       end
     end
+    
+    @Operation addCreationButton(class)
+    
+      // Add a palette creation button for the class. Take appropriate action
+      // depending on the type of the class. In addition, if the class is a meta-class
+      // then add an extension point for displaying instances of the class...
+      
+      let className = class.name.toString();
+          groupNames = diagram.getGroupNames() then
+          groupName = xmf.select("Select Group","Select a group for the button",groupNames,"",@Operation(x) x end);
+          metaHandler(x,y) = self.newClassNode(x,y,class.pathSeq());
+          classHandler = self.instantiateClassHandler(class,package,self);
+          attHandler(sourcePort,targetPort) = self.newAttributeEdge(sourcePort,targetPort,class.pathSeq())
+      in if not(groupName = "" or groupName = null) 
+         then 
+           if class.inheritsFrom(XCore::Attribute)
+           then diagram.defineNewHandler(groupName,className,true,"XCore/Attribute.gif",attHandler)
+           elseif class.isMetaClass()
+           then 
+             diagram.defineNewHandler(groupName,className,false,"XCore/Class.gif",metaHandler);
+             self.defineMetaClassRegistryContributions(class)
+           else diagram.defineNewHandler(groupName,className,false,"XCore/Object.gif",classHandler)
+           end
+         end
+      end
+    end
 
     @Operation addDropped(element)
       @TypeCase(element)
@@ -637,7 +663,8 @@ context ClassMapping
           name = self.newClassName();
           metaClass = classNode.typePath->ref(Seq{Root,XCore}) then
           class = metaClass[name=Symbol(name.toString())] then
-          map = ClassXNode(class,classNode,self)
+          mapClass = xmf.registry().getExtensionPoint("com.ceteva.diagrams.class.map").find(metaClass).values->head then
+          map = mapClass(class,classNode,self)
         in 
           classNode.setName(name);
           self.add(map);
@@ -762,6 +789,51 @@ context ClassMapping
 
     @Operation handleDiagramRenewEvent(diagram)
       self.refreshToolGroups()
+    end
+    
+    @Operation defineMetaClassRegistryContributions(metaClass)
+      // When a metaClass is added to the diagram, we add entries into the sub-package
+      // called Displays. The user can then navigate to the elements in this package
+      // and extend or redefine them...
+      self.ensureDisplayPackage();
+      self.defineClassNodeExtension(metaClass);
+      self.defineClassXNodeExtension(metaClass)
+    end
+    
+    @Operation defineClassNodeExtension(metaClass)
+      // An extension point for class node displays. The extension is an operation defined
+      // in the registry that receives (x,y) the type path and the diagram and adds an
+      // instance of ClassNode to the diagram. By adding a sub-class of ClassNode to the
+      // Displays package, the user can override the display elements...
+      let registry    = xmf.registry();
+          classNodeId = "com.ceteva.diagrams.class.node";
+          displays    = package.getElement("Displays");
+          classNode   = XCore::Class(metaClass.name+"Node") then
+          createClassNode(x,y,typePath,diagram) = 
+            @WithoutRendering(diagram)
+              let node = classNode("A Class","",false,typePath,x,y,diagram.showAttributes(),diagram.showOperations(),true)
+              in node.new(diagram,true);
+                 diagram.addNode(node)
+              end
+            end
+      in classNode.addParent(ClassNode);
+         displays.add(classNode);
+         registry.addContribution(classNodeId,ExtensionPoints::Contribution(metaClass,[createClassNode]))
+      end
+    end
+    
+    @Operation defineClassXNodeExtension(metaClass)
+      // The registry contains a sub-class of ClassXNode that will be used to manage the
+      // association between an instance of ClassNode and an instance of metaClass. By 
+      // adding the sub-class of ClassXNode to Displays, the user can override the mapping...
+      let registry   = xmf.registry();
+          classMapId = "com.ceteva.diagrams.class.map";
+          displays   = package.getElement("Displays");
+          classXNode = XCore::Class(metaClass.name+"XNode") 
+      in classXNode.addParent(ClassXNode);
+         displays.add(classXNode);
+         registry.addContribution(classMapId,ExtensionPoints::Contribution(metaClass,[classXNode]))
+      end
     end
 
     @Operation dependencyEdgeAddedDaemon(diagram,slot,dependencyEdge)
@@ -894,6 +966,17 @@ context ClassMapping
       if element <> null and element.isKindOf(Object)
       then self.objectAdded(element,x,y)
       else self.nonObjectAdded(element,x,y)
+      end
+    end
+    
+    @Operation ensureDisplayPackage()
+    
+      // The Displays package is used to contain definitions for the
+      // display of elements. It is intended to contain defaults that
+      // can be extended by the user...
+      
+      if not package.hasElement("Displays")
+      then package.add(Package("Displays"))
       end
     end
     
@@ -1045,6 +1128,34 @@ context ClassMapping
     
     @Operation inheritanceEdgeRemovedDaemon(diagram,slot,inheritanceEdge)
       self.inheritanceEdgeRemoved(inheritanceEdge)
+    end
+    
+    @Operation instantiateClassHandler(c,p,m)
+    
+      // Create a handler for a new button where the element being instantiated is
+      // not a meta-class. A few checks are used to see ifwe can meaningfully add
+      // the new object to the package...
+      
+      @Operation(x,y) 
+        let instance = try c() catch(exception) try c.new() catch(exception) null end end then
+            message = "Do you want to add this element to the contents of package " + p.name() + "?" then
+            addToPackage =
+            if instance.isReallyKindOf(Contained)
+            then xmf.question(message)
+            else false
+            end
+        in if instance <> null
+           then 
+             if instance.isKindOf(NamedElement)
+             then instance.setName(p.newName(c.name().toString()))
+             end;
+             m.elementAdded(instance,x,y);
+             if addToPackage
+             then p.add(instance)
+             end
+           end
+        end
+      end
     end
     
     @Operation dropMenu()
@@ -1472,7 +1583,7 @@ context ClassMapping
          end;
 
          // If the package is a meta-package then we want to allow instances of
-         // the meta-classes to be created on the diagam...
+         // the meta-classes to be created on the diagram...
 
          if package.isMetaPackage()
          then 
@@ -1616,28 +1727,7 @@ context ClassMapping
          @For c in otherToolGroups do
            let p = self.package;
                m = self then
-               handler = 
-                 @Operation(x,y) 
-                   let instance = try c() catch(exception) try c.new() catch(exception) null end end then
-                       message = "Do you want to add this element to the contents of package " + p.name() + "?" then
-                       addToPackage =
-                         if instance.isReallyKindOf(Contained)
-                         then xmf.question(message)
-                         else false
-                         end
-                   in
-                      if instance <> null
-                      then 
-                        if instance.isKindOf(NamedElement)
-                        then instance.setName(p.newName(c.name().toString()))
-                        end;
-                        m.elementAdded(instance,x,y);
-                        if addToPackage
-                        then p.add(instance)
-                        end
-                      end
-                   end
-                 end
+               handler = self.instantiateClassHandler(c,p,m)
            in diagram.defineNewHandler(
                 languageName,
                 c.name.toString(),

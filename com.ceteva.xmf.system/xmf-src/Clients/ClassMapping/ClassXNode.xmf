@@ -29,15 +29,19 @@ context ClassMapping
       self.checkDaemons();
       self.setGlobalMenu(node,Set{class.of(),node.of()})
     end
+    
+    @Operation addCreationButton()
+      owner.addCreationButton(class)
+    end
 
     @Operation buildGlobalMenu(rightClickable)      
       let globalMenu = rightClickable.globalMenu(false);
           type = class.of();
           clientType = rightClickable.of()
       in
-        xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,
-                                                  ClassXNode::proxyElementTarget);
+        xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,ClassXNode::proxyElementTarget);
         globalMenu.add(MenuAction("Delete from Diagram Only",RightClickableProxy::proxyTarget,Seq{},DiagramsMapping::ElementXNode::deleteNodeFromDiagram));
+        globalMenu.add(MenuAction("Add Creation Button",RightClickableProxy::proxyTarget,Seq{},ClassXNode::addCreationButton));
         globalMenu.new();
         globalMenu
       end
