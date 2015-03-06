@@ -118,6 +118,6 @@ context XCore::Operation
       '[' p = Property ps = (',' Property)* ']' { Seq{p|ps} } 
     | { Seq{} }.
     
-    Property ::= n = Name '=' e = Exp { Seq{n,e} }.
+    Property ::= n = Name '=' e = Exp { [n,e] } | n = Name { [ n,[| true |] ] }.
     
   end

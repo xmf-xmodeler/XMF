@@ -47,6 +47,20 @@ context ClassMapping
       classMaps + packageMaps
     end
     
+    @Operation actionAdded(handler)
+      // Add the action to the appropriate group in the palette...
+      let name = handler.getProperty("actionName",handler.name.toString());
+          icon = handler.getProperty("actionIcon","Tools/Activity.gif");
+          group = handler.getProperty("actionGroup","Actions")
+      in diagram.defineToolGroup(group);
+         diagram.defineActionHandler(group,name,name,icon,handler)
+      end
+    end
+    
+    @Operation actionRemoved(handler)
+      "PackageXClassDiagram::actionRemoved not implemented".println()
+    end
+    
     @Operation add(element)
       @TypeCase(element)
         AssociationXAssociationEdge do
@@ -689,38 +703,6 @@ context ClassMapping
       self.classRemoved(class)
     end
     
-    @Operation packageAdded_classDiagramDaemon(obj,slot,package)
-      if not self.eventFiltered("package added")
-      then self.packageAdded(package)
-      end
-    end
-    
-    @Operation packageRemoved_classDiagramDaemon(obj,slot,package)
-      self.packageRemoved(package)
-    end
-    
-    @Operation parentAdded(parent)
-      // Called when a parent has been added to the package...
-      self.addMetaTray()
-    end
-    
-    @Operation parentRemoved(parent)
-      // Called when a parent has been removed from the package...
-      if not package.isMetaPackage()
-      then self.deleteMetaTray()
-      end
-    end
-    
-    @Operation parentAdded_classDiagramDaemon(obj,slot,parent)
-      if not self.eventFiltered("parent added")
-      then self.parentAdded(parent)
-      end
-    end
-    
-    @Operation parentRemoved_classDiagramDaemon(obj,slot,parent)
-      self.parentRemoved(parent)
-    end
-    
     @Operation checkPackageDaemons()
       @SlotValueChanged multi once   PackageXClassDiagram::nameChanged_classDiagramDaemon(package,"name")                end;
       // @SlotValueChanged multi once   PackageXClassDiagram::ownerChanged_classDiagramDaemon(package,"owner")           end;
@@ -732,6 +714,8 @@ context ClassMapping
       @SlotValueChanged multi once - PackageXClassDiagram::packageRemoved_classDiagramDaemon(package,"packages")         end;
       @SlotValueChanged multi once + PackageXClassDiagram::parentAdded_classDiagramDaemon(package,"parents")             end;
       @SlotValueChanged multi once - PackageXClassDiagram::parentRemoved_classDiagramDaemon(package,"parents")           end;
+      @SlotValueChanged multi once + PackageXClassDiagram::operationAdded_classDiagramDaemon(package,"operations")       end;
+      @SlotValueChanged multi once - PackageXClassDiagram::operationRemoved_classDiagramDaemon(package,"operations")     end;
       @SlotValueChanged multi once + PackageXClassDiagram::importAdded_classDiagramDaemon(package,"imports")             end;
       @SlotValueChanged multi once - PackageXClassDiagram::importRemoved_classDiagramDaemon(package,"imports")           end;
       @SlotValueChanged multi once   PackageXClassDiagram::metaPackageChanged_classDiagramDaemon(package,"metaPackage")  end
@@ -923,7 +907,12 @@ context ClassMapping
                m.package.deleteRecursive()
               end
             end
-      in diagram.defineActionHandler("Actions","Delete Selected","delete","Tools/Delete.gif",delete)
+      in diagram.defineActionHandler("Actions","Delete Selected","delete","Tools/Delete.gif",delete);
+         // User defined operations with the named properties below are transformed into actions.
+         // The operation properties define the group, label and icon. These default as shown...
+         @For handler in package.allOperations() when handler.getProperty("diagramAction",false) do
+           self.actionAdded(handler)
+         end
       end
     end
     
@@ -1517,6 +1506,28 @@ context ClassMapping
       end
     end  
     
+    @Operation operationAdded(operation)
+      if operation.getProperty("diagramAction",false)
+      then self.actionAdded(operation)
+      end
+    end
+    
+    @Operation operationRemoved(operation)
+      if operation.getProperty("diagramAction",false)
+      then self.actionRemoved(operation)
+      end
+    end 
+    
+    @Operation operationAdded_classDiagramDaemon(obj,slot,operation)
+      if not self.eventFiltered("operation added")
+      then self.operationAdded(operation)
+      end
+    end
+    
+    @Operation operationRemoved_classDiagramDaemon(obj,slot,operation)
+      self.operationRemoved(operation)
+    end
+    
     @Operation packageAdded(package)
       if not packageMaps->exists(map | map.package = package) and
          not elementMaps->exists(map | map.element = package)
@@ -1576,6 +1587,38 @@ context ClassMapping
         do self.remove(map);
            package.remove(map.package)
       end
+    end
+    
+    @Operation packageAdded_classDiagramDaemon(obj,slot,package)
+      if not self.eventFiltered("package added")
+      then self.packageAdded(package)
+      end
+    end
+    
+    @Operation packageRemoved_classDiagramDaemon(obj,slot,package)
+      self.packageRemoved(package)
+    end
+    
+    @Operation parentAdded(parent)
+      // Called when a parent has been added to the package...
+      self.addMetaTray()
+    end
+    
+    @Operation parentRemoved(parent)
+      // Called when a parent has been removed from the package...
+      if not package.isMetaPackage()
+      then self.deleteMetaTray()
+      end
+    end
+    
+    @Operation parentAdded_classDiagramDaemon(obj,slot,parent)
+      if not self.eventFiltered("parent added")
+      then self.parentAdded(parent)
+      end
+    end
+    
+    @Operation parentRemoved_classDiagramDaemon(obj,slot,parent)
+      self.parentRemoved(parent)
     end
     
     @Operation parentAdded(child,parent)
