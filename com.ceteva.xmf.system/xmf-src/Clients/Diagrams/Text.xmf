@@ -7,14 +7,14 @@ context Diagrams
 
   @Class Text extends Display
   
-    @Bind textDimension = Table(10) end
+    @Bind textDimension = Table(10)                     end
   
-    @Attribute text : String (?) end
-    @Attribute font : String (?) end
-    @Attribute editable : Boolean (?,!) end
-    @Attribute underline : Boolean (?) end
-    @Attribute italicise : Boolean (?) end
-    @Attribute color : Color = static Color() (?,!) end
+    @Attribute text      : String (?)                   end
+    @Attribute font      : String (?)                   end
+    @Attribute editable  : Boolean (?,!)                end
+    @Attribute underline : Boolean (?)                  end
+    @Attribute italicise : Boolean (?)                  end
+    @Attribute color     : Color = static Color() (?,!) end
     
     @Constructor(id,text,x,y,editable) ! end
     
@@ -29,15 +29,11 @@ context Diagrams
     @Operation calculateSize()
       let d = 
         if Text::textDimension.hasKey(text) and self.font = ""
-        then
-          Text::textDimension.get(text)
+        then Text::textDimension.get(text)
         else
           let td = self.dimension()
-          in
-          
-             // If there is no command interpreter then don't cache the text dimension
-             // since it will not have been properly calculated
-             
+          in // If there is no command interpreter then don't cache the text dimension
+             // since it will not have been properly calculated.
              if font = "" and self.hasCommandInterpreter()
              then Text::textDimension.put(text,td)
              end;
@@ -168,9 +164,24 @@ context Diagrams
       @Command(self) setColor(self,color) end
     end
     
-    @Operation setFont(font:String)
-      self.font := font;
-      @Command(self) setFont(self,font) end
+    @Operation setFont(font:String) 
+      // Backward compatibility: We would like this argument
+      // to be an instance of Font, but legacy code uses
+      // String...
+      if font.isKindOf(String)
+      then
+        self.font := font;
+        @Command(self) setFont(self,font) end;
+        self.calculateSize();
+        @Command(self) resizeCommand(self,width,height) end;
+        owner.resized(self)
+      else
+        self.font := font.getFontData();
+        @Command(self) setFont(self,font.getFontData()) end;
+        self.calculateSize();
+        @Command(self) resizeCommand(self,width,height) end;
+        owner.resized(self)
+      end
     end
     
     // use the following method for non-user interface level text changes

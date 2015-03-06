@@ -88,10 +88,13 @@ context ClassMapping
           let metaclass_ = 
                 if attribute.of() = Attribute
                 then "" 
-                else attribute.of().name end 
+                else attribute.of().name 
+                end 
               then
-              text = node.nextAttribute(attribute.name.toString(),metaclass_,attribute.type) then
-              map = AttributeXText(attribute,text)
+              text = node.nextAttributeExtension(attribute.name.toString(),attribute.of(),metaclass_,attribute.type) then
+              extensionPoint = xmf.registry().getExtensionPoint("com.ceteva.diagrams.attribute.text.map") then
+              class = (extensionPoint.find(attribute.of()).values->head)() then
+              map = class(attribute,text)
           in self.add(map);
              text.new(node.attBox);
              node.add(text)
@@ -122,7 +125,7 @@ context ClassMapping
             self.remove(map);
             map.text.delete()
           else
-            super.attributeRemoved(attribute)
+            owner.attributeRemoved(attribute)
         end
       end
     end

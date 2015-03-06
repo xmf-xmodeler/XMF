@@ -6,11 +6,15 @@ import OCL;
 import XOCL; 
 
 context Class
-     
-     @Operation compile(env,frame,isLast,saveSource)
-       self.compileClassPopulation(
-          self.compileClassCreation(env,frame),env,frame,isLast,saveSource)
-     end 
+  @Operation compile(env,frame,isLast,saveSource)
+  
+    // Compilation of a single class definition is complicated because the
+    // class might need to reference other classes in the same name-space.
+    // To facilitate this, classifier references are delayed via closures.
+    // The closures are removed when the class is initialized by its owner.
+    
+    self.compileClassPopulation(self.compileClassCreation(env,frame),env,frame,isLast,saveSource)
+  end 
 
 context Class
      
@@ -24,18 +28,19 @@ context Class
        
        let parents = 
              if parents->isEmpty 
-             then [| @Operation <name + "DelayedDefaultParents">() newClass.defaultParents() end |] 
-             else [| @Operation <name + "DelayedParents">() 
+             then [| @Operation <name.toString() + "DelayedDefaultParents">() newClass.defaultParents() end |] 
+             else [| @Operation <name.toString() + "DelayedParents">() 
                        try <parents->iterate(p e = [| Set{} |] | [| <e> ->including(<p>) |])> 
                        catch(exception)
-                         throw Exceptions::ClassInheritanceException(<name.lift()>,<parents->map("pprint").lift()>,exception)
+                         throw Exceptions::ClassInheritanceException(<name.toString().lift()>,<parents->map("pprint").lift()>,exception)
                        end
                      end |]
-             end
+             end;
+           nameExp = if name.isKindOf(Performable) then name else StrExp(name) end
        in [| let newClass = <self.metaExp()>.new() in
              let parents = <parents>
              in parents.owner := newClass;
-                newClass.set("name",XCore::Symbol(<StrExp(name)>));
+                newClass.set("name",XCore::Symbol(<nameExp>));
                 newClass.set("parents",parents);
                 newClass.set("isAbstract",<BoolExp(isAbstract)>);
                 newClass.set("imports",@Imports(imports) imports end);
@@ -50,7 +55,7 @@ context Class
      @Operation compileClassPopulation(classInstrs,env,frame,isLast,saveSource)
        // Compile the elements and add them to the class at the head
        // of the stack.
-       let env = env.incNameSpaceRefs().consNameSpaceRef(name,1);  // The class is defined wrt its container.
+       let env = env.incNameSpaceRefs().consNameSpaceRef(name.toString(),1);  // The class is defined wrt its container.
            add = Compiler::Symbol("add")
        in self.allDefs()->iterate(def instrs = classInstrs |
             Seq{Instrs::StartCall() | def.compile(env,frame,false,saveSource)} + 

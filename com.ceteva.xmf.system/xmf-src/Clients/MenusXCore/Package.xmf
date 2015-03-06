@@ -131,7 +131,16 @@ context Package
       available = self.getAvailablePackages()->asSeq.sortNamedElements_CaseIndependent() then
       selected = xmf.choose("Set Imports","Choose imported package to add:",available)
     in if selected <> 0-1
-       then self.imports := selected
+       then @For p in selected do self.addImport(p) end
+       end
+    end
+  end
+  
+context Package
+  @Operation removeImports_client()
+    let selected = xmf.choose("Remove Imports","Choose imported package to remove:",imports->excluding(XCore))
+    in if selected <> 0-1
+       then @For p in selected do self.removeImport(p) end
        end
     end
   end

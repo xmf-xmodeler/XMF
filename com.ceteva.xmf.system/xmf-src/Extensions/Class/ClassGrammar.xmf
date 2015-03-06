@@ -20,7 +20,7 @@ context Class
     
       // The name of the class may be dropped...
       
-      name = AName 
+      name = ClassName 
       
       // The type of the class may be different 
       // from XCore::Class...
@@ -30,6 +30,10 @@ context Class
       // A class may optionally be abstract...
       
       isAbstract = IsAbstract 
+      
+      // A stand-alone class?
+      
+      isOrphan = IsOrphan
       
       // The parents of a class default to 
       // XCore::Object...
@@ -43,7 +47,12 @@ context Class
       
       'end'
       
-      { Class(name,metaClass,isAbstract,parents,defs) }.
+      { if isOrphan
+        then [| <Class(name,metaClass,isAbstract,parents,defs).desugar()>.init() |]
+        else Class(name,metaClass,isAbstract,parents,defs) 
+        end }.
+      
+    ClassName ::= AName | '(' e=Exp ')' { e }.
       
     Defs ::= 
     
@@ -77,6 +86,15 @@ context Class
       // By default a class is not abstract...
     
       'isabstract' { true } 
+      
+    | { false }.
+    
+    IsOrphan ::= 
+    
+      // By default a class lives in a name-space and must be
+      // added to the name-space before it is usable...
+    
+      'isOrphan' { true }
       
     | { false }.
     

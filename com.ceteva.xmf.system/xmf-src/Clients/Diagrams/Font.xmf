@@ -1,0 +1,26 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+
+context Diagrams
+
+  @Class Font
+
+    // A font is a platform-specific encoding of a string.
+    // Use the underlying platform to encode and decode
+    // strings...
+    
+    @Attribute fontData:String end
+    
+    @Constructor(fontData) ! end
+    
+    @Operation getFontData():String
+      fontData
+    end
+    
+    @Operation getPlatformFont()
+      xmf.javaClass("tools.clients.diagrams.XFont")
+    end
+    
+  end

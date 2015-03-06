@@ -9,20 +9,23 @@ context Diagrams
 
   @Class Diagram extends Display, DisplayContainer, DroppableClientElement, ElementViewerInterface
   
-    @Attribute graph           : Graph  = Graph() end           // Underlying nodes and edges.
-    @Attribute name            : String (?) end                 // Diagrams are named.
+    @Attribute graph             : Graph  = Graph()           end           // Underlying nodes and edges.
+    @Attribute name              : String (?)                 end           // Diagrams are named.
     
     // Note that the isOpen state is not applicable to sub diagrams.  Sub diagrams should use
     // their top level diagram to determine their isOpen state.
     
-    @Attribute isOpen          : Boolean = true (?) end            // Is being shown.
-    @Attribute selected        : Boolean = false (!) end           // Is being shown.
-    @Attribute newHandlers     : Table = Table(10) end             // Handlers for the creation tools.
-    @Attribute isSubDiagram    : Boolean end                       // Set when this diagram is a display element.
-    @Attribute listeners       : Set(DiagramListener) (+,-) end    // Listeners for diagram events
-    @Attribute backgroundColor : Color = null (?,!)      end       // Background color for diagram
-    @Attribute zoom			 : Integer = 100 end				 // Zoom ratio when shown as a top level diagram
-    @Attribute nestedZoom	     : Integer = 100 end				 // Zoom ratio when shown as a nested diagram
+    @Attribute isOpen            : Boolean = true (?)         end           // Is being shown.
+    @Attribute selected          : Boolean = false (!)        end           // Is being shown.
+    @Attribute newHandlers       : Table = Table(10)          end           // Handlers for the creation tools.
+    @Attribute toggleHandlers    : Table = Table(10)          end           // Handlers for toggle tools.
+    @Attribute actionHandlers    : Table = Table(10)          end           // Handlers for action tools.
+    @Attribute isSubDiagram      : Boolean                    end           // Set when this diagram is a display element.
+    @Attribute listeners         : Set(DiagramListener) (+,-) end           // Listeners for diagram events.
+    @Attribute backgroundColor   : Color = null (?,!)         end           // Background color for diagram.
+    @Attribute zoom			    : Integer = 100              end	        // Zoom ratio when shown as a top level diagram.
+    @Attribute nestedZoom	    : Integer = 100              end		    // Zoom ratio when shown as a nested diagram.
+    @Attribute magneticWaypoints : Boolean = true             end           // Handled in the client, recorded here.
     
     @Constructor(name)
     end
@@ -33,6 +36,12 @@ context Diagrams
     end
     
     @Constructor(id,name,graph) ! end
+    
+    @Operation action(id,args) 
+      if actionHandlers.hasKey(id)
+      then actionHandlers.get(id).invoke(self,args)
+      end
+    end
 
     @Operation add(element)
       @TypeCase(element)
@@ -160,6 +169,14 @@ context Diagrams
       graph.deepContains(node)
     end
     
+    @Operation defineActions()
+      // Actions are buttons that do something when pressed...
+      self.defineToolGroup("Actions");
+      self.defineActionHandler("Actions","Zoom +","zoom in","Tools/Activity.gif",Diagram::zoomIn);
+      self.defineActionHandler("Actions","Zoom -","zoom out","Tools/Activity.gif",Diagram::zoomOut);
+      self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected)
+    end
+    
     @Operation defineEdgeToolGroups()
     
       // Redefine this in sub-classes to produce appropriate node tool groups.
@@ -182,7 +199,15 @@ context Diagrams
     @Operation defineToolGroups()
       self.defineToolGroupTypes();
       self.defineNodeToolGroups();
-      self.defineEdgeToolGroups()
+      self.defineEdgeToolGroups();
+      self.defineToggles();
+      self.defineActions()
+    end
+    
+    @Operation defineToggles() 
+      // Toggles switch properties on and off...
+      self.defineToolGroup("Toggles");
+      self.defineToggleHandler("Toggles","Magnetic Waypoints","magnetic",magneticWaypoints,"XCore/Object.gif",Diagram::setMagneticWaypoints)
     end
     
     @Operation defineToolGroupTypes()
@@ -225,8 +250,7 @@ context Diagrams
       if isSubDiagram
       then xmf.warning("Nested diagrams cannot be directly deleted.")
       elseif xmf.question("Are you sure you want to delete diagram \"" + name.toString() + "\"?")
-      then
-        self.delete()
+      then self.delete()
       end
     end
     
@@ -311,13 +335,31 @@ context Diagrams
       end 
     end
     
-    @Operation defineNewHandler(type,handler)
+    @Operation defineActionHandler(type,handler)
+      // When a request is made to perform an action by name, the handler
+      // is found in the table and supplied with arguments...
+      actionHandlers.put(type,handler)
+    end
     
+    @Operation defineNewHandler(type,handler)
       // When a request is made to create a new edge or node the request
       // is handled by  looking up the name of the edge or node type in
       // the newHandlers table and dispatching...
-      
       newHandlers.put(type,handler)
+    end
+    
+    @Operation defineToggleHandler(type,handler)
+      // When a request is made to switch state, call the handler with the
+      // new state...
+      toggleHandlers.put(type,handler)
+    end
+    
+    @Operation defineActionHandler(group:String,label:String,type:String,icon:String,handler) 
+      // When the toggle is pressed on the diagram the new state is supplied to 
+      // the handler. It is then up to the handler to perform the appropriate action
+      // on the diagram...
+      self.defineActionHandler(type,handler);
+      @Command(self) newActionCommand(self,group,label,type,icon) end
     end
     
     @Operation defineNewHandler(group:String,type:String,isEdge:Boolean,iconFile:String,handler:Operation)
@@ -328,6 +370,14 @@ context Diagrams
     @Operation defineNewHandler(group:String,label:String,type:String,isEdge:Boolean,iconFile:String,handler:Operation)
       self.defineNewHandler(type,handler);
       @Command(self) newToolCommand(self,group,label,type,isEdge,iconFile) end  
+    end
+    
+    @Operation defineToggleHandler(group:String,label:String,type:String,state:Boolean,icon:String,handler) 
+      // When the toggle is pressed on the diagram the new state is supplied to 
+      // the handler. It is then up to the handler to perform the appropriate action
+      // on the diagram...
+      self.defineToggleHandler(type,handler);
+      @Command(self) newToggleCommand(self,group,label,type,state,icon) end
     end
 
     @Operation dispose()
@@ -410,6 +460,21 @@ context Diagrams
     
     @Operation hasNewHandler(type)
       newHandlers.hasKey(type)
+    end
+    
+    @Operation hideSelected() 
+      @WithoutRendering(self)
+        @For edge in graph.edges do
+          if edge.selected
+          then edge.hide()
+          end
+        end;
+        @For node in graph.nodes do
+          if node.selected
+          then node.hide()
+          end
+        end
+      end
     end
     
     @Operation invokeMenuOperation()
@@ -826,12 +891,16 @@ context Diagrams
     end
     
     @Operation setFocus()
-      /* if not self.isOpen 
-      then
-        self.renew()
-      end; */
       self.zoomIn();
       @Command(self) showDiagram(self.getTopLevelDiagram()) end
+    end
+    
+    @Operation setMagneticWaypoints(state:Boolean)
+      if magneticWaypoints <> state
+      then
+        self.magneticWaypoints := state;
+        @Command(self) setMagneticWaypoints(self,state) end
+      end
     end
 
     @Operation setName(element,slot,newName,oldName)
@@ -905,6 +974,12 @@ context Diagrams
            then x := 10; y := y + height
            end
          end
+      end
+    end
+    
+    @Operation toggle(toggleId:String,state:Boolean)
+      if toggleHandlers.hasKey(toggleId)
+      then toggleHandlers.get(toggleId).invoke(self,[state])
       end
     end
     

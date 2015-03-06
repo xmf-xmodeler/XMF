@@ -187,19 +187,20 @@ context XMap
 
      // Need to check if the daemon to be added is a multi object daemon and
      // if it exists in the Daemon::multiDaemons table.
-     [| if <BoolExp(multi)>
-        then
-          let key = Set{<OCL::Path::toPath(path)>,<slot> ->asSymbol}
-          in
-            if Daemon::hasMultiDaemon(key)
-            then
-              XMap::SlotValueChanged::applyExistingMultiDaemon(key,<object>,self)
-            else <addDaemon>
-            end
-          end
-        else <addDaemon>
-        end
-     |]
+     
+     let pathExp = if path.equals(["AnonymousDaemon"]) then [| "AnonymousDaemon" |] else OCL::Path::toPath(path) end
+     in [| if <BoolExp(multi)>
+           then
+             let key = Set{<pathExp>,<slot> ->asSymbol}
+             in if Daemon::hasMultiDaemon(key)
+                then XMap::SlotValueChanged::applyExistingMultiDaemon(key,<object>,self)
+                else <addDaemon>
+                end
+             end
+           else <addDaemon>
+           end
+        |]
+     end
    end
 
    @Operation desugarRemove()

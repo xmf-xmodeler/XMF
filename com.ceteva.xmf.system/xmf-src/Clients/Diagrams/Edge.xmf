@@ -8,7 +8,10 @@ context Diagrams
 
   @Class Edge isabstract extends RightClickable, ContainedDiagramElement
   
-    // Constants used for source and target heads.
+    // Constants used for source and target heads. Note that the client maintains
+    // an implicit start and end waypoint at the first and last positions in the
+    // waypoint list. This should be reflected when sending waypoint indices to
+    // the client.
   
     @Bind noArrow        = 0 end
     @Bind arrow          = 1 end
@@ -22,7 +25,7 @@ context Diagrams
     @Bind normal		 = "normal"  end
     @Bind splined		 = "splined" end
     
-    @Attribute renderType : String					end
+    @Attribute renderType : String                  end
     @Attribute source     : Port (?)                end
     @Attribute target     : Port (?)                end
     @Attribute refx       : Integer (?)             end
@@ -32,10 +35,10 @@ context Diagrams
     @Attribute labels     : Set(Label) (+)          end
     @Attribute wayPoints  : Seq(WayPoint) (+)       end
     @Attribute lineStyle  : Integer (?)             end
-    @Attribute width	  : Integer = 1 (?)        	 end
+    @Attribute width	  : Integer = 1 (?)         end
     @Attribute hidden     : Boolean (?)             end 
     @Attribute selected   : Boolean = false (?,!)   end
-    @Attribute color	  : Color = static Color() (?,!)      end
+    @Attribute color	  : Color = static Color() (?,!) end
     
     @Constructor(source,target,sourceHead,targetHead,color) 
       self.lineStyle := Line::solidLine;
@@ -46,8 +49,8 @@ context Diagrams
    
     @Constructor(id,source,target,sourceHead,targetHead,labels,wayPoints,color) ! 
       self.lineStyle := Line::solidLine;
-      if source = target then
-        self.addSelfWaypoints()
+      if source = target 
+      then self.addSelfWaypoints()
       end
     end 
     
@@ -60,12 +63,13 @@ context Diagrams
     end
     
     @Operation addSelfWaypoints()
-      let x = source.owner().x + source.x();
-          y = source.owner().y + source.y()
-      in
-        self.addWayPoint(WayPoint(0,x+source.width+20,(y+(source.height/3)*2).round()));
-        self.addWayPoint(WayPoint(1,x+source.width+20,y+source.height+20));
-        self.addWayPoint(WayPoint(2,(x+(source.width/3)*2).round(),y+source.height+20))        
+      let x = source.owner().x;
+          y = source.owner().y;
+          w = source.owner().width;
+          h = source.owner().height
+      in self.addWayPoint(WayPoint(1,x + (w * 1.5).round(),y + (h * 0.5).round()));
+         self.addWayPoint(WayPoint(2,x + (w * 1.5).round(),y + (h * 1.5).round()));
+         self.addWayPoint(WayPoint(3,x + (w * 0.5).round(),y + (h * 1.5).round()))     
       end
     end
     
@@ -326,7 +330,7 @@ context Diagrams
     @Operation resetWaypointIndices()
       // Set the index of each element in the sequence.
       @For wayPoint in wayPoints do
-        wayPoint.index := wayPoints->indexOf(wayPoint)
+        wayPoint.index := wayPoints->indexOf(wayPoint) + 1
       end
     end 
     

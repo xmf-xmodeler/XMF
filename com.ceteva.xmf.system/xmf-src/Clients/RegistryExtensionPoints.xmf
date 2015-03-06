@@ -20,7 +20,8 @@ let
   labelsChangeHandlerId = "com.ceteva.xmf.labels.changeHandler";
   protectViewId         = "com.ceteva.xmf.protect.view";
   protectDeleteId       = "com.ceteva.xmf.protect.delete";
-  classNodeId           = "com.ceteva.diagrams.class.node"
+  classNodeId           = "com.ceteva.diagrams.class.node";
+  attributeTextId       = "com.ceteva.diagrams.attribute.text"
 then 
   menuPoint                = MultipleExtensionPoint(menuId);
   menuRootPoint            = InheritanceExtensionPoint(menuRootId);
@@ -35,7 +36,8 @@ then
   labelsChangeHandlerPoint = InheritanceExtensionPoint(labelsChangeHandlerId);
   protectViewPoint         = TypeLessExtensionPoint(protectViewId);
   protectDeletePoint       = TypeLessExtensionPoint(protectDeleteId);
-  classPoint               = InheritanceExtensionPoint(classNodeId)
+  classPoint               = InheritanceExtensionPoint(classNodeId);
+  attributeTextPoint       = InheritanceExtensionPoint(attributeTextId)
 in
   registry.addExtensionPoint(menuPoint);
   registry.addExtensionPoint(menuRootPoint);
@@ -50,5 +52,6 @@ in
   registry.addExtensionPoint(labelsChangeHandlerPoint);
   registry.addExtensionPoint(protectViewPoint);
   registry.addExtensionPoint(protectDeletePoint);
-  registry.addExtensionPoint(classPoint)
+  registry.addExtensionPoint(classPoint);
+  registry.addExtensionPoint(attributeTextPoint)
 end;

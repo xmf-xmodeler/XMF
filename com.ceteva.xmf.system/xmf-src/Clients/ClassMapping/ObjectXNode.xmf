@@ -14,7 +14,7 @@ context ClassMapping
   
     @Attribute slotMaps    : Seq(SlotXText) (+,-) end
     @Attribute attributes  : Set(Attribute) (+,-) end
-    @Attribute allClasses  : Set(Class) end
+    @Attribute allClasses  : Set(Class)           end
 
     @Operation add(element)
       @TypeCase(element)

@@ -4,8 +4,9 @@ import Clients;
 import ExtensionPoints;
 import ClassDiagrams;
 
-let registry    = xmf.registry();
-    classNodeId = "com.ceteva.diagrams.class.node";
+let registry            = xmf.registry();
+    classNodeId         = "com.ceteva.diagrams.class.node";
+    attributeTextId     = "com.ceteva.diagrams.attribute.text";
     createDefaultClassNode(x,y,typePath,diagram) = 
       @WithoutRendering(diagram)
         let node = ClassNode("A Class","",false,typePath,x,y,diagram.showAttributes(),diagram.showOperations(),diagram.showMetaslots()) 
@@ -14,5 +15,6 @@ let registry    = xmf.registry();
         end
       end
 in // By default a class is represented by a ClassNode.
-   registry.addContribution(classNodeId,Contribution(XCore::Class,[createDefaultClassNode]))
+   registry.addContribution(classNodeId,Contribution(XCore::Class,[createDefaultClassNode]));
+   registry.addContribution(attributeTextId,Contribution(XCore::Attribute,[@Operation() AttributeText end]))
 end;

@@ -74,16 +74,15 @@ context ClassDiagrams
           target = RightClickable::selfTarget;
           hideMenu = MenuItems("Hide Contents");
           showMenu = MenuItems("Show Contents")
-      in
-        globalMenu.add(hideMenu);
-        globalMenu.add(showMenu);
-        hideMenu.add(MenuAction("Attributes",target,Seq{false},ClassNode::showAttributesMenuCommand));
-        hideMenu.add(MenuAction("Operations",target,Seq{false},ClassNode::showOperationsMenuCommand));
-        hideMenu.add(MenuAction("Slot Values",target,Seq{false},ClassNode::showMetaslotsMenuCommand));
-        showMenu.add(MenuAction("Attributes",target,Seq{true},ClassNode::showAttributesMenuCommand));
-        showMenu.add(MenuAction("Operations",target,Seq{true},ClassNode::showOperationsMenuCommand));
-        showMenu.add(MenuAction("Slot Values",target,Seq{true},ClassNode::showMetaslotsMenuCommand));
-        globalMenu
+      in globalMenu.add(hideMenu);
+         globalMenu.add(showMenu);
+         hideMenu.add(MenuAction("Attributes",target,Seq{false},ClassNode::showAttributesMenuCommand));
+         hideMenu.add(MenuAction("Operations",target,Seq{false},ClassNode::showOperationsMenuCommand));
+         hideMenu.add(MenuAction("Slot Values",target,Seq{false},ClassNode::showMetaslotsMenuCommand));
+         showMenu.add(MenuAction("Attributes",target,Seq{true},ClassNode::showAttributesMenuCommand));
+         showMenu.add(MenuAction("Operations",target,Seq{true},ClassNode::showOperationsMenuCommand));
+         showMenu.add(MenuAction("Slot Values",target,Seq{true},ClassNode::showMetaslotsMenuCommand));
+         globalMenu
       end
     end
     
@@ -146,6 +145,10 @@ context ClassDiagrams
      
      @Operation nextAttribute(name,metaclass_,type)
        attBox.nextAttribute(name,metaclass_,type)
+     end
+    
+    @Operation nextAttributeExtension(name,metaclass_,metaclassName,type)
+       attBox.nextAttributeExtension(name,metaclass_,metaclassName,type)
      end
      
      @Operation nextOperation(name,metaclass_,type)

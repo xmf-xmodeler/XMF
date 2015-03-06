@@ -14,7 +14,7 @@ context ClassDiagrams
     
     @Attribute classNodes         : Seq(ClassNode)       end
     @Attribute elementNodes       : Seq(ElementNode)     end
-    @Attribute objectNodes 		  : Seq(ObjectNode)      end
+    @Attribute objectNodes 		: Seq(ObjectNode)      end
     @Attribute packageNodes       : Seq(PackageNode)     end
     @Attribute noteNodes          : Seq(NoteNode)	     end
     @Attribute inheritanceEdges   : Seq(InheritanceEdge) end
@@ -126,16 +126,19 @@ context ClassDiagrams
       let globalMenu = super();
           target = RightClickable::selfTarget;
           hideMenu = MenuItems("Hide All");
-          showMenu = MenuItems("Show All")
+          showMenu = MenuItems("Show All");
+          fontMenu = MenuItems("Fonts")
       in
         globalMenu.add(hideMenu);
         globalMenu.add(showMenu);
+        globalMenu.add(fontMenu);
         hideMenu.add(MenuAction("Attributes",target,Seq{true},ClassDiagram::hideAttributes));
         hideMenu.add(MenuAction("Operations",target,Seq{true},ClassDiagram::hideOperations));
         hideMenu.add(MenuAction("Slot Values",target,Seq{true},ClassDiagram::hideMetaslots));
         showMenu.add(MenuAction("Attributes",target,Seq{false},ClassDiagram::hideAttributes));
         showMenu.add(MenuAction("Operations",target,Seq{false},ClassDiagram::hideOperations));
         showMenu.add(MenuAction("Slot Values",target,Seq{false},ClassDiagram::hideMetaslots));
+        fontMenu.add(MenuAction("Set Diagram Font",target,Seq{},ClassDiagram::setDiagramFont));
         globalMenu
       end
     end
@@ -167,6 +170,14 @@ context ClassDiagrams
     @Operation defaultSubDiagram(x,y)
       self.newSubDiagram(x,y)
     end
+    
+    @Operation defaultSelfAttribute(x,y)
+      self.newSelfAttributeEdge(x,y,XCore::Attribute.pathSeq())
+    end
+    
+    @Operation defaultSelfAssociation(x,y)
+      self.newSelfAssociationEdge(x,y,Associations::Association.pathSeq())
+    end
    
     @Operation defineEdgeToolGroups()
       self.defineNewHandler("XCore","Association",true,"XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
@@ -174,8 +185,7 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
       self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
       if xmf.preference("EnableMeta")
-      then
-        self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
+      then self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
       end
     end
     
@@ -183,7 +193,9 @@ context ClassDiagrams
       // self.defineNewHandler("XCore","Sub Diagram",false,"XCore/Package.gif",ClassDiagram::defaultSubDiagram);
       self.defineNewHandler("XCore","Class",false,"XCore/Class.gif",ClassDiagram::defaultClassNode);
       self.defineNewHandler("XCore","Package",false,"XCore/Package.gif",ClassDiagram::defaultPackageNode);
-      self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote)
+      self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote);
+      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
+      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation)
     end
     
     @Operation defineToolGroupTypes()
@@ -372,35 +384,29 @@ context ClassDiagrams
     end
 
     @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
-      let 
-        // Calculate positions of end labels and create ends
-        starty = if targetPort.owner.y > sourcePort.owner.y then 15 else 0-30 end;
-        startx = if targetPort.owner.x > sourcePort.owner.x then 15 else 0-35 end;
-        endy = if sourcePort.owner.y > targetPort.owner.y then 15 else 0-30 end;
-        endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end 
-        in
-        
-        let  
+      let  // Calculate positions of end labels and create ends
+          starty = if targetPort.owner.y > sourcePort.owner.y then 15 else 0-30 end;
+          startx = if targetPort.owner.x > sourcePort.owner.x then 15 else 0-35 end;
+          endy = if sourcePort.owner.y > targetPort.owner.y then 15 else 0-30 end;
+          endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end then
           end1 = AssociationEnd(Label("e1","start",startx,starty,true),Multiplicity("start",10,25));
           end2 = AssociationEnd(Label("e2","end",endx,endy,true),Multiplicity("end",0-20,0-40)) then
           edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
-        in 
-          edge.new(self,false);
-          self.addEdge(edge)
-        end
+      in edge.new(self,false);
+         self.addEdge(edge)
       end
     end
     
-    @Operation newAttributeEdge(sourcePort,targetPort,typePath)
+    @Operation newAttributeEdge(sourcePort,targetPort,typePath):AttributeEdge
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
-         then 
-           let edge = AttributeEdge("att",sourcePort,targetPort,typePath)
-           in 
-             edge.new(self,false);
-             self.addEdge(edge)
-           end
+         then let edge = AttributeEdge("att",sourcePort,targetPort,typePath)
+              in edge.new(self,false);
+                 self.addEdge(edge);
+                 edge
+              end
+         else null
          end
       end
     end
@@ -418,6 +424,22 @@ context ClassDiagrams
       in 
         edge.new(self,false);
         self.addEdge(edge)
+      end
+    end
+    
+    @Operation newSelfAttributeEdge(x,y,path:Seq(String))
+      @Find(node,classNodes) when node.contains(x,y) do
+        let port = node.ports->head
+        in self.newAttributeEdge(port,port,path)
+        end
+      end
+    end
+    
+    @Operation newSelfAssociationEdge(x,y,path:Seq(String))
+      @Find(node,classNodes) when node.contains(x,y) do
+        let port = node.ports->head
+        in self.newAssociationEdgeCommand(port,port,path)
+        end
       end
     end
     
@@ -576,6 +598,14 @@ context ClassDiagrams
         ContainsEdge    do self.removeContainsEdge(edge)      end
         DependencyEdge  do self.removeDependencyEdge(edge)    end
         else self
+      end
+    end
+    
+    @Operation setDiagramFont()
+      let font = xmf.chooseFont()
+      in @For node in graph.nodes() do
+           node.setFont(font)
+         end
       end
     end
     

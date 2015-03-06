@@ -31,14 +31,10 @@ context ClassMapping
           clientType = rightClickable.of()
       in
         if rightClickable = edge
-        then
-          xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,
-                                                    AttributeXAttributeEdge::proxyElementTarget)
+        then xmf.menuRegistryHandler().buildGlobalMenu(globalMenu,type,clientType,AttributeXAttributeEdge::proxyElementTarget)
         elseif rightClickable = edge.name
-        then
-          globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AttributeXAttributeEdge::setMultiplicity))
-        else // mult
-          globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AttributeXAttributeEdge::setMultiplicity))
+        then globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AttributeXAttributeEdge::setMultiplicity))
+        else globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AttributeXAttributeEdge::setMultiplicity))
         end;
         globalMenu.new();
         globalMenu
@@ -47,12 +43,6 @@ context ClassMapping
 
     @Operation proxyElementTarget()
       xmf.menuManager().getProxy(self).attribute
-    end
-    
-    @Operation attributeMultChangedDaemon(attribute,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
-      then edge.setMult(self.calcMultLabelString(newMult))
-      end
     end
     
     @Operation attributeSourceChangedDaemon(edge,slot,newPort,oldPort)
@@ -65,7 +55,6 @@ context ClassMapping
     
     @Operation checkAttributeDaemons()
       @SlotValueChanged multi once AttributeXAttributeEdge::nameChanged_classDiagramDaemon(attribute,"name")   end;
-      @SlotValueChanged multi once AttributeXAttributeEdge::attributeMultChangedDaemon(attribute,"mult")  	   end;
       @SlotValueChanged multi once AttributeXAttributeEdge::ownerChanged_classDiagramDaemon(attribute,"owner") end;
       @SlotValueChanged multi once AttributeXAttributeEdge::typeChanged_classDiagramDaemon(attribute,"type")   end
     end
@@ -154,7 +143,9 @@ context ClassMapping
     
     @Operation typeChanged_classDiagramDaemon(attribute,slot,newType,oldType)
       if oldType <> null and newType <> oldType
-      then owner.attributeTypeChanged(self)
+      then 
+        owner.attributeTypeChanged(self);
+        edge.setMult(self.calcMultLabelString(attribute.mult()))
       end
     end
     

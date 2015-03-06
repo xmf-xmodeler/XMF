@@ -106,10 +106,14 @@ context ClassMapping
       in if not(groupName = "" or groupName = null) 
          then 
            if class.inheritsFrom(XCore::Attribute)
-           then diagram.defineNewHandler(groupName,className,true,"XCore/Attribute.gif",attHandler)
+           then 
+             diagram.defineNewHandler(groupName,className,true,"XCore/Attribute.gif",attHandler);
+             // Perhaps this should be done via another menu item...
+             self.defineAttributeRegistryContributions(class)
            elseif class.isMetaClass()
            then 
              diagram.defineNewHandler(groupName,className,false,"XCore/Class.gif",metaHandler);
+             // Perhaps this should be done via another menu item...
              self.defineMetaClassRegistryContributions(class)
            else diagram.defineNewHandler(groupName,className,false,"XCore/Object.gif",classHandler)
            end
@@ -255,9 +259,91 @@ context ClassMapping
       elementMap.setOwner(self)
     end
     
+    @Operation addImportTrays()
+      @For i in package.imports when i.isReallyKindOf(Package) and not Seq{XCore,Root}->includes(i) do
+        // The imports of a package are available as buttons in the palette
+        // to create objects on the diagram. This allows type and instance
+        // to be mixed on a single diagram...
+        self.addImportTray(i)
+      end
+    end
+    
+    @Operation addImportTray(package)
+      let name = package.name.toString();
+          map = self
+      in diagram.defineToolGroup(name);
+         @For class in package.classes when not(class.isAbstract) do
+           let handler(x,y) = map.add(class())
+           in diagram.defineNewHandler(name,class.name.toString(),false,"XCore/Object.gif",handler)
+           end
+         end
+      end
+    end
+    
     @Operation addInheritanceMap(inheritanceMap)
       self.inheritanceMaps := inheritanceMaps->prepend(inheritanceMap);
       inheritanceMap.setOwner(self)
+    end
+    
+    @Operation addMetaTray()
+      if package.isMetaPackage()
+      then 
+        let parents = package.allParents() then
+            contents = parents->iterate(p O=Set{} | O + p.contents()) then
+            classes = contents->select(o | o <> null and o.isKindOf(Class)) then
+            attributes = classes->select(c | c.inheritsFrom(Attribute));
+            associations = classes->select(c | c.inheritsFrom(Associations::Association)) then
+            classes = classes->including(Class)->excluding(Package)->excluding(Array)->excluding(Enum) then 
+            metaclasses = classes->select(c | c.isMetaClass());
+            thePackage = package
+        in diagram.defineToolGroup("Meta Elements");
+           @For a in attributes do
+             diagram.defineNewHandler(
+               "Meta Elements",
+               a.name.toString(),
+               false,
+               "XCore/Attribute.gif",
+               @Operation(x,y) 
+                 // Create a sub-class of a..
+                 let class = Class(thePackage.newName(a.name.toString() + "Like"))
+                 in class.addParent(a);
+                    thePackage.add(class)
+                 end
+               end)
+           end;
+           @For a in associations do
+             diagram.defineNewHandler(
+               "Meta Elements",
+               a.name.toString(),
+               false,
+               "XCore/Association.gif",
+               @Operation(x,y) 
+                 // Create a sub-class of a..
+                 let class = Class(thePackage.newName(a.name.toString() + "Like"))
+                 in class.addParent(a);
+                    thePackage.add(class)
+                 end
+               end)
+           end;
+           @For metaclass in metaclasses do
+             diagram.defineNewHandler(
+               "Meta Elements",
+               metaclass.name.toString(),
+               false,
+               "XCore/Class.gif",
+               @Operation(x,y) 
+                 // Create a new instance of the meta-class and make it inherit 
+                 // from Class (actually this should be selectable). Should get
+                 // the node and move it...
+                 let class = metaclass(thePackage.newName(metaclass.name.toString()))
+                 in class.addParent(Class);
+                    thePackage.add(class)
+                 end
+               end)
+           end
+        end
+      else self.deleteMetaTray()
+      end
     end
     
     @Operation addPackageMap(packageMap)
@@ -613,15 +699,41 @@ context ClassMapping
       self.packageRemoved(package)
     end
     
+    @Operation parentAdded(parent)
+      // Called when a parent has been added to the package...
+      self.addMetaTray()
+    end
+    
+    @Operation parentRemoved(parent)
+      // Called when a parent has been removed from the package...
+      if not package.isMetaPackage()
+      then self.deleteMetaTray()
+      end
+    end
+    
+    @Operation parentAdded_classDiagramDaemon(obj,slot,parent)
+      if not self.eventFiltered("parent added")
+      then self.parentAdded(parent)
+      end
+    end
+    
+    @Operation parentRemoved_classDiagramDaemon(obj,slot,parent)
+      self.parentRemoved(parent)
+    end
+    
     @Operation checkPackageDaemons()
       @SlotValueChanged multi once   PackageXClassDiagram::nameChanged_classDiagramDaemon(package,"name")                end;
-      // @SlotValueChanged multi once   PackageXClassDiagram::ownerChanged_classDiagramDaemon(package,"owner")              end;
+      // @SlotValueChanged multi once   PackageXClassDiagram::ownerChanged_classDiagramDaemon(package,"owner")           end;
       @SlotValueChanged multi once + PackageXClassDiagram::associationAdded_classDiagramDaemon(package,"associations")   end;
       @SlotValueChanged multi once - PackageXClassDiagram::associationRemoved_classDiagramDaemon(package,"associations") end;
       @SlotValueChanged multi once + PackageXClassDiagram::classAdded_classDiagramDaemon(package,"classes")              end;
       @SlotValueChanged multi once - PackageXClassDiagram::classRemoved_classDiagramDaemon(package,"classes")            end;
       @SlotValueChanged multi once + PackageXClassDiagram::packageAdded_classDiagramDaemon(package,"packages")           end;
       @SlotValueChanged multi once - PackageXClassDiagram::packageRemoved_classDiagramDaemon(package,"packages")         end;
+      @SlotValueChanged multi once + PackageXClassDiagram::parentAdded_classDiagramDaemon(package,"parents")             end;
+      @SlotValueChanged multi once - PackageXClassDiagram::parentRemoved_classDiagramDaemon(package,"parents")           end;
+      @SlotValueChanged multi once + PackageXClassDiagram::importAdded_classDiagramDaemon(package,"imports")             end;
+      @SlotValueChanged multi once - PackageXClassDiagram::importRemoved_classDiagramDaemon(package,"imports")           end;
       @SlotValueChanged multi once   PackageXClassDiagram::metaPackageChanged_classDiagramDaemon(package,"metaPackage")  end
       
       // self.addContentsChangedDaemon() // to monitor added and removed named elements not covered by above, and associations
@@ -641,12 +753,6 @@ context ClassMapping
       // necessary to guard the addition of a newly dropped class
       
       self.addClass(class)
-      //@For parent in class.parents do
-      //  self.parentAdded(class,parent)
-      //end;
-      //@For attribute in class.attributes do
-      //  self.attributeAdded(attribute)
-      //end
     end
     
    @Operation classNodeAdded(classNode)
@@ -663,7 +769,7 @@ context ClassMapping
           name = self.newClassName();
           metaClass = classNode.typePath->ref(Seq{Root,XCore}) then
           class = metaClass[name=Symbol(name.toString())] then
-          mapClass = xmf.registry().getExtensionPoint("com.ceteva.diagrams.class.map").find(metaClass).values->head then
+          mapClass = (xmf.registry().getExtensionPoint("com.ceteva.diagrams.class.map").find(metaClass).values->head)() then
           map = mapClass(class,classNode,self)
         in 
           classNode.setName(name);
@@ -777,6 +883,10 @@ context ClassMapping
     @Operation containsEdgeRemovedDaemon(diagram,slot,containsEdge)
       self.containsEdgeRemoved(containsEdge)
     end
+    
+    @Operation deleteImportTray(package)
+      diagram.deleteGroupNamed(package.name.toString())
+    end
 
     @Operation handleDiagramCloseEvent(diagram)
       if package.owner = null
@@ -789,6 +899,62 @@ context ClassMapping
 
     @Operation handleDiagramRenewEvent(diagram)
       self.refreshToolGroups()
+    end
+    
+    @Operation defineActions()
+      // Any default actions that require access to the mapping.
+      // Remember self will be the diagram in any handler.
+      let map = self then
+          delete() = 
+            @WithoutRendering(self)
+              @For m in map.inheritanceMaps when m.edge.selected do
+                m.child.removeParent(m.parent)
+              end; 
+              @For m in map.attributeMaps when m.edge.selected do
+                m.attribute.deleteRecursive()
+              end; 
+              @For m in map.associationMaps when m.edge.selected do
+                m.association.deleteRecursive()
+              end;
+              @For m in map.classMaps when m.node.selected do
+                m.class.deleteRecursive()
+              end;
+              @For m in map.packageMaps when m.node.selected do
+               m.package.deleteRecursive()
+              end
+            end
+      in diagram.defineActionHandler("Actions","Delete Selected","delete","Tools/Delete.gif",delete)
+      end
+    end
+    
+    @Operation defineAttributeRegistryContributions(attClass)
+      self.ensureDisplayPackage();
+      self.defineAttributeTextExtension(attClass);
+      self.defineAttributeXTextExtension(attClass)
+    end
+    
+    @Operation defineAttributeTextExtension(attClass)
+      let registry      = xmf.registry();
+          attTextId     = "com.ceteva.diagrams.attribute.text";
+          displays      = Clients::Displays.getElement(package.name);
+          attributeText = XCore::Class(attClass.name+"Text") then
+          accessor()    = displays.getElement(attClass.name+"Text")
+      in attributeText.addParent(AttributeText);
+         displays.add(attributeText);
+         registry.addContribution(attTextId,ExtensionPoints::Contribution(attClass,[accessor]))
+      end
+    end
+    
+    @Operation defineAttributeXTextExtension(attClass)
+      let registry       = xmf.registry();
+          attXTextId     = "com.ceteva.diagrams.attribute.text.map";
+          displays       = Clients::Displays.getElement(package.name);
+          attributeXText = XCore::Class(attClass.name+"XText") then
+          accessor()     = displays.getElement(attClass.name+"XText")
+      in attributeXText.addParent(AttributeXText);
+         displays.add(attributeXText);
+         registry.addContribution(attXTextId,ExtensionPoints::Contribution(attClass,[accessor]))
+      end
     end
     
     @Operation defineMetaClassRegistryContributions(metaClass)
@@ -807,11 +973,12 @@ context ClassMapping
       // Displays package, the user can override the display elements...
       let registry    = xmf.registry();
           classNodeId = "com.ceteva.diagrams.class.node";
-          displays    = package.getElement("Displays");
+          displays    = Clients::Displays.getElement(package.name);
           classNode   = XCore::Class(metaClass.name+"Node") then
           createClassNode(x,y,typePath,diagram) = 
             @WithoutRendering(diagram)
-              let node = classNode("A Class","",false,typePath,x,y,diagram.showAttributes(),diagram.showOperations(),true)
+              let class = displays.getElement(metaClass.name+"Node") then
+                  node = class("A Class","",false,typePath,x,y,diagram.showAttributes(),diagram.showOperations(),true)
               in node.new(diagram,true);
                  diagram.addNode(node)
               end
@@ -828,12 +995,22 @@ context ClassMapping
       // adding the sub-class of ClassXNode to Displays, the user can override the mapping...
       let registry   = xmf.registry();
           classMapId = "com.ceteva.diagrams.class.map";
-          displays   = package.getElement("Displays");
-          classXNode = XCore::Class(metaClass.name+"XNode") 
+          displays   = Clients::Displays.getElement(package.name);
+          classXNode = XCore::Class(metaClass.name+"XNode") then
+          accessor() = displays.getElement(metaClass.name+"XNode")
       in classXNode.addParent(ClassXNode);
          displays.add(classXNode);
-         registry.addContribution(classMapId,ExtensionPoints::Contribution(metaClass,[classXNode]))
+         registry.addContribution(classMapId,ExtensionPoints::Contribution(metaClass,[accessor]))
       end
+    end
+    
+    @Operation defineToggles()
+      // Any default toggles that require access to the mapping...
+      null
+    end
+    
+    @Operation deleteMetaTray()
+      diagram.deleteGroupNamed("Meta Elements")
     end
 
     @Operation dependencyEdgeAddedDaemon(diagram,slot,dependencyEdge)
@@ -975,8 +1152,8 @@ context ClassMapping
       // display of elements. It is intended to contain defaults that
       // can be extended by the user...
       
-      if not package.hasElement("Displays")
-      then package.add(Package("Displays"))
+      if not Clients::Displays.hasElement(package.name)
+      then Clients::Displays.add(Package(package.name))
       end
     end
     
@@ -1043,9 +1220,6 @@ context ClassMapping
     @Operation generateDiagram()
       self.toolGroups();
       super();
-      //@For map in classMaps do
-      //  map.generateDiagram()
-      //end;
       diagram.cardLayout(12,200,10,20)
     end
     
@@ -1120,6 +1294,24 @@ context ClassMapping
         end
       end
 
+    end
+    
+    @Operation importAdded_classDiagramDaemon(obj,slot,package)
+      if not self.eventFiltered("import added")
+      then self.importAdded(package)
+      end
+    end
+    
+    @Operation importRemoved_classDiagramDaemon(obj,slot,package)
+      self.importRemoved(package)
+    end
+    
+    @Operation importAdded(package)
+      self.addImportTray(package)
+    end
+    
+    @Operation importRemoved(package)
+      self.deleteImportTray(package)
     end
     
     @Operation inheritanceEdgeAddedDaemon(diagram,slot,inheritanceEdge)
@@ -1525,6 +1717,20 @@ context ClassMapping
       end
               
     end
+
+    @Operation setElementAdded(object,slot,newValue)
+      // Called when a monitored object's slot is updated where the type of the
+      // slot is a collection. Currently do nothing, but it should mimic the behaviour
+      // of SnapshotXSnapshotDiagram.
+      object
+    end
+    
+    @Operation setElementRemoved(object,slot,newValue)
+      // Called when a monitored object's slot is updated where the type of the
+      // slot is a collection. Currently do nothing, but it should mimic the behaviour
+      // of SnapshotXSnapshotDiagram.
+      object
+    end
     
     @Operation slotValueChanged(object,slot,newValue)
       // Called when an object changes value. The simple
@@ -1532,6 +1738,25 @@ context ClassMapping
       // ObjectXNode. However this will get called when
       // an edge between objects changes.
       object
+    end
+    
+    @Operation XCoreToolGroups()
+      diagram.defineNewHandler("XCore","Attribute (String)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,String));
+      diagram.defineNewHandler("XCore","Attribute (Integer)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Integer));
+      diagram.defineNewHandler("XCore","Attribute (Boolean)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Boolean));
+      diagram.defineNewHandler("XCore","Attribute (Float)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Float))
+    end
+    
+    @Operation defaultSimpleAttribute(map:PackageXClassDiagram,type:Classifier)
+      @Operation(x,y)
+        map.newSimpleAttribute(x,y,type)
+      end
+    end
+    
+    @Operation newSimpleAttribute(x,y,type:Classifier)
+      @Find(map,classMaps) when map.node.contains(x,y) do
+        map.class.add(Attribute(map.class.newName("att"),type))
+      end
     end
 
     @Operation toolGroups()
@@ -1585,34 +1810,20 @@ context ClassMapping
          // If the package is a meta-package then we want to allow instances of
          // the meta-classes to be created on the diagram...
 
-         if package.isMetaPackage()
-         then 
-           let parents = package.allParents() then
-               contents = parents->iterate(p O=Set{} | O + p.contents()) then
-               classes = contents->select(o | o <> null and o.isKindOf(Class)) then
-               classes = classes->including(Class)->excluding(Package) then 
-               metaclasses = classes->select(c | c.isMetaClass());
-               thePackage = package
-           in diagram.defineToolGroup("Meta Elements");
-              @For metaclass in metaclasses do
-                diagram.defineNewHandler(
-                  "Meta Elements",
-                  "["+metaclass.name.toString()+"]",
-                  false,
-                  "XCore/Class.gif",
-                  @Operation(x,y) 
-                    // Create a new instance of the meta-class and make it inherit 
-                    // from Class (actually this should be selectable). Then get
-                    // the node and move it...
-                    let class = metaclass(thePackage.newName(metaclass.name.toString()))
-                    in class.addParent(Class);
-                       thePackage.add(class)
-                    end
-                  end)
-              end
-           end
-         end;
+         self.addMetaTray();
          
+         // Assume that all class diagrams have an XCore tray and add in the default
+         // tools that come with that language...
+         
+         self.XCoreToolGroups();
+      
+         // Any toggles that need access to the mapping...
+         
+         self.defineToggles();
+         
+         // Any actions that require access to the mapping...
+         
+         self.defineActions();
      
          // If there are any sub-classes of the standard model elements for a class
          // diagram then we need a stereotypes node group to create them...
@@ -1621,27 +1832,10 @@ context ClassMapping
                  packageToolGroups->isEmpty and 
                  classToolGroups->isEmpty and 
                  attributeToolGroups->isEmpty)
-         then 
-           diagram.defineToolGroup(languageName)
+         then diagram.defineToolGroup(languageName)
          end;
          
-         
-         @For i in package.imports when i.isReallyKindOf(Package) and not Seq{XCore,Root}->includes(i) do
-         
-            // The imports of a package are available as buttons in the palette
-            // to create objects on the diagram. This allows type and instance
-            // to be mixed on a single diagram...
-            
-            let name = i.name.toString();
-                map = self
-            in diagram.defineToolGroup(name);
-               @For class in i.classes when not(class.isAbstract) do
-                 let handler = @Operation(x,y) map.elementAdded(class(),x,y) end
-                 in diagram.defineNewHandler(name,class.name.toString(),false,"XCore/Object.gif",handler)
-                 end
-               end
-            end
-         end;
+         self.addImportTrays();
 
          // Add in a catch all element creator that will offer all model element
          // types in the meta-package via a selection list.
@@ -1686,10 +1880,7 @@ context ClassMapping
            end
          end;
          @For c in classToolGroups do
-           let handler = 
-                 @Operation(x,y) 
-                   self.newClassNode(x,y,c.pathSeq())
-                 end
+           let handler(x,y) = self.newClassNode(x,y,c.pathSeq())
            in diagram.defineNewHandler(
                 languageName,
                 c.name.toString(),
@@ -1699,23 +1890,24 @@ context ClassMapping
            end
          end;
          @For c in attributeToolGroups do
-           let handler = 
-                 @Operation(sourcePort,targetPort) 
-                   self.newAttributeEdge(sourcePort,targetPort,c.pathSeq())
-                 end
+           let handler(sourcePort,targetPort) = self.newAttributeEdge(sourcePort,targetPort,c.pathSeq());
+               selfHandler(x,y) = self.newSelfAttributeEdge(x,y,c.pathSeq())
            in diagram.defineNewHandler(
                 languageName,
                 c.name.toString(),
                 true,
                 "XCore/Attribute.gif",
-                handler)
+                handler);
+              diagram.defineNewHandler(
+                languageName,
+                c.name.toString() + " (self)",
+                false,
+                "XCore/Attribute.gif",
+                handler) 
            end
          end;
          @For c in dependencyToolGroups do
-           let handler = 
-                 @Operation(sourcePort,targetPort) 
-                   self.newDependencyEdgeCommand(sourcePort,targetPort,c.pathSeq())
-                 end
+           let handler(sourcePort,targetPort) = self.newDependencyEdgeCommand(sourcePort,targetPort,c.pathSeq())
            in diagram.defineNewHandler(
                 languageName,
                 c.name.toString(),

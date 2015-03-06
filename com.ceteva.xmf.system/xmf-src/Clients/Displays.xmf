@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+context Clients
+  @Package Displays
+    @Doc
+      This package contains plug-points, in the form of classes, for the
+      user-defined display and mapping classes for diagrams. A class on
+      a diagram can be designated to be extensible. In that case a package
+      with the same name as the owner of the class is added to this package
+      and placeholder classes for the display and the mapping are added
+      to the new package. The default implementation for these classes can
+      be replaced programmatically.
+    end
+  end

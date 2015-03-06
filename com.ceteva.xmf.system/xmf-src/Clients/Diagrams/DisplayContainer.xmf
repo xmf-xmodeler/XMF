@@ -47,6 +47,12 @@ context Diagrams
       end
     end
     
+    @Operation pack()
+      @For display in displays do
+        display.pack()
+      end
+    end
+    
     @Operation remove(display)
       self.deleteFromDisplays(display)
     end
@@ -58,6 +64,12 @@ context Diagrams
       
       @For display in displays do
         display.renew(parent)
+      end
+    end
+    
+    @Operation setFont(font:Font)
+      @For display in displays do
+        display.setFont(font)
       end
     end
     

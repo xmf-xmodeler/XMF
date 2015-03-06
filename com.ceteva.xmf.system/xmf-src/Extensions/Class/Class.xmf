@@ -86,14 +86,23 @@ context XOCL
        
        defs->iterate(def 
          class = parents->iterate(parent 
-           class = [| <metaClass>(<StrExp(name.toString())>) |] |
+           class = [| <metaClass>(<self.desugarName()>) |] |
              [| <class>.addParent(<parent>) |]) |
          [| <class>.add(<def>) |])
      end
      
+     @Operation desugarName()
+       if name.isKindOf(Drop)
+       then name
+       elseif name.isKindOf(Performable)
+       then name
+       else StrExp(name.toString())
+       end
+     end
+     
      @Operation eval(target,env,imports)
        let class = self.metaExp().eval(target,env,imports).new(Seq{})
-       in class.name := XCore::Symbol(name);
+       in class.name := if name.isKindOf(Performable) then name.eval(target,env,imports) else XCore::Symbol(name) end;
           class.parents := parents->iterate(p P = class.defaultParents() | P->including(p.eval(target,env,imports)));
           class.isAbstract := isAbstract;
           class.imports := imports;

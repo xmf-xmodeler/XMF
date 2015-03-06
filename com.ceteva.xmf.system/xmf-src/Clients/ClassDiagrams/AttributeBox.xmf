@@ -13,6 +13,11 @@ context ClassDiagrams
       self.init(Seq{x,y,width,16,0,Color(),Color()})
     end
     
+    @Operation add(att:AttributeText)
+      super(att);
+      att.pack()
+    end
+    
     @Operation classNode()
       owner.owner
     end
@@ -33,7 +38,7 @@ context ClassDiagrams
       
       let maxNameWidth = 0
       in @For attText in displays do
-           maxNameWidth := maxNameWidth.max(attText.name.width())
+           maxNameWidth := maxNameWidth.max(attText.preTypeWidth())
          end;
          @For attText in displays do
            attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
@@ -46,8 +51,7 @@ context ClassDiagrams
       let height = 0
       in
         @For attText in displays do
-          attText.name.move(attText.name.x(),height+3);
-          attText.type.move(attText.type.x(),height+3);
+          attText.moveY(height+3);
           height := height + 16
         end
       end;
@@ -83,13 +87,24 @@ context ClassDiagrams
       AttributeText(name,metaclass_,type.name.toString(),0,self.displays->size * 16)
     end
     
+    @Operation nextAttributeExtension(name,metaclass_,metaclassName,type)
+      let extensionPoint = xmf.registry().getExtensionPoint("com.ceteva.diagrams.attribute.text") then
+          class = (extensionPoint.find(metaclass_).values->head)()
+      in class(name,metaclassName,type.name.toString(),0,self.displays->size * 16)
+      end
+    end
+    
     @Operation packWidth()
     
       // Align all the types at the end of the longest name.
       
+      @For attText in displays do
+        attText.packWidth()
+      end;
+      
       let maxNameWidth = 0
       in @For attText in displays do
-           maxNameWidth := maxNameWidth.max(attText.name.width())
+           maxNameWidth := maxNameWidth.max(attText.preTypeWidth())
          end;
          @For attText in displays do
            attText.type.move(maxNameWidth + attText.separator(),attText.type.y())

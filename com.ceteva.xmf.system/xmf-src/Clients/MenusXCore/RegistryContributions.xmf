@@ -250,8 +250,12 @@ end;
   XCore::Package::setMetaPackage_redirect
 end;
 
-@Menu "Set":"Imports" on XCore::Package
+@Menu "Add Element":"Import" on XCore::Package
   XCore::Package::setImports_client
+end;
+
+@Menu "Remove Element":"Import" on XCore::Package
+  XCore::Package::removeImports_client
 end;
 
 @Menu "Add Element":"Choice" on XCore::Enum

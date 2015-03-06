@@ -11,7 +11,7 @@ context Diagrams
   
     @Bind defaultIcon = "logo.jpg" end
   
-    @Attribute icon		           : Image			(?)   end
+    @Attribute icon		           : Image			 (?)   end
     @Attribute ports               : Seq(Port)       (+,?) end
     @Attribute x                   : Integer         (!,?) end
     @Attribute y                   : Integer         (!,?) end
@@ -73,6 +73,11 @@ context Diagrams
       // the user
     
       self
+    end
+    
+    @Operation contains(x:Integer,y:Integer):Boolean
+      x >= self.x and x <= (self.x + width) and
+      y >= self.y and y <= (self.y + height)
     end
     
     @Operation deepContains(node:Node)

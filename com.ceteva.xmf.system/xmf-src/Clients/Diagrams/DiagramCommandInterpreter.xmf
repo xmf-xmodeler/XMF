@@ -11,6 +11,7 @@ context Diagrams
        This class defines a command interpreter over diagrams. It can be used as the basis
        for defining event driven mappings. The mapping handles the following output
        commands by sen-ding them in the appropriate format to the client.
+          // These are incomplete - please update the list...
           // [deleteCommand(element)]
           // [deleteRightClickMenu]
           // [moveCommand(element,x,y)]
@@ -32,6 +33,8 @@ context Diagrams
           // [newTextCommand(parentId,text,x,y,editable,r,g,b,font)]
           // [clearToolPaletteCommand(diagramId)]
           // [newToolCommand(diagramId,groupName,label,typeName,isEdge,iconPath)]
+          // [newToggleCommand(diagramId,groupName,label,typeName,state,iconPath)]
+          // [newActionCommand(diagramId,groupName,label,typeName,iconPath)]
           // [newToolGroupCommand(diagramId,groupId,toolName,isEdge)]
           // [newWayPointCommand(wayPoint)]
           // [resizeCommand(element,width,height)]
@@ -141,6 +144,12 @@ context Diagrams
     @Operation moveCommand(element,x,y) 
       @SendCommand(self)
         move(element.id(),x,y)
+      end
+    end   
+    
+    @Operation newActionCommand(diagram,groupName:String,label,toolName,iconPath)
+      @SendCommand(self)
+        newAction(diagram.id(),groupName,label,toolName,iconPath)
       end
     end
     
@@ -428,6 +437,12 @@ context Diagrams
       @SendCommand(self)
         newTool(diagram.id(),groupName,label,toolName,isEdge,iconPath)
       end
+    end   
+    
+    @Operation newToggleCommand(diagram,groupName:String,label,toolName,state:Boolean,iconPath)
+      @SendCommand(self)
+        newToggle(diagram.id(),groupName,label,toolName,state,iconPath)
+      end
     end
     
     @Operation newToolGroupCommand(diagram,groupName)
@@ -526,6 +541,12 @@ context Diagrams
     @Operation setImage(image)
       @SendCommand(self)
         setImage(image.id(),image.filename())
+      end
+    end
+    
+    @Operation setMagneticWaypoints(diagram:Diagram,state:Boolean)
+      @SendCommand(self)
+        setMagneticWaypoints(diagram.id(),state)
       end
     end
     

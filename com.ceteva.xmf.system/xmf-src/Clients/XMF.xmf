@@ -1,6 +1,17 @@
 parserImport XOCL;
 
+import Clients::Diagrams;
+
 context XMF
   @Operation diagramManager()
     self.property("diagramManager")
+  end
+   
+context XMF    
+  @Operation chooseFont():Font
+    // Return a font in string format. Returns
+    // the empty string if unsuccessful...
+    let DialogClient = self.dialogsClient()
+    in Font(DialogClient.chooseFont())
+    end
   end

@@ -179,6 +179,11 @@ context Diagrams
       self.find(displayId).clicks(clicks)
     end
     
+    @Operation toggle(diagramId,toggleId,state)
+      self.debug("toggle[~S,~S,~S]",Seq{diagramId,toggleId,state});
+      self.find(diagramId).toggle(toggleId,state)
+    end
+    
     @Operation zoomChanged(diagramId,zoomValue)
       self.debug("zoomChanged[~S,~S]",Seq{diagramId,zoomValue});
       self.find(diagramId).zoomChanged(zoomValue)
@@ -186,33 +191,42 @@ context Diagrams
     
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
-        "delete"                 do self.readDelete(parameters) end
-        "deleteWaypoint"         do self.readDelete(parameters) end
-        "diagramOpen"			 do self.readDiagramOpen(parameters) end
-        "acceptDrop"             do self.readAcceptDrop(parameters) end
-        "dragAndDrop"			 do self.readDragAndDrop(parameters) end
-        "edgeDeselected"         do self.readEdgeDeselected(parameters) end
-        "edgeSelected"           do self.readEdgeSelected(parameters) end
-        "edgeSourceReconnected"  do self.readEdgeSourceReconnected(parameters) end
-        "edgeTargetReconnected"  do self.readEdgeTargetReconnected(parameters) end
-        "moveEdgeText"           do self.readMoveEdgeText(parameters) end
-        "move"                   do self.readMove(parameters) end
-        "newEdge"                do self.readNewEdge(parameters) end
-        "newNode"                do self.readNewNode(parameters) end
-        "newWaypoint"            do self.readNewWayPoint(parameters) end
-        "nodeDeselected"         do self.readNodeDeselected(parameters) end
-        "nodeSelected"           do self.readNodeSelected(parameters) end
-        "preferenceChange"		 do self.readPreferenceChange(parameters) end
-        "resizeNode"             do self.readResizeNode(parameters) end
+        "action"                 do self.readAction(parameters)                 end
+        "delete"                 do self.readDelete(parameters)                 end
+        "deleteWaypoint"         do self.readDelete(parameters)                 end
+        "diagramOpen"			 do self.readDiagramOpen(parameters)            end
+        "acceptDrop"             do self.readAcceptDrop(parameters)             end
+        "dragAndDrop"			 do self.readDragAndDrop(parameters)            end
+        "edgeDeselected"         do self.readEdgeDeselected(parameters)         end
+        "edgeSelected"           do self.readEdgeSelected(parameters)           end
+        "edgeSourceReconnected"  do self.readEdgeSourceReconnected(parameters)  end
+        "edgeTargetReconnected"  do self.readEdgeTargetReconnected(parameters)  end
+        "moveEdgeText"           do self.readMoveEdgeText(parameters)           end
+        "move"                   do self.readMove(parameters)                   end
+        "newEdge"                do self.readNewEdge(parameters)                end
+        "newNode"                do self.readNewNode(parameters)                end
+        "newWaypoint"            do self.readNewWayPoint(parameters)            end
+        "nodeDeselected"         do self.readNodeDeselected(parameters)         end
+        "nodeSelected"           do self.readNodeSelected(parameters)           end
+        "preferenceChange"		 do self.readPreferenceChange(parameters)       end
+        "resizeNode"             do self.readResizeNode(parameters)             end
         "rightClickMenuSelected" do self.readRightClickMenuSelected(parameters) end
-        "setReferencePoint"      do self.readSetReferencePoint(parameters) end
-        "textChanged"            do self.readTextChanged(parameters) end
-        "diagramClosed"		     do self.readDiagramClosed(parameters) end
-        "focusGained"			 do self.readFocusGained(parameters) end
-        "focusLost"			     do self.readFocusLost(parameters) end
-        "textDimension"          do self.readTextDimension(parameters) end
-        "selected"				 do self.readSelected(parameters) end
-        "zoomChanged"			 do self.readZoomChanged(parameters) end
+        "setReferencePoint"      do self.readSetReferencePoint(parameters)      end
+        "textChanged"            do self.readTextChanged(parameters)            end
+        "diagramClosed"		     do self.readDiagramClosed(parameters)          end
+        "focusGained"			 do self.readFocusGained(parameters)            end
+        "focusLost"			     do self.readFocusLost(parameters)              end
+        "textDimension"          do self.readTextDimension(parameters)          end
+        "toggle"                 do self.readToggle(parameters)                 end
+        "selected"				 do self.readSelected(parameters)               end
+        "zoomChanged"			 do self.readZoomChanged(parameters)            end
+      end
+    end
+    
+    @Operation readAction(parameters)
+      let diagramId = parameters.at(0);
+          actionId = parameters.at(1)
+      in self.find(diagramId).action(actionId,[])
       end
     end
 
@@ -413,6 +427,14 @@ context Diagrams
         zoomValue = parameters.at(1)
       in
         self.zoomChanged(diagramId,zoomValue)
+      end
+    end
+    
+    @Operation readToggle(parameters) 
+      let diagramId = parameters.at(0);
+          toggleId = parameters.at(1);
+          state = parameters.at(2)
+      in self.toggle(diagramId,toggleId,state)
       end
     end
     

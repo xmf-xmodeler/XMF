@@ -237,6 +237,11 @@ context Diagrams
       owner.resized(self)
     end
     
+    @Operation setFont(font:Font)
+      // By default do nothing...
+      null
+    end
+    
     @Operation sychronise()
     
       // Does nothing by default over ride for concrete instances
