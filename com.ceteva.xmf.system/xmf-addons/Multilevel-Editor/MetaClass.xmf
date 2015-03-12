@@ -1,0 +1,125 @@
+parserImport XOCL;
+
+import Root::FMML;
+
+context Root::FMML
+
+  @Class MetaClass metaclass Root::Extensions::MetaAdaptor extends Root::Extensions::MetaAdaptor
+
+    @Attribute metaClass : *MetaClass end
+
+    @Attribute model : 1..1 Model end
+
+	@Operation allAssociations():XCore::Element
+      self.allEnds->collect(e |
+        e.association)
+    end
+	
+	@Operation allAttributesWithoutIntrinsic():XCore::Element
+      let all = super();
+          newAll = Set{}
+      in @While not all.isEmpty() do
+           let a = all.sel()
+           in if not a.isIntrinsic
+              then
+                newAll := newAll.including(a)
+              else
+                false
+              end;
+              all := all.excluding(a)
+           end
+         end;
+         newAll
+      end
+    end
+	
+	@Operation allEnds():XCore::Element
+      self.allAttributes()->select(a |
+        a.of() = Associations::End)
+    end
+	
+	@Operation allInstances():XCore::Element
+      Root.allContentsOf(self)
+    end
+	
+	@Operation allMEMOAttributes():XCore::Element
+      self.allAttributes()->select(a |
+        a.isCore or (a.isIntrinsic and self.level = a.instLevel + 1)) + self.attributes->select(a |
+        not a.isIntrinsic)
+    end
+	
+	@Operation createAssociation(elem2 : MetaEntity,role1 : String,role2 : String,lower1 : Integer,upper1 : Integer,lower2 : Integer,upper2 : Integer,inst_lev : XCore::Element):XCore::Element
+      let c1 = CollectionMult(false,true,lower1,upper1);
+          c2 = CollectionMult(false,true,lower2,upper2)
+      in let e1 = Associations::End(role1,self.of(),c1);
+             e2 = Associations::End(role2,elem2.of(),c2)
+         in let a = Associations::Association("regular",e1,e2)
+            in a.instLevel := inst_lev
+            end
+         end
+      end
+    end
+	
+	@Operation getInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
+      Kernel_setDefaultGetMOP(object.of(),true);
+      Kernel_getSlotValue(object,name)
+    end
+	
+	@Operation hasInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
+      if not Kernel_hasSlot(object,name)
+      then
+        throw Exception(name + " is intrinsic and cannot be accessed on this level.")
+      else
+        true
+      end
+    end
+	
+	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
+      if self.of() = FMML::MetaClass
+      then
+        true
+      else
+        let a = self.of().retrieveAttribute(name)
+        in if a <> null
+           then
+             if a.isIntrinsic and a.instLevel < self.level
+             then
+               false
+             else
+               true
+             end
+           else
+             false
+           end
+        end
+      end
+    end
+	
+	@Operation retrieveAttribute(n : String):XCore::Attribute
+      let attList = self.allAttributes()->select(a |
+                      a.name = n.asSymbol())
+      in xmf.message("name " + n);
+         if not attList.isEmpty()
+         then
+           attList.sel()
+         else
+           null
+         end
+      end
+    end
+	
+	@Operation set(name : String,value : Element):Element
+      if not self.isInstantiableAttOfName(name)
+      then
+        throw Exception(name + " is intrinsic and cannot be instantiated on this level.")
+      else
+        if self.of().of() = XCore::Class
+        then
+          Kernel_setSlotValue(self,name,value)
+        else
+          self.of().setInstanceSlot(self,name,value)
+        end;
+        self
+      end
+    end
+  end

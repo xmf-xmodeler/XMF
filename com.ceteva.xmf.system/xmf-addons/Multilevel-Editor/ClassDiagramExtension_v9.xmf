@@ -1,0 +1,427 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+import IO;
+import SnapshotDiagrams;
+
+Root::red := Color(139,0,0);
+Root::green := Color(0,100,0);
+Root::blue := Color(0,0,139);
+Root::black := Color(0,0,0);
+Root::white := Color(255,255,255);
+
+//BB
+
+ context Clients::ClassDiagrams
+   @Class InstBox extends Clients::Diagrams::Box
+		@Attribute instLevel : Clients::Diagrams::Text end
+		
+		@Constructor(x,y)
+			self.fillColor := Clients::Diagrams::Color();
+			self.hideAllEdges();
+			self
+		end
+		
+//		@Operation createText(text,x,y,editable,underline,italicise)
+		@Operation createText()	
+			
+//			self.instLevel.createText(" ",1,1,true,false,false);
+			self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white);
+		
+			self.add(self.instLevel);
+			self.checkDaemons()
+		end
+		
+		@Operation maxWidth():XCore::Element
+      		if not shown
+     		 then
+       		  0
+     		 else
+      		  super() + 2
+      		end
+   		 end
+   		 
+   		 @Operation minWidth():XCore::Element
+      		if self.width = 0
+      		then
+        		10
+     		else
+        		self.width
+      		end
+   		 end
+   		 
+   		@Operation maxHeight():XCore::Element
+      		self.instLevel.maxHeight()
+    	end
+    	
+    	// context Clients::ClassDiagrams::AttributeBox
+  		@Operation checkDaemons()
+  			@SlotValueChanged multi once Clients::ClassDiagrams::InstBox::valueChanged(self.instLevel,"text") end
+  			  			
+  		end
+  		
+   //context Clients::ClassDiagrams::AttributeBox
+  		@Operation valueChanged(obj, slot, new, old)
+  			if new = " " or new = ""
+   			then
+   				@WithoutDaemons(instLevel)
+   					obj.text := " ";
+   					obj.renew(obj.owner)
+   				end;
+			   	obj.owner.setFillColor(Clients::Diagrams::Color())
+			else
+			    obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
+			end
+	  	end
+  	
+	  @Operation expandWidth()
+    
+      	if self.width <> self.instLevel.width + 2 then
+        	self.resize(self.instLevel.width + 2,height)
+      	end
+      end
+      
+    @Operation expandHeight()
+    
+      if self.height <> self.instLevel.height then
+        self.resize(width,self.instLevel.height)
+      end
+    end
+    
+   end
+
+//END BB
+
+context Root
+  @Package Language extends XCore
+    @Class Type extends Class
+    @Attribute level : Integer end
+    end
+  end
+  
+context Root
+  @Package Model metapackage Language
+  end
+  
+Model.createDiagram();
+
+context AttributeXText
+  @Operation init(args)
+    super(args);
+ 
+    @SlotValueChanged multi once AttributeXText::levelChanged(attribute,"instLevel")  end;
+    
+    @SlotValueChanged multi once AttributeXText::instLevelChangedDaemon(text.instLevel.instLevel,"text") end; //ADDED BB
+	
+	if(self.attribute.isIntrinsic) //ADDED BB
+	then
+	  self.text.instLevel.instLevel.text := self.attribute.instLevel.toString()//ADDED BB
+	else
+	  false
+	end;
+	
+//	xmf.message(self.attribute.instLevel.toString());
+ /*    if self.attribute.isIntrinsic then
+     xmf.message("instLevel  " + text.instLevel.of());
+      text.instLevel.setText(self.attribute.instLevel.toString()) else
+
+       text.instLevel.setText(new.toString());*/
+    self
+  end
+  
+context AttributeXText
+  @Operation levelChanged(obj,slot,new,old)
+	if text.instLevel.instLevel.text <> new //EDIT BB
+    then
+    	text.instLevel.instLevel.setText(new.toString()); //EDIT BB
+    	text.packWidth()
+    else 
+     false
+    end
+  end
+
+context AttributeXText //ADDED BB
+	@Operation instLevelChangedDaemon(obj,slot,newInstLevel,oldInstLevel )
+      if attribute.instLevel <> newInstLevel
+      then
+        try
+        	newInstLevel.asInt();
+        	if newInstLevel <> " "
+        	then
+     	  		attribute.isIntrinsic := true	
+        	else
+  	       		attribute.isIntrinsic := false	
+        	end
+        catch(x)
+        	attribute.isIntrinsic := false
+        end;
+        attribute.instLevel := newInstLevel
+      else
+        false
+      end      
+    end	
+
+context ClassXNode
+  @Operation levelChanged(obj,slot,new,old)
+    @Case new of
+    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
+    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
+    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
+    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
+    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
+    end
+  end
+
+context ClassXNode
+  @Operation init(args)
+    super(args);
+    node.showMetaslots := true;
+    @Case class.level of
+    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
+    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
+    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
+    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
+    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
+    end;  
+
+  
+//    self.generateMetaslots();
+
+//    self.node.showMetaslots();
+@SlotValueChanged multi once ClassXNode::levelChanged(class,"level")
+ 
+    end;
+    self
+  end
+  
+context ClassDiagrams
+
+  @Class AttributeText extends Group
+  
+    //@Attribute instLevel : Text end
+    @Attribute instLevel : InstBox end //EDIT BB
+	@Attribute name      : AttributeName end
+    @Attribute metaclass_ : String end
+    @Attribute type      : AttributeType end
+    
+   @Constructor(name,metaclass_,type,x,y) !
+ 
+      // Expects to be supplied with name:String and type:String.
+     
+    self.instLevel := InstBox(x+1,y); //EDIT BB
+
+//    self.instLevel.createText(" ",1,1,true,false,false); //EDIT BB
+    self.instLevel.createText(); //EDIT BB
+    //  self.instLevel.setFont("Times");
+
+	self.name := AttributeName(name, x + self.separator(),y);
+      if metaclass_ <> "" then
+        self.type := AttributeType("<<" + metaclass_ + ">> " + type,x+70,y)
+      else
+   //self.type := AttributeType(type,x+120,y)
+   self.type := AttributeType(type,self.name.x+120,y)
+
+      end;
+
+
+      // A group should not have any Display attributes set.
+
+      self.x := 0;
+      self.y := 0
+    end
+        
+/*    @Operation packWidth()
+    xmf.message("in packWidth    instLevel.x, name.x, type.x:  " + level.x + "   " + name.x + "  " + type.x + "  sep  " + self. separator());   
+      level.move(self.separator(),instLevel.y);
+      name.move(level.x + instLevel.width() + self.separator(),name.y);
+     type.move(name.x + name.width() + self.separator(),type.y)
+    end
+*/
+
+    @Operation addDisplays()
+	  self.add(type);
+      self.add(instLevel);
+      self.add(name)
+
+    end
+   
+    @Operation editName()
+      name.editText()
+    end
+
+
+   @Operation name():String
+//   type.move(self.separator() + name.x + instLevel.width() + name.width() + self.separator(),type.y);
+      name.text
+    end
+    
+   @Operation setName(name)
+      self.name.setText(name)
+    end
+   
+    @Operation separator()
+      // Between the name and the type...
+      15
+    end
+    
+    @Operation separatorIntrinsic() //ADDED BB
+      //Between intrinsic and name
+      5
+    end
+    
+    @Operation type():Classifier
+      type.type()
+    end
+ 
+  end
+
+//BEGIN: BB, Ab hier Erweiterung für Zentrierung
+  context Clients::Diagrams::Text
+  @Operation checkDaemons()
+  	@SlotValueChanged multi once Clients::Diagrams::Text::widthChanged(self,"width") end
+  end
+
+  context Clients::Diagrams::Text  
+  @Operation widthChanged(obj, slot, new, old)
+  	obj.center(new,obj.owner.width)
+  end
+	
+  context Clients::Diagrams::Text  
+  @Operation center(newWidth, newParentWidth)
+  	self.move(((newParentWidth - newWidth) / 2).floor(),self.y)
+  end
+  
+context Clients::ClassDiagrams::NameBox 
+  @Operation checkDaemons()
+  	@SlotValueChanged multi once Clients::ClassDiagrams::NameBox::widthChanged(self,"width") end
+  end
+  
+  context Clients::ClassDiagrams::NameBox
+  @Operation widthChanged(obj, slot, new, old)
+  	 @For d in obj.displays do
+  		d.center(d.width,new)
+  	 end
+  end
+  
+  context Clients::ClassDiagrams::NameBox
+  @Operation addDisplays():XCore::Element
+      if sourcePackage <> ""
+      then
+        self.add(Text(sourcePackage,5,0,false))
+      else
+        false
+      end;
+      if stereotype <> ""
+      then
+        self.add(let t = Text(stereotype,5,0,false,false,false,Color(190,190,190))
+        in t.checkDaemons();
+           t
+        end)
+      else
+        false
+      end;
+      self.add(name)
+    end
+
+Clients::ClassDiagrams::NameBox.constructors := Seq{};
+    
+  context Clients::ClassDiagrams::NameBox
+  @Constructor(name,sourcePackage,isAbstract,stereotype,x,y,width)
+	self.cornerCurve := 0;
+	self.name := if name.isKindOf(String)
+	then
+  		let t = Text(name,5,0,true,false,isAbstract)
+  		in
+   			t.checkDaemons();
+   			t
+  		end
+	else
+  		name
+	end;
+	self.checkDaemons();
+	self.showAllEdges()
+  end    
+  
+  context Clients::ClassDiagrams::ClassNode
+  @Operation stereotype():String
+      if typePath->asSet = XCore::Class.pathSeq()->asSet
+      then
+        ""
+      else
+        Seq{24}->asString + typePath->last + Seq{24}->asString
+      end
+    end
+
+   context Clients::ClassDiagrams::AttributeBox	
+   @Operation packWidth()
+                        	 
+	  let maxNameWidth = 0;
+	  	  maxIntrinsicLevelName = 0
+	  in
+
+		@For attText in displays do
+           maxIntrinsicLevelName := maxIntrinsicLevelName.max(attText.instLevel.x + attText.instLevel.minWidth())
+        end;
+ 
+		@For attText in displays do
+           attText.name.move(maxIntrinsicLevelName + attText.separatorIntrinsic(),attText.name.y())
+        end;
+        @For attText in displays do
+          maxNameWidth := maxNameWidth.max(attText.name.x + attText.name.width())
+        end;
+        @For attText in displays do
+          attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
+        end
+      end;
+      super()
+    end
+	
+   context Clients::ClassDiagrams::AttributeBox	
+   @Operation expandHeight()
+	  let maxNameWidth = 0;
+	        maxIntrinsicLevelName = 0
+	  in
+		@For attText in displays do 
+           maxIntrinsicLevelName := maxIntrinsicLevelName.max(attText.instLevel.x + attText.instLevel.minWidth())
+        end;
+		@For attText in displays do
+           attText.name.move(maxIntrinsicLevelName + attText.separatorIntrinsic(),attText.name.y())
+        end;
+        @For attText in displays do
+          maxNameWidth := maxNameWidth.max(attText.name.x + attText.name.width())
+        end;
+        
+        @For attText in displays do
+          attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
+        end
+      end;
+	  
+      let height = 0;
+      	  div = 0
+      in 
+		 let v = Vector(3)
+		 in
+			v.put(0,"getTextDimension");
+			//even an empty string will return height
+			v.put(1,"");
+			v.put(2,false);
+			div := Kernel_call("com.ceteva.diagram",v)->at(1)
+		 end;       
+      
+      	@For attText in displays do
+           attText.name.move(attText.name.x(),height + 3);
+           attText.type.move(attText.type.x(),height + 3);
+           attText.instLevel.move(attText.instLevel.x,height + 3);
+           height := height + div
+         end
+      end;
+      super()
+   end
+  		
+//END: BB
