@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import threads.Thread;
 import util.Unify;
 import values.Serializer;
@@ -37,6 +38,8 @@ import engine.Machine;
 import errors.Errors;
 import errors.MachineError;
 import foreignobj.ForeignObject;
+import gc.AllInstances;
+import gc.GC;
 
 public class ForeignFuns implements Value, Instr, Errors {
 
@@ -56,6 +59,7 @@ public class ForeignFuns implements Value, Instr, Errors {
 
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "gc", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_addAtt", 3));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_allInstances", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_arrayDaemons", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_arrayDaemonsActive", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_arrayLength", 1));
@@ -420,6 +424,21 @@ public class ForeignFuns implements Value, Instr, Errors {
   public static void Kernel_arrayDaemons(Machine machine) {
     int array = machine.frameLocal(0);
     machine.pushStack(machine.arrayDaemons(array));
+    machine.popFrame();
+  }
+
+  public static void Kernel_allInstances(Machine machine) {
+    int types = machine.frameLocal(0);
+    int length = machine.consLength(types);
+    int[] classes = new int[length];
+    for (int i = 0; i < length; i++) {
+      classes[i] = machine.consHead(types);
+      types = machine.consTail(types);
+    }
+    GC gc = machine.getGC();
+    machine.setGC(new AllInstances(machine, classes));
+    machine.gc();
+    machine.setGC(gc);
     machine.popFrame();
   }
 

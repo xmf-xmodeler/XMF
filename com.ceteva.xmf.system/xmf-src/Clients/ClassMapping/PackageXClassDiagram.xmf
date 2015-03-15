@@ -314,7 +314,7 @@ context ClassMapping
            @For a in attributes do
              diagram.defineNewHandler(
                "Meta Elements",
-               a.name.toString(),
+               a.name.toString() + "(subclass)",
                false,
                "XCore/Attribute.gif",
                @Operation(x,y) 
@@ -328,7 +328,7 @@ context ClassMapping
            @For a in associations do
              diagram.defineNewHandler(
                "Meta Elements",
-               a.name.toString(),
+               a.name.toString() + "(subclass)",
                false,
                "XCore/Association.gif",
                @Operation(x,y) 
@@ -342,7 +342,7 @@ context ClassMapping
            @For metaclass in metaclasses do
              diagram.defineNewHandler(
                "Meta Elements",
-               metaclass.name.toString(),
+               metaclass.name.toString() + "(subclass)",
                false,
                "XCore/Class.gif",
                @Operation(x,y) 
@@ -906,8 +906,12 @@ context ClassMapping
               @For m in map.packageMaps when m.node.selected do
                m.package.deleteRecursive()
               end
-            end
+            end;
+          manageParents() = map.package.setParents_client();
+          manageImports() = map.package.setImports_client()
       in diagram.defineActionHandler("Actions","Delete Selected","delete","Tools/Delete.gif",delete);
+         diagram.defineActionHandler("Actions","Manage Parents","parents","XCore/Generalization.gif",manageParents);
+         diagram.defineActionHandler("Actions","Manage Imports","imports","XCore/Dependency.gif",manageImports);
          // User defined operations with the named properties below are transformed into actions.
          // The operation properties define the group, label and icon. These default as shown...
          @For handler in package.allOperations() when handler.getProperty("diagramAction",false) do

@@ -135,6 +135,30 @@ context Class
   end
   
 context Class
+  @Operation allDirectInstances():Seq(Object)
+    @Doc
+      Return a list of all instances o for which o.of() = self
+    end
+    Kernel_allInstances([self])
+  end
+  
+context Class
+  @Operation allInstances():Seq(Object)
+    @Doc
+      Return a list of all objects o for which o.of().inheritsFrom(self)
+    end
+    Kernel_allInstances(self.allSubclasses())
+  end
+  
+context Class
+  @Operation allSubclasses():Seq(Object)
+    @Doc
+      Return a list of all classes c for which c.inheritsFrom(self)
+    end
+    Class.allDirectInstances()->select(c | c.inheritsFrom(self))
+  end
+  
+context Class
   @Operation defaultParents():Set(Classifier)
   
     @Doc

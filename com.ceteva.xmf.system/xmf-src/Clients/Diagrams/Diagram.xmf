@@ -174,7 +174,8 @@ context Diagrams
       self.defineToolGroup("Actions");
       self.defineActionHandler("Actions","Zoom +","zoom in","Tools/Activity.gif",Diagram::zoomIn);
       self.defineActionHandler("Actions","Zoom -","zoom out","Tools/Activity.gif",Diagram::zoomOut);
-      self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected)
+      self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected);
+      self.defineActionHandler("Actions","Copy to Clipboard","clip","Tools/Copy.gif",Diagram::copyDiagramToClipboard)
     end
     
     @Operation defineEdgeToolGroups()

@@ -1,0 +1,32 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Adding an action to a class diagram.";
+
+context Root
+  @Package ExamplePackage
+    // Defining or adding an operation with the 'diagramAction' property set adds the
+    // operation to the actions in the diagram palette. The actionName, actionIcon
+    // and actionGroup provide control over the display in the palette. These naming
+    // properties default...
+    @Operation addNameToSelectedClasses[diagramAction,actionGroup="My Actions",actionName="Add Name",actionIcon="XCore/Attribute.gif"]()
+      // The operation should have arity 0, and binds 'self' to the diagram. The owner of a
+      // class diagram is an instance of PackageXClassDiagram that contains mappings between
+      // the model elements and the display elements. Typically the action should operate on
+      // the model elements, perhaps using properties of the diagram to guide it, for example
+      // using the currently selected nodes or edges. In this example the selected classes all
+      // have a name attribute added...
+      @For map in self.owner.classMaps when map.node.selected do
+        map.class.add(Attribute("name",String))
+      end
+    end
+  end
+  
+ExamplePackage.showDiagram();
+
+context ExamplePackage
+  @Operation removeNameFromSelectedClasses[diagramAction,actionGroup="My Actions",actionName="Remove Name",actionIcon="XCore/Attribute.gif"]()
+      @For map in self.owner.classMaps when map.node.selected and map.class.hasElement("name") do
+        map.class.remove(map.class.getElement("name"))
+      end
+  end
