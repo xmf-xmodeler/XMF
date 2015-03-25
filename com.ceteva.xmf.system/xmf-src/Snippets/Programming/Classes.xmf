@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to create classes programmtically.";
+
+// Packages, classes and attributes can all be created in XOCL code.
+// The XCore classes have constructors for this purpose. Note that
+// it is usual, but not necessary, for all named elements to be
+// accessible from Root. This is achieved by adding them to an existing
+// name-space. Doing this ensures that they can be referenced by '::' 
+// from Root and that they have an 'owner'.
+
+let p = Package("MyPackage");
+    c = Class("MyClass");
+    a = Attribute("myAtt",Integer)
+in Root.add(p);
+   p.add(c);
+   c.add(a)
+end;
+
+// Now you can access Root::MyPackage and the rest. Try browsing the new 
+// package and opening a diagram on it.

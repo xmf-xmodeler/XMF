@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "How to create local functions.";
+
+// Local functions have a convenient syntax in a let-expression...
+
+let getParents(c:Class):Set(Class) = c.allParents()->excluding(Object)
+in getParents(Attribute) + 
+   getParents(Clients::Diagrams::Diagram)
+end.println();

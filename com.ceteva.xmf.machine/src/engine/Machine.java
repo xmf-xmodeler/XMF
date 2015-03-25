@@ -56,8 +56,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import clients.ClientResult;
-
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 import threads.Thread;
@@ -79,6 +77,7 @@ import xos.MessagePacket;
 import xos.OperatingSystem;
 import xos.TChannel;
 import xos.XData;
+import clients.ClientResult;
 import debug.Debugger;
 import debug.StepListener;
 import errors.Errors;
@@ -87,6 +86,7 @@ import foreignfuns.ForeignFun;
 import foreignfuns.ForeignFuns;
 import foreignobj.ForeignObject;
 import foreignobj.ForeignObjectMOP;
+import gc.GC;
 
 public final class Machine implements Words, Constants, ObjectProperties, Daemons, StackFrame, Instr, Value, Errors, SignalHandler {
 
@@ -96,11 +96,6 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // and heaps are all integer arrays, therefore pointers are Java ints
   // that index array elements. The machine implements its own heap
   // management including a stop and copy garbage collector.
-
-  // If XMF is run with a license manager then the license is represented
-  // as the value of the following...
-
-  // public License license = null;
 
   // The heap is allocated to be heapSize words, unless the image that is
   // loaded requires a larger heap. Note that since XMF has a stop-and-
@@ -138,7 +133,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int                         constructorTableSize      = 100;
 
-  // Set to be the file to load on startuo. Should be a binary file...
+  // Set to be the file to load on startup. Should be a binary file...
 
   public String                      initFile                  = null;
 
@@ -257,7 +252,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // The loader may encounter name lookups which existed when the
   // object was serialized, but does not exist when the value is loaded.
   // If this happens then the loader creates a forward reference
-  // on the forwardRefs list. The upper levels can thenprocess the
+  // on the forwardRefs list. The upper levels can then process the
   // forward refs and replace the values appropriately...
 
   private int                        forwardRefs               = Machine.nilValue;
@@ -275,8 +270,8 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   private Thread                     threads;
 
-  // Set by a thread when it wats to yield. The Vm will simply stop
-  // and return to the operting system ...
+  // Set by a thread when it wants to yield. The VM will simply stop
+  // and return to the operating system ...
 
   private boolean                    yield                     = false;
 
@@ -300,6 +295,11 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // The encoding is in the XMF byte coded serialization language...
 
   private Serializer                 serializer                = new Serializer(this);
+
+  // The garbage collector provides a mechanism for weeping the heap. This defaults
+  // to a mark-and-sweep, but can be modified and extended...
+
+  private GC                         gc                        = new GC(this, false);
 
   // Various classes and types are known to the VM. Many of these are
   // simply so that VM managed data structures can return a particular
@@ -816,6 +816,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(ARRAY, ptr);
   }
 
+  public int gcArray(int array) {
+    int length = arrayLength(array);
+    System.arraycopy(words, ptr(array), gcWords, gcFreePtr, length + ARRAY_HEADER);
+    int ptr = mkPtr(ARRAY, gcFreePtr);
+    gcFreePtr += length + ARRAY_HEADER;
+    return ptr;
+  }
+
   public int mkAttribute() {
 
     // Object attributes are encoded as cons pairs.
@@ -931,6 +939,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(CODE, ptr);
   }
 
+  public int gcCode(int code) {
+    int length = codeLength(code);
+    System.arraycopy(words, ptr(code), gcWords, gcFreePtr, length + CODE_HEADER);
+    int ptr = mkPtr(CODE, gcFreePtr);
+    gcFreePtr += length + CODE_HEADER;
+    return ptr;
+  }
+
   public int mkCodeBox(int locals) {
 
     // A code box is used to contain program code and associated information
@@ -960,6 +976,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(CODEBOX, ptr);
   }
 
+  public int gcCodeBox(int codeBox) {
+    System.arraycopy(words, ptr(codeBox), gcWords, gcFreePtr, CODEBOX_SIZE);
+    int ptr = mkPtr(CODEBOX, gcFreePtr);
+    gcFreePtr += CODEBOX_SIZE;
+    return ptr;
+  }
+
   public int mkCodeBox(int constArray, int locals, int instrs) {
 
     // Create an populate a code box...
@@ -979,6 +1002,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     set(ptr, head);
     set(ptr + 1, tail);
     return mkPtr(CONS, ptr);
+  }
+
+  public int gcCons(int cons) {
+    System.arraycopy(words, ptr(cons), gcWords, gcFreePtr, CONS_SIZE);
+    int ptr = mkPtr(CONS, gcFreePtr);
+    gcFreePtr += CONS_SIZE;
+    return ptr;
   }
 
   public int mkCont(int length) {
@@ -1010,6 +1040,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     daemonSetTraced(daemon, falseValue);
     daemonSetTarget(daemon, frameSelf());
     return daemon;
+  }
+
+  public int gcDaemon(int daemon) {
+    System.arraycopy(words, ptr(daemon), gcWords, gcFreePtr, DAEMON_SIZE);
+    int ptr = mkPtr(DAEMON, gcFreePtr);
+    gcFreePtr += DAEMON_SIZE;
+    return ptr;
   }
 
   public int mkDataInputChannel(int inputChannel) {
@@ -1267,6 +1304,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return fun;
   }
 
+  public int gcFun(int fun) {
+    System.arraycopy(words, ptr(fun), gcWords, gcFreePtr, FUN_SIZE);
+    int ptr = mkPtr(FUN, gcFreePtr);
+    gcFreePtr += FUN_SIZE;
+    return ptr;
+  }
+
   public int mkGlobals() {
 
     // The globals of a function are its closed in variables.
@@ -1321,6 +1365,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(HASHTABLE, table);
   }
 
+  public int gcTable(int table) {
+    return mkPtr(HASHTABLE, gcArray(table));
+  }
+
   public static final int mkImmediate(int tag, int value) {
 
     // Combine the tag in the top byte of the word
@@ -1367,6 +1415,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     set(ptr + 2, nilValue);
     set(ptr + 3, mkInt(OBJ_DEFAULT_PROPS));
     return mkPtr(OBJ, ptr);
+  }
+
+  public int gcCopyObj(int objPtr) {
+    // The GC wants to copy an existing object from the old heap to the
+    // new heap...
+    System.arraycopy(words, ptr(objPtr), gcWords, gcFreePtr, OBJ_SIZE);
+    int ptr = mkPtr(OBJ, gcFreePtr);
+    gcFreePtr += OBJ_SIZE;
+    return ptr;
   }
 
   public int mkObj(int type) {
@@ -1430,6 +1487,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(STRING, ptr);
   }
 
+  public int gcString(int string) {
+    int l = (stringLength(string) / 4) + 1;
+    System.arraycopy(words, ptr(string), gcWords, gcFreePtr, STRING_HEADER + l);
+    int ptr = mkPtr(STRING, gcFreePtr);
+    gcFreePtr += STRING_HEADER + l;
+    return ptr;
+  }
+
   public int mkStringInputChannel(int string) {
     String s = valueToString(string);
     int sinch = XOS.newStringInputChannel(s);
@@ -1454,6 +1519,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     symbolSetName(symbol, undefinedValue);
     symbolSetValue(symbol, undefinedValue);
     return symbol;
+  }
+
+  public int gcSymbol(int symbol) {
+    System.arraycopy(words, ptr(symbol), gcWords, gcFreePtr, SYMBOL_SIZE);
+    int ptr = mkPtr(SYMBOL, gcFreePtr);
+    gcFreePtr += SYMBOL_SIZE;
+    return ptr;
   }
 
   public int mkSymbol(CharSequence name) {
@@ -8031,13 +8103,21 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       gcStack();
       gcConstants();
       gcUndo();
-      gcComplete();
+      gc.gcComplete();
       swapHeap();
-      gcPopStack();
-      gcDiagnostics(startTime);
+      gc.gcPopStack();
+      if (!gc.isSilent()) gcDiagnostics(startTime);
     } catch (Throwable t) {
       error(GCERROR, t.getMessage());
     }
+  }
+
+  public GC getGC() {
+    return gc;
+  }
+
+  public void setGC(GC gc) {
+    this.gc = gc;
   }
 
   public void clearGCHeap() {
@@ -8089,256 +8169,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return mkPtr(tag, ptr(ref(ptr(word))));
   }
 
-  public int gcArray(int array) {
-    if (collected(array))
-      return forward(ARRAY, array);
-    else {
-      int length = arrayLength(array);
-      int daemonsActive = arrayDaemonsActive(array);
-      int daemons = arrayDaemons(array);
-      swapHeap();
-      int newArray = mkArray(length);
-      swapHeap();
-      for (int i = 0; i < length; i++) {
-        int element = arrayRef(array, i);
-        swapHeap();
-        arraySet(newArray, i, element);
-        swapHeap();
-      }
-      swapHeap();
-      arraySetDaemonsActive(newArray, daemonsActive);
-      arraySetDaemons(newArray, daemons);
-      swapHeap();
-      setForward(array, newArray);
-      return newArray;
-    }
-  }
-
-  public int gcBuffer(int buffer) {
-    if (collected(buffer))
-      return forward(BUFFER, buffer);
-    else {
-      int increment = bufferIncrement(buffer);
-      int daemons = bufferDaemons(buffer);
-      int daemonsActive = bufferDaemonsActive(buffer);
-      int storage = bufferStorage(buffer);
-      int size = bufferSize(buffer);
-      int asString = bufferAsString(buffer);
-      swapHeap();
-      int newBuffer = mkBuffer();
-      bufferSetIncrement(newBuffer, increment);
-      bufferSetDaemons(newBuffer, daemons);
-      bufferSetDaemonsActive(newBuffer, daemonsActive);
-      bufferSetStorage(newBuffer, storage);
-      bufferSetSize(newBuffer, size);
-      bufferSetAsString(newBuffer, asString);
-      swapHeap();
-      setForward(buffer, newBuffer);
-      return newBuffer;
-    }
-  }
-
-  public int gcCode(int code) {
-    if (collected(code))
-      return forward(CODE, code);
-    else {
-      int length = codeLength(code);
-      swapHeap();
-      int newCode = mkCode(length);
-      swapHeap();
-      for (int i = 0; i < length; i++) {
-        int instr = codeRef(code, i);
-        swapHeap();
-        codeSet(newCode, i, instr);
-        swapHeap();
-      }
-      setForward(code, newCode);
-      return newCode;
-    }
-  }
-
-  public int gcCodeBox(int codeBox) {
-    if (collected(codeBox))
-      return forward(CODEBOX, codeBox);
-    else {
-      int locals = codeBoxLocals(codeBox);
-      swapHeap();
-      int newCodeBox = mkCodeBox(locals);
-      swapHeap();
-      int constants = codeBoxConstants(codeBox);
-      int instrs = codeBoxInstrs(codeBox);
-      int name = codeBoxName(codeBox);
-      int source = codeBoxSource(codeBox);
-      int resourceName = codeBoxResourceName(codeBox);
-      swapHeap();
-      codeBoxSetConstants(newCodeBox, constants);
-      codeBoxSetInstrs(newCodeBox, instrs);
-      codeBoxSetName(newCodeBox, name);
-      codeBoxSetSource(newCodeBox, source);
-      codeBoxSetResourceName(newCodeBox, resourceName);
-      swapHeap();
-      setForward(codeBox, newCodeBox);
-      return newCodeBox;
-    }
-  }
-
-  public void gcComplete() {
-
-    // Called once the initial roots have been copied.
-    // The copied pointer trails the free pointer and
-    // refers to the contents of the original heap
-    // that must be replaced with newly created elements
-    // in the new heap...
-
-    while (gcFreePtr != gcCopiedPtr) {
-      int value = gcWords[gcCopiedPtr];
-      switch (tag(value)) {
-      case ARRAY:
-        gcWords[gcCopiedPtr++] = gcArray(value);
-        break;
-      case BUFFER:
-        gcWords[gcCopiedPtr++] = gcBuffer(value);
-        break;
-      case BOOL:
-        gcCopiedPtr++;
-        break;
-      case CODE:
-        gcWords[gcCopiedPtr++] = gcCode(value);
-        break;
-      case CODEBOX:
-        gcWords[gcCopiedPtr++] = gcCodeBox(value);
-        break;
-      case CODELENGTH:
-        gcCopiedPtr = gcCopiedPtr + value(value) + 1;
-        break;
-      case CONT:
-        gcWords[gcCopiedPtr++] = gcCont(value);
-        break;
-      case FOREIGNFUN:
-        gcCopiedPtr++;
-        break;
-      case FOREIGNOBJ:
-        gcCopiedPtr++;
-        break;
-      case FUN:
-        gcWords[gcCopiedPtr++] = gcFun(value);
-        break;
-      case INT:
-      case NEGINT:
-        gcCopiedPtr++;
-        break;
-      case OBJ:
-        gcWords[gcCopiedPtr++] = gcObj(value);
-        break;
-      case STRING:
-        gcWords[gcCopiedPtr++] = gcString(value);
-        break;
-      case STRINGLENGTH:
-        gcCopiedPtr = gcCopiedPtr + (value(value) / 4) + 1;
-        break;
-      case UNDEFINED:
-        gcCopiedPtr++;
-        break;
-      case CONS:
-        gcWords[gcCopiedPtr++] = gcCons(value);
-        break;
-      case NIL:
-        gcCopiedPtr++;
-        break;
-      case SYMBOL:
-        gcWords[gcCopiedPtr++] = gcSymbol(value);
-        break;
-      case SET:
-        gcWords[gcCopiedPtr++] = gcSet(value);
-        break;
-      case INPUT_CHANNEL:
-      case OUTPUT_CHANNEL:
-      case CLIENT:
-      case THREAD:
-      case DATABASE:
-      case QUERYRESULT:
-        gcCopiedPtr++;
-        break;
-      case HASHTABLE:
-        gcWords[gcCopiedPtr++] = gcHashTable(value);
-        break;
-      case FLOAT:
-        gcWords[gcCopiedPtr++] = gcFloat(value);
-        break;
-      case DAEMON:
-        gcWords[gcCopiedPtr++] = gcDaemon(value);
-        break;
-      case FORWARDREF:
-        gcWords[gcCopiedPtr++] = gcForwardRef(value);
-        break;
-      case ILLEGAL:
-        // Arises when a continuation is garbage collected.
-        // since the continuation contains a stack copy and
-        // the stack contains machine words or the special -1.
-        gcCopiedPtr++;
-        break;
-      case BIGINT:
-        gcWords[gcCopiedPtr++] = gcBigInt(value);
-        break;
-      default:
-        throw new MachineError(GCERROR, "gcComplete: unknown value tag: " + tag(value));
-      }
-    }
-  }
-
-  public int gcBigInt(int bigInt) {
-    if (collected(bigInt))
-      return forward(BIGINT, bigInt);
-    else {
-      int newString = gcString(bigInt);
-      return mkPtr(BIGINT, value(newString));
-    }
-  }
-
-  public int gcCons(int cons) {
-    if (collected(cons))
-      return forward(CONS, cons);
-    else {
-      int head = consHead(cons);
-      int tail = consTail(cons);
-      swapHeap();
-      int newCons = mkCons(head, tail);
-      swapHeap();
-      setForward(cons, newCons);
-      return newCons;
-    }
-  }
-
   public void gcConstants() {
     gcSymbolConstants();
     gcTypeConstants();
     operatorTable = gcCopy(operatorTable);
     constructorTable = gcCopy(constructorTable);
     newListenersTable = gcCopy(newListenersTable);
-  }
-
-  public int gcCont(int cont) {
-    if (collected(cont))
-      return forward(CONT, cont);
-    else {
-      int length = contLength(cont);
-      int currFrame = contCurrentFrame(cont);
-      int openFrame = contOpenFrame(cont);
-      swapHeap();
-      int newCont = mkCont(length);
-      contSetCurrentFrame(newCont, mkInt(currFrame));
-      contSetOpenFrame(newCont, mkInt(openFrame));
-      swapHeap();
-      for (int i = 0; i < length; i++) {
-        int value = contRef(cont, i);
-        swapHeap();
-        contSet(newCont, i, value);
-        swapHeap();
-      }
-      setForward(cont, newCont);
-      return newCont;
-    }
-
   }
 
   public int gcCopy(int word) {
@@ -8348,17 +8184,17 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     switch (tag(word)) {
     case ARRAY:
-      return gcArray(word);
+      return gc.gcArray(word);
     case BUFFER:
-      return gcBuffer(word);
+      return gc.gcBuffer(word);
     case BOOL:
       return word;
     case CODEBOX:
-      return gcCodeBox(word);
+      return gc.gcCodeBox(word);
     case CODE:
-      return gcCode(word);
+      return gc.gcCode(word);
     case CONT:
-      return gcCont(word);
+      return gc.gcCont(word);
     case INT:
     case NEGINT:
       return word;
@@ -8367,62 +8203,36 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     case FOREIGNOBJ:
       return word;
     case FUN:
-      return gcFun(word);
+      return gc.gcFun(word);
     case OBJ:
-      return gcObj(word);
+      return gc.gcObj(word);
     case STRING:
-      return gcString(word);
+      return gc.gcString(word);
     case UNDEFINED:
       return word;
     case CONS:
-      return gcCons(word);
+      return gc.gcCons(word);
     case SET:
-      return gcSet(word);
+      return gc.gcSet(word);
     case NIL:
       return word;
     case SYMBOL:
-      return gcSymbol(word);
+      return gc.gcSymbol(word);
     case INPUT_CHANNEL:
     case OUTPUT_CHANNEL:
     case CLIENT:
     case THREAD:
       return word;
     case HASHTABLE:
-      return gcHashTable(word);
+      return gc.gcHashTable(word);
     case FLOAT:
-      return gcFloat(word);
+      return gc.gcFloat(word);
     case DAEMON:
-      return gcDaemon(word);
+      return gc.gcDaemon(word);
     case FORWARDREF:
-      return gcForwardRef(word);
+      return gc.gcForwardRef(word);
     default:
       throw new MachineError(GCERROR, "Machine.gcCopy: unknown type tag " + tag(word));
-    }
-  }
-
-  public int gcDaemon(int daemon) {
-    if (collected(daemon))
-      return forward(DAEMON, daemon);
-    else {
-      int id = daemonId(daemon);
-      int type = daemonType(daemon);
-      int slot = daemonSlot(daemon);
-      int action = daemonAction(daemon);
-      int persistent = daemonPersistent(daemon);
-      int traced = daemonTraced(daemon);
-      int target = daemonTarget(daemon);
-      swapHeap();
-      int newDaemon = mkDaemon();
-      daemonSetId(newDaemon, id);
-      daemonSetType(newDaemon, type);
-      daemonSetSlot(newDaemon, slot);
-      daemonSetAction(newDaemon, action);
-      daemonSetPersistent(newDaemon, persistent);
-      daemonSetTraced(newDaemon, traced);
-      daemonSetTarget(newDaemon, target);
-      swapHeap();
-      setForward(daemon, newDaemon);
-      return newDaemon;
     }
   }
 
@@ -8440,21 +8250,6 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     System.out.print(" " + percentFreed + "% collected in " + time + " ms,");
     System.out.print(" " + usedMB + "MB used,");
     System.out.println(" " + availableMB + "MB available.]");
-
-  }
-
-  public int gcFloat(int f) {
-    if (collected(f))
-      return forward(FLOAT, f);
-    else {
-      int str = floatString(f);
-      swapHeap();
-      int newFloat = mkFloat();
-      floatSetString(newFloat, str);
-      swapHeap();
-      setForward(f, newFloat);
-      return newFloat;
-    }
   }
 
   public void gcForeign() {
@@ -8465,127 +8260,8 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       f.setType(gcCopy(f.getType()));
   }
 
-  public int gcForwardRef(int forwardRef) {
-
-    // If we can resolve the forward ref then
-    // do so silently....
-
-    if (collected(forwardRef))
-      return forward(FORWARDREF, forwardRef);
-    else {
-      int value = forwardRefValue(forwardRef);
-      if (value != undefinedValue)
-        return gcCopy(value);
-      else {
-        int path = forwardRefPath(forwardRef);
-        int listeners = forwardRefListeners(forwardRef);
-        swapHeap();
-        int newForwardRef = mkForwardRef(path);
-        forwardRefSetListeners(newForwardRef, listeners);
-        swapHeap();
-        setForward(forwardRef, newForwardRef);
-        return newForwardRef;
-      }
-    }
-  }
-
-  public int gcFun(int fun) {
-    if (collected(fun))
-      return forward(FUN, fun);
-    else {
-      int arity = funArity(fun);
-      swapHeap();
-      int newFun = mkFun();
-      funSetArity(newFun, mkInt(arity));
-      swapHeap();
-      int globals = funGlobals(fun);
-      int code = funCode(fun);
-      int self = funSelf(fun);
-      int owner = funOwner(fun);
-      int supers = funSupers(fun);
-      int dynamics = funDynamics(fun);
-      int sig = funSig(fun);
-      int properties = funProperties(fun);
-      swapHeap();
-      funSetGlobals(newFun, globals);
-      funSetCode(newFun, code);
-      funSetSelf(newFun, self);
-      funSetOwner(newFun, owner);
-      funSetSupers(newFun, supers);
-      funSetDynamics(newFun, dynamics);
-      funSetSig(newFun, sig);
-      funSetProperties(newFun, properties);
-      swapHeap();
-      setForward(fun, newFun);
-      return newFun;
-    }
-  }
-
-  public int gcHashTable(int table) {
-
-    // To garbage collect a hashtable we must take into
-    // account the hash codes of the keys in the table.
-    // Garbage collection may cause the hash codes to change
-    // since the codes may be computed on the basis of the
-    // machine address of the key. It is therefore important
-    // to rehash the table into the new space.
-
-    if (collected(table))
-      return forward(HASHTABLE, table);
-    else {
-      int length = arrayLength(table);
-      int daemonsActive = arrayDaemonsActive(table);
-      int daemons = arrayDaemons(table);
-      swapHeap();
-      int newTable = mkHashtable(length);
-      swapHeap();
-      for (int i = 0; i < length; i++) {
-        int element = arrayRef(table, i);
-        swapHeap();
-        arraySet(newTable, i, element);
-        swapHeap();
-      }
-      swapHeap();
-      arraySetDaemonsActive(newTable, daemonsActive);
-      arraySetDaemons(newTable, daemons);
-      swapHeap();
-      setForward(table, newTable);
-      valueStack.push(newTable);
-      return newTable;
-    }
-  }
-
-  public int gcObj(int obj) {
-    if (collected(obj))
-      return forward(OBJ, obj);
-    else {
-      swapHeap();
-      int newObj = mkObj();
-      swapHeap();
-      int atts = objAttributes(obj);
-      int type = objType(obj);
-      int daemons = objDaemons(obj);
-      int properties = objProperties(obj);
-      swapHeap();
-      objSetAttributes(newObj, atts);
-      objSetType(newObj, type);
-      objSetDaemons(newObj, daemons);
-      objSetProperties(newObj, properties);
-      swapHeap();
-      setForward(obj, newObj);
-      return newObj;
-    }
-  }
-
-  public void gcPopStack() {
-    while (valueStack.getTOS() != gcTOS) {
-      int value = valueStack.pop();
-      switch (tag(value)) {
-      case HASHTABLE:
-        rehash(value);
-        break;
-      }
-    }
+  public int getGCTOS() {
+    return gcTOS;
   }
 
   public void rehash(int table) {
@@ -8698,67 +8374,40 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     }
   }
 
-  public int gcString(int string) {
-    if (collected(string))
-      return forward(STRING, string);
-    else {
-      int length = stringLength(string);
-      swapHeap();
-      int newString = mkString(length);
-      swapHeap();
-      for (int i = 0; i < length; i++) {
-        int c = stringRef(string, i);
-        swapHeap();
-        stringSet(newString, i, c);
-        swapHeap();
-      }
-      setForward(string, newString);
-      return newString;
-    }
-  }
-
-  public int gcSymbol(int symbol) {
-    if (collected(symbol))
-      return forward(SYMBOL, symbol);
-    else {
-      int name = symbolName(symbol);
-      int value = symbolValue(symbol);
-      swapHeap();
-      int newSymbol = mkSymbol();
-      symbolSetName(newSymbol, name);
-      symbolSetValue(newSymbol, value);
-      swapHeap();
-      setForward(symbol, newSymbol);
-      return newSymbol;
-    }
-  }
-
   public void gcSymbolConstants() {
-    theSymbolAttributes = gcSymbol(theSymbolAttributes);
-    theSymbolInit = gcSymbol(theSymbolInit);
-    theSymbolMachineInit = gcSymbol(theSymbolMachineInit);
-    theSymbolType = gcSymbol(theSymbolType);
-    theSymbolDefault = gcSymbol(theSymbolDefault);
-    theSymbolOperations = gcSymbol(theSymbolOperations);
-    theSymbolParents = gcSymbol(theSymbolParents);
-    theSymbolName = gcSymbol(theSymbolName);
-    theSymbolArity = gcSymbol(theSymbolArity);
-    theSymbolOwner = gcSymbol(theSymbolOwner);
-    theSymbolContents = gcSymbol(theSymbolContents);
-    theSymbolInvoke = gcSymbol(theSymbolInvoke);
-    theSymbolDot = gcSymbol(theSymbolDot);
-    theSymbolFire = gcSymbol(theSymbolFire);
-    theSymbolValue = gcSymbol(theSymbolValue);
-    theSymbolDocumentation = gcSymbol(theSymbolDocumentation);
-    theSymbolHead = gcSymbol(theSymbolHead);
-    theSymbolTail = gcSymbol(theSymbolTail);
-    theSymbolIsEmpty = gcSymbol(theSymbolIsEmpty);
-    theSymbolNewListener = gcSymbol(theSymbolNewListener);
+    theSymbolAttributes = gc.gcSymbol(theSymbolAttributes);
+    theSymbolInit = gc.gcSymbol(theSymbolInit);
+    theSymbolMachineInit = gc.gcSymbol(theSymbolMachineInit);
+    theSymbolType = gc.gcSymbol(theSymbolType);
+    theSymbolDefault = gc.gcSymbol(theSymbolDefault);
+    theSymbolOperations = gc.gcSymbol(theSymbolOperations);
+    theSymbolParents = gc.gcSymbol(theSymbolParents);
+    theSymbolName = gc.gcSymbol(theSymbolName);
+    theSymbolArity = gc.gcSymbol(theSymbolArity);
+    theSymbolOwner = gc.gcSymbol(theSymbolOwner);
+    theSymbolContents = gc.gcSymbol(theSymbolContents);
+    theSymbolInvoke = gc.gcSymbol(theSymbolInvoke);
+    theSymbolDot = gc.gcSymbol(theSymbolDot);
+    theSymbolFire = gc.gcSymbol(theSymbolFire);
+    theSymbolValue = gc.gcSymbol(theSymbolValue);
+    theSymbolDocumentation = gc.gcSymbol(theSymbolDocumentation);
+    theSymbolHead = gc.gcSymbol(theSymbolHead);
+    theSymbolTail = gc.gcSymbol(theSymbolTail);
+    theSymbolIsEmpty = gc.gcSymbol(theSymbolIsEmpty);
+    theSymbolNewListener = gc.gcSymbol(theSymbolNewListener);
   }
 
   public void gcSymbols() {
     forwardRefs = gcCopy(forwardRefs);
     symbolTable = gcCopy(symbolTable);
+  }
+
+  public int getSymbolTable() {
+    return symbolTable;
+  }
+
+  public int getForwardRefs() {
+    return forwardRefs;
   }
 
   public void gcTypeConstants() {
@@ -8792,6 +8441,42 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public void gcUndo() {
     undo.gc(this);
+  }
+
+  public boolean gcIsComplete() {
+    return gcFreePtr != gcCopiedPtr;
+  }
+
+  public void gcUpdateCopied(int word) {
+    gcWords[gcCopiedPtr++] = word;
+  }
+
+  public int[] getGCHeap() {
+    return gcWords;
+  }
+
+  public int getGCCopiedPtr() {
+    return gcCopiedPtr;
+  }
+
+  public int getGCFreePtr() {
+    return gcFreePtr;
+  }
+
+  public void setGCCopiedPtr(int gcCopiedPtr) {
+    this.gcCopiedPtr = gcCopiedPtr;
+  }
+
+  public void advanceCopiedPtr() {
+    gcCopiedPtr++;
+  }
+
+  public void advanceCopiedPtrBy(int inc) {
+    gcCopiedPtr = gcCopiedPtr + inc;
+  }
+
+  public int gcValue() {
+    return gcWords[gcCopiedPtr];
   }
 
   public Header defaultHeader() {
@@ -11465,6 +11150,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       words = new int[heapSize];
       gcWords = new int[heapSize];
     }
+    return words;
+  }
+
+  public int[] getHeap() {
     return words;
   }
 
