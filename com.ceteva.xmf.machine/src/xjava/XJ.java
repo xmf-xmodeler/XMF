@@ -154,6 +154,7 @@ public class XJ extends JavaTranslator {
 
     int arity = machine.consLength(args);
     Method method = getMethod(target, message, arity);
+    error = "";
     if (method == null) {
       error = "Cannot find method named " + message;
       return -1;
