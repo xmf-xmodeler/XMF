@@ -368,7 +368,7 @@ Clients::ClassDiagrams::NameBox.constructors := Seq{};
       then
         ""
       else
-        Seq{24}->asString + typePath->last + Seq{24}->asString
+         "^" + typePath->last + "^"
       end
     end
 
