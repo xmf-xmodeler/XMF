@@ -1,20 +1,36 @@
 //Version 1.0 XMF2
 parserImport XOCL;
 
+// import Compiler;
+
 let	myprojects = xmf.projectManager().contents.get(Symbol("MyProjects"))
 in
 		//Bootreihenfolgeangeben
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Utils.xar",false);
 			Utils::updateAttribute();
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
-			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.xmf",true,true);
+		    (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Model.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Model.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaClass.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaClass.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Association.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Association.o").loadBin(true);
 			FMML::MetaClass.level := 2;
 //			myprojects.loadMosaicProject(xmf.homeDir()+"/_Load/FMML-4.xar",true);
 //			myprojects.loadMosaicProject(xmf.homeDir()+"/_Load/MultiLevel-1.xar",true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/ClassDiagramExtension_v10.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/ClassDiagramExtension_v10.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXClassDiagram.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXClassDiagram.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.o").loadBin(true)
 end;
