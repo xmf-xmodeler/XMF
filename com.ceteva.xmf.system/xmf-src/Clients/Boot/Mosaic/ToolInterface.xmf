@@ -225,6 +225,10 @@ if xmf.hasProperty("initFile")
 then
   let initFile = xmf.property("initFile")
   in xmf.setInitFile(initFile.subString(0,initFile->size - 2) + ".xmf");
+    if xmf.initFile.fileExists()
+    then
+    	Compiler::compileFile(xmf.initFile,true,true)
+    end;
     if initFile.fileExists() and initFile.hasSuffix(".o")
     then
       initFile.loadBin(false)
