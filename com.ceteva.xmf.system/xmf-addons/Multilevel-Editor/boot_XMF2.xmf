@@ -1,9 +1,13 @@
 //Version 1.0 XMF2
 parserImport XOCL;
 
-// import Compiler;
+import Projects;
+import Clients::ExtensionPoints;
 
-let	myprojects = xmf.projectManager().contents.get(Symbol("MyProjects"))
+// import Compiler;
+xmf.projectManager().add(ProjectManagerContainer("Multilevel",xmf.projDir(),null));
+let	myprojects = xmf.projectManager().contents.get(Symbol("Multilevel"))
+//let	myprojects = xmf.projectManager().contents.get(Symbol("MyProjects"))
 in
 		//Bootreihenfolgeangeben
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Utils.xar",false);
@@ -32,5 +36,19 @@ in
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXClassDiagram.o").loadBin(true);
 
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.xmf",true,true);
-			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.o").loadBin(true)
+			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.o").loadBin(true);
+
+xmf.registry().addContribution("com.ceteva.xmf.dropMenus",
+	    TypeLessContribution(
+	      Seq{
+	        Seq{"&Multilevel","Projects","&Multilevel Projects"},
+	        @Operation showSystemBrowser()
+	      		let client = xmf.clientManager().findClientByName("com.ceteva.modelBrowser:XCore")
+	      			in
+	        			client.showModelBrowser(xmf.projectManager("Multilevel"))
+	      			end
+	    	end
+	      }
+	    )
+	  )
 end;

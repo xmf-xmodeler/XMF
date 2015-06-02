@@ -187,11 +187,11 @@ try
           if hasArg("initFile")
           then
             let initFile = getArg("initFile")
-            in xmf.setInitFile(initFile.subString(0,initFile->size - 2) + ".xmf");
-               if initFile.fileExists() and initFile.hasSuffix(".o")
-               then initFile.loadBin(false)
-               else xmf.warning("Cannot find Mosaic init file " + initFile)
-               end
+            in xmf.setInitFile(initFile.subString(0,initFile->size - 2) + ".xmf")//;
+               //if initFile.fileExists() and initFile.hasSuffix(".o")
+               //then initFile.loadBin(false)
+               //else xmf.warning("Cannot find Mosaic init file " + initFile)
+               //end
             end
           end
           
