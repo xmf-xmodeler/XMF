@@ -54,14 +54,15 @@ context ProjectManager
     // that will contain all of the elements for the project. The
     // new package is added to root. 
     
-	let answer = xmf.selects("Projekttype","choose Projekttype",Seq{"Project","MultilevelProject"}, Seq{"Project"},null)
-	in
+	//let answer = xmf.selects("Projekttype","choose Projekttype",Seq{"Project","MultilevelProject"}, Seq{"Project"},null)
+	//in
 		let name : XCore::Element = Root.newName("Project")
 		in let package : XCore::Element = XCore::Package(name)
 			in let project : XCore::Element = Project(package,"",null)
 				in Root.add(package);
 					self.add(project);
-					if answer->contains("MultilevelProject")
+					//if answer->contains("MultilevelProject")
+					if Root.hasElement("FMML")
 					then
 						package.addParent(FMML);
 						package.removeParent(Object)
@@ -69,7 +70,7 @@ context ProjectManager
 				end
 			end
 		end
-	end	
+	//end	
   end
 
 context ProjectManager

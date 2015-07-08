@@ -6,10 +6,13 @@ import Clients::ExtensionPoints;
 
 // import Compiler;
 xmf.projectManager().add(ProjectManagerContainer("Multilevel",xmf.projDir(),null));
-let	myprojects = xmf.projectManager().contents.get(Symbol("Multilevel"))
+let	myprojects = xmf.projectManager().contents.get(Symbol("Multilevel"));
+	bootloading = xmf.question("Load Multilevel-Extension?")
 //let	myprojects = xmf.projectManager().contents.get(Symbol("MyProjects"))
 in
 		//Bootreihenfolgeangeben
+		if(bootloading)
+		then	
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Utils.xar",false);
 			Utils::updateAttribute();
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
@@ -51,4 +54,5 @@ xmf.registry().addContribution("com.ceteva.xmf.dropMenus",
 	      }
 	    )
 	  )
+	  end
 end;
