@@ -366,3 +366,24 @@ context Integer
     end
   end
     
+context Integer
+  @Operation isPrime():Boolean
+  
+    if self < 0
+    then false
+    elseif self <= 1
+    then false
+    else    
+      let i = 2;
+      q = self.sqrt();
+      result = true
+      in @While i <= q and result do
+          if self.mod(i) = 0
+          then result := result and false
+          end;
+          i := i + 1
+        end;
+      result
+      end
+    end
+  end
