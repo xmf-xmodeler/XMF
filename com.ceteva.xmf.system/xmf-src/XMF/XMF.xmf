@@ -660,6 +660,11 @@ context Root
       self.textArea("warning",title,warning)
     end
     
+    @Operation xmf()
+      // Return a reference to the underlying VM.
+      Kernel_xmf()
+    end
+    
   end
   
 Root::xmf := XMF(".");

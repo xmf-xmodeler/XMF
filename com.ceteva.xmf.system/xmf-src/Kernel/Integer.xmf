@@ -354,6 +354,7 @@ context Integer
       Converts an integer to a string using the
       supplied radix.
     end
+    if radix = 1 then self.error("cannot use 1 as a radix") end;
     let m = self.mod(radix);
         d = self.div(radix) then
         pre = if d = 0 then "" else d.toString(radix) end;
