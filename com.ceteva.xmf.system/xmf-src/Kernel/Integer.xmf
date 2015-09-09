@@ -11,9 +11,8 @@ parserImport XOCL;
  *   provided here so that they can be passed around and called directly.     *
  *                                                                            *
  ******************************************************************************/ 
-
 context Integer
-  @Operation abs():Integer
+ @Operation abs():Integer
     @Doc 
       Returns the absolute value of an integer.
     end
@@ -387,3 +386,44 @@ context Integer
       end
     end
   end
+  
+  context Integer
+  @Operation getFirstPrimeFactor():Integer
+  
+    if self < 0 
+    then
+    -1 //(0-self).getFirstPrimeFactor()
+    elseif self = 0
+    then 0
+    elseif self = 1
+    then 1
+    else    
+      let i = 2;
+      q = self.sqrt();
+      result = self
+      in
+      @While i <= q and result = self do
+          if self.mod(i) = 0
+          then result := i
+          end;
+          i := i + 1
+        end;
+      result
+      end
+    end
+  end
+  
+  context Integer
+  @Operation printAllPrimeFactors():Integer
+  let 
+  temp = self
+  in 
+  @ While not (temp = temp.getFirstPrimeFactor()) do
+     temp.getFirstPrimeFactor().print();
+     temp := temp.div(temp.getFirstPrimeFactor());
+     " * ".print()
+     end;
+     temp.print();
+     ""
+    end
+  end  
