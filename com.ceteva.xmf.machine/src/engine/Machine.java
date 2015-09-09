@@ -5164,7 +5164,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     boolean v2IsNegInt = (v2 >> 24) == NEGINT;
 
     if ((v1IsInt || v1IsNegInt) && (v2IsInt || v2IsNegInt))
-      valueStack.push(mulInts(v1IsNegInt || v2IsNegInt, value(v1), value(v2)));
+      valueStack.push(mulInts(v1IsNegInt ^ v2IsNegInt, value(v1), value(v2)));
     else if (isFloat(v1) && isFloat(v2))
       valueStack.push(floatMul(v2, v1));
     else if (isBigInt(v1) && isBigInt(v2))
