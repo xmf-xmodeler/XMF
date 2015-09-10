@@ -149,7 +149,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // The interrupt flag is set when the user causes an interrupt (usually
   // ^C). The VM handles the flag approprately...
 
-  public boolean                     interrupt                 = false;
+  public static boolean /*static for testing because of infinity loop */                    interrupt                 = false;
 
   // Lots of occurrences of the empty array - so preallocate and reuse...
 
@@ -5201,7 +5201,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     else if (isFloat(v1) && isFloat(v2))
       valueStack.push(floatDiv(v2, v1));
     else if (isBigInt(v1) || isBigInt(v2))
-      valueStack.push(bigIntDiv(v1, v2));
+      valueStack.push(bigIntDiv(v2, v1));
     else overloadedBinOp(v2, v1, "slash");
   }
 
