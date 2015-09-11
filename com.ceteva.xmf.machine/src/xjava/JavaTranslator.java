@@ -187,30 +187,42 @@ public class JavaTranslator {
   }
 
   public static Object mapXMFValue(Machine machine, Class<?> type, int value) {
-    if (value == Machine.undefinedValue) if (type.isPrimitive())
-      throw new XMFToJavaTypeError("Primitive type cannot be null", value, type);
-    else return null;
-    if (Machine.isInt(value)) if (type == Integer.TYPE || type == java.lang.Integer.class || type == java.lang.Object.class)
-      return new Integer(Machine.intValue(value));
-    else throw new XMFToJavaTypeError("Integer clash", value, type);
-    if (Machine.isBool(value)) if (type == Boolean.TYPE || type == Boolean.class || type == java.lang.Object.class)
-      return new Boolean(value == Machine.trueValue ? true : false);
-    else throw new XMFToJavaTypeError("Boolean clash", value, type);
-    if (Machine.isFloat(value)) if (type == Float.TYPE || type == Float.class || type == java.lang.Object.class)
-      return new Float(machine.valueToString(value));
-    else if (type == Double.TYPE || type == Double.class)
-      return new Double(machine.valueToString(value));
-    else throw new XMFToJavaTypeError("Float clash", value, type);
-    if (Machine.isString(value)) if (type == String.class || type == java.lang.Object.class)
-      return machine.valueToString(value);
-    else throw new XMFToJavaTypeError("String clash", value, type);
-    if (Machine.isCons(value)) if (type.isArray())
-      return mapXMFConsToArray(machine, type.getComponentType(), value);
-    else if (type == Vector.class || type == java.lang.Object.class)
-      return mapXMFConsToVector(machine, value);
-    else if (type == java.util.List.class)
-      return mapXMFConsToVector(machine, value);
-    else throw new XMFToJavaTypeError("Cons clash", value, type);
+    if (value == Machine.undefinedValue) {
+      if (type.isPrimitive())
+        throw new XMFToJavaTypeError("Primitive type cannot be null", value, type);
+      else return null;
+    }
+    if (Machine.isInt(value)) {
+      if (type == Integer.TYPE || type == java.lang.Integer.class || type == java.lang.Object.class)
+        return new Integer(Machine.intValue(value));
+      else throw new XMFToJavaTypeError("Integer clash", value, type);
+    }
+    if (Machine.isBool(value)) {
+      if (type == Boolean.TYPE || type == Boolean.class || type == java.lang.Object.class)
+        return new Boolean(value == Machine.trueValue ? true : false);
+      else throw new XMFToJavaTypeError("Boolean clash", value, type);
+    }
+    if (Machine.isFloat(value)) {
+      if (type == Float.TYPE || type == Float.class || type == java.lang.Object.class)
+        return new Float(machine.valueToString(value));
+      else if (type == Double.TYPE || type == Double.class)
+        return new Double(machine.valueToString(value));
+      else throw new XMFToJavaTypeError("Float clash", value, type);
+    }
+    if (Machine.isString(value)) {
+      if (type == String.class || type == java.lang.Object.class)
+        return machine.valueToString(value);
+      else throw new XMFToJavaTypeError("String clash", value, type);
+    }
+    if (Machine.isCons(value)) {
+      if (type.isArray())
+        return mapXMFConsToArray(machine, type.getComponentType(), value);
+      else if (type == Vector.class || type == java.lang.Object.class)
+        return mapXMFConsToVector(machine, value);
+      else if (type == java.util.List.class)
+        return mapXMFConsToVector(machine, value);
+      else throw new XMFToJavaTypeError("Cons clash", value, type);
+    }
     if (Machine.isForeignObj(value)) {
       Object object = machine.foreignObj(Machine.value(value));
       if (type.isInstance(object))
@@ -224,7 +236,7 @@ public class JavaTranslator {
     }
     if (Machine.isNil(value)) {
       if (type.isArray())
-        return new Object[] {};
+        return Array.newInstance(type.getComponentType(), 0);
       else if (type == java.lang.Object.class)
         return new Vector<Object>();
       else if (type == java.util.Vector.class)

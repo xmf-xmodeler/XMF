@@ -336,6 +336,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_writeCommand", -1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_writePacket", 3));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_yield", 0));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_xmf", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_zipNewEntry", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_zipInputChannel", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_zipOutputChannel", 1));
@@ -2763,6 +2764,12 @@ public class ForeignFuns implements Value, Instr, Errors {
 
   public static void Kernel_yield(Machine machine) {
     machine.pushStack(Machine.trueValue);
+    machine.popFrame();
+    machine.yield();
+  }
+
+  public static void Kernel_xmf(Machine machine) {
+    machine.pushStack(machine.newForeignObj(machine));
     machine.popFrame();
     machine.yield();
   }

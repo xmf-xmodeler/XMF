@@ -3,6 +3,7 @@ package xjava;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import engine.Machine;
 
@@ -184,7 +185,7 @@ public class XJ extends JavaTranslator {
       e.printStackTrace();
       error = e.getMessage();
       return -1;
-    }
+    } 
   }
 
   public static void setLoader(ClassLoader loader) {
