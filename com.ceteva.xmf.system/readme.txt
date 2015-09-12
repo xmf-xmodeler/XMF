@@ -2,7 +2,7 @@ To compile all .xmf files, do the following ONCE:
 
 - Start XModeler, "Open File Browser...", choose xmf-src/
 
-- Right-click the top-most Manifest.xmf -> Manifest / Compile
+- Right-click the top-most Manifest.xmf -> Compile File
 
 - Right-click the top-most Manifest.xmf -> Manifest / Build
 
