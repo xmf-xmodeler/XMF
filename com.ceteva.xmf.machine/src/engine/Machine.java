@@ -11176,9 +11176,5 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public void setOpenFrame(int frame) {
     openFrame = frame;
   }
-  
-  public String toString() {
-    return "Machine()";
-  }
 
 }
