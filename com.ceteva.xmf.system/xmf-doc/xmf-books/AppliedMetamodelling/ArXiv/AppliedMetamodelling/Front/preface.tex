@@ -1,0 +1,199 @@
+\chapter*{Preface}
+\LARGE{\emph{(Third Edition)}}\\[2cm]
+\normalsize
+\addcontentsline{toc}{chapter}{Preface (Third Edition)}
+
+The Third Edition of Applied Metamodelling represents a small increment since the Second Edition was produced in 2008.
+The book continues to be referenced in scholarly articles with 212 citations on Google Scholar including nearly 150 since 2008.
+The open-source release of the accompanying technologies XMF and XMF-Mosaic did not generate the same level of
+interest, partly due to a lack of exposure and associated tutorial materials. 
+Recently, interest in the field of multi-level modelling has increased
+and has led to publications \cite{clark2014foundation,clark2013ocl,clark2013domain,henderson2013search,clark2012software} and a Dagstuhl Seminar \cite{clark2013meta} based on the ideas of meta-languages and tool-modelling. An overview of the historical development of XMF, the ideas in this book, and the the birth and death of an associated startup company has been published in \cite{clark2012exploiting} as part of the $10^{th}$ anniversary edition of the the Journal of Software and Systems Modeling.
+A project based on the foundations developed in this book and the tooling, now rebranded XModeler, is underway and the aim is to advance the field of multi-level language-based 
+system engineering.
+
+
+\chapter*{Preface}
+\LARGE{\emph{(Second Edition)}}\\[2cm]
+\normalsize
+\addcontentsline{toc}{chapter}{Preface (Second Edition)}
+
+Since publishing the first edition in 2004 we were pleasantly surprised by how much momentum
+\emph{Applied Metamodelling} created.  The fundamental tenets of the book have been cited in a large
+number of papers and books, and key ideas have been influential in a number of technology
+initiatives including the Eclipse Modeling Project \cite{EMP}.
+
+A recurring response that we
+commonly receive is a frustration that although the book gives readers the knowledge to apply
+metamodelling, they cannot easily do this using the XMF technology which was used to construct
+the examples in the book.  This is about to change with the release of XMF as an open source
+technology in the first quarter of 2008.
+
+Much has happened since 2004 but the fundamental problem of complexity in software and systems
+remains.  This second version of the book makes a number of corrections to the original text and
+includes a number of new chapters including two additional case studies which demonstrate the
+application and benefits of metamodelling.
+
+\chapter*{Preface}
+\LARGE{\emph{(First Edition)}}\\[2cm]
+\normalsize
+\addcontentsline{toc}{chapter}{Preface (First Edition)}
+
+Modern day system developers have some serious problems to contend
+with. The systems they develop are becoming increasingly complex
+as customers demand richer functionality delivered in ever shorter
+timescales. They have to manage a huge diversity of implementation
+technologies, design techniques and development processes:
+everything from scripting languages to web-services to the latest
+'silver bullet' design abstraction. To add to that, nothing stays
+still: today's 'must have' technology rapidly becomes tomorrow's
+legacy problem that must be managed along with everything else.
+
+How can these problems be dealt with? In this book we propose that
+there is a common foundation to their resolution: {\em languages}.
+Languages are the primary way in which system developers
+communicate, design and implement systems. Languages provide
+abstractions that can encapsulate complexity, embrace the
+diversity of technologies and design abstractions, and unite
+modern and legacy systems.
+
+\section*{Language-Driven Development}
+
+Understanding how we can manage languages to best fit the needs of
+developers is the key to improving system development practises.
+We call this {\em Language-Driven Development}. The right
+languages enable developers to be significantly more productive
+than using traditional development practices. Rather than dealing
+with a plethora of low level technologies, developers can use
+powerful language abstractions and development environments that
+support their development processes. They can create models that
+are rich enough to permit analysis and simulation of system
+properties before completely generating the code for the system.
+They can manipulate their models and programs in significantly
+more sophisticated ways than they can code. Moreover, provided the
+language definitions are flexible, they can adapt their languages
+to meet their development needs with relative ease.
+
+\section*{Metamodelling}
+
+In order to realise Language-Driven Development, we need the
+ability to rapidly design and integrate semantically rich
+languages in a unified way. {\em Metamodelling} is the way to
+achieve this. A metamodel is a model of a language that captures
+its essential properties and features. These include the language
+concepts it supports, its textual and/or graphical syntax and its
+semantics (what the models and programs written in the language
+mean and how they behave). Metamodels unify languages because the
+same metamodelling language is used in each case. Significant
+advantage can be made of this unification to construct powerful
+and flexible design environments for languages. These enable the
+rapid assembly of Language-Driven Development tools that give
+developers the power they need to design their systems faster,
+cheaper and more flexibly.
+
+\section*{Purpose of this Book}
+
+The aim of this book is to advance the state of the art in
+metamodelling to the point at which it can realise the
+Language-Driven Development vision. Traditionally, metamodelling
+has focused on the design of data centric models of language
+concepts. In this book, we go way beyond that, showing how they
+can capture all aspects of languages, including concrete syntax,
+abstract syntax and semantics in a sound and pragmatic way.
+
+This book also aims to fill a large gap in the metamodelling
+literature, providing a technically rich book on an a subject that
+is mentioned often, but for which there is little concrete
+material available. Metamodels are increasingly being used across
+wider application domains, and it is the intention that this book
+will provide good advice to metamodellers irrespective of the
+languages and tools they are using.
+
+\section*{Scope of this Book}
+
+The scope of this book is deliberately not restricted to software
+systems. Many other types of domains, from systems engineering to
+business, manufacturing and even physical engineering, can benefit
+from the ideas presented here.
+
+\section*{Intended Audience}
+
+This book should be useful to anyone who has an interest in the
+design of languages, language and model-driven development, and
+metamodelling. Our intention is that the book has an industrial
+focus, and we have tried hard to ensure that it is relevant to
+real practitioners. In particular, everything in this book has
+been implemented, therefore ensuring that it is has been tried and
+tested.
+
+\section*{Relationship to Other Approaches}
+
+We do not claim that the ideas presented in this book are new.
+Approaches to rapidly designing languages in flexible ways have
+been around since the early days of LISP, ObjVLisp and Smalltalk.
+Meta-case tools have been widely touted as a means of designing
+tailored tools and languages. Efforts by the Object Management
+Group (OMG) to standardise facilities for capturing language
+meta-data are already influencing the way vendors build tools.
+More recently, work on domain specific languages has highlighted
+the benefits of rapidly designing languages targeted at specific
+application domains.
+
+In this book we have combined many of these approaches on top of
+existing standards to facilitate the definition of languages in a
+general and complete way. An important emphasis has been on
+raising the level of abstraction at which complex aspects of
+language design such as the definition of concrete syntax and
+semantics are expressed. Thus we {\em model} languages, but in
+sufficient detail that these models can be turned into
+semantically rich development environments and tools. This
+capability has not been achieved in such a complete way before.
+
+\section*{Organisation of this Book}
+
+This book is organised into three parts. The first and shortest
+part gives an overview of challenges facing the system development
+industry and proposes Language-Driven Development as a way forward
+to addressing those challenges.
+
+The middle part provides a detailed treatment of metamodelling. It
+contains the following chapters:
+
+\begin{description}
+\item[Metamodelling]: introduces the key features of languages and
+describes what metamodels are and how they can capture those
+features. \item[A Metamodelling Facility]: presents an overview of
+an executable metamodelling facility that provides a number of
+powerful languages for capturing the syntax and semantics of
+languages. \item[Abstract Syntax]: describes how metamodels can be
+used to define the concepts that are provided by the language.
+\item[Concrete Syntax]: describes how the textual and
+diagrammatical syntaxes of language can be modelled. \item [
+Semantics]: introduces semantics and the motivation for having
+them in language definitions. The chapter goes on to describe four
+different approach to describing semantics. \item[Executable
+Metamodelling]: discusses how the addition of a small number of
+action primitives to a metamodelling language turn it into a
+powerful metaprogramming environment for Language-Driven
+Development. \item[Mappings]: motivates and presents two languages
+for transforming and relating metamodels. \item[Reuse]: this
+chapter describes a number of different approaches to reusing
+existing language metamodels.
+\end{description}
+
+The final part provides a number of indepth case studies each describing a
+specific example of metamodelling.  These examples range from the design of
+a small general purpose language to a domain specific language for modelling
+interactive television based applications.  The case studies are a significant
+resource for demonstrating metamodelling best practice.
+
+\section*{Acknowledgements}
+
+We are grateful to the following people for giving us feedback on
+early versions of the book and the technology it is based on:
+Manooch Azmoodeh, Steve Crook-Dawkings, Tom Dalton, John Davies,
+Kevin Dockerill, Desmond D'Souza, Karl Frank, Nektarios Georgal,
+Robert France, Sheila Gupta, Martin Hargreaves, Girish Maskeri,
+Stephen Mellor, Joaquin Miller, Alan Moore, Alphonse Orosun, John
+Rowlands, Bran Selic, Laurence Tratt, Andrew Watson, Stephen
+Whymark.

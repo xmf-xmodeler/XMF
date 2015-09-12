@@ -1,0 +1,23 @@
+let table = Stacks::Stack()
+in @Package CPP metapackage Root::EMOF::Package
+     @Class CPPClass metaclass Root::EMOF::Class  extends Root::CPP::CPPType
+       @Attribute operations : Set(Root::CPP::CPPOp) end
+       @Attribute attributes : Set(Root::CPP::CPPAtt) end
+     end
+     @Class Named metaclass Root::EMOF::Class isabstract extends Root::EMOF::Object
+       @Attribute name : Root::EMOF::String end
+     end
+     @Class CPPOp metaclass Root::EMOF::Class  extends Root::CPP::Named
+       @Attribute body : Root::EMOF::String end
+     end
+     @Class CPPAtt metaclass Root::EMOF::Class  extends Root::CPP::Named
+       @Attribute type : Root::CPP::CPPType end
+     end
+     @Class CPPType metaclass Root::EMOF::Class  extends Root::CPP::Named
+       
+     end
+     @Class EnumerationType metaclass Root::EMOF::Class  extends Root::CPP::CPPType
+       @Attribute values : Set(Root::EMOF::String) end
+     end
+   end
+end

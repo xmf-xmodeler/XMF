@@ -1,0 +1,120 @@
+let table = Stacks::Stack()
+in @Package XCore metapackage Root::EMOF::Package
+     @Class Bind metaclass Root::EMOF::Class  extends Root::EMOF::Object
+       @Attribute value : Root::XCore::Element end
+     end
+     @Class Collection metaclass Root::EMOF::Class isabstract extends Root::XCore::DataType
+       
+     end
+     @Class BehaviouralFeature metaclass Root::EMOF::Class isabstract extends Root::XCore::TypedFeature
+       
+     end
+     @Class Contained metaclass Root::EMOF::Class isabstract extends Root::XCore::Object
+       @Attribute owner : Root::XCore::Container end
+     end
+     @Class Seq metaclass Root::EMOF::Class  extends Root::XCore::Collection
+       
+     end
+     @Class Container metaclass Root::EMOF::Class isabstract extends Root::XCore::Object
+       @Attribute contents : Set(Root::XCore::Element) end
+       @Operation contents():EMOF::Element
+         null
+       end
+     end
+     @Class Set metaclass Root::EMOF::Class  extends Root::XCore::Collection
+       
+     end
+     @Class DataType metaclass Root::EMOF::Class  extends Root::XCore::Classifier
+       
+     end
+     @Class Package metaclass Root::EMOF::Class  extends Root::XCore::Classifier
+       @Attribute metaPackage : Root::XCore::Package end
+       @Attribute packages : Set(Root::XCore::Package) end
+       @Attribute classes : Set(Root::XCore::Class) end
+     end
+     @Class NamedElement metaclass Root::EMOF::Class isabstract extends Root::XCore::Contained
+       @Attribute name : Root::EMOF::String end
+     end
+     @Class Operation metaclass Root::EMOF::Class  extends Root::XCore::BehaviouralFeature
+       @Operation invoke():EMOF::Element
+         null
+       end
+     end
+     @Class Object metaclass Root::EMOF::Class  extends Root::XCore::Element
+       @Operation set():EMOF::Element
+         null
+       end
+       @Operation get():EMOF::Element
+         null
+       end
+     end
+     @Class Element metaclass Root::EMOF::Class isabstract extends Root::EMOF::Object
+       @Operation send():EMOF::Element
+         null
+       end
+       @Operation of():EMOF::Element
+         null
+       end
+       @Operation checkConstraints():EMOF::Element
+         null
+       end
+       @Operation isKindOf():EMOF::Element
+         null
+       end
+       @Operation equals():EMOF::Element
+         null
+       end
+     end
+     @Class Performable metaclass Root::EMOF::Class isabstract extends Root::XCore::Object
+       
+     end
+     @Class Constraint metaclass Root::EMOF::Class  extends Root::XCore::NamedElement
+       @Attribute body : Root::XCore::Operation end
+     end
+     @Class StructuralFeature metaclass Root::EMOF::Class isabstract extends Root::XCore::TypedFeature
+       
+     end
+     @Class Classifier metaclass Root::EMOF::Class isabstract extends Root::XCore::Namespace
+       @Attribute constraints : Set(Root::XCore::Constraint) end
+       @Attribute parents : Set(Root::XCore::Classifier) end
+       @Operation allConstraints():EMOF::Element
+         null
+       end
+       @Operation allParents():EMOF::Element
+         null
+       end
+       @Operation new():EMOF::Element
+         null
+       end
+       @Operation classifiy():EMOF::Element
+         null
+       end
+       @Operation allOperations():EMOF::Element
+         null
+       end
+     end
+     @Class Namespace metaclass Root::EMOF::Class isabstract extends Root::XCore::NamedElement,Root::XCore::Container
+       @Attribute imports : Seq(Root::XCore::Namespace) end
+       @Attribute bindings : Set(Root::XCore::Bind) end
+     end
+     @Class Class metaclass Root::EMOF::Class  extends Root::XCore::Classifier
+       @Attribute attributes : Set(Root::XCore::Attribute) end
+       @Attribute isAbstract : Root::EMOF::Boolean end
+       @Operation allAttributes():EMOF::Element
+         null
+       end
+       @Operation new():EMOF::Element
+         null
+       end
+     end
+     @Class TypedFeature metaclass Root::EMOF::Class isabstract extends Root::XCore::NamedElement
+       @Attribute type : Root::XCore::Classifier end
+     end
+     @Class Attribute metaclass Root::EMOF::Class  extends Root::XCore::StructuralFeature
+       
+     end
+     @Class Snapshot metaclass Root::EMOF::Class  extends Root::XCore::Container
+       
+     end
+   end
+end

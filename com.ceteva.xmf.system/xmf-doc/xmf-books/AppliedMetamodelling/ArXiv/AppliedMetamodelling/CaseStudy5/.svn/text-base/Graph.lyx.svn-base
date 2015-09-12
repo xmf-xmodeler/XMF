@@ -1,0 +1,1332 @@
+#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
+\begin_document
+\begin_header
+\textclass amsbook
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\spacing single
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Chapter
+Graphs
+\begin_inset LatexCommand label
+name "sub:Graphs"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unfortunately, information is not always convniently organised in a tree
+ structure.
+ A tree structure does not make allowances for relationships that span the
+ tree or where cycles occur in the data.
+ For example, what happens when a company employee fills two roles within
+ the company in different departments? It would be approprate for the employee
+ to occur underneath both departments in the tree; the employee is 
+\shape italic
+shared
+\shape default
+ between the departments or equivalently there are two different 
+\shape italic
+paths
+\shape default
+ from the root of the tree to the employee.
+\end_layout
+
+\begin_layout Standard
+Trees do not represent sharing and multiple paths very well.
+ There are strategies; for example, XML is a tree structured data format
+ where labels are used to mark up the elements in order to represent sharing.
+ When data representation requires sharing, it is usually because the data
+ naturally forms a 
+\shape italic
+graph
+\shape default
+.
+ Graphs can be encoded in trees (and other forms of data representation),
+ but if the data requires a graph then it is probably best to use one and
+ be done with it.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename C:/Modelling/Graphs/Graphs.jpg
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Graphs
+\begin_inset LatexCommand label
+name "fig:Graphs"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset LatexCommand ref
+reference "fig:Graphs"
+
+\end_inset
+
+ shows a model of graphs.
+ A graph consists of a set of nodes and a set of edges.
+ Each node has a label and a sequence of data.
+ The label is used to identify the node and the data is used by applications
+ for whatever purpose they require.
+\end_layout
+
+\begin_layout Standard
+Each edge has a label and data, and also has a source and target node.
+ Edges go between nodes and are directed.
+ The diagram shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:Graphs"
+
+\end_inset
+
+ is itself an example of a graph where the nodes are displayed as class
+ boxes and the edges are shown as attribute edges.
+ Notice that the node labelled Element is shared (parent-wise) between Edge
+ and Node; equivalently there are two paths from the rot node (labelled
+ Graph) to the node labelled Element: Graph, Edge, Element and Graph, Node,
+ Element.
+ Such sharing is difficult to represent using trees.
+\end_layout
+
+\begin_layout Standard
+Graphs are a very rich form of data representation.
+ There is a wealth of material written about graphs and how to process them.
+ Here are some useful operations on graphs defined in XOCL:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+context Graph
+\end_layout
+
+\begin_layout Standard
+
+  @Operation nodeFor(label:String):Node
+\end_layout
+
+\begin_layout Standard
+
+    @Find(node,nodes)
+\end_layout
+
+\begin_layout Standard
+
+      when node.label() = label
+\end_layout
+
+\begin_layout Standard
+
+      else null
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The operation nodeFor returns the node with the supplied label, or null
+ if no such node exists.
+ The operation edgesFrom returns the set of edges from a given node:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+context Graph
+\end_layout
+
+\begin_layout Standard
+
+  @Operation edgesFrom(n:Node):Set(Edge)
+\end_layout
+
+\begin_layout Standard
+
+    edges->select(e | e.source() = n)
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Graphs are generally useful and therefore it is appropriate to have a general
+ purpose language construct to define a graph.
+ As mentioned above, each use of a graph structure will attach different
+ amounts of data to the nodes and labels.
+ The data is used to support the application specific processing of the
+ graph.
+ Therefore, a general purpose language construct for graph construction
+ should support:
+\end_layout
+
+\begin_layout Enumerate
+Arbitrary node and edge data.
+\end_layout
+
+\begin_layout Enumerate
+Plug-points for the sub-classes of Graph, Node and Edge that are used to
+ represent the graph.
+\end_layout
+
+\begin_layout Standard
+Here are two examples of different graph applications:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+@Graph(Routes,Location,Road)
+\end_layout
+
+\begin_layout Standard
+
+  London()
+\end_layout
+
+\begin_layout Standard
+
+    M1(200) -> Leeds
+\end_layout
+
+\begin_layout Standard
+
+    A1(50)  -> Cambridge
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+
+@Graph(Plan,Task,Dependency)
+\end_layout
+
+\begin_layout Standard
+
+  Start("January")
+\end_layout
+
+\begin_layout Standard
+
+    -> Contractors
+\end_layout
+
+\begin_layout Standard
+
+    -> Plans
+\end_layout
+
+\begin_layout Standard
+
+  Contractors("March")
+\end_layout
+
+\begin_layout Standard
+
+  Plans("April")
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first graph is represented as an instance of the class Routes where
+ the nodes and edges are instances of the classes Location and Road.
+ These classes are sub-classes of Graph, Node and Edge repsectively.
+ Locations have no data; the three locations have labels London, Leeds and
+ Cambridge.
+ 
+\end_layout
+
+\begin_layout Standard
+An edge is listed below the source node.
+ In the first example graph, there are two edges with labels M1 and A1.
+ The edges have data 100 and 50 (being the distance in miles) and the label
+ of the edge target is givn after ->.
+\end_layout
+
+\begin_layout Standard
+The second example is a plan graph.
+ The nodes have data that represents the month at which the task is completed.
+ Edges have no labels or data (they just represent dependencies).
+\end_layout
+
+\begin_layout Standard
+The proposed structure for a graph definition has plug-points for the graph,
+ node and edge classes and a body consisting of a sequence of node definitions.
+ A node definition n is a node label, followed by node data in parentheses
+ followed by a series of edge definitions for which the source of the node
+ is n.
+ An edge definition is an optional edge label, optional edge data in parentheses
+, an arrow and then the label of the target node.
+ Here is an example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+@Graph(G,N,E)
+\end_layout
+
+\begin_layout Standard
+
+  n1(a,b,c)
+\end_layout
+
+\begin_layout Standard
+
+    e1(d) -> n2
+\end_layout
+
+\begin_layout Standard
+
+    e2() -> n3
+\end_layout
+
+\begin_layout Standard
+
+  n2()
+\end_layout
+
+\begin_layout Standard
+
+    e3() -> n1
+\end_layout
+
+\begin_layout Standard
+
+  n3()
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+When the parser encounters a graph definition it will synthesize program
+ code that, when evaluated, produces the required graph.
+ Are there any rules that need to be observed when this synthesis takes
+ place? Given the model of graphs in figure 
+\begin_inset LatexCommand ref
+reference "fig:Graphs"
+
+\end_inset
+
+, a graph contains nodes and edges, and edges link nodes.
+ Here is a possible program that produces the graph above
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+(1) let g = G()
+\end_layout
+
+\begin_layout Standard
+
+(2) in g.addToNodes(N("n1",Seq{a,b,c}));
+\end_layout
+
+\begin_layout Standard
+
+       g.addToNodes(N("n2"));
+\end_layout
+
+\begin_layout Standard
+
+(3)    g.addToNodes(N("n3"));
+\end_layout
+
+\begin_layout Standard
+
+(4)    g.addToEdges(E("e1",Seq{d},g.nodeFor("n1"),g.nodeFor("n2")));
+\end_layout
+
+\begin_layout Standard
+
+       g.addToEdges(E("e2",g.nodeFor("n1"),g.nodeFor("n3")));
+\end_layout
+
+\begin_layout Standard
+
+(5)    g.addToEdges(E("e3",g.nodeFor("n2"),g.nodeFor("n1")));
+\end_layout
+
+\begin_layout Standard
+
+(6)    g
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Line (1) creates the graph using the supplied class G (a sub-class of Graph).
+ Each node must be added first in lines (2-3) so that edges can then be
+ created 
+\shape italic
+between
+\shape default
+ the nodes in lines (4-5).
+ Note that the supplied classes N and E are used to create the nodes and
+ edges.
+ Finally the graph is returned in line (6).
+\end_layout
+
+\begin_layout Standard
+The rules for graph construction are: create the graph, add the nodes and
+ then add the edges.
+ Unfortunately, the graph definition construct does not follow this pattern;
+ it interleaves node and edge definitions.
+ A strategy is required to untangle this interleaving.
+\end_layout
+
+\begin_layout Standard
+One way to address the interleaving is to have the parser synthesize an
+ intermediate graph definition that is processes using two or more passes.
+ This is perfectly respectable, and often a sensible way forward when the
+ required processing is fairly complex.
+ 
+\end_layout
+
+\begin_layout Standard
+In this case, the processing is not that complex, so another strategy is
+ used.
+ To see how this works, a few definitions are required.
+ An 
+\shape italic
+edge constructor
+\shape default
+ expects a graph and an edge class; it adds some edges to the supplied graph.
+ A 
+\shape italic
+node constructor
+\shape default
+ expects a graph, a node class, an edge class and a collection of edge construct
+ors; it adds some nodes to the supplied graph and then uses the edge constructor
+ to add some edges.
+\end_layout
+
+\begin_layout Standard
+Node definitions are synthesized into node constructors and edge definitions
+ into edge constructors.
+ The trick is to build up the edge constuctors so that they are performed
+ after all the node constructors.
+ Since the edge constructors are supplied to the node constructors, this
+ should be easy.
+ Using the running example from above:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+n3 =
+\end_layout
+
+\begin_layout Standard
+
+  @Operation(nodeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    @Operation(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+      g.addToNodes(N("n3"));
+\end_layout
+
+\begin_layout Standard
+
+      nodeConstructor(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The node definition for n3 is transformed into an operation that is supplied
+ with a node constructor and returns a node constructor.
+ This construction allows n3 to be linked with other noe constuctors without
+ knowing any details -- i.e.
+ n3 can be defined 
+\shape italic
+in isolation
+\shape default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The node constructor for n2 is similar, but involves the addition of an
+ edge constructor:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+n2 =
+\end_layout
+
+\begin_layout Standard
+
+  @Operation(nodeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    @Operation(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+      let e3 = 
+\end_layout
+
+\begin_layout Standard
+
+        @Operation(g,E)
+\end_layout
+
+\begin_layout Standard
+
+          g.addToEdges(E("e3",g.nodeFor("n2"),g.nodeFor("n1")))
+\end_layout
+
+\begin_layout Standard
+
+        end
+\end_layout
+
+\begin_layout Standard
+
+      in g.addToNodes(N("n2"));
+\end_layout
+
+\begin_layout Standard
+
+         nodeConstructor(g,N,E,addEdges(edgeConstructor,e3))
+\end_layout
+
+\begin_layout Standard
+
+      end
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note how the edge constructor for e3 is added to the supplied edge contructor
+ (using the yet-to-be-defined addEdges) when the supplid node constructor
+ is activated.
+ This is the key to deferring the construction of edges until all the nodes
+ have been defined.
+\end_layout
+
+\begin_layout Standard
+What should addEdges do? It is used to link all the edge constructors together
+ so that they all get activated.
+ It takes two edge constructors and returns an edge constructor:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+@Operation addEdges(ec1,ec2)
+\end_layout
+
+\begin_layout Standard
+
+  @Operation(g,E)
+\end_layout
+
+\begin_layout Standard
+
+    ec1(g,E);
+\end_layout
+
+\begin_layout Standard
+
+    ec2(g,E)
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The noe constructor for n1 is similar, but two edge constructors are required:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+n1 =
+\end_layout
+
+\begin_layout Standard
+
+  @Operation(nodeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    @Operation(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+      let e1 = 
+\end_layout
+
+\begin_layout Standard
+
+        @Operation(g,E)
+\end_layout
+
+\begin_layout Standard
+
+          g.addToEdges(E("e1",g.nodeFor("n1")Seq{d},g.nodeFor("n2")))
+\end_layout
+
+\begin_layout Standard
+
+        end;
+\end_layout
+
+\begin_layout Standard
+
+          e2 = 
+\end_layout
+
+\begin_layout Standard
+
+        @Operation(g,E)
+\end_layout
+
+\begin_layout Standard
+
+          g.addToEdges(E("e1",g.nodeFor("n1"),g.nodeFor("n3")))
+\end_layout
+
+\begin_layout Standard
+
+        end then
+\end_layout
+
+\begin_layout Standard
+
+          edges = addEdges(e1,e2)
+\end_layout
+
+\begin_layout Standard
+
+      in g.addToNodes(N("n2"));
+\end_layout
+
+\begin_layout Standard
+
+         nodeConstructor(g,N,E,addEdges(edgeConstructor,edges))
+\end_layout
+
+\begin_layout Standard
+
+      end
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The complete graph can now be defined by linking the node constructors together
+ and supplying a graph:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+let nc = addNodes(n1,addNodes(n2,addNodes(n3,noNodes)))
+\end_layout
+
+\begin_layout Standard
+
+in nc(G(),N,E,@Operation(g,E) g end)
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each of the node constructors are linked via an operation addNodes.
+ The left-hand argument of addNodes is an operation that maps a node constructor
+ to a node constructor.
+ The right-hand argument is a node constructor.
+ It is easier to see how this works from the definition:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+@Operation addNodes(nodeCnstrCnstr,nodeCnstr2)
+\end_layout
+
+\begin_layout Standard
+
+  @Operation(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    let nodeCnstr1 = nodeCnstrCnstr(nodeCnstr2)
+\end_layout
+
+\begin_layout Standard
+
+    in nodeCnstr1(g,N,E,edgeConstructor)
+\end_layout
+
+\begin_layout Standard
+
+    end
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The mechanism used by addNodes is an example of a typical pattern that threads
+ sequences of operations together.
+ It allows the node constuctor encoded in nodeCnstrCnstr to occur before
+ that encoded in nodeCnstr2 while also allowing the edge constructors produced
+ by the first to be handed on to the second (because they are to be deferrred
+ until all the nodes are added to the graph).
+\end_layout
+
+\begin_layout Standard
+There are two types of constructor, each of which can occur repeatedly in
+ a sequence: nodes and edges.
+ When this occurs, it is usual to have some way to encode an empty sequence;
+ in this case there are noNodes and noEdges.
+ Both of these are constructors:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+@Operation noNodes(g,N,E,edgeConstuctor)
+\end_layout
+
+\begin_layout Standard
+
+  edgeConstructor(g,E)
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+
+@Operation noEdges(g,E)
+\end_layout
+
+\begin_layout Standard
+
+  null
+\end_layout
+
+\begin_layout Standard
+
+end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+noNodes is a node constructor that starts edge construction.
+ Therefore, noNodes should be the right-most node constuctor in a sequence
+ that is combined using addNodes.
+ noEdges does nothing, and can occur anywhere in a sequence.
+\end_layout
+
+\begin_layout Standard
+The grammar for graph definition synthesizes node and edge constructors
+ combined usin addNodes and addEdge.
+ When an empty sequence is encountered, the gramar synthesizes noNodes and
+ noEdges respectively.
+ The grammar is defined below:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+begin{verbatim}
+\end_layout
+
+\begin_layout Standard
+
+  @Grammar extends OCL::OCL.grammar
+\end_layout
+
+\begin_layout Standard
+
+    Data ::= '(' es = CommaSepExps ')' { SetExp("Seq",es) }.
+\end_layout
+
+\begin_layout Standard
+
+    Edges(s) ::= e = Edge^(s) es = Edges^(s) 
+\end_layout
+
+\begin_layout Standard
+
+      { [| addEdges(<e>,<es>) |] } 
+\end_layout
+
+\begin_layout Standard
+
+    | { [| noEdges |] }.
+\end_layout
+
+\begin_layout Standard
+
+    Edge(s) ::= l = Label d = OptData '->' t = Label { [| 
+\end_layout
+
+\begin_layout Standard
+
+      @Operation(g,E)
+\end_layout
+
+\begin_layout Standard
+
+        g.addToEdges(E(<l>,<d>,g.nodeFor(<s>),g.nodeFor(<t>)))
+\end_layout
+
+\begin_layout Standard
+
+      end 
+\end_layout
+
+\begin_layout Standard
+
+    |] }.
+\end_layout
+
+\begin_layout Standard
+
+    Graph ::= '(' mkGraph = Exp ',' mkNode = Exp ',' mkEdge = Exp')' 
+\end_layout
+
+\begin_layout Standard
+
+      GraphBody^(mkGraph,mkNode,mkEdge).
+\end_layout
+
+\begin_layout Standard
+
+    GraphBody(mkGraph,mkNode,mkEdge) ::= ns = Nodes 'end' { [| 
+\end_layout
+
+\begin_layout Standard
+
+      <ns>(<mkGraph>(),<mkNode>,<mkEdge>,@Operation(g,E) g end) 
+\end_layout
+
+\begin_layout Standard
+
+    |] }.
+\end_layout
+
+\begin_layout Standard
+
+    Label ::= NameExp | { "".lift() }.
+\end_layout
+
+\begin_layout Standard
+
+    NameExp ::= n = Name { n.lift() }.
+\end_layout
+
+\begin_layout Standard
+
+    Nodes ::= n = Node ns = Nodes 
+\end_layout
+
+\begin_layout Standard
+
+      { [| addNodes(<n>,<ns>) |] } 
+\end_layout
+
+\begin_layout Standard
+
+    | { [| noNodes |] }.
+\end_layout
+
+\begin_layout Standard
+
+    Node ::= l = Label d = Data e = Edges^(l) { [|
+\end_layout
+
+\begin_layout Standard
+
+      @Operation(Cn)
+\end_layout
+
+\begin_layout Standard
+
+        @Operation(g,N,E,Ce)
+\end_layout
+
+\begin_layout Standard
+
+          g.addToNodes(N(<l>,<d>));
+\end_layout
+
+\begin_layout Standard
+
+          Cn(g,N,E,addEdges(<e>,Ce))
+\end_layout
+
+\begin_layout Standard
+
+        end
+\end_layout
+
+\begin_layout Standard
+
+      end
+\end_layout
+
+\begin_layout Standard
+
+    |] }.
+\end_layout
+
+\begin_layout Standard
+
+    OptData ::= Data | { [| Seq{} |] }.
+\end_layout
+
+\begin_layout Standard
+
+  end
+\end_layout
+
+\begin_layout Standard
+
+
+\backslash
+end{verbatim}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Walkers and cycles.
+\end_layout
+
+\begin_layout Itemize
+DB access: use meta-clases to implement these.
+\end_layout
+
+\begin_layout Itemize
+Definitions, Containers, Templates
+\end_layout
+
+\end_body
+\end_document

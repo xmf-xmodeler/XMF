@@ -1,0 +1,46 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Undoable actions.";
+
+// Collections of side efects to objects, vectors and tables can be marked
+// as Undoable. The XMF undo-engine will remember the changes and can be
+// instructed to undo them. The actions are managed by two stacks: the
+// undo-stack and the redo-stack...s
+
+context Root
+  @Class Thing 
+    @Attribute counter : Integer = 0                      end
+    @Attribute range   : Vector  = [0,1,2].asVector() end
+    @Constructor(counter,range) ! end
+    @Operation add()
+      @Undoable 
+        self.counter := counter + 1;
+        @Count i from 0 to range.size() do
+          range.put(i,counter+i)
+        end
+      end
+    end
+  end
+  
+Root::t := Thing();
+  
+// Update the thing twice and then undo the last action...
+  
+t.add();
+t.println();
+t.add();
+t.println();
+xmf.undo();
+t.println();
+
+// Redo the last action that was undone...
+
+xmf.redo();
+t.println();
+
+// Undo all actions...
+
+xmf.undo();
+xmf.undo();
+t.println();

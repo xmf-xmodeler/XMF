@@ -1,0 +1,122 @@
+\documentclass[a4paper,pdftex,12pt]{scrbook}
+\pdfoutput=1
+\usepackage{a4wide}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{subfigure}
+\usepackage{placeins}
+\usepackage{palatino}
+\usepackage{fancyhdr}
+\usepackage[Conny]{fncychap}
+
+\ChNameUpperCase
+\ChTitleUpperCase
+\ChNameVar{\Huge\rm\bfseries}
+\ChNumVar{\Huge}
+\ChTitleVar{\Huge\rm}
+
+\pagestyle{fancyplain}
+
+\lhead[\fancyplain{}{\bf\thepage}]{\fancyplain{}{\bf\nobreak\rightmark}}
+\rhead[\fancyplain{}{\bf\nobreak\leftmark}]{\fancyplain{}{\bf\thepage}}
+
+\begin{document}
+
+\makeatletter
+\gdef\lst@PrintOtherKeyword#1\@empty{%
+    \lst@XPrintToken
+    \begingroup
+      \lst@modetrue \lsthk@TextStyle
+      \let\lst@ProcessDigit\lst@ProcessLetter
+      \let\lst@ProcessOther\lst@ProcessLetter
+      \lst@lettertrue
+      #1%
+      \lst@SaveToken
+    \endgroup
+        \lst@RestoreToken
+        \global\let\lst@savedcurrstyle\lst@currstyle
+        \let\lst@currstyle\lst@gkeywords@sty
+    \lst@Output
+        \let\lst@currstyle\lst@savedcurrstyle}
+\makeatother
+
+\lstdefinelanguage{XOCL}{
+        morekeywords={context,self,throw,try,catch,let,then,
+                      if,else,elseif,and,or,implies,
+                      parserImport,in,end,import,not,true,false,when,do},
+        otherkeywords={@,|>,<|,<,>,|,::=,{,},[|,|],[,],;,:,
+                       .,*,-,+,->,=,<>,>=,<=},
+        sensitive=false,
+        comment=[l]//,
+        morecomment=[s]{/*}{*/},
+        basicstyle=\ttfamily\small,
+        stringstyle=\ttfamily\small,
+        frame=lines,
+        aboveskip=20pt,
+        belowskip=20pt,
+        breaklines=true,
+        showspaces=false,
+        showtabs=false
+}
+
+\lstset{language=XOCL}
+
+\frontmatter
+
+%\maketitle
+
+\begin{titlepage}
+ 
+\begin{center}
+ 
+ 
+% Upper part of the page
+ 
+\textsc{}\\[2cm] 
+ 
+\textsc{\LARGE \textsf{Applied Metamodelling}}\\[0.5cm]
+ 
+\textsc{\Large \textsf{A Foundation for Language Driven Development}}\\[1.0cm]
+\textsc{\Large \textsf{Third Edition}}\\[2cm]
+
+\includegraphics[width=0.3\textwidth]{XMF.pdf}\\[2cm]
+ 
+\large
+\textsf{Tony Clark, Paul Sammut, James Willans}\\[0.7cm]
+ 
+\vfill
+ 
+% Bottom of the page
+ 
+\end{center}
+ 
+\end{titlepage}
+
+
+
+\tableofcontents
+\include{Front/preface}
+
+\mainmatter
+
+\include{LanguageDrivenDevelopment/ldd}
+\include{Metamodelling/metamodelling}
+\include{XMF/xmf}
+\include{AbstractSyntax/static}
+\include{ConcreteSyntax/concrete}
+\include{Semantics/semantics}
+\include{Programming/programming}
+\include{Mappings/mappings}
+\include{LanguageFamilies/langfamilies}
+\include{CaseStudy1/aspects}
+\include{CaseStudy2/telecoms}
+\include{CaseStudy3/programming}
+\include{CaseStudy4/InteractiveTV}
+\include{CaseStudy5/Graph}
+%\include{MetaToolArchitecture/kernel}
+
+\backmatter
+\bibliographystyle{alpha}
+\bibliography{bib_willans,bib_sammut,bib_tony}
+\end{document}
