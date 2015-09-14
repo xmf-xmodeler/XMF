@@ -70,12 +70,4 @@ public class Message {
         s = s + ")";
         return s;
     }
-        String s = name + "(";
-        for (int i = 0; i < arity; i++) {
-            s = s + args[i].strValue();
-            if (i < arity - 1)
-                s = s + ",";
-        }
-        s = s + ")";
-        return s;
-    }
+}
