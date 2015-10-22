@@ -202,6 +202,8 @@ let
             Kernel_addAtt(att,"init",null);
             Kernel_addAtt(att,"isComposite",false);
             Kernel_addAtt(att,"properties",Seq{});
+            Kernel_addAtt(att,"instLevel",0);
+            Kernel_addAtt(att,"isIntrinsic",false);
             att
          end
       end;
@@ -513,7 +515,9 @@ let
              false,
              Set{mkAtt("init",Op,Attribute,false),
                  mkAtt("isComposite",Boolean,Attribute,false),
-                 mkAtt("properties",mkSeqType(Element),Attribute,false)
+                 mkAtt("properties",mkSeqType(Element),Attribute,false),
+                 mkAtt("isIntrinsic",Boolean,Attribute,false),
+                 mkAtt("instLevel",Integer,Attribute,0)
              },
              "Attribute",
              Set{},
