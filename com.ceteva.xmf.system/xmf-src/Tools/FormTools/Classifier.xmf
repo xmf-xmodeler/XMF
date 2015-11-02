@@ -3,6 +3,6 @@ import FormTools;
 import Types;
 
 context Classifier
-  @Operation formToolDescriptors():Set(ToolDescriptor)
+  @Operation formToolDescriptors():Set(Structure::ToolDescriptor)
     self.toolDescriptors()->select(t | t.type().isReallyKindOf(ToolType))
   end

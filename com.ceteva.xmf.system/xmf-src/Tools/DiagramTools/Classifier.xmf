@@ -3,6 +3,6 @@ import DiagramTools;
 import Types;
 
 context Classifier
-  @Operation diagramToolDescriptors():Set(ToolDescriptor)
+  @Operation diagramToolDescriptors():Set(Structure::ToolDescriptor)
     self.toolDescriptors()->select(t | t.type().isReallyKindOf(ToolType))
   end
