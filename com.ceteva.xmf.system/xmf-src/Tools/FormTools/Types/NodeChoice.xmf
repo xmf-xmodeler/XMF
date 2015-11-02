@@ -4,6 +4,7 @@ parserImport Parser::BNF;
 import Tools;
 import FormTools;
 import Types;
+import Diagrams;
 
 context Types
 
@@ -49,14 +50,14 @@ context Types
       end
     end
     
-    @Operation typeNamed(name:String):DisplayType
+    @Operation typeNamed(name:String):Tools::DiagramTools::Diagrams::DisplayType
       @Find(type,types)
         when type.name().toString() = name
         else null
       end
     end
     
-    @Operation underlyingTypes(env):Set(DisplayType)
+    @Operation underlyingTypes(env):Set(Tools::DiagramTools::Diagrams::DisplayType)
       types->iterate(type T = Seq{} | T + type.underlyingTypes(env))
     end
 end

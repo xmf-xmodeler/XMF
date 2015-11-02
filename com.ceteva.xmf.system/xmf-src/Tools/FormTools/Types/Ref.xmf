@@ -4,6 +4,8 @@ parserImport Parser::BNF;
 import Tools;
 import FormTools;
 import Types;
+import DiagramTools;
+import Diagrams;
 
 context Types
 
@@ -30,7 +32,7 @@ context Types
     end
   end
   
-  @Operation underlyingTypes(env):Set(DisplayType)
+  @Operation underlyingTypes(env):Set(Tools::DiagramTools::Diagrams::DisplayType)
     env.lookup(name.toString()).underlyingTypes(env)
   end
   

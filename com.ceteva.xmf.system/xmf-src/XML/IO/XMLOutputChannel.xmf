@@ -129,7 +129,7 @@ context IO
     end
     
     @Operation funDoc(fun):String
-      if fun.doc().doc = "No Documentation Specified" 
+      if fun.doc().doc = "No Documentation Specified (by DocumentedElement)" 
       then "" 
       else fun.doc().doc 
       end
