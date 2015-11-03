@@ -481,7 +481,8 @@ import IO;
           then
             c.doc().doc
           else
-            "<i><font color=\"#666666\">No Documentation Specified</font></i>"
+            "No Documentation Found".println();
+            "<i><font color=\"#666666\">No Documentation Specified (by ToHTML; unused?)</font></i>"
           end
         in
           if(c.isKindOf(Class))
