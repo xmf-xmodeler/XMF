@@ -35,13 +35,18 @@ context LiveDocViewer
     end
     
     @Operation requestURL(url)
+      //"requestURL called".println();
+      //("url:" + url).println();
       let path = url.subst("","about:blank",true)
       in
+        path := path.subst("","about:",true); // new
         path := path.subst("","../",true);
         path := path.subst(":","/",true);
         path := path.subst("",":index.html",true);
+        //("path: " + path).println();
         let element = path.splitBy(":",0,0).ref(Seq{Root})
         in
+          //("element: " + element).println();
           if element <> null then
             if multipage then
               let viewer = Viewer(element)
