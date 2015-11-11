@@ -40,6 +40,7 @@ context LiveDocViewer
       let path = url.subst("","about:blank",true)
       in
         path := path.subst("","about:",true); // new
+        path := path.subst("","file:///",true); // new
         path := path.subst("","../",true);
         path := path.subst(":","/",true);
         path := path.subst("",":index.html",true);
