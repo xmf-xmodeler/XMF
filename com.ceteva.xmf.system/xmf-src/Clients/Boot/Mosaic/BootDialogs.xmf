@@ -61,6 +61,12 @@ context XMF
     self.dialogClient().newQuestionDialog(question) = "Yes"
   end
   
+// Jens
+context XMF
+  @Operation questionYesNoCancel(question:String):String
+    self.dialogClient().newQuestionDialogYesNoCancel(question)
+  end
+  
 context XMF
   @Operation confirm(question:String)
     self.dialogClient().newConfirmDialog(question)
