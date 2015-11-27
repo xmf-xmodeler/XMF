@@ -32,6 +32,24 @@ context Root
   end
   
 context Root
+  @Operation test2a()
+   @WithRules(Test)
+        GetName(<Class>,name)
+        return name
+    end
+  end
+  
+context Root
+  @Operation test2b()
+    let v = NamedElement("fred")
+    in @WithRules(Test)
+            GetName(<v>,name)
+            return name
+       end
+    end
+  end
+  
+context Root
   @Operation test2()
     let v = NamedElement("fred")
     in let time = Time()

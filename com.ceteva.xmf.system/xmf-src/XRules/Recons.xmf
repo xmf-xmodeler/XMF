@@ -7,6 +7,10 @@ context XRules
 
   @Class Recons extends Walker
   
+    // This walker is ideally the mechanism for rebuilding the results of
+    // a @WithRules ... end, but sadly is very slow compared to performing 
+    // the direct version shown at the end of the file...
+  
     @Attribute consTable : Table = Table(10) end
     
     @Operation defaultWalk(value,env)
@@ -100,7 +104,7 @@ context XRules
   
 context XRules
   @Operation recons(value,env)
-  /*
+    // Ideally use the walker, but doing it directly is sooo much faster...
     if env->assoc(value) <> null 
     then recons(env->assoc(value)->head->tail,env)
     elseif value.isKindOf(Integer) or
@@ -126,9 +130,9 @@ context XRules
       end
     else value
     end
-*/
-    reconsWalker.reset();
-    reconsWalker.walk(value,env)
+
+//    reconsWalker.reset();
+//    reconsWalker.walk(value,env)
   end
          
   
