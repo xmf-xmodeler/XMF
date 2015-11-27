@@ -1,0 +1,52 @@
+parserImport XOCL;
+
+Class.remove(Class.operations->select(c | c.name().toString() = "remove")->asSeq->head);
+
+context Class
+@Operation removeIntrinsic(a: Attribute, deleteLevel: Integer)
+if a.owner.level > deleteLevel
+then
+	a.intrinsicChildren->iterate(c x=0 | c.owner.removeIntrinsic(c, deleteLevel))
+else
+	a.intrinsicChildren->iterate(c x=0 | c.intrinsicParent := null)
+end;
+a.owner.contents.remove(a.name());
+a.removeFromOwner();
+self.removeAttribute(a)
+end
+
+context Class
+@Operation remove(n : NamedElement):Classifier
+      if n.isKindOf(Attribute)
+      then
+        if n.isIntrinsic
+		then
+			if n.intrinsicParent <> null
+			then
+				xmf.message("You can only delete intrinsic attributes from the topmost layer!")
+			else
+					let sd = xmf.javaClass("de.unidue.icb.xmf.multilevel.gui.SpecificDeletionDialog").showDialog(n.owner.level.asInt(),n.instLevel.asInt())
+				in
+					if sd <> null
+					then
+						self.removeIntrinsic(n, sd.getDeletionUntilLayer())
+					else
+						xmf.message("Operation canceled by user")
+					end
+				end
+			end
+		else
+			self.removeAttribute(n);
+			super(n)
+		end	
+      else
+        if n.isKindOf(Constructor)
+        then
+          self.removeConstructor(n);
+          super(n)
+        else
+          super(n)
+        end
+      end
+    end
+
