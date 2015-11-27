@@ -15,6 +15,8 @@ in
 		then	
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Utils.xar",false);
 			Utils::updateAttribute();
+			Attribute.add(Attribute("intrinsicParent",Attribute));
+			Attribute.add(Attribute("intrinsicChildren",Seq(Attribute)));
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
 
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.xmf",true,true);
@@ -40,6 +42,9 @@ in
 
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/PackageXMappingDiagram.o").loadBin(true);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/IntrinsicDeletion.xmf",true,true);
+			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/IntrinsicDeletion.o").loadBin(true);
 
 xmf.registry().addContribution("com.ceteva.xmf.dropMenus",
 	    TypeLessContribution(
