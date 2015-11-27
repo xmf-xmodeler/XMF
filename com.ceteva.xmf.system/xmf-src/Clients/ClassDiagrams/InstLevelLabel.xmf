@@ -9,7 +9,7 @@ context ClassDiagrams
   @Class InstLevelLabel extends Label
   
     @Attribute border : Boolean end
-    @Attribute borderColor : String end
+    @Attribute borderColor : Color end
       
     @Constructor(text,attachedTo,relx,rely,borderColor,editable)
       self.init(Seq{text,attachedTo,relx,rely,editable})

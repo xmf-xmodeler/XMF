@@ -22,7 +22,7 @@ context ClassDiagrams
       if typePath->asSet <> Associations::Association.pathSeq()->asSet
       then self.add(StereotypeLabel(typePath->last))
       end;
-      //self.add(self.name);
+      self.add(self.name);
       self.add(end1.name);
       self.add(end1.mult);
       self.add(end1.instLevel);

@@ -400,8 +400,8 @@ context ClassDiagrams
           startx = if targetPort.owner.x > sourcePort.owner.x then 15 else 0-35 end;
           endy = if sourcePort.owner.y > targetPort.owner.y then 15 else 0-30 end;
           endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end;
-          instLevel1 = InstLevelLabel("Ø", "start", 10, 40, "000003", true);
-          instLevel2 = InstLevelLabel("Ø", "end", -20, -55, "000004", true) then
+          instLevel1 = InstLevelLabel("Ø", "start", 10, 40, Color(100,0,100), true);
+          instLevel2 = InstLevelLabel("Ø", "end", -20, -55, Color(0,100,100), true) then
           end1 = AssociationEnd(Label("e1","start",startx,starty,true),Multiplicity("start",10,25), instLevel1);
           end2 = AssociationEnd(Label("e2","end",endx,endy,true),Multiplicity("end",0-20,0-40), instLevel2) then
           edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)

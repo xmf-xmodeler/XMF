@@ -266,10 +266,12 @@ context ClassMapping
             do @Find(targetMap,acMaps)
                  when targetMap.element() = association.end2.underlyingType()
                  do let name = association.name.toString();
+                        instLevel1 = Label("Ø", "start", 10, 20, true);
                         mult1 = Multiplicity(association.end1.mult.labelString(),"start") then
-                        end1 = AssociationEnd(Label(association.end1.name.toString(),"start",10,10,true),mult1);
+                        end1 = AssociationEnd(Label(association.end1.name.toString(),"start",10,10,true),mult1,instLevel1);
+                        instLevel2 = Label("Ø", "end", -10, -20, true);
                         mult2 = Multiplicity(association.end2.mult.labelString(),"end") then
-                        end2 = AssociationEnd(Label(association.end2.name.toString(),"end",0-10,0-10,true),mult2) then
+                        end2 = AssociationEnd(Label(association.end2.name.toString(),"end",0-10,0-10,true),mult2,instLevel2) then
                         edge = diagram.makeAssociation(name,end1,end2,sourceMap.node,targetMap.node,association.of().pathSeq())
                     in  self.add(AssociationXAssociationEdge(association,edge));
                         self.diagram.add(edge)

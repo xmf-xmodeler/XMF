@@ -100,26 +100,26 @@ context ClassMapping
     end
 
     @Operation end1MultChanged_classDiagramDaemon(assocEnd,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
+      if newMult <> oldMult and newMult.isReallyKindOf(Multiplicities::Multiplicity)
       then edge.end1.setMult(self.calcMultLabelString(newMult))
       end
     end
 
     @Operation end2MultChanged_classDiagramDaemon(assocEnd,slot,newMult,oldMult)
-      if newMult <> oldMult and newMult.isReallyKindOf(Associations::Multiplicity)
+      if newMult <> oldMult and newMult.isReallyKindOf(Multiplicities::Multiplicity)
       then edge.end2.setMult(self.calcMultLabelString(newMult))
       end
     end
 
     @Operation calcMultLabelString(mult):String
       @TypeCase(mult)
-        SingleMult do
+        Multiplicities::SingleMult do
           if mult.isMandatory
           then "1 <<mandatory>>"
           else ""
           end
         end
-        CollectionMult do
+        Multiplicities::CollectionMult do
           if mult.isOrdered
           then mult.simpleMultString() + " <<ordered>>"
           else mult.simpleMultString()
