@@ -252,7 +252,10 @@ context Diagrams
            			   label.color().red(),
                    	   label.color().green(),
                        label.color().blue(),
-                       label.font())
+                       label.font(),
+                       label.hasBorder(), 
+                       label.getBorderColor()
+                       )
          end;
          labelId
       end
@@ -623,6 +626,12 @@ context Diagrams
     @Operation zoomIn(diagram)
       @SendCommand(self)
         zoomIn(diagram.id)
+      end
+    end
+    
+    @Operation zoomOne(diagram)
+      @SendCommand(self)
+        zoomOne(diagram.id)
       end
     end
     

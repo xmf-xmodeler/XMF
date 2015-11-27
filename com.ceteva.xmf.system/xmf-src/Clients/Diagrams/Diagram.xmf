@@ -23,8 +23,8 @@ context Diagrams
     @Attribute isSubDiagram      : Boolean                    end           // Set when this diagram is a display element.
     @Attribute listeners         : Set(DiagramListener) (+,-) end           // Listeners for diagram events.
     @Attribute backgroundColor   : Color = null (?,!)         end           // Background color for diagram.
-    @Attribute zoom			    : Integer = 100              end	        // Zoom ratio when shown as a top level diagram.
-    @Attribute nestedZoom	    : Integer = 100              end		    // Zoom ratio when shown as a nested diagram.
+    @Attribute zoom			     : Float = 1.0                end	        // Zoom ratio when shown as a top level diagram.
+    @Attribute nestedZoom	     : Float = 1.0                end		    // Zoom ratio when shown as a nested diagram.
     @Attribute magneticWaypoints : Boolean = true             end           // Handled in the client, recorded here.
     
     @Constructor(name)
@@ -172,10 +172,12 @@ context Diagrams
     @Operation defineActions()
       // Actions are buttons that do something when pressed...
       self.defineToolGroup("Actions");
-      self.defineActionHandler("Actions","Zoom +","zoom in","Tools/Activity.gif",Diagram::zoomIn);
-      self.defineActionHandler("Actions","Zoom -","zoom out","Tools/Activity.gif",Diagram::zoomOut);
+      self.defineActionHandler("Actions","Zoom +","zoom in","MDC/ZoomIn.png",Diagram::zoomIn);
+      self.defineActionHandler("Actions","Zoom 1","zoom one","MDC/ZoomOne.png",Diagram::zoomOne);
+      self.defineActionHandler("Actions","Zoom -","zoom out","MDC/ZoomOut.png",Diagram::zoomOut);
       self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected);
       self.defineActionHandler("Actions","Copy to Clipboard","clip","Tools/Copy.gif",Diagram::copyDiagramToClipboard)
+//      self.defineActionHandler("Actions","Add New Button","add new button","User/Balls1.gif",Diagram::addNewButton)
     end
     
     @Operation defineEdgeToolGroups()
@@ -1000,6 +1002,10 @@ context Diagrams
       @Command(self) zoomIn(self) end
     end
     
+    @Operation zoomOne()
+      @Command(self) zoomOne(self) end
+    end
+    
     @Operation zoomOut()
       @Command(self) zoomOut(self) end
     end
@@ -1008,18 +1014,22 @@ context Diagrams
       self.zoomTo(0-1)
     end
     
+    @Operation addNewButton()
+      3.141592654
+    end
+    
     // the following operation sets the diagram zoom level for when it is displayed in nested
     // mode
     
-    @Operation zoomTo(percent:Integer)
-      self.nestedZoom := percent.asInt();
-      @Command(self) nestedZoomTo(self,nestedZoom) end
+    @Operation zoomTo(factor:Float)
+      //self.nestedZoom := percent.asInt();
+      @Command(self) nestedZoomTo(self,factor) end
     end
     
     // the following operation sets the diagram zoom level for when it is displayed
     
-    @Operation diagramZoomTo(percent:Integer)
-      @Command(self) zoomTo(self,percent) end
+    @Operation diagramZoomTo(factor:Float)
+      @Command(self) zoomTo(self,factor) end
     end
 
   end

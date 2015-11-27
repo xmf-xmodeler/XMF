@@ -11,8 +11,9 @@ context ClassDiagrams
   
     @Attribute name : Label end
     @Attribute mult : Multiplicity end
+    @Attribute instLevel : Label end
     
-    @Constructor(name,mult) ! 
+    @Constructor(name,mult,instLevel) ! 
     end
 
     @Operation proxyElementTarget()
@@ -31,8 +32,8 @@ context ClassDiagrams
       name.textChanged(text)
     end
     
-    @Operation setMult(text:String)
-      mult.textChanged(text)
+    @Operation setMult(mult)
+      self.mult.setMultiplicity(mult)
     end
     
   end 

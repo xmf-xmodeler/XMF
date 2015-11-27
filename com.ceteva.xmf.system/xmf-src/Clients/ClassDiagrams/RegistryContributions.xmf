@@ -11,7 +11,8 @@ let registry            = xmf.registry();
       @WithoutRendering(diagram)
         let node = ClassNode("A Class","",false,typePath,x,y,diagram.showAttributes(),diagram.showOperations(),diagram.showMetaslots()) 
         in node.new(diagram,true);
-           diagram.addNode(node)
+           diagram.addNode(node);
+           node
         end
       end
 in // By default a class is represented by a ClassNode.

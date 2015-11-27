@@ -31,14 +31,20 @@ context Mosaic
          end
       end
     end
-    
+      
     @Operation shutdown()
       self.debug("shutdown",Seq{});
-      if xmf.question("Are you sure you want to quit?")
-      then 
-        if xmf.saveImageAndInflater() = true
-        then self.owner().commandInterpreter().shutdown()
-        end
+      let answer = xmf.questionYesNoCancel("Save image before quit?") 
+      //let answer = xmf.choose("Shutdown", "Save image before quit?", Seq{"Yes","No"})->head()
+      in
+      	if answer <> "" // do nothing on Cancel
+      	then 
+        	if (answer = "No") then
+        	  self.owner().commandInterpreter().shutdown()
+        	elseif (xmf.saveImageAndInflater() = true) then
+        	  self.owner().commandInterpreter().shutdown()
+        	end
+      	end
       end
     end
     

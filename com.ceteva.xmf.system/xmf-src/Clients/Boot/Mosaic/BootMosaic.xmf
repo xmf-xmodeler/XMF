@@ -64,7 +64,7 @@ context XMF
   
 context XMF
   @Operation saveImageAndInflater():Boolean
-    // Returns true when saving and false when restoring...
+    // Returns true when saving and false when restoring..., also returns false when cancel is chosen
     let path = xmf.saveFile(xmf.projDir(),"*.img","XModeler")
     in if path <> ""
        then 
@@ -94,7 +94,8 @@ context XMF
             else true
             end
          end
-       else true
+       //else true
+       else false // Jens, so 'cancel' on shutdown can be detected
        end
     end
   end
