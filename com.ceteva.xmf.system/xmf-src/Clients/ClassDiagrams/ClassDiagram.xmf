@@ -14,7 +14,7 @@ context ClassDiagrams
     
     @Attribute classNodes         : Seq(ClassNode)       end
     @Attribute elementNodes       : Seq(ElementNode)     end
-    @Attribute objectNodes 		: Seq(ObjectNode)      end
+    @Attribute objectNodes 	      : Seq(ObjectNode)      end
     @Attribute packageNodes       : Seq(PackageNode)     end
     @Attribute noteNodes          : Seq(NoteNode)	     end
     @Attribute inheritanceEdges   : Seq(InheritanceEdge) end
@@ -154,6 +154,16 @@ context ClassDiagrams
     @Operation defaultClassNode(x,y)
       self.newClassNode(x,y,XCore::Class.pathSeq()) 
     end
+    
+    @Operation twinClassNode(x,y)
+      let 
+        classNode1 = self.newClassNode(x,y,XCore::Class.pathSeq()) 
+      then
+        classNode2 = self.newClassNode(x,y+100,XCore::Class.pathSeq())
+      in 
+        self.newInheritanceEdge(classNode2.ports->head,classNode1.ports->head)
+      end
+    end
      
     @Operation defaultDependencyEdgeCommand(sourcePort,targetPort)
        self.newDependencyEdgeCommand(sourcePort,targetPort,XCore::Dependency.pathSeq())
@@ -195,7 +205,8 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Package",false,"XCore/Package.gif",ClassDiagram::defaultPackageNode);
       self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote);
       self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
-      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation)
+      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
+      self.defineNewHandler("XCore","TwinClasses",false,"XCore/TwinClass.gif",ClassDiagram::twinClassNode)
     end
     
     @Operation defineToolGroupTypes()
@@ -388,12 +399,18 @@ context ClassDiagrams
           starty = if targetPort.owner.y > sourcePort.owner.y then 15 else 0-30 end;
           startx = if targetPort.owner.x > sourcePort.owner.x then 15 else 0-35 end;
           endy = if sourcePort.owner.y > targetPort.owner.y then 15 else 0-30 end;
-          endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end then
-          end1 = AssociationEnd(Label("e1","start",startx,starty,true),Multiplicity("start",10,25));
-          end2 = AssociationEnd(Label("e2","end",endx,endy,true),Multiplicity("end",0-20,0-40)) then
+          endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end;
+          instLevel1 = InstLevelLabel("Ø", "start", 10, 40, "000003", true);
+          instLevel2 = InstLevelLabel("Ø", "end", -20, -55, "000004", true) then
+          end1 = AssociationEnd(Label("e1","start",startx,starty,true),Multiplicity("start",10,25), instLevel1);
+          end2 = AssociationEnd(Label("e2","end",endx,endy,true),Multiplicity("end",0-20,0-40), instLevel2) then
           edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
       in edge.new(self,false);
-         self.addEdge(edge)
+          //instLevel1.border=true;
+          //instLevel1.borderColor="000000";
+          //instLevel2.border=true;
+          //instLevel2.borderColor="000000";
+	        self.addEdge(edge)
       end
     end
     
