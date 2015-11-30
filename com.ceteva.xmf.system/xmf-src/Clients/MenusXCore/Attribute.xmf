@@ -105,3 +105,18 @@ context Attribute
        end
     end
   end
+  
+  context Attribute
+  @Operation setInstLevel_client()
+    let message = "Enter an instantiation level for " + name + "." +"\n" +
+                  "Leave empty for non-intrinsic Attributes or Associations.\n\n\n\n" then
+        instString = xmf.getString("Enter Instantiation Level for " + name,message,"Old instantiation level should appear here")
+    in if instString <> null
+       then try
+              ("Instantiation level entered: " + instString).println()
+            catch(exception)
+              xmf.warning(exception.message)
+            end
+       end
+    end
+  end

@@ -43,15 +43,21 @@ context ClassMapping
           ClassDiagrams::Multiplicity
             do
               if rightClickable = mult1
-              then globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd1Multiplicity))
-              else globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2Multiplicity))
+              then 
+                globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd1Multiplicity))
+              else 
+                globalMenu.add(MenuAction("Edit",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2Multiplicity))
               end
             end
           Diagrams::Label // name label
             do
               if rightClickable = name1
-              then globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd1Multiplicity))
-              else globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2Multiplicity))
+              then 
+                globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd1Multiplicity));
+                globalMenu.add(MenuAction("Set Instantiation Level",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd1InstLevel))
+              else 
+                globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2Multiplicity));
+                globalMenu.add(MenuAction("Set Instantiation Level",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2InstLevel))
               end
             end
         end;
@@ -239,6 +245,14 @@ context ClassMapping
 
     @Operation setEnd2Multiplicity()
       association.end2.setMultString_client()
+    end
+    
+    @Operation setEnd1InstLevel()
+      association.end1.setInstLevel_client()
+    end
+
+    @Operation setEnd2InstLevel()
+      association.end2.setInstLevel_client()
     end
 
     @Operation element()
