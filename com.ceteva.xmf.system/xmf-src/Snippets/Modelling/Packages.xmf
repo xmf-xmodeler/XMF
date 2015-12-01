@@ -1,0 +1,29 @@
+parserImport XOCL;
+parserImport Snippets;
+
+@Snippet "Defining a package.";
+
+// Packages are name-spaces that typically contain classes and
+// nested packages. They can also contain operations that are used
+// in the same way as static-methods in Java...
+
+context Root
+  @Package ExamplePackage
+    @Class ExampleClass 
+      @Attribute exampleAtt1 : Integer end
+    end
+    // Classes in package definitions can reference
+    // other classes...
+    @Class AnotherClass extends ExampleClass
+      @Attribute exampleAtt2 : ExampleClass end
+    end
+    @Operation exampleOperation()
+      AnotherClass()
+    end
+  end
+  
+  // You can refer to elements of a package using name-space lookup:
+  ExamplePackage::ExampleClass.println();
+  
+  // Browse the package to see the elements:
+  ExamplePackage.browse();
