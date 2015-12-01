@@ -33,6 +33,7 @@ context Associations
   
     @Attribute end1 : End end
     @Attribute end2 : End end
+    @Attribute unidirectional : Boolean (?,!) end
     
     @Constructor(name,end1,end2) ! end
     
@@ -66,6 +67,7 @@ context Associations
         end;
         end1.setMult(end1.mult);
         end2.setMult(end2.mult);
+        self.unidirectional := false;
         super()
       else super()
       end

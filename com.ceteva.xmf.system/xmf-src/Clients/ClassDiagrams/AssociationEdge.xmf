@@ -17,7 +17,9 @@ context ClassDiagrams
     @Constructor(name,end1,end2,source,target,typePath) 
       self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{},Color()});
       if name.isKindOf(String)
-      then self.name := Label(name,"",0,0-16,true)
+      then 
+        self.name := Label(name,"",0,0-16,true);
+        self.name.arrow := 1
       end;
       if typePath->asSet <> Associations::Association.pathSeq()->asSet
       then self.add(StereotypeLabel(typePath->last))
