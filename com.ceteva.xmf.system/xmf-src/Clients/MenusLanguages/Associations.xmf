@@ -15,3 +15,8 @@ context Associations::End
     self.association.delete_client();
     self
   end
+  
+context Association
+  @Operation toggleArrow_client()
+	"toggleArrow_client".println()
+end
