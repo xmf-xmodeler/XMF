@@ -114,7 +114,7 @@ context Attribute
         instString = xmf.getString("Enter Instantiation Level for " + name,message,(""+self.instLevel))
     in if instString <> null
        then try
-            ("instString: " + instString).println();
+            //("instString: " + instString).println();
             self.instLevel := instString.asInt()
             //  ("Instantiation level entered: " + instString).println()
             catch(exception)
