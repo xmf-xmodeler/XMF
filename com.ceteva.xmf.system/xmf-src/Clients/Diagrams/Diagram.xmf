@@ -109,6 +109,7 @@ context Diagrams
           paletteMenu = MenuItems("Palette")
       in
         globalMenu.add(MenuAction("Copy Diagram",target,Seq{},Diagram::copyDiagramToClipboard));
+        layoutMenu.add(MenuAction("Auto Layout (GraphViz)",target,Seq{self},DiagramLayout::GraphVizLayouter::performLayout));
         layoutMenu.add(MenuAction("Standard Layout",target,Seq{},Diagram::layout));
         layoutMenu.add(MenuAction("Circulate",target,Seq{700,700,100,100},Diagram::circulateGraph));
         layoutMenu.add(MenuAction("Save Layout",target,Seq{true},Diagram::saveLayout));
