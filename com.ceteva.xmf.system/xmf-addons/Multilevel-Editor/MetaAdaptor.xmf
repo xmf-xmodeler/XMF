@@ -1,0 +1,88 @@
+parserImport XOCL;
+
+context Root
+
+@Package Extensions metapackage XCore extends XCore
+end
+
+//import Root::Extensions;
+
+context Root::Extensions
+
+  @Class MetaAdaptor metaclass Class extends Class
+
+    @Attribute created : Integer end
+    @Attribute level : Integer end
+
+    //@Attribute model : 1..1 Model end
+
+	@Operation new():Object
+	      let o = Kernel_mkObj();
+          A = self.allAttributes();
+          intrinsicA = Set{}
+      in Kernel_setOf(o,self);
+         @While not A->isEmpty do
+           let a = A->sel
+           in if a.isIntrinsic and a.instLevel < o.of().level - 1
+              then
+                intrinsicA := intrinsicA.including(a)
+              else
+                if a.init <> null
+                then
+                  Kernel_addAtt(o,a.name,a.init.invoke(o,Seq{}))
+                else
+                  Kernel_addAtt(o,a.name,a.type.default())
+                end
+              end;
+              A := A->excluding(a)
+           end
+         end;
+         if self.inheritsFrom(Classifier)
+         then
+           o.parents := o.defaultParents()
+         else
+           false
+         end;
+         o.init();
+         if self.of() = Extensions::MetaAdaptor
+         then
+           o.level := xmf.getInteger("Metaebene","Auf welcher Metaebene soll sich diese Entität befinden?",3);
+           o.addParent(FMML::MetaClass)
+         else
+           if o.of().level > 2
+           then
+             o.addParent(FMML::MetaClass);
+             if o.of().of().allAttributes()->exists(a |
+               a.name = "level".asSymbol())
+             then
+               o.level := o.of().level - 1
+             else
+               o.level := 2
+             end
+           else
+             o.level := o.of().level - 1
+           end
+         end;
+         @While not intrinsicA.isEmpty() do
+           let intA = intrinsicA.sel()
+           in let newIntA = Attribute(intA.name,intA.type)
+               in
+                newIntA.isIntrinsic := intA.isIntrinsic;
+                newIntA.instLevel := intA.instLevel;
+                newIntA.intrinsicParent := intA;
+                intA.intrinsicChildren := intA.intrinsicChildren.including(newIntA);
+                o.add(newIntA)
+               end;
+              intrinsicA := intrinsicA.excluding(intA)
+           end
+         end;
+         if Root.contents.keys().includes("TargetPackage".asSymbol())
+         then
+           TargetPackage.add(o)
+         else
+           false
+         end;
+         o
+      end
+    end
+  end

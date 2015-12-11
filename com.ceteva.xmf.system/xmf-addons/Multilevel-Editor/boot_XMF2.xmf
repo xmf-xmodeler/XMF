@@ -17,7 +17,11 @@ in
 			Utils::updateAttribute();
 			Attribute.add(Attribute("intrinsicParent",Attribute));
 			Attribute.add(Attribute("intrinsicChildren",Seq(Attribute)));
-			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
+			
+			//myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
+
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaAdaptor.xmf",true,true);
+		    (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaAdaptor.o").loadBin(true);
 
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.xmf",true,true);
 		    (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/FMML_Package.o").loadBin(true);

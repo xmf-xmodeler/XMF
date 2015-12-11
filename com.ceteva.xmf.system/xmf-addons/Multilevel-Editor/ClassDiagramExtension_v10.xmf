@@ -299,7 +299,7 @@ context ClassDiagrams
  
   end
 
-//BEGIN: BB, Ab hier Erweiterung für Zentrierung
+//BEGIN: BB, Ab hier Erweiterung fï¿½r Zentrierung
   context Clients::Diagrams::Text
   @Operation checkDaemons()
   	@SlotValueChanged multi once Clients::Diagrams::Text::widthChanged(self,"width") end
@@ -443,3 +443,21 @@ Clients::ClassDiagrams::NameBox.constructors := Seq{};
    end
   		
 //END: BB
+
+// JG
+
+  context ClassXNode	
+
+    // overwrite existing operation to avoid creation of slots on too high meta levels, and to exclude MetaAdaptor's attributes from slot creation 
+    
+    @Operation generateMetaslots()
+      @For metaAttribute in class.of().allAttributes() do
+        if metaAttribute.underlyingType().isKindOf(DataType) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
+          @WithoutRendering(node.owner)
+            self.metaslotAdded(metaAttribute)
+          end
+        end
+      end
+    end    
+
+//END: JG
