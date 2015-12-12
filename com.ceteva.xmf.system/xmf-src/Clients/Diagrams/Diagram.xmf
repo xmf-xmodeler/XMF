@@ -109,6 +109,7 @@ context Diagrams
           paletteMenu = MenuItems("Palette")
       in
         globalMenu.add(MenuAction("Copy Diagram",target,Seq{},Diagram::copyDiagramToClipboard));
+        layoutMenu.add(MenuAction("Auto Layout (GraphViz)",target,Seq{self},DiagramLayout::GraphVizLayouter::performLayout));
         layoutMenu.add(MenuAction("Standard Layout",target,Seq{},Diagram::layout));
         layoutMenu.add(MenuAction("Circulate",target,Seq{700,700,100,100},Diagram::circulateGraph));
         layoutMenu.add(MenuAction("Save Layout",target,Seq{true},Diagram::saveLayout));
@@ -380,9 +381,16 @@ context Diagrams
       // the handler. It is then up to the handler to perform the appropriate action
       // on the diagram...
       self.defineToggleHandler(type,handler);
-      @Command(self) newToggleCommand(self,group,label,type,state,icon) end
+      @Command(self) newToggleCommand(self,group,label,type,state,icon,icon) end
     end
-
+    
+    @Operation defineToggleHandler(group:String,label:String,type:String,state:Boolean,iconTrue:String,iconFalse:String,handler) 
+      // When the toggle is pressed on the diagram the new state is supplied to 
+      // the handler. It is then up to the handler to perform the appropriate action
+      // on the diagram...
+      self.defineToggleHandler(type,handler);
+      @Command(self) newToggleCommand(self,group,label,type,state,iconTrue,iconFalse) end
+    end
     @Operation dispose()
       /* if not isSubDiagram
       then 

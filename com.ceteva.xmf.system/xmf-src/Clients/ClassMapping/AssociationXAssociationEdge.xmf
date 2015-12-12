@@ -58,7 +58,8 @@ context ClassMapping
               else 
                 globalMenu.add(MenuAction("Set Multiplicity",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2Multiplicity));
                 globalMenu.add(MenuAction("Set Instantiation Level",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::setEnd2InstLevel))
-              end
+              end;
+              globalMenu.add(MenuAction("Toggle Unidirectionality",RightClickableProxy::proxyTarget,Seq{},AssociationXAssociationEdge::toggleArrow))
             end
         end;
         globalMenu.new();
@@ -87,8 +88,10 @@ context ClassMapping
       @SlotValueChanged multi once AssociationXAssociationEdge::delete_classDiagramDaemon(association,"owner") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1NameChanged_classDiagramDaemon(association.end1,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1MultChanged_classDiagramDaemon(association.end1,"mult") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end1InstLevelChanged_classDiagramDaemon(association.end1,"instLevel") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2NameChanged_classDiagramDaemon(association.end2,"name") end;
-      @SlotValueChanged multi once AssociationXAssociationEdge::end2MultChanged_classDiagramDaemon(association.end2,"mult") end
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2MultChanged_classDiagramDaemon(association.end2,"mult") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged_classDiagramDaemon(association.end2,"instLevel") end
     end
 
     @Operation end1NameChanged_classDiagramDaemon(assocEnd,slot,newName,oldName)
@@ -117,12 +120,24 @@ context ClassMapping
       end
     end
 
+    @Operation end1InstLevelChanged_classDiagramDaemon(assocEnd,slot,newInstLevel,oldInstLevel)
+      if newInstLevel <> oldInstLevel and newInstLevel.isReallyKindOf(Integer)
+      then edge.end1.setInstLevel(newInstLevel)
+      end
+    end
+
+    @Operation end2InstLevelChanged_classDiagramDaemon(assocEnd,slot,newInstLevel,oldInstLevel)
+      if newInstLevel <> oldInstLevel and newInstLevel.isReallyKindOf(Integer)
+      then edge.end2.setInstLevel(newInstLevel)
+      end
+    end
+
     @Operation calcMultLabelString(mult):String
       @TypeCase(mult)
         Multiplicities::SingleMult do
           if mult.isMandatory
           then "1 <<mandatory>>"
-          else ""
+          else "1"
           end
         end
         Multiplicities::CollectionMult do
@@ -253,6 +268,10 @@ context ClassMapping
 
     @Operation setEnd2InstLevel()
       association.end2.setInstLevel_client()
+    end
+
+    @Operation toggleArrow()
+      association.toggleArrow_client()
     end
 
     @Operation element()

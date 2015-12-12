@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+
+context DiagramLayout
+
+@Class GraphVizLayouter 
+
+	@Operation performLayout(diagram:Diagram)
+	
+		print("Do the Layout for "+diagram.of()+ ", number of nodes "+diagram.graph.nodes->size+"\n");
+		
+		@For node in diagram.graph.nodes do
+		
+			print("Node: "+node.id+" - "+node+"\n")
+		
+		end;
+		
+		@For edge in diagram.graph.edges do
+		
+			print("Edge: "+edge.id+" ("+edge.source.owner.id+","+edge.target.owner.id+") - "+edge+"\n")
+		
+		end
+	
+	end
+
+end

@@ -25,6 +25,11 @@ context ClassDiagrams
     @Attribute showAttributes     : Boolean = true (?)   end
     @Attribute showOperations     : Boolean = false (?)  end
     @Attribute showMetaslots      : Boolean = false (?)  end
+    @Attribute showAttributeEdges : Boolean = true       end
+    @Attribute showAssociationEdges : Boolean = true     end
+    @Attribute showInheritanceEdges : Boolean = true     end
+    @Attribute showMultiplicity   : Boolean = true       end
+    @Attribute showInstantiationLevel : Boolean = true   end
     
     @Operation addEdge(edge)
       @TypeCase(edge)
@@ -207,6 +212,16 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
       self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
       self.defineNewHandler("XCore","TwinClasses",false,"XCore/TwinClass.gif",ClassDiagram::twinClassNode)
+    end
+    
+    @Operation defineToggles() 
+      self.defineToolGroup("Toggles");
+      super();
+      self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "Tools/Ghost1.png","Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
+      self.defineToggleHandler("Toggles","Show Associations",        "foo3",showAssociationEdges,   "Tools/Ghost3.png","Tools/Ghost0.png",ClassDiagram::setShowAssociationEdges);
+      self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "Tools/Ghost5.png","Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
+      self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "Tools/Ghost2.png","Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
+      self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "Tools/Ghost4.png","Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
     end
     
     @Operation defineToolGroupTypes()
@@ -400,8 +415,8 @@ context ClassDiagrams
           startx = if targetPort.owner.x > sourcePort.owner.x then 15 else 0-35 end;
           endy = if sourcePort.owner.y > targetPort.owner.y then 15 else 0-30 end;
           endx = if sourcePort.owner.x > targetPort.owner.x then 15 else 0-35 end;
-          instLevel1 = InstLevelLabel("Ø", "start", 10, 40, Color(100,0,100), true);
-          instLevel2 = InstLevelLabel("Ø", "end", -20, -55, Color(0,100,100), true) then
+          instLevel1 = InstLevelLabel("0", "start", 10, 40, Color(0,0,0), true);
+          instLevel2 = InstLevelLabel("0", "end", -20, -55, Color(0,0,0), true) then
           end1 = AssociationEnd(Label("e1","start",startx,starty,true),Multiplicity("start",10,25), instLevel1);
           end2 = AssociationEnd(Label("e2","end",endx,endy,true),Multiplicity("end",0-20,0-40), instLevel2) then
           edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
@@ -635,6 +650,48 @@ context ClassDiagrams
             mb.owner := node.nodeBox
           end
         end
+      end
+    end
+    
+
+    
+    @Operation setShowAttributeEdges(state:Boolean)
+      if showAttributeEdges <> state
+      then
+        self.showAttributeEdges := state;
+        @Command(self) setShowAttributeEdges(self,state) end
+      end
+    end   
+     
+    @Operation setShowAssociationEdges(state:Boolean)
+      if showAssociationEdges <> state
+      then
+        self.showAssociationEdges := state;
+        @Command(self) setShowAssociationEdges(self,state) end
+      end
+    end   
+     
+    @Operation setShowInheritanceEdges(state:Boolean)
+      if showInheritanceEdges <> state
+      then
+        self.showInheritanceEdges := state;
+        @Command(self) setShowInheritanceEdges(self,state) end
+      end
+    end  
+      
+    @Operation setShowMultiplicity(state:Boolean)
+      if showMultiplicity <> state
+      then
+        self.showMultiplicity := state;
+        @Command(self) setShowMultiplicity(self,state) end
+      end
+    end    
+      
+    @Operation setShowInstantiationLevel(state:Boolean)
+      if showInstantiationLevel <> state
+      then
+        self.showInstantiationLevel := state;
+        @Command(self) setShowInstantiationLevel(self,state) end
       end
     end
 

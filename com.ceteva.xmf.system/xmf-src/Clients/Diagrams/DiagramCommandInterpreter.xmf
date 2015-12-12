@@ -445,9 +445,9 @@ context Diagrams
       end
     end   
     
-    @Operation newToggleCommand(diagram,groupName:String,label,toolName,state:Boolean,iconPath)
+    @Operation newToggleCommand(diagram,groupName:String,label,toolName,state:Boolean,iconTruePath,iconFalsePath)
       @SendCommand(self)
-        newToggle(diagram.id(),groupName,label,toolName,state,iconPath)
+        newToggle(diagram.id(),groupName,label,toolName,state,iconTruePath,iconFalsePath)
       end
     end
     
@@ -650,4 +650,39 @@ context Diagrams
       end
     end
     
+    @Operation setShowAttributeEdges(diagram,state)
+      @SendCommand(self)
+        setShowAttributeEdges(diagram.id,state)
+      end
+    end
+    
+    @Operation setShowAssociationEdges(diagram,state)
+      @SendCommand(self)
+        setShowAssociationEdges(diagram.id,state)
+      end
+    end
+    
+    @Operation setShowInheritanceEdges(diagram,state)
+      @SendCommand(self)
+        setShowInheritanceEdges(diagram.id,state)
+      end
+    end
+    
+    @Operation setShowMultiplicity(diagram,state)
+      @SendCommand(self)
+        setShowMultiplicity(diagram.id,state)
+      end
+    end
+    
+    @Operation setShowInstantiationLevel(diagram,state)
+      @SendCommand(self)
+        setShowInstantiationLevel(diagram.id,state)
+      end
+    end
+    
+    @Operation setVisible(diagram,id,state) 
+      @SendCommand(self)
+        setVisible(diagram.id,id,state)
+      end
+    end
   end

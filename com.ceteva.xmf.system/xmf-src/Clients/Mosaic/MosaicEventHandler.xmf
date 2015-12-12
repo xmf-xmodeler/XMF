@@ -35,7 +35,6 @@ context Mosaic
     @Operation shutdown()
       self.debug("shutdown",Seq{});
       let answer = xmf.questionYesNoCancel("Save image before quit?") 
-      //let answer = xmf.choose("Shutdown", "Save image before quit?", Seq{"Yes","No"})->head()
       in
       	if answer <> "" // do nothing on Cancel
       	then 
@@ -52,21 +51,26 @@ context Mosaic
       self.debug("shutDownAndSave",parameters);
       let imagePath = parameters.at(0);
           inflationPath = parameters.at(1);
-          ok = true
-      in if imagePath.fileExists()
-         then ok := xmf.question("Overwrite " + imagePath)
+          answer = "Yes"
+      in if imagePath.fileExists() and inflationPath.fileExists() // will typically be true, otherwise this method is not called
+         then answer := xmf.questionYesNoCancel("Overwrite " + imagePath + " and .xml?")
+         else
+           if imagePath.fileExists()
+           then answer := xmf.questionYesNoCancel("Overwrite " + imagePath + "?")
+           end;
+           if answer = "Yes" and inflationPath.fileExists()
+           then answer := xmf.questionYesNoCancel("Overwrite " + inflationPath + "?")
+           end
          end;
-         if ok and inflationPath.fileExists()
-         then ok := xmf.question("Overwrite " + inflationPath)
-         end;
-         if ok
+         if answer = "Yes"
          then 
            self.owner().commandInterpreter().saveInflater(inflationPath);
            if xmf.saveImage(imagePath)
            then self.owner().commandInterpreter().shutdown()
            else self.owner().commandInterpreter().inflate(inflationPath)
            end
-         else self.owner().commandInterpreter().shutdown()
+         elseif answer = "No" then self.owner().commandInterpreter().shutdown()
+         // else canceled
          end
       end
     end
