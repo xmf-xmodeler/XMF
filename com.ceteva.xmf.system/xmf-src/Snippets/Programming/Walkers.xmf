@@ -1,0 +1,89 @@
+parserImport XOCL;
+parserImport Snippets;
+
+import Walkers;
+
+@Snippet "How to write a simple walker.";
+
+context Root
+
+  @Class PrintAllValues extends Walker
+  
+    // A walker processes a value by visiting all of the constituent elements.
+    // Starting at the root, the walker supplies each child to a type-specific
+    // operation. The operation processes the child and then optionally calls
+    // the walker which keeps track of the visited elements so that it does not
+    // loop indefinitely.
+    
+    // Note that each of the walking operations takes two arguments:
+    // (1) The current element.
+    // (2) An extra argument that is optionally used by the walker.
+    
+    @Operation reWalk(v,limit:Integer)
+      format(stdout, "revisit ~S~%",Seq{v})
+    end
+    
+    @Operation walk(v,limit:Integer)
+      if limit >= 0
+      then
+        // Dispatch to a type-specific walk operation...
+        super(v,limit)
+      end
+    end
+    
+    @Operation walkBoolean(b:Boolean,limit:Integer) 
+      format(stdout, "boolean ~S~%",Seq{b})
+    end
+     
+    @Operation walkInteger(i:Integer,limit:Integer) 
+      format(stdout, "integer ~S~%",Seq{i})
+    end
+    
+    @Operation walkNull(n:Null,limit:Integer) 
+      null.println()
+    end
+    
+    @Operation walkSeq(s:SeqOfElement,limit:Integer) 
+      self.walk(s->head,limit-1);
+      self.walk(s->tail,limit-1)
+    end
+     
+    @Operation walkSet(s:SetOfElement,limit:Integer) 
+      @For x in s do
+        self.walk(x,limit-1)
+      end
+    end
+     
+    @Operation walkSlot(o:Object,s:String,value,limit:Integer)
+      // Called for each slot of an encountered object...
+      self.walk(value,limit-1)
+    end
+    
+    @Operation walkString(s:String,limit:Integer) 
+      format(stdout, "string ~S~%",Seq{s})
+    end
+    
+    @Operation walkSymbol(s:Symbol,limit:Integer)
+      // Remember a symbol is a unique string. Symbols are usually used
+      // as the names in named elements so that they can be used as keys
+      // in tables and lookup is efficient... 
+      format(stdout, "symbol ~S~%",Seq{s})
+    end
+    
+    @Operation walkTable(t:Table,limit:Integer)
+      @For key in t.keys() do
+        self.walk(key,limit-1);
+        self.walk(t.get(key),limit-1)
+      end
+    end
+    
+    @Operation walkVector(v:Vector,limit:Integer)
+      @Count i from 0 to v.size() - 1 do
+        self.walk(v.ref(i),limit-1)
+      end
+    end
+     
+  end
+  
+PrintAllValues().walk([1,"a string",Class("X")],7);
+    
