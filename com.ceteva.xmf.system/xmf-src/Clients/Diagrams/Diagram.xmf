@@ -250,6 +250,10 @@ context Diagrams
       @Command(self) getPalette(self) end.println()
     end
     
+    @Operation deleteNode(id)
+      ("Delete Node " + id).println()
+    end
+    
     @Operation delete_check()
       if isSubDiagram
       then xmf.warning("Nested diagrams cannot be directly deleted.")
