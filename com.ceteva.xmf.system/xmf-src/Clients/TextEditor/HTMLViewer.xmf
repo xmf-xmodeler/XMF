@@ -208,7 +208,7 @@ context TextEditor
     
     @Operation new()
       self.commandInterpreter().newBrowser(self);
-      self.requestURL(url);
+      // self.requestURL(url); (Jens) removed, url is always null or "" when new() is called, will confuse some browser implementations
       self
     end
     
