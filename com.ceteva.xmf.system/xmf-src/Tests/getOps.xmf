@@ -10,12 +10,11 @@ context Root
       @For op in ops do  
         if op.arity = 0 
           and op.name.toString() <> "loopInfinitely" 
-        then 
-          op.println();     
+          and op.name.toString().hasPrefix("monitor_")
+        then     
           let 
             result = op.invoke(object,{})
           in
-            result.println();
             let 
               seq = Seq{op, result.toString()}
             in
