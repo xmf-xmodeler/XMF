@@ -393,7 +393,7 @@ context Integer
   
     if self < 0 
     then
-    -1 //(0-self).getFirstPrimeFactor()
+    -1
     elseif self = 0
     then 0
     elseif self = 1
@@ -415,27 +415,28 @@ context Integer
   end
   
   context Integer
-  @Operation printAllPrimeFactors():Integer
+  @Operation getAllPrimeFactors():Integer
   let 
-  temp = self
+  temp = self;
+  s = ""
   in 
   @ While not (temp = temp.getFirstPrimeFactor()) do
-     temp.getFirstPrimeFactor().print();
+     s := s + temp.getFirstPrimeFactor();
      temp := temp.div(temp.getFirstPrimeFactor());
-     " * ".print()
+     s := s + " * "
      end;
-     temp.print();
-     ""
+     s := s + temp;
+     s
     end
   end    
   
-  context Integer
-  @Operation loopInfinitely():Integer
-  let 
-  i = 0
-  in 
-  @ While not (i = 1) do
-     i = 0
-     end
-    end
-  end  
+//  context Integer
+//  @Operation loopInfinitely():Integer
+//  let 
+//  i = 0
+//  in 
+//  @ While not (i = 1) do
+//     i = 0
+//     end
+//    end
+//  end  
