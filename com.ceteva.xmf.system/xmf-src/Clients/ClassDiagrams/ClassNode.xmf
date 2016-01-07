@@ -10,29 +10,37 @@ context ClassDiagrams
 
   @Class ClassNode extends ClassifierNode
   
-    @Attribute name           : NameBox end
-    @Attribute isAbstract     : Boolean end
-    @Attribute package        : String end  // Used in case the class is imported.
-    @Attribute typePath       : Seq(String) = XCore::Class.pathSeq() end // The meta-class path.
-    @Attribute attBox         : AttributeBox end
-    @Attribute opsBox         : OperationBox end
-    @Attribute metaslotsBox   : MetaslotBox end
-    @Attribute nodeBox        : Box end
-    @Attribute showAttributes : Boolean end
-    @Attribute showOperations : Boolean end
-    @Attribute showMetaslots  : Boolean end
+    @Attribute name                 : NameBox end
+    @Attribute isAbstract           : Boolean end
+    @Attribute package              : String end  // Used in case the class is imported.
+    @Attribute typePath             : Seq(String) = XCore::Class.pathSeq() end // The meta-class path.
+    @Attribute attBox               : AttributeBox end
+    @Attribute opsBox               : OperationBox end
+    @Attribute operationValuesBox   : OperationValuesBox end
+    @Attribute metaslotsBox         : MetaslotBox end
+    @Attribute nodeBox              : Box end
+    @Attribute showAttributes       : Boolean end
+    @Attribute showOperations 	    : Boolean end
+    @Attribute showOperationValues  : Boolean end
+    @Attribute showMetaslots  	    : Boolean end
     
-    @Constructor(name,package,isAbstract,typePath,x,y,showAttributes,showOperations,showMetaslots)
+    @Constructor(name,package,isAbstract,typePath,x,y,showAttributes,showOperations,showMetaslots,showOperationValues)
        self.name := NameBox(name,package,isAbstract,self.stereotype(),0,0,100);
        self.attBox := AttributeBox(0,self.name.height,100);
        self.opsBox := OperationBox(0,self.attBox.y + self.attBox.height,100);
        self.metaslotsBox := MetaslotBox(0,self.attBox.y + self.attBox.height + self.opsBox.height,100);
+       self.operationValuesBox := OperationValuesBox(0,self.attBox.y + self.attBox.height + self.opsBox.height + self.metaslotsBox.height,100);
        self.attBox.setShown(showAttributes);
        self.opsBox.setShown(showOperations);
        self.metaslotsBox.setShown(showMetaslots);
+       self.operationValuesBox.setShown(showOperationValues);
        self.width := 100;
        self.height := self.name.height + self.attBox.height + self.opsBox.height + self.metaslotsBox.height;
        self.nodeBox := Box(0,0,100,self.height,0)
+    end
+    
+    @Constructor(name,package,isAbstract,typePath,x,y,showAttributes,showOperations,showMetaslots)
+       self.init(Seq{name,package,isAbstract,typePath,x,y,showAttributes,showOperations,false,false})
     end
     
     @Constructor(name,package,isAbstract,typePath,x,y,showAttributes,showOperations)
@@ -53,6 +61,10 @@ context ClassDiagrams
           metaslotsBox.add(element);
           self.expand()
         end
+        OperationValueGroup do
+          operationValuesBox.add(element);
+          self.expand()
+        end
         else super(element)
       end
     end
@@ -62,7 +74,8 @@ context ClassDiagrams
       nodeBox.add(name);
       nodeBox.add(attBox);
       nodeBox.add(opsBox);
-      nodeBox.add(metaslotsBox)
+      nodeBox.add(metaslotsBox);
+      nodeBox.add(operationValuesBox)
     end
     
     @Operation addPorts()
@@ -79,9 +92,11 @@ context ClassDiagrams
          hideMenu.add(MenuAction("Attributes",target,Seq{false},ClassNode::showAttributesMenuCommand));
          hideMenu.add(MenuAction("Operations",target,Seq{false},ClassNode::showOperationsMenuCommand));
          hideMenu.add(MenuAction("Slot Values",target,Seq{false},ClassNode::showMetaslotsMenuCommand));
+         hideMenu.add(MenuAction("Operation Values",target,Seq{false},ClassNode::showOperationValuesMenuCommand));
          showMenu.add(MenuAction("Attributes",target,Seq{true},ClassNode::showAttributesMenuCommand));
          showMenu.add(MenuAction("Operations",target,Seq{true},ClassNode::showOperationsMenuCommand));
          showMenu.add(MenuAction("Slot Values",target,Seq{true},ClassNode::showMetaslotsMenuCommand));
+         showMenu.add(MenuAction("Operation Values",target,Seq{true},ClassNode::showOperationValuesMenuCommand));
          globalMenu
       end
     end
@@ -158,6 +173,11 @@ context ClassDiagrams
      @Operation nextMetaslot(name,value,type)
        metaslotsBox.nextMetaslot(name,value,type)
      end
+     
+     @Operation nextOperationValue(name,value,type)
+       "nextOperationValue() in ClassNode".println();
+       operationValuesBox.nextMetaslot(name,value,type)
+     end
 
      @Operation packHeight()
      
@@ -170,9 +190,11 @@ context ClassDiagrams
        attBox.packHeight();
        opsBox.packHeight();
        metaslotsBox.packHeight();
+       operationValuesBox.packHeight();
        attBox.move(0,name.height() - 1);
        opsBox.move(0,name.height() + attBox.maxHeight() - 2);
        metaslotsBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
+       operationValuesBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
        super()
      end
      
@@ -181,9 +203,11 @@ context ClassDiagrams
        attBox.expandHeight();
        opsBox.expandHeight();
        metaslotsBox.expandHeight();
+       operationValuesBox.expandHeight();
        attBox.move(0,name.height() - 1);
        opsBox.move(0,name.height() + attBox.maxHeight() - 2);
        metaslotsBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
+       operationValuesBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
        super()
      end
      
@@ -297,6 +321,17 @@ context ClassDiagrams
 
     @Operation showMetaslotsMenuCommand(show)
       self.showMetaslots(show)
+    end
+    
+    @Operation showOperationValues(show)
+      @WithoutRendering(self.owner)
+        operationValuesBox.setShown(show);
+        self.pack()
+      end
+    end
+    
+    @Operation showOperationValuesMenuCommand(show)
+      self.showOperationValues(show)
     end
 
     @Operation stereotype():String
