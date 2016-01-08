@@ -176,7 +176,7 @@ context ClassDiagrams
      
      @Operation nextOperationValue(name,value,type)
        "nextOperationValue() in ClassNode".println();
-       operationValuesBox.nextMetaslot(name,value,type)
+       operationValuesBox.nextOperationValue(name,value,type)
      end
 
      @Operation packHeight()
@@ -191,23 +191,28 @@ context ClassDiagrams
        opsBox.packHeight();
        metaslotsBox.packHeight();
        operationValuesBox.packHeight();
-       attBox.move(0,name.height() - 1);
-       opsBox.move(0,name.height() + attBox.maxHeight() - 2);
-       metaslotsBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
-       operationValuesBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
+       
+       attBox.move(				0,name.height() - 1);
+       opsBox.move(				0,name.height() + attBox.maxHeight() - 2);
+       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
+       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
+       
        super()
      end
      
      @Operation expandHeight()
+     
        name.expandHeight();
        attBox.expandHeight();
        opsBox.expandHeight();
        metaslotsBox.expandHeight();
        operationValuesBox.expandHeight();
-       attBox.move(0,name.height() - 1);
-       opsBox.move(0,name.height() + attBox.maxHeight() - 2);
-       metaslotsBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
-       operationValuesBox.move(0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
+       
+       attBox.move(				0,name.height() - 1);
+       opsBox.move(				0,name.height() + attBox.maxHeight() - 2);
+       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
+       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
+       
        super()
      end
      
@@ -241,9 +246,15 @@ context ClassDiagrams
             // to the new width of the node.
          
             name.resize(width,name.maxHeight());
+            
             metaslotsBox.resize(width,metaslotsBox.maxHeight());
+            attBox.resize(width,attBox.maxHeight());
+            opsBox.resize(width,opsBox.maxHeight());
+            operationValuesBox.resize(width,operationValuesBox.maxHeight())
+            
+/*             metaslotsBox.resize(width,metaslotsBox.maxHeight());
 
-            if attBox.shown() then
+           if attBox.shown() then
               if opsBox.shown() then
                 attBox.resize(width,attBox.maxHeight())
               else
@@ -258,7 +269,7 @@ context ClassDiagrams
                 attBox.resize(width,attBox.maxHeight());
                 opsBox.resize(width,height-opsBox.y())
               end
-            end
+            end*/
          
 /*         if metaslotsBox.shown() then
            metaslotsBox.resize(width,height-attBox.y()-opsBox.y());
