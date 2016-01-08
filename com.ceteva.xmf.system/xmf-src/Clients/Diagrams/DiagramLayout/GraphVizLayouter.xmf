@@ -7,22 +7,102 @@ context DiagramLayout
 
 @Class GraphVizLayouter 
 
+	@Operation classnameToArrowhead(classname)
+	  let
+	    c = classname.toString()
+	  in  
+	    if c = "InheritanceEdge" then
+			"empty"	    
+	    elseif c = "AttributeEdge" then
+			"dot"	    
+	    else
+	    	"normal"
+	    end
+	  end
+	end
+
 	@Operation performLayout(diagram:Diagram)
-	
-		print("Do the Layout for "+diagram.of()+ ", number of nodes "+diagram.graph.nodes->size+"\n");
-		
-		@For node in diagram.graph.nodes do
-		
-			print("Node: "+node.id+" - "+node+"\n")
-		
+	  let
+
+		// TODO: get these from config
+	    tmpDir = "/tmp"; 			
+	    dotExe = "/usr/bin/dot";
+
+        rnd = (Float::random() * 1000000).round() then
+        tmpDotFile = tmpDir + "/tmp" + rnd + ".dot" then
+        tmpOutFile = tmpDotFile + ".plain";
+        tmpOutAvailable = false;
+        waitCounter = 0
+	  in  
+		//print("Doing the layout for "+diagram.of()+ ", number of nodes "+diagram.graph.nodes->size+" from temp file "+tmpDotFile+" to "+tmpOutFile+"\n");
+		@WithOpenFile(fout -> tmpDotFile)
+			format(fout, "digraph g {\n");
+			@For node in diagram.graph.nodes do
+				format(fout, "node"+node.id+";\n")
+			end;			
+			@For edge in diagram.graph.edges do
+				format(fout, "node"+edge.source.owner.id+" -> node"+edge.target.owner.id+" [type=\""+edge.of().name+"\",arrowhead=\""+GraphVizLayouter::classnameToArrowhead(edge.of().name)+"\"];\n")
+			end;
+			format(fout, "}")
 		end;
 		
-		@For edge in diagram.graph.edges do
+		Kernel_exec("/usr/bin/dot", Seq{"-O", "-Tplain", tmpDotFile}); // -O outputs *.plain file
 		
-			print("Edge: "+edge.id+" ("+edge.source.owner.id+","+edge.target.owner.id+") - "+edge+"\n")
+		//print("Waiting for result...\n");
+		@While ( (not tmpOutAvailable) and (waitCounter <= 20) ) do
+	      @Count i from 0 to 100000 do i end; // TODO non-polling way to wait
+		  tmpOutAvailable := tmpOutFile.fileExists();
+		  if not tmpOutAvailable then
+		    waitCounter := waitCounter + 1;
+		    print("Waiting for layouter result, retrying ("+waitCounter+")...\n") 
+		  end
+		end; 
 		
-		end
-	
+		if tmpOutAvailable then
+		
+		  //print("Parsing result...\n");
+		  let
+		    s = tmpOutFile.readFile()
+		  in
+		    print(s+"\n")
+		    
+		    // TODO parse and set nodes' positions
+		    
+		  end
+		  //print("Done.")
+		  
+		else
+		  print("Error: temporary file "+tmpOutFile+" not available after 20 tries. Operation canceled.\n")
+	    end
+	    
+	  end
 	end
 
 end
+
+/* example:
+digraph obj{
+        node[shape=record];
+        rankdir="BT";
+        
+        teacher [label = "{<f0> Teacher|<f1> \n  |<f2> \n   }"];
+        course [label = "{<f0> Course|<f1> \n  |<f2> \n   }"];
+        student [label = "{<f0> Student|<f1> \n  |<f2> \n   }"];
+        lesson [label = "{<f0> Lesson |<f1> \n  |<f2> \n   }"];
+        tutorial [label = "{<f0> Tutorial|<f1> \n  |<f2> \n   }"];
+        assessment[label = "{<f0> Assessment|<f1> \n  |<f2> \n   }"];
+        coursework [label = "{<f0> Coursework|<f1> \n  |<f2> \n   }"];
+        exam [label = "{<f0> Exam|<f1> \n  |<f2> \n   }"];
+
+        {rank=same; teacher course student}
+
+        teacher->course [dir="forward",arrowhead="none",arrowtail="normal",headlabel="1",taillabel="1.."];
+        student->course [dir="forward",arrowhead="none",arrowtail="normal",headlabel="1",taillabel="1.."];
+        lesson->course [dir="forward",arrowhead="diamond",arrowtail="normal"];
+        tutorial->course [dir="forward",arrowhead="diamond",arrowtail="normal"];
+        assessment->course [dir="forward",arrowhead="diamond",arrowtail="normal"];
+        coursework->assessment;
+        exam->assessment;
+
+}
+*/
