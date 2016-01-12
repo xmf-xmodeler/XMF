@@ -81,8 +81,8 @@ context ClassMapping
       operationMap.setOwner(self)
     end
     
-    @Operation addOperationValueMap(operationMap)
-      self.addToOperationValueMaps(operationMap);
+    @Operation addOperationValueMap(operationValueMap)
+      self.addToOperationValueMaps(operationValueMap);
       operationValueMap.setOwner(self)
     end
 
@@ -271,34 +271,42 @@ context ClassMapping
       end
     end
     
-    
     @Operation generateOperationValues()
-      //let 
-      //  list = getOpValues(object)
-      //in
-      @For first in self.getOpValues(class) do
+      "generateOperationValues()".println();
+      self.getOpValues(class).println();
+      @For item in self.getOpValues(class) do
         let
-            //setOfMonitoredValues = self.getOpValues(class) then
-            //first = setOfMonitoredValues.asSeq()->head() then
-            name = first->head().name+"()";
-            result = first->tail()->head() then
-            text = node.nextMetaslot(name, result, XCore::String) //then 
-            //map = MetaslotXText(class, 
-          in
-            text.new(node.metaslotsBox);
-            node.add(text)
-          end
-        //end
-      end/*
-      @For metaAttribute in class.of().allAttributes() do
-        if metaAttribute.underlyingType().isKindOf(DataType) and not XCore::Class.allAttributes().contains(metaAttribute) then
-        //if metaAttribute.underlyingType().isKindOf(DataType) then
+          name = item->head().name+"()"
+          //result = item->tail()->head() then
+          //text = node.nextMetaslot(name, result, XCore::String)
+        in
+          ("add: " + name + "/" + item).println();
           @WithoutRendering(node.owner)
-            self.metaslotAdded(metaAttribute)
+            "@WithoutRendering".println();
+            self.operationValuesAdded(name, item)
+            //text.new(node.operationValuesBox);
+            //node.add(text)
           end
         end
-      end*/
+      end
     end
+    
+    @Operation operationValuesAdded(name, opItem)
+      ("operationValuesAdded("+name+")").println();
+      if not operationValueMaps->exists(operation | operation.name = name)
+      then
+        "does not exist yet".println();
+        let
+          result = opItem->tail()->head() then
+          text = node.nextOperationValue(name, result, XCore::String) then
+          map = OperationValueXText(class,opItem,name,text)
+        in
+          self.add(map);
+          text.new(node.operationValuesBox);
+          node.add(text)
+        end
+      end
+    end   
     
     @Operation generateOperations()
       @For operation in class.operations do
@@ -360,14 +368,6 @@ context ClassMapping
         self.metaslotsCreated := true
       end
     end    
-    
-    @Operation operationValuesShownChangedDaemon(obj,op,newVal,oldVal)
-      if newVal = true and not operationValuesCreated 
-      then
-        self.generateOperationValues();
-        self.operationValuesCreated := true
-      end
-    end
     
     @Operation nameChanged_classDiagramDaemon(obj,slot,newName,oldName)
       if node.name() <> newName.toString()
@@ -492,6 +492,14 @@ context ClassMapping
       then
         self.generateOperations();
         self.operationsCreated := true
+      end
+    end
+    
+    @Operation operationValuesShownChangedDaemon(obj,op,newVal,oldVal)
+      if newVal = true and not operationValuesCreated 
+      then
+        self.generateOperationValues();
+        self.operationValuesCreated := true
       end
     end
     

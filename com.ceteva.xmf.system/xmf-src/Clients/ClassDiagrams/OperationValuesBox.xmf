@@ -40,9 +40,9 @@ context ClassDiagrams
 //      end
 //    end
     
-    @Operation nextOperationValue(name,metaclass_)
-      "nextOperationValue() in OperationsValueBox".println()
-      //OperationGroup(name,metaclass_,5,self.displays->size * 16)
+    @Operation nextOperationValue(name,value)
+      ("nextOperationValue("+name+"/"+value+") in OperationsValueBox").println();
+      OperationValueGroup(name,value,5,self.displays->size * 16)
     end
     
     @Operation node()

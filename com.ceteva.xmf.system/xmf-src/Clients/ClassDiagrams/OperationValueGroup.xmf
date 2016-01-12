@@ -9,21 +9,22 @@ context ClassDiagrams
 
   @Class OperationValueGroup extends Group
   
-    @Attribute name : MetaslotName end
-    @Attribute value : MetaslotValue end
-    @Attribute type : Element end
+    @Attribute name : OperationValueName end
+    @Attribute value : OperationValueValue end
+//    @Attribute type : Element end
     
-    @Constructor(name,value,type,x,y) !
+    @Constructor(name,value,x,y) !
     
       // Expects to be supplied with name:String and value:String.
       
-      self.name := MetaslotName(name+" =",x+5,y);
-      if type.inheritsFrom(String)
-      then
-        self.value := StringMetaslotValue(value,x+50,y)
-      else
-        self.value := MetaslotValue(value,x+50,y)
-      end;
+      self.name := OperationValueName(name+" =",x+5,y);
+      self.value := OperationValueValue(value,x+50,y);
+      //if type.inheritsFrom(String)
+      //then
+      //  self.value := StringMetaslotValue(value,x+50,y)
+      //else
+      //  self.value := MetaslotValue(value,x+50,y)
+      //end;
       
       // A group should not have any Display attributes set.
       
@@ -75,6 +76,18 @@ context ClassDiagrams
     @Operation separator()
       // Between the name and the value...
       8
+    end 
+    
+    @Operation packWidth()
+    
+      // Called to shrink/expand the display element
+      // along the x-axis.
+      
+      @For display in displays do
+        display.packWidth();
+        self.resized(display)
+      end
+    
     end
    
   end

@@ -12,24 +12,26 @@ context ClassMapping
   @Class OperationValueXText extends ElementMap
   
     @Attribute object : Object end
-    @Attribute metaAttribute : XCore::Attribute end
+    //// @Attribute metaAttribute : XCore::Attribute end
+    @Attribute opItem : Seq end
+    @Attribute name : String end
     @Attribute text : MetaslotText end
     @Attribute daemonPairs : Seq(Seq(Element)) end
     
-    @Constructor(object,metaAttribute,text) ! 
+    @Constructor(object,name,opItem,text) ! 
       self.checkDaemons()  
     end
     
     @Operation checkDaemons()
       self.daemonPairs := Seq{};
-      @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object,metaAttribute.name().toString()) end;
+//      @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object,metaAttribute.name().toString()) end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
-      @SlotValueChanged multi once MetaslotXText::textChanged_classDiagram_MetaslotXText(text.value,"text") end;
+//      @SlotValueChanged multi once MetaslotXText::textChanged_classDiagram_MetaslotXText(text.value,"text") end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
       self
     end
     
-    @Operation parseText(newText)
+/*    @Operation parseText(newText)
       let
         type = metaAttribute.type;
         slotName = metaAttribute.name().toString()
@@ -50,7 +52,7 @@ context ClassMapping
         end;
         text.setValue(object.get(slotName).toString())
       end
-    end
+    end*/
     
     @Operation removeDaemons()
       // Called to tidy up when the mapping is no longer valid.
@@ -61,21 +63,21 @@ context ClassMapping
       self
     end
     
-    @Operation slotValueChanged_classDiagram_MetaslotXText(attribute,slot,newValue,oldValue)
+/*    @Operation operationValueChanged_classDiagram_MetaslotXText(attribute,slot,newValue,oldValue)
       if text.value.text.toString() <> newValue.toString() then
         text.setValue(newValue.toString())  
       end
-    end
+    end*/
     
-    @Operation textChanged_classDiagram_MetaslotXText(attribute,slot,newText,oldText)
+/*    @Operation textChanged_classDiagram_MetaslotXText(attribute,slot,newText,oldText)
       if newText.toString() <> oldText.toString() then
         self.parseText(newText)
       end
-    end
+    end*/
 
-    @Operation element()
+/*    @Operation element()
       Seq{object,metaAttribute}
-    end
+    end*/
 
     @Operation diagramElement()
       text
