@@ -82,7 +82,9 @@ context ClassMapping
     end
     
     @Operation addOperationValueMap(operationValueMap)
+      //"addOperationValueMap".println();
       self.addToOperationValueMaps(operationValueMap);
+      //self.operationValueMaps.println();
       operationValueMap.setOwner(self)
     end
 
@@ -272,17 +274,17 @@ context ClassMapping
     end
     
     @Operation generateOperationValues()
-      "generateOperationValues()".println();
-      self.getOpValues(class).println();
+      //"generateOperationValues()".println();
+      //self.getOpValues(class).println();
       @For item in self.getOpValues(class) do
         let
           name = item->head().name+"()"
           //result = item->tail()->head() then
           //text = node.nextMetaslot(name, result, XCore::String)
         in
-          ("add: " + name + "/" + item).println();
+          //("add: " + name + "/" + item).println();
           @WithoutRendering(node.owner)
-            "@WithoutRendering".println();
+            //"@WithoutRendering".println();
             self.operationValuesAdded(name, item)
             //text.new(node.operationValuesBox);
             //node.add(text)
@@ -292,14 +294,16 @@ context ClassMapping
     end
     
     @Operation operationValuesAdded(name, opItem)
-      ("operationValuesAdded("+name+")").println();
+//      name := name +"";
+//      ("operationValuesAdded("+name+")").println();
+//      self.operationValueMaps.println();
       if not operationValueMaps->exists(operation | operation.name = name)
       then
-        "does not exist yet".println();
+        //"does not exist yet".println();
         let
           result = opItem->tail()->head() then
           text = node.nextOperationValue(name, result, XCore::String) then
-          map = OperationValueXText(class,opItem,name,text)
+          map = OperationValueXText(class,name,opItem,text)
         in
           self.add(map);
           text.new(node.operationValuesBox);
@@ -308,7 +312,7 @@ context ClassMapping
       end
     end   
     
-    @Operation generateOperations()
+    @Operation generateOperations[a=1]()
       @For operation in class.operations do
         @WithoutRendering(node.owner)
           self.operationAdded(operation)

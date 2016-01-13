@@ -76,7 +76,20 @@ context OCL
     
     @Operation pprint(out,indent)
       let index = 0
-      in format(out,"@Operation ~S(",Seq{name});
+      in 
+         format(out,"@Operation ~S",Seq{name});
+         //self.println();
+         /*if 1 > 0 then //properties->size > 0 then 
+           format(out,"[");
+           @For p in properties do
+             p.pprint(out);
+             index := index + 1;
+             if index < properties->size then format(out,",") end
+           end;
+           format(out,"]")
+         end;*/
+         index := 0;
+         format(out,"(");
          @For p in parameters do
            p.pprint(out);
            index := index + 1;

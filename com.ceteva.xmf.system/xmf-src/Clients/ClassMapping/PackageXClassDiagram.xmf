@@ -212,6 +212,9 @@ context ClassMapping
           if node.showMetaslots then
             map.generateMetaslots()
           end;
+          if node.showOperationValues then
+            map.generateOperationValues()
+          end;
           node
         end
       end
@@ -766,6 +769,9 @@ context ClassMapping
           end;
           if classNode.showMetaslots then
             map.generateMetaslots()
+          end;
+          if classNode.showOperationValues then
+            map.generateOperationValues()
           end
         end
       end
