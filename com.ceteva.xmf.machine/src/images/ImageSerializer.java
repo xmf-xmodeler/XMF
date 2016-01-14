@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Stack;
 
 import threads.Thread;
@@ -65,7 +66,7 @@ public class ImageSerializer {
   // Date format...
 
   private String           dateFormat           = "E MMM dd hh:mm:ss Z yyyy";
-  private SimpleDateFormat sdf                  = new SimpleDateFormat(dateFormat);
+  private SimpleDateFormat sdf                  = new SimpleDateFormat(dateFormat, Locale.UK);
 
   public ImageSerializer(Machine machine) {
     this.machine = machine;
