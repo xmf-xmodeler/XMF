@@ -82,9 +82,7 @@ context ClassMapping
     end
     
     @Operation addOperationValueMap(operationValueMap)
-      //"addOperationValueMap".println();
       self.addToOperationValueMaps(operationValueMap);
-      //self.operationValueMaps.println();
       operationValueMap.setOwner(self)
     end
 
