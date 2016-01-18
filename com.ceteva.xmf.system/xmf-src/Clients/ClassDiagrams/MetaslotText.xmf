@@ -17,13 +17,14 @@ context ClassDiagrams
     
       // Expects to be supplied with name:String and value:String.
       
-      self.name := MetaslotName(name+" =",x+5,y);
-      if type.inheritsFrom(String)
-      then
-        self.value := StringMetaslotValue(value,x+50,y)
-      else
-        self.value := MetaslotValue(value,x+50,y)
-      end;
+      self.name := MetaslotName(name+" =",x+5,y+5);
+      //if type.inheritsFrom(String)
+      //then
+      //  self.value := StringMetaslotValue(value,x+50,y+2)
+      //else
+        self.value := MetaslotValue(value,x+50,y+3)
+      //end
+      ;
       
       // A group should not have any Display attributes set.
       
@@ -33,7 +34,7 @@ context ClassDiagrams
   
     @Operation addDisplays()
       self.add(name);
-      self.add(value)
+      self.add(value)//;      self.add(value.text())
     end
 
     @Operation moveDown()
