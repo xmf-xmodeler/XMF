@@ -76,7 +76,7 @@ context DiagramLayout
 		    name = null;
 		    x  = 0;
 		    y = 0;
-		    zoom = 200
+		    zoom = 200 // TODO find suitable conversion from dot's float coordinates to pixels 
 		  in
 			if l->head() = "graph" then
 			  scale := l->at(1);
@@ -97,27 +97,20 @@ context DiagramLayout
 					if "node"+node.id = name then
 						x := (x.asFloat() * zoom).round();
 						y := (y.asFloat() * zoom).round();
-						//node.x = x; // TODO make sure this shows in diagram (refresh diagram)  
-						//node.y = y;
-						node.setX(x);
+						node.setX(x); // does not immediately show in diagram
 						node.setY(y);
 		                print("* setting "+name+"("+x+","+y+")\n")
 					end
-				end			
+				end;
+				
+				diagram.renew() // TODO is this the right way to refresh the diagram? seems to be buggy: only works once, and then doubles buttons in toolbar			
 
 		      end
 			
 			else
 		      print("Parse error: 'graph' expected in line 1.\n")
 			end
-/*		    
- There are four types of statements.
 
- graph scale width height
- node name x y width height label style shape color fillcolor
- edge tail head n x1 y1 .. xn yn [label xl yl] style color
- stop
-*/	    
 		  end;
 		  tmpOutFile.deleteFile()
 		  //print("Done.")
@@ -157,3 +150,11 @@ digraph obj{
 
 }
 */
+/*		    
+ There are four types of statements.
+
+ graph scale width height
+ node name x y width height label style shape color fillcolor
+ edge tail head n x1 y1 .. xn yn [label xl yl] style color
+ stop
+*/	    
