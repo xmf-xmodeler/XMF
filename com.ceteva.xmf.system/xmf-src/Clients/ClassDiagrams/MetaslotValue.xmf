@@ -7,18 +7,46 @@ import ClassDiagrams;
 
 context ClassDiagrams
 
-  @Class MetaslotValue extends Text
-  
-    @Constructor(text,x,y)
-      self.init(Seq{text,x,y,true})
+  @Class MetaslotValue extends Box
+    @Attribute text  : Text end
+    @Attribute value : String end
+    
+    @Constructor(value,x,y)
+      self.init(Seq{x,y,20,12,0,Color(100,100,100),Color(255,255,255)});
+      self.text := Text(value,1,2,true,false,false,Color(30,130,60));//Seq{"value",x+3,y+3,true});
+      self.add(self.text);
+      self.showAllEdges()
     end
     
-/*    @Operation type()
-      try
-        text.parseAndEval()
-      catch(exception)
-        Element
+	@Operation expandWidth()
+      if self.width <> self.text.width + 2 then
+        self.resize(self.text.width + 2,height)
+      	end
+      end
+      
+  	@Operation text() text end
+      
+    @Operation expandHeight()
+      if self.height <> self.text.height then
+        self.resize(width,self.text.height)
       end
     end
-*/    
+    
+    @Operation maxWidth():XCore::Element
+       self.text.maxWidth() + 4
+    end    
+    
+    @Operation minWidth():XCore::Element
+       self.text.minWidth() + 4
+    end
+    
+    @Operation maxHeight():XCore::Element
+       self.text.maxHeight() + 4
+    end
+    
+    @Operation setText(name)
+      ("text: " + name).println();
+      self.text.setText(name)
+    end
+   
   end

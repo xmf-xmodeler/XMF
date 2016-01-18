@@ -6,22 +6,65 @@ import Diagrams;
 import ClassDiagrams;
 
 context ClassDiagrams
-
-  @Class OperationValueValue extends Text
   
-    @Constructor(text,x,y)
-      self.init(Seq{text,x,y,true})
+   @Class OperationValueValue extends Box
+		@Attribute value : Text end
+		@Attribute text : String end
+		
+		@Constructor(text,x,y)
+			//self.createText(text)	
+            self.value := Text(text,1,0,true,false,false,Color(255,60,60));
+			self.add(self.value);
+			self.fillColor := Color(0,0,0);
+			self.hideAllEdges();
+			self
+		end
+		
+		/*@Operation createText(text)	
+
+			self.value := Text(text,1,0,true,false,false,Color(0,100,20));
+			self.add(self.value)//;
+			//self.checkDaemons()
+		end*/
+		
+		@Operation maxWidth():XCore::Element
+      		self.value.maxWidth()+2
+   		 end
+   		 
+   		 @Operation minWidth():XCore::Element
+            self.value.minWidth()+2
+   		 end
+   		 
+   		@Operation maxHeight():XCore::Element
+      		self.value.maxHeight()
+    	end
+	
+  		@Operation valueChanged(obj, slot, new, old)
+            obj.text := new
+  			/*if new = " " or new = ""
+   			then
+   				@WithoutDaemons(instLevel)
+   					obj.text := " ";
+   					obj.renew(obj.owner)
+   				end;
+			   	obj.owner.setFillColor(Clients::Diagrams::Color())
+			else
+			    obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
+			end*/
+	  	end
+  	
+	  @Operation expandWidth()
+    
+      	if self.width <> self.value.width + 2 then
+        	self.resize(self.value.width + 2,height)
+      	end
+      end
+      
+    @Operation expandHeight()
+      
+      if self.height <> self.value.height then
+        self.resize(width,self.value.height)
+      end
     end
     
-    /*@Operation setText(newText)
-      let displayText = newText
-      in
-        displayText := self.addQuotes(displayText);
-        self.commandInterpreter().setTextCommand(self,displayText);
-        self.text := newText;
-        self.calculateSize();
-        owner.resized(self)
-      end
-    end*/
-  
-  end
+   end
