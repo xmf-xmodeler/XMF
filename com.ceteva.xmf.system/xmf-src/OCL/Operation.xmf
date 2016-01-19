@@ -30,6 +30,7 @@ context OCL
     @Attribute performable   : Performable            end
     @Attribute documentation : Performable            end
     @Attribute imports       : Seq(Seq(String)) (!,?) end
+    @Attribute properties    : Seq(Object) (!,?)      end
     
     @Constructor(name,parameters,type) end
     
@@ -39,7 +40,9 @@ context OCL
     
     @Constructor(name,parameters,type,performable,documentation,isMultiArgs) end
     
-    @Constructor(name,parameters,type,performable,documentation,isMultiArgs,imports) ! end
+    @Constructor(name,parameters,type,performable,documentation,isMultiArgs,imports) end
+    
+    @Constructor(name,parameters,type,performable,documentation,isMultiArgs,imports,properties) ! end
     
     @Operation add(element)
     

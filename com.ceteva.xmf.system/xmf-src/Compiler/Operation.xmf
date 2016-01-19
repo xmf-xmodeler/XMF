@@ -132,7 +132,7 @@ context Operation
            Symbol do StrExp(name.name) end
            else throw TypeError(name,String)
          end
-    in Apply(self.typeExp(),Seq{nameExp,self.liftParameters(),type.lift(),performable.lift(),self.doc().lift(),BoolExp(isMultiArgs),imports.lift()})
+    in Apply(self.typeExp(),Seq{nameExp,self.liftParameters(),type.lift(),performable.lift(),self.doc().lift(),BoolExp(isMultiArgs),imports.lift(),properties.lift()})
     end
   end 
   

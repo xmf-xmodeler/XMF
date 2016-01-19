@@ -72,7 +72,7 @@ context XCore::Operation
       
       // Create the operation...
       
-      { ps->iterate(p x = Operation(name,args + multi,type).add(body).setIsMultiArgs(not multi->isEmpty).setImports(p.imports->excluding(XCore)->excluding(Root)->map("pathSeq")) |
+      { ps->iterate(p x = Operation(name,args + multi,type).add(body).setIsMultiArgs(not multi->isEmpty).setImports(p.imports->excluding(XCore)->excluding(Root)->map("pathSeq")).setProperties(ps) |
             [| <x>.setProperty(<StrExp(p->at(0))>,<p->at(1)>) |]
         )
       }.

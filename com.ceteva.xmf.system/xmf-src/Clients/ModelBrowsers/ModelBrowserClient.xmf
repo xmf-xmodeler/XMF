@@ -16,14 +16,6 @@ context ModelBrowsers
       self.setCommandInterpreter(ModelBrowserCommandInterpreter());
       self.setEventHandler(ModelBrowserEventHandler())
     end
-
-    @Operation allModelBrowsers():Set(ModelBrowser)
-      modelBrowsers->asSet->union(browsersWithFocus->asSet)
-    end
-
-    @Operation allModelBrowsersByRootType(class:Classifier):Set(ModelBrowser)
-      self.allModelBrowsers()->select(m | m.element.isKindOf(class))
-    end
     
     @Operation add(modelBrowser)
       self.modelBrowsers := modelBrowsers->prepend(modelBrowser);

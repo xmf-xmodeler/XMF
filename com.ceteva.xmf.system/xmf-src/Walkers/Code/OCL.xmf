@@ -257,7 +257,7 @@ context Code
       ]
     end
 
-    @Operation walkOperation(documentation:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,parameters:Seq(Pattern),performable:Performable,type:TypeExp,arg)
+    @Operation walkOperation(documentation:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,parameters:Seq(Pattern),performable:Performable,type:TypeExp,properties,arg)
       Operation[
         documentation=self.walk(documentation,arg),
         imports=imports->collect(x | self.walk(x,arg)),
@@ -265,7 +265,8 @@ context Code
         name=self.walk(name,arg),
         parameters=parameters->collect(x | self.walk(x,arg)),
         performable=self.walk(performable,arg),
-        type=self.walk(type,arg)
+        type=self.walk(type,arg),
+        properties=self.walk(properties,arg)
       ]
     end
 
@@ -508,8 +509,8 @@ context Code
         OpType[domains,range] do
           self.walkOpType(domains,range,arg)
         end
-        Operation[documentation,imports,isMultiArgs,name,parameters,performable,type] do
-          self.walkOperation(documentation,imports,isMultiArgs,name,parameters,performable,type,arg)
+        Operation[documentation,imports,isMultiArgs,name,parameters,performable,type,properties] do
+          self.walkOperation(documentation,imports,isMultiArgs,name,parameters,performable,type,properties,arg)
         end
         Order[first,second] do
           self.walkOrder(first,second,arg)
