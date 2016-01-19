@@ -25,6 +25,7 @@ context DiagramLayout
 	  let
 
 		// TODO: get these from config
+		
 	    tmpDir = "/tmp"; 			
 	    dotExe = "/usr/bin/dot";
 
@@ -46,11 +47,11 @@ context DiagramLayout
 			format(fout, "}")
 		end;
 		
-		Kernel_exec("/usr/bin/dot", Seq{"-O", "-Tplain", tmpDotFile}); // -O outputs *.plain file
+		Kernel_exec(dotExe, Seq{"-O", "-Tplain", tmpDotFile}); // -O outputs *.plain file
 		
 		//print("Waiting for result...\n");
 		@While ( (not tmpOutAvailable) and (waitCounter <= 20) ) do
-	      @Count i from 0 to 100000 do i end; // TODO non-polling way to wait
+	      @Count i from 0 to 100000 do i end; // TODO non-busy way to wait
 		  tmpOutAvailable := tmpOutFile.fileExists();
 		  if not tmpOutAvailable then
 		    waitCounter := waitCounter + 1;
@@ -62,13 +63,56 @@ context DiagramLayout
 		
 		  //print("Parsing result...\n");
 		  let
-		    s = tmpOutFile.readFile()
+		    s = tmpOutFile.readFile() then
+		    lines = s.splitBy("\n",0,0) then
+		    line = lines->head() then // first line
+		    lines = lines->tail() then
+		    l = line.splitBy(" ",0,0) then
+		    line = lines->head() then // second line
+		    lines = lines->tail();
+		    scale = 1;
+		    width = 1;
+		    height = 1;
+		    name = null;
+		    x  = 0;
+		    y = 0;
+		    zoom = 200 // TODO find suitable conversion from dot's float coordinates to pixels 
 		  in
-		    print(s+"\n")
-		    
-		    // TODO parse and set nodes' positions
-		    
-		  end
+			if l->head() = "graph" then
+			  scale := l->at(1);
+			  width := l->at(2);
+			  height := l->at(3);
+
+			  l := line.splitBy(" ",0,0); // second line
+		      
+		      @While l->head() = "node" do
+				name := l->at(1);
+				x := l->at(2);
+				y := l->at(3);
+		        line := lines->head();
+				lines := lines->tail();
+				l := line.splitBy(" ",0,0);
+
+				@For node in diagram.graph.nodes do
+					if "node"+node.id = name then
+						x := (x.asFloat() * zoom).round();
+						y := (y.asFloat() * zoom).round();
+						node.setX(x); // does not immediately show in diagram
+						node.setY(y);
+		                print("* setting "+name+"("+x+","+y+")\n")
+					end
+				end;
+				
+				diagram.renew() // TODO is this the right way to refresh the diagram? seems to be buggy: only works once, and then doubles buttons in toolbar			
+
+		      end
+			
+			else
+		      print("Parse error: 'graph' expected in line 1.\n")
+			end
+
+		  end;
+		  tmpOutFile.deleteFile()
 		  //print("Done.")
 		  
 		else
@@ -106,3 +150,11 @@ digraph obj{
 
 }
 */
+/*		    
+ There are four types of statements.
+
+ graph scale width height
+ node name x y width height label style shape color fillcolor
+ edge tail head n x1 y1 .. xn yn [label xl yl] style color
+ stop
+*/	    
