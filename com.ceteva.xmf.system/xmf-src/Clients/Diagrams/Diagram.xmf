@@ -770,7 +770,7 @@ context Diagrams
     
     @Operation renew()
       let diagram = self.getTopLevelDiagram() 
-      in 
+      in
         if not diagram.isOpen 
         then
           self.isOpen := true;
@@ -779,7 +779,7 @@ context Diagrams
             @Command(diagram) newDiagramCommand(diagram) end;
             diagram.refreshBackgroundColor();    
             @WithoutRendering(diagram)
-              diagram.defineToolGroups();
+              //diagram.defineToolGroups();
               diagram.graph.renew(diagram);
               diagram.setRightClickMenu();
 	          diagram.renewZoom();
