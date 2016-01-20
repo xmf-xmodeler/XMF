@@ -245,7 +245,23 @@ context ClassMapping
         end
       end
       
-    end    
+    end 
+       
+    @Operation opDoesMonitor(operation)
+      let
+        properties = op.properties();
+        monitorTagFound = false
+      in 
+        @For property in properties do  
+          if property->head() = "monitor"
+          then if property->tail() = true
+            then monitorTagFound := true
+            end
+          end
+        end;
+        monitorTagFound
+      end      
+    end
     
     @Operation getOpValues(object)
       let 
@@ -254,7 +270,8 @@ context ClassMapping
       in
         @For op in ops do  
           if op.arity = 0 
-            and op.name.toString().hasPrefix("monitor_")
+            and self.opDoesMonitor(op)
+            //and op.name.toString().hasPrefix("monitor_")
           then     
             let 
               result = op.invoke(object,{})
