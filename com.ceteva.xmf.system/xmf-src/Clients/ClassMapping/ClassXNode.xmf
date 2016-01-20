@@ -249,7 +249,7 @@ context ClassMapping
        
     @Operation opDoesMonitor(operation)
       let
-        properties = op.properties();
+        properties = operation.properties();
         monitorTagFound = false
       in 
         @For property in properties do  
