@@ -7,6 +7,42 @@ context DiagramLayout
 
 @Class GraphVizLayouter 
 
+	@Operation getXMFProperty(name)  // TODO move to XMF.xmf
+      let result = null
+      in
+	  @For p in xmf.properties do
+	    if p->head() = name then
+          result := p->tail()
+	    end
+	  end;
+	  result
+      end
+	end
+
+	@Operation getXMFArg(name)  // TODO move to XMF.xmf
+      let result = null
+      in
+	  @For p in GraphVizLayouter::getXMFProperty("allArgs") do
+	    if p->head() = name then
+          result := p->tail()
+	    end
+	  end;
+	  result
+      end
+	end
+
+	@Operation getTmpDir()  // TODO move to XMF.xmf
+      let 
+        tmpDir = GraphVizLayouter::getXMFArg("tmp");
+        javaSystem = xmf.javaClass("java.lang.System")
+      in
+        if tmpDir = null then
+          tmpDir := javaSystem.getProperties().get("java.io.tmpdir")
+        end;
+        tmpDir
+      end
+	end
+
 	@Operation classnameToArrowhead(classname)
 	  let
 	    c = classname.toString()
@@ -23,18 +59,21 @@ context DiagramLayout
 
 	@Operation performLayout(diagram:Diagram)
 	  let
-
-		// TODO: get these from config
-		
-	    tmpDir = "/tmp"; 			
-	    dotExe = "/usr/bin/dot";
+	    //tmpDir = "/tmp"; 			
+		tmpDir = GraphVizLayouter::getTmpDir();
+	    //dotExe = "/usr/bin/dot";
+		dotExe = GraphVizLayouter::getXMFArg("graphviz");
+	    zoom = 150; // TODO find suitable conversion from dot's float coordinates to pixels,  maybe make configurable
 
         rnd = (Float::random() * 1000000).round() then
         tmpDotFile = tmpDir + "/tmp" + rnd + ".dot" then
         tmpOutFile = tmpDotFile + ".plain";
         tmpOutAvailable = false;
         waitCounter = 0
-	  in  
+	  in
+	    if dotExe = null then
+	      xmf.message("Cannot perform auto-layout: the GraphViz executable is not configured, please provide the path of dot.exe in argument 'graphviz'")
+	    else
 		//print("Doing the layout for "+diagram.of()+ ", number of nodes "+diagram.graph.nodes->size+" from temp file "+tmpDotFile+" to "+tmpOutFile+"\n");
 		@WithOpenFile(fout -> tmpDotFile)
 			format(fout, "digraph g {\n");
@@ -75,8 +114,7 @@ context DiagramLayout
 		    height = 1;
 		    name = null;
 		    x  = 0;
-		    y = 0;
-		    zoom = 200 // TODO find suitable conversion from dot's float coordinates to pixels 
+		    y = 0
 		  in
 			if l->head() = "graph" then
 			  scale := l->at(1);
@@ -97,14 +135,13 @@ context DiagramLayout
 					if "node"+node.id = name then
 						x := (x.asFloat() * zoom).round();
 						y := (y.asFloat() * zoom).round();
-						node.setX(x); // does not immediately show in diagram
-						node.setY(y);
-		                print("* setting "+name+"("+x+","+y+")\n")
+						node.move(x,y)
+		                //print("* setting "+name+"("+x+","+y+")\n")
+		            //else
+		                //print("("+name+" != "+node.id+")\n")
 					end
-				end;
+				end
 				
-				diagram.renew() // TODO is this the right way to refresh the diagram? seems to be buggy: only works once, and then doubles buttons in toolbar			
-
 		      end
 			
 			else
@@ -118,7 +155,7 @@ context DiagramLayout
 		else
 		  print("Error: temporary file "+tmpOutFile+" not available after 20 tries. Operation canceled.\n")
 	    end
-	    
+	    end
 	  end
 	end
 
