@@ -97,14 +97,13 @@ context DiagramLayout
 					if "node"+node.id = name then
 						x := (x.asFloat() * zoom).round();
 						y := (y.asFloat() * zoom).round();
-						node.setX(x); // does not immediately show in diagram
-						node.setY(y);
-		                print("* setting "+name+"("+x+","+y+")\n")
+						node.move(x,y)
+		                //print("* setting "+name+"("+x+","+y+")\n")
+		            else
+		                //print("("+name+" != "+node.id+")\n")
 					end
-				end;
+				end
 				
-				diagram.renew() // TODO is this the right way to refresh the diagram? seems to be buggy: only works once, and then doubles buttons in toolbar			
-
 		      end
 			
 			else
