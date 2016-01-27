@@ -180,7 +180,7 @@ context ClassMapping
       @SlotValueChanged multi once   ClassXNode::nameChangedDaemon(node.name.name,"text")               end;
       @SlotValueChanged multi once   ClassXNode::attributesShownChangedDaemon(node.attBox,"shown")      end;
       @SlotValueChanged multi once   ClassXNode::opsShownChangedDaemon(node.opsBox,"shown")             end;
-      @SlotValueChanged multi once   ClassXNode::metaSlotsShownChangedDaemon(node.metaslotsBox,"shown") end
+      @SlotValueChanged multi once   ClassXNode::metaSlotsShownChangedDaemon(node.metaslotsBox,"shown") end;
       @SlotValueChanged multi once   ClassXNode::operationValuesShownChangedDaemon(node.operationValuesBox,"shown") end
     end
     
@@ -277,7 +277,7 @@ context ClassMapping
               result = op.invoke(object,{})
             in
               let 
-                seq = Seq{op, result.toString()}
+                seq = Seq{op, result}
               in
                 set := set.union({seq})
               end
@@ -317,7 +317,7 @@ context ClassMapping
         //"does not exist yet".println();
         let
           result = opItem->tail()->head() then
-          text = node.nextOperationValue(name, result, XCore::String) then
+          text = node.nextOperationValue(name, result, opItem->head()) then
           map = OperationValueXText(class,name,opItem,text)
         in
           self.add(map);
@@ -580,5 +580,17 @@ context ClassMapping
       attributeMaps +
       operationMaps
     end
-
+    
+        
+    @Operation refresh() 
+      @For mapping in operationValueMaps do
+        let 
+        result = mapping.opItem->head().invoke(class,{}); 
+        group = mapping.text
+        in
+        group.value.setTextAndColor(result)
+        //; group.value.value.setColor(Color(255,200,60))
+        end
+      end
+    end
   end

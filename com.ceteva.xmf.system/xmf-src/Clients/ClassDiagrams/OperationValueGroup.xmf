@@ -11,14 +11,21 @@ context ClassDiagrams
   
     @Attribute name : OperationValueName end
     @Attribute value : OperationValueValue end
+    @Attribute operation : Operation end
 //    @Attribute type : Element end
     
-    @Constructor(name,value,x,y) !
+    @Constructor(name,value,operation,x,y) !
     
       // Expects to be supplied with name:String and value:String.
       
+      self.operation := operation;
       self.name := OperationValueName(name+" =",x+5,y+3);
-      self.value := OperationValueValue(value,x+50,y+3);
+      let
+        min = self.getOpProp(operation, "monitorMin");
+        max = self.getOpProp(operation, "monitorMax")
+      in
+        self.value := OperationValueValue(value,x+50,y+3, min, max)
+      end;
       
       // A group should not have any Display attributes set.
       
@@ -82,6 +89,29 @@ context ClassDiagrams
         self.resized(display)
       end
     
+    end
+    
+    @Operation refresh() 
+     ("OperationValueGroup refresh..." + self).println()
+     let result = op.invoke(object,{})
+     in self.value.setText(result)
+     end
+    end
+    
+    @Operation getOpProp(operation, name)
+      let
+        properties = operation.properties();
+        tagFound = null
+      in 
+        @For property in properties do  
+          if property->head() = name
+          //then if property->tail() = true
+            then tagFound := property->tail()
+          //  end
+          end
+        end;
+        tagFound
+      end      
     end
    
   end

@@ -174,8 +174,8 @@ context ClassDiagrams
        metaslotsBox.nextMetaslot(name,value,type)
      end
      
-     @Operation nextOperationValue(name,value,type)
-       operationValuesBox.nextOperationValue(name,value)
+     @Operation nextOperationValue(name,value,operation)
+       operationValuesBox.nextOperationValue(name,value,operation)
      end
 
      @Operation packHeight()
@@ -334,6 +334,7 @@ context ClassDiagrams
     end
     
     @Operation showOperationValues(show)
+      self.showOperationValues := show;
       @WithoutRendering(self.owner)
         operationValuesBox.setShown(show);
         self.pack()

@@ -407,6 +407,11 @@ context Diagrams
       @Command(self) setEdgeSourceCommand(self,self.source) end
     end
     
+    @Doc
+      Straightens the edge. 
+      This operation prepares the recursive call 
+      of the Operation "straightenEdge(waypoint,wayPoints)" below.
+    end
     @Operation straighten()
       if not wayPoints->isEmpty
       then
@@ -414,6 +419,22 @@ context Diagrams
       end
     end
     
+    @Doc
+      Straightens the edge by comparing a given waypoint to the next 
+      waypoint from the list waypoints, which is supposed to hold the 
+      remaining waypoints of this edge. The next waypoint is then moved
+      on the x- or y-axis to the point where it is on the same x- or y-axis 
+      as the waypoint before, where the position on the other axis is kept. 
+      It is moved on that axis which requires less movement.
+      	After that the procedure is repeated on the remaining waypoints.
+      If the list of remaining waypoints is empty the nex cycle will stop 
+      the recursion.
+      
+      This operation should not be accessed externally as it is the 
+      iterating part od a recursion. It should only be used by the 
+      counterpart operation which will do the initialisation of the 
+      recursion.
+    end
     @Operation straightenEdge(waypoint,wayPoints)
       if not wayPoints->isEmpty
       then
@@ -431,6 +452,7 @@ context Diagrams
         end
       end
     end
+
     
     @Operation synchronise()
       let

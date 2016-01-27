@@ -542,6 +542,12 @@ context Diagrams
       @SendCommand(self)
         setLineColor(element.id(),lineColor.red(),lineColor.green(),lineColor.blue())
       end
+    end    
+    
+    @Operation setTextColor(element,textColor)
+      @SendCommand(self)
+        setTextColor(element.id(),textColor.red(),textColor.green(),textColor.blue())
+      end
     end
     
     @Operation setImage(image)

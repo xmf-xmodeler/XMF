@@ -173,6 +173,7 @@ context Diagrams
     @Operation defineActions()
       // Actions are buttons that do something when pressed...
       self.defineToolGroup("Actions");
+      self.defineActionHandler("Actions","Update","update","Mapping/update.png",Diagram::updateValues);
       self.defineActionHandler("Actions","Zoom +","zoom in","MDC/ZoomIn.png",Diagram::zoomIn);
       self.defineActionHandler("Actions","Zoom 1","zoom one","MDC/ZoomOne.png",Diagram::zoomOne);
       self.defineActionHandler("Actions","Zoom -","zoom out","MDC/ZoomOut.png",Diagram::zoomOut);
@@ -1020,6 +1021,17 @@ context Diagrams
     
     @Operation zoomOut()
       @Command(self) zoomOut(self) end
+    end
+    
+    @Operation updateValues()
+              //owner.classMaps // PackageXMappingDiagram --> ClassXNode
+      //"Update Diagram from Model".println();
+      // graph.nodes.println();
+      @For node in owner.classMaps do
+        node.refresh()
+      end
+      //"Update Diagram from Model".println()
+      //@Command(self) updateValues(self) end
     end
     
     @Operation zoomToFit()

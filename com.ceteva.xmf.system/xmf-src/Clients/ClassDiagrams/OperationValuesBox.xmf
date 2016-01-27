@@ -33,8 +33,8 @@ context ClassDiagrams
       end
     end
     
-    @Operation nextOperationValue(name,value)
-      OperationValueGroup(name,value,5,self.displays->size * 16)
+    @Operation nextOperationValue(name,value,operation)
+      OperationValueGroup(name,value,operation,5,self.displays->size * 16)
     end
     
     @Operation node()
@@ -50,5 +50,15 @@ context ClassDiagrams
       end;
       self.classNode().packHeight()
     end
-       
+    
+    @Operation refresh() 
+     ("OperationValuesBox refresh...").println();
+      @For display in displays do
+        //("display "+ display).println();
+        if display.isKindOf(OperationValueGroup)
+        then display.refresh()
+        end
+      end
+    end
+    
   end

@@ -87,5 +87,8 @@ context DiagramsMapping
     @Operation selectedChangedDaemon(node,slot,newSelected,oldSelected)
       self.element().selectModelBrowserNode(newSelected)
     end
+    
+            
+    @Operation refresh() null end
 
   end
