@@ -29,6 +29,12 @@ context Class
 				in
 					if sd <> null
 					then
+						if sd.isDeleteSlotValues()
+						then
+							self.deleteSlotAtInstance(n, sd.getInstantiationLayer())
+						else
+							false
+						end;
 						self.removeIntrinsic(n, sd.getDeletionUntilLayer())
 					else
 						xmf.message("Operation canceled by user")
@@ -49,4 +55,41 @@ context Class
         end
       end
     end
+
+context Class
+@Operation deleteSlotAtInstance(a: Attribute, instLevel : Integer):XCore::Element
+	if self.level > (instLevel+1)
+	then
+		a.intrinsicChildren->iterate(c x=0 | c.owner.deleteSlotAtInstance(c, instLevel))
+	else
+		self.allInstances()->iterate(c x=0 | c.deleteSlot(a))
+	end
+end	
+	
+context Class
+@Operation deleteSlot(a: Attribute):XCore::Element
+	self.removeStructuralFeature(a.name.toString());	
+	@For daemon in self.daemons() do
+		//"daemonSchleife".println();
+		if not daemon.type = Daemon::ANY and daemon.slot.toString() = a.name.toString()
+		then
+			//"richtigerDaemon".println();
+			@For metaslotLabel in daemon.target.get(self) do
+				//"metaslot".println();	
+				@For metaAtt in self.of().attributes do
+					//"Attribute".println();			
+					if metaAtt.name.toString() = a.name.toString()
+					then
+						//"richtiges Attribut".println();
+						metaslotLabel.owner.metaslotRemoved(metaAtt)
+					else
+						false
+					end
+				end
+			end
+		else
+			false
+		end
+	end
+end
 

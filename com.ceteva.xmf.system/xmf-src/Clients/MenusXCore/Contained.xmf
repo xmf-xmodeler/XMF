@@ -66,6 +66,11 @@ context Contained
   @Operation delete_client_check()
     let name = if self.isKindOf(NamedElement) then self.name() else self.toString() end
     in
-      xmf.question("Are you sure you want to delete " + name + "?")
+    	if self.isKindOf(Attribute) andthen self.isIntrinsic
+    	then 
+    		true
+    	else 
+			xmf.question("Are you sure you want to delete " + name + "?")
+    	end	
     end
   end
