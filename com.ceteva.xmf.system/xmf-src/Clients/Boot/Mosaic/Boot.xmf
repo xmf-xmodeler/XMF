@@ -58,6 +58,8 @@ try
      then format(stdout,"[ Mosaic Build Completed. ]~%")
      else 
      
+       xmf.setProperty("allArgs",startup); // make arguments accessible from running system, Jens
+     
        // When the image restarts the command line -arg name:value arguments are passed
        // as a sequence of name-value pairs as the value of startup.
      
