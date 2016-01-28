@@ -83,6 +83,42 @@ context Root
       self.buildDate := self.date()
     end
     
+ 	@Operation getConfigProperty(name)
+      let result = null
+      in
+	  @For p in xmf.properties do
+	    if p->head() = name then
+          result := p->tail()
+	    end
+	  end;
+	  result
+      end
+	end
+
+	@Operation getConfigArg(name)
+      let result = null
+      in
+	  @For p in XMF::getConfigProperty("allArgs") do
+	    if p->head() = name then
+          result := p->tail()
+	    end
+	  end;
+	  result
+      end
+	end
+
+	@Operation getTmpDir()
+      let 
+        tmpDir = XMF::getConfigArg("tmp");
+        javaSystem = xmf.javaClass("java.lang.System")
+      in
+        if tmpDir = null then
+          tmpDir := javaSystem.getProperties().get("java.io.tmpdir")
+        end;
+        tmpDir
+      end
+	end
+
     @Operation basicBanner():String
       "XMF"
     end
