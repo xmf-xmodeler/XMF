@@ -141,6 +141,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbQueryNext", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbQueryPrevious", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbQueryClose", 1));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_delay", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_deleteFile", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_die", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dirContents", 2));
@@ -1020,6 +1021,17 @@ public class ForeignFuns implements Value, Instr, Errors {
 
   public static void Kernel_dbUpdate(Machine machine) {
     Database.update(machine);
+  }
+
+  public static void Kernel_delay(Machine machine) {
+	  int millis = machine.frameLocal(0);
+	  int milliseconds = Machine.value(millis);
+	  try {
+		  java.lang.Thread.sleep(milliseconds);
+	  } catch (InterruptedException ie) {
+		  
+	  }
+	  machine.popFrame();
   }
 
   public static void Kernel_deleteFile(Machine machine) {

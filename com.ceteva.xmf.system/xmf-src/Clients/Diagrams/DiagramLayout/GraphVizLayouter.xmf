@@ -52,7 +52,7 @@ context DiagramLayout
 		
 		//print("Waiting for result...\n");
 		@While ( (not tmpOutAvailable) and (waitCounter <= 20) ) do
-	      @Count i from 0 to 100000 do i end; // TODO non-busy way to wait
+          xmf.delay(50); // wait until file is there
 		  tmpOutAvailable := tmpOutFile.fileExists();
 		  if not tmpOutAvailable then
 		    waitCounter := waitCounter + 1;

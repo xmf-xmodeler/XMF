@@ -119,6 +119,10 @@ context Root
       end
 	end
 
+    @Operation delay(milliseconds)
+      Kernel_delay(milliseconds)
+    end
+    
     @Operation basicBanner():String
       "XMF"
     end
