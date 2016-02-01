@@ -42,7 +42,12 @@ context NameSpace
     then self.addBinding(element)
     elseif element.isKindOf(NamedElement)
     then
-      element.setOwner(self);
+      if element.isKindOf(Attribute) 
+      then 
+		false
+	else
+		element.setOwner(self)
+    end;
       contents.put(element.name,element);
       Kernel_objSetSaveAsLookup(element,true);
       self

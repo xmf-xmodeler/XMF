@@ -1,19 +1,34 @@
 parserImport XOCL;
 
+Class.remove(Class.operations->select(c | c.name().toString() = "addAttribute")->asSeq->head);
 Class.remove(Class.operations->select(c | c.name().toString() = "remove")->asSeq->head);
 
 context Class
-@Operation removeIntrinsic(a: Attribute, deleteLevel: Integer)
-if a.owner.level > deleteLevel
-then
-	a.intrinsicChildren->iterate(c x=0 | c.owner.removeIntrinsic(c, deleteLevel))
-else
-	a.intrinsicChildren->iterate(c x=0 | c.intrinsicParent := null)
-end;
-a.owner.contents.remove(a.name());
-a.removeFromOwner();
-self.removeAttribute(a)
-end
+@Operation addAttribute(a : Attribute):Classifier
+      self.resolveNameClash(a.name,attributes);
+	  //if(a.isIntrinsic)
+	  //then
+		//a.owner.level.println();
+		//">".println();
+		//self.level.println()
+	  //end;
+      if(a.isIntrinsic andthen a.owner.level > self.level)
+	  then
+		//"true".println();
+		//a.owner.println();
+		false
+	  else
+		//"false".println();
+		//a.owner.println();
+		a.setOwner(self);
+		//a.owner.println();
+		true
+	  end;
+	  //"after".println();
+	  //a.owner.println();
+      self.attributes := attributes->including(a);
+      self
+    end
 
 context Class
 @Operation remove(n : NamedElement):Classifier
@@ -21,24 +36,20 @@ context Class
       then
         if n.isIntrinsic
 		then
-			if n.intrinsicParent <> null
-			then
-				xmf.message("You can only delete intrinsic attributes from the topmost layer!")
-			else
-					let sd = xmf.javaClass("de.unidue.icb.xmf.multilevel.gui.SpecificDeletionDialog").showDialog(n.owner.level.asInt(),n.instLevel.asInt())
-				in
-					if sd <> null
+			let sd = xmf.javaClass("de.unidue.icb.xmf.multilevel.gui.SpecificDeletionDialog").showDialog(n.owner.level.asInt(),n.instLevel.asInt())
+			in
+				if sd <> null //TODO
+				then
+					if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
 					then
-						if sd.isDeleteSlotValues()
-						then
-							self.deleteSlotAtInstance(n, sd.getInstantiationLayer())
-						else
-							false
-						end;
-						self.removeIntrinsic(n, sd.getDeletionUntilLayer())
+						self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
+						self.removeAttribute(n)
 					else
-						xmf.message("Operation canceled by user")
+						self.removeAttribute(n);
+						self.addIntrinsicAttributeAtLevel(n,sd.getInstantiationLayer()-1)
 					end
+				else
+					xmf.message("Operation canceled by user")
 				end
 			end
 		else
@@ -57,12 +68,27 @@ context Class
     end
 
 context Class
-@Operation deleteSlotAtInstance(a: Attribute, instLevel : Integer):XCore::Element
-	if self.level > (instLevel+1)
+@Operation  addIntrinsicAttributeAtLevel(a: Attribute, addLevel : Integer)
+	if self.level > addLevel
 	then
-		a.intrinsicChildren->iterate(c x=0 | c.owner.deleteSlotAtInstance(c, instLevel))
+		self.allInstances()->iterate(c x=0 | c.addIntrinsicAttributeAtLevel(a,addLevel))
 	else
-		self.allInstances()->iterate(c x=0 | c.deleteSlot(a))
+		let newIntA = Attribute(a.name,a.type)
+		in
+			newIntA.isIntrinsic := a.isIntrinsic;
+			newIntA.instLevel := a.instLevel;
+			o.add(newIntA)
+		end
+	end
+end
+	
+context Class 
+@Operation deleteSlotAtInstance(a: Attribute, instLevel : Integer):XCore::Element
+	if self.level > instLevel
+	then
+		self.allInstances()->iterate(c x=0 | c.deleteSlotAtInstance(a,instLevel))
+	else
+		self.deleteSlot(a)
 	end
 end	
 	

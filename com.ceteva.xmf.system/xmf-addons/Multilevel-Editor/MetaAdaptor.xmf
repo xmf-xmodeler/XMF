@@ -17,13 +17,13 @@ context Root::Extensions
     //@Attribute model : 1..1 Model end
 
 	@Operation new():Object
-	      let o = Kernel_mkObj();
+      let o = Kernel_mkObj();
           A = self.allAttributes();
           intrinsicA = Set{}
       in Kernel_setOf(o,self);
          @While not A->isEmpty do
            let a = A->sel
-           in if a.isIntrinsic and a.instLevel < o.of().level - 1
+           in if a.isIntrinsic andthen a.instLevel < o.of().level - 1
               then
                 intrinsicA := intrinsicA.including(a)
               else
@@ -44,7 +44,7 @@ context Root::Extensions
            false
          end;
          o.init();
-         if self.of() = Extensions::MetaAdaptor
+		 if self.of() = Extensions::MetaAdaptor
          then
            o.level := xmf.getInteger("Metaebene","Auf welcher Metaebene soll sich diese Entität befinden?",3);
            o.addParent(FMML::MetaClass)
@@ -65,17 +65,19 @@ context Root::Extensions
          end;
          @While not intrinsicA.isEmpty() do
            let intA = intrinsicA.sel()
-           in let newIntA = Attribute(intA.name,intA.type)
-               in
-                newIntA.isIntrinsic := intA.isIntrinsic;
-                newIntA.instLevel := intA.instLevel;
-                newIntA.intrinsicParent := intA;
-                intA.intrinsicChildren := intA.intrinsicChildren.including(newIntA);
-                o.add(newIntA)
-               end;
+           in 
+			   //let newIntA = Attribute(intA.name,intA.type)
+			   //in
+			//	newIntA.isIntrinsic := intA.isIntrinsic;
+			//	newIntA.instLevel := intA.instLevel;
+			//	newIntA.intrinsicParent := intA;
+			//	intA.intrinsicChildren := intA.intrinsicChildren.including(newIntA);
+			//	o.add(newIntA)
+			//   end;
+			o.add(intA);
               intrinsicA := intrinsicA.excluding(intA)
            end
-         end;
+		 end;
          if Root.contents.keys().includes("TargetPackage".asSymbol())
          then
            TargetPackage.add(o)

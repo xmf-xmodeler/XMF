@@ -46,7 +46,12 @@ context Classifier
       self.addConstraint(n); 
       super(n)
     else 
-      n.setOwner(self); 
+      if n.isKindOf(Attribute) 
+      then 
+		false
+	  else
+        n.setOwner(self)
+      end;  
       super(n)
     end
   end
