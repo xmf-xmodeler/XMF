@@ -179,34 +179,56 @@ context AttributeXText //ADDED BB
         false
       end      
     end	
+    
+context ClassXNode
+  @Operation setColor(level:Integer)
+    if level >= 5
+    then Color::makeHSV(0.3+((level*2.0)/(1.0+5.0.sqrt())), (4.0/level), 1.0-(2.5/level)).println();
+         (0.3+((level*2.0)/(1.0+5.0.sqrt()))).println();
+         node.name.name.setColor(white); node.name.setFillColor(Color::makeHSV(0.3+((level*2.0)/(1.0+5.0.sqrt())), (4.0/level), 1.0-(2.5/level)))
+    elseif level = 4
+    then node.name.name.setColor(white); node.name.setFillColor(red)
+    elseif level = 3
+    then node.name.name.setColor(white); node.name.setFillColor(blue)
+    elseif level = 2
+    then node.name.name.setColor(white); node.name.setFillColor(black)
+    elseif level = 1
+    then node.name.name.setColor(black); node.name.setFillColor(white)
+    else 
+         node.name.name.setColor(black); node.name.setFillColor(white)
+    end
+  end 
+  
 
 context ClassXNode
   @Operation levelChanged(obj,slot,new,old)
-    @Case new of
-    0 do node end
-    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
-    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
-    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
-    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
-    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
-    else 
-    	node.name.setFillColor(white); node.name.name.setColor(black)
-    end
+      self.setColor(class.level)
+//    @Case new of
+//    0 do node end
+//    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
+//    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
+//    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
+//    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
+//    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
+//    else 
+//    	node.name.setFillColor(white); node.name.name.setColor(black)
+//    end
   end
 
 context ClassXNode
   @Operation init(args)
     super(args);
     node.showMetaslots := true;
-    @Case class.level of
-    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
-    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
-    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
-    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
-    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
-    else 
-    	node.name.setFillColor(white); node.name.name.setColor(black)
-    end;  
+    self.setColor(class.level);
+//    @Case class.level of
+//    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
+//    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
+//    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
+//    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
+//    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
+//    else 
+//    	node.name.setFillColor(white); node.name.name.setColor(black)
+//    end;  
 
   
 //    self.generateMetaslots();

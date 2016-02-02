@@ -20,4 +20,29 @@ context Diagrams
     @Constructor(red,green,blue) !
     end
     
+    @Operation makeHSV(hue:Float, saturation:Float, brightness:Float)
+      let 
+        hue = hue * 6.0
+      then 
+        c = hue.floor().mod(6);
+        f = (hue - hue.floor());
+        b = 255.0*brightness
+      then
+        p = (b*(1.0- saturation)).round();
+        q = (b*(1.0-(saturation*f))).round();
+        t = (b*(1.0-((1.0-f)*saturation))).round()
+      then 
+        b = b.round()
+      in 
+        @Case c of      
+        0 do Color(b,t,p) end 
+        1 do Color(q,b,p) end
+        2 do Color(p,b,t) end
+        3 do Color(p,q,b) end
+        4 do Color(t,p,b) end
+        5 do Color(b,p,q) end
+        end
+      end
+    end
+    
   end
