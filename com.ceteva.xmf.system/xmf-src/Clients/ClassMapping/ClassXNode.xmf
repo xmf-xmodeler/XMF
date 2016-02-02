@@ -289,32 +289,20 @@ context ClassMapping
     end
     
     @Operation generateOperationValues()
-      //"generateOperationValues()".println();
-      //self.getOpValues(class).println();
       @For item in self.getOpValues(class) do
         let
           name = item->head().name+"()"
-          //result = item->tail()->head() then
-          //text = node.nextMetaslot(name, result, XCore::String)
         in
-          //("add: " + name + "/" + item).println();
           @WithoutRendering(node.owner)
-            //"@WithoutRendering".println();
             self.operationValuesAdded(name, item)
-            //text.new(node.operationValuesBox);
-            //node.add(text)
           end
         end
       end
     end
     
     @Operation operationValuesAdded(name, opItem)
-//      name := name +"";
-//      ("operationValuesAdded("+name+")").println();
-//      self.operationValueMaps.println();
       if not operationValueMaps->exists(operation | operation.name = name)
       then
-        //"does not exist yet".println();
         let
           result = opItem->tail()->head() then
           text = node.nextOperationValue(name, result, opItem->head()) then
