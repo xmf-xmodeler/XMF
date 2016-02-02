@@ -92,7 +92,6 @@ context ClassDiagrams
     end
     
     @Operation refresh() 
-     ("OperationValueGroup refresh..." + self).println()
      let result = op.invoke(object,{})
      in self.value.setText(result)
      end

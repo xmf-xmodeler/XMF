@@ -52,9 +52,7 @@ context ClassDiagrams
     end
     
     @Operation refresh() 
-     ("OperationValuesBox refresh...").println();
       @For display in displays do
-        //("display "+ display).println();
         if display.isKindOf(OperationValueGroup)
         then display.refresh()
         end

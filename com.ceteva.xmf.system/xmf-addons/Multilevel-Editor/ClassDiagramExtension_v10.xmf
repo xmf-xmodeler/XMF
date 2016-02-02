@@ -183,9 +183,7 @@ context AttributeXText //ADDED BB
 context ClassXNode
   @Operation setColor(level:Integer)
     if level >= 5
-    then Color::makeHSV(0.3+((level*2.0)/(1.0+5.0.sqrt())), (4.0/level), 1.0-(2.5/level)).println();
-         (0.3+((level*2.0)/(1.0+5.0.sqrt()))).println();
-         node.name.name.setColor(white); node.name.setFillColor(Color::makeHSV(0.3+((level*2.0)/(1.0+5.0.sqrt())), (4.0/level), 1.0-(2.5/level)))
+    then node.name.name.setColor(white); node.name.setFillColor(Color::makeHSV(0.3+((level*2.0)/(1.0+5.0.sqrt())), (4.0/level), 1.0-(2.5/level)))
     elseif level = 4
     then node.name.name.setColor(white); node.name.setFillColor(red)
     elseif level = 3
