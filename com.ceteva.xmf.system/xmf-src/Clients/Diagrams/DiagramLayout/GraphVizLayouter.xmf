@@ -7,42 +7,6 @@ context DiagramLayout
 
 @Class GraphVizLayouter 
 
-	@Operation getXMFProperty(name)  // TODO move to XMF.xmf
-      let result = null
-      in
-	  @For p in xmf.properties do
-	    if p->head() = name then
-          result := p->tail()
-	    end
-	  end;
-	  result
-      end
-	end
-
-	@Operation getXMFArg(name)  // TODO move to XMF.xmf
-      let result = null
-      in
-	  @For p in GraphVizLayouter::getXMFProperty("allArgs") do
-	    if p->head() = name then
-          result := p->tail()
-	    end
-	  end;
-	  result
-      end
-	end
-
-	@Operation getTmpDir()  // TODO move to XMF.xmf
-      let 
-        tmpDir = GraphVizLayouter::getXMFArg("tmp");
-        javaSystem = xmf.javaClass("java.lang.System")
-      in
-        if tmpDir = null then
-          tmpDir := javaSystem.getProperties().get("java.io.tmpdir")
-        end;
-        tmpDir
-      end
-	end
-
 	@Operation classnameToArrowhead(classname)
 	  let
 	    c = classname.toString()
@@ -57,12 +21,10 @@ context DiagramLayout
 	  end
 	end
 
-	@Operation performLayout(diagram:Diagram)
+	@Operation performLayout() // self will contain diagram:Diagram
 	  let
-	    //tmpDir = "/tmp"; 			
-		tmpDir = GraphVizLayouter::getTmpDir();
-	    //dotExe = "/usr/bin/dot";
-		dotExe = GraphVizLayouter::getXMFArg("graphviz");
+		tmpDir = XMF::getTmpDir();
+		dotExe = XMF::getConfigArg("graphviz");
 	    zoom = 150; // TODO find suitable conversion from dot's float coordinates to pixels,  maybe make configurable
 
         rnd = (Float::random() * 1000000).round() then
@@ -74,13 +36,13 @@ context DiagramLayout
 	    if dotExe = null then
 	      xmf.message("Cannot perform auto-layout: the GraphViz executable is not configured, please provide the path of dot.exe in argument 'graphviz'")
 	    else
-		//print("Doing the layout for "+diagram.of()+ ", number of nodes "+diagram.graph.nodes->size+" from temp file "+tmpDotFile+" to "+tmpOutFile+"\n");
+		//print("Doing the layout for "+self.of()+ ", number of nodes "+self.graph.nodes->size+" from temp file "+tmpDotFile+" to "+tmpOutFile+"\n");
 		@WithOpenFile(fout -> tmpDotFile)
 			format(fout, "digraph g {\n");
-			@For node in diagram.graph.nodes do
+			@For node in self.graph.nodes do
 				format(fout, "node"+node.id+";\n")
 			end;			
-			@For edge in diagram.graph.edges do
+			@For edge in self.graph.edges do
 				format(fout, "node"+edge.source.owner.id+" -> node"+edge.target.owner.id+" [type=\""+edge.of().name+"\",arrowhead=\""+GraphVizLayouter::classnameToArrowhead(edge.of().name)+"\"];\n")
 			end;
 			format(fout, "}")
@@ -90,7 +52,7 @@ context DiagramLayout
 		
 		//print("Waiting for result...\n");
 		@While ( (not tmpOutAvailable) and (waitCounter <= 20) ) do
-	      @Count i from 0 to 100000 do i end; // TODO non-busy way to wait
+          xmf.delay(50); // wait until file is there
 		  tmpOutAvailable := tmpOutFile.fileExists();
 		  if not tmpOutAvailable then
 		    waitCounter := waitCounter + 1;
@@ -122,27 +84,33 @@ context DiagramLayout
 			  height := l->at(3);
 
 			  l := line.splitBy(" ",0,0); // second line
-		      
-		      @While l->head() = "node" do
-				name := l->at(1);
-				x := l->at(2);
-				y := l->at(3);
-		        line := lines->head();
-				lines := lines->tail();
-				l := line.splitBy(" ",0,0);
 
-				@For node in diagram.graph.nodes do
+              @WithoutRendering(self)
+
+                1; // workaround, needed for correct compilation of @While inside @WithoutRendering
+              
+		        @While l->head() = "node" do
+				  name := l->at(1);
+				  x := l->at(2);
+				  y := l->at(3);
+		          line := lines->head();
+				  lines := lines->tail();
+				  l := line.splitBy(" ",0,0);
+				  
+				  @For node in self.graph.nodes do
 					if "node"+node.id = name then
-						x := (x.asFloat() * zoom).round();
-						y := (y.asFloat() * zoom).round();
-						node.move(x,y)
-		                //print("* setting "+name+"("+x+","+y+")\n")
+					  x := (x.asFloat() * zoom).round();
+					  y := (y.asFloat() * zoom).round();
+					  node.move(x,y)
+		              //print("* setting "+name+"("+x+","+y+")\n")
 		            //else
-		                //print("("+name+" != "+node.id+")\n")
-					end
-				end
+		              //print("("+name+" != "+node.id+")\n")
+				    end
+				  end
 				
-		      end
+		        end
+
+              end
 			
 			else
 		      print("Parse error: 'graph' expected in line 1.\n")
