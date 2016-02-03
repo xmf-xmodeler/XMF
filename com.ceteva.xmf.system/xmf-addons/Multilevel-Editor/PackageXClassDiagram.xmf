@@ -1532,7 +1532,10 @@ context ClassMapping
 					in 	
 						class.addParent(FMML::MetaClass);
 						thePackage.add(class);
-						theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping)
+						theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
+						@Find(map,theMapping.classMaps) when map.class = class do
+						  map.node.move(x,y)
+						end
 					end
 				end	
 			)
