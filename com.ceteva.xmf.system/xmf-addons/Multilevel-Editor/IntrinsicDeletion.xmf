@@ -6,26 +6,13 @@ Class.remove(Class.operations->select(c | c.name().toString() = "remove")->asSeq
 context Class
 @Operation addAttribute(a : Attribute):Classifier
       self.resolveNameClash(a.name,attributes);
-	  //if(a.isIntrinsic)
-	  //then
-		//a.owner.level.println();
-		//">".println();
-		//self.level.println()
-	  //end;
       if(a.isIntrinsic andthen a.owner.level > self.level)
 	  then
-		//"true".println();
-		//a.owner.println();
 		false
 	  else
-		//"false".println();
-		//a.owner.println();
 		a.setOwner(self);
-		//a.owner.println();
 		true
 	  end;
-	  //"after".println();
-	  //a.owner.println();
       self.attributes := attributes->including(a);
       self
     end
@@ -40,14 +27,15 @@ context Class
 			in
 				if sd <> null //TODO
 				then
-					if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
-					then
-						self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
-						self.removeAttribute(n)
-					else
-						self.removeAttribute(n);
-						self.addIntrinsicAttributeAtLevel(n,sd.getInstantiationLayer()-1)
-					end
+					//if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
+					//then
+						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer())
+						//self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
+						//self.removeAttribute(n)
+					//else
+						//self.removeAttribute(n);
+						//self.addIntrinsicAttributeAtLevel(n,sd.getInstantiationLayer()-1)
+					//end
 				else
 					xmf.message("Operation canceled by user")
 				end
@@ -83,12 +71,19 @@ context Class
 end
 	
 context Class 
-@Operation deleteSlotAtInstance(a: Attribute, instLevel : Integer):XCore::Element
-	if self.level > instLevel
+@Operation removeAttributeIntrinsic(a: Attribute, deleteLevel : Integer, instLevel : Integer):XCore::Element
+	if self.level > deleteLevel
 	then
-		self.allInstances()->iterate(c x=0 | c.deleteSlotAtInstance(a,instLevel))
+		//self.removeAttribute(a);
+		self.allInstances()->iterate(c x=0 | c.removeAttributeIntrinsic(a,deleteLevel,instLevel));
+		self.removeAttribute(a)
 	else
-		self.deleteSlot(a)
+		if level = self.level
+		then
+			self.deleteSlot(a)
+		else
+			self.removeAttribute(a)
+		end
 	end
 end	
 	
