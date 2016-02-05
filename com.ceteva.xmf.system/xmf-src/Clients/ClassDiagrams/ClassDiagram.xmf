@@ -163,6 +163,10 @@ context ClassDiagrams
     @Operation defaultDependencyEdgeCommand(sourcePort,targetPort)
        self.newDependencyEdgeCommand(sourcePort,targetPort,XCore::Dependency.pathSeq())
     end
+     
+    @Operation defaultDelegationEdgeCommand(sourcePort,targetPort)
+       null
+    end
     
     @Operation defaultPackageNode(x,y)
        self.newPackageNode(x,y,XCore::Package.pathSeq()) 
@@ -188,6 +192,7 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Association",true,"XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
       self.defineNewHandler("XCore","Inheritance",true,"XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
       self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
+      self.defineNewHandler("XCore","(Future) Delegation",true,"XCore/Delegation.png",ClassDiagram::defaultDelegationEdgeCommand);
       self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
       if xmf.preference("EnableMeta")
       then self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)

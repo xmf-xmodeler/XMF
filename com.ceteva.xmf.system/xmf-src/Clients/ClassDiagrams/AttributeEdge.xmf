@@ -18,15 +18,15 @@ context ClassDiagrams
       if name.isKindOf(String)
       then 
         // Calculate position of attribute label
-        let y = if source.owner.y > target.owner.y then 15 else 0-30 end;
-            x = if source.owner.x > target.owner.x then 15 else 0-35 end 
+        let y = if source.owner.y > target.owner.y then 40 else -60 end;// 15 else 0-30 end;
+            x = 15//if source.owner.x > target.owner.x then 15// else 0-35 end 
         in self.name := AttributeLabel(name,x,y)
         end
       end;
       if typePath->asSet <> XCore::Attribute.pathSeq()->asSet
       then self.add(StereotypeLabel(typePath->last))
       end;
-      self.mult := Multiplicity("end",self.name.relx-10,self.name.rely);
+      self.mult := Multiplicity("end",self.name.relx-15,self.name.rely);
       self.add(self.name);
       self.add(self.mult)
     end
