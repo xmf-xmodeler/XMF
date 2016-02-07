@@ -7,6 +7,7 @@ import Tools::DiagramTools::Types;
 import Tools::DiagramTools::Types::DisplayTypes;
 import Tools::DiagramTools::Structure;
 import MDC;
+import IO;
 import Types;
 
 context ! Types 
@@ -648,7 +649,7 @@ context ! Types
       then
         self.preSave();
         @WithOpenFile(fout -> file)
-          let xout = ElementOutputChannel(fout)
+          let xout = ElementOutputChannel(fout) // *** BUG, fails with "Unbound dynamic 'ElementOutputChannel'" (Jens) 
           in xout.write(self,Root.allContentsOf(NameSpace)->asSeq->including(Root))
           end
         end;
