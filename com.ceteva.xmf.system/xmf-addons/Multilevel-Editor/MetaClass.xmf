@@ -53,7 +53,7 @@ context Root::FMML
           c2 = CollectionMult(false,true,lower2,upper2)
       in let e1 = Associations::End(role1,self.of(),c1);
              e2 = Associations::End(role2,elem2.of(),c2)
-         in let a = Associations::Association("regular",e1,e2)
+         in let a = Associations::Association("regular","regularOther",e1,e2)
             in a.instLevel := inst_lev
             end
          end
