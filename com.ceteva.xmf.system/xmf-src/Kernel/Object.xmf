@@ -294,6 +294,14 @@ context Object
   end
   
 context Object
+  @Operation getProperties()
+    if self.hasSlot("Object***Properties") 
+      then self.get("Object***Properties")
+      else Seq{}
+    end    
+  end
+  
+context Object
   @Operation hasProperty(name)
     self.getProperty(name) <> null
   end  
