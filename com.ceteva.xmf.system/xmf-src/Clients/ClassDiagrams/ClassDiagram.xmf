@@ -399,8 +399,8 @@ context ClassDiagrams
       self.makeInheritanceEdge(sourceNode.ports->sel,targetNode.ports->sel)
     end
 
-    @Operation makeAssociation(name,end1,end2,sourceNode,targetNode,typePath)
-      self.makeAssociationEdge(name,end1,end2,sourceNode.ports->sel,targetNode.ports->sel,typePath)
+    @Operation makeAssociation(name,otherName,end1,end2,sourceNode,targetNode,typePath)
+      self.makeAssociationEdge(name,otherName,end1,end2,sourceNode.ports->sel,targetNode.ports->sel,typePath)
     end
 
     @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
@@ -424,7 +424,7 @@ context ClassDiagrams
           end2 = AssociationEnd(Label("e2","end",endx,endy,true),
               Multiplicity("end",  10, (-yDiff)+(1*endy)), instLevel2) 
         then
-          edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
+          edge = AssociationEdge("A","B",end1,end2,sourcePort,targetPort,typePath)
       in edge.new(self,false);
 	        self.addEdge(edge)
       end
@@ -504,12 +504,12 @@ context ClassDiagrams
       end
     end
 
-    @Operation makeAssociationEdge(name,end1,end2,sourcePort,targetPort,typePath)
+    @Operation makeAssociationEdge(name,otherName,end1,end2,sourcePort,targetPort,typePath)
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
          then 
-           let edge = AssociationEdge(name,end1,end2,sourcePort,targetPort,typePath)
+           let edge = AssociationEdge(name,otherName,end1,end2,sourcePort,targetPort,typePath)
            in edge.new(self);
               edge
            end
