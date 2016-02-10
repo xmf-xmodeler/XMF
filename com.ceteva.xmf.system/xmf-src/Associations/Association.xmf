@@ -34,12 +34,8 @@ context Associations
     @Attribute end1 : End end
     @Attribute end2 : End end
     @Attribute unidirectional : Boolean (?,!) end
-    @Attribute nameForReverseDirection : String end
     
-    @Constructor(name,end1,end2) ! 
-      nameForReverseDirection="noOtherNameAvailable"
-      end
-    @Constructor(name,nameForReverseDirection,end1,end2) ! end
+    @Constructor(name,end1,end2) ! end
     
     @Operation add(element)
       if element.isKindOf(End)

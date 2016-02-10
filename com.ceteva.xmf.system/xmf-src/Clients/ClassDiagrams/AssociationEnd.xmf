@@ -10,10 +10,11 @@ context ClassDiagrams
   @Class AssociationEnd extends RightClickableProxy
   
     @Attribute name : Label end
+    @Attribute displayName : Label end
     @Attribute mult : Multiplicity end
     @Attribute instLevel : Label end
     
-    @Constructor(name,mult,instLevel) ! 
+    @Constructor(name,displayName,mult,instLevel) ! 
     end
 
     @Operation proxyElementTarget()
@@ -30,6 +31,10 @@ context ClassDiagrams
 
     @Operation setName(text:String)
       name.textChanged(text)
+    end
+    
+    @Operation setDisplayName(text:String)
+      displayName.textChanged(text)
     end
     
     @Operation setMult(mult)

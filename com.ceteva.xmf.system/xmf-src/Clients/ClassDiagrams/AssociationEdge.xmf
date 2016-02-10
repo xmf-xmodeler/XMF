@@ -10,32 +10,32 @@ context ClassDiagrams
   @Class AssociationEdge extends Edge
   
     @Attribute name      : Label          end
-    @Attribute otherName : Label          end
     @Attribute end1      : AssociationEnd end
     @Attribute end2      : AssociationEnd end
     @Attribute typePath  : Seq(String)    end
   
-    @Constructor(name,otherName,end1,end2,source,target,typePath) 
+    @Constructor(name,end1,end2,source,target,typePath) 
       self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{},Color()});
       if name.isKindOf(String)
       then 
-        self.name := Label(name,"",0,-21,true);
-        self.name.arrow := 1
+        self.name := Label(name,"",0,-53,true);
+        self.name.arrow := 0
       end;
-      if otherName.isKindOf(String)
-      then 
-        self.otherName := Label(otherName,"",0,11,true);
-        self.otherName.arrow := -1
-      end;
+      //if otherName.isKindOf(String)
+      //then 
+      //  self.otherName := Label(otherName,"",0,11,true);
+      //  self.otherName.arrow := -1
+      //end;
       if typePath->asSet <> Associations::Association.pathSeq()->asSet
       then self.add(StereotypeLabel(typePath->last))
       end;
       self.add(self.name);
-      self.add(self.otherName);
+      self.add(end1.displayName);
       self.add(end1.name);
       self.add(end1.mult);
       self.add(end1.instLevel);
       self.add(end2.name);
+      self.add(end2.displayName);
       self.add(end2.mult);
       self.add(end2.instLevel)
     end
@@ -50,14 +50,6 @@ context ClassDiagrams
 
     @Operation setName(name)
       self.name.text := name
-    end
-    
-    @Operation otherName()
-      otherName.text()
-    end
-
-    @Operation setOtherName(name)
-      self.otherName.text := name
     end
     
   end

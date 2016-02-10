@@ -20,15 +20,17 @@ context Diagrams
     @Attribute hidden : Boolean (?) end
     @Attribute arrow : Integer (?) end
     
-    @Constructor(text,attachedTo,relx,rely,editable) end
+    @Constructor(text,attachedTo,relx,rely,editable) end//("Label1: " + text).println() end
     
-    @Constructor(text,attachedTo,relx,rely,editable,color) end
+    @Constructor(text,attachedTo,relx,rely,editable,color) end//("Label2: " + text).println() end
         
-    @Constructor(id,text,attachedTo,relx,rely,editable) ! end
+    @Constructor(text,attachedTo,relx,rely,editable,color,arrow) ! end//("Label3: " + text).println() end
     
-    @Constructor(id,text,attachedTo,relx,rely,editable,color) ! end
+    @Constructor(id,text,attachedTo,relx,rely,editable) ! end//("Label4: " + text).println() end
+        
+    @Constructor(id,text,attachedTo,relx,rely,editable,color) ! end//("Label5: " + text).println() end
     
-    @Constructor(id,text,attachedTo,relx,rely,editable,truncate) end
+    @Constructor(id,text,attachedTo,relx,rely,editable,truncate) end//("Label6: " + text).println() end
 
     @Operation delete()
       @Command(self) deleteCommand(self) end;

@@ -49,8 +49,12 @@ context Associations
   
     @Attribute mult        : Multiplicity = One() (?) end
     @Attribute association : Element              (!) end
+    @Attribute displayName : String                   end
     
-    @Constructor(name,type,mult) ! end 
+    @Constructor(name,type,mult) ! 
+       self.displayName := name.toString()
+       end 
+    @Constructor(name,type,mult, displayName) ! end 
     
     @Operation checkRoundTrip(object):Boolean
 

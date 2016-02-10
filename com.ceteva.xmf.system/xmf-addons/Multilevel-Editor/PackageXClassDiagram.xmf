@@ -268,20 +268,22 @@ context ClassMapping
             when sourceMap.element() = association.end1.underlyingType()
             do @Find(targetMap,acMaps)
                  when targetMap.element() = association.end2.underlyingType()
-                 do ("otherName: " + association.nameForReverseDirection.toString()).println();  let name = association.name.toString();
-                        otherName = association.nameForReverseDirection.toString() then
-                        otherName = if otherName.size()<1 then "otherNameNotFound" else otherName end;
-                        instLevel1 = Label("Ø", "start", 10, 20, true);
-                        mult1 = Multiplicity(association.end1.mult.labelString(),"start") then
-                        end1 = AssociationEnd(Label(association.end1.name.toString(),"start",10,10,true),mult1,instLevel1);
-                        instLevel2 = Label("Ø", "end", -10, -20, true);
-                        mult2 = Multiplicity(association.end2.mult.labelString(),"end") then
-                        end2 = AssociationEnd(Label(association.end2.name.toString(),"end",0-10,0-10,true),mult2,instLevel2) then
-                        edge = diagram.makeAssociation(name,otherName,end1,end2,sourceMap.node,targetMap.node,association.of().pathSeq())
-                    in  self.add(AssociationXAssociationEdge(association,edge));
-                        self.diagram.add(edge)
-                    end
-               end
+                do let name = association.name.toString();
+                  mult1 = Multiplicity(association.end1.mult.labelString(),"start");
+                  mult2 = Multiplicity(association.end2.mult.labelString(),"end") then 
+                  instLevel1 = Label("Ø", "start", 10, 40, true, true, Color(0,0,0));
+                  instLevel2 = Label("Ø", "start", -10, -40, true, true, Color(0,0,0));
+                  varName1 = Label(association.end1.name.toString(),"start",10,10,true);
+                  varName2 = Label(association.end2.name.toString(),"end",0-10,0-10,true);
+                  displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
+            	  displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) then
+                  end1 = AssociationEnd(varName1,displayName1,mult1,instLevel1);
+                  end2 = AssociationEnd(varName2,displayName2,mult2,instLevel2) then
+                  edge = diagram.makeAssociation(name,end1,end2,sourceMap.node,targetMap.node,association.of().pathSeq())
+                in self.add(AssociationXAssociationEdge(association,edge));
+                  self.diagram.add(edge)
+                end
+              end
           end
         end
       end

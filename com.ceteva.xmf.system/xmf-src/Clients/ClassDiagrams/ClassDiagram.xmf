@@ -399,12 +399,13 @@ context ClassDiagrams
       self.makeInheritanceEdge(sourceNode.ports->sel,targetNode.ports->sel)
     end
 
-    @Operation makeAssociation(name,otherName,end1,end2,sourceNode,targetNode,typePath)
-      self.makeAssociationEdge(name,otherName,end1,end2,sourceNode.ports->sel,targetNode.ports->sel,typePath)
+    @Operation makeAssociation(name,end1,end2,sourceNode,targetNode,typePath)
+      self.makeAssociationEdge(name,end1,end2,sourceNode.ports->sel,targetNode.ports->sel,typePath)
     end
 
     @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
-      let  // Calculate positions of end labels and create ends
+        //"newAssociationEdgeCommand START".println();
+      let  // Calculate positions of end labels and create ends    
           southbound = targetPort.owner.y > sourcePort.owner.y;
           eastbound  = targetPort.owner.x > sourcePort.owner.x 
         then
@@ -417,15 +418,24 @@ context ClassDiagrams
           yDiff = if southbound then 25 else -25 end
         then
           instLevel1 = InstLevelLabel("0", "start", 10, (2*yDiff)+(1*starty), Color(0,0,0), true);
-          instLevel2 = InstLevelLabel("0", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true) 
+          instLevel2 = InstLevelLabel("0", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
+            varName1 = Label("e1","start",startx,starty,true);
+            varName2 = Label("e2","end",endx,endy,true);
+            //displayName1 = Label("displayName1","";0,-21,true, 1);
+            //displayName2 = Label("displayName2","",0, 11,true,-1) 
+            displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
+            displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
         then
-          end1 = AssociationEnd(Label("e1","start",startx,starty,true),
+          end1 = AssociationEnd(varName1,displayName1,
               Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);
-          end2 = AssociationEnd(Label("e2","end",endx,endy,true),
+          end2 = AssociationEnd(varName2,displayName2,
               Multiplicity("end",  10, (-yDiff)+(1*endy)), instLevel2) 
         then
-          edge = AssociationEdge("A","B",end1,end2,sourcePort,targetPort,typePath)
+          edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
       in edge.new(self,false);
+            //("newAssociationEdgeCommand varName1: " + varName1).println();
+            //displayName1.arrow := 1;
+            //displayName2.arrow := 0-1;
 	        self.addEdge(edge)
       end
     end
@@ -504,12 +514,12 @@ context ClassDiagrams
       end
     end
 
-    @Operation makeAssociationEdge(name,otherName,end1,end2,sourcePort,targetPort,typePath)
+    @Operation makeAssociationEdge(name,end1,end2,sourcePort,targetPort,typePath)
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
          then 
-           let edge = AssociationEdge(name,otherName,end1,end2,sourcePort,targetPort,typePath)
+           let edge = AssociationEdge(name,end1,end2,sourcePort,targetPort,typePath)
            in edge.new(self);
               edge
            end
