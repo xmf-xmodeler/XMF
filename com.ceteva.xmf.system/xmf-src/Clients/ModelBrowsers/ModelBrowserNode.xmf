@@ -230,13 +230,13 @@ context ModelBrowsers
     end
 
     @Operation doubleSelected()
-      element.doubleClick();
-      let parentBrowser = self.parentBrowser()
-      in
-        if parentBrowser <> null
-        then parentBrowser.setFocus()
-        end
-      end
+      element.doubleClick()//;
+//      let parentBrowser = self.parentBrowser()
+//      in
+//        if parentBrowser <> null
+//        then parentBrowser.setFocus()
+//        end
+//      end
     end
 
     @Operation drop()
