@@ -58,7 +58,7 @@ context IO
           "editor.");
         let client = xmf.clientNamed("com.ceteva.text")
         in super(text);
-           text.println();
+           ("TextEditorChannel: " + text).println();
            client.addEditor(self);
            self.renew();
            self.setText(text)
