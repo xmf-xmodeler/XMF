@@ -2,6 +2,7 @@ parserImport XOCL;
 
 import XCore;
 import Clients::Menus;
+import Multiplicities::MultiplicityDialog;
 
 context Attribute
   @Operation addGetterOperation()
@@ -80,43 +81,31 @@ context Attribute
   end
 
 context Attribute
-  @Operation setMultString_client()
-    let message = "Enter a multiplicity for " + name + "." +"\nThe syntax is as follows:\n\n" +
-                  "Single Multiplicities\n" +
-                  "- '1' or ''       =   optional (i.e. can be null)\n" +
-                  "- '!'              =   mandatory (i.e. cannot be null)\n" +
-                  "\n" +
-                  "Unordered Collection (Set) Multiplicities\n" +
-                  "- '*'             =   any number of elements (including none)\n" +
-                  "- 'x..*'         =   has at least x elements\n" +
-                  "- 'x..y'         =   has number of elements between x and y\n" +
-                  "\n" +
-                  "Ordered Collection (Seq) Multiplicities\n" +
-                  "- '$' or '$*'   =   any number of elements (including none)\n" +
-                  "- '$x..*'       =   has at least x elements\n" +
-                  "- '$x..y'       =   has number of elements between x and y\n\n\n\n" then
-        multString = xmf.getString("Enter Multiplicity for " + name,message,self.multString().stripWhiteSpace())
-    in if multString <> null
-       then try
-              self.setMultString(multString.stripWhiteSpace())
-            catch(exception)
-              xmf.warning(exception.message)
-            end
-       end
+  @Operation setMultString_client(oldMultiplicity)
+    let newMultiplicityString = Multiplicities::MultiplicityDialog::showDialog(oldMultiplicity)
+    in if newMultiplicityString <> null
+      then try
+          self.setMultString(newMultiplicityString)
+        catch(exception)
+          xmf.warning(exception.message)
+        end
+      end
     end
+  end
+  
+context Attribute
+  @Operation setMultString_client()
+  	self.setMultString_client(self.mult)
   end
   
   context Attribute
   @Operation setInstLevel_client()
-    ("setInstLevel_client start").println();
     let message = "Enter an instantiation level for " + name + "." +"\n" +
                   "Leave empty for non-intrinsic Attributes or Associations.\n\n\n\n" then
         instString = xmf.getString("Enter Instantiation Level for " + name,message,(""+self.instLevel))
     in if instString <> null
        then try
-            //("instString: " + instString).println();
             self.instLevel := instString.asInt()
-            //  ("Instantiation level entered: " + instString).println()
             catch(exception)
               xmf.warning(exception.message)
             end

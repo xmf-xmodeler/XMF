@@ -1,0 +1,33 @@
+parserImport XOCL;
+
+context Multiplicities
+  @Class MultiplicityDialog
+   
+	@Operation showDialog(oldMultiplicity):String
+	  try
+	    if oldMultiplicity.isKindOf(Multiplicities::CollectionMult)
+	    then 
+	      let 
+	        min = oldMultiplicity.lowerBound;
+	        max = if oldMultiplicity.hasUpperBound then oldMultiplicity.upperBound else -1 end;
+	        ordered = oldMultiplicity.isOrdered
+	      in 
+	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, max, ordered, false)
+	      end
+	    else if oldMultiplicity.isKindOf(Multiplicities::SingleMult)
+	    then
+	      let min = if oldMultiplicity.isMandatory then 1 else 0 end
+	      in 
+	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, 1, false, false)
+	      end
+	    else if oldMultiplicity.isKindOf(Associations::One)
+	    then
+	      xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(0, 1, false, false)
+	    else error(oldMultiplicity.of() + "not recognised") end end end
+	  catch(exc) 
+		exc.println();
+	    null
+	  end
+	end
+	  
+  end
