@@ -29,7 +29,8 @@ context Class
 				then
 					//if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
 					//then
-						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer())
+						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer())//;
+						//super(n)
 						//self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
 						//self.removeAttribute(n)
 					//else
@@ -76,13 +77,17 @@ context Class
 	then
 		//self.removeAttribute(a);
 		self.allInstances()->iterate(c x=0 | c.removeAttributeIntrinsic(a,deleteLevel,instLevel));
-		self.removeAttribute(a)
+		self.removeAttribute(a);
+		a.removeFromOwner();
+		contents.remove(a.name())
 	else
 		if level = self.level
 		then
 			self.deleteSlot(a)
 		else
-			self.removeAttribute(a)
+			self.removeAttribute(a);
+			a.removeFromOwner();
+			contents.remove(a.name())
 		end
 	end
 end	
