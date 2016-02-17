@@ -29,13 +29,16 @@ context Class
 				then
 					//if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
 					//then
-						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer())//;
+						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer());
 						//super(n)
 						//self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
 						//self.removeAttribute(n)
 					//else
 						//self.removeAttribute(n);
-						//self.addIntrinsicAttributeAtLevel(n,sd.getInstantiationLayer()-1)
+						if sd.getDeletionUntilLayer()  > sd.getInstantiationLayer()
+						then
+							self.addIntrinsicAttributeAtLevel(n,sd.getDeletionUntilLayer()-1)
+						end
 					//end
 				else
 					xmf.message("Operation canceled by user")
@@ -62,18 +65,34 @@ context Class
 	then
 		self.allInstances()->iterate(c x=0 | c.addIntrinsicAttributeAtLevel(a,addLevel))
 	else
-		let newIntA = Attribute(a.name,a.type)
-		in
-			newIntA.isIntrinsic := a.isIntrinsic;
-			newIntA.instLevel := a.instLevel;
-			o.add(newIntA)
+		if self.level = addLevel
+		then
+		//Kernel_addAtt(self,a.name,a.type.default())
+		//TODO 
+			let newIntA = Attribute(a.name,a.type)
+			in
+				self.add(newIntA);
+				newIntA.isIntrinsic := a.isIntrinsic;
+				newIntA.instLevel := a.instLevel;
+				self.allInstances()->iterate(c x=0 | c.addIntrinsicAttributeAtLevel(newIntA,addLevel))
+			end
+		else
+			if self.level > a.instLevel.asInt()
+			then
+				self.add(a);
+				if self.level > 1 
+				then
+					self.allInstances()->iterate(c x=0 | c.addIntrinsicAttributeAtLevel(a,addLevel))
+				end
+			end
 		end
 	end
 end
 	
 context Class 
 @Operation removeAttributeIntrinsic(a: Attribute, deleteLevel : Integer, instLevel : Integer):XCore::Element
-	if self.level > deleteLevel
+	//if self.level > deleteLevel
+	if self.level > instLevel
 	then
 		//self.removeAttribute(a);
 		self.allInstances()->iterate(c x=0 | c.removeAttributeIntrinsic(a,deleteLevel,instLevel));
@@ -81,16 +100,23 @@ context Class
 		a.removeFromOwner();
 		contents.remove(a.name())
 	else
-		if level = self.level
+		//if instLevel = self.level
+		if instLevel = deleteLevel
 		then
 			self.deleteSlot(a)
-		else
-			self.removeAttribute(a);
-			a.removeFromOwner();
-			contents.remove(a.name())
+		//else
+		//	self.removeAttribute(a);
+		//	a.removeFromOwner();
+		//	contents.remove(a.name())//;
+		//self.allInstances()->iterate(c x=0 | c.add(a))
 		end
 	end
 end	
+
+context Object
+@Operation removeAttributeIntrinsic(a: Attribute, deleteLevel : Integer, instLevel : Integer):XCore::Element
+	self.removeStructuralFeature(a.name.toString())
+end
 	
 context Class
 @Operation deleteSlot(a: Attribute):XCore::Element
