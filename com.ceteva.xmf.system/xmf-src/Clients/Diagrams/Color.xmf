@@ -21,9 +21,16 @@ context Diagrams
     end
     
     @Operation makeHSV(hue:Float, saturation:Float, brightness:Float)
-      let 
-        hue = hue * 6.0
+      let // as mod() does not yet work with negative numbers...
+        addPlus = if hue < 0 // if hue is negative
+        then (-(hue.floor())) // the next higher integer number is added, not affecting the fractional digits
+        else 0 // if already positive, do nothing
+        end
+      then
+        hue = hue + addPlus // now hue is positive
       then 
+        hue = hue * 6.0
+      then
         c = hue.floor().mod(6);
         f = (hue - hue.floor());
         b = 255.0*brightness
