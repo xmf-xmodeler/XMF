@@ -25,6 +25,8 @@ context Diagrams
     @Constructor(text,attachedTo,relx,rely,editable,color) end//("Label2: " + text).println() end
         
     @Constructor(text,attachedTo,relx,rely,editable,color,arrow) ! end//("Label3: " + text).println() end
+        
+    @Constructor(text,attachedTo,relx,rely,editable,color,arrow,hidden) ! end//("Label3: " + text).println() end
     
     @Constructor(id,text,attachedTo,relx,rely,editable) ! end//("Label4: " + text).println() end
         
@@ -51,13 +53,13 @@ context Diagrams
       DiagramLayout::Label(text,relx,rely)
     end
     
-    @Operation hide() 
-    
+    @Operation hide()    
       // Cause the label to disappear from the diagram. 
-      
+      ("hide("+hidden+")").println();
       if not hidden
       then 
         self.hidden := true;
+        "hide!".println();
         @Command(self) hideCommand(self) end
       end
     end
