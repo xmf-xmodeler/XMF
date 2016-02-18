@@ -19,7 +19,8 @@ context ClassDiagrams
       if name.isKindOf(String)
       then 
         self.name := Label(name,"",0,-53,true);
-        self.name.arrow := 0
+        self.name.arrow := 0;
+        self.name.hidden := true
       end;
       //if otherName.isKindOf(String)
       //then 
@@ -32,10 +33,13 @@ context ClassDiagrams
       self.add(self.name);
       self.add(end1.displayName);
       self.add(end1.name);
+      self.end1.name.hide();
       self.add(end1.mult);
       self.add(end1.instLevel);
       self.add(end2.name);
+      self.end2.name.hide();
       self.add(end2.displayName);
+      self.end2.displayName.hide();
       self.add(end2.mult);
       self.add(end2.instLevel)
     end
