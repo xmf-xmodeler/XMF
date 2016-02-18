@@ -55,11 +55,9 @@ context Diagrams
     
     @Operation hide()    
       // Cause the label to disappear from the diagram. 
-      ("hide("+hidden+")").println();
       if not hidden
       then 
         self.hidden := true;
-        "hide!".println();
         @Command(self) hideCommand(self) end
       end
     end

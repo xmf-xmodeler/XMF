@@ -84,7 +84,7 @@ context ClassMapping
     end
     
     @Operation checkAssociationDaemons()
-      @SlotValueChanged multi once AssociationXAssociationEdge::nameChanged_classDiagramDaemon(association,"name") end;
+//      @SlotValueChanged multi once AssociationXAssociationEdge::nameChanged_classDiagramDaemon(association,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::delete_classDiagramDaemon(association,"owner") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1NameChanged_classDiagramDaemon(association.end1,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1MultChanged_classDiagramDaemon(association.end1,"mult") end;
@@ -171,7 +171,7 @@ context ClassMapping
     end
     
     @Operation checkEdgeDaemons()
-      @SlotValueChanged multi once AssociationXAssociationEdge::nameChangedDaemon(edge.name,"text")         end;
+//      @SlotValueChanged multi once AssociationXAssociationEdge::nameChangedDaemon(edge.name,"text")         end;
       @SlotValueChanged multi once AssociationXAssociationEdge::associationEnd1ChangedDaemon(edge,"source") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::associationEnd2ChangedDaemon(edge,"target") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1NameChangedDaemon(edge.end1.name,"text") end;

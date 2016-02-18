@@ -453,7 +453,7 @@ context ClassMapping
                           association = metaClass(name);
                           end1 = Associations::End(end1Name,class1,Associations::One());
                           end2 = Associations::End(end2Name,class2,Associations::One())
-                      in  associationEdge.setName(name);
+                      in  //associationEdge.setName(name);
                           associationEdge.end1.setName(end1Name);
                           associationEdge.end2.setName(end2Name);
                           association.setEnd1(end1);

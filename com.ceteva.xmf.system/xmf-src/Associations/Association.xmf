@@ -7,7 +7,6 @@ context Associations
 
   @Class Association extends NameSpace
   
-
     //  An association is a binary relationship between two classes.
     //  The association has two en-ds that correspond to two attributes,
     //  one for each class. The relationship requires an invariant to 
@@ -35,7 +34,14 @@ context Associations
     @Attribute end2 : End end
     @Attribute unidirectional : Boolean (?,!) end
     
-    @Constructor(name,end1,end2) ! end
+    @Attribute showLabel : Boolean = true end
+    @Attribute showInverseLabel : Boolean end
+    @Attribute showVarName : Boolean end
+    @Attribute showInverseVarName : Boolean end
+    
+    @Constructor(name,end1,end2) ! 
+    end
+ 
     
     @Operation add(element)
       if element.isKindOf(End)

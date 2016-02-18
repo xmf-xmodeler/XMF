@@ -436,7 +436,8 @@ context ClassDiagrams
             //("newAssociationEdgeCommand varName1: " + varName1).println();
             //displayName1.arrow := 1;
             //displayName2.arrow := 0-1;
-	        self.addEdge(edge)
+	        self.addEdge(edge);
+			edge.end2.displayName.hide()
       end
     end
     

@@ -130,7 +130,6 @@ context Diagrams
     end
     
     @Operation hideCommand(element)
-      ("hideCommand("+self+")").println();
       @SendCommand(self)
         hide(element.id())
       end
