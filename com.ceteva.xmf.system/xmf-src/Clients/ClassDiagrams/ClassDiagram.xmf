@@ -437,7 +437,9 @@ context ClassDiagrams
             //displayName1.arrow := 1;
             //displayName2.arrow := 0-1;
 	        self.addEdge(edge);
-			edge.end2.displayName.hide()
+			edge.end2.displayName.hide();
+			edge.end1.name.hide();
+			edge.end2.name.hide()
       end
     end
     

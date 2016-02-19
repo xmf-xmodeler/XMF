@@ -91,9 +91,49 @@ context ClassMapping
       @SlotValueChanged multi once AssociationXAssociationEdge::end1InstLevelChanged_classDiagramDaemon(association.end1,"instLevel") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2NameChanged_classDiagramDaemon(association.end2,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2MultChanged_classDiagramDaemon(association.end2,"mult") end;
-      @SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged_classDiagramDaemon(association.end2,"instLevel") end
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged_classDiagramDaemon(association.end2,"instLevel") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end1ShowDisplayName_classDiagramDaemon(association,"showLabel") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowDisplayName_classDiagramDaemon(association,"showInverseLabel") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end1ShowVarName_classDiagramDaemon(association,"showVarName") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowVarName_classDiagramDaemon(association,"showInverseVarName") end
     end
 
+    @Operation end1ShowDisplayName_classDiagramDaemon(assoc,slot,newBool,oldBool)
+      if newBool and not oldBool
+      then edge.end1.displayName.show()
+      end;    
+      if oldBool and not newBool
+      then edge.end1.displayName.hide()
+      end
+    end
+    
+    @Operation end2ShowDisplayName_classDiagramDaemon(assoc,slot,newBool,oldBool)
+      if newBool and not oldBool
+      then edge.end2.displayName.show()
+      end;    
+      if oldBool and not newBool
+      then edge.end2.displayName.hide()
+      end
+    end
+    
+    @Operation end1ShowVarName_classDiagramDaemon(assoc,slot,newBool,oldBool)
+      if newBool and not oldBool
+      then edge.end1.name.show()
+      end;    
+      if oldBool and not newBool
+      then edge.end1.name.hide()
+      end
+    end
+    
+    @Operation end2ShowVarName_classDiagramDaemon(assoc,slot,newBool,oldBool)
+      if newBool and not oldBool
+      then edge.end2.name.show()
+      end;    
+      if oldBool and not newBool
+      then edge.end2.name.hide()
+      end
+    end
+    
     @Operation end1NameChanged_classDiagramDaemon(assocEnd,slot,newName,oldName)
       self.changeEdgeEndName(edge.end1,newName)
     end
