@@ -203,16 +203,6 @@ context ClassXNode
 context ClassXNode
   @Operation levelChanged(obj,slot,new,old)
       self.setColor(class.level)
-//    @Case new of
-//    0 do node end
-//    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
-//    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
-//    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
-//    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
-//    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
-//    else 
-//    	node.name.setFillColor(white); node.name.name.setColor(black)
-//    end
   end
 
 context ClassXNode
@@ -220,23 +210,7 @@ context ClassXNode
     super(args);
     node.showMetaslots := true;
     self.setColor(class.level);
-//    @Case class.level of
-//    1 do node.name.setFillColor(white); node.name.name.setColor(black) end
-//    2 do node.name.setFillColor(black); node.name.name.setColor(white) end
-//    3 do node.name.setFillColor(blue); node.name.name.setColor(white) end
-//    4 do node.name.setFillColor(red); node.name.name.setColor(white) end
-//    5 do node.name.setFillColor(green); node.name.name.setColor(white) end
-//    else 
-//    	node.name.setFillColor(white); node.name.name.setColor(black)
-//    end;  
-
-  
-//    self.generateMetaslots();
-
-//    self.node.showMetaslots();
-@SlotValueChanged multi once ClassXNode::levelChanged(class,"level")
- 
-    end;
+    @SlotValueChanged multi once ClassXNode::levelChanged(class,"level") end;
     self
   end
   
