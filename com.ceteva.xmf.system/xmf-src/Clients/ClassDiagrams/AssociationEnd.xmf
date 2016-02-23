@@ -14,7 +14,11 @@ context ClassDiagrams
     @Attribute mult : Multiplicity end
     @Attribute instLevel : Label end
     
-    @Constructor(name,displayName,mult,instLevel) ! 
+    @Constructor(name,displayName,mult,instLevel) !
+    	if not Root.hasElement("FMML")
+    	then
+    		instLevel.hide()
+       	end    	 
     end
 
     @Operation proxyElementTarget()
