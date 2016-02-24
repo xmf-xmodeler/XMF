@@ -158,6 +158,12 @@ context AttributeXText
 	then
 		self.text.instLevel.setActive(true)
 	else
+		//self.text.instLevel.instLevel.owner.println();
+		//self.text.instLevel.instLevel.owner.owner.println();
+		//self.text.instLevel.instLevel.owner.owner.owner.println();
+		//self.text.instLevel.instLevel.commandInterpreter();
+		
+
 		self.text.instLevel.instLevel.setEditable(false)
 	end;
 	
@@ -251,7 +257,7 @@ context ClassDiagrams
       // Expects to be supplied with name:String and type:String.
      
     self.instLevel := InstBox(x+1,y); //EDIT BB
-
+	self.instLevel.setOwner(self);
 //    self.instLevel.createText(" ",1,1,true,false,false); //EDIT BB
     self.instLevel.createText(); //EDIT BB
     //  self.instLevel.setFont("Times");
