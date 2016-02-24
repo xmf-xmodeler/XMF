@@ -190,10 +190,10 @@ context ClassDiagrams
    
     @Operation defineEdgeToolGroups()
       self.defineNewHandler("XCore","Association",true,"XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
+      self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
       self.defineNewHandler("XCore","Inheritance",true,"XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
       self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
-      self.defineNewHandler("XCore","(Future) Delegation",true,"XCore/Delegation.png",ClassDiagram::defaultDelegationEdgeCommand);
-      self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
+      // [29Feb16] self.defineNewHandler("XCore","(Future) Delegation",true,"XCore/Delegation.png",ClassDiagram::defaultDelegationEdgeCommand);
       if xmf.preference("EnableMeta")
       then self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
       end
@@ -204,11 +204,12 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Class",false,"XCore/Class.gif",ClassDiagram::defaultClassNode);
       self.defineNewHandler("XCore","Package",false,"XCore/Package.gif",ClassDiagram::defaultPackageNode);
       self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote);
-      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
-      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation)
+      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
+      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute)
     end
     
     @Operation defineToggles() 
+      /* [29Feb16] 
       self.defineToolGroup("Toggles");
       super();
       self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "Tools/Ghost1.png","Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
@@ -216,6 +217,8 @@ context ClassDiagrams
       self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "Tools/Ghost5.png","Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
       self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "Tools/Ghost2.png","Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
       self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "Tools/Ghost4.png","Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
+      */
+      self // [29Feb16]
     end
     
     @Operation defineToolGroupTypes()
