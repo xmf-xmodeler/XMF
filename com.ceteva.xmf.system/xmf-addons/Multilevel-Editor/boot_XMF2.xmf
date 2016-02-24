@@ -15,8 +15,10 @@ in
 		then	
 			myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Utils.xar",false);
 			Utils::updateAttribute();
-			Attribute.add(Attribute("intrinsicParent",Attribute));
-			Attribute.add(Attribute("intrinsicChildren",Seq(Attribute)));
+			//Attribute.add(Attribute("intrinsicParent",Attribute));
+			//Attribute.add(Attribute("intrinsicChildren",Seq(Attribute)));
+			Class.add(Attribute("level",Integer));
+			
 			
 			//myprojects.loadProject(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Extensions_modif.xar",false);
 

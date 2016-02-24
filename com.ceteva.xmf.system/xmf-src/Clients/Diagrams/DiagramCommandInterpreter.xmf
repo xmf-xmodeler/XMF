@@ -692,4 +692,10 @@ context Diagrams
         setVisible(diagram.id,id,state)
       end
     end
+    
+    @Operation setEditable(text,editable) 
+      @SendCommand(self)
+        setEditable(text.id(),editable)
+      end
+    end
   end

@@ -34,38 +34,53 @@ end);
  context Clients::ClassDiagrams
    @Class InstBox extends Clients::Diagrams::Box
 		@Attribute instLevel : Clients::Diagrams::Text end
+		@Attribute active : Boolean end
 		
 		@Constructor(x,y)
 			self.fillColor := Clients::Diagrams::Color();
 			self.hideAllEdges();
-			self
+			self.active := false
+		end
+		
+		@Operation setActive(active : Boolean)
+			self.active := active 
 		end
 		
 //		@Operation createText(text,x,y,editable,underline,italicise)
 		@Operation createText()	
 			
 //			self.instLevel.createText(" ",1,1,true,false,false);
-			self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white);
+			//if self.active
+			//then
+			//	self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white)
+			//else
+			//	self.instLevel := Clients::Diagrams::Text(" ",1,0,false,false,false,white)
+			//end;
+			self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white);		
 		
 			self.add(self.instLevel);
 			self.checkDaemons()
 		end
 		
 		@Operation maxWidth():XCore::Element
-      		if not shown
-     		 then
-       		  0
-     		 else
-      		  super() + 2
-      		end
+			if not shown
+			then
+				0
+			else
+				super() + 2
+			end
    		 end
    		 
    		 @Operation minWidth():XCore::Element
-      		if self.width = 0
-      		then
-        		10
-     		else
-        		self.width
+      		if not active then
+				0
+			else
+       			if self.width = 0
+      			then
+        			10
+     			else
+        			self.width
+      			end
       		end
    		 end
    		 
@@ -137,6 +152,13 @@ context AttributeXText
 	  self.text.instLevel.instLevel.text := self.attribute.instLevel.toString()//ADDED BB
 	else
 	  false
+	end;
+	
+	if self.attribute.owner.isKindOf(Extensions::MetaAdaptor)
+	then
+		self.text.instLevel.setActive(true)
+	else
+		self.text.instLevel.instLevel.setEditable(false)
 	end;
 	
 //	xmf.message(self.attribute.instLevel.toString());

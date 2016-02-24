@@ -11,7 +11,7 @@ context Diagrams
   
     @Attribute text      : String (?)                   end
     @Attribute font      : String (?)                   end
-    @Attribute editable  : Boolean (?,!)                end
+    @Attribute editable  : Boolean (?)                end
     @Attribute underline : Boolean (?)                  end
     @Attribute italicise : Boolean (?)                  end
     @Attribute color     : Color = static Color() (?,!) end
@@ -183,6 +183,13 @@ context Diagrams
         owner.resized(self)
       end
     end
+    
+    @Operation setEditable(value:Boolean)
+    //Björn
+		self.editable := value;
+		@Command(self) setEditable(self,value) end
+    end
+    
     
     // use the following method for non-user interface level text changes
     // calls to this method cannot be undone
