@@ -11,18 +11,19 @@ context Multiplicities
 	        min = oldMultiplicity.lowerBound;
 	        max = if oldMultiplicity.hasUpperBound then oldMultiplicity.upperBound else -1 end;
 	        ordered = oldMultiplicity.isOrdered
+	        // TODO navigable
 	      in 
-	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, max, ordered, false)
+	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, max, ordered, true)
 	      end
 	    else if oldMultiplicity.isKindOf(Multiplicities::SingleMult)
 	    then
 	      let min = if oldMultiplicity.isMandatory then 1 else 0 end
 	      in 
-	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, 1, false, false)
+	        xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(min, 1, false, true)
 	      end
 	    else if oldMultiplicity.isKindOf(Associations::One)
 	    then
-	      xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(0, 1, false, false)
+	      xmf.javaClass("tool.clients.dialogs.MultiplicityDialog").show(0, 1, false, true)
 	    else error(oldMultiplicity.of() + "not recognised") end end end
 	  catch(exc) 
 		exc.println();
