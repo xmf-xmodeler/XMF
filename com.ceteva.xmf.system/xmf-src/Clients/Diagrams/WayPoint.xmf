@@ -37,12 +37,12 @@ context Diagrams
     
     @Operation new(parent,setMenu)
       self.setOwner(parent);
-      @Command(self) newWayPointCommand(parent,self) end;
+      @Command(self) newWayPointCommand(parent,self,false) end;
       self
     end
     
     @Operation renew(parent)
-      @Command(self) newWayPointCommand(parent,self) end;
+      @Command(self) newWayPointCommand(parent,self,true) end;
       self
     end
     
