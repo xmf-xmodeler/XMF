@@ -271,8 +271,8 @@ context ClassMapping
                 do let name = association.name.toString();
                   mult1 = Multiplicity(association.end1.mult.labelString(),"start");
                   mult2 = Multiplicity(association.end2.mult.labelString(),"end") then 
-                  instLevel1 = Label("Ø", "start", 10, 40, true, true, Color(0,0,0));
-                  instLevel2 = Label("Ø", "start", -10, -40, true, true, Color(0,0,0));
+                  instLevel1 = Label("ï¿½", "start", 10, 40, true, true, Color(0,0,0));
+                  instLevel2 = Label("ï¿½", "start", -10, -40, true, true, Color(0,0,0));
                   varName1 = Label(association.end1.name.toString(),"start",10,10,true);
                   varName2 = Label(association.end2.name.toString(),"end",0-10,0-10,true);
                   displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
@@ -1532,16 +1532,22 @@ context ClassMapping
 				false,
 				theMapping.getElementIcon(group),//"XCore/Class.gif",
 				@Operation(x,y)
-					let class = metaclass(xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString())))
-					in 	
-						class.addParent(FMML::MetaClass);
-						thePackage.add(class);
-						theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
-						@Find(map,theMapping.classMaps) when map.class = class do
-						  map.node.move(x,y)
-						end
-					end
-				end	
+                    let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
+                    in
+                        if not (name = null)
+                        then
+                            let class = metaclass(name)
+                            in
+                                class.addParent(FMML::MetaClass);
+                                thePackage.add(class);
+                                theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
+                                @Find(map,theMapping.classMaps) when map.class = class do
+                                    map.node.move(x,y)
+                                end
+                            end
+                        end
+                    end 
+                end	
 			)
 		end
 	end

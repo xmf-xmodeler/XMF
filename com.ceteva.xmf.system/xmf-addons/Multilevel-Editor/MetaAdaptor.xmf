@@ -46,7 +46,16 @@ context Root::Extensions
          o.init();
 		 if self.of() = Extensions::MetaAdaptor
          then
-           o.level := xmf.getInteger("Metaebene","Auf welcher Metaebene soll sich diese Entität befinden?",3);
+			let
+               level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
+        	in
+               if level = null
+               then
+                   o.level := 3
+               else
+                   o.level := level.asInt()
+               end
+           end;          
            o.addParent(FMML::MetaClass)
          else
            if o.of().level > 2
