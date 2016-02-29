@@ -191,6 +191,8 @@ context ClassDiagrams
     @Operation defineEdgeToolGroups()
       self.defineNewHandler("XCore","Association",true,"XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
       self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
+      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
+      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
       self.defineNewHandler("XCore","Inheritance",true,"XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
       self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
       // [29Feb16] self.defineNewHandler("XCore","(Future) Delegation",true,"XCore/Delegation.png",ClassDiagram::defaultDelegationEdgeCommand);
@@ -203,9 +205,7 @@ context ClassDiagrams
       // self.defineNewHandler("XCore","Sub Diagram",false,"XCore/Package.gif",ClassDiagram::defaultSubDiagram);
       self.defineNewHandler("XCore","Class",false,"XCore/Class.gif",ClassDiagram::defaultClassNode);
       self.defineNewHandler("XCore","Package",false,"XCore/Package.gif",ClassDiagram::defaultPackageNode);
-      self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote);
-      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
-      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute)
+      self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote)
     end
     
     @Operation defineToggles() 
