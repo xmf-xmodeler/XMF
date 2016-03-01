@@ -76,7 +76,7 @@ context Diagrams
     @Operation addWayPoint(wayPoint)
       // Waypoints have an index and must occur in the sequence
       // at the appropriate point.
-      self.wayPoints := wayPoints->insertAt(wayPoint,wayPoint.index);
+      self.wayPoints := wayPoints->insertAt(wayPoint,wayPoint.index-1);
       self.resetWaypointIndices();
       self
     end
