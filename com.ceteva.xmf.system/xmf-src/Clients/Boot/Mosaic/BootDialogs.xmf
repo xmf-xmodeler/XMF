@@ -462,13 +462,29 @@ context XMF
 
 context XMF
   @Operation getFloat(title,question,value)
-    self.getString(title,question,value.toString()).asFloat()
+    let float = self.getString(title,question,value.toString())
+	  in
+		if float = null
+ 		then 
+			null
+		else
+			float.asFloat()
+		end
+	  end
   end
 
 context XMF
-  @Operation getInteger(title,question,value)
-    self.getString(title,question,value.toString()).asInt()
-  end
+	@Operation getInteger(title : XCore::Element,question : XCore::Element,value : XCore::Element):XCore::Element
+      let int = self.getString(title,question,value.toString())
+	  in
+		if int = null
+ 		then 
+			null
+		else
+			int.asInt()
+		end
+	  end
+    end
   
 context XMF
   @Operation getClassifier(title,question,value,imports)
