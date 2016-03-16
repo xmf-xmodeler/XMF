@@ -61,6 +61,7 @@ context Forms
         "focusGained"				do self.readFocusGained(parameters) end
         "focusLost"					do self.readFocusLost(parameters) end
         "lockForm"					do self.readLockForm(parameters) end
+//        "switchLockForm"			do self.readSwitchLockForm(parameters) end
         "browseHistory"				do self.readBrowseHistory(parameters) end
         "clearHistory"				do self.readClearHistory(parameters) end
         "nextInHistory"				do self.readNextInHistory(parameters) end
@@ -150,6 +151,11 @@ context Forms
       self.debug("lockForm[~S,~S]~%",Seq{formId,value});
       self.find(formId).lockForm(value)
     end
+
+//    @Operation switchLockForm(formId)
+//      self.debug("switchLockForm[~S]~%",Seq{formId});
+//      self.find(formId).switchLockForm()
+//    end
 
     @Operation nextInHistory(formId)
       self.debug("nextInHistory[~S]~%",Seq{formId});
@@ -246,6 +252,12 @@ context Forms
         end
       end
     end
+
+//    @Operation readSwitchLockForm(parameters)
+//      let formId = parameters.at(0) in
+//          self.switchLockForm(formId)
+//      end
+//    end
 
     @Operation readNextInHistory(parameters)
       let formId = parameters.at(0)

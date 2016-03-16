@@ -18,6 +18,16 @@ context Forms
       super();
       self.updateTools()
     end
+    
+    @Operation lockForm(value:Boolean)
+      super(value);
+      self.updateTools()
+    end
+
+//    @Operation switchLockForm()
+//      super();
+//      self.updateTools()
+//    end
 
     @Operation handleClientNewForm(client:FormClient)
       self.client := client;
@@ -34,7 +44,8 @@ context Forms
         else
           client.newFormDefinitely(self)
         end
-      end
+      end;
+      self.updateTools()
     end
 
     @Operation handleFormUpdate(newForm)
@@ -58,7 +69,8 @@ context Forms
             client.newFormDefinitely(newForm)
           end
         end
-      end
+      end;
+      self.updateTools()
     end
 
     @Operation updateTools()
