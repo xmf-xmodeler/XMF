@@ -1,0 +1,21 @@
+parserImport XOCL;
+parserImport XMap;
+
+//TODO refactor
+
+//Class.add(@Operation isMetaClass():Boolean
+//    self.inheritsFrom(Class)
+//  end);
+  
+context Class
+	@Operation isMetaClass():Boolean
+    	self.inheritsFrom(Class)
+  	end
+  
+context Class
+  	@Operation metaLevel():Integer
+	  if self = Class
+	  then 0
+	  else 1 + self.of().metaLevel()
+	  end
+	end

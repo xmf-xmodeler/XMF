@@ -1,0 +1,21 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+import IO;
+import SnapshotDiagrams;
+  
+      context Clients::ClassDiagrams::ClassNode
+  @Operation stereotype():String
+      if typePath->asSet = XCore::Class.pathSeq()->asSet
+      then
+        ""
+      else
+         "^" + typePath->last + "^"
+      end
+    end

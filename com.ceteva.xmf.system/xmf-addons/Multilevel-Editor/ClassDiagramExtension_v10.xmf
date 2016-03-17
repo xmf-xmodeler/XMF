@@ -264,10 +264,10 @@ context ClassDiagrams
 
 	self.name := AttributeName(name, x + self.separator(),y);
       if metaclass_ <> "" then
-        self.type := AttributeType("<<" + metaclass_ + ">> " + type,x+70,y)
+        self.type := AttributeType("<<" + metaclass_ + ">> " + type,x+50,y)
       else
    //self.type := AttributeType(type,x+120,y)
-   self.type := AttributeType(type,self.name.x+120,y)
+   self.type := AttributeType(type,self.name.x+50,y)
 
       end;
 
@@ -296,11 +296,43 @@ context ClassDiagrams
     @Operation editName()
       name.editText()
     end
-
-
-   @Operation name():String
-//   type.move(self.separator() + name.x + instLevel.width() + name.width() + self.separator(),type.y);
+  
+    @Operation moveDown()
+      let height = 16
+      in name.move(name.x,name.y-height);
+         type.move(type.x,type.y-height);
+         instLevel.move(instLevel.x,instLevel.y-height)
+      end
+    end
+    
+    @Operation moveY(y)
+      name.move(name.x(),y);
+      type.move(type.x(),y);
+      instLevel.move(instLevel.x(),y)
+    end
+    
+    @Operation name():String
       name.text
+    end
+    
+    @Operation preTypeWidth()
+      // The intention is that the type is the last thing in an attribute
+      // box and that the types all line up. Up you add new types of AttributeText
+      // then add new decorators in before the type.
+      name.width()
+    end
+    
+    @Operation resized(display)
+    
+      // If the name has resized then the type
+      // may need to move along accordingly.
+      
+      if type.x() < (name.x() + name.width()) or
+         type.x() > (name.x() + name.width() + self.separator())
+      then 
+        type.move(name.x() + name.width() + self.separator(),type.y());
+        owner.resized(self)
+      end
     end
     
    @Operation setName(name)
@@ -309,7 +341,7 @@ context ClassDiagrams
    
     @Operation separator()
       // Between the name and the type...
-      15
+      10
     end
     
     @Operation separatorIntrinsic() //ADDED BB

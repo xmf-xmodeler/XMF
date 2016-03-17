@@ -1,0 +1,76 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+import IO;
+import SnapshotDiagrams;
+
+context AttributeText
+    @Attribute instLevel : InstBox end 
+
+Clients::ClassDiagrams::AttributeText.constructors := Seq{};
+
+context AttributeText
+
+   @Constructor(name,metaclass_,type,x,y) !
+ 
+      // Expects to be supplied with name:String and type:String.
+     
+    self.instLevel := InstBox(x+1,y); //EDIT BB
+	self.instLevel.setOwner(self);
+    self.instLevel.createText(); 
+
+	self.name := AttributeName(name, x + self.separator(),y);
+      if metaclass_ <> "" then
+        self.type := AttributeType("<<" + metaclass_ + ">> " + type,x+50,y)
+      else
+   		self.type := AttributeType(type,self.name.x+50,y)
+
+      end;
+
+      // A group should not have any Display attributes set.
+      self.x := 0;
+      self.y := 0
+    end
+
+
+context AttributeText
+    @Operation addDisplays()
+	  self.add(type);
+      self.add(instLevel);
+      self.add(name)
+
+    end
+    
+context AttributeText
+    
+    @Operation moveDown()
+      let height = 16
+      in name.move(name.x,name.y-height);
+         type.move(type.x,type.y-height);
+         instLevel.move(instLevel.x,instLevel.y-height)
+      end
+    end
+    
+context AttributeText
+    
+    @Operation moveY(y)
+      name.move(name.x(),y);
+      type.move(type.x(),y);
+      instLevel.move(instLevel.x(),y)
+    end
+    
+context AttributeText
+    
+    @Operation separatorIntrinsic() //ADDED BB
+      //Between intrinsic and name
+      5
+    end
+    
+
+

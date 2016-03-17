@@ -1,0 +1,26 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+import IO;
+import SnapshotDiagrams;
+  
+  context Clients::Diagrams::Text
+  @Operation checkDaemons()
+  	@SlotValueChanged multi once Clients::Diagrams::Text::widthChanged(self,"width") end
+  end
+
+  context Clients::Diagrams::Text  
+  @Operation widthChanged(obj, slot, new, old)
+  	obj.center(new,obj.owner.width)
+  end
+	
+  context Clients::Diagrams::Text  
+  @Operation center(newWidth, newParentWidth)
+  	self.move(((newParentWidth - newWidth) / 2).floor(),self.y)
+  end

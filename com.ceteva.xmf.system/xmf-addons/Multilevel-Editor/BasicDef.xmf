@@ -1,0 +1,22 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+
+Root::red := Color(139,0,0);
+Root::green := Color(0,100,0);
+Root::blue := Color(0,0,139);
+Root::black := Color(0,0,0);
+Root::white := Color(255,255,255);
+
+context Root
+  @Package Language extends XCore
+    @Class Type extends Class
+    @Attribute level : Integer end
+    end
+  end
+  
+context Root
+  @Package Model metapackage Language
+  end

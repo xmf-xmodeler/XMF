@@ -1,0 +1,77 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+import IO;
+import SnapshotDiagrams;
+
+context Clients::ClassDiagrams::AttributeBox	
+   @Operation packWidth()
+                        	 
+	  let maxNameWidth = 0;
+	  	  maxIntrinsicLevelName = 0
+	  in
+
+		@For attText in displays do
+           maxIntrinsicLevelName := maxIntrinsicLevelName.max(attText.instLevel.x + attText.instLevel.minWidth())
+        end;
+ 
+		@For attText in displays do
+           attText.name.move(maxIntrinsicLevelName + attText.separatorIntrinsic(),attText.name.y())
+        end;
+        @For attText in displays do
+          maxNameWidth := maxNameWidth.max(attText.name.x + attText.name.width())
+        end;
+        @For attText in displays do
+          attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
+        end
+      end;
+      super()
+    end
+	
+   context Clients::ClassDiagrams::AttributeBox	
+   @Operation expandHeight()
+	  let maxNameWidth = 0;
+	        maxIntrinsicLevelName = 0
+	  in
+		@For attText in displays do 
+           maxIntrinsicLevelName := maxIntrinsicLevelName.max(attText.instLevel.x + attText.instLevel.minWidth())
+        end;
+		@For attText in displays do
+           attText.name.move(maxIntrinsicLevelName + attText.separatorIntrinsic(),attText.name.y())
+        end;
+        @For attText in displays do
+          maxNameWidth := maxNameWidth.max(attText.name.x + attText.name.width())
+        end;
+        
+        @For attText in displays do
+          attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
+        end
+      end;
+	  
+      let height = 0;
+      	  div = 0
+      in 
+		 let v = Vector(3)
+		 in
+			v.put(0,"getTextDimension");
+			//even an empty string will return height
+			v.put(1,"");
+			v.put(2,false);
+			div := Kernel_call("com.ceteva.diagram",v)->at(1)
+		 end;       
+      
+      	@For attText in displays do
+           attText.name.move(attText.name.x(),height + 3);
+           attText.type.move(attText.type.x(),height + 3);
+           attText.instLevel.move(attText.instLevel.x,height + 3);
+           height := height + div
+         end
+      end;
+      super()
+   end
