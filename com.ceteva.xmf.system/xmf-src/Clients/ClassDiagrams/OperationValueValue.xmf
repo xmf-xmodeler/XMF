@@ -26,8 +26,8 @@ context ClassDiagrams
 		@Operation setValueColor() 
           if value.isKindOf(Number)
             then 
-            if value < min or value > max 
-              then self.text.setColor(Color(255,60,60))
+            if (min <> null andthen value < min) or (max <> null andthen value > max) 
+              then self.text.setColor(Color(255, 60,60))
               else self.text.setColor(Color(255,200,60))
             end
           end
