@@ -769,11 +769,12 @@ context String
     end
     self
   end
-  
+ 
 context String
   @Operation toFilePath()
     let path = self.splitBy("/",0,0)
     in
+      if(path.size() <=1 ) then path := self.splitBy("\\",0,0) end;
       let directory = IO::Directory(path.head())
       in
         self.toFilePath(directory,path.tail())

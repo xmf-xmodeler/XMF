@@ -25,8 +25,8 @@ context XmfTextEditor
 
     @Operation commitTextAs()
       // saves text back out to a file
-      let newFilePath = xmf.saveFile(file.owner,"*.xmf",file.name);
-          dir = file.owner;
+      let newFilePath = xmf.saveFile(file.owner,"*.xmf",file.name) then
+          dir = newFilePath.toFilePath().owner;
           text = self.getText() then
           write = if newFilePath = "" 
                   then false
@@ -52,7 +52,9 @@ context XmfTextEditor
                  fout.close();
                  self.setClean();
                  self.setName(newFile.name);
-                 dir.refreshFileTree();
+                 try dir.refreshFileTree()
+                   catch(exception) null // ignore
+                 end;
                  xmf.fileEditorManager().changeEditorFile(self,self.file,newFile);
                  self.file := newFile
                end
