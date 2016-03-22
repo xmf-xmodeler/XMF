@@ -24,7 +24,7 @@ context ClassMapping
       self.daemonPairs := Seq{};
       @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object,metaAttribute.name().toString()) end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
-      @SlotValueChanged multi once MetaslotXText::textChanged_classDiagram_MetaslotXText(text.value,"text") end;
+      @SlotValueChanged multi once MetaslotXText::textChanged_classDiagram_MetaslotXText(text.value.text,"text") end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
       self
     end
