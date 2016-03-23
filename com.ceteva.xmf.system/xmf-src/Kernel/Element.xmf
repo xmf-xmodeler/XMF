@@ -160,19 +160,32 @@ context Element
     self.of()=classifier
   end
   
+
 context Element
-  @Operation noOperationFound(message:Symbol,args:Seq(Element))
-  
+
+  @Operation noOperationFound(message : Symbol, args : Seq(Element)):XCore::Element
     @Doc
-      Called when a message cannot be delivered to an element.
-      The default behaviour is to throe an appropriate exception,
-      however you may choose to redefine this in a sub-class to 
-      handle specific missing behaviours.
+      If the receiver does not understand the message, it propagates it to its roleFiller.
     end
-    
-    throw Exceptions::NoOperation(self,message,args)
+    if self.hasSlot("roleFiller") andthen self.roleFiller <> null then
+        self.roleFiller.send(message,args)
+    else
+        throw Exceptions::NoOperation(self,message,args)
+    end
   end
-  
+
+
+context Element
+
+  @Operation setDelegation(d:Element)
+    if not self.hasSlot("roleFiller") then
+      self.addStructuralFeature("roleFiller", d)
+    else
+      self.roleFiller := d
+    end
+  end
+
+
 context Element
 
   @Operation oclIsTypeOf(classifier:Classifier):Boolean
