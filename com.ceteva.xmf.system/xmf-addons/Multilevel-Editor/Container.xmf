@@ -1,0 +1,17 @@
+parserImport XOCL;
+parserImport XMap;
+
+Container.removeOperation(Contained.getOperation("deleteRecursive"));
+        
+context Container		
+@Operation deleteRecursive():XCore::Element
+	  if self.allInstances() <> Set{}  
+	  then
+	  	self.allInstances()->iterate(c x=0 | c.deleteRecursive())
+	  end;
+      super();
+      @For c in self.contents() do
+        c.deleteRecursive()
+      end;
+      self
+    end
