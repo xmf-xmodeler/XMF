@@ -31,11 +31,14 @@ Contained.removeOperation(Contained.getOperation("delete_client_check()"));
     	then 
     		true
     	else 
-			if self.allInstances() <> Set{}
-			then
-				xmf.question("Are you sure you want to delete " + name + "? All instances will be deleted, too")
-			else
-				xmf.question("Are you sure you want to delete " + name + "?")
+			let ret = self.allInstances()
+			in
+				if ret <> Set{} and ret <> Seq{} 
+				then
+					xmf.question("Are you sure you want to delete " + name + "? All instances will be deleted, too")
+				else
+					xmf.question("Are you sure you want to delete " + name + "?")
+				end
 			end
     	end	
     end
