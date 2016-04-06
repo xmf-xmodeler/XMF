@@ -1489,10 +1489,12 @@ context ClassMapping
 					"XCore/Class.gif"
 				end
 				[ "0" ] do
-					"XCore/Object.gif"
+					//"XCore/Object.gif"
+					"XCore/Class.gif"
            		end
 				[ "1" ] do
-					"XCore/Object.gif"
+					//"XCore/Object.gif"
+					"XCore/Class.gif"
            		end
 				[ "2" ] do
 					"XCore/Class.gif"
@@ -1560,7 +1562,24 @@ context ClassMapping
 			false,
 			theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
 			@Operation(x,y)
-				theMapping.dropInstanceOf(metaclass,x,y)
+				//theMapping.dropInstanceOf(metaclass,x,y)
+				let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
+                    in
+                        if not (name = null)
+                        then
+                            let class = metaclass(name)
+                            in
+                                class.addParent(FMML::MetaClass);
+                                thePackage.add(class);
+                                //theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
+                                @Find(map,theMapping.classMaps) when map.class = class do
+                                    map.node.move(x,y);
+                                    map.node.showMetaslots(true);
+                                    map.node.showAttributes(false)
+                                end
+                            end
+                        end
+                    end
 			end
 		)
 	end
@@ -1683,7 +1702,12 @@ context ClassMapping
 //			diagram.defineToolGroup("Top Level");
 			self.paletteList := Seq{};
 			self.addMetaClass(FMML::MetaClass, "Top Level");
-			package.classes->iterate(c tmp = null | self.addMetaClass(c,"M"+(c.level - 1))  )
+			package.classes->iterate(c tmp = null | 
+				if c.level > 0
+				then 
+					self.addMetaClass(c,"M"+(c.level - 1))
+				end
+			)
 //           let parents = package.allParents() then
 //               contents = parents->iterate(p O=Set{} | O + p.contents()) then
 //               classes = contents->select(o | o <> null and o.isKindOf(Class)) then
