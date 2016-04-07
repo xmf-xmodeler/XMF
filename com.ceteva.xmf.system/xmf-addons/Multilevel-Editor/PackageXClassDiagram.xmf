@@ -172,6 +172,11 @@ context ClassMapping
           if node.showOperationValues then
             map.generateOperationValues()
           end;
+          if class.level = 0
+          then
+          	node.showMetaslots(true);
+          	node.showAttributes(false)
+          end;
           node
         end
       end
@@ -977,13 +982,13 @@ context ClassMapping
                then self.add(type)
                end
             end
-          end;
-          @For parent in class.parents do
-            if not class.defaultParents()->includes(parent) andthen
-               not package.classes->includes(parent)
-             then self.add(parent)
-           end
-          end
+          end//;
+          //@For parent in class.parents do
+          //  if not class.defaultParents()->includes(parent) andthen
+          //     not package.classes->includes(parent)
+          //   then self.add(parent)
+          // end
+          //end
         end;
         @For package in package.packages do
           self.packageAdded(package);
