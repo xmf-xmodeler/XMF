@@ -7,14 +7,14 @@ context Contained
 @Operation deleteRecursive():XCore::Element
       if self.owner.isReallyKindOf(Container)
       then
-        if self.isKindOf(Attribute) andthen self.isIntrinsic
-        then
-          self.owner.removeAttribute(self);
-          self.owner.contents.remove(self.name());
-          self.removeFromOwner()
-        else
+        //if self.isKindOf(Attribute) andthen self.isIntrinsic
+        //then
+        //  self.owner.removeAttribute(self);
+        //  self.owner.contents.remove(self.name());
+        //  self.removeFromOwner()
+        //else
           self.owner.remove(self)
-        end
+        //end
       else
         false
       end;
@@ -27,9 +27,14 @@ Contained.removeOperation(Contained.getOperation("delete_client_check"));
   @Operation delete_client_check()
     let name = if self.isKindOf(NamedElement) then self.name() else self.toString() end
     in
-    	if self.isKindOf(Attribute) andthen self.isIntrinsic
+    	if self.isKindOf(Attribute)
     	then 
-    		true
+    		if self.isIntrinsic
+    		then
+    			true
+    		else
+    			xmf.question("Are you sure you want to delete " + name + "?")
+    		end
     	else 
 			let ret = self.allInstances()
 			in

@@ -13,7 +13,14 @@ context Container
       @For c in self.contents() do
         if c.owner = self
         then
-        	c.deleteRecursive()
+        	if c.isKindOf(Attribute) andthen c.isIntrinsic
+        	then
+        	  self.removeAttribute(c);
+        	  self.contents.remove(c.name());
+        	  c.removeFromOwner()
+        	else
+          		c.deleteRecursive()
+        	end
         end	
       end;
       self
