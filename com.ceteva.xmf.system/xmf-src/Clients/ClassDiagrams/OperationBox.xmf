@@ -58,4 +58,12 @@ context ClassDiagrams
       self.classNode().packHeight()
     end
        
+    //Override Method   
+    @Operation setShown(v : XCore::Element):XCore::Element
+      @For display in displays do
+        display.name.setEditable(v)
+      end;
+      self.shown := v
+    end   
+       
   end
