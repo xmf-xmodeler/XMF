@@ -161,6 +161,7 @@ let
          Kernel_addAtt(class,"imports",Seq{});
          Kernel_addAtt(class,"isFinal",false);
          Kernel_addAtt(class,"resourceName","");
+         Kernel_addAtt(class,"delegatesTo",null);
          class
       end;
       
@@ -517,7 +518,7 @@ let
                  mkAtt("isComposite",Boolean,Attribute,false),
                  mkAtt("properties",mkSeqType(Element),Attribute,false),
                  mkAtt("isIntrinsic",Boolean,Attribute,false),
-                 mkAtt("instLevel",Integer,Attribute,0)
+                 mkAtt("instLevel",Integer,Attribute,false)
              },
              "Attribute",
              Set{},
@@ -563,7 +564,8 @@ let
              Set{mkAtt("attributes",mkSetType(Attribute),Class,true),
                  mkAtt("isAbstract",Boolean,Class,false),
                  mkAtt("resourceName",String,Class,false),
-                 mkAtt("constructors",mkSeqType(Constructor),Class,true)},
+                 mkAtt("constructors",mkSeqType(Constructor),Class,true),          
+                 mkAtt("delegatesTo",Class,Class,false)},       
              "Class",
              Set{},
              Set{},
