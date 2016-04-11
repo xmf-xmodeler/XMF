@@ -76,4 +76,11 @@ context ClassDiagrams
       self.classNode().packHeight()
     end
        
+    @Operation setShown(v : XCore::Element):XCore::Element
+      @For display in displays do
+        display.value.text.setEditable(v)
+      end;
+      self.shown := v
+    end   
+       
   end
