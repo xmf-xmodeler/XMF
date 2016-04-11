@@ -18,6 +18,7 @@ context ClassDiagrams
     @Attribute packageNodes       : Seq(PackageNode)     end
     @Attribute noteNodes          : Seq(NoteNode)	     end
     @Attribute inheritanceEdges   : Seq(InheritanceEdge) end
+    @Attribute delegationEdges    : Seq(DelegationEdge)  end
     @Attribute attributeEdges     : Seq(AttributeEdge)   end
     @Attribute containsEdges      : Seq(ContainsEdge)    end
     @Attribute dependencyEdges    : Seq(DependencyEdge)  end
@@ -51,6 +52,10 @@ context ClassDiagrams
         end
         DependencyEdge do
           self.addDependencyEdge(edge);
+          super(edge)
+        end
+        DelegationEdge do
+          self.addDelegationEdge(edge);
           super(edge)
         end
         else self.error("I don't know how to add " + edge.toString() + " to a class diagram.")
@@ -113,6 +118,10 @@ context ClassDiagrams
     
     @Operation addInheritanceEdge(inheritanceEdge)
       self.inheritanceEdges := inheritanceEdges->prepend(inheritanceEdge)
+    end    
+    
+    @Operation addDelegationEdge(delegationEdge)
+      self.delegationEdges := delegationEdges->prepend(delegationEdge)
     end
     
     @Operation addNoteNode(noteNode)
@@ -195,7 +204,7 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
       self.defineNewHandler("XCore","Inheritance",true,"XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
       self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
-      self.defineNewHandler("XCore","Delegation",true,"XCore/Delegation.png",ClassDiagram::defaultDelegationEdgeCommand);
+      self.defineNewHandler("XCore","Delegation",true,"XCore/Delegation.png",ClassDiagram::newDelegationEdge);
       if xmf.preference("EnableMeta")
       then self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
       end
@@ -470,6 +479,29 @@ context ClassDiagrams
       in 
         edge.new(self,false);
         self.addEdge(edge)
+      end
+    end
+    
+//    @Operation newInheritance(sourceNode,targetNode)
+//      let sourcePort = sourceNode.ports()->sel;
+//          targetPort = targetNode.ports()->sel
+//      in self.newInheritanceEdge(sourcePort,targetPort)
+//      end
+//    end
+    
+    @Operation newDelegationEdge(sourcePort,targetPort)
+      let sourceNode = sourcePort.owner;
+          targetNode = targetPort.owner
+      in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
+               and sourceNode.of() = targetNode.of()
+               and sourceNode <> targetNode
+         then 
+           let edge = DelegationEdge(sourcePort,targetPort)
+           in edge.new(self,false);
+              self.addEdge(edge);
+              edge
+           end
+         end
       end
     end
     
