@@ -1,0 +1,71 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import Menus;
+import ClassDiagrams;
+import ClassMapping;
+
+context ClassMapping
+
+  @Class DelegationXDelegationEdge extends ElementXEdge, RightClickableProxy
+  
+    @Attribute roleClass       : XCore::Classifier end
+    @Attribute roleFillerClass : XCore::Classifier end
+    @Attribute edge            : DelegationEdge (?) end
+    
+    @Constructor(roleClass,roleFillerClass,edge) !
+      self.setHotLoad(true);
+      self.checkDaemons();
+      self.setGlobalMenu(edge,Set{Classifier,edge.of()});
+      roleClass.delegatesTo := roleFillerClass
+    end
+    
+    @Operation buildGlobalMenu(rightClickable)      
+      let globalMenu = rightClickable.globalMenu(false)
+      in
+        globalMenu.add(MenuAction("Delete","CTRL+D",RightClickableProxy::proxyTarget,Seq{},DelegationXDelegationEdge::delete));
+        globalMenu.new();
+        globalMenu
+      end
+    end
+        
+    @Operation checkDaemons() // changed in diagram
+      @SlotValueChanged multi once DelegationXDelegationEdge::roleClassChangedDaemon(edge,"source")  end;
+      @SlotValueChanged multi once DelegationXDelegationEdge::roleFillerClassChangedDaemon(edge,"target") end
+    end
+
+    @Operation roleClassChangedDaemon(edge,slot,newPort,oldPort)
+      owner.delegationSourceChanged(self,newPort.owner)
+    end
+    
+    @Operation roleFillerClassChangedDaemon(edge,slot,newPort,oldPort)
+      owner.delegationTargetChanged(self,newPort.owner)
+    end
+        
+    @Operation hotLoaded()
+      self.checkDaemons();
+      self.setGlobalMenu(edge,Set{Classifier,edge.of()},false)
+    end
+    
+    @Operation delete()
+      roleClass.delegatesTo := null
+    end
+    
+    @Operation deleteEdgeFromDiagram()
+      edge.delete();
+      self.owner.remove(self)
+    end
+    
+    @Operation element()
+      Seq{roleClass,roleFillerClass}
+    end
+
+    @Operation removeDaemons()
+      // Called to tidy up when the mapping is no longer valid.
+      edge.removeDaemonsWithTarget(self,true)
+    end
+    
+  end

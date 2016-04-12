@@ -20,6 +20,7 @@ context ClassMapping
     @Attribute docMaps          : Seq(DocXNote)                   (+,-) end
     @Attribute elementMaps      : Seq(ElementXNode)               (+,-) end
     @Attribute inheritanceMaps  : Seq(ClassifierXInheritanceEdge) (+,-) end
+    @Attribute delegationMaps  : Seq(DelegationXDelegationEdge)  (+,-) end
     @Attribute attributeMaps    : Seq(AttributeXAttributeEdge)    (+,-) end
     @Attribute containerMaps    : Seq(ContainerXContainsEdge)     (+,-) end
     @Attribute dependencyMaps   : Seq(DependencyXDependencyEdge)  (+,-) end
@@ -71,6 +72,9 @@ context ClassMapping
         end
         ClassifierXInheritanceEdge do
           self.addInheritanceMap(element)
+        end
+        DelegationXDelegationEdge do
+          self.addDelegationMap(element)
         end
         DependencyXDependencyEdge do
           self.addDependencyMap(element)
@@ -264,6 +268,11 @@ context ClassMapping
     @Operation addDependencyMap(dependencyMap)
       self.addToDependencyMaps(dependencyMap);
       dependencyMap.setOwner(self)
+    end
+    
+    @Operation addDelegationMap(delegationMap)
+      self.addToDelegationMaps(delegationMap);
+      delegationMap.setOwner(self)
     end
     
     @Operation addDocMap(docMap)
@@ -679,6 +688,8 @@ context ClassMapping
       @SlotValueChanged multi once - PackageXClassDiagram::containsEdgeRemovedDaemon(diagram,"containsEdges")       end;
       @SlotValueChanged multi once + PackageXClassDiagram::dependencyEdgeAddedDaemon(diagram,"dependencyEdges")     end;
       @SlotValueChanged multi once - PackageXClassDiagram::dependencyEdgeRemovedDaemon(diagram,"dependencyEdges")   end;
+      @SlotValueChanged multi once + PackageXClassDiagram::delegationEdgeAddedDaemon(diagram,"delegationEdges")     end;
+      @SlotValueChanged multi once - PackageXClassDiagram::delegationEdgeRemovedDaemon(diagram,"delegationEdges")   end;
       @SlotValueChanged multi once + PackageXClassDiagram::associationEdgeAddedDaemon(diagram,"associationEdges")   end;
       @SlotValueChanged multi once - PackageXClassDiagram::associationEdgeRemovedDaemon(diagram,"associationEdges") end;
       @SlotValueChanged multi once + PackageXClassDiagram::attributeEdgeAddedDaemon(diagram,"attributeEdges")       end;
@@ -1023,6 +1034,10 @@ context ClassMapping
       self.dependencyEdgeAdded(dependencyEdge)
     end
     
+    @Operation delegationEdgeAddedDaemon(diagram,slot,delegationEdge)
+      self.delegationEdgeAdded(delegationEdge)
+    end
+    
     @Operation dependencyEdgeAdded(dependencyEdge)
       if self.validEdge(dependencyEdge)
       then
@@ -1045,6 +1060,26 @@ context ClassMapping
       end
     end
     
+    @Operation delegationEdgeAdded(delegationEdge)
+      if self.validEdge(delegationEdge)
+      then
+        if not delegationMaps->exists(map | map.edge = delegationEdge)
+        then
+          @Find(sourceMap,self.nodeMaps())
+            when sourceMap.node = delegationEdge.sourceNode()
+            do @Find(targetMap,self.nodeMaps())
+              when targetMap.node = delegationEdge.targetNode()
+              do let source = sourceMap.element();
+                target = targetMap.element()
+              in self.add(DelegationXDelegationEdge(source,target,delegationEdge))
+                //;delegation.attach()
+              end
+            end
+          end
+        end
+      end
+    end
+    
     @Operation dependencyEdgeRemoved(dependencyEdge)
       @Find(dependencyMap,dependencyMaps)
         when dependencyMap.edge = dependencyEdge
@@ -1057,8 +1092,22 @@ context ClassMapping
     @Operation dependencyEdgeRemovedDaemon(diagram,slot,dependencyEdge)
       self.dependencyEdgeRemoved(dependencyEdge)
     end
+      
+    @Operation delegationEdgeRemovedDaemon(diagram,slot,delegationEdge)
+      self.delegationEdgeRemoved(delegationEdge)
+    end
     
-    @Operation dependencySourceChanged(dependency)
+    
+    @Operation delegationEdgeRemoved(delegationEdge)
+      @Find(delegationMap,delegationMaps)
+        when delegationMap.edge = delegationEdge
+        do self.remove(delegationMap);
+           delegationMap.detach();
+           delegationMap.dispose()
+      end
+    end
+    
+            @Operation dependencySourceChanged(dependency)
       // We do nothing for this since we don't expect
       // a dependency to be directly modified. Update
       // this in line with other model element changes.

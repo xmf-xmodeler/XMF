@@ -173,9 +173,9 @@ context ClassDiagrams
        self.newDependencyEdgeCommand(sourcePort,targetPort,XCore::Dependency.pathSeq())
     end
      
-    @Operation defaultDelegationEdgeCommand(sourcePort,targetPort)
-       null
-    end
+//    @Operation defaultDelegationEdgeCommand(sourcePort,targetPort)
+//       self.newDelegationEdgeCommand(sourcePort,targetPort)
+//    end
     
     @Operation defaultPackageNode(x,y)
        self.newPackageNode(x,y,XCore::Package.pathSeq()) 
@@ -413,7 +413,6 @@ context ClassDiagrams
     end
 
     @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
-        //"newAssociationEdgeCommand START".println();
       let  // Calculate positions of end labels and create ends    
           southbound = targetPort.owner.y > sourcePort.owner.y;
           eastbound  = targetPort.owner.x > sourcePort.owner.x 
@@ -428,12 +427,10 @@ context ClassDiagrams
         then
           instLevel1 = InstLevelLabel(" ", "start", 10, (2*yDiff)+(1*starty), Color(0,0,0), true);
           instLevel2 = InstLevelLabel(" ", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
-            varName1 = Label("e1","start",startx,starty,true);
-            varName2 = Label("e2","end",endx,endy,true);
-            //displayName1 = Label("displayName1","";0,-21,true, 1);
-            //displayName2 = Label("displayName2","",0, 11,true,-1) 
-            displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
-            displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
+          varName1 = Label("e1","start",startx,starty,true);
+          varName2 = Label("e2","end",endx,endy,true);
+          displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
+          displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
         then
           end1 = AssociationEnd(varName1,displayName1,
               Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);
@@ -442,13 +439,10 @@ context ClassDiagrams
         then
           edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
       in edge.new(self,false);
-            //("newAssociationEdgeCommand varName1: " + varName1).println();
-            //displayName1.arrow := 1;
-            //displayName2.arrow := 0-1;
-	        self.addEdge(edge);
-			edge.end2.displayName.hide();
-			edge.end1.name.hide();
-			edge.end2.name.hide()
+	    self.addEdge(edge);
+		edge.end2.displayName.hide();
+		edge.end1.name.hide();
+		edge.end2.name.hide()
       end
     end
     
@@ -481,13 +475,6 @@ context ClassDiagrams
         self.addEdge(edge)
       end
     end
-    
-//    @Operation newInheritance(sourceNode,targetNode)
-//      let sourcePort = sourceNode.ports()->sel;
-//          targetPort = targetNode.ports()->sel
-//      in self.newInheritanceEdge(sourcePort,targetPort)
-//      end
-//    end
     
     @Operation newDelegationEdge(sourcePort,targetPort)
       let sourceNode = sourcePort.owner;

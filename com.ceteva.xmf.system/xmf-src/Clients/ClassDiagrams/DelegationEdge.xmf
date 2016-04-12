@@ -10,7 +10,7 @@ context ClassDiagrams
   @Class DelegationEdge extends Edge
   
     @Constructor(source,target) 
-      self.init(Seq{source,target,0,Edge::whiteCircle,Color()})
+      self.init(Seq{source,target,Edge::whiteCircle,0,Color()})
     end
     
     @Operation layoutId():String
