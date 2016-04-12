@@ -25,21 +25,13 @@ context Class
 		then
 			let sd = xmf.javaClass("de.unidue.icb.xmf.multilevel.gui.SpecificDeletionDialog").showDialog(n.owner.level.asInt(),n.instLevel.asInt())
 			in
-				if sd <> null //TODO
+				if sd <> null 
 				then
-					//if sd.getDeletionUntilLayer() = sd.getInstantiationLayer()
-					//then
-						self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer());
-						//super(n)
-						//self.deleteSlotAtInstance(n, sd.getInstantiationLayer());
-						//self.removeAttribute(n)
-					//else
-						//self.removeAttribute(n);
-						if sd.getDeletionUntilLayer()  > sd.getInstantiationLayer()
-						then
-							self.addIntrinsicAttributeAtLevel(n,sd.getDeletionUntilLayer()-1)
-						end
-					//end
+					self.removeAttributeIntrinsic(n, sd.getDeletionUntilLayer(), sd.getInstantiationLayer());
+					if sd.getDeletionUntilLayer()  > sd.getInstantiationLayer()
+					then
+						self.addIntrinsicAttributeAtLevel(n,sd.getDeletionUntilLayer()-1)
+					end
 				else
 					xmf.message("Operation canceled by user")
 				end
@@ -67,8 +59,6 @@ context Class
 	else
 		if self.level = addLevel
 		then
-		//Kernel_addAtt(self,a.name,a.type.default())
-		//TODO 
 			let newIntA = Attribute(a.name,a.type)
 			in
 				self.add(newIntA);
@@ -91,32 +81,24 @@ end
 	
 context Class 
 @Operation removeAttributeIntrinsic(a: Attribute, deleteLevel : Integer, instLevel : Integer):XCore::Element
-	//if self.level > deleteLevel
 	if self.level > instLevel
 	then
-		//self.removeAttribute(a);
 		self.allInstances()->iterate(c x=0 | c.removeAttributeIntrinsic(a,deleteLevel,instLevel));
 		self.removeAttribute(a);
 		a.removeFromOwner();
 		contents.remove(a.name())
 	else
-		//if instLevel = self.level
 		if instLevel = deleteLevel
 		then
 			self.deleteSlot(a)
-		//else
-		//	self.removeAttribute(a);
-		//	a.removeFromOwner();
-		//	contents.remove(a.name())//;
-		//self.allInstances()->iterate(c x=0 | c.add(a))
 		end
 	end
 end	
 
-context Object
+/* context Object
 @Operation removeAttributeIntrinsic(a: Attribute, deleteLevel : Integer, instLevel : Integer):XCore::Element
 	self.removeStructuralFeature(a.name.toString())
-end
+end */
 	
 context Class
 @Operation deleteSlot(a: Attribute):XCore::Element
