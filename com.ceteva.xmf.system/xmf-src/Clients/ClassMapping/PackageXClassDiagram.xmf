@@ -20,7 +20,7 @@ context ClassMapping
     @Attribute docMaps          : Seq(DocXNote)                   (+,-) end
     @Attribute elementMaps      : Seq(ElementXNode)               (+,-) end
     @Attribute inheritanceMaps  : Seq(ClassifierXInheritanceEdge) (+,-) end
-    @Attribute delegationMaps  : Seq(DelegationXDelegationEdge)  (+,-) end
+    @Attribute delegationMaps   : Seq(DelegationXDelegationEdge)  (+,-) end
     @Attribute attributeMaps    : Seq(AttributeXAttributeEdge)    (+,-) end
     @Attribute containerMaps    : Seq(ContainerXContainsEdge)     (+,-) end
     @Attribute dependencyMaps   : Seq(DependencyXDependencyEdge)  (+,-) end
@@ -675,8 +675,8 @@ context ClassMapping
     end
     
     @Operation checkDiagramDaemons()
-      @SlotValueChanged multi once + PackageXClassDiagram::noteNodeAdded(diagram,"noteNodes") 				  	  end;
-      @SlotValueChanged multi once - PackageXClassDiagram::noteNodeRemoved(diagram,"noteNodes") 			      	  end;
+      @SlotValueChanged multi once + PackageXClassDiagram::noteNodeAdded(diagram,"noteNodes") 				  	    end;
+      @SlotValueChanged multi once - PackageXClassDiagram::noteNodeRemoved(diagram,"noteNodes") 			        end;
       @SlotValueChanged multi once + PackageXClassDiagram::classNodeAddedDaemon(diagram,"classNodes")               end;
       // @SlotValueChanged multi once - PackageXClassDiagram::classNodeRemovedDaemon(diagram,"classNodes")          end;
       @SlotValueChanged multi once + PackageXClassDiagram::packageNodeAddedDaemon(diagram,"packageNodes")           end;

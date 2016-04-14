@@ -87,6 +87,18 @@ context Root::Extensions
               intrinsicA := intrinsicA.excluding(intA)
            end
 		 end;
+		 //(o + " delegates to "+ delegatesTo).println();
+		 //("self: " + self).println();
+		 //("o: " + o).println();
+		 //(o.delegatesTo).println();
+		 //(o.delegatesTo <> null).println();
+		 //(self.delegatesTo).println();
+		 //(self.delegatesTo <> null).println();
+		 if self.delegatesTo <> null	
+		 then self.selectRoleFiller(o, self) end;
+		   //"Start Delegation Dialog".println();	   
+		   //xmf.select("Role-filler of type " + type + " required","Select role-filler",{"Choose this"},"Choose this",null)
+		   //end;
          if Root.contents.keys().includes("TargetPackage".asSymbol())
          then
            TargetPackage.add(o)
@@ -96,4 +108,27 @@ context Root::Extensions
          o
       end
     end
-  end
+    
+    @Operation selectRoleFiller(object, class)
+      let type = class.delegatesTo
+	  then list = Root.allContentsOf(type)
+	  then size = list.size()
+	  in 
+		if size = 0 
+		then xmf.questionYesOnly("No instance of roll filler class found! This instance will behave erratically until the roleFiller slot is set to a non-null value.")
+		elseif size = 1
+		then xmf.questionYesOnly("The only known instance of the roll filler class (" + ("foo") + ") will be used as role filler.");
+				object.setDelegation(list.asSeq().head())
+		else // if size > 1
+		  let choice = xmf.select("Role-filler of type " + type + " required","Select role-filler", list.asSeq(), list.asSeq().head(),null) 
+		  //then name = exp
+		  in //(choice.name + " selected.").println();
+			 //(choice.of()).println();
+			if choice <> null then object.setDelegation(choice) end
+		  end // let/in
+        end // if
+	  end // let/in
+	end //@Operation
+
+end
+ 

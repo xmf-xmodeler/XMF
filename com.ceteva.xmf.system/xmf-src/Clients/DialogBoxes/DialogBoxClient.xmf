@@ -70,6 +70,13 @@ context DialogBoxes
       end
     end
     
+    @Operation newQuestionDialogYesOnly(question)
+      let dialog = QuestionDialogYesOnly(question) in
+        dialog.setOwner(self);
+        dialog.new()
+      end
+    end
+    
     @Operation newQuestionDialogYesNoCancel(question)
       let dialog = QuestionDialogYesNoCancel(question) in
         dialog.setOwner(self);

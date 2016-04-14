@@ -16,6 +16,7 @@ context DialogBoxes
            [newErrorDialog(dialogId,message)]
            [newQuestionDialog(dialogId,message)]
            [newQuestionDialogYesNoCancel(dialogId,message)]
+           [newQuestionDialogYesOnly(dialogId,message)]
            [newConfirmDialog(dialogId,message)]
            //[newMultioptionDialog(dialogId,message,type)]
            [newFileDialog(dialogId,type,dir,ext)]
@@ -104,6 +105,12 @@ context DialogBoxes
     @Operation newQuestionDialog(dialog)
       @CallCommand(self)
         newQuestionDialog(dialog.message)
+      end
+    end
+    
+    @Operation newQuestionDialogYesOnly(dialog)
+      @CallCommand(self)
+        newQuestionDialogYesOnly(dialog.message)
       end
     end
     

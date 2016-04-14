@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Clients;
+import DialogBoxes;
+
+context DialogBoxes
+
+  @Class QuestionDialogYesOnly extends ContainedClientElement
+    
+    @Attribute message : String end
+    
+    @Constructor(message) end 
+    
+    @Operation new()
+      self.commandInterpreter().newQuestionDialogYesOnly(self)
+    end
+  
+  end
