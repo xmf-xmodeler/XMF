@@ -61,6 +61,11 @@ context XMF
     self.dialogClient().newQuestionDialog(question) = "Yes"
   end
   
+context XMF
+  @Operation questionYesOnly(question:String):Boolean
+    self.dialogClient().newQuestionDialogYesOnly(question)
+  end
+  
 // Jens
 context XMF
   @Operation questionYesNoCancel(question:String):String
