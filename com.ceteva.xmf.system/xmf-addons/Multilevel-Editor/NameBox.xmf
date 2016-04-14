@@ -11,6 +11,12 @@ import IO;
 import SnapshotDiagrams;
 
 context Clients::ClassDiagrams::NameBox 
+    @Attribute sourcePackageText : Text	end
+    
+context Clients::ClassDiagrams::NameBox     
+    @Attribute stereotypeText    : Text end 
+
+context Clients::ClassDiagrams::NameBox 
   @Operation checkDaemons()
   	@SlotValueChanged multi once Clients::ClassDiagrams::NameBox::widthChanged(self,"width") end
   end
@@ -26,16 +32,13 @@ context Clients::ClassDiagrams::NameBox
   @Operation addDisplays():XCore::Element
       if sourcePackage <> ""
       then
-        self.add(Text(sourcePackage,5,0,false))
+        self.add(self.sourcePackageText)
       else
         false
       end;
       if stereotype <> ""
       then
-        self.add(let t = Text(stereotype,5,0,false,false,false,Color(190,190,190))
-        in t.checkDaemons();
-           t
-        end)
+        self.add(self.stereotypeText)
       else
         false
       end;
@@ -57,6 +60,20 @@ Clients::ClassDiagrams::NameBox.constructors := Seq{};
 	else
   		name
 	end;
+	if sourcePackage <> ""
+      then
+        self.sourcePackageText := Text(sourcePackage,5,0,false);
+        self.sourcePackageText.checkDaemons()
+      else
+        false
+      end;
+	if stereotype <> ""
+      then
+    	self.stereotypeText := Text(stereotype,5,0,false,false,false,grey);
+        self.stereotypeText.checkDaemons()
+      else
+        false
+    end;
 	self.checkDaemons();
 	self.showAllEdges()
   end  
