@@ -86,8 +86,23 @@ context Mosaic
               Class do
                 let atts = type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
                     ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
-                in self.owner().commandInterpreter().consoleDot(atts + ops)
-                end
+				in
+//				then 
+				  @While type.hasStructuralFeature("delegatesTo") andthen type.delegatesTo <> null
+				  do 
+					//(type + " hasStructuralFeature delegatesTo").println();
+					type := type.delegatesTo;
+					atts := atts + type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
+                    ops  := ops  + type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})                 
+//					let pi = 3 // type = type.delegatesTo 
+//					then atts = atts + type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
+//                         ops = ops + type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})                 
+//                    in null end // let
+                    //;type.println()
+                    //;type.delegatesTo.println()
+                  end; //while/do 
+				self.owner().commandInterpreter().consoleDot(atts + ops)
+                end //let/then/in
               end
               Classifier do
                 let ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})

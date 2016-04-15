@@ -33,7 +33,7 @@ context ClassMapping
     end
         
     @Operation checkDaemons() // changed in diagram
-      @SlotValueChanged multi once DelegationXDelegationEdge::delegatesToChangedDaemon(roleClass,"delegatesTo")  end; // <-- changed otherwise
+//      @SlotValueChanged multi once DelegationXDelegationEdge::delegatesToChangedDaemon(roleClass,"delegatesTo")  end; // <-- changed otherwise
       @SlotValueChanged multi once DelegationXDelegationEdge::roleClassChangedDaemon(edge,"source")  end;
       @SlotValueChanged multi once DelegationXDelegationEdge::roleFillerClassChangedDaemon(edge,"target") end
     end
