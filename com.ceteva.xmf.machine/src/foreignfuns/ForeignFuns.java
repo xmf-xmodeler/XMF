@@ -423,12 +423,6 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
-  public static void Kernel_arrayDaemons(Machine machine) {
-    int array = machine.frameLocal(0);
-    machine.pushStack(machine.arrayDaemons(array));
-    machine.popFrame();
-  }
-
   public static void Kernel_allInstances(Machine machine) {
     int types = machine.frameLocal(0);
     int length = machine.consLength(types);
@@ -441,6 +435,12 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.setGC(new AllInstances(machine, classes));
     machine.gc();
     machine.setGC(gc);
+    machine.popFrame();
+  }
+
+  public static void Kernel_arrayDaemons(Machine machine) {
+    int array = machine.frameLocal(0);
+    machine.pushStack(machine.arrayDaemons(array));
     machine.popFrame();
   }
 
@@ -628,6 +628,13 @@ public class ForeignFuns implements Value, Instr, Errors {
     } else error(TYPE, machine, "Kernel_ceiling expects a float " + machine.valueToString(f));
   }
 
+  public static void Kernel_charCount(Machine machine) {
+    int string = machine.frameLocal(0);
+    int charPos = machine.frameLocal(1);
+    machine.pushStack(Machine.mkInt(machine.charCount(string, Machine.value(charPos))));
+    machine.popFrame();
+  }
+
   public static void Kernel_client_connect(Machine machine) {
     System.out.println("Kernel_clientConnect() not implemented");
     System.exit(0);
@@ -661,13 +668,6 @@ public class ForeignFuns implements Value, Instr, Errors {
     int channel = machine.frameLocal(0);
     machine.close(channel);
     machine.pushStack(channel);
-    machine.popFrame();
-  }
-
-  public static void Kernel_charCount(Machine machine) {
-    int string = machine.frameLocal(0);
-    int charPos = machine.frameLocal(1);
-    machine.pushStack(Machine.mkInt(machine.charCount(string, Machine.value(charPos))));
     machine.popFrame();
   }
 
@@ -1216,6 +1216,16 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
+  public static void Kernel_foreignMOPMapping(Machine machine) {
+    machine.pushStack(machine.getForeignMOPMapping());
+    machine.popFrame();
+  }
+
+  public static void Kernel_foreignTypeMapping(Machine machine) {
+    machine.pushStack(machine.getForeignTypeMapping());
+    machine.popFrame();
+  }
+
   public static void Kernel_fork(Machine machine) {
     int value = machine.frameLocal(0);
     int fun = machine.frameLocal(1);
@@ -1256,16 +1266,6 @@ public class ForeignFuns implements Value, Instr, Errors {
   public static void Kernel_forwardRefPath(Machine machine) {
     int forwardRef = machine.frameLocal(0);
     machine.pushStack(machine.forwardRefPath(forwardRef));
-    machine.popFrame();
-  }
-
-  public static void Kernel_foreignTypeMapping(Machine machine) {
-    machine.pushStack(machine.getForeignTypeMapping());
-    machine.popFrame();
-  }
-
-  public static void Kernel_foreignMOPMapping(Machine machine) {
-    machine.pushStack(machine.getForeignMOPMapping());
     machine.popFrame();
   }
 
@@ -1671,35 +1671,6 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
-  public static void Kernel_invokeMethod(Machine machine) {
-
-    // A Java method is supplied as a foreign object. This
-    // is a way of invoking an arbitrary Java method. The
-    // upper levels can search for any method they like and
-    // invoke it on a Java target.
-
-    int foreign = machine.frameLocal(0);
-    int args = machine.frameLocal(2);
-    int arity = machine.consLength(args);
-
-    Object object = machine.foreignObj(machine.foreignObjIndex(foreign));
-    if (object instanceof java.lang.reflect.Method && arity == 2) {
-      Object javaTarget = XJ.mapXMFValue(machine, java.lang.Object.class, machine.at(args, 0));
-      Object[] javaArgs = (Object[]) XJ.mapXMFValue(machine, java.lang.Object[].class, machine.at(args, 1));
-      java.lang.reflect.Method method = (java.lang.reflect.Method) object;
-      try {
-        machine.pushStack(XJ.mapJavaValue(machine, method.invoke(javaTarget, javaArgs)));
-      } catch (IllegalArgumentException e) {
-        machine.error(ERROR, e.toString());
-      } catch (IllegalAccessException e) {
-        machine.error(ERROR, e.toString());
-      } catch (InvocationTargetException e) {
-        machine.error(ERROR, e.toString());
-      }
-      machine.popFrame();
-    } else machine.error(ERROR, "Cannot invoke foreign object.");
-  }
-
   public static void Kernel_invoke(Machine machine) {
 
     // Get the arguments supplied to Kernel_invoke and
@@ -1747,6 +1718,35 @@ public class ForeignFuns implements Value, Instr, Errors {
     default:
       machine.error(ERROR, "Trying to apply a non-applicable value.");
     }
+  }
+
+  public static void Kernel_invokeMethod(Machine machine) {
+
+    // A Java method is supplied as a foreign object. This
+    // is a way of invoking an arbitrary Java method. The
+    // upper levels can search for any method they like and
+    // invoke it on a Java target.
+
+    int foreign = machine.frameLocal(0);
+    int args = machine.frameLocal(2);
+    int arity = machine.consLength(args);
+
+    Object object = machine.foreignObj(machine.foreignObjIndex(foreign));
+    if (object instanceof java.lang.reflect.Method && arity == 2) {
+      Object javaTarget = XJ.mapXMFValue(machine, java.lang.Object.class, machine.at(args, 0));
+      Object[] javaArgs = (Object[]) XJ.mapXMFValue(machine, java.lang.Object[].class, machine.at(args, 1));
+      java.lang.reflect.Method method = (java.lang.reflect.Method) object;
+      try {
+        machine.pushStack(XJ.mapJavaValue(machine, method.invoke(javaTarget, javaArgs)));
+      } catch (IllegalArgumentException e) {
+        machine.error(ERROR, e.toString());
+      } catch (IllegalAccessException e) {
+        machine.error(ERROR, e.toString());
+      } catch (InvocationTargetException e) {
+        machine.error(ERROR, e.toString());
+      }
+      machine.popFrame();
+    } else machine.error(ERROR, "Cannot invoke foreign object.");
   }
 
   public static void Kernel_isDir(Machine machine) {
@@ -2127,12 +2127,6 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
-  public static void Kernel_ready(Machine machine) {
-    int state = machine.frameLocal(0);
-    machine.setReady(state == Machine.trueValue);
-    machine.popFrame();
-  }
-
   public static void Kernel_readXML(Machine machine) {
     machine.gc();
     int source = machine.frameLocal(0);
@@ -2141,6 +2135,12 @@ public class ForeignFuns implements Value, Instr, Errors {
     else if (Machine.isInputChannel(source)) {
       machine.pushStack(XMLReader.parse(machine.inputChannel(Machine.value(source)), machine));
     } else error(TYPE, machine, "Kernel_realXML expects a string or an input channel: " + machine.valueToString(source));
+    machine.popFrame();
+  }
+
+  public static void Kernel_ready(Machine machine) {
+    int state = machine.frameLocal(0);
+    machine.setReady(state == Machine.trueValue);
     machine.popFrame();
   }
 
@@ -2683,13 +2683,6 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
-  public static void Kernel_tokenChannelTextTo(Machine machine) {
-    int channel = machine.frameLocal(0);
-    int position = machine.frameLocal(1);
-    machine.pushStack(machine.textTo(channel, position));
-    machine.popFrame();
-  }
-
   public static void Kernel_toJava(Machine machine) {
     int value = machine.frameLocal(0);
     int type = machine.frameLocal(1);
@@ -2702,6 +2695,13 @@ public class ForeignFuns implements Value, Instr, Errors {
         machine.popFrame();
       } else error(TYPE, machine, "expecting a Java class in toJava: " + machine.valueToString(type));
     }
+  }
+
+  public static void Kernel_tokenChannelTextTo(Machine machine) {
+    int channel = machine.frameLocal(0);
+    int position = machine.frameLocal(1);
+    machine.pushStack(machine.textTo(channel, position));
+    machine.popFrame();
   }
 
   public static void Kernel_undoStackSize(Machine machine) {
@@ -2774,14 +2774,14 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
-  public static void Kernel_yield(Machine machine) {
-    machine.pushStack(Machine.trueValue);
+  public static void Kernel_xmf(Machine machine) {
+    machine.pushStack(machine.newForeignObj(machine));
     machine.popFrame();
     machine.yield();
   }
 
-  public static void Kernel_xmf(Machine machine) {
-    machine.pushStack(machine.newForeignObj(machine));
+  public static void Kernel_yield(Machine machine) {
+    machine.pushStack(Machine.trueValue);
     machine.popFrame();
     machine.yield();
   }

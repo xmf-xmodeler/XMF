@@ -147,6 +147,18 @@ public class XJ extends JavaTranslator {
     return found;
   }
 
+  public static void removeClass(Machine machine, String[] paths, String name) {
+    
+    // Remove the class from the loader cache. Next time the class is asked
+    // for the new version is loaded. Note existing references need to be updated...
+    
+    if (loader instanceof XJLoader) {
+      XJLoader xjl = (XJLoader) loader;
+      xjl.setPaths(paths);
+      xjl.removeClass(name);
+    } else System.out.println("warning: cannot remove " + name);
+  }
+
   public static int send(Machine machine, Object target, String message, int args) {
 
     // Called when XMF wants to send a message to a Java object.
