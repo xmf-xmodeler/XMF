@@ -9,7 +9,7 @@ import engine.Machine;
 
 public class XJ extends JavaTranslator {
 
-  public static String      error  = "";            // Set if an error code is returned
+  public static String      error  = "";             // Set if an error code is returned
 
   // (-1).
 
@@ -36,6 +36,21 @@ public class XJ extends JavaTranslator {
       error = "Class " + name + " not found";
       return -1;
     }
+  }
+
+  static Class<?> getClassComponent(Class<?> c, String name) {
+
+    // Try the contained classes and interfaces of the class...
+
+    Class<?>[] classes = c.getClasses();
+    for (Class<?> cc : classes) {
+      if (cc.getName().equals(name)) return cc;
+    }
+    Class<?>[] declaredClasses = c.getDeclaredClasses();
+    for (Class<?> cc : declaredClasses) {
+      if (cc.getName().endsWith("$" + name)) return cc;
+    }
+    return null;
   }
 
   public static Field getField(Object object, String name) {
@@ -107,21 +122,6 @@ public class XJ extends JavaTranslator {
 
   }
 
-  static Class<?> getClassComponent(Class<?> c, String name) {
-
-    // Try the contained classes and interfaces of the class...
-
-    Class<?>[] classes = c.getClasses();
-    for (Class<?> cc : classes) {
-      if (cc.getName().equals(name)) return cc;
-    }
-    Class<?>[] declaredClasses = c.getDeclaredClasses();
-    for (Class<?> cc : declaredClasses) {
-      if (cc.getName().endsWith("$" + name)) return cc;
-    }
-    return null;
-  }
-
   public static boolean hasSlot(Object object, String name) {
 
     // Return true when the object has a field name...
@@ -185,7 +185,7 @@ public class XJ extends JavaTranslator {
       e.printStackTrace();
       error = e.getMessage();
       return -1;
-    } 
+    }
   }
 
   public static void setLoader(ClassLoader loader) {
