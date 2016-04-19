@@ -484,8 +484,7 @@ context ClassDiagrams
                and sourceNode <> targetNode
          then 
            let edge = DelegationEdge(sourcePort,targetPort)
-           in  edge.println();edge.edit();
-               edge.new(self,false);
+           in edge.new(self,false);
               self.addEdge(edge);
               edge
            end
