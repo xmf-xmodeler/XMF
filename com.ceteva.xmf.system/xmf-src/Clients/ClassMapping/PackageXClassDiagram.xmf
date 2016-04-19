@@ -1073,10 +1073,20 @@ context ClassMapping
                 target = targetMap.element()
               in self.add(DelegationXDelegationEdge(source,target,delegationEdge))
                 //;delegation.attach()
+                ;self.cleanUpDelegations(source,target)
               end
             end
           end
         end
+      end
+    end
+    
+    @Operation cleanUpDelegations(source,target)      
+      @Find(delegationMap,delegationMaps)
+        when delegationMap.roleClass = source and delegationMap.roleFillerClass <> target
+        do self.remove(delegationMap);
+          delegationMap.edge.delete();
+          delegationMap.owner.remove(delegationMap)
       end
     end
     
@@ -1102,7 +1112,6 @@ context ClassMapping
       @Find(delegationMap,delegationMaps)
         when delegationMap.edge = delegationEdge
         do self.remove(delegationMap);
-           delegationMap.detach();
            delegationMap.dispose()
       end
     end
@@ -1757,6 +1766,10 @@ context ClassMapping
         end
         DependencyXDependencyEdge do
           self.deleteFromDependencyMaps(element);
+          element.removeDaemons()
+        end
+        DelegationXDelegationEdge do
+          self.deleteFromDelegationMaps(element);
           element.removeDaemons()
         end
         PackageXNode do

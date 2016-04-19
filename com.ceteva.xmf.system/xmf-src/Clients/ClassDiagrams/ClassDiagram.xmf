@@ -484,7 +484,8 @@ context ClassDiagrams
                and sourceNode <> targetNode
          then 
            let edge = DelegationEdge(sourcePort,targetPort)
-           in edge.new(self,false);
+           in  edge.println();edge.edit();
+               edge.new(self,false);
               self.addEdge(edge);
               edge
            end
@@ -635,6 +636,10 @@ context ClassDiagrams
       self.dependencyEdges := dependencyEdges.excluding(dependencyEdge)
     end
     
+    @Operation removeDelegationEdge(delegationEdge)
+      self.delegationEdges := delegationEdges.excluding(delegationEdge)
+    end
+    
     @Operation removeObjectNode(objectNode)
       self.objectNodes := self.objectNodes->excluding(objectNode)
     end
@@ -662,6 +667,7 @@ context ClassDiagrams
         AttributeEdge   do self.removeAttributeEdge(edge)     end
         ContainsEdge    do self.removeContainsEdge(edge)      end
         DependencyEdge  do self.removeDependencyEdge(edge)    end
+        DelegationEdge  do self.removeDelegationEdge(edge)    end
         else self
       end
     end

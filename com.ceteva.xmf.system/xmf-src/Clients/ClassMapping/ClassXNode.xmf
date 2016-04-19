@@ -193,6 +193,7 @@ context ClassMapping
       @SlotValueChanged multi once - ClassXNode::attributeRemoved_classDiagramDaemon(class,"attributes")  end;
       @SlotValueChanged multi once + ClassXNode::operationAdded_classDiagramDaemon(class,"operations")    end;
       @SlotValueChanged multi once - ClassXNode::operationRemoved_classDiagramDaemon(class,"operations")  end;
+      @SlotValueChanged multi once   ClassXNode::delegationChanged_classDiagramDaemon(class,"delegatesTo")end;
       
       // if this class is imported then we need to monitor its owner to see when it is removed
       
@@ -380,6 +381,23 @@ context ClassMapping
       if node.name() <> newName.toString()
       then node.setName(newName.toString())
       end
+    end   
+     
+    @Operation delegationChanged_classDiagramDaemon(obj,slot,newPort,oldPort)
+      if oldPort <> newPort 
+        then 
+        if newPort <> null 
+          then
+            // add edge
+            @Find(classMap,self.owner.classMaps)
+              when classMap.class = newPort
+              do
+              self.owner.diagram.newDelegationEdge(self.node.ports().head(),classMap.node.ports().head())
+              end
+          end 
+      end;
+
+      self.owner.cleanUpDelegations(self.class, newPort)
     end
     
     @Operation nameChangedDaemon(text,slot,newName,oldName)
