@@ -139,6 +139,17 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
+        Seq{"&Browse","Projects","&Compile All"},
+			@Operation compileAll()
+			(xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir()) 
+			end
+      }
+    )
+  );
+
+  registry.addContribution(id,
+    TypeLessContribution(
+      Seq{
         Seq{"&Browse","XTools","&XTools Manager"},
         Tools::Basic::showXToolsBrowser
       }
@@ -232,6 +243,11 @@ then
     //end
   end
 end;
+
+context Root
+@Operation compileAll()
+(xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir()) 
+end
 
 context Root
   @Bind XModelerStateRestorer =
