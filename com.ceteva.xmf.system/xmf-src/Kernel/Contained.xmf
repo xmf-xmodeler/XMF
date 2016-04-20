@@ -39,7 +39,8 @@ context Contained
       then Seq{self.owner()}
       else Seq{self.owner() | self.owner().allOwners()}
       end
-    else Seq{self.owner()}
+    else 
+      if self.owner() <> null then Seq{self.owner()} else Seq{} end
     end
   end
 
