@@ -19,6 +19,7 @@ context Diagrams
     @Attribute color : Color = static Color() (?,!) end
     @Attribute hidden : Boolean (?) end
     @Attribute arrow : Integer (?) end
+    @Attribute fill : Boolean (?) end
     
     @Constructor(text,attachedTo,relx,rely,editable) end//("Label1: " + text).println() end
     
@@ -143,6 +144,16 @@ context Diagrams
       if self.text <> newText
       then self.text := newText
       end // Avoid unnecessary daemon firing
+    end
+    
+    @Operation setBorder(border)
+    	self.border := border;
+    	@Command(self) setBorderCommand(self,border) end
+    end
+    
+    @Operation setFill(fill)
+    	self.fill := fill;
+    	@Command(self) setFillCommand(self,fill) end
     end
     
     @Operation hasBorder()

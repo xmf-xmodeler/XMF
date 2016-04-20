@@ -574,6 +574,18 @@ context Diagrams
         setText(text.id(),newText)
       end
     end
+
+    @Operation setBorderCommand(text,border) 
+      @SendCommand(self)
+        setBorder(text.id(),border)
+      end
+    end
+    
+    @Operation setFillCommand(text,fill) 
+      @SendCommand(self)
+        setFill(text.id(),fill)
+      end
+    end
     
     @Operation setItaliciseCommand(text,italicise)
       @SendCommand(self)

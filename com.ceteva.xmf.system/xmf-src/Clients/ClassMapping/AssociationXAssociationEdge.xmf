@@ -215,9 +215,35 @@ context ClassMapping
       @SlotValueChanged multi once AssociationXAssociationEdge::associationEnd1ChangedDaemon(edge,"source") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::associationEnd2ChangedDaemon(edge,"target") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1NameChangedDaemon(edge.end1.name,"text") end;
-      @SlotValueChanged multi once AssociationXAssociationEdge::end2NameChangedDaemon(edge.end2.name,"text") end
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2NameChangedDaemon(edge.end2.name,"text") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end1InstLevelChanged(edge.end1.instLevel,"text") end;
+      @SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged(edge.end2.instLevel,"text") end
     end
-    
+
+    @Operation end1InstLevelChanged(obj,slot,newInstLevel,oldInstLevel)
+      if newInstLevel <> oldInstLevel
+      then association.end1.instLevel := newInstLevel.asInt();
+            if newInstLevel <> " " and newInstLevel <> ""
+        	then
+     	  		association.end1.isIntrinsic := true	
+        	else
+  	       		association.end1.isIntrinsic := false	
+        	end
+      end
+    end
+
+    @Operation end2InstLevelChanged(obj,slot,newInstLevel,oldInstLevel)
+      if newInstLevel <> oldInstLevel
+      then  association.end2.instLevel := newInstLevel.asInt();
+            if newInstLevel <> " " and newInstLevel <> ""
+        	then
+     	  		association.end2.isIntrinsic := true	
+        	else
+  	       		association.end2.isIntrinsic := false	
+        	end
+      end
+    end
+            
     @Operation checkLegacy()
       let owner = association.owner
       in
