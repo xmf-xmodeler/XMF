@@ -2729,17 +2729,32 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     return ref(ptr(fun) + 1);
   }
 
+  public int funInstLevel(int fun) {
+
+    // The number of arguments required by a function...
+     int instLevel = funGetStringProperty(fun, "instLevel");
+    return instLevel;
+  }
+  
+  public int funIsIntrinsic(int fun) {
+
+    int isIntrinsic = funGetStringProperty(fun, "Intrinsic");
+    if (isIntrinsic == -1)
+      return falseValue;
+    else return isIntrinsic;
+  }
+  
   public int funIsVarArgs(int fun) {
 
-    // A function may have var=args in which case extra argument
-    // that are supplied tothe function are packaged up as a single
-    // sequence and supplied as the last argument to the function...
+	    // A function may have var=args in which case extra argument
+	    // that are supplied tothe function are packaged up as a single
+	    // sequence and supplied as the last argument to the function...
 
-    int varArgs = funGetStringProperty(fun, "VarArgs");
-    if (varArgs == -1)
-      return falseValue;
-    else return varArgs;
-  }
+	    int varArgs = funGetStringProperty(fun, "VarArgs");
+	    if (varArgs == -1)
+	      return falseValue;
+	    else return varArgs;
+	  }
 
   public int funName(int fun) {
 
@@ -2833,6 +2848,23 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     set(ptr(fun) + 1, globals);
   }
 
+  
+  public void funSetInstLevel(int fun, int instLevel) {
+
+    // Change the InstLevel...
+	  funSetStringProperty(fun, "instLevel", instLevel);
+//    set(ptr(fun), mkInt(value(instLevel)));
+  }
+  
+  public void funSetIsIntrinsic(int fun, int isIntrinsic) {
+
+    // Set the boolean to be isIntrinsic...
+
+    if (isIntrinsic == falseValue)
+      funRemoveStringProperty(fun, "Intrinsic");
+    else funSetStringProperty(fun, "Intrinsic", isIntrinsic);
+  }
+
   public void funSetIsVarArgs(int fun, int isVarArgs) {
 
     // Set the boolean to be isVarArgs...
@@ -2841,7 +2873,6 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       funRemoveStringProperty(fun, "VarArgs");
     else funSetStringProperty(fun, "VarArgs", isVarArgs);
   }
-
   public void funSetName(int fun, int name) {
 
     // Set the name in the code box...
@@ -5622,6 +5653,8 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     funSetDocumentation(fun, doc);
     funSetSig(fun, sig);
     funSetIsVarArgs(fun, isVarArgs(byte3) ? trueValue : falseValue);
+    funSetInstLevel(fun, mkInt(-1));
+    funSetIsIntrinsic(fun, falseValue);
     valueStack.push(fun);
   }
 

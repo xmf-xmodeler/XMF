@@ -174,6 +174,9 @@ context CompiledOperation
   end
   
 context CompiledOperation
+  @Attribute foo : Integer end
+  
+context CompiledOperation
   @Operation get(name:String)
     @Doc
       Handles access to the state of a compiled-operation as
@@ -185,6 +188,8 @@ context CompiledOperation
       "documentation" do self.doc()        end
       "dynamics"      do self.dynamics()   end
       "globals"       do self.globals()    end
+      "instLevel"     do self.instLevel()  end
+      "isIntrinsic"   do self.isIntrinsic()end
       "isVarArgs"     do self.isVarArgs()  end
       "name"          do self.name()       end
       "owner"         do self.owner()      end
@@ -206,6 +211,8 @@ context CompiledOperation
         "documentation",
         "dynamics",
         "globals",
+        "instLevel",
+        "isInstrinsic",
         "isVarArgs",
         "name",
         "owner",
@@ -336,6 +343,11 @@ context CompiledOperation
   end
   
 context CompiledOperation
+  @Operation instLevel():Boolean
+    Kernel_funInstLevel(self) 
+  end
+    
+context CompiledOperation
   @Operation isVarArgs():Boolean
     @Doc
       If a compiled operation has variable arguments then it may
@@ -345,6 +357,11 @@ context CompiledOperation
       last argument.
     end
     Kernel_funIsVarArgs(self) 
+  end
+  
+context CompiledOperation
+  @Operation isIntrinsic():Boolean
+    Kernel_funIsIntrinsic(self) 
   end
   
 context CompiledOperation 
@@ -483,6 +500,8 @@ context CompiledOperation
       "documentation" do self.setDoc(value)             end
       "dynamics"      do self.setDynamics(value)        end
       "globals"       do self.setGlobals(value)         end
+      "instLevel"     do self.setInstLevel(value)       end
+      "isIntrinsic"   do self.setIsIntrinsic(value)     end
       "isVarArgs"     do self.setIsVarArgs(value)       end
       "properties"    do self.setProperties(value)      end
       "name"          do self.setName(value.toString()) end
@@ -509,6 +528,22 @@ context CompiledOperation
     let oldCodeBox = self.codeBox()
     in Kernel_funSetCodeBox(self,codeBox);
        self.fire(Symbol("codeBox"),codeBox,oldCodeBox)
+    end
+  end
+ 
+context CompiledOperation
+  @Operation setInstLevel(instLevel)
+    let oldInstLevel = self.instLevel()
+    in Kernel_funSetInstLevel(self,instLevel);
+       self.fire(Symbol("instLevel"),instLevel,oldInstLevel)
+    end
+  end 
+    
+context CompiledOperation
+  @Operation setIsIntrinsic(isintrinsic)
+    let oldIsintrinsic = self.isIntrinsic()
+    in Kernel_funSetIsIntrinsic(self,isintrinsic);
+       self.fire(Symbol("isIntrinsic"),isintrinsic,oldIsintrinsic)
     end
   end
   

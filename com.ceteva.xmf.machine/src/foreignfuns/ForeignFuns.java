@@ -179,6 +179,8 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSig", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funCodeBox", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funGlobals", 1));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funInstLevel", 1));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funIsIntrinsic", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funIsVarArgs", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funDoc", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funDynamics", 1));
@@ -193,6 +195,8 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetArity", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetDynamics", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetGlobals", 2));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetInstLevel", 2));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetIsIntrinsic", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetIsVarArgs", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetName", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_funSetOwner", 2));
@@ -1348,6 +1352,20 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
+  public static void Kernel_funIsIntrinsic(Machine machine) {
+    int fun = machine.frameLocal(0);
+    int isIntrinsic = machine.funIsIntrinsic(fun);
+    machine.pushStack(isIntrinsic);
+    machine.popFrame();
+  }
+
+  public static void Kernel_funInstLevel(Machine machine) {
+    int fun = machine.frameLocal(0);
+    int instLevel = machine.funInstLevel(fun);
+    machine.pushStack(instLevel);
+    machine.popFrame();
+  }
+
   public static void Kernel_funName(Machine machine) {
     int fun = machine.frameLocal(0);
     machine.pushStack(machine.funName(fun));
@@ -1424,6 +1442,22 @@ public class ForeignFuns implements Value, Instr, Errors {
     int fun = machine.frameLocal(0);
     int isVarArgs = machine.frameLocal(1);
     machine.funSetIsVarArgs(fun, isVarArgs);
+    machine.pushStack(fun);
+    machine.popFrame();
+  }
+  
+  public static void Kernel_funSetIsIntrinsic(Machine machine) {
+    int fun = machine.frameLocal(0);
+    int isIntrinsic = machine.frameLocal(1);
+    machine.funSetIsIntrinsic(fun, isIntrinsic);
+    machine.pushStack(fun);
+    machine.popFrame();
+  }
+  
+  public static void Kernel_funSetInstLevel(Machine machine) {
+    int fun = machine.frameLocal(0);
+    int instLevel = machine.frameLocal(1);
+    machine.funSetInstLevel(fun, instLevel);
     machine.pushStack(fun);
     machine.popFrame();
   }
