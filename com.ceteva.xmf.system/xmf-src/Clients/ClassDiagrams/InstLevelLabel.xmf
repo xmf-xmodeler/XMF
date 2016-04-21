@@ -15,8 +15,8 @@ context ClassDiagrams
       
     @Constructor(text,attachedTo,relx,rely,borderColor,editable)
       self.init(Seq{text,attachedTo,relx,rely,editable})
-      ;self.border := true//;
-//      self.checkDaemons
+      ;self.border := true;
+      self.checkDaemons()
     end
     
     @Operation instLevel()
@@ -35,21 +35,22 @@ context ClassDiagrams
       borderColor
     end
     
-      	@Operation checkDaemons()
-  			@SlotValueChanged multi once Clients::ClassDiagrams::InstLevelLabel::valueChanged(self,"text") end
-  			  			
-  		end
+     @Operation checkDaemons()
+  			@SlotValueChanged multi once Clients::ClassDiagrams::InstLevelLabel::valueChanged(self,"text") end		
+  	end
   		
   		@Operation valueChanged(obj, slot, new, old)
   			if new = " " or new = ""
    			then
-   				@WithoutDaemons(text)
+   				@WithoutDaemons(obj)
    					obj.text := " ";
    					obj.renew(obj.owner)
    				end;
-			   	obj.setFillColor(Clients::Diagrams::Color())
+			   	obj.setFill(false);
+			    obj.setColor(black)
 			else
-			    obj.setFillColor(Clients::Diagrams::Color(0,0,0))
+			    obj.setFill(true);
+				obj.setColor(white)
 			end
 	  	end
     

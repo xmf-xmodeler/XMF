@@ -43,7 +43,7 @@ context Classifier
       super(n)
     elseif n.isKindOf(Constraint)
     then 
-      self.addConstraint(n); 
+      self.addConstraint(n);         	
       super(n)
     else 
       if n.isKindOf(Attribute) 
@@ -64,9 +64,17 @@ context Classifier
       to this operation.
     end
      
+
+
     self.resolveNameClash(c.name,constraints);
     self.constraints := constraints->including(c);
-    c.setOwner(self);
+
+	if self.hasSlot("level") andthen c.owner <> null andthen self.level < c.owner.level
+	then
+       true
+    else    
+    c.setOwner(self)
+    end;
     self
   end
   

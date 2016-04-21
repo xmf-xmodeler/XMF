@@ -136,7 +136,7 @@ context Associations
       // When an en-d is initialised we initialise as for an attribute
       // and then add the en-d to the type.
       // Set up the elements necessary to act as a constraint ...
-      
+    if not self.isIntrinsic then  
       self.setBody();
       self.setReason() ;
       
@@ -159,7 +159,8 @@ context Associations
         self
       else self
       end
-    end
+end
+     end
     
     @Operation init(args)
     

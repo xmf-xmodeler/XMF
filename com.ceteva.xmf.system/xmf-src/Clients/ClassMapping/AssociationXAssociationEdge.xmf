@@ -96,7 +96,9 @@ context ClassMapping
       @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowDisplayName_classDiagramDaemon(association,"showInverseLabel") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1ShowVarName_classDiagramDaemon(association,"showVarName") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowVarName_classDiagramDaemon(association,"showInverseVarName") end
+      
     end
+
 
     @Operation end1ShowDisplayName_classDiagramDaemon(assoc,slot,newBool,oldBool)
       if newBool and not oldBool

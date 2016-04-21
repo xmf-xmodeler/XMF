@@ -42,7 +42,7 @@ context NameSpace
     then self.addBinding(element)
     elseif element.isKindOf(NamedElement)
     then
-      if element.isKindOf(Attribute) 
+      if element.isKindOf(Attribute) or element.isKindOf(Constraint)
       then 
 		false
 	else

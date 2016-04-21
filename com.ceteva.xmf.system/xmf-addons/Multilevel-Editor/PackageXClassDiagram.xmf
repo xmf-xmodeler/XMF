@@ -225,8 +225,12 @@ context ClassMapping::PackageXClassDiagram
                     in
                         if not (name = null)
                         then
+//                       metaclass.attributes->iterate(a ignore = null | a.name.println(); a.owner.println());
+//                            metaclass.attributes.browse();
+//"___".println();
                             let class = metaclass(name)
                             in
+                                                       //metaclass.attributes->iterate(a ignore = null | a.name.println(); a.owner.println());
                                 class.addParent(FMML::MetaClass);
                                 thePackage.add(class);
                                 theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
