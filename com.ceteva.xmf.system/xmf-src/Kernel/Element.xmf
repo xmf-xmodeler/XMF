@@ -171,7 +171,7 @@ context Element
     //if message = "hasSlot" 
     //then throw Exceptions::NoOperation(self,message,args)
     //end;
-    if self.hasSlot("roleFiller") andthen self.roleFiller <> null then
+    if self <> null andthen self.hasSlot("roleFiller") andthen self.roleFiller <> null then
         self.roleFiller.send(message,args)
     else
         throw Exceptions::NoOperation(self,message,args)
