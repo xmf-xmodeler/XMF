@@ -60,6 +60,12 @@ context Col
     if properties.binds("rowspan")
     then format(out," rowspan='~S'",Seq{properties.lookup("rowspan")})
     end;
+    if properties.binds("align")
+    then format(out," align='~S'",Seq{properties.lookup("align")})
+    end;
+    if properties.binds("valign")
+    then format(out," valign='~S'",Seq{properties.lookup("valign")})
+    end;
     format(out,">");
     entry.html(out);
     format(out,"</td>")
@@ -261,10 +267,15 @@ context Button
   
 context CheckBox
   @Operation html(out:OutputChannel)
-    let checked = if checked then "checked" else "" end
+    let checked = if checked then "checked=checked" else "" end
     in
-      format(out,"<input type=\"checkbox\" name=\"~S\" value=\"~S\">",Seq{label,checked})
+      format(out,"<input type=\"checkbox\" name=\"~S\" ~S>",Seq{label,checked})
     end
+  end
+  
+context Colour
+  @Operation html(out:OutputChannel)
+   format(out,"<input type=\"color\" name=\"~S\" ~S>",Seq{label,colour})
   end
     
 context ComboBox

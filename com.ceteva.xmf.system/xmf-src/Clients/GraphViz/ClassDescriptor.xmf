@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+import GraphViz;
+
+context GraphViz
+
+  @Class ClassDescriptor extends Descriptor
+  
+    @Attribute showAttributes   : Boolean = true  (!) end
+    @Attribute showAssociations : Boolean = true  (!) end
+    @Attribute showOperations   : Boolean = false (!) end
+    @Attribute attDescriptors   : Table = Table(10)   end
+    @Attribute opDescriptors    : Table = Table(10)   end
+    
+    @Operation canShowOp(op:Operation):Boolean
+      if opDescriptors.hasKey(op)
+      then opDescriptors.get(op)
+      else false
+      end
+    end
+    
+    @Operation canShowAtt(att:Attribute):Boolean
+      if attDescriptors.hasKey(att)
+      then attDescriptors.get(att)
+      else false
+      end
+    end
+    
+    @Operation setShowOp(op:Operation,show:Boolean)
+      opDescriptors.put(op,show)
+    end
+    
+    @Operation setShowAtt(att:Attribute,show:Boolean)
+      attDescriptors.put(att,show)
+    end
+    
+  end

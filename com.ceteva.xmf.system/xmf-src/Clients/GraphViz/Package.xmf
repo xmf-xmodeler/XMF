@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import GraphViz;
+    
+context Package
+  @Operation graphVizNode(browser:DiagramBrowser,gv)
+   let node = gv.addNode(name.toString()) then
+       box = node.addVBox()
+   in node.setURL("package:" + self.path());
+      node.setShape("tab");
+      if self.doc() <> null then node.setDoc(self.doc().doc) end;
+      let row = box.addRow()
+      in row.setCellPadding(4);
+         box.addText(name.toString())
+      end
+   end
+  end

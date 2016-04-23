@@ -1,0 +1,32 @@
+parserImport XOCL;
+
+import GraphViz;
+import IO;
+
+//xmf.clearClassLoader();
+     
+context Element
+  @Operation graphVizNode(browser:DiagramBrowser,gv)
+    null
+  end
+     
+context Element
+  @Operation populateGraphViz(browser:DiagramBrowser,gv)
+    null
+  end
+   
+ context Element
+   @Operation toSVG(browser):String
+     let GraphViz = xmf.javaClass("tool.clients.graphviz.GraphViz",[]) then
+         gv = GraphViz("../tmp");
+         type = "svg";
+         representationType = "dot" then
+         out = File(xmf.projDir() + "/graphviz/out." + type)
+     in self.populateGraphViz(browser,gv);
+        let s = gv.getString(xmf.projDir()+"/graphviz","out","svg","dot") then
+            i = s.indexOf("<svg",0) then
+            s = s.subString(i,s.size())
+        in s
+        end
+     end
+   end

@@ -1,0 +1,29 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                               Colour Picker                                *
+ *                            -------------------                             *
+ *                                                                            *
+ *  A colour picker defines a label which is the name of a colour supplied to *
+ *  an event handling operation.                                              *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class Colour extends Entry
+
+    @Attribute label  : String (?,!) end
+    @Attribute colour : String (?,!) end
+
+    @Constructor(label,colour) ! end
+    
+    @Operation contents()
+      Seq{}
+    end
+
+  end

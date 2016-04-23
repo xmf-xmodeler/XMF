@@ -1,0 +1,260 @@
+parserImport XOCL;
+
+import GraphViz;
+import Clients;
+import TextEditor;
+import DocTables;
+import Server;
+import Basic;
+import Forms;
+import Stacks;
+ 
+context GraphViz
+
+  @Class DiagramBrowser extends DocTableBrowser
+  
+    @Attribute descriptors : XCore::Table = XCore::Table(100)  end
+    @Attribute element     : NameSpace              end
+    @Attribute elements    : Stack        = Stack() end
+    
+    @Constructor(element) ! 
+      self.page := element.toGraphVizPage(self)
+    end
+    
+    @Operation back()
+      if elements.isEmpty()
+      then element.toGraphVizPage(self)
+      else 
+        self.element := elements.pop();
+        self.setName(element.path());
+        element.toGraphVizPage(self)
+      end
+    end
+    
+    @Operation canShowClass(c:Class):Boolean
+      self.getDescriptor(c,ClassDescriptor).isShown
+    end
+    
+    @Operation canShowOp(c:Class,op:Operation):Boolean
+      self.getDescriptor(c,ClassDescriptor).canShowOp(op)
+    end
+    
+    @Operation canShowAtt(c:Class,att:Attribute):Boolean
+      self.getDescriptor(c,ClassDescriptor).canShowAtt(att)
+    end
+    
+    @Operation canShowPackage(p:Package):Boolean
+      self.getDescriptor(p,PackageDescriptor).isShown
+    end
+    
+    @Operation canShowClassAttributes(c:Class):Boolean
+      self.getDescriptor(c,ClassDescriptor).showAttributes
+    end
+    
+    @Operation canShowClassAssociations(c:Class):Boolean
+      self.getDescriptor(c,ClassDescriptor).showAssociations
+    end
+    
+    @Operation canShowClassOperations(c:Class):Boolean
+      self.getDescriptor(c,ClassDescriptor).showOperations
+    end
+    
+    @Operation push(element)
+      elements.push(element)
+    end
+    
+    @Operation pop()
+      elements.pop()
+    end
+    
+    @Operation showClass(c:Class,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setIsShown(show)
+    end
+    
+    @Operation showClassAttributes(c:Class,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setShowAttributes(show)
+    end
+    
+    @Operation showClassAssociations(c:Class,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setShowAssociations(show)
+    end
+    
+    @Operation showClassOperations(c:Class,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setShowOperations(show)
+    end
+    
+    @Operation showClassOp(c:Class,op:Operation,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setShowOp(op,show)
+    end
+    
+    @Operation showClassAtt(c:Class,att:Attribute,show:Boolean)
+      self.getDescriptor(c,ClassDescriptor).setShowAtt(att,show)
+    end
+    
+    @Operation getDescriptor(key,descriptorClass:Class):Descriptor
+      if descriptors.hasKey(key)
+      then descriptors.get(key)
+      else 
+        descriptors.put(key,descriptorClass());
+        descriptors.get(key)
+      end
+    end
+    
+    @Operation requestURL(url:String)
+      if url.hasPrefix("package:")
+      then self.processPackage(url.drop(8).lookupPath(Root))
+      elseif url.hasPrefix("class:")
+      then self.processClass(url.drop(6).lookupPath(Root))
+      elseif url.hasPrefix("diagram:")
+      then self.processDiagram(url.drop(8).lookupPath(Root))
+      elseif url.hasPrefix("namespace:")
+      then self.processNameSpace(url.drop(10).lookupPath(Root))
+      else super(url)
+      end
+    end
+    
+    @Operation setNewPage(page:Page)
+      self.page := page;
+      self.setURL(page.html())
+    end
+    
+    @Operation processDiagram(p:Package)
+      self.setName(p.path());
+      self.setNewPage(self.diagramPage(p))
+    end
+    
+    @Operation diagramPage(p:NameSpace)
+      let back(env) = 
+            let classes = p.contents()->select(o | o.isKindOf(Class))
+            in @For bind in env do
+                 let path = bind->at(0).subst(":","%3A",true) then
+                     class = path.lookupPath(Root)
+                 in classes := classes->excluding(class);
+                    self.showClass(class,true)
+                 end
+               end;
+               @For class in classes do
+                 self.showClass(class,false)
+               end;
+               element.toGraphVizPage(self)
+            end
+       in Page("DiagramEditor",[
+            Form("DiagEditor/changes",[
+            Centre(Big(Text(p.name.toString()))),
+            Break(),
+            Text("Properties controlling the display of elements in the package."),
+            Break(),
+            Text("After making changes use the back button."),
+            Button("Back",back),
+            Break(),
+            Break(),
+            Table("",
+              p.contents()->select(o | o<> null and o.isKindOf(Class))->collect(class |
+                Row([
+                  Text(class.path().subst("&#58;",":",true)),
+                  Text("shown"),
+                  CheckBox(class.path().subst("&#58;",":",true),self.canShowClass(class))
+                ])
+              )
+            ),
+            Button("Show All",@Operation()
+              @For c in p.contents()->select(o | o.isKindOf(Class)) do
+                self.showClass(c,true)
+              end;
+              self.diagramPage(p)
+            end),
+            Button("Hide All",@Operation()
+              @For c in p.contents()->select(o | o.isKindOf(Class)) do
+                self.showClass(c,false)
+              end;
+              self.diagramPage(p)
+            end),
+            Button("Back",back)
+          ])
+        ])
+      end
+    end
+    
+    @Operation processPackage(package:Package)
+      elements.push(element);
+      self.element := package;
+      self.setName(package.path());
+      self.setNewPage(package.toGraphVizPage(self))
+    end
+    
+    @Operation processNameSpace(namespace:NameSpace)
+      elements.push(element);
+      self.element := namespace;
+      self.setName(namespace.path());
+      self.setNewPage(namespace.toGraphVizPage(self))
+    end
+    
+    @Operation classPage(c:Class):Page
+      let done(shown,showatts,showassocs,showops,env) = 
+           (self.showClass(c,shown = "on"); 
+            self.showClassAttributes(c,showatts = "on");
+            self.showClassAssociations(c,showassocs = "on");
+            self.showClassOperations(c,showops = "on");
+            @For op in c.operations do
+              if env.binds("showop" + op.name)
+              then self.showClassOp(c,op,env.assoc("showop"+op.name)->head->at(1) = "on")
+              else self.showClassOp(c,op,false)
+              end
+            end;
+            @For att in c.attributes do
+              if env.binds("showatt" + att.name)
+              then self.showClassAtt(c,att,env.assoc("showatt"+att.name)->head->at(1) = "on")
+              else self.showClassAtt(c,att,false)
+              end
+            end;
+            element.toGraphVizPage(self))
+      in Page("ClassEditor",[
+           Form("ClassEditor/form",[
+             Centre(Big(Text(c.path()))),
+             Break(),
+             Text("Set the properties and then click update."),
+             Break(),
+             Table("",[
+               Row([Text("Show Class"),CheckBox("shown",self.canShowClass(c))]),
+               Row([Text("Show Attributes"),CheckBox("showatts",self.canShowClassAttributes(c))]),
+               Row([Text("Show Associations"),CheckBox("showassocs",self.canShowClassAssociations(c))]),
+               Row([Text("Show Operations"),CheckBox("showops",self.canShowClassOperations(c))])
+             ]),
+             Break(),
+             Text("Operations:"),
+             Break(),
+             Table("",
+               c.operations->collect(op |
+                 Row([Text("Show " + op.name),CheckBox("showop" + op.name,self.canShowOp(c,op))])
+               )
+             ),
+             Break(),
+             Text("Attributes:"),
+             Break(),
+             Table("",
+               c.attributes->collect(att |
+                 Row([Text("Show " + att.name),CheckBox("showatt" + att.name,self.canShowAtt(c,att))])
+               )
+             ),
+             Break(),
+             Centre(Button("Update",done))
+           ])
+         ])  
+      end
+    end
+    
+    @Operation processClass(c:Class)
+      self.setName(c.path());
+      self.setNewPage(self.classPage(c))
+    end
+  end
+    
+  context Root
+    @Operation addExternalClass(c:Class,browser:DiagramBrowser,gv)
+      let node = gv.addNode(c.name.toString()) then
+          box = node.addVBox()
+      in node.setURL("package:" + c.owner.path());
+         node.setShape("box");
+         node.addText(c.path())
+      end
+    end

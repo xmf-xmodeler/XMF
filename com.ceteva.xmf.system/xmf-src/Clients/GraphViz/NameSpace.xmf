@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+import GraphViz;
+import Clients;
+import TextEditor;
+import DocTables;
+import Server;
+import Basic;
+import Forms;
+import Env;
+     
+xmf.clearClassLoader();
+     
+context NameSpace
+  @Operation populateGraphViz(browser:DiagramBrowser,gv)
+    gv.setURL("diagram:" + self.path());  
+    @For c in self.contents()->select(o | o.isKindOf(Class)) when browser.canShowClass(c) do
+      c.graphVizNode(browser,gv)
+    end; 
+    @For p in self.contents()->select(o | o.isKindOf(Package)) when browser.canShowPackage(p) do
+      p.graphVizNode(browser,gv)
+    end     
+  end
+
+context NameSpace
+  @Operation graphViz()
+    DiagramBrowser(self).browse()
+  end
+  
+context NameSpace
+  @Operation toGraphVizPage(browser:DiagramBrowser)
+    let back() = browser.back() then
+        button = Button("Back",back) then
+        left = Table("",[Row([Centre(button)])] + browser.elements.asSeq()->reverse->collect(ns | Row([Text(ns.path())])))
+    in Page(self.path(),[
+         Form("xxx",[
+           Table("",[
+             Row([
+               if browser.elements.isEmpty()
+               then Text("Top")
+               else Col(NullEnv().bind("valign","top"),left)
+               end,
+               HTML(self.toSVG(browser))
+             ])
+           ])
+         ])
+       ])
+     end
+   end

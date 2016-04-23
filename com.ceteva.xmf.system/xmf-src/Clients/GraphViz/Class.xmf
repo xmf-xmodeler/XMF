@@ -1,0 +1,115 @@
+parserImport XOCL;
+
+import GraphViz;
+    
+context Root
+   @Operation addClassAttributes(c:Class,browser:DiagramBrowser,box,gv)
+     if browser.canShowClassAttributes(c)
+     then
+         let attBox = box.addVBox()
+         in @For a in c.attributes when browser.canShowAtt(c,a) do
+              let type = a.type then
+                  typeName = type.name.toString();
+                  edgeLabel = a.name.toString()
+              in if not(a.hasAtomicType())
+                 then
+                    type := type.elementType;
+                    typeName := "*" + type.name.toString();
+                    edgeLabel := "*" + edgeLabel
+                 end;
+                 if type = Integer or type = String or type = Boolean or type = Float or type = Object or type = Element
+                 then 
+                    let row = attBox.addRow() in row.setCellPadding(2) end;
+                    attBox.addText(a.name + ":" + typeName)
+                 end
+              end
+            end;
+            if attBox.isEmpty() then box.remove(attBox) end
+         end
+        end
+     end
+    
+context Root
+   @Operation addClassOperations(c:Class,browser:DiagramBrowser,box,gv)
+     if browser.canShowClassOperations(c)
+     then
+         let opBox = box.addVBox()
+         in @For o in c.operations when browser.canShowOp(c,o) do
+              let names = o.paramNames();
+                  types = o.paramTypes();
+                  type = o.type() then
+                  argTypes = (names.zip(types))->collect(p | p->head + ":" + p->tail.name) then
+                  sig = o.name + "(" + argTypes->separateWith(",") + "):" + type.name then
+                  row = opBox.addRow() 
+               in row.setCellPadding(2);
+                  opBox.addText(sig)
+               end
+            end;
+            if opBox.isEmpty() then box.remove(opBox) end
+         end
+      end
+    end
+    
+  context Root
+     @Operation addClassAssociations(c:Class,browser:DiagramBrowser,gv)
+       // Actually the attributes that are drawn as edges...
+       if browser.canShowClassAssociations(c)
+       then 
+         @For a in c.attributes when browser.canShowAtt(c,a) do
+           let type = a.type then
+               edgeLabel = a.name.toString()
+           in if not(a.hasAtomicType())
+              then
+                type := type.elementType;
+                edgeLabel := "*" + edgeLabel
+              end;
+              if not(type = Integer or type = String or type = Boolean or type = Float or type = Object or type = Element)
+              then 
+                let edge = gv.addEdge(c.name.toString(),type.name.toString())
+                in edge.setLabel(edgeLabel);
+                   edge.setArrowhead("vee");
+                   if type.owner <> c.owner and type.owner <> null
+                   then addExternalClass(type,browser,gv)
+                   end
+                end
+              end
+           end
+         end
+       end
+     end
+    
+context Class
+    @Operation graphVizNode(browser:DiagramBrowser,gv)
+      let node = gv.addNode(name.toString()) then
+          box = node.addVBox()
+        in node.setURL("class:" + self.path());
+           if self.inheritsFrom(Classifier) 
+           then 
+              node.setShape("box");
+              node.setStyle("dashed")
+           end;
+           if self.inheritsFrom(Class) then node.setStyle("solid") end;
+           box.setCellBorder(1);
+           if self.doc() <> null then node.setDoc(self.doc().doc) end;
+           let row = box.addRow()
+           in row.setCellPadding(4);
+              box.addText(name.toString())
+           end;
+           box.addRow();
+           addClassAttributes(self,browser,box,gv);
+           box.addRow();
+           addClassOperations(self,browser,box,gv);
+           addClassAssociations(self,browser,gv)
+         end;
+         @For super in parents when browser.canShowClass(super) do
+           if not([Class,Classifier,Object].contains(super))
+           then
+             let edge = gv.addEdge(name.toString(),super.name.toString())
+             in edge.setArrowhead("empty")
+             end;
+             if super.owner <> owner and super.owner <> null
+             then addExternalClass(super,browser,gv)
+             end
+           end
+         end
+       end

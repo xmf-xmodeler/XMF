@@ -30,8 +30,14 @@ context DocTables::Server
       end
     
       @Operation handle(args:Seq(Element))
-        self.page := page.handle(args);
-        self.setURL(self.page.html())
+        let newPage = page.handle(args)
+        in if newPage.isKindOf(String)
+           then self.setURL(newPage)
+           else 
+             self.page := newPage;
+             self.setURL(self.page.html())
+           end
+        end
       end
     
       @Operation requestURL(url:String)
@@ -41,6 +47,7 @@ context DocTables::Server
               args = self.getQueryArgs(url)
           in self.handle(args)
           end
+        else super(url)
         end
       end
     end
