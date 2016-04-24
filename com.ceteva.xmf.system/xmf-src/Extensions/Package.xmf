@@ -45,6 +45,11 @@ context XOCL
                 @For nameSpace in definedImports do
                   newPackage.addImport(nameSpace)
                 end;
+                @Imports(imports)
+                  @For i in imports do
+                    newPackage.addImport(i)
+                  end
+                end;
                 newPackage
              end
           |]

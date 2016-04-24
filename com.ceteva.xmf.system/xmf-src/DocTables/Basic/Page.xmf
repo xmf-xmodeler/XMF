@@ -31,11 +31,15 @@ context Basic
     end
     
     @Operation handle(args)
-      let page = null
-      in @For entry in self.contents() when page = null do
-           page := entry.handle(args)
-         end;
-         page
+      if args.binds("ignore")
+      then self
+      else
+        let page = null
+        in @For entry in self.contents() when page = null do
+             page := entry.handle(args)
+           end;
+           page
+        end
       end
     end
     

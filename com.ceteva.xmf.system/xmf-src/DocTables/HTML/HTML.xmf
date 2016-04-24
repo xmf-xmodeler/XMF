@@ -164,20 +164,30 @@ context Page
   
 context Page
   @Operation html(out:OutputChannel)
-    format(out,"<html>");
-    format(out,"<head>");
-    if stylesheet <> ""
-    then
-      format(out,"<link rel=StyleSheet href=\"~S\" TYPE=\"text/css\" media=\"screen, print\">",Seq{stylesheet})
-    end;
-    format(out,"<title>~S</title>",Seq{title});
-    format(out,"</head>");
-    format(out,"<body>");
-    @For entry in entries do
-      entry.html(out)
-    end;
-    format(out,"</body>");
-    format(out,"</html>")
+  
+    // Navigate to the web folder and use it as the base for loading library
+    // definitions for the page...
+    
+    let root = xmf.javaClass("tool.xmodeler.XModeler").getResource(".").toString()+"../../../web" then
+        cssdefs = root + "/css/doctables.css";
+        jsdefs = root + "/js/doctables.js"
+    in format(out,"<html>");
+       format(out,"<head>");
+       format(out,"<link rel=\"stylesheet\" href=\"" + cssdefs +"\" type=\"text/css\">");
+       if stylesheet <> ""
+       then
+         format(out,"<link rel=stylesheet href=\"~S\" type=\"text/css\" media=\"screen, print\">",Seq{stylesheet})
+       end;
+       format(out,"<title>~S</title>",Seq{title});
+       format(out,"</head>");
+       format(out,"<body>");
+       format(out, "<script src=\"" + jsdefs +"\"></script>");
+       @For entry in entries do
+         entry.html(out)
+       end;
+       format(out,"</body>");
+       format(out,"</html>")
+    end
   end
   
 context Para
@@ -289,6 +299,19 @@ context ComboBox
       end
     end;
     format(out,"</select>")
+  end  
+    
+context Menu
+  @Operation html(out:OutputChannel)
+    format(out,"<div class=\"dropdown\">");
+    format(out,"<input type=\"submit\" class=\"dropbtn\" onclick=\"myFunction()\" name=\"ignore\" value=\"~S\">",Seq{label});
+    format(out,"<div id=\"myDropdown\" class=\"dropdown-content\">");
+    format(out, "<table cellborder='0'>");
+    @For value in values do
+      format(out,"<tr><td><input type=\"submit\" name=\"~S\" value=\"~S\"></td></tr>",Seq{label,value})
+    end;
+    format(out, "</table>");
+    format(out,"</div></div>")
   end    
   
 context Span    
