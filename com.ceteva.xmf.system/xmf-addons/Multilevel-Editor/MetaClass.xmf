@@ -98,8 +98,7 @@ context Root::FMML
 	@Operation retrieveAttribute(n : String):XCore::Attribute
       let attList = self.allAttributes()->select(a |
                       a.name = n.asSymbol())
-      in xmf.message("name " + n);
-         if not attList.isEmpty()
+      in if not attList.isEmpty()
          then
            attList.sel()
          else

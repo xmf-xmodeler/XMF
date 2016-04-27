@@ -158,7 +158,64 @@ context ClassDiagrams
     end
     
     @Operation defaultAssociationEdgeCommand(sourcePort,targetPort) 
-      self.newAssociationEdgeCommand(sourcePort,targetPort,Associations::Association.pathSeq()) 
+      let edge_new = self.newAssociationEdgeCommand(sourcePort,targetPort,Associations::Association.pathSeq())
+      in
+      	@Find(source, self.owner.classMaps)
+	    when source.node = sourcePort.owner do
+      		@Find(target, self.owner.classMaps)
+      		when target.node = targetPort.owner do
+      			@Find(asso, self.owner.associationMaps)
+      			when asso.edge = edge_new
+      			do
+	    			let sc = source.class;
+    					tc = target.class;
+	    				mappings = self.owner
+    				in	
+    					self.owner.updateToolGroup("Edges");
+//    					association.edit();
+      					self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif",
+//       					self.defineNewHandler("Edges","Test",true,"XCore/Association.gif",
+	    				@Operation fillAssociations(sourceInstancePort,targetInstancePort)
+    						@Find(sourceInstance, mappings.classMaps)
+	     					when sourceInstance.node = sourceInstancePort.owner do
+        	 					@Find(targetInstance, mappings.classMaps)
+     							when targetInstance.node = targetInstancePort.owner do
+    								@Find(sourceSlot, sourceInstance.class.slots())
+    								when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) do
+    									@Find(targetSlot, targetInstance.class.slots())
+    									when targetSlot.type.type = sc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = sc )
+	    								do  
+											if sourceSlot.type.type.isKindOf(Set)
+											then
+												sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
+											else
+												sourceInstance.class.set(sourceSlot.name,targetInstance.class)
+											end;
+											if targetSlot.type.type.isKindOf(Set)
+											then
+	   											targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
+											else
+    											targetInstance.class.set(targetSlot.name,sourceInstance.class)
+   											end; 
+    										xmf.message("Association has been created successfully")
+	    								else
+    										xmf.warning("not successful: target instance does not have an association to the source instance")
+    									end
+    								else
+									    xmf.warning("not successful: source instance does not have an association to the target instance")
+    								end
+	    						else
+							    	xmf.warning("not successful: target instance could not be found")
+	    						end
+							else
+								xmf.warning("not successful: source instance could not be found")
+    						end
+	      				end)
+		      		end
+				end
+    	  	end
+      	end	
+      end
     end
     
     @Operation defaultAttributeEdge(sourcePort,targetPort)
@@ -442,7 +499,8 @@ context ClassDiagrams
 	    self.addEdge(edge);
 		edge.end2.displayName.hide();
 		edge.end1.name.hide();
-		edge.end2.name.hide()
+		edge.end2.name.hide();
+		edge
       end
     end
     

@@ -160,7 +160,11 @@ context ClassMapping::PackageXClassDiagram
 				[ "5" ] do
 					"M5"
            		end
-				else "M" + group
+				else 
+					if group.isKindOf(Integer) 
+					then "M" + group
+					else group
+					end	
 			end
 	end
     

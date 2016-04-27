@@ -63,6 +63,8 @@ context PropertyEditorXCore
       self.initialiseAttributeCollections();
       let attributes = self.element.of().allAttributes()->asSeq in
         @For a inSeq attributes do
+          if not (a.isIntrinsic and a.instLevel < element.level)
+          then
           if a.type.isReallyKindOf(Set) or a.type.isReallyKindOf(Seq) then
             self.setOrSeqAttributes := setOrSeqAttributes->prepend(a);
             self.collectionAttributes := collectionAttributes->prepend(a)
@@ -75,6 +77,7 @@ context PropertyEditorXCore
             self.enumerationAttributes := enumerationAttributes->prepend(a)
           elseif not a.type.inheritsFrom(Doc) then
             self.singletonAttributes := singletonAttributes->prepend(a)
+          end
           end
         end;
         self.setOrSeqAttributes := setOrSeqAttributes->sortNamedElements_CaseIndependent();
