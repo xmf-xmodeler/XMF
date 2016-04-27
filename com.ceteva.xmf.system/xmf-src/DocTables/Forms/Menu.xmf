@@ -1,0 +1,59 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Menus                                    *
+ *                            -------------------                             *
+ *                                                                            *
+ * A menu is an event handler. The label on the menu is used to name an       *
+ * argument that will be set in the event handling operation to the chosen    *
+ * menu item. When an event occurs it is broadcast to all                     *
+ * the event handlers on the page. The event handler is responsible for       *
+ * determining whether or not it should handle the event based on the supplied*
+ * argument values. If the event is handed then the handler must return a new *
+ * page to be displayed, otherwise it should return null.                     *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import DocTables;
+import Basic;
+import Forms;
+
+context Forms
+
+  @Class Menu extends Entry, EventHandler
+
+    @Attribute label : String       (?,!) end
+    @Attribute values : Seq(String) (?,!) end
+    
+    @Constructor(values,handler) 
+      self.label := self.generateLabel()
+    end
+    
+    @Constructor(label,values,handler) ! end
+    
+    @Operation args()
+      handler.sig()->butLast->collect(sigEntry | sigEntry->head.toString())
+    end
+    
+    @Operation contents()
+      Seq{}
+    end
+    
+    @Operation handle(env)
+      if env.binds(label)
+      then 
+        let values = self.args()->collect(a | 
+              if env.binds(a)
+              then env.lookup(a)->head
+              elseif a = "env"
+              then env
+              else false
+              end)
+        in handler.invoke(handler.target(),values)
+        end
+      else null
+      end
+    end
+
+  end
