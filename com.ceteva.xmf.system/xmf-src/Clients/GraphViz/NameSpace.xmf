@@ -14,17 +14,27 @@ xmf.clearClassLoader();
 context NameSpace
   @Operation populateGraphViz(browser:DiagramBrowser,gv)
     gv.setURL("diagram:" + self.path());  
-    @For c in self.contents()->select(o | o.isKindOf(Class)) when browser.canShowClass(c) do
+    @For c in self.contents()->select(o | o<>null and o.isKindOf(Class) and not(o.isKindOf(Package))) when browser.canShowClass(c) do
       c.graphVizNode(browser,gv)
     end; 
-    @For p in self.contents()->select(o | o.isKindOf(Package)) when browser.canShowPackage(p) do
+    @For p in self.contents()->select(o | o<>null and o.isKindOf(Package)) when browser.canShowPackage(p) do
       p.graphVizNode(browser,gv)
+    end; 
+    @For p in self.imports->select(o | o<>null and o.isKindOf(NameSpace)) do
+      @For c in p.contents()->select(o | o<>null and o.isKindOf(Class) and not(o.isKindOf(Package))) do
+        if browser.canImportClass(p,c)
+        then c.graphVizNode(browser,gv)
+        end
+      end
     end     
   end
 
 context NameSpace
   @Operation graphViz()
-    DiagramBrowser(self).browse()
+    let browser = DiagramBrowser(self)
+    in browser.browse();
+       browser
+    end
   end
   
 context NameSpace

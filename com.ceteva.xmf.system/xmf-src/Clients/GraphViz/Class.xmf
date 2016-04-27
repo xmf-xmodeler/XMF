@@ -33,13 +33,16 @@ context Root
    @Operation addClassOperations(c:Class,browser:DiagramBrowser,box,gv)
      if browser.canShowClassOperations(c)
      then
-         let opBox = box.addVBox()
+         let opBox = box.addVBox();
+             isStar(t) = t.inheritsFrom(Set(Element)) or t.inheritsFrom(Seq(Element))
          in @For o in c.operations when browser.canShowOp(c,o) do
               let names = o.paramNames();
                   types = o.paramTypes();
                   type = o.type() then
-                  argTypes = (names.zip(types))->collect(p | p->head + ":" + p->tail.name) then
-                  sig = o.name + "(" + argTypes->separateWith(",") + "):" + type.name then
+                  types = types->collect(t | if isStar(t) then "*"+t.elementType.name else t.name end);
+                  type = if isStar(type) then "*"+ type.elementType.name else type.name end then
+                  argTypes = (names.zip(types))->collect(p | p->head + ":" + p->tail) then
+                  sig = o.name + "(" + argTypes->separateWith(",") + "):" + type then
                   row = opBox.addRow() 
                in row.setCellPadding(2);
                   opBox.addText(sig)
@@ -65,12 +68,30 @@ context Root
               end;
               if not(type = Integer or type = String or type = Boolean or type = Float or type = Object or type = Element)
               then 
-                let edge = gv.addEdge(c.name.toString(),type.name.toString())
-                in edge.setLabel(edgeLabel);
-                   edge.setArrowhead("vee");
-                   if type.owner <> c.owner and type.owner <> null
-                   then addExternalClass(type,browser,gv)
-                   end
+                if browser.element.contents()->contains(type)
+                then
+                  if browser.canShowClass(type)
+                  then 
+                    let edge = gv.addEdge(c.name.toString(),type.name.toString())
+                    in edge.setLabel(edgeLabel);
+                       edge.setArrowhead("vee")
+                    end
+                  end
+                elseif browser.element.imports(type)
+                then 
+                  if browser.canShowImportedClass(browser.element.importedFrom(type),type)
+                  then 
+                    let edge = gv.addEdge(c.name.toString(),type.name.toString())
+                    in edge.setLabel(edgeLabel);
+                       edge.setArrowhead("vee")
+                    end
+                  end
+                else  
+                  let edge = gv.addEdge(c.name.toString(),type.name.toString())
+                  in edge.setLabel(edgeLabel);
+                     edge.setArrowhead("vee");
+                     addExternalClass(type,browser,gv)
+                  end
                 end
               end
            end
@@ -101,14 +122,27 @@ context Class
            addClassOperations(self,browser,box,gv);
            addClassAssociations(self,browser,gv)
          end;
-         @For super in parents when browser.canShowClass(super) do
-           if not([Class,Classifier,Object].contains(super))
+         @For super in parents when not([Class,Classifier,Object].contains(super)) do
+           if browser.element.contents()->contains(super)
            then
+             if browser.canShowClass(super)
+             then 
+               let edge = gv.addEdge(name.toString(),super.name.toString())
+               in edge.setArrowhead("empty")
+               end
+             end
+           elseif browser.element.imports(super)
+           then 
+             if browser.canShowImportedClass(browser.element.importedFrom(super),super)
+             then
+               let edge = gv.addEdge(name.toString(),super.name.toString())
+               in edge.setArrowhead("empty")
+               end
+             end
+           else 
              let edge = gv.addEdge(name.toString(),super.name.toString())
-             in edge.setArrowhead("empty")
-             end;
-             if super.owner <> owner and super.owner <> null
-             then addExternalClass(super,browser,gv)
+             in edge.setArrowhead("empty");
+                addExternalClass(super,browser,gv)
              end
            end
          end

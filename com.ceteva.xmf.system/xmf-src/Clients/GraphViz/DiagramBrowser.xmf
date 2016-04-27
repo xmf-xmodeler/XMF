@@ -13,11 +13,13 @@ context GraphViz
 
   @Class DiagramBrowser extends DocTableBrowser
   
-    @Attribute descriptors : XCore::Table = XCore::Table(100)  end
-    @Attribute element     : NameSpace              end
-    @Attribute elements    : Stack        = Stack() end
+    @Attribute descriptor  : NameSpaceDescriptor           end
+    @Attribute descriptors : Stack               = Stack() end
+    @Attribute element     : NameSpace                     end
+    @Attribute elements    : Stack               = Stack() end
     
-    @Constructor(element) ! 
+    @Constructor(element) !
+      self.descriptor := NameSpaceDescriptor();
       self.page := element.toGraphVizPage(self)
     end
     
@@ -25,79 +27,71 @@ context GraphViz
       if elements.isEmpty()
       then element.toGraphVizPage(self)
       else 
-        self.element := elements.pop();
+        self.element    := elements.pop();
+        self.descriptor := descriptors.pop();
         self.setName(element.path());
         element.toGraphVizPage(self)
       end
     end
     
-    @Operation canShowClass(c:Class):Boolean
-      self.getDescriptor(c,ClassDescriptor).isShown
+    @Operation canImportClass(p:Package,c:Class)
+      descriptor.getImportedDescriptor(p).getContentDescriptor(c,ClassDescriptor).isShown
     end
     
+    @Operation canShowClass(c:Class):Boolean
+      descriptor.getContentDescriptor(c,ClassDescriptor).isShown
+    end
+    
+    @Operation canShowImportedClass(n:NameSpace,c:Class):Boolean
+      descriptor.getImportedDescriptor(n).getContentDescriptor(c,ClassDescriptor).isShown
+    end
+    
+    @Operation showClass(c:Class,shown:Boolean)
+      descriptor.getContentDescriptor(c,ClassDescriptor).isShown := shown
+    end
+
     @Operation canShowOp(c:Class,op:Operation):Boolean
-      self.getDescriptor(c,ClassDescriptor).canShowOp(op)
+      descriptor.getContentDescriptor(c,ClassDescriptor).canShowOp(op)
     end
     
     @Operation canShowAtt(c:Class,att:Attribute):Boolean
-      self.getDescriptor(c,ClassDescriptor).canShowAtt(att)
+      descriptor.getContentDescriptor(c,ClassDescriptor).canShowAtt(att)
     end
     
     @Operation canShowPackage(p:Package):Boolean
-      self.getDescriptor(p,PackageDescriptor).isShown
+      descriptor.getContentDescriptor(p,NameSpaceDescriptor).isShown
     end
     
     @Operation canShowClassAttributes(c:Class):Boolean
-      self.getDescriptor(c,ClassDescriptor).showAttributes
+      descriptor.getContentDescriptor(c,ClassDescriptor).showAttributes
     end
     
     @Operation canShowClassAssociations(c:Class):Boolean
-      self.getDescriptor(c,ClassDescriptor).showAssociations
+      descriptor.getContentDescriptor(c,ClassDescriptor).showAssociations
     end
     
     @Operation canShowClassOperations(c:Class):Boolean
-      self.getDescriptor(c,ClassDescriptor).showOperations
+      descriptor.getContentDescriptor(c,ClassDescriptor).showOperations
     end
-    
-    @Operation push(element)
-      elements.push(element)
-    end
-    
-    @Operation pop()
-      elements.pop()
-    end
-    
-    @Operation showClass(c:Class,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setIsShown(show)
-    end
-    
+
     @Operation showClassAttributes(c:Class,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setShowAttributes(show)
+      descriptor.getContentDescriptor(c,ClassDescriptor).setShowAttributes(show)
     end
     
     @Operation showClassAssociations(c:Class,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setShowAssociations(show)
+      descriptor.getContentDescriptor(c,ClassDescriptor).setShowAssociations(show)
     end
     
     @Operation showClassOperations(c:Class,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setShowOperations(show)
+      descriptor.getContentDescriptor(c,ClassDescriptor).setShowOperations(show)
     end
     
     @Operation showClassOp(c:Class,op:Operation,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setShowOp(op,show)
+      descriptor.getContentDescriptor(c,ClassDescriptor).setShowOp(op,show)
     end
     
     @Operation showClassAtt(c:Class,att:Attribute,show:Boolean)
-      self.getDescriptor(c,ClassDescriptor).setShowAtt(att,show)
-    end
-    
-    @Operation getDescriptor(key,descriptorClass:Class):Descriptor
-      if descriptors.hasKey(key)
-      then descriptors.get(key)
-      else 
-        descriptors.put(key,descriptorClass());
-        descriptors.get(key)
-      end
+      descriptor.getContentDescriptor(c,ClassDescriptor).setShowAtt(att,show)
     end
     
     @Operation requestURL(url:String)
@@ -120,23 +114,33 @@ context GraphViz
     
     @Operation processDiagram(p:Package)
       self.setName(p.path());
-      self.setNewPage(self.diagramPage(p))
+      self.setNewPage(self.diagramPage(p,descriptor,
+        @Operation() 
+          element.toGraphVizPage(self) 
+        end))
     end
     
-    @Operation diagramPage(p:NameSpace)
+    @Operation diagramPage(p:NameSpace,d:NameSpaceDescriptor,backPage:Operation)
       let back(env) = 
             let classes = p.contents()->select(o | o.isKindOf(Class))
             in @For bind in env do
                  let path = bind->at(0).subst(":","%3A",true) then
                      class = path.lookupPath(Root)
                  in classes := classes->excluding(class);
-                    self.showClass(class,true)
+                    d.getContentDescriptor(class,ClassDescriptor).isShown := true
                  end
                end;
                @For class in classes do
-                 self.showClass(class,false)
+                 d.getContentDescriptor(class,ClassDescriptor).isShown := false
                end;
-               element.toGraphVizPage(self)
+               backPage()
+            end;
+          importProperties(p2:NameSpace,d2:NameSpaceDescriptor) = 
+            @Operation() 
+              self.diagramPage(p2,d2,
+                @Operation() 
+                  self.diagramPage(p,d,backPage) 
+                end)
             end
        in Page("DiagramEditor",[
             Form("DiagEditor/changes",[
@@ -153,21 +157,24 @@ context GraphViz
                 Row([
                   Text(class.path().subst("&#58;",":",true)),
                   Text("shown"),
-                  CheckBox(class.path().subst("&#58;",":",true),self.canShowClass(class))
+                  CheckBox(class.path().subst("&#58;",":",true),d.getContentDescriptor(class,ClassDescriptor).isShown)
                 ])
               )
             ),
+            Table("",[
+              Row(p.imports->asSeq->collect(p | Button("Import " + p.name,importProperties(p,d.getImportedDescriptor(p)))))
+            ]),
             Button("Show All",@Operation()
               @For c in p.contents()->select(o | o.isKindOf(Class)) do
-                self.showClass(c,true)
+                d.getContentDescriptor(c,ClassDescriptor).isShown := true
               end;
-              self.diagramPage(p)
+              self.diagramPage(p,d,backPage)
             end),
             Button("Hide All",@Operation()
               @For c in p.contents()->select(o | o.isKindOf(Class)) do
-                self.showClass(c,false)
+                d.getContentDescriptor(c,ClassDescriptor).isShown := false
               end;
-              self.diagramPage(p)
+              self.diagramPage(p,d,backPage)
             end),
             Button("Back",back)
           ])
@@ -177,14 +184,18 @@ context GraphViz
     
     @Operation processPackage(package:Package)
       elements.push(element);
+      descriptors.push(descriptor);
       self.element := package;
+      self.descriptor := descriptor.getContentDescriptor(package,NameSpaceDescriptor);
       self.setName(package.path());
       self.setNewPage(package.toGraphVizPage(self))
     end
     
     @Operation processNameSpace(namespace:NameSpace)
       elements.push(element);
+      descriptors.push(descriptor);
       self.element := namespace;
+      self.descriptor := descriptor.getContentDescriptor(namespace,NameSpaceDescriptor);
       self.setName(namespace.path());
       self.setNewPage(namespace.toGraphVizPage(self))
     end

@@ -1,0 +1,35 @@
+parserImport XOCL;
+
+import GraphViz;
+
+context GraphViz
+
+  @Class NameSpaceDescriptor extends Descriptor
+  
+    @Attribute contentDescriptors  : Table = Table(10) end
+    @Attribute importedDescriptors : Table = Table(5)  end
+    
+    @Operation getContentDescriptor(element:Element,type:Class)
+      if contentDescriptors.hasKey(element)
+      then contentDescriptors.get(element)
+      else
+        contentDescriptors.put(element,type());
+        contentDescriptors.get(element)
+      end
+    end
+    
+    @Operation getImportedDescriptor(element:NameSpace)
+      if importedDescriptors.hasKey(element)
+      then importedDescriptors.get(element)
+      else
+        importedDescriptors.put(element,NameSpaceDescriptor());
+        @For c in element.contents() do
+          if c.isKindOf(Class)
+          then importedDescriptors.get(element).contentDescriptors.put(c,ClassDescriptor(false))
+          end
+        end;
+        importedDescriptors.get(element)
+      end
+    end
+    
+  end

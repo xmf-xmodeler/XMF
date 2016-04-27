@@ -183,6 +183,20 @@ context XCore::NameSpace
         else Set{}
         end
   end
+  
+context NameSpace
+  @Operation imports(e:Element):Boolean
+    // Return true when the element is a contained element
+    // of one of the imported namespaces...
+    imports->exists(i | i.contents()->includes(e))
+  end
+  
+context NameSpace
+  @Operation importedFrom(e:Element):NameSpace
+    // Returns the name space that the element is imported
+    // from or null...
+    @Find(i,imports) when i.contents()->includes(e) do i else null end
+  end
 
 context NameSpace
   @Operation init()
