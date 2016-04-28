@@ -179,34 +179,74 @@ context ClassDiagrams
     						@Find(sourceInstance, mappings.classMaps)
 	     					when sourceInstance.node = sourceInstancePort.owner do
         	 					@Find(targetInstance, mappings.classMaps)
-     							when targetInstance.node = targetInstancePort.owner do
+		     					when targetInstance.node = targetInstancePort.owner do
     								@Find(sourceSlot, sourceInstance.class.slots())
-    								when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) do
+		    						when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) do
     									@Find(targetSlot, targetInstance.class.slots())
     									when targetSlot.type.type = sc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = sc )
 	    								do  
-											if sourceSlot.type.type.isKindOf(Set)
-											then
-												sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
-											else
-												sourceInstance.class.set(sourceSlot.name,targetInstance.class)
-											end;
-											if targetSlot.type.type.isKindOf(Set)
-											then
-	   											targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
-											else
-    											targetInstance.class.set(targetSlot.name,sourceInstance.class)
-   											end; 
-    										xmf.message("Association has been created successfully")
+											let css = Seq{sc};
+												iss = Seq{}
+											in	
+												if targetSlot.type.isIntrinsic
+												then
+													@While not css.isEmpty() andthen css.head().level > targetSlot.type.instLevel do
+														iss := css->iterate(e col = Seq{} | col + e.allInstances().asSeq());
+														css := iss;
+														iss := Seq{}
+													end
+												else 
+													iss := css.head().allInstances().asSeq();
+													css := iss
+												end;
+												if css.contains(sourceInstance.class)
+												then
+													let cst = Seq{tc};
+														ist = Seq{}
+													in	
+														if sourceSlot.type.isIntrinsic
+														then
+															@While not cst.isEmpty() andthen cst.head().level > sourceSlot.type.instLevel do
+																ist := cst->iterate(e col = Seq{} | col + e.allInstances().asSeq());
+																cst := ist;
+																ist := Seq{}
+															end
+														else 
+															ist := cst.head().allInstances().asSeq();
+															cst := ist
+														end;
+														if cst.contains(targetInstance.class)
+														then
+															if sourceSlot.type.type.isKindOf(Set)
+															then
+																sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
+															else
+																sourceInstance.class.set(sourceSlot.name,targetInstance.class)
+															end;
+															if targetSlot.type.type.isKindOf(Set)
+															then
+	   															targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
+															else
+    															targetInstance.class.set(targetSlot.name,sourceInstance.class)
+															end; 
+    														xmf.message("Association has been created successfully")
+    													else
+    														xmf.warning("not successful: target instance does not match target class")
+    													end
+    												end
+    											else
+    												xmf.warning("not successful: source instance does not match source class")
+    											end
+    										end
 	    								else
     										xmf.warning("not successful: target instance does not have an association to the source instance")
     									end
-    								else
+									else
 									    xmf.warning("not successful: source instance does not have an association to the target instance")
     								end
-	    						else
-							    	xmf.warning("not successful: target instance could not be found")
-	    						end
+	   							else
+								   	xmf.warning("not successful: target instance could not be found")
+								end
 							else
 								xmf.warning("not successful: source instance could not be found")
     						end
