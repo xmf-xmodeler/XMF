@@ -23,6 +23,7 @@ context ClassDiagrams
     @Attribute containsEdges      : Seq(ContainsEdge)    end
     @Attribute dependencyEdges    : Seq(DependencyEdge)  end
     @Attribute associationEdges   : Seq(AssociationEdge) end
+    @Attribute associationInstanceEdges   : Seq(AssociationInstanceEdge) end
     @Attribute showAttributes     : Boolean = true (?)   end
     @Attribute showOperations     : Boolean = false (?)  end
     @Attribute showMetaslots      : Boolean = false (?)  end
@@ -36,6 +37,10 @@ context ClassDiagrams
       @TypeCase(edge)
         AssociationEdge do
           self.addAssociationEdge(edge);
+          super(edge)
+        end
+        AssociationInstanceEdge do
+          self.addAssociationInstanceEdge(edge);
           super(edge)
         end
         InheritanceEdge do
@@ -95,7 +100,11 @@ context ClassDiagrams
     @Operation addAssociationEdge(associationEdge) 
       self.associationEdges := associationEdges->prepend(associationEdge)
     end
-    
+
+    @Operation addAssociationInstanceEdge(associationInstanceEdge) 
+      self.associationInstanceEdges := associationInstanceEdges->prepend(associationInstanceEdge)
+    end
+            
     @Operation addAttributeEdge(attributeEdge) 
       self.attributeEdges := attributeEdges->prepend(attributeEdge)
     end
@@ -229,6 +238,7 @@ context ClassDiagrams
 															else
     															targetInstance.class.set(targetSlot.name,sourceInstance.class)
 															end; 
+															self.owner.associationInstanceAdded(sourceSlot,targetSlot,sourceInstancePort,targetInstancePort);
     														xmf.message("Association has been created successfully")
     													else
     														xmf.warning("not successful: target instance does not match target class")

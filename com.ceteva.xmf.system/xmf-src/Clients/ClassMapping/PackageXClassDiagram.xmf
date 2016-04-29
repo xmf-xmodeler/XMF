@@ -25,6 +25,7 @@ context ClassMapping
     @Attribute containerMaps    : Seq(ContainerXContainsEdge)     (+,-) end
     @Attribute dependencyMaps   : Seq(DependencyXDependencyEdge)  (+,-) end
     @Attribute associationMaps  : Seq(AssociationXAssociationEdge)(+,-) end
+    @Attribute associationInstanceMaps  : Seq(AssociationInstanceXAssociationInstanceEdge)(+,-) end
     
     @Constructor(package,diagram,owner)
       self.init(Seq{package,diagram})
@@ -66,6 +67,9 @@ context ClassMapping
       @TypeCase(element)
         AssociationXAssociationEdge do
           self.addAssociationMap(element)
+        end
+        AssociationInstanceXAssociationInstanceEdge do
+          self.addAssociationInstanceMap(element)
         end
         AttributeXAttributeEdge do
           self.addAttributeMap(element)
@@ -157,7 +161,12 @@ context ClassMapping
       self.addToAssociationMaps(associationMap);
       associationMap.setOwner(self)
     end
-    
+
+    @Operation addAssociationInstanceMap(associationInstanceMap)
+      self.addToAssociationInstanceMaps(associationInstanceMap);
+      associationInstanceMap.setOwner(self)
+    end
+            
     @Operation addAttributeMap(attributeMap)
       self.attributeMaps := attributeMaps->prepend(attributeMap);
       attributeMap.setOwner(self)
@@ -389,6 +398,17 @@ context ClassMapping
           self.add(PackageXNode(package,node,self));
           diagram.add(node);
           node.new(diagram)
+        end
+      end
+    end
+    
+    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
+      if not associationInstanceMaps->exists(map | map.slot1 = sourceSlot and map.slot2 = targetSlot)
+      then
+		let edge = AssociationInstanceEdge(sourcePort,targetPort)
+        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
+           edge.new(self.diagram);
+           self.diagram.add(edge)
         end
       end
     end

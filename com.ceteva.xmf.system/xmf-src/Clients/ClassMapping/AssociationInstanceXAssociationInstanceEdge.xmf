@@ -1,0 +1,66 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+import DiagramsMapping;
+import ClassDiagrams;
+import ClassMapping;
+import Menus;
+
+context ClassMapping
+
+  @Class AssociationInstanceXAssociationInstanceEdge extends ElementXEdge, RightClickableProxy
+  
+    @Attribute slot1 : Slot end
+    @Attribute slot2 : Slot end
+    @Attribute edge        : AssociationInstanceEdge (?) end
+    
+    @Constructor(slot1,slot2,edge) ! 
+      self.setHotLoad(true);
+      self.checkDaemons()
+    end
+
+//End changed daemon
+
+    @Operation end1Changed_classDiagramDaemon(association,slot,newSlot1,oldSlot1)
+      if newSlot1 <> oldSlot1
+      then slot2.owner.set(slot2.name,null);
+      		edge.delete();
+      		self.delete()
+      end
+    end
+    
+    @Operation end2Changed_classDiagramDaemon(association,slot,newSlot2,oldSlot2)
+      if newSlot2 <> oldSlot2
+      then slot1.owner.set(slot1.name,null);
+      		edge.delete();
+      		self.delete()
+      end
+    end
+    
+    @Operation checkAssociationDaemons()
+      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end1Changed_classDiagramDaemon(slot1,"value") end;
+      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end2Changed_classDiagramDaemon(slot2,"value") end
+    end
+
+    @Operation checkDaemons()
+      super();
+      self.checkAssociationDaemons()
+    end
+    
+    @Operation hotLoaded()
+      self.checkDaemons()
+    end
+    
+    @Operation removeDaemons()
+    
+      // Called when this mapping is no longer valid.
+      
+      super();
+      association.removeDaemonsWithTarget(self,true);
+      association.end1.removeDaemonsWithTarget(self,true);
+      association.end2.removeDaemonsWithTarget(self,true)
+    end
+    
+  end
