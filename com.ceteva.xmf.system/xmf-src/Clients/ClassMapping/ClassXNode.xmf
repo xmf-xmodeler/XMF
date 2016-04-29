@@ -451,15 +451,21 @@ context ClassMapping
       @WithoutRendering(node.owner)
         if not operationMaps->exists(map | map.operation = operation)
         then
-          let metaclass_ = 
-              if operation.hasProperty("of")
-              then operation.property("of").name 
-              else "" end then
-            text = node.nextOperation(operation.name.toString(),metaclass_,XCore::String) then
-            map = OperationXText(operation,text)
+          let 
+            metaclass_ = if operation.hasProperty("of")
+                         then operation.property("of").name 
+                         else "" end;
+            instLevel = if operation.isIntrinsic 
+                         then operation.instLevel 
+                         else "" end
+            then
+              text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String);
+              instLevel = null 
+            then
+              map = OperationXText(operation,text)
           in self.add(map);
-            text.new(node.opsBox);
-             node.add(text)
+              text.new(node.opsBox);
+              node.add(text)
           end
         end
       end

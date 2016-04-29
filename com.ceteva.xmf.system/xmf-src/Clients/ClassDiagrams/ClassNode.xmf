@@ -166,8 +166,8 @@ context ClassDiagrams
        attBox.nextAttributeExtension(name,metaclass_,metaclassName,type)
      end
      
-     @Operation nextOperation(name,metaclass_,type)
-       opsBox.nextOperation(name,metaclass_)
+     @Operation nextOperation(name,metaclass_,instLevel,type)
+       opsBox.nextOperation(name,metaclass_,instLevel)
      end
 
      @Operation nextMetaslot(name,value,type)

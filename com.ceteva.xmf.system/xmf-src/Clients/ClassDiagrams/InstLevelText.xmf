@@ -1,0 +1,88 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import ClassDiagrams;
+
+// textbox for inst level next to operation (and attribute later)
+context Clients::ClassDiagrams
+   @Class InstLevelText extends Clients::Diagrams::Box
+		@Attribute instLevel : Clients::Diagrams::Text end
+		@Attribute active : Boolean end
+		
+		@Constructor(x,y)
+			self.fillColor := Clients::Diagrams::Color();
+			self.hideAllEdges();
+			self.active := false
+		end
+		
+		@Operation setActive(active : Boolean)
+			self.active := active 
+		end
+		
+		@Operation createText()	
+			"InstLevelText::createText".println();
+			self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white);		
+			self.add(self.instLevel);
+			self.checkDaemons()
+		end
+		
+		@Operation maxWidth():XCore::Element
+			if not shown
+			then
+				0
+			else
+				super() + 2
+			end
+   		 end
+   		 
+   		 @Operation minWidth():XCore::Element
+      		if not active then
+				0
+			else
+       			if self.width = 0
+      			then
+        			10
+     			else
+        			self.width
+      			end
+      		end
+   		 end
+   		 
+   		@Operation maxHeight():XCore::Element
+      		self.instLevel.maxHeight()
+    	end
+    	
+  		@Operation checkDaemons()
+  			@SlotValueChanged multi once Clients::ClassDiagrams::InstBox::valueChanged(self.instLevel,"text") end
+  			  			
+  		end
+  		
+  		@Operation valueChanged(obj, slot, new, old)
+  			if new = " " or new = ""
+   			then
+   				@WithoutDaemons(instLevel)
+   					obj.text := " ";
+   					obj.renew(obj.owner)
+   				end;
+			   	obj.owner.setFillColor(Clients::Diagrams::Color())
+			else
+			    obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
+			end
+	  	end
+  	
+	  @Operation expandWidth()
+    
+      	if self.width <> self.instLevel.width + 2 then
+        	self.resize(self.instLevel.width + 2,height)
+      	end
+      end
+      
+    @Operation expandHeight()
+    
+      if self.height <> self.instLevel.height then
+        self.resize(width,self.instLevel.height)
+      end
+    end
+    
+   end
