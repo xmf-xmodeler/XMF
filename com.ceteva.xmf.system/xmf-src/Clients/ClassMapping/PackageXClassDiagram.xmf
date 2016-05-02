@@ -402,11 +402,13 @@ context ClassMapping
       end
     end
     
-    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
-      if not associationInstanceMaps->exists(map | map.slot1 = sourceSlot and map.slot2 = targetSlot)
+//    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
+    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort)
+      if not associationInstanceMaps->exists(map | map.class1 = sourceClass and map.class2 = targetClass and map.name1 = sourceSlotName and map.name2 = targetSlotName)
       then
 		let edge = AssociationInstanceEdge(sourcePort,targetPort)
-        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
+//        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
+        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
            edge.new(self.diagram);
            self.diagram.add(edge)
         end
@@ -471,7 +473,7 @@ context ClassMapping
               when end1Map.node = associationEdge.sourceNode()
               do @Find(end2Map,acMaps)
                    when end2Map.node = associationEdge.targetNode()
-                   do let name = package.newName("A");
+                   do let name = associationEdge.name; //package.newName("A");
                           class1 = end1Map.element();
                           class2 = end2Map.element() then
                           class1Name = class1.name.toString().lowerCaseInitialLetter();

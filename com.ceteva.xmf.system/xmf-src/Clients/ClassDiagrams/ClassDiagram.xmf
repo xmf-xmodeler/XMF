@@ -238,7 +238,8 @@ context ClassDiagrams
 															else
     															targetInstance.class.set(targetSlot.name,sourceInstance.class)
 															end; 
-															self.owner.associationInstanceAdded(sourceSlot,targetSlot,sourceInstancePort,targetInstancePort);
+//															self.owner.associationInstanceAdded(sourceSlot,targetSlot,sourceInstancePort,targetInstancePort);
+															self.owner.associationInstanceAdded(sourceInstance.class,targetInstance.class,sourceSlot.name,targetSlot.name,sourceInstancePort,targetInstancePort);
     														xmf.message("Association has been created successfully")
     													else
     														xmf.warning("not successful: target instance does not match target class")
@@ -520,37 +521,44 @@ context ClassDiagrams
     end
 
     @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
-      let  // Calculate positions of end labels and create ends    
-          southbound = targetPort.owner.y > sourcePort.owner.y;
-          eastbound  = targetPort.owner.x > sourcePort.owner.x 
-        then
-          starty = if southbound then 25 else -45 end;
-          startx = if eastbound then 0 else 0 end;
+      let
+      	assoName = xmf.getString("Association Name", "Please enter the association name", owner.package.newName("A"))
+      in
+      	if assoName <> null
+      	then
+    	  let  // Calculate positions of end labels and create ends    
+	          southbound = targetPort.owner.y > sourcePort.owner.y;
+        	  eastbound  = targetPort.owner.x > sourcePort.owner.x 
+    	    then
+	          starty = if southbound then 25 else -45 end;
+        	  startx = if eastbound then 0 else 0 end;
      
-          endy = if southbound then -45 else 25 end;
-          endx = if eastbound then 0 else 0 end;
-          
-          yDiff = if southbound then 25 else -25 end
-        then
-          instLevel1 = InstLevelLabel(" ", "start", 10, (2*yDiff)+(1*starty), Color(0,0,0), true);
-          instLevel2 = InstLevelLabel(" ", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
-          varName1 = Label("e1","start",startx,starty,true);
-          varName2 = Label("e2","end",endx,endy,true);
-          displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
-          displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
-        then
-          end1 = AssociationEnd(varName1,displayName1,
-              Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);
-          end2 = AssociationEnd(varName2,displayName2,
-              Multiplicity("end",  10, (-yDiff)+(1*endy)), instLevel2) 
-        then
-          edge = AssociationEdge("A",end1,end2,sourcePort,targetPort,typePath)
-      in edge.new(self,false);
-	    self.addEdge(edge);
-		edge.end2.displayName.hide();
-		edge.end1.name.hide();
-		edge.end2.name.hide();
-		edge
+    	      endy = if southbound then -45 else 25 end;
+	          endx = if eastbound then 0 else 0 end;
+          	
+        	  yDiff = if southbound then 25 else -25 end
+    	    then
+	          instLevel1 = InstLevelLabel(" ", "start", 10, (2*yDiff)+(1*starty), Color(0,0,0), true);
+        	  instLevel2 = InstLevelLabel(" ", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
+    	      varName1 = Label("e1","start",startx,starty,true);
+	          varName2 = Label("e2","end",endx,endy,true);
+        	  displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
+    	      displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
+	        then
+        	  end1 = AssociationEnd(varName1,displayName1,
+    	          Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);
+	          end2 = AssociationEnd(varName2,displayName2,
+            	  Multiplicity("end",  10, (-yDiff)+(1*endy)), instLevel2) 
+        	then
+    	      edge = AssociationEdge(assoName,end1,end2,sourcePort,targetPort,typePath)
+	      in edge.new(self,false);
+	    	self.addEdge(edge);
+			edge.end2.displayName.hide();
+			edge.end1.name.hide();
+			edge.end2.name.hide();
+			edge
+	      end
+		end
       end
     end
     

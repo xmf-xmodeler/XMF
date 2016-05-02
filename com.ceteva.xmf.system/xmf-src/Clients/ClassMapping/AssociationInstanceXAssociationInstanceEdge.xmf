@@ -12,11 +12,20 @@ context ClassMapping
 
   @Class AssociationInstanceXAssociationInstanceEdge extends ElementXEdge, RightClickableProxy
   
-    @Attribute slot1 : Slot end
-    @Attribute slot2 : Slot end
+//    @Attribute slot1 : Slot end
+//    @Attribute slot2 : Slot end
+    @Attribute class1 : Class end
+    @Attribute class2 : Class end
+    @Attribute name1 : String end
+    @Attribute name2 : String end
     @Attribute edge        : AssociationInstanceEdge (?) end
     
-    @Constructor(slot1,slot2,edge) ! 
+//    @Constructor(slot1,slot2,edge) ! 
+//      self.setHotLoad(true);
+//      self.checkDaemons()
+//    end
+
+    @Constructor(class1,class2,name1,name2,edge) ! 
       self.setHotLoad(true);
       self.checkDaemons()
     end
@@ -24,24 +33,30 @@ context ClassMapping
 //End changed daemon
 
     @Operation end1Changed_classDiagramDaemon(association,slot,newSlot1,oldSlot1)
-      if newSlot1 <> oldSlot1
-      then slot2.owner.set(slot2.name,null);
+      if not class1.of().getAttribute(name1).type.isKindOf(Set) and newSlot1 <> oldSlot1 and newSlot1 <> null
+      then  if class2.of().getAttribute(name2).type.isKindOf(Set) 
+	        then class2.set(name2,class2.get(name2)->excluding(class1))
+     	    else class2.set(name2,null)
+	        end;
       		edge.delete();
-      		self.delete()
+      		self.deleteRecursive()
       end
     end
     
     @Operation end2Changed_classDiagramDaemon(association,slot,newSlot2,oldSlot2)
-      if newSlot2 <> oldSlot2
-      then slot1.owner.set(slot1.name,null);
+      if not class2.of().getAttribute(name2).type.isKindOf(Set) and newSlot2 <> oldSlot2 and newSlot2 <> null
+      then  if class1.of().getAttribute(name1).type.isKindOf(Set) 
+	        then class1.set(name1,class1.get(name1)->excluding(class2))
+     	    else class1.set(name1,null)
+	        end;
       		edge.delete();
-      		self.delete()
+      		self.deleteRecursive()
       end
     end
     
     @Operation checkAssociationDaemons()
-      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end1Changed_classDiagramDaemon(slot1,"value") end;
-      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end2Changed_classDiagramDaemon(slot2,"value") end
+      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end1Changed_classDiagramDaemon(class1,name1) end;
+      @SlotValueChanged multi once AssociationInstanceXAssociationInstanceEdge::end2Changed_classDiagramDaemon(class2,name2) end
     end
 
     @Operation checkDaemons()
@@ -62,5 +77,9 @@ context ClassMapping
       association.end1.removeDaemonsWithTarget(self,true);
       association.end2.removeDaemonsWithTarget(self,true)
     end
-    
+   
+    @Operation element()
+      class1
+    end
+      
   end
