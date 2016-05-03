@@ -189,17 +189,60 @@ context ClassDiagrams
 	     					when sourceInstance.node = sourceInstancePort.owner do
         	 					@Find(targetInstance, mappings.classMaps)
 		     					when targetInstance.node = targetInstancePort.owner do
-    								@Find(sourceSlot, sourceInstance.class.slots())
-		    						when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) do
-    									@Find(targetSlot, targetInstance.class.slots())
-    									when targetSlot.type.type = sc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = sc )
-	    								do  
+									
+									let class1 = null;
+										slot1 = null;
+										class2 = null;
+										slot2 = null
+									in
+										@Find(sourceSlot, sourceInstance.class.slots())
+			    						when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) 
+										do
+											@Find(targetSlot, targetInstance.class.slots())
+    										when targetSlot.type.type = sc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = sc )
+	    									do
+												class1 := sourceInstance;
+												slot1 := sourceSlot;
+												class2 := targetInstance;
+												slot2 := targetSlot
+											else
+    											xmf.warning("not successful: target instance does not have an association to the source instance")
+											end 
+										else
+											//reverse Search
+											@Find(sourceSlot, sourceInstance.class.slots())
+		    								when sourceSlot.type.type = sc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = sc ) 
+											do
+    											@Find(targetSlot, targetInstance.class.slots())
+    											when targetSlot.type.type = tc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = tc )
+	    										do 										
+													class1 := targetInstance;
+													slot1 := targetSlot;
+													class2 := sourceInstance;
+													slot2 := sourceSlot
+												else
+    												xmf.warning("not successful: target instance does not have an association to the source instance")
+												end
+											else
+												 xmf.warning("not successful: source instance does not have an association to the target instance")
+											end
+										end;
+										if slot1 <> null and slot2 <> null 
+										then 
+
+
+    
+       								//@Find(sourceSlot, sourceInstance.class.slots())
+		    						//when sourceSlot.type.type = tc or ( sourceSlot.type.type.isKindOf(Set) andthen sourceSlot.type.type.elementType = tc ) do
+    								//	@Find(targetSlot, targetInstance.class.slots())
+    								//	when targetSlot.type.type = sc or ( targetSlot.type.type.isKindOf(Set) andthen targetSlot.type.type.elementType = sc )
+	    							//	do  
 											let css = Seq{sc};
 												iss = Seq{}
 											in	
-												if targetSlot.type.isIntrinsic
+												if slot2.type.isIntrinsic//targetSlot.type.isIntrinsic
 												then
-													@While not css.isEmpty() andthen css.head().level > targetSlot.type.instLevel do
+													@While not css.isEmpty() andthen css.head().level > slot2.type.instLevel do //targetSlot.type.instLevel do
 														iss := css->iterate(e col = Seq{} | col + e.allInstances().asSeq());
 														css := iss;
 														iss := Seq{}
@@ -208,14 +251,15 @@ context ClassDiagrams
 													iss := css.head().allInstances().asSeq();
 													css := iss
 												end;
-												if css.contains(sourceInstance.class)
+												//if css.contains(sourceInstance.class)
+												if css.contains(class1.class)
 												then
 													let cst = Seq{tc};
 														ist = Seq{}
 													in	
-														if sourceSlot.type.isIntrinsic
+														if slot1.type.isIntrinsic//sourceSlot.type.isIntrinsic
 														then
-															@While not cst.isEmpty() andthen cst.head().level > sourceSlot.type.instLevel do
+															@While not cst.isEmpty() andthen cst.head().level > slot1.type.instLevel do//sourceSlot.type.instLevel do
 																ist := cst->iterate(e col = Seq{} | col + e.allInstances().asSeq());
 																cst := ist;
 																ist := Seq{}
@@ -224,22 +268,26 @@ context ClassDiagrams
 															ist := cst.head().allInstances().asSeq();
 															cst := ist
 														end;
-														if cst.contains(targetInstance.class)
+														//if cst.contains(targetInstance.class)
+														if cst.contains(class2.class)
 														then
-															if sourceSlot.type.type.isKindOf(Set)
+															if slot1.type.type.isKindOf(Set)//sourceSlot.type.type.isKindOf(Set)
 															then
-																sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
+																//sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
+																class1.class.set(slot1.name,slot1.value.including(class2.class))
 															else
-																sourceInstance.class.set(sourceSlot.name,targetInstance.class)
+																//sourceInstance.class.set(sourceSlot.name,targetInstance.class)
+																class1.class.set(slot1.name,class2.class)
 															end;
-															if targetSlot.type.type.isKindOf(Set)
+															if slot2.type.type.isKindOf(Set)//targetSlot.type.type.isKindOf(Set)
 															then
-	   															targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
+	   															//targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
+	   															class2.class.set(slot2.name,slot2.value.including(class1.class))
 															else
-    															targetInstance.class.set(targetSlot.name,sourceInstance.class)
+    															//targetInstance.class.set(targetSlot.name,sourceInstance.class)
+       															class2.class.set(slot2.name,class1.class)
 															end; 
-//															self.owner.associationInstanceAdded(sourceSlot,targetSlot,sourceInstancePort,targetInstancePort);
-															self.owner.associationInstanceAdded(sourceInstance.class,targetInstance.class,sourceSlot.name,targetSlot.name,sourceInstancePort,targetInstancePort);
+															self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort);
     														xmf.message("Association has been created successfully")
     													else
     														xmf.warning("not successful: target instance does not match target class")
@@ -249,12 +297,14 @@ context ClassDiagrams
     												xmf.warning("not successful: source instance does not match source class")
     											end
     										end
-	    								else
-    										xmf.warning("not successful: target instance does not have an association to the source instance")
-    									end
-									else
-									    xmf.warning("not successful: source instance does not have an association to the target instance")
-    								end
+										end		
+    								end    
+	    								//else
+    									//	xmf.warning("not successful: target instance does not have an association to the source instance")
+    									//end
+									//else
+									//    xmf.warning("not successful: source instance does not have an association to the target instance")
+    								//end
 	   							else
 								   	xmf.warning("not successful: target instance could not be found")
 								end
@@ -726,7 +776,11 @@ context ClassDiagrams
     @Operation removeAssociationEdge(associationEdge)
       self.associationEdges := associationEdges.excluding(associationEdge)
     end
-    
+
+    @Operation removeAssociationInstanceEdge(associationInstanceEdge)
+      self.associationInstanceEdges := associationInstanceEdges.excluding(associationInstanceEdge)
+    end
+            
     @Operation removeAttributeEdge(attributeEdge)
       self.attributeEdges := attributeEdges.excluding(attributeEdge)
     end
@@ -779,6 +833,7 @@ context ClassDiagrams
       @TypeCase(edge)
         InheritanceEdge do self.removeInheritanceEdge(edge)   end
         AssociationEdge do self.removeAssociationEdge(edge)   end
+        AssociationInstanceEdge do self.removeAssociationInstanceEdge(edge)   end
         AttributeEdge   do self.removeAttributeEdge(edge)     end
         ContainsEdge    do self.removeContainsEdge(edge)      end
         DependencyEdge  do self.removeDependencyEdge(edge)    end

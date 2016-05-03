@@ -39,7 +39,8 @@ context ClassMapping
      	    else class2.set(name2,null)
 	        end;
       		edge.delete();
-      		self.deleteRecursive()
+        	self.owner.remove(self);
+        	self.removeFromOwner()
       end
     end
     
@@ -50,7 +51,8 @@ context ClassMapping
      	    else class1.set(name1,null)
 	        end;
       		edge.delete();
-      		self.deleteRecursive()
+        	self.owner.remove(self);
+        	self.removeFromOwner()
       end
     end
     
@@ -73,9 +75,9 @@ context ClassMapping
       // Called when this mapping is no longer valid.
       
       super();
-      association.removeDaemonsWithTarget(self,true);
-      association.end1.removeDaemonsWithTarget(self,true);
-      association.end2.removeDaemonsWithTarget(self,true)
+      edge.removeDaemonsWithTarget(self,true);
+      class1.removeDaemonsWithTarget(self,true);
+      class2.removeDaemonsWithTarget(self,true)
     end
    
     @Operation element()

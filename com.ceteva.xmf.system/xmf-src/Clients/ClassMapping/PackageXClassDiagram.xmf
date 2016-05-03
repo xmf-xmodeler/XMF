@@ -1769,7 +1769,11 @@ context ClassMapping
         AssociationXAssociationEdge do
           self.deleteFromAssociationMaps(element);
           element.removeDaemons()
-        end
+        end 
+        AssociationInstanceXAssociationInstanceEdge do
+          self.deleteFromAssociationInstanceMaps(element);
+          element.removeDaemons()
+        end        
         ClassXNode do
           self.deleteFromClassMaps(element);
           element.removeDaemons()
