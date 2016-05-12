@@ -8,22 +8,24 @@ context ClassDiagrams
 
   @Class OperationGroup extends Group
   
-    @Attribute instLevel  : Text end
-    @Attribute name 	  : OperationText end
+    @Attribute instLevel  : InstLevelText end
+    @Attribute name  : OperationText end
     @Attribute metaclass_ : Text end
-  
-    @Constructor(name,metaclass_,instLevel,x,y)
-      self.name := OperationText(name,x+16,y);
-      if metaclass_ <> "" then
-        self.metaclass_ := Text("<<" + metaclass_ + ">> ",x + 100,y,false)
+      
+    @Operation initOperationGroup(nameArg,metaclass0,instLevel,x,y) // initOperationGroup
+      self.name := OperationText(nameArg,x+16,y);
+      if metaclass0 <> "" then
+        self.metaclass_ := Text("<<" + metaclass0 + ">> ",x + 100,y,false)
       else
-        self.metaclass_ := Text("Foo",x + 120,y,false)
+        self.metaclass_ := Text("",x + 120,y,false)
       end;      
-      self.instLevel := Text("X",x,y,false);
+      self.instLevel := InstLevelText(x,y);
+      self.instLevel.setLevel(instLevel);
       // A group should not have any Display attributes set.
       
       self.x := 0;
       self.y := 0
+    
     end
     
     @Operation addDisplays()
@@ -45,7 +47,7 @@ context ClassDiagrams
     
     @Operation resized(display)
     
-      // If the name has resized then the type
+      // If the nameLabel has resized then the type
       // may need to move along accordingly.
       
       if metaclass_.x() < (name.x() + name.width()) or

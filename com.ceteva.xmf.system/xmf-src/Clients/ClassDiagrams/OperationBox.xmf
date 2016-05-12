@@ -34,14 +34,17 @@ context ClassDiagrams
     end
     
     @Operation newOperation(name,metaclass_,instLevel)    
-      let text = OperationGroup(name,metaclass_,instLevel,5,16 * displays->size)
-      in text.new(self);
+      let text = OperationGroup()
+      in text.initOperationGroup(name,metaclass_,instLevel,5,16 * displays->size);
+        text.new(self);
         self.add(text)
       end
     end
     
     @Operation nextOperation(name,metaclass_,instLevel)
-      OperationGroup(name,metaclass_,instLevel,5,self.displays->size * 16)
+      let result = OperationGroup() in 
+      result.initOperationGroup(name,metaclass_,instLevel,5,self.displays->size * 16)
+      end
     end
     
     @Operation node()
@@ -61,8 +64,10 @@ context ClassDiagrams
     //Override Method   
     @Operation setShown(v : XCore::Element):XCore::Element
       @For display in displays do
-      ("display.name.of(): "+display.name.of()).println();
-        display.name.setEditable(v)
+        display.name.setEditable(v);
+        display.instLevel.setEditable(v);
+        display.instLevel.setActive(v);
+        display.instLevel.setShown(v)
       end;
       self.shown := v
     end   

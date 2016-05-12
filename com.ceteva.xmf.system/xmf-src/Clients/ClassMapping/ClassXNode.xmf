@@ -457,9 +457,9 @@ context ClassMapping
                          else "" end;
             instLevel = if operation.isIntrinsic 
                          then operation.instLevel 
-                         else "" end
+                         else "N" end
             then
-              text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String);
+              text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String); // text is of OperationGroup
               instLevel = null 
             then
               map = OperationXText(operation,text)

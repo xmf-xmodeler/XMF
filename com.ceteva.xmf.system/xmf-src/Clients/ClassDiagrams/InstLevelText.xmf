@@ -13,19 +13,25 @@ context Clients::ClassDiagrams
 		@Constructor(x,y)
 			self.fillColor := Clients::Diagrams::Color();
 			self.hideAllEdges();
-			self.active := false
+			self.active := false;
+            self.instLevel := Clients::Diagrams::Text("X",1,0,true,false,false,white)	
 		end
 		
 		@Operation setActive(active : Boolean)
 			self.active := active 
 		end
+
+		@Operation setLevel(level)
+  		    self.instLevel.text := level;
+  			self.checkDaemons()
+		end
 		
-		@Operation createText()	
+/*		@Operation createText()	
 			"InstLevelText::createText".println();
-			self.instLevel := Clients::Diagrams::Text(" ",1,0,true,false,false,white);		
+			self.instLevel := Clients::Diagrams::Text("Q",1,0,true,false,false,black);		
 			self.add(self.instLevel);
 			self.checkDaemons()
-		end
+		end*/
 		
 		@Operation maxWidth():XCore::Element
 			if not shown
@@ -48,26 +54,40 @@ context Clients::ClassDiagrams
       			end
       		end
    		 end
+   
+    @Operation addDisplays()
+      self.add(self.instLevel)
+    end
    		 
    		@Operation maxHeight():XCore::Element
       		self.instLevel.maxHeight()
     	end
     	
   		@Operation checkDaemons()
-  			@SlotValueChanged multi once Clients::ClassDiagrams::InstBox::valueChanged(self.instLevel,"text") end
-  			  			
+  			@SlotValueChanged multi once InstLevelText::valueChanged(self.instLevel,"text") end
   		end
   		
   		@Operation valueChanged(obj, slot, new, old)
+  			("valueChanged Listener: " + obj + "." + slot +": " + old + "-->" + new).println();
   			if new = " " or new = ""
    			then
+   				"isIntrinsic := false;".println();
    				@WithoutDaemons(instLevel)
    					obj.text := " ";
    					obj.renew(obj.owner)
    				end;
 			   	obj.owner.setFillColor(Clients::Diagrams::Color())
 			else
-			    obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
+				try
+  					"isIntrinsic := true;".println();
+  					("instLevel := "+new.asInt()+";").println();
+  					obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
+				catch(exception)
+   				  @WithoutDaemons(instLevel)
+   					obj.text := old;
+   					obj.renew(obj.owner)
+   				  end
+				end
 			end
 	  	end
   	
@@ -83,6 +103,10 @@ context Clients::ClassDiagrams
       if self.height <> self.instLevel.height then
         self.resize(width,self.instLevel.height)
       end
+    end
+    
+    @Operation setEditable(b)
+      instLevel.setEditable(b)
     end
     
    end
