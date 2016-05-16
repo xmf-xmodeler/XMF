@@ -84,7 +84,7 @@ context Mosaic
          else 
            @TypeCase(type)
               Class do
-                let atts = type.allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic and a.instLevel < type.level )
+                let atts = type.allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel < type.level )
 												    then
 						    							col.including(Seq{"field",a.name.toString()})
 													else 
