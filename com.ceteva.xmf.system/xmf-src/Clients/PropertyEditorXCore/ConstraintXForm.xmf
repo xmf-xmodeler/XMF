@@ -18,19 +18,26 @@ context PropertyEditorXCore
       end
     end
 
-    @Operation daemons_failChanged(e,slot,newValue,oldValue)
+    @Operation daemons_reasonChanged(e,slot,newValue,oldValue)
       slot:=slot.toString();
-      if slot="codeBox" or slot="source" then
-        self.form.setTextOut("fail",self.form.strippedSource(element.fail()))
+      if slot="codeBox" or slot="reason" then
+        self.form.setTextOut("reason",self.form.strippedSource(element.reason))
       end
     end
 
-    @Operation daemons_successChanged(e,slot,newValue,oldValue)
-      slot:=slot.toString();
-      if slot="codeBox" or slot="source" then
-        self.form.setTextOut("success",self.form.strippedSource(element.success()))
-      end
-    end
+//    @Operation daemons_failChanged(e,slot,newValue,oldValue)
+//      slot:=slot.toString();
+//      if slot="codeBox" or slot="source" then
+//        self.form.setTextOut("fail",self.form.strippedSource(element.fail()))
+//      end
+//    end
+
+//    @Operation daemons_successChanged(e,slot,newValue,oldValue)
+//      slot:=slot.toString();
+//      if slot="codeBox" or slot="source" then
+//        self.form.setTextOut("success",self.form.strippedSource(element.success()))
+//      end
+//    end
 
     @Operation checkDaemons()
       @SlotValueChanged multi once ObjectXForm::daemons_selfNameChanged(element,"name") end;
@@ -39,8 +46,9 @@ context PropertyEditorXCore
       @SlotValueChanged multi once ObjectXForm::daemons_ofParentsChanged(element.of(),"parents") end;
       @SlotValueChanged multi once ObjectXForm::daemons_ownerChanged(element,"owner") end;
       @SlotValueChanged multi once ConstraintXForm::daemons_bodyChanged(element.body,"*") end;
-      @SlotValueChanged multi once ConstraintXForm::daemons_successChanged(element.success(),"*") end;
-      @SlotValueChanged multi once ConstraintXForm::daemons_failChanged(element.fail(),"*") end;
+      @SlotValueChanged multi once ConstraintXForm::daemons_reasonChanged(element.reason,"*") end;      
+//      @SlotValueChanged multi once ConstraintXForm::daemons_successChanged(element.success(),"*") end;
+//      @SlotValueChanged multi once ConstraintXForm::daemons_failChanged(element.fail(),"*") end;
       if element.owner() <> null then
         @SlotValueChanged multi once ObjectXForm::daemons_ownerNameChanged(element.owner(),"name") end
       end;
@@ -55,8 +63,9 @@ context PropertyEditorXCore
         element.owner().removeDaemonsWithTarget(self,true)
       end;
       element.body.removeDaemonsWithTarget(self,true);
-      element.success().removeDaemonsWithTarget(self,true);
-      element.fail().removeDaemonsWithTarget(self,true);
+      element.reason.removeDaemonsWithTarget(self,true);      
+//      element.success().removeDaemonsWithTarget(self,true);
+//      element.fail().removeDaemonsWithTarget(self,true);
       self
     end
 

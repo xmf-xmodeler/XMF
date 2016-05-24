@@ -13,8 +13,9 @@ context PropertyEditorXCore
     @Attribute ofDisplay : SingletonDisplay end
     @Attribute ownerDisplay : SingletonDisplay end
     @Attribute bodyDisplay : CodeboxDisplay end
-    @Attribute successDisplay : CodeboxDisplay end
-    @Attribute failDisplay : CodeboxDisplay end
+    @Attribute reasonDisplay : CodeboxDisplay end
+//    @Attribute successDisplay : CodeboxDisplay end
+//    @Attribute failDisplay : CodeboxDisplay end
 
     @Operation new()
       super();
@@ -25,7 +26,8 @@ context PropertyEditorXCore
       if not self.layoutManager = null then
         layoutManager.add(self.selfDisplays());
         layoutManager.addSeparator();
-        layoutManager.add(Seq{self.bodyDisplay(),self.successDisplay(),self.failDisplay()});
+//        layoutManager.add(Seq{self.bodyDisplay(),self.successDisplay(),self.failDisplay()});
+		layoutManager.add(Seq{self.bodyDisplay(),self.reasonDisplay()});
         layoutManager.layoutContents()
       else self.error("Layout manager must be set for " + self.toString())
       end
@@ -53,8 +55,9 @@ context PropertyEditorXCore
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         @For rule inSeq rules do
           bodyDisplay.textbox.addWordRule(rule,FormTextBox::blue);
-          successDisplay.textbox.addWordRule(rule,FormTextBox::blue);
-          failDisplay.textbox.addWordRule(rule,FormTextBox::blue)
+		  reasonDisplay.textbox.addWordRule(rule,FormTextBox::blue)
+          //successDisplay.textbox.addWordRule(rule,FormTextBox::blue);
+          //failDisplay.textbox.addWordRule(rule,FormTextBox::blue)
         end
       end;
       self
@@ -65,10 +68,15 @@ context PropertyEditorXCore
       bodyDisplay
     end
 
-    @Operation failDisplay()
-      self.failDisplay := self.sourceDisplay("fail");
-      failDisplay
+    @Operation reasonDisplay()
+      self.reasonDisplay := self.sourceDisplay("reason");
+      reasonDisplay
     end
+
+//    @Operation failDisplay()
+//      self.failDisplay := self.sourceDisplay("fail");
+//      failDisplay
+//    end
     
     @Operation refresh()
       super();
@@ -83,18 +91,24 @@ context PropertyEditorXCore
             textbox.setText(valueLabel);
             self.commandInterpreter().setText(textbox,valueLabel)
           end
-        elseif slotName = "success" then
-          let textbox = successDisplay.textbox
+		elseif slotName = "reason" then
+          let textbox = reasonDisplay.textbox
           in
             textbox.setText(valueLabel);
             self.commandInterpreter().setText(textbox,valueLabel)
           end
-        elseif slotName = "fail" then
-          let textbox = failDisplay.textbox
-          in
-            textbox.setText(valueLabel);
-            self.commandInterpreter().setText(textbox,valueLabel)
-          end
+//         elseif slotName = "success" then
+//          let textbox = successDisplay.textbox
+//          in
+//            textbox.setText(valueLabel);
+//            self.commandInterpreter().setText(textbox,valueLabel)
+//          end
+//        elseif slotName = "fail" then
+//          let textbox = failDisplay.textbox
+//          in
+//            textbox.setText(valueLabel);
+//            self.commandInterpreter().setText(textbox,valueLabel)
+//          end
         else
           let displays = Seq{selfDisplay,ofDisplay,ownerDisplay} in
             @Find(display,displays)
@@ -117,10 +131,10 @@ context PropertyEditorXCore
       then
         code =
           if source.isKindOf(Null)
-          then ""
+         then ""
           else source
           end
-      then
+       then
         textbox = ConstraintSourceTextBox(0,0,0,0,code,true)
           .setContex(element)
           .setSlotName(slotName)
@@ -138,11 +152,11 @@ context PropertyEditorXCore
       end
     end
 
-    @Operation successDisplay()
-      self.element.success(); //Ensures the success slot is initialized first
-      self.element.fail(); //Ensures the fail slot is initialized first
-      self.successDisplay := self.sourceDisplay("success");
-      successDisplay
-    end
+//    @Operation successDisplay()
+//      self.element.success(); //Ensures the success slot is initialized first
+//      self.element.fail(); //Ensures the fail slot is initialized first
+//      self.successDisplay := self.sourceDisplay("success");
+//      successDisplay
+//    end
 
   end
