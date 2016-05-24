@@ -306,7 +306,10 @@ context ClassMapping
       then
         let
           result = opItem->tail()->head() then
-          text = node.nextOperationValue(name, result, opItem->head()) then
+          instLevel = if operation.isIntrinsic 
+                        then operation.instLevel 
+                        else "U" end then
+          text = node.nextOperationValue(name, result, instLevel, opItem->head()) then
           map = OperationValueXText(class,name,opItem,text)
         in
           self.add(map);
