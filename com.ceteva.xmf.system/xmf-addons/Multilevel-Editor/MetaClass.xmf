@@ -48,6 +48,61 @@ context Root::FMML
         not a.isIntrinsic)
     end
 	
+	@Operation checkForNeededConstraints()
+		let ends = Seq{};
+			selectedEnd = null;
+			otherEnd = null;
+			classPool = Seq{};
+			instancePool = Seq{};
+			selectedClass = null;
+			tmp = Seq{}
+		in 
+			@For att in self.attributes do
+				if att.isKindOf(Associations::End) and att.isIntrinsic
+				then
+					ends := ends.including(att)
+				end
+			end;
+			if ends.size() > 1
+			then
+				tmp := Seq{};
+				@For element in ends do
+					tmp := tmp.including(Seq{element})	
+ 				end;
+				selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",Seq{tmp}},Seq{"Classes"},null)
+			else 
+				selectedEnd := ends.head()
+			end;
+			if selectedEnd <> null 
+			then 
+				if selectedEnd.association.end1 = selectedEnd
+				then 
+					otherEnd := selectedEnd.association.end2
+				else
+					otherEnd := selectedEnd.association.end1
+				end;
+				classPool := classPool.including(otherEnd.owner);
+				@While not classPool.isEmpty() andthen classPool.head().level > otherEnd.instLevel + 1
+				do
+					@For c in classPool do
+					  instancePool := instancePool + c.allInstances().asSeq()
+					end;
+					classPool := instancePool;
+					instancePool := Seq{}
+				end;
+				tmp := Seq{};
+				@For element in classPool do
+					tmp := tmp.including(Seq{element})	
+ 				end;
+				selectedClass := xmf.treeSelection("Select Target",Seq{"Classes","*",tmp},Seq{"Classes"},null);
+				if selectedClass <> null 
+				then 
+					self.newIntrinsicAssociationConstraint(selectedEnd.name, selectedClass)
+				end
+			end
+		end
+	end
+
 	@Operation createAssociation(elem2 : MetaEntity,role1 : String,role2 : String,lower1 : Integer,upper1 : Integer,lower2 : Integer,upper2 : Integer,inst_lev : XCore::Element):XCore::Element
       let c1 = CollectionMult(false,true,lower1,upper1);
           c2 = CollectionMult(false,true,lower2,upper2)
@@ -95,6 +150,17 @@ context Root::FMML
       end
     end
 	
+	@Operation newIntrinsicAssociationConstraint(slotname, classifier):XCore::Element
+      let name : XCore::Element = self.newName(slotname) then
+      	  constraintString : XCore::Element = "@Constraint " + name + " self." + slotname + ".of() = " + classifier.path() + " fail \"Unspecified Reason\" end" then
+          conAS : XCore::Element = OCL::OCL.grammar.parseString(constraintString,"Exp1",Seq{XOCL}) then
+          conASfun : XCore::Element = Compiler::compileToFun("",conAS,Seq{},Seq{Seq{2 | Root.contents},Seq{2 | XCore.contents}},true) then
+          constraint : XCore::Element = conASfun()
+       in constraint.setName(name);
+          self.add(constraint)
+      end
+    end
+
 	@Operation retrieveAttribute(n : String):XCore::Attribute
       let attList = self.allAttributes()->select(a |
                       a.name = n.asSymbol())

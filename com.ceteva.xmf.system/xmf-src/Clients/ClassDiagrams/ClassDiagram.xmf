@@ -271,24 +271,65 @@ context ClassDiagrams
 														//if cst.contains(targetInstance.class)
 														if cst.contains(class2.class)
 														then
-															if slot1.type.type.isKindOf(Set)//sourceSlot.type.type.isKindOf(Set)
-															then
-																//sourceInstance.class.set(sourceSlot.name,sourceSlot.value.including(targetInstance.class))
-																class1.class.set(slot1.name,slot1.value.including(class2.class))
-															else
-																//sourceInstance.class.set(sourceSlot.name,targetInstance.class)
-																class1.class.set(slot1.name,class2.class)
-															end;
-															if slot2.type.type.isKindOf(Set)//targetSlot.type.type.isKindOf(Set)
-															then
-	   															//targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
-	   															class2.class.set(slot2.name,slot2.value.including(class1.class))
-															else
-    															//targetInstance.class.set(targetSlot.name,sourceInstance.class)
-       															class2.class.set(slot2.name,class1.class)
-															end; 
-															self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort);
-    														xmf.message("Association has been created successfully")
+      														let slotvalue1 = class1.class.get(slot1.name);
+														        slotvalue2 = class2.class.get(slot2.name)
+															in
+																@WithoutDaemons(class1.class)
+																	if slot1.type.type.isKindOf(Set)//sourceSlot.type.type.isKindOf(Set)
+																	then
+																		class1.class.set(slot1.name,slot1.value.including(class2.class))
+																	else
+																		class1.class.set(slot1.name,class2.class)
+																	end
+																end;
+																@WithoutDaemons(class2.class)
+																	if slot2.type.type.isKindOf(Set)//targetSlot.type.type.isKindOf(Set)
+																	then
+   																		//targetInstance.class.set(targetSlot.name,targetSlot.value.including(sourceInstance.class))
+   																		class2.class.set(slot2.name,slot2.value.including(class1.class))
+																	else
+ 																		//targetInstance.class.set(targetSlot.name,sourceInstance.class)
+    																	class2.class.set(slot2.name,class1.class)
+																	end 
+																end;
+																let constrains1 = class1.class.of().constraints->iterate(a t=Seq{} | 
+      																				if a.name.hasPrefix(slot1.name) and a.name.toString().size() > slot1.name.toString().size() 
+					      															then t := t.including(a) 
+      																				else t end ) then
+      																result1 = constrains1->iterate(a t = true | t := t and a.body().invoke(class1.class,Seq{null})) then
+      																constrains2 = class2.class.of().constraints->iterate(a t=Seq{} | 
+      																				if a.name.hasPrefix(slot2.name) and a.name.toString().size() > slot2.name.toString().size() 
+					      															then t := t.including(a) 
+      																				else t end ) then
+      																result2 = constrains2->iterate(a t = true | t := t and a.body().invoke(class2.class,Seq{null}))
+																in	
+																	@WithoutDaemons(class1.class)
+																		class1.class.set(slot1.name,slotvalue1)
+																	end;
+																	@WithoutDaemons(class2.class)
+																		class2.class.set(slot2.name,slotvalue2)														
+																	end;
+																	if result1 and result2 
+																		then 
+																		if slot1.type.type.isKindOf(Set)//sourceSlot.type.type.isKindOf(Set)
+																		then
+																			class1.class.set(slot1.name,slot1.value.including(class2.class))
+																		else
+																			class1.class.set(slot1.name,class2.class)
+																		end;
+																		if slot2.type.type.isKindOf(Set)//targetSlot.type.type.isKindOf(Set)
+																		then
+   																			class2.class.set(slot2.name,slot2.value.including(class1.class))
+																		else
+    																		class2.class.set(slot2.name,class1.class)
+																		end; 		
+																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort);
+    																	xmf.message("Association has been created successfully")
+    																else
+    																	xmf.warning("not successful: constraints are not satisfied!")
+																	end
+																end
+															end
     													else
     														xmf.warning("not successful: target instance does not match target class")
     													end
