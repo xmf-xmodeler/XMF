@@ -53,7 +53,8 @@ context ClassMapping
       @SlotValueChanged multi once OperationXText::slotNameChanged_OperationXText(operation,"name") end;
       @SlotValueChanged multi once OperationXText::instLevelChanged_OperationXText(operation,"instLevel") end;
       @SlotValueChanged multi once OperationXText::isIntrinsicChanged_OperationXText(operation,"isIntrinsic") end;
-      @SlotValueChanged multi once OperationXText::textNameChanged_OperationXText(text.name,"text") end
+      @SlotValueChanged multi once OperationXText::textNameChanged_OperationXText(text.name,"text") end;
+      @SlotValueChanged multi once OperationXText::textinstLevelChanged_OperationXText(text.instLevel.instLevel,"text") end
     end
 
     @Operation hotLoaded()
@@ -111,6 +112,33 @@ context ClassMapping
         operation.setName(text.name.strippedText());
         text.setName(self.stripText(newName))
       end
+    end
+        
+    @Operation textinstLevelChanged_OperationXText(attribute,slot,new,old)
+			("textinstLevelChanged_OperationXText: " + attribute + "." + slot +": " + old + "-->" + new).println();
+  			if new = " " or new = ""
+   			then
+   				operation.isIntrinsic := false;
+   				"isIntrinsic := false;".println();
+   				//@WithoutDaemons(instLevel)
+   				//	obj.text := " ";
+   				//	obj.renew(obj.owner)
+   				//end;
+			   	text.instLevel.setFillColor(Clients::Diagrams::Color())
+			else
+				//try 
+  					operation.isIntrinsic := true;
+  					operation.instLevel := new.asInt();
+  					"isIntrinsic := true;".println();
+  					("instLevel := "+new.asInt()+";").println();
+  					text.instLevel.setFillColor(Clients::Diagrams::Color(0,0,0))
+				//catch(exception)
+   				  // @WithoutDaemons(instLevel)
+   				  //	obj.text := old;
+   				  //	obj.renew(obj.owner)
+   				  //end
+				//end
+			end
     end
 
     @Operation stripText(string)
