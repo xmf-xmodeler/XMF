@@ -69,7 +69,7 @@ context Root::FMML
 				@For element in ends do
 					tmp := tmp.including(Seq{element})	
  				end;
-				selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",Seq{tmp}},Seq{"Classes"},null)
+				selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",tmp},Seq{"Classes"},null)
 			else 
 				selectedEnd := ends.head()
 			end;

@@ -1,0 +1,15 @@
+parserImport XOCL;
+parserImport XMap;
+
+import Clients;
+import Diagrams;
+
+@Menu "Set Intrinsic Association Target Constraint" on FMML::MetaClass
+  FMML::MetaClass::checkForNeededConstraints
+end; 
+
+/*
+@Menu "Check Constraints" on Class
+  Container::checkConstraints
+end;  
+*/

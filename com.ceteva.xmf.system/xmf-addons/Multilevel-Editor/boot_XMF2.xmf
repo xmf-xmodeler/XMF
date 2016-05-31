@@ -93,6 +93,9 @@ in
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Container.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Container.o").loadBin(true);
 
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Menu.xmf",true,true);
+			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Menu.o").loadBin(true);
+
 xmf.registry().addContribution("com.ceteva.xmf.dropMenus",
 	    TypeLessContribution(
 	      Seq{
