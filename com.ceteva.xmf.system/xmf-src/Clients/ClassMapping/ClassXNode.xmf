@@ -462,8 +462,8 @@ context ClassMapping
                          then operation.instLevel 
                          else "N" end
             then
-              text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String); // text is of OperationGroup
-              instLevel = null 
+              text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String)//; // text is of OperationGroup
+              //instLevel = null 
             then
               map = OperationXText(operation,text)
           in self.add(map);

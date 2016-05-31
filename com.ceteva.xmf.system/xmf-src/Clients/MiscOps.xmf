@@ -715,9 +715,24 @@ context XCore::CompiledOperation
        self.setArity(newOp.arity);
        self.setDoc(newOp.documentation);
        self.setSig(newOp.sig);
-       self.setProperties(newOp.properties);
        
-       self.resetDynamics()
+       // Now some values will be overriden, but we need some of the old values,
+       // Instead of doing this properly we cheat by restoring the old values.
+       
+       let 
+         oldInst = self.instLevel;
+         oldIsInst = self.isIntrinsic;
+         oldDaemons = self.daemons()
+       in 
+         // now the overriding
+         self.setProperties(newOp.properties);
+         // then restoring
+         self.instLevel := oldInst;
+         self.isIntrinsic := oldIsInst;
+         self.setDaemons(oldDaemons)
+       end;       
+
+		self.resetDynamics()
        
      end
      
