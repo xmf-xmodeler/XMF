@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+import Menus;
+import ClassDiagrams;
+
+context ClassDiagrams
+
+  @Class IntrinsicAssociationEdge extends Edge
+  
+    @Attribute name      : Label          end
+  
+    @Constructor(name,source,target) 
+      self.init(Seq{name,source,target,0,Edge::noArrow,Set{},Seq{},Color()});
+        //self.end1 := end1;
+        //self.end2 := end2;
+      self.add(self.name)
+//      self.add(end1.displayName);
+//      self.add(end1.name);
+      //self.end1.name.hide();
+//      self.add(end1.mult);
+//      self.add(end1.instLevel);
+//      self.add(end2.name);
+      //self.end2.name.hide();
+//      self.add(end2.displayName);
+      //self.end2.displayName.hide();
+//      self.add(end2.mult);
+//      self.add(end2.instLevel)
+    end
+    
+    @Operation layoutId():String
+      self.name()
+    end
+    
+    @Operation name()
+      name.text()
+    end
+
+    @Operation setName(name)
+      null//self.name.text := name
+    end
+    
+  end
+  

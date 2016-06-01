@@ -24,6 +24,7 @@ context ClassDiagrams
     @Attribute dependencyEdges    : Seq(DependencyEdge)  end
     @Attribute associationEdges   : Seq(AssociationEdge) end
     @Attribute associationInstanceEdges   : Seq(AssociationInstanceEdge) end
+    @Attribute intrinsicAssociationEdges   : Seq(IntrinsicAssociationEdge) end
     @Attribute showAttributes     : Boolean = true (?)   end
     @Attribute showOperations     : Boolean = false (?)  end
     @Attribute showMetaslots      : Boolean = false (?)  end
@@ -37,6 +38,10 @@ context ClassDiagrams
       @TypeCase(edge)
         AssociationEdge do
           self.addAssociationEdge(edge);
+          super(edge)
+        end
+		IntrinsicAssociationEdge do
+          self.addIntrinsicAssociationEdge(edge);
           super(edge)
         end
         AssociationInstanceEdge do
@@ -99,6 +104,10 @@ context ClassDiagrams
     
     @Operation addAssociationEdge(associationEdge) 
       self.associationEdges := associationEdges->prepend(associationEdge)
+    end
+
+    @Operation addIntrinsicAssociationEdge(intrinsicAssociationEdge) 
+      self.intrinsicAssociationEdges := intrinsicAssociationEdges->prepend(intrinsicAssociationEdge)
     end
 
     @Operation addAssociationInstanceEdge(associationInstanceEdge) 

@@ -26,6 +26,7 @@ context ClassMapping
     @Attribute dependencyMaps   : Seq(DependencyXDependencyEdge)  (+,-) end
     @Attribute associationMaps  : Seq(AssociationXAssociationEdge)(+,-) end
     @Attribute associationInstanceMaps  : Seq(AssociationInstanceXAssociationInstanceEdge)(+,-) end
+    @Attribute intrinsicAssociationMaps  : Seq(IntrinsicAssociationXIntrinsicAssociationEdge)(+,-) end
     
     @Constructor(package,diagram,owner)
       self.init(Seq{package,diagram})
@@ -68,6 +69,9 @@ context ClassMapping
         AssociationXAssociationEdge do
           self.addAssociationMap(element)
         end
+        IntrinsicAssociationXIntrinsicAssociationEdge do
+          self.addIntrinsicAssociationMap(element)
+        end        
         AssociationInstanceXAssociationInstanceEdge do
           self.addAssociationInstanceMap(element)
         end
@@ -160,6 +164,11 @@ context ClassMapping
     @Operation addAssociationMap(associationMap)
       self.addToAssociationMaps(associationMap);
       associationMap.setOwner(self)
+    end
+    
+   @Operation addIntrinsicAssociationMap(intrinsicAssociationMap)
+      self.addToIntrinsicAssociationMaps(intrinsicAssociationMap);
+      intrinsicAssociationMap.setOwner(self)
     end
 
     @Operation addAssociationInstanceMap(associationInstanceMap)
@@ -409,6 +418,17 @@ context ClassMapping
 		let edge = AssociationInstanceEdge(sourcePort,targetPort)
 //        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
         in self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
+           edge.new(self.diagram);
+           self.diagram.add(edge)
+        end
+      end
+    end
+    
+    @Operation addIntrinsicAssociationEdge(sourceMap,targetMap,name)
+      if not intrinsicAssociationMaps->exists(map | map.class1 = sourceMap.class and map.class2 = targetMap.class)
+      then
+		let edge = IntrinsicAssociationEdge(name, sourceMap.node.ports().head(),targetMap.node.ports().head())
+        in self.add(IntrinsicAssociationXIntrinsicAssociationEdge(sourceMap.class,targetMap.class, edge));
            edge.new(self.diagram);
            self.diagram.add(edge)
         end

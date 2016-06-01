@@ -105,7 +105,8 @@ context Root::FMML
 							if self.owner = null 
 							then self.setOwner(selectedClass.owner)
 							end;
-							selectedClass.newIntrinsicAssociationConstraint(otherEnd.name, self)
+							selectedClass.newIntrinsicAssociationConstraint(otherEnd.name, self);
+							self.createIntrinsicAssociationEdge(self, selectedClass,selectedEnd.association.name )
 						end
 					else
 						xmf.warning("There is no class which is a suited counterpart for the intrinsic association")
@@ -126,6 +127,19 @@ context Root::FMML
          end
       end
     end
+    
+    @Operation createIntrinsicAssociationEdge(source, target, name)
+		let mapping = xmf.clientManager().findClientByName("com.ceteva.mappingMapping").mappingsFor(self.owner).head()
+		in
+      		@Find(sourceMap, mapping.classMaps)
+		    when sourceMap.class = source do
+    	  		@Find(targetMap, mapping.classMaps)
+      			when targetMap.class = target do
+					mapping.addIntrinsicAssociationEdge(sourceMap,targetMap, name)
+      			end
+      		end
+		end      
+    end
 	
 	@Operation getInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
       Kernel_setDefaultGetMOP(object.of(),true);
@@ -141,10 +155,10 @@ context Root::FMML
       end
     end
 	
-	@Constructor(name)
-		self.checkForNeededConstraints();
-		self
-    end
+//	@Constructor(name)
+//		self.checkForNeededConstraints();
+//		self
+//    end
 
 	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
       if self.of() = FMML::MetaClass

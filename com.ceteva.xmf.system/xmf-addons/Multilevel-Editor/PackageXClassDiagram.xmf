@@ -240,7 +240,8 @@ context ClassMapping::PackageXClassDiagram
                                 theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
                                 @Find(map,theMapping.classMaps) when map.class = class do
                                     map.node.move(x,y)
-                                end
+                                end;
+                                class.checkForNeededConstraints()
                             end
                         end
                     end 
