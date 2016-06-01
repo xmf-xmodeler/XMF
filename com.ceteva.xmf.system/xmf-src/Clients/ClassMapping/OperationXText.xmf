@@ -115,11 +115,9 @@ context ClassMapping
     end
         
     @Operation textinstLevelChanged_OperationXText(attribute,slot,new,old)
-			("textinstLevelChanged_OperationXText: " + attribute + "." + slot +": " + old + "-->" + new).println();
   			if new = " " or new = ""
    			then
    				operation.isIntrinsic := false;
-   				"isIntrinsic := false;".println();
    				//@WithoutDaemons(instLevel)
    				//	obj.text := " ";
    				//	obj.renew(obj.owner)
@@ -129,8 +127,6 @@ context ClassMapping
 				//try 
   					operation.isIntrinsic := true;
   					operation.instLevel := new.asInt();
-  					"isIntrinsic := true;".println();
-  					("instLevel := "+new.asInt()+";").println();
   					text.instLevel.setFillColor(Clients::Diagrams::Color(0,0,0))
 				//catch(exception)
    				  // @WithoutDaemons(instLevel)
