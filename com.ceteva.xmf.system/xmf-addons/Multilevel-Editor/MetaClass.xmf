@@ -63,41 +63,53 @@ context Root::FMML
 					ends := ends.including(att)
 				end
 			end;
-			if ends.size() > 1
-			then
-				tmp := Seq{};
-				@For element in ends do
-					tmp := tmp.including(Seq{element})	
- 				end;
-				selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",tmp},Seq{"Classes"},null)
-			else 
-				selectedEnd := ends.head()
-			end;
-			if selectedEnd <> null 
+			if not ends.isEmpty()
 			then 
-				if selectedEnd.association.end1 = selectedEnd
-				then 
-					otherEnd := selectedEnd.association.end2
-				else
-					otherEnd := selectedEnd.association.end1
+				if ends.size() > 1
+				then
+					tmp := Seq{};
+					@For element in ends do
+						tmp := tmp.including(Seq{element})	
+	 				end;
+					selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",tmp},Seq{"Classes"},null)
+				else 
+					selectedEnd := ends.head()
 				end;
-				classPool := classPool.including(otherEnd.owner);
-				@While not classPool.isEmpty() andthen classPool.head().level > otherEnd.instLevel + 1
-				do
-					@For c in classPool do
-					  instancePool := instancePool + c.allInstances().asSeq()
+				if selectedEnd <> null 
+				then 
+					if selectedEnd.association.end1 = selectedEnd
+					then 
+						otherEnd := selectedEnd.association.end2
+					else
+						otherEnd := selectedEnd.association.end1
 					end;
-					classPool := instancePool;
-					instancePool := Seq{}
-				end;
-				tmp := Seq{};
-				@For element in classPool do
-					tmp := tmp.including(Seq{element})	
- 				end;
-				selectedClass := xmf.treeSelection("Select Target",Seq{"Classes","*",tmp},Seq{"Classes"},null);
-				if selectedClass <> null 
-				then 
-					self.newIntrinsicAssociationConstraint(selectedEnd.name, selectedClass)
+					classPool := classPool.including(otherEnd.owner);
+					@While not classPool.isEmpty() andthen classPool.head().level > otherEnd.instLevel + 1
+					do
+						@For c in classPool do
+						  instancePool := instancePool + c.allInstances().asSeq()
+						end;
+						classPool := instancePool;
+						instancePool := Seq{}
+					end;
+					if not classPool.isEmpty()
+					then
+						tmp := Seq{};
+						@For element in classPool do
+							tmp := tmp.including(Seq{element})	
+		 				end;
+						selectedClass := xmf.treeSelection("Select Target",Seq{"Classes","*",tmp},Seq{"Classes"},null);
+						if selectedClass <> null and selectedClass <> "Classes"
+						then 
+							self.newIntrinsicAssociationConstraint(selectedEnd.name, selectedClass);
+							if self.owner = null 
+							then self.setOwner(selectedClass.owner)
+							end;
+							selectedClass.newIntrinsicAssociationConstraint(otherEnd.name, self)
+						end
+					else
+						xmf.warning("There is no class which is a suited counterpart for the intrinsic association")
+					end
 				end
 			end
 		end
@@ -129,6 +141,11 @@ context Root::FMML
       end
     end
 	
+	@Constructor(name)
+		self.checkForNeededConstraints();
+		self
+    end
+
 	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
       if self.of() = FMML::MetaClass
       then
@@ -149,7 +166,7 @@ context Root::FMML
         end
       end
     end
-	
+
 	@Operation newIntrinsicAssociationConstraint(slotname, classifier):XCore::Element
       let name : XCore::Element = self.newName(slotname) then
       	  constraintString : XCore::Element = "@Constraint " + name + " self." + slotname + ".of() = " + classifier.path() + " fail \"Unspecified Reason\" end" then
