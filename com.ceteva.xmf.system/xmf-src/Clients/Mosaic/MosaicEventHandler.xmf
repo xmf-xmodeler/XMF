@@ -91,6 +91,12 @@ context Mosaic
 														col
 													end);
                     ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
+                   // ops = type.allOperations()->asSeq->iterate(o col = Seq{} | if not (o.isIntrinsic andthen o.instLevel < type.level )
+				//								    then
+					//	    							col.including(Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
+						//							else 
+							//							col
+								//					end)
 				in
 //				then 
 				  @While type.hasStructuralFeature("delegatesTo") andthen type.delegatesTo <> null
