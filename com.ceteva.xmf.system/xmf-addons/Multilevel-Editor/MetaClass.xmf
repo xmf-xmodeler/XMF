@@ -10,7 +10,12 @@ context Root::FMML
 
     @Attribute model : 1..1 Model end
 
-	@Operation allAssociations():XCore::Element
+//    @Operation sendInstance(element,message,args):XCore::Element
+//      ("Calling "+message+"/"+element+"/"+args+"...").println();
+//      super(element,message,args)
+//    end
+    
+    @Operation allAssociations():XCore::Element
       self.allEnds->collect(e |
         e.association)
     end
