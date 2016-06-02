@@ -18,7 +18,7 @@ context Root::Extensions
 
 	@Operation new():Object
 
-	  // We make instanciate a new object "obj", whereas the class is "self". Therefore: obj.of()=self
+	  // We instantiate a new object "obj", whereas the class is "self". Therefore: obj.of()=self
       let obj = Kernel_mkObj(); 
           // We prepare a set of all Attributes form the class and a set of all Operations
           A = self.allAttributes();
@@ -116,7 +116,7 @@ context Root::Extensions
 		 end;
 
 		 if self.delegatesTo <> null	
-		 then self.selectRoleFiller(o, self) end;
+		 then self.selectRoleFiller(obj, self) end;
 		   //"Start Delegation Dialog".println();	   
 		   //xmf.select("Role-filler of type " + type + " required","Select role-filler",{"Choose this"},"Choose this",null)
 		   //end;
