@@ -424,16 +424,21 @@ context ClassMapping
       end
     end
     
-    @Operation addIntrinsicAssociationEdge(sourceMap,targetMap,name)
+    @Operation addIntrinsicAssociationEdge(sourceMap,targetMap,association)
       if not intrinsicAssociationMaps->exists(map | map.class1 = sourceMap.class and map.class2 = targetMap.class)
       then
-		let edge = IntrinsicAssociationEdge(name, sourceMap.node.ports().head(),targetMap.node.ports().head())
-        in self.add(IntrinsicAssociationXIntrinsicAssociationEdge(sourceMap.class,targetMap.class, edge));
-           edge.new(self.diagram);
-           self.diagram.add(edge)
+      	@Find(assoMap, self.associationMaps)
+        when assoMap.association = association
+        do 
+			let nameLabel = Label(assoMap.edge.end1.displayName.text,"",0,-16,true, Color(120,120,120),0-1) then
+				edge = IntrinsicAssociationEdge(nameLabel, sourceMap.node.ports().head(),targetMap.node.ports().head())
+	        in self.add(IntrinsicAssociationXIntrinsicAssociationEdge(sourceMap.class,targetMap.class, edge));
+        	   edge.new(self.diagram);
+    	       self.diagram.add(edge)
+	        end
         end
       end
-    end
+     end
     
     @Operation associationAdded(association)
       if not associationMaps->exists(map | map.association = association)

@@ -13,6 +13,8 @@ context ClassDiagrams
     @Attribute end1      : AssociationEnd end
     @Attribute end2      : AssociationEnd end
     @Attribute typePath  : Seq(String)    end
+    @Attribute displayName1 : Label end
+    
   
     @Constructor(name,end1,end2,source,target,typePath) 
       self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{},Color()});

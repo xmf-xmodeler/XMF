@@ -106,7 +106,7 @@ context Root::FMML
 							then self.setOwner(selectedClass.owner)
 							end;
 							selectedClass.newIntrinsicAssociationConstraint(otherEnd.name, self);
-							self.createIntrinsicAssociationEdge(self, selectedClass,selectedEnd.association.name )
+							self.createIntrinsicAssociationEdge(self, selectedClass,selectedEnd.association )
 						end
 					else
 						xmf.warning("There is no class which is a suited counterpart for the intrinsic association")
@@ -128,14 +128,14 @@ context Root::FMML
       end
     end
     
-    @Operation createIntrinsicAssociationEdge(source, target, name)
+    @Operation createIntrinsicAssociationEdge(source, target, association)
 		let mapping = xmf.clientManager().findClientByName("com.ceteva.mappingMapping").mappingsFor(self.owner).head()
 		in
       		@Find(sourceMap, mapping.classMaps)
 		    when sourceMap.class = source do
     	  		@Find(targetMap, mapping.classMaps)
       			when targetMap.class = target do
-					mapping.addIntrinsicAssociationEdge(sourceMap,targetMap, name)
+					mapping.addIntrinsicAssociationEdge(sourceMap,targetMap, association)
       			end
       		end
 		end      
