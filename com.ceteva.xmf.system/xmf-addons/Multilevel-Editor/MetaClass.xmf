@@ -93,6 +93,13 @@ context Root::FMML
 						classPool := instancePool;
 						instancePool := Seq{}
 					end;
+					@For element in classPool do
+						@Find( c, element.constraints)
+						when c.name.toString().hasPrefix(otherEnd.name.toString()) and c.of() = Constraint
+						do
+						  	classPool := classPool.excluding(element)
+						end	
+		 			end;
 					if not classPool.isEmpty()
 					then
 						tmp := Seq{};
@@ -102,11 +109,11 @@ context Root::FMML
 						selectedClass := xmf.treeSelection("Select Target",Seq{"Classes","*",tmp},Seq{"Classes"},null);
 						if selectedClass <> null and selectedClass <> "Classes"
 						then 
-							self.newIntrinsicAssociationConstraint(selectedEnd.name, selectedClass);
+							self.newIntrinsicAssociationConstraint(selectedEnd, selectedClass);
 							if self.owner = null 
 							then self.setOwner(selectedClass.owner)
 							end;
-							selectedClass.newIntrinsicAssociationConstraint(otherEnd.name, self);
+							selectedClass.newIntrinsicAssociationConstraint(otherEnd, self);
 							self.createIntrinsicAssociationEdge(self, selectedClass,selectedEnd.association )
 						end
 					else
@@ -182,9 +189,15 @@ context Root::FMML
       end
     end
 
-	@Operation newIntrinsicAssociationConstraint(slotname, classifier):XCore::Element
-      let name : XCore::Element = self.newName(slotname) then
-      	  constraintString : XCore::Element = "@Constraint " + name + " self." + slotname + ".of() = " + classifier.path() + " fail \"Unspecified Reason\" end" then
+	@Operation newIntrinsicAssociationConstraint(slot, classifier):XCore::Element
+      let name : XCore::Element = self.newName(slot.name) then
+      	  constraintString : XCore::Element = "@Constraint " + name + " self." + slot.name + if slot.type.isKindOf(Set)
+      																			 			then 
+      																						"->forAll(s| s.of() = " + classifier.path()  +")"
+			      																			else
+																						      ".of() = " + classifier.path() 
+																							 end + 
+      	" fail \"Unspecified Reason\" end" then
           conAS : XCore::Element = OCL::OCL.grammar.parseString(constraintString,"Exp1",Seq{XOCL}) then
           conASfun : XCore::Element = Compiler::compileToFun("",conAS,Seq{},Seq{Seq{2 | Root.contents},Seq{2 | XCore.contents}},true) then
           constraint : XCore::Element = conASfun()
