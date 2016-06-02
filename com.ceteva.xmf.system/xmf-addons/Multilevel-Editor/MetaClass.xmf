@@ -39,7 +39,8 @@ context Root::FMML
     end
 	
 	@Operation allInstances():XCore::Element
-      Root.allContentsOf(self)
+      //Root.allContentsOf(self)
+      Kernel_allInstances([self])
     end
 	
 	@Operation allMEMOAttributes():XCore::Element
