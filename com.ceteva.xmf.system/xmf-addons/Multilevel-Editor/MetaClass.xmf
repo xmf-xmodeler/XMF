@@ -10,10 +10,76 @@ context Root::FMML
 
     @Attribute model : 1..1 Model end
 
-//    @Operation sendInstance(element,message,args):XCore::Element
-//      ("Calling "+message+"/"+element+"/"+args+"...").println();
-//      super(element,message,args)
-//    end
+    @Operation sendInstance(element,message,args):XCore::Element /*
+      ("Calling "+message+"/"+element+"/"+args+"...").println();
+      ("The operation큦 name:" + message).println();
+      ("The operation큦 name큦 of:" + message.of()).println();
+      ("The class: " + self).println();
+      ("The instance: ?").println();
+      ("The class큦 level: " + self.level).println();
+      ("The instance큦 level: " + (self.level-1)).println();
+      ("The args: " + args).println();
+      ("The arity: " + args.size()).println();
+      ("The args� type: " + args.of()).println();
+      ("The operation큦 level: ?").println();
+      ("The operation is available: ?").println();
+      ("The instance delegates: ?").println();*/
+      
+      // super(element,message,args)
+
+      let 
+        // String to Symbol if necessary
+        name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
+        operations = element.of().allOperations()->asSeq
+      in // try to find an operation with the matching name
+        let index = 0;
+           size = operations->size;
+           found = false;
+           op = null;
+           arity = args->size
+       in @While index < size and not found do //loop until found through all operations 
+            op := operations->at(index);
+            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            then found := true
+            else index := index + 1
+            end
+          end;
+          if found
+          then
+            /* Now, we found the operation.
+               Before we can invoke it,
+               we must check if the intrinsic 
+               level forbids us to do so.
+               We'll throw an exception then*/
+            if 
+              op.isIntrinsic andthen op.instLevel < (self.level-1)
+            then
+              ("The level " + (self.level-1) + " object " + element 
+              + " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
+              element.noOperationFound(message,args)
+            else        
+              //"Operation found and to be invoked".println();
+              operations := operations->drop(index);
+              op.setSupers(operations);
+              op.invoke(element,args)
+            end
+          else 
+            /* We have not found the operation yet.
+               But maybe we are lucky with delegation.
+               If we find a role filler forward to them. */
+            if 
+              element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
+            then
+              ("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
+              element.roleFiller.send(message,args)
+            else
+              "Operation not found, throwing Exception".println();
+              element.noOperationFound(message,args)
+            end
+          end
+        end
+      end
+    end
     
     @Operation allAssociations():XCore::Element
       self.allEnds->collect(e |
