@@ -10,23 +10,8 @@ context Root::FMML
 
     @Attribute model : 1..1 Model end
 
-    @Operation sendInstance(element,message,args):XCore::Element /*
-      ("Calling "+message+"/"+element+"/"+args+"...").println();
-      ("The operation큦 name:" + message).println();
-      ("The operation큦 name큦 of:" + message.of()).println();
-      ("The class: " + self).println();
-      ("The instance: ?").println();
-      ("The class큦 level: " + self.level).println();
-      ("The instance큦 level: " + (self.level-1)).println();
-      ("The args: " + args).println();
-      ("The arity: " + args.size()).println();
-      ("The args� type: " + args.of()).println();
-      ("The operation큦 level: ?").println();
-      ("The operation is available: ?").println();
-      ("The instance delegates: ?").println();*/
+    @Operation sendInstance(element,message,args):XCore::Element 
       
-      // super(element,message,args)
-
       let 
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 

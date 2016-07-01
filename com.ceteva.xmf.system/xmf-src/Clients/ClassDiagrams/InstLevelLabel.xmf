@@ -47,10 +47,10 @@ context ClassDiagrams
    					obj.renew(obj.owner)
    				end;
 			   	obj.setFill(false);
-			    obj.setColor(black)
+			    obj.setColor(Clients::Diagrams::Color(0,0,0))
 			else
 			    obj.setFill(true);
-				obj.setColor(white)
+				obj.setColor(Clients::Diagrams::Color(255,255,255))
 			end
 	  	end
     

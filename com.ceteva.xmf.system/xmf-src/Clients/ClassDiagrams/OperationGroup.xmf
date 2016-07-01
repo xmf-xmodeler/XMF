@@ -13,17 +13,23 @@ context ClassDiagrams
     @Attribute metaclass_ : Text end
       
     @Operation initOperationGroup(nameArg,metaclass0,instLevel,x,y) // initOperationGroup
-      self.name := OperationText(nameArg,x+16,y);
+      self.name := OperationText(nameArg,if not "noBox"= (instLevel+"") then 16 else 0 end + x,y);
       if metaclass0 <> "" then
         self.metaclass_ := Text("<<" + metaclass0 + ">> ",x + 100,y,false)
       else
         self.metaclass_ := Text("",x + 120,y,false)
-      end;      
-      self.instLevel := InstLevelText(x,y);
-      self.instLevel.setLevel(instLevel+"");
-      // A group should not have any Display attributes set.
-      if not "N"= (instLevel+"")
-      then self.instLevel.setFillColor(Clients::Diagrams::Color(0,0,0))
+      end;
+      if not "noBox"= (instLevel+"")
+      then 
+        //1 / "NULL" + NuLL;
+        self.instLevel := InstLevelText(x,y);
+        self.instLevel.setLevel(instLevel+"");
+        // A group should not have any Display attributes set.
+        if not " "= (instLevel+"")
+        then self.instLevel.setFillColor(Clients::Diagrams::Color(0,0,0))
+        end
+      else
+        self.instLevel := InstLevelText(-3000,-3000)
       end;
       
       self.x := 0;

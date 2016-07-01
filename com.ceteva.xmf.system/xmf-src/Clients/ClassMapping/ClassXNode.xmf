@@ -460,7 +460,7 @@ context ClassMapping
                          else "" end;
             instLevel = if operation.isIntrinsic 
                          then operation.instLevel 
-                         else "N" end
+                         else if class.of()=Class then "noBox" else " " end end
             then
               text = node.nextOperation(operation.name.toString(),metaclass_,instLevel,XCore::String)//; // text is of OperationGroup
               //instLevel = null 

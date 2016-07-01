@@ -16,7 +16,7 @@ context Clients::ClassDiagrams
 			self.fillColor := Clients::Diagrams::Color();
 			self.hideAllEdges();
 			self.active := false;
-            self.instLevel := Clients::Diagrams::Text("X",1,0,true,false,false,white)	
+            self.instLevel := Clients::Diagrams::Text("X",1,0,true,false,false,Clients::Diagrams::Color(255,255,255))	
 		end
 		
 		@Operation setActive(active : Boolean)
