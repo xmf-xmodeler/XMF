@@ -178,25 +178,64 @@ context ClassDiagrams
     @Operation defaultAssociationEdgeCommand(sourcePort,targetPort) 
       let edge_new = self.newAssociationEdgeCommand(sourcePort,targetPort,Associations::Association.pathSeq())
       in
-      	@Find(source, self.owner.classMaps)
+      	@Find(asso, self.owner.associationMaps)
+      	when asso.edge = edge_new
+      	do
+    		self.owner.updateToolGroup("Edges");
+      		self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort) );
+      		self.owner.updateToolGroup("IntrinsicConstraintEdges");
+			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"XCore/Association.gif", self.generateAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2) )      
+		end
+      end
+    end
+    
+    @Operation generateAssociationConstraintEdgeCreationMethod(end1, end2)
+    	@Operation createAssociationConstraintEdge(sourcePort,targetPort)
+    		@Find(source, self.owner.classMaps)
+	    	when source.node = sourcePort.owner do
+      			@Find(target, self.owner.classMaps)
+      			when target.node = targetPort.owner do
+					if	( end1.type = end2.owner or end1.type.isKindOf(Collection) andthen end1.type.elementType = end2.owner ) and
+            			( end2.type = end1.owner or end2.type.isKindOf(Collection) andthen end2.type.elementType = end1.owner ) and
+      					( ( source.class.hasAttribute(end1.name) and source.class.isDescendentOf(end1.owner) and // and source.class.level = end1.instLevel + 1 and 
+      						target.class.hasAttribute(end2.name) and target.class.isDescendentOf(end2.owner) ) or // and target.class.level = end2.instLevel + 1 ) or
+      					  ( source.class.hasAttribute(end2.name) and source.class.isDescendentOf(end2.owner) and // and target.class.level = end1.instLevel + 1 and 
+      						target.class.hasAttribute(end1.name) and target.class.isDescendentOf(end1.owner) ) ) //and source.class.level = end2.instLevel + 1 ) )
+      					
+					then		
+							if(source.class.hasAttribute(end1.name))
+							then
+								source.class.newIntrinsicAssociationConstraint(end1, target.class);
+								target.class.newIntrinsicAssociationConstraint(end2, source.class);
+								source.class.createIntrinsicAssociationEdge(source.class, target.class,end1.association )
+							else
+								source.class.newIntrinsicAssociationConstraint(end2, target.class);
+								target.class.newIntrinsicAssociationConstraint(end1, source.class);
+								target.class.createIntrinsicAssociationEdge(target.class, source.class,end1.association )
+							end
+	   				else
+    					xmf.warning("Fehler: Constraint konnte nicht erzeugt werden")
+    				end
+    			end
+    		end
+    	end
+    end
+    
+    @Operation generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort)
+       	@Find(source, self.owner.classMaps)
 	    when source.node = sourcePort.owner do
       		@Find(target, self.owner.classMaps)
       		when target.node = targetPort.owner do
-      			@Find(asso, self.owner.associationMaps)
-      			when asso.edge = edge_new
-      			do
-	    			let sc = source.class;
-    					tc = target.class;
-	    				mappings = self.owner
-    				in	
-    					self.owner.updateToolGroup("Edges");
-//    					association.edit();
-      					self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif",
-//       					self.defineNewHandler("Edges","Test",true,"XCore/Association.gif",
-	    				@Operation fillAssociations(sourceInstancePort,targetInstancePort)
+      			let sc = source.class;
+    				tc = target.class;
+	    			mappings = self.owner
+    			in	
+	    			@Operation createAssociationInstanceEdge(sourceInstancePort,targetInstancePort)
     						@Find(sourceInstance, mappings.classMaps)
+//    						@Find(sourceInstance, self.owner.classMaps)
 	     					when sourceInstance.node = sourceInstancePort.owner do
         	 					@Find(targetInstance, mappings.classMaps)
+//        	 					@Find(targetInstance, self.owner.classMaps)
 		     					when targetInstance.node = targetInstancePort.owner do
 									
 									let class1 = null;
@@ -252,12 +291,12 @@ context ClassDiagrams
 												if slot2.type.isIntrinsic//targetSlot.type.isIntrinsic
 												then
 													@While not css.isEmpty() andthen css.head().level > slot2.type.instLevel do //targetSlot.type.instLevel do
-														iss := css->iterate(e col = Seq{} | col + e.allInstances().asSeq());
+														iss := css->iterate(e col = Seq{} | col + e.allDirectInstances().asSeq());
 														css := iss;
 														iss := Seq{}
 													end
 												else 
-													iss := css.head().allInstances().asSeq();
+													iss := css.head().allDirectInstances().asSeq();
 													css := iss
 												end;
 												//if css.contains(sourceInstance.class)
@@ -269,12 +308,12 @@ context ClassDiagrams
 														if slot1.type.isIntrinsic//sourceSlot.type.isIntrinsic
 														then
 															@While not cst.isEmpty() andthen cst.head().level > slot1.type.instLevel do//sourceSlot.type.instLevel do
-																ist := cst->iterate(e col = Seq{} | col + e.allInstances().asSeq());
+																ist := cst->iterate(e col = Seq{} | col + e.allDirectInstances().asSeq());
 																cst := ist;
 																ist := Seq{}
 															end
 														else 
-															ist := cst.head().allInstances().asSeq();
+															ist := cst.head().allDirectInstances().asSeq();
 															cst := ist
 														end;
 														//if cst.contains(targetInstance.class)
@@ -361,13 +400,13 @@ context ClassDiagrams
 							else
 								xmf.warning("not successful: source instance could not be found")
     						end
-	      				end)
-		      		end
-				end
-    	  	end
-      	end	
-      end
-    end
+	      				end
+	
+	end
+	end
+	end
+	end
+
     
     @Operation defaultAttributeEdge(sourcePort,targetPort)
       self.newAttributeEdge(sourcePort,targetPort,XCore::Attribute.pathSeq()) 
@@ -642,8 +681,8 @@ context ClassDiagrams
         	  instLevel2 = InstLevelLabel(" ", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
     	      varName1 = Label("e1","start",startx,starty,true);
 	          varName2 = Label("e2","end",endx,endy,true);
-        	  displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);
-    	      displayName2 = Label("displayName2","",0, 16,true, Color(0,0,0),0-1) 
+        	  displayName1 = Label(assoName,"",0,-16,true, Color(0,0,0),0+1);
+    	      displayName2 = Label(assoName,"",0, 16,true, Color(0,0,0),0-1) 
 	        then
         	  end1 = AssociationEnd(varName1,displayName1,
     	          Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);

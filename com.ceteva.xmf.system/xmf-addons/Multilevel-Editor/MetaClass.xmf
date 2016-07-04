@@ -9,9 +9,24 @@ context Root::FMML
     @Attribute metaClass : *MetaClass end
 
     @Attribute model : 1..1 Model end
-
-    @Operation sendInstance(element,message,args):XCore::Element 
+ 
+    @Operation sendInstance(element,message,args):XCore::Element /*
+      ("Calling "+message+"/"+element+"/"+args+"...").println();
+      ("The operation큦 name:" + message).println();
+      ("The operation큦 name큦 of:" + message.of()).println();
+      ("The class: " + self).println();
+      ("The instance: ?").println();
+      ("The class큦 level: " + self.level).println();
+      ("The instance큦 level: " + (self.level-1)).println();
+      ("The args: " + args).println();
+      ("The arity: " + args.size()).println();
+      ("The args� type: " + args.of()).println();
+      ("The operation큦 level: ?").println();
+      ("The operation is available: ?").println();
+      ("The instance delegates: ?").println();*/
       
+      // super(element,message,args)
+
       let 
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
@@ -96,10 +111,10 @@ context Root::FMML
         a.of() = Associations::End)
     end
 	
-	@Operation allInstances():XCore::Element
-      //Root.allContentsOf(self)
-      Kernel_allInstances([self])
-    end
+/*	@Operation allInstances():Seq(Object)
+      Root.allContentsOf(self).asSeq() 
+//		Kernel_allInstances([self])
+    end */
 	
 	@Operation allMEMOAttributes():XCore::Element
       self.allAttributes()->select(a |
@@ -146,7 +161,14 @@ context Root::FMML
 					@While not classPool.isEmpty() andthen classPool.head().level > otherEnd.instLevel + 1
 					do
 						@For c in classPool do
-						  instancePool := instancePool + c.allInstances().asSeq()
+						  instancePool := instancePool + c.allDirectInstances()/*;
+							("classPool: "+classPool.toString()).println();
+							("otherEnd: "+otherEnd.toString()).println();
+							("otherEnd.instLevel: "+otherEnd.instLevel).println();
+							("instancePool: "+instancePool.toString()).println();
+							("instancePool.of(): "+instancePool.of()).println();
+							("c.allDirectInstances(): "+c.allDirectInstances()).println();
+							("c: "+c).println()*/
 						end;
 						classPool := instancePool;
 						instancePool := Seq{}
@@ -225,6 +247,16 @@ context Root::FMML
 //		self.checkForNeededConstraints();
 //		self
 //    end
+	
+	@Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
+		let tmp = self
+		in
+			@While tmp.level < ancestor.level and tmp <> FMML::MetaClass do
+				tmp := tmp.of()
+			end;
+			tmp = ancestor
+		end 
+	end
 
 	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
       if self.of() = FMML::MetaClass
