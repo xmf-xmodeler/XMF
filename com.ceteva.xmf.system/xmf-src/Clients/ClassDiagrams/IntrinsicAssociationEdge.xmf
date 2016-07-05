@@ -12,7 +12,7 @@ context ClassDiagrams
     @Attribute name      : Label          end
   
     @Constructor(name,source,target) 
-      self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{},Color(120,120,120)});
+      self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color(120,120,120)});
         //self.end1 := end1;
         //self.end2 := end2;
       self.add(self.name)

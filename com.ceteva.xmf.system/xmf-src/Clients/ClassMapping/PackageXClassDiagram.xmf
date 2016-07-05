@@ -412,10 +412,11 @@ context ClassMapping
     end
     
 //    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
-    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort)
+    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort,asso)
       if not associationInstanceMaps->exists(map | map.class1 = sourceClass and map.class2 = targetClass and map.name1 = sourceSlotName and map.name2 = targetSlotName)
       then
-		let edge = AssociationInstanceEdge(sourcePort,targetPort)
+		let name_label = Label("instance of " + asso.edge.end1.displayName.text,"",0,-16,true, Color(120,120,120),0+1) then
+			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort)
 //        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
         in self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
            edge.new(self.diagram);

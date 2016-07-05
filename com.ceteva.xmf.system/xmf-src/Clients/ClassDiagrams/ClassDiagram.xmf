@@ -182,7 +182,7 @@ context ClassDiagrams
       	when asso.edge = edge_new
       	do
     		self.owner.updateToolGroup("Edges");
-      		self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort) );
+      		self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort,asso) );
       		self.owner.updateToolGroup("IntrinsicConstraintEdges");
 			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"XCore/Association.gif", self.generateAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2) )      
 		end
@@ -221,7 +221,7 @@ context ClassDiagrams
     	end
     end
     
-    @Operation generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort)
+    @Operation generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort,asso)
        	@Find(source, self.owner.classMaps)
 	    when source.node = sourcePort.owner do
       		@Find(target, self.owner.classMaps)
@@ -371,7 +371,7 @@ context ClassDiagrams
 																		else
     																		class2.class.set(slot2.name,class1.class)
 																		end; 		
-																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort);
+																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort,asso);
     																	xmf.message("Association has been created successfully")
     																else
     																	xmf.warning("not successful: constraints are not satisfied!")

@@ -8,10 +8,25 @@ import ClassDiagrams;
 context ClassDiagrams
 
   @Class AssociationInstanceEdge extends Edge
-  
-    @Constructor(source,target) 
-      self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color()});
-      self.setStyle(Line::dottedLine)
+
+    @Attribute name      : Label          end
+      
+    @Constructor(name,source,target) 
+      self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color(120,120,120)});
+      self.add(self.name);
+      self.setStyle(Line::dashLine)      
+    end
+    
+    @Operation layoutId():String
+      self.name()
+    end
+    
+    @Operation name()
+      name.text()
+    end
+
+    @Operation setName(name)
+      null//self.name.text := name
     end
     
   end
