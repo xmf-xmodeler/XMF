@@ -7,7 +7,8 @@ import Clients::ExtensionPoints;
 // import Compiler;
 xmf.projectManager().add(ProjectManagerContainer("Multilevel",xmf.projDir(),null));
 let	myprojects = xmf.projectManager().contents.get(Symbol("Multilevel"));
-	bootloading = xmf.question("Load Multilevel-Extension?")
+//	bootloading = xmf.question("Load Multilevel-Extension?")
+	bootloading = true
 //let	myprojects = xmf.projectManager().contents.get(Symbol("MyProjects"))
 in
 		//Bootreihenfolgeangeben
