@@ -57,7 +57,7 @@ context ModelBrowserXCore
         then not elementMaps->exists(mapping | mapping.element = e) andthen
              not node.isCyclicChild(e)
         else not elementMaps->exists(mapping | mapping.element = e)
-        end
+        end andthen e.of() <> Associations::AssociationInstance //temporary for excluding AssociationInstances
     end
 
     @Operation childNodeShouldBeRemovedFor(e:Element):Boolean

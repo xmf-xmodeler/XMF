@@ -371,7 +371,8 @@ context ClassDiagrams
 																		else
     																		class2.class.set(slot2.name,class1.class)
 																		end; 		
-																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort,asso);
+//																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort,asso);
+																		self.newAssociationInstanceEdgeCommand(sourceInstancePort,targetInstancePort,asso.association.pathSeq());
     																	xmf.message("Association has been created successfully")
     																else
     																	xmf.warning("not successful: constraints are not satisfied!")
@@ -699,6 +700,18 @@ context ClassDiagrams
 	      end
 		end
       end
+    end
+    
+    @Operation newAssociationInstanceEdgeCommand(sourcePort,targetPort,typePath)
+    	let metaclass = typePath->ref([Root,self.owner.package]) then
+    		name_label = Label("instance of " + metaclass.name,"",0,-16,true, Color(120,120,120),0+1) then
+			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort,typePath)
+//        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
+        in //self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
+           edge.new(self,false);
+           self.addEdge(edge);
+           edge
+        end
     end
     
     @Operation newAttributeEdge(sourcePort,targetPort,typePath):AttributeEdge

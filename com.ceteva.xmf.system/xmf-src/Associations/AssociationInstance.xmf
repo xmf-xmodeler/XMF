@@ -1,0 +1,137 @@
+parserImport XOCL;
+parserImport XMap;
+parserImport Parser::BNF;
+
+import Associations;
+
+context Associations
+
+  @Class AssociationInstance extends NameSpace
+  
+    //  An association is a binary relationship between two classes.
+    //  The association has two en-ds that correspond to two attributes,
+    //  one for each class. The relationship requires an invariant to 
+    //  hold between the classes. The invariant relates to the properties
+    //  of the round-trip from an instance of each class using the
+    //  attributes.
+    
+/*    @Grammar extends OCL::OCL.grammar import Associations
+    
+      Association ::= 
+      
+        name = Name 
+        
+        end1 = Exp:EndDef 
+        
+        end2 = Exp:EndDef 
+        
+        'end' 
+        
+        { AssociationDef(name,end1,end2) }.
+      
+    end */
+  
+    @Attribute class1 : Class end
+    @Attribute class2 : Class end
+    @Attribute name1 : String end
+    @Attribute name2 : String end
+    
+/*    @Attribute showLabel : Boolean = true end
+    @Attribute showInverseLabel : Boolean end
+    @Attribute showVarName : Boolean end
+    @Attribute showInverseVarName : Boolean end */
+    
+    @Constructor(name,class1,class2,name1,name2 )  
+    	//checkDaemons()
+    end
+ 
+    
+/*    @Operation add(element)
+      if element.isKindOf(End)
+      then 
+        self.addEnd(element);
+        super(element);
+        
+        // The owner of an end should be the class it is attached to.
+        // The end is un-owned until it is added to the attached class...
+        
+        element.setOwner(null);
+        self
+      else super(element)
+      end
+    end
+    
+    @Operation addEnd(e)
+      e.setAssociation(self)
+    end */
+    
+   @Operation checkDaemons()
+//      super();
+	  @SlotValueChanged multi once AssociationInstance::end1Changed_classDiagramDaemon(class1,name1) end;
+      @SlotValueChanged multi once AssociationInstance::end2Changed_classDiagramDaemon(class2,name2) end
+    end
+       
+    @Operation end1Changed_classDiagramDaemon(association,slot,newSlot1,oldSlot1)
+      if not class1.of().getAttribute(name1).type.isKindOf(Set) and newSlot1 <> oldSlot1 and newSlot1 <> null
+      then  if class2.of().getAttribute(name2).type.isKindOf(Set) 
+	        then class2.set(name2,class2.get(name2)->excluding(class1))
+     	    else class2.set(name2,null)
+	        end;
+//      		edge.delete()//;
+        	self.owner.remove(self);
+        	self.removeFromOwner()
+      end
+    end
+    
+    @Operation end2Changed_classDiagramDaemon(association,slot,newSlot2,oldSlot2)
+      if not class2.of().getAttribute(name2).type.isKindOf(Set) and newSlot2 <> oldSlot2 and newSlot2 <> null
+      then  if class1.of().getAttribute(name1).type.isKindOf(Set) 
+	        then class1.set(name1,class1.get(name1)->excluding(class2))
+     	    else class1.set(name1,null)
+	        end;
+//      		edge.delete();
+        	self.owner.remove(self);
+        	self.removeFromOwner()
+      end
+    end                
+                                  
+    @Operation init()
+      /*if owner <> null
+      then
+        if end1.name.toString() = "end1" or end1.name.toString() = "end2" then
+          end1.name := end1.type.name.lowerCaseInitialLetter()
+        end;
+        if end2.name.toString() = "end1" or end2.name.toString() = "end2" then
+          end2.name := end2.type.name.lowerCaseInitialLetter()
+        end;
+        end1.setMult(end1.mult);
+        end2.setMult(end2.mult);
+        self.unidirectional := false;
+        super()
+      else super()
+      end*/
+      super()
+//      self.checkDaemons()
+    end
+    
+    @Operation remove()
+    
+      // Called when the association is removed from its container.
+      // The ends are removed from the classes they are attached to...
+      
+/*      end1.remove();
+      end2.remove(); */
+      self
+    end
+    
+    @Operation setSlot1(class1,name1)
+      self.class1 := class1;
+      self.name1:= name1
+    end
+    
+    @Operation setSlot2(class2,name2)
+      self.class2 := class2;
+      self.name2:= name2
+    end
+    
+  end

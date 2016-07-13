@@ -10,8 +10,9 @@ context ClassDiagrams
   @Class AssociationInstanceEdge extends Edge
 
     @Attribute name      : Label          end
-      
-    @Constructor(name,source,target) 
+    @Attribute typePath  : Seq(String)    end
+        
+    @Constructor(name,source,target,typePath) 
       self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color(120,120,120)});
       self.add(self.name);
       self.setStyle(Line::dashLine)      
@@ -24,6 +25,7 @@ context ClassDiagrams
     @Operation name()
       name.text()
     end
+
 
     @Operation setName(name)
       null//self.name.text := name

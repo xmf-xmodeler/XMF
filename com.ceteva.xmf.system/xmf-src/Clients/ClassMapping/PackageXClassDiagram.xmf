@@ -412,15 +412,25 @@ context ClassMapping
     end
     
 //    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
-    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort,asso)
-      if not associationInstanceMaps->exists(map | map.class1 = sourceClass and map.class2 = targetClass and map.name1 = sourceSlotName and map.name2 = targetSlotName)
+//    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort,asso)
+	  @Operation associationInstanceAdded(associationInstance)
+      if not associationInstanceMaps->exists(map | map.associationInstance = associationInstance)
       then
-		let name_label = Label("instance of " + asso.edge.end1.displayName.text,"",0,-16,true, Color(120,120,120),0+1) then
-			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort)
-//        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
-        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
-           edge.new(self.diagram);
-           self.diagram.add(edge)
+      	let acMaps = self.abstractClassMaps()
+        in
+          @Find(sourceMap,acMaps)
+            when sourceMap.element() = associationInstance.class1
+            do @Find(targetMap,acMaps)
+              when targetMap.element() = associationInstance.class2
+                do 
+	                let name_label = Label("instance of " + associationInstance.class1.of().getAttribute(associationInstance.name1).association.name,"",0,-16,true, Color(120,120,120),0+1) then
+						edge = AssociationInstanceEdge(name_label, sourceMap.node.ports().head(),targetMap.node.ports().head(),associationInstance.of().pathSeq())
+			        in self.add(AssociationInstanceXAssociationInstanceEdge(associationInstance,edge));
+        			   edge.new(self.diagram);
+		        	   self.diagram.add(edge)
+	        		end            
+              end
+          end
         end
       end
     end
@@ -566,12 +576,76 @@ context ClassMapping
       end
     end
 
+    @Operation associationInstanceEdgeAdded(associationInstanceEdge)
+      if self.validEdge(associationInstanceEdge)
+      then
+        if not associationInstanceMaps->exists(map | map.edge = associationInstanceEdge)
+        then
+          let acMaps = self.abstractClassMaps()
+          in
+            @Find(class1Map,acMaps)
+              when class1Map.node = associationInstanceEdge.sourceNode()
+              do @Find(class2Map,acMaps)
+                   when class2Map.node = associationInstanceEdge.targetNode()
+                   do let name = associationInstanceEdge.name.text; //package.newName("A");
+                          class1 = class1Map.class;
+                          class2 = class2Map.class then
+                          //slotname1 = null;
+                          //slotname2 = null then
+                          //class1Name = class1.name.toString().lowerCaseInitialLetter();
+                          //class2Name = class2.name.toString().lowerCaseInitialLetter() then
+                          //end1Name = if class2.hasElement(class1Name) then class2.newName("a") else class1Name end;
+                          //end2Name = if class1.hasElement(class2Name) then class1.newName("b") else class2Name end;
+                          metaClass = associationInstanceEdge.typePath->ref(Seq{Root,package}) then
+//                          association = metaClass(name);
+						  associationInstance = Associations::AssociationInstance(package.newName(metaClass.name+"Instance"))
+//						  associationInstance = Associations::AssociationInstance(name,class1,class2,metaClass.end2.name,metaClass.end1.name)
+                          //end1 = Associations::End(end1Name,class1,Associations::One());
+                          //end2 = Associations::End(end2Name,class2,Associations::One())
+                      in  //associationEdge.setName(name);
+
+                          //associationEdge.end1.setName(end1Name);
+                          //associationEdge.end2.setName(end2Name);
+                          associationInstance.setSlot1(class1,metaClass.end2.name);
+                          associationInstance.setSlot2(class2,metaClass.end1.name);
+                          associationInstance.checkDaemons();
+                          self.add(AssociationInstanceXAssociationInstanceEdge(associationInstance,associationInstanceEdge));
+                          package.add(associationInstance);
+                          associationInstance.init()
+                      end
+                 end
+            end       
+          end
+        end
+      end
+    end
+    
+    @Operation associationInstanceEdgeRemoved(associationInstanceEdge)
+      @Find(associationInstanceMap,associationInstanceMaps)
+        when associationInstanceMap.edge = associationInstanceEdge
+        do self.remove(associationInstanceMap);
+           let associationInstance = associationInstanceMap.associationInstance
+           in  associationInstance.remove();
+               associationInstance.owner.remove(associationInstance)
+           end
+      end
+    end
+
     @Operation associationRemoved(association)
       @Find(associationMap,associationMaps)
         when associationMap.association = association
         do 
           self.remove(associationMap);
           associationMap.edge.delete()
+      end
+    end
+
+    @Operation associationInstanceRemoved(associationInstance)
+      @Find(associationInstanceMap,associationInstanceMaps)
+        when associationInstanceMap.associationInstance = associationInstance
+        do 
+          self.remove(associationInstanceMap);
+          associationInstanceMap.edge.delete()
       end
     end
 
@@ -606,7 +680,16 @@ context ClassMapping
     @Operation associationEdgeRemovedDaemon(diagram,slot,associationEdge)
       self.associationEdgeRemoved(associationEdge)
     end
+
+    @Operation associationInstanceEdgeAddedDaemon(diagram,slot,associationInstanceEdge)
+      self.associationInstanceEdgeAdded(associationInstanceEdge)
+    end
     
+    @Operation associationInstanceEdgeRemovedDaemon(diagram,slot,associationInstanceEdge)
+      self.associationInstanceEdgeRemoved(associationInstanceEdge)
+    end
+
+            
     @Operation attributeEdgeAddedDaemon(diagram,slot,attributeEdge)
       self.attributeEdgeAdded(attributeEdge)
     end
@@ -741,7 +824,10 @@ context ClassMapping
       @SlotValueChanged multi once + PackageXClassDiagram::associationEdgeAddedDaemon(diagram,"associationEdges")   end;
       @SlotValueChanged multi once - PackageXClassDiagram::associationEdgeRemovedDaemon(diagram,"associationEdges") end;
       @SlotValueChanged multi once + PackageXClassDiagram::attributeEdgeAddedDaemon(diagram,"attributeEdges")       end;
-      @SlotValueChanged multi once - PackageXClassDiagram::attributeEdgeRemovedDaemon(diagram,"attributeEdges")     end
+      @SlotValueChanged multi once - PackageXClassDiagram::attributeEdgeRemovedDaemon(diagram,"attributeEdges")     end;
+      @SlotValueChanged multi once + PackageXClassDiagram::associationInstanceEdgeAddedDaemon(diagram,"associationInstanceEdges")   end;
+      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceEdgeRemovedDaemon(diagram,"associationInstanceEdges") end
+
     end
 
     @Operation metaPackageChanged_classDiagramDaemon(package,slot,newPackage,oldPackage)
@@ -759,7 +845,15 @@ context ClassMapping
     @Operation associationRemoved_classDiagramDaemon(package,slot,association)
       self.associationRemoved(association)
     end
+
+    @Operation associationInstanceAdded_classDiagramDaemon(package,slot,associationInstance)
+      self.associationInstanceAdded(associationInstance)
+    end
     
+    @Operation associationInstanceRemoved_classDiagramDaemon(package,slot,associationInstance)
+      self.associationInstanceRemoved(associationInstance)
+    end
+            
     @Operation classAdded_classDiagramDaemon(package,slot,class)
       if not self.eventFiltered("class added")
       then self.classAdded(class);
@@ -786,8 +880,12 @@ context ClassMapping
       @SlotValueChanged multi once - PackageXClassDiagram::operationRemoved_classDiagramDaemon(package,"operations")     end;
       @SlotValueChanged multi once + PackageXClassDiagram::importAdded_classDiagramDaemon(package,"imports")             end;
       @SlotValueChanged multi once - PackageXClassDiagram::importRemoved_classDiagramDaemon(package,"imports")           end;
-      @SlotValueChanged multi once   PackageXClassDiagram::metaPackageChanged_classDiagramDaemon(package,"metaPackage")  end
-      
+      @SlotValueChanged multi once   PackageXClassDiagram::metaPackageChanged_classDiagramDaemon(package,"metaPackage")  end;
+
+      @SlotValueChanged multi once + PackageXClassDiagram::associationInstanceAdded_classDiagramDaemon(package,"associationInstances")   end;
+      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceRemoved_classDiagramDaemon(package,"associationInstances") end
+
+                  
       // self.addContentsChangedDaemon() // to monitor added and removed named elements not covered by above, and associations
     end
     
