@@ -35,7 +35,9 @@ Contained.removeOperation(Contained.getOperation("delete_client_check"));
     		else
     			xmf.question("Are you sure you want to delete " + name + "?")
     		end
-    	else 
+    	elseif self.isKindOf(Constraint) or self.isKindOf(Operation) then
+    		xmf.question("Are you sure you want to delete " + name + "?")
+    	else
 			let ret = self.allInstances()
 			in
 				if ret <> Set{} and ret <> Seq{} 

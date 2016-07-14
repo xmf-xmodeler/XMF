@@ -26,7 +26,7 @@ context ClassMapping
     @Attribute dependencyMaps   : Seq(DependencyXDependencyEdge)  (+,-) end
     @Attribute associationMaps  : Seq(AssociationXAssociationEdge)(+,-) end
     @Attribute associationInstanceMaps  : Seq(AssociationInstanceXAssociationInstanceEdge)(+,-) end
-    @Attribute intrinsicAssociationMaps  : Seq(IntrinsicAssociationXIntrinsicAssociationEdge)(+,-) end
+    @Attribute intrinsicAssociationConstraintMaps  : Seq(IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge)(+,-) end
     
     @Constructor(package,diagram,owner)
       self.init(Seq{package,diagram})
@@ -69,8 +69,8 @@ context ClassMapping
         AssociationXAssociationEdge do
           self.addAssociationMap(element)
         end
-        IntrinsicAssociationXIntrinsicAssociationEdge do
-          self.addIntrinsicAssociationMap(element)
+        IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge do
+          self.addIntrinsicAssociationConstraintMap(element)
         end        
         AssociationInstanceXAssociationInstanceEdge do
           self.addAssociationInstanceMap(element)
@@ -166,9 +166,9 @@ context ClassMapping
       associationMap.setOwner(self)
     end
     
-   @Operation addIntrinsicAssociationMap(intrinsicAssociationMap)
-      self.addToIntrinsicAssociationMaps(intrinsicAssociationMap);
-      intrinsicAssociationMap.setOwner(self)
+   @Operation addIntrinsicAssociationConstraintMap(intrinsicAssociationConstraintMap)
+      self.addToIntrinsicAssociationConstraintMaps(intrinsicAssociationConstraintMap);
+      intrinsicAssociationConstraintMap.setOwner(self)
     end
 
     @Operation addAssociationInstanceMap(associationInstanceMap)
@@ -411,9 +411,7 @@ context ClassMapping
       end
     end
     
-//    @Operation associationInstanceAdded(sourceSlot,targetSlot,sourcePort,targetPort)
-//    @Operation associationInstanceAdded(sourceClass,targetClass,sourceSlotName,targetSlotName,sourcePort,targetPort,asso)
-	  @Operation associationInstanceAdded(associationInstance)
+    @Operation associationInstanceAdded(associationInstance)
       if not associationInstanceMaps->exists(map | map.associationInstance = associationInstance)
       then
       	let acMaps = self.abstractClassMaps()
@@ -424,7 +422,7 @@ context ClassMapping
               when targetMap.element() = associationInstance.class2
                 do 
 	                let name_label = Label("instance of " + associationInstance.class1.of().getAttribute(associationInstance.name1).association.name,"",0,-16,true, Color(120,120,120),0+1) then
-						edge = AssociationInstanceEdge(name_label, sourceMap.node.ports().head(),targetMap.node.ports().head(),associationInstance.of().pathSeq())
+						edge = AssociationInstanceEdge(name_label, sourceMap.node.ports().head(),targetMap.node.ports().head(),associationInstance.class1.of().getAttribute(associationInstance.name1).association.pathSeq())
 			        in self.add(AssociationInstanceXAssociationInstanceEdge(associationInstance,edge));
         			   edge.new(self.diagram);
 		        	   self.diagram.add(edge)
@@ -435,18 +433,24 @@ context ClassMapping
       end
     end
     
-    @Operation addIntrinsicAssociationEdge(sourceMap,targetMap,association)
-      if not intrinsicAssociationMaps->exists(map | map.class1 = sourceMap.class and map.class2 = targetMap.class)
+    @Operation intrinsicAssociationConstraintAdded(intrinsicAssociationConstraint)
+	  if not intrinsicAssociationConstraintMaps->exists(map | map.intrinsicAssociationConstraint = intrinsicAssociationConstraint)
       then
-      	@Find(assoMap, self.associationMaps)
-        when assoMap.association = association
-        do 
-			let nameLabel = Label(assoMap.edge.end1.displayName.text,"",0,-16,true, Color(120,120,120),0-1) then
-				edge = IntrinsicAssociationEdge(nameLabel, sourceMap.node.ports().head(),targetMap.node.ports().head())
-	        in self.add(IntrinsicAssociationXIntrinsicAssociationEdge(sourceMap.class,targetMap.class, edge));
-        	   edge.new(self.diagram);
-    	       self.diagram.add(edge)
-	        end
+      	let acMaps = self.abstractClassMaps()
+        in
+          @Find(sourceMap,acMaps)
+            when sourceMap.element() = intrinsicAssociationConstraint.constraint1.owner
+            do @Find(targetMap,acMaps)
+              when targetMap.element() = intrinsicAssociationConstraint.constraint2.owner
+                do 
+	                let name_label = Label(intrinsicAssociationConstraint.refersTo.name,"",0,-16,true, Color(120,120,120),0+1) then
+						edge = IntrinsicAssociationConstraintEdge(name_label, sourceMap.node.ports().head(),targetMap.node.ports().head(),intrinsicAssociationConstraint.refersTo.pathSeq())
+			        in self.add(IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge(intrinsicAssociationConstraint,edge));
+        			   edge.new(self.diagram);
+		        	   self.diagram.add(edge)
+	        		end            
+              end
+          end
         end
       end
      end
@@ -590,23 +594,9 @@ context ClassMapping
                    do let name = associationInstanceEdge.name.text; //package.newName("A");
                           class1 = class1Map.class;
                           class2 = class2Map.class then
-                          //slotname1 = null;
-                          //slotname2 = null then
-                          //class1Name = class1.name.toString().lowerCaseInitialLetter();
-                          //class2Name = class2.name.toString().lowerCaseInitialLetter() then
-                          //end1Name = if class2.hasElement(class1Name) then class2.newName("a") else class1Name end;
-                          //end2Name = if class1.hasElement(class2Name) then class1.newName("b") else class2Name end;
                           metaClass = associationInstanceEdge.typePath->ref(Seq{Root,package}) then
-//                          association = metaClass(name);
 						  associationInstance = Associations::AssociationInstance(package.newName(metaClass.name+"Instance"))
-//						  associationInstance = Associations::AssociationInstance(name,class1,class2,metaClass.end2.name,metaClass.end1.name)
-                          //end1 = Associations::End(end1Name,class1,Associations::One());
-                          //end2 = Associations::End(end2Name,class2,Associations::One())
-                      in  //associationEdge.setName(name);
-
-                          //associationEdge.end1.setName(end1Name);
-                          //associationEdge.end2.setName(end2Name);
-                          associationInstance.setSlot1(class1,metaClass.end2.name);
+                      in  associationInstance.setSlot1(class1,metaClass.end2.name);
                           associationInstance.setSlot2(class2,metaClass.end1.name);
                           associationInstance.checkDaemons();
                           self.add(AssociationInstanceXAssociationInstanceEdge(associationInstance,associationInstanceEdge));
@@ -631,6 +621,49 @@ context ClassMapping
       end
     end
 
+	 @Operation intrinsicAssociationConstraintEdgeAdded(intrinsicAssociationConstraintEdge)
+      if self.validEdge(intrinsicAssociationConstraintEdge)
+      then
+        if not intrinsicAssociationConstraintMaps->exists(map | map.edge = intrinsicAssociationConstraintEdge)
+        then
+          let acMaps = self.abstractClassMaps()
+          in
+            @Find(class1Map,acMaps)
+              when class1Map.node = intrinsicAssociationConstraintEdge.sourceNode()
+              do @Find(class2Map,acMaps)
+                   when class2Map.node = intrinsicAssociationConstraintEdge.targetNode()
+                   do let name = intrinsicAssociationConstraintEdge.name.text; //package.newName("A");
+                          class1 = class1Map.class;
+                          class2 = class2Map.class then
+                          metaClass = intrinsicAssociationConstraintEdge.typePath->ref(Seq{Root,package}) then
+						  intrinsicAssociationConstraint = Associations::IntrinsicAssociationConstraint(package.newName(metaClass.name+"Constraint"))
+                      in  intrinsicAssociationConstraint.setConstraint1(class1.newIntrinsicAssociationConstraint(metaClass.end1,class2));
+                          intrinsicAssociationConstraint.setConstraint2(class2.newIntrinsicAssociationConstraint(metaClass.end2,class1));
+                          intrinsicAssociationConstraint.setRefersTo(metaClass);
+                          intrinsicAssociationConstraint.checkDaemons();
+                          self.add(IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge(intrinsicAssociationConstraint,intrinsicAssociationConstraintEdge));
+                          package.add(intrinsicAssociationConstraint);
+                          intrinsicAssociationConstraint.init()
+                      end
+                 end
+            end       
+          end
+        end
+      end
+    end
+    
+    @Operation intrinsicAssociationConstraintEdgeRemoved(intrinsicAssociationConstraintEdge)
+      @Find(intrinsicAssociationConstraintMap,intrinsicAssociationConstraintMaps)
+        when intrinsicAssociationConstraintMap.edge = intrinsicAssociationConstraintEdge
+        do self.remove(intrinsicAssociationConstraintMap);
+           let intrinsicAssociationConstraint = intrinsicAssociationConstraintMap.intrinsicAssociationConstraint
+           in  intrinsicAssociationConstraint.remove();
+               intrinsicAssociationConstraint.owner.remove(intrinsicAssociationConstraint)
+           end
+      end 
+      			
+    end
+
     @Operation associationRemoved(association)
       @Find(associationMap,associationMaps)
         when associationMap.association = association
@@ -646,6 +679,15 @@ context ClassMapping
         do 
           self.remove(associationInstanceMap);
           associationInstanceMap.edge.delete()
+      end
+    end
+
+    @Operation intrinsicAssociationConstraintRemoved(intrinsicAssociationConstraint)
+      @Find(intrinsicAssociationConstraintMap,intrinsicAssociationConstraintMaps)
+        when intrinsicAssociationConstraintMap.intrinsicAssociationConstraint = intrinsicAssociationConstraint
+        do 
+          self.remove(intrinsicAssociationConstraintMap);
+          intrinsicAssociationConstraintMap.edge.delete()
       end
     end
 
@@ -688,7 +730,14 @@ context ClassMapping
     @Operation associationInstanceEdgeRemovedDaemon(diagram,slot,associationInstanceEdge)
       self.associationInstanceEdgeRemoved(associationInstanceEdge)
     end
-
+    
+    @Operation intrinsicAssociationConstraintEdgeAddedDaemon(diagram,slot,intrinsicAssociationConstraint)
+      self.intrinsicAssociationConstraintEdgeAdded(intrinsicAssociationConstraint)
+    end
+    
+    @Operation intrinsicAssociationConstraintEdgeRemovedDaemon(diagram,slot,intrinsicAssociationConstraint)
+      self.intrinsicAssociationConstraintEdgeRemoved(intrinsicAssociationConstraint)
+    end
             
     @Operation attributeEdgeAddedDaemon(diagram,slot,attributeEdge)
       self.attributeEdgeAdded(attributeEdge)
@@ -826,7 +875,9 @@ context ClassMapping
       @SlotValueChanged multi once + PackageXClassDiagram::attributeEdgeAddedDaemon(diagram,"attributeEdges")       end;
       @SlotValueChanged multi once - PackageXClassDiagram::attributeEdgeRemovedDaemon(diagram,"attributeEdges")     end;
       @SlotValueChanged multi once + PackageXClassDiagram::associationInstanceEdgeAddedDaemon(diagram,"associationInstanceEdges")   end;
-      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceEdgeRemovedDaemon(diagram,"associationInstanceEdges") end
+      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceEdgeRemovedDaemon(diagram,"associationInstanceEdges") end;
+      @SlotValueChanged multi once + PackageXClassDiagram::intrinsicAssociationConstraintEdgeAddedDaemon(diagram,"intrinsicAssociationConstraintEdges")   end;
+      @SlotValueChanged multi once - PackageXClassDiagram::intrinsicAssociationConstraintEdgeRemovedDaemon(diagram,"intrinsicAssociationConstraintEdges") end
 
     end
 
@@ -853,9 +904,17 @@ context ClassMapping
     @Operation associationInstanceRemoved_classDiagramDaemon(package,slot,associationInstance)
       self.associationInstanceRemoved(associationInstance)
     end
-            
+
+    @Operation intrinsicAssociationConstraintAdded_classDiagramDaemon(package,slot,intrinsicAssociationConstraint)
+      self.intrinsicAssociationConstraintAdded(intrinsicAssociationConstraint)
+    end
+    
+    @Operation intrinsicAssociationConstraintRemoved_classDiagramDaemon(package,slot,intrinsicAssociationConstraint)
+      self.intrinsicAssociationConstraintRemoved(intrinsicAssociationConstraint)
+    end
+                                    
     @Operation classAdded_classDiagramDaemon(package,slot,class)
-      if not self.eventFiltered("class added")
+	  if not self.eventFiltered("class added")
       then self.classAdded(class);
            self.generateEdges()
       end
@@ -883,8 +942,9 @@ context ClassMapping
       @SlotValueChanged multi once   PackageXClassDiagram::metaPackageChanged_classDiagramDaemon(package,"metaPackage")  end;
 
       @SlotValueChanged multi once + PackageXClassDiagram::associationInstanceAdded_classDiagramDaemon(package,"associationInstances")   end;
-      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceRemoved_classDiagramDaemon(package,"associationInstances") end
-
+      @SlotValueChanged multi once - PackageXClassDiagram::associationInstanceRemoved_classDiagramDaemon(package,"associationInstances") end;
+	  @SlotValueChanged multi once + PackageXClassDiagram::intrinsicAssociationConstraintAdded_classDiagramDaemon(package,"intrinsicAssociationConstraints")   end;
+      @SlotValueChanged multi once - PackageXClassDiagram::intrinsicAssociationConstraintRemoved_classDiagramDaemon(package,"intrinsicAssociationConstraints") end
                   
       // self.addContentsChangedDaemon() // to monitor added and removed named elements not covered by above, and associations
     end
@@ -1478,6 +1538,12 @@ context ClassMapping
       end;
       @For association in package.contentsOf(Associations::Association)->excluding(null) do
         self.associationAdded(association)
+      end;
+	  @For associationInstance in package.contentsOf(Associations::AssociationInstance)->excluding(null) do
+        self.associationInstanceAdded(associationInstance)
+      end;
+      @For intrinsicAssociationConstraint in package.contentsOf(Associations::IntrinsicAssociationConstraint)->excluding(null) do
+        self.intrinsicAssociationConstraintAdded(intrinsicAssociationConstraint)
       end
     end
 
@@ -1897,7 +1963,11 @@ context ClassMapping
         AssociationInstanceXAssociationInstanceEdge do
           self.deleteFromAssociationInstanceMaps(element);
           element.removeDaemons()
-        end        
+        end
+        IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge do
+          self.deleteFromIntrinsicAssociationConstraintMaps(element);
+          element.removeDaemons()
+        end 
         ClassXNode do
           self.deleteFromClassMaps(element);
           element.removeDaemons()

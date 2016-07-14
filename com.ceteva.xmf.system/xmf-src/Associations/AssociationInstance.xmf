@@ -72,7 +72,7 @@ context Associations
     end
        
     @Operation end1Changed_classDiagramDaemon(association,slot,newSlot1,oldSlot1)
-      if not class1.of().getAttribute(name1).type.isKindOf(Set) and newSlot1 <> oldSlot1 and newSlot1 <> null
+      if not class1.of().getAttribute(name1).type.isKindOf(Set) and newSlot1 <> oldSlot1 and class2.get(name2) <> null //newSlot1 <> null
       then  if class2.of().getAttribute(name2).type.isKindOf(Set) 
 	        then class2.set(name2,class2.get(name2)->excluding(class1))
      	    else class2.set(name2,null)
@@ -84,7 +84,7 @@ context Associations
     end
     
     @Operation end2Changed_classDiagramDaemon(association,slot,newSlot2,oldSlot2)
-      if not class2.of().getAttribute(name2).type.isKindOf(Set) and newSlot2 <> oldSlot2 and newSlot2 <> null
+            if not class2.of().getAttribute(name2).type.isKindOf(Set) and newSlot2 <> oldSlot2 and class1.get(name1) <> null//newSlot2 <> null
       then  if class1.of().getAttribute(name1).type.isKindOf(Set) 
 	        then class1.set(name1,class1.get(name1)->excluding(class2))
      	    else class1.set(name1,null)

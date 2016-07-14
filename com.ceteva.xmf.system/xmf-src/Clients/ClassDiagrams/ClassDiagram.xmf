@@ -24,7 +24,7 @@ context ClassDiagrams
     @Attribute dependencyEdges    : Seq(DependencyEdge)  end
     @Attribute associationEdges   : Seq(AssociationEdge) end
     @Attribute associationInstanceEdges   : Seq(AssociationInstanceEdge) end
-    @Attribute intrinsicAssociationEdges   : Seq(IntrinsicAssociationEdge) end
+    @Attribute intrinsicAssociationConstraintEdges   : Seq(IntrinsicAssociationConstraintEdge) end
     @Attribute showAttributes     : Boolean = true (?)   end
     @Attribute showOperations     : Boolean = false (?)  end
     @Attribute showMetaslots      : Boolean = false (?)  end
@@ -40,8 +40,8 @@ context ClassDiagrams
           self.addAssociationEdge(edge);
           super(edge)
         end
-		IntrinsicAssociationEdge do
-          self.addIntrinsicAssociationEdge(edge);
+		IntrinsicAssociationConstraintEdge do
+          self.addIntrinsicAssociationConstraintEdge(edge);
           super(edge)
         end
         AssociationInstanceEdge do
@@ -106,8 +106,8 @@ context ClassDiagrams
       self.associationEdges := associationEdges->prepend(associationEdge)
     end
 
-    @Operation addIntrinsicAssociationEdge(intrinsicAssociationEdge) 
-      self.intrinsicAssociationEdges := intrinsicAssociationEdges->prepend(intrinsicAssociationEdge)
+    @Operation addIntrinsicAssociationConstraintEdge(intrinsicAssociationConstraintEdge) 
+      self.intrinsicAssociationConstraintEdges := intrinsicAssociationConstraintEdges->prepend(intrinsicAssociationConstraintEdge)
     end
 
     @Operation addAssociationInstanceEdge(associationInstanceEdge) 
@@ -184,13 +184,13 @@ context ClassDiagrams
     		self.owner.updateToolGroup("Edges");
       		self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort,asso) );
       		self.owner.updateToolGroup("IntrinsicConstraintEdges");
-			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"XCore/Association.gif", self.generateAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2) )      
+			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"XCore/Association.gif", self.generateIntrinsicAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2,asso) )      
 		end
       end
     end
     
-    @Operation generateAssociationConstraintEdgeCreationMethod(end1, end2)
-    	@Operation createAssociationConstraintEdge(sourcePort,targetPort)
+    @Operation generateIntrinsicAssociationConstraintEdgeCreationMethod(end1, end2,asso)
+    	@Operation createIntrinsicAssociationConstraintEdge(sourcePort,targetPort)
     		@Find(source, self.owner.classMaps)
 	    	when source.node = sourcePort.owner do
       			@Find(target, self.owner.classMaps)
@@ -205,13 +205,15 @@ context ClassDiagrams
 					then		
 							if(source.class.hasAttribute(end1.name))
 							then
-								source.class.newIntrinsicAssociationConstraint(end1, target.class);
-								target.class.newIntrinsicAssociationConstraint(end2, source.class);
-								source.class.createIntrinsicAssociationEdge(source.class, target.class,end1.association )
+//								source.class.newIntrinsicAssociationConstraint(end1, target.class);
+//								target.class.newIntrinsicAssociationConstraint(end2, source.class);
+//								source.class.createIntrinsicAssociationEdge(source.class, target.class,end1.association )
+								self.newIntrinsicAssociationConstraintEdgeCommand(sourcePort,targetPort,asso.association.pathSeq())
 							else
-								source.class.newIntrinsicAssociationConstraint(end2, target.class);
-								target.class.newIntrinsicAssociationConstraint(end1, source.class);
-								target.class.createIntrinsicAssociationEdge(target.class, source.class,end1.association )
+//								source.class.newIntrinsicAssociationConstraint(end2, target.class);
+//								target.class.newIntrinsicAssociationConstraint(end1, source.class);
+//								target.class.createIntrinsicAssociationEdge(target.class, source.class,end1.association )
+								self.newIntrinsicAssociationConstraintEdgeCommand(targetPort,sourcePort,asso.association.pathSeq())
 							end
 	   				else
     					xmf.warning("Fehler: Constraint konnte nicht erzeugt werden")
@@ -706,8 +708,7 @@ context ClassDiagrams
     	let metaclass = typePath->ref([Root,self.owner.package]) then
     		name_label = Label("instance of " + metaclass.name,"",0,-16,true, Color(120,120,120),0+1) then
 			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort,typePath)
-//        in self.add(AssociationInstanceXAssociationInstanceEdge(sourceSlot,targetSlot,edge));
-        in //self.add(AssociationInstanceXAssociationInstanceEdge(sourceClass,targetClass,sourceSlotName,targetSlotName,edge));
+        in 
            edge.new(self,false);
            self.addEdge(edge);
            edge
@@ -758,6 +759,17 @@ context ClassDiagrams
            end
          end
       end
+    end
+    
+    @Operation newIntrinsicAssociationConstraintEdgeCommand(sourcePort,targetPort,typePath)
+    	let metaclass = typePath->ref([Root,self.owner.package]) then
+    		name_label = Label(metaclass.name,"",0,-16,true, Color(120,120,120),0-1) then
+			edge = IntrinsicAssociationConstraintEdge(name_label, sourcePort,targetPort,typePath)
+        in 
+           edge.new(self,false);
+           self.addEdge(edge);
+           edge
+        end
     end
     
     @Operation newSelfAttributeEdge(x,y,path:Seq(String))

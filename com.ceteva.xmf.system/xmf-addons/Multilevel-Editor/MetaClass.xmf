@@ -292,7 +292,8 @@ context Root::FMML
           conASfun : XCore::Element = Compiler::compileToFun("",conAS,Seq{},Seq{Seq{2 | Root.contents},Seq{2 | XCore.contents}},true) then
           constraint : XCore::Element = conASfun()
        in constraint.setName(name);
-          self.add(constraint)
+          self.add(constraint);
+          constraint
       end
     end
 

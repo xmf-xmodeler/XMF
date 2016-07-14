@@ -1,0 +1,81 @@
+parserImport XOCL;
+parserImport XMap;
+parserImport Parser::BNF;
+
+import Associations;
+
+context Associations
+
+  @Class IntrinsicAssociationConstraint extends NameSpace
+  
+    
+/*    @Grammar extends OCL::OCL.grammar import Associations
+    
+      Association ::= 
+      
+        name = Name 
+        
+        end1 = Exp:EndDef 
+        
+        end2 = Exp:EndDef 
+        
+        'end' 
+        
+        { AssociationDef(name,end1,end2) }.
+      
+    end */
+  
+    @Attribute constraint1 : Constraint end
+    @Attribute constraint2 : Constraint end
+    @Attribute refersTo : Association end
+    
+    @Constructor(name,constraint1,constraint2)  
+    end
+ 
+   @Operation checkDaemons()
+//      super();
+		@SlotValueChanged multi once   IntrinsicAssociationConstraint::ownerConstraint1Changed(constraint1,"owner")           end;
+		@SlotValueChanged multi once   IntrinsicAssociationConstraint::ownerConstraint2Changed(constraint2,"owner")           end
+    end
+                                                            
+    @Operation init()
+      super()
+    end
+    
+    @Operation ownerConstraint1Changed(association,slot,newOwner,oldOwner)
+    	if newOwner = null and constraint2.owner <> null
+    	then
+		    constraint2.owner.remove(constraint2);
+    		self.owner.remove(self);
+        	self.removeFromOwner()
+    	end
+    end
+
+    @Operation ownerConstraint2Changed(association,slot,newOwner,oldOwner)
+    	if newOwner = null and constraint2.owner <> null
+    	then
+	   		constraint1.owner.remove(constraint1);
+    		self.owner.remove(self);
+        	self.removeFromOwner()
+    	end
+    end    
+            
+    @Operation remove()
+	  constraint1.owner.remove(constraint1);
+      constraint2.owner.remove(constraint2);
+      self
+    end
+    
+    @Operation setConstraint1(constraint1)
+      self.constraint1 := constraint1
+    end
+    
+    @Operation setConstraint2(constraint2)
+      self.constraint2 := constraint2
+    end
+
+   @Operation setRefersTo(refersTo)
+      self.refersTo := refersTo
+    end
+            
+  end
