@@ -1,6 +1,7 @@
 parserImport XOCL;
 
 import MDC::Values;
+import MDC::Types::Value_x_Appearance;
 
 context ! Values
 
@@ -16,6 +17,7 @@ context ! Values
   @Class Object extends Value
 
     @Attribute slots : Set(Slot) (?,!,+,-) end
+    @Attribute value_x_appearances : Set(Value_x_Appearance) (?,!,+,-) end
     
     @Operation allValues()
       slots->iterate(slot V = Seq{self} |
@@ -60,6 +62,12 @@ context ! Values
       // Called when some text has changed in the
       // diagram. Find the value with the associated
       // display and change the value...
+      //"displayChanged".println();
+      //("display:" +display).println();
+      //("new:" +new).println();
+      @For x in value_x_appearances do
+        x.value2Appearance(new, display)
+      end;
       
       @For slot in slots do
         slot.displayChanged(tool,display,new,old)
@@ -279,6 +287,12 @@ context ! Values
       // object is that managed by this value node then update
       // the display accordingly. Otherwise pass the state
       // changed event down the tree.
+      
+      "stateChanged".println();
+      ("display:" + display).println();
+      @For x in value_x_appearances do
+        x.value2Appearance.invoke(x,[new, display])
+      end;
       
       if object = element
       then 

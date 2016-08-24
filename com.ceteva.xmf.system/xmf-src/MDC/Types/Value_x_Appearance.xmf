@@ -1,0 +1,41 @@
+parserImport XOCL;
+
+import Tools::DiagramTools::Types;
+import Tools::DiagramTools::Types::DisplayTypes;
+import Tools::Menus;
+import MDC;
+import Types;
+import Displays;
+
+context ! Types
+
+  @Class Value_x_Appearance
+  
+  @Attribute value2Appearance : Operation = Value_x_Appearance::exampleOP end
+  
+  // deploy manually: diagram ... MDCTool ... Object ... o.addToValue_x_appearances(MDC::Types::Value_x_Appearance());
+  
+  @Operation exampleOP(value, appearance)
+    // appearance.bgcolor := calcColor(value.temperatur);
+    // appearance of Node
+    let box = appearance.displays.asSeq().head() in
+      if box.hasSlot("fillColor") 
+      then box.setFillColor(Clients::Diagrams::Color(value, 0, 255-value))
+      else "mist!".println()
+      end
+    end;
+    "foo".println()
+    
+  end
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  end
