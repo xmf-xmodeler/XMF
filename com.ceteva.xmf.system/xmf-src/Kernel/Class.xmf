@@ -155,7 +155,39 @@ context Class
     @Doc
       Return a list of all classes c for which c.inheritsFrom(self)
     end
-    Class.allDirectInstances()->select(c | c.inheritsFrom(self))
+    self.allClasses()->select(c|c.inheritsFrom(self)).asSeq()
+  end
+    
+context Class
+  @Operation allClasses():Set(Object)
+    @Doc
+      Return a list of all classes
+    end
+    let
+    	listNew = Class.allDirectInstances().asSet();
+    	listDone = {Class}
+    in 
+      @While not listNew->isEmpty do
+        let nonMetaClasses = listNew->select(c|not c.inheritsFrom(Class))
+        in 
+          listNew := listNew - nonMetaClasses; 
+          listDone := listDone.union(nonMetaClasses);
+          let nextClass = listNew.sel()
+          in         
+            listDone := listDone.union({nextClass});
+            listNew := listNew.excluding(nextClass);
+            if  
+              nextClass.inheritsFrom(Class)
+            then 
+              listNew := listNew.asSet() 
+            	.union(nextClass.allDirectInstances().asSet()->select(c|c.inheritsFrom(Class)))
+          	    - listDone
+            end
+          end
+        end
+      end;
+      listDone
+    end
   end
   
 context Class
