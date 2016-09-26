@@ -167,15 +167,7 @@ context Element
     @Doc
       If the receiver does not understand the message, it propagates it to its roleFiller.
     end
-    //("message: >" + message + "<").println();
-    //if message = "hasSlot" 
-    //then throw Exceptions::NoOperation(self,message,args)
-    //end;
-//    if self <> null andthen self.hasSlot("roleFiller") andthen self.roleFiller <> null then
-//        self.roleFiller.send(message,args)
-//    else
-        throw Exceptions::NoOperation(self,message,args)
-//    end
+    throw Exceptions::NoOperation(self,message,args)
   end
 
 
@@ -326,9 +318,6 @@ context Element
 context Element
   
   @Operation setRoleFillerDialog()
-    //("setRoleFillerDialog: " + self).println();
-    //("setRoleFillerDialog: " + self.of()).println();
-    //("setRoleFillerDialog: " + self.of().hasStructuralFeature("delegatesTo")).println();
     if self.of().hasStructuralFeature("delegatesTo") andthen self.of().delegatesTo <> null
     then Root::Extensions::MetaAdaptor::selectRoleFiller(self, self.of())
     else xmf.questionYesOnly("Cannot change role filler. This class does not delegate!")
