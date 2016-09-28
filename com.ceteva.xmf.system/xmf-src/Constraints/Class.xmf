@@ -10,12 +10,14 @@ parserImport XOCL;
  ******************************************************************************/
 
 context Class
-  @Constraint NoCircularInheritance
+  @Constraint NoCyclicInheritance
     @Letrec hasParent(child: Class): Boolean = 
       child.parents -> includes(self) orelse
-      child.parents -> exists(p | hasParent(p))
+      child.parents -> exists(p | hasParent(p)) orelse
+      child.delegatesTo = self orelse
+      ((not child.delegatesTo = null) andthen hasParent(child.delegatesTo))
     in 
-      false//hasParent(self)
+      not hasParent(self)
     end
     fail self.toString() + " has circular inheritance"
   end
