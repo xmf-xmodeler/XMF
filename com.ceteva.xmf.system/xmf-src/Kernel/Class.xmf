@@ -164,6 +164,27 @@ context Class
       Return a list of all classes
     end
     let
+    	list = Class.allDirectInstances();
+        oldSize = -1
+    in 
+      @While not list.size() = oldSize do
+        oldSize := list.size();
+        let 
+          metaClasses = list.asSet()->select(c|c.inheritsFrom(Class)).asSeq() 
+        in
+          list := Kernel_allInstances(metaClasses)
+        end
+      end;
+      list
+    end
+  end
+  
+  context Class
+  @Operation allClassesOldVersion():Set(Object)
+    @Doc
+      Return a list of all classes
+    end
+    let
     	listNew = Class.allDirectInstances().asSet();
     	listDone = {Class}
     in 
