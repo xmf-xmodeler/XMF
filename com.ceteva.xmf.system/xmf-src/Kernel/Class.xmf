@@ -179,38 +179,6 @@ context Class
     end
   end
   
-  context Class
-  @Operation allClassesOldVersion():Set(Object)
-    @Doc
-      Return a list of all classes
-    end
-    let
-    	listNew = Class.allDirectInstances().asSet();
-    	listDone = {Class}
-    in 
-      @While not listNew->isEmpty do
-        let nonMetaClasses = listNew->select(c|not c.inheritsFrom(Class))
-        in 
-          listNew := listNew - nonMetaClasses; 
-          listDone := listDone.union(nonMetaClasses);
-          let nextClass = listNew.sel()
-          in         
-            listDone := listDone.union({nextClass});
-            listNew := listNew.excluding(nextClass);
-            if  
-              nextClass.inheritsFrom(Class)
-            then 
-              listNew := listNew.asSet() 
-            	.union(nextClass.allDirectInstances().asSet()->select(c|c.inheritsFrom(Class)))
-          	    - listDone
-            end
-          end
-        end
-      end;
-      listDone
-    end
-  end
-  
 context Class
   @Operation defaultParents():Set(Classifier)
   
