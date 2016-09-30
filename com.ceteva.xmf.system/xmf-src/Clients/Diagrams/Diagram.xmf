@@ -170,16 +170,28 @@ context Diagrams
       graph.deepContains(node)
     end
     
+    @Attribute updateTEMPmax : Integer end
+    
     @Operation defineActions()
       // Actions are buttons that do something when pressed...
       self.defineToolGroup("Actions");
-      self.defineActionHandler("Actions","Update","update","Mapping/update.png",Diagram::updateValues);
+      //self.defineActionHandler("Actions","Update","update","Mapping/update.png",Diagram::updateValues);
       self.defineActionHandler("Actions","Zoom +","zoom in","MDC/ZoomIn.png",Diagram::zoomIn);
       self.defineActionHandler("Actions","Zoom 1","zoom one","MDC/ZoomOne.png",Diagram::zoomOne);
       self.defineActionHandler("Actions","Zoom -","zoom out","MDC/ZoomOut.png",Diagram::zoomOut);
       self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected);
-      self.defineActionHandler("Actions","Copy to Clipboard","clip","Tools/Copy.gif",Diagram::copyDiagramToClipboard)
+      self.defineActionHandler("Actions","Copy to Clipboard","clip","Tools/Copy.gif",Diagram::copyDiagramToClipboard);
 //      self.defineActionHandler("Actions","Add New Button","add new button","User/Balls1.gif",Diagram::addNewButton)
+	  self.updateTEMPmax := 0;
+      @XOCL::Fork 
+          @XOCL::Repeat 
+              Kernel_delay(2000); 
+              self.updateValues(); 
+              self.updateTEMPmax:=updateTEMPmax+1
+          until 
+              self.updateTEMPmax = 10 
+          end 
+      end
     end
     
     @Operation defineEdgeToolGroups()
@@ -1027,7 +1039,7 @@ context Diagrams
               //owner.classMaps // PackageXMappingDiagram --> ClassXNode
       //"Update Diagram from Model".println();
       // graph.nodes.println();
-      @For node in owner.classMaps do
+      @For node in self.owner.classMaps do
         node.refresh()
       end
       //"Update Diagram from Model".println()
