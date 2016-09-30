@@ -451,7 +451,8 @@ public class GC implements Value {
   }
 
   public boolean isSilent() {
-    return silent;
+	  // Removed for presentation  
+    return true;//silent;
   }
 
   public void setMachine(Machine machine) {
