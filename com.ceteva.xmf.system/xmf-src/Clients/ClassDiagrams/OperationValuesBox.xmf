@@ -16,6 +16,28 @@ context ClassDiagrams
     @Operation classNode()
       owner.owner
     end
+        
+    @Operation add(opGroup:OperationValuesGroup)
+      super(opGroup);
+      opGroup.pack()
+    end
+    
+    @Operation expand()
+      self.expandHeight();
+      self.expandWidth()
+    end
+    
+    @Operation expandHeight()
+      let height = 3
+      in
+        @For opValGroup in displays do
+          opValGroup.moveY(height);
+          height := height + opValGroup.value.maxHeight() + 3
+        end
+      end;
+      
+      super()
+    end
     
     @Operation maxHeight()
       if not shown 

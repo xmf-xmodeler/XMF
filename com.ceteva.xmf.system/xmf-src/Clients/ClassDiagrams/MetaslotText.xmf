@@ -60,9 +60,10 @@ context ClassDiagrams
       if value.x() < (name.x() + name.width()) or
          value.x() > (name.x() + name.width() + self.separator())
       then 
-        value.move(name.x() + name.width() + self.separator(),value.y());
-        owner.resized(self)
-      end
+        value.move(name.x() + name.width() + self.separator(),value.y())
+      end;
+      // ??? should this be forwarded in any case?
+      owner.resized(self)
     end
     
     @Operation setName(name)

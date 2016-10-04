@@ -12,6 +12,11 @@ context ClassDiagrams
     @Constructor(x,y,width)
       self.init(Seq{x,y,width,16,0,Color(0-1,0-1,0-1),Color(0-1,0-1,0-1)})
     end
+        
+    @Operation add(slotText:MetaslotText)
+      super(slotText);
+      slotText.pack()
+    end
     
     @Operation classNode()
       owner.owner
@@ -24,7 +29,15 @@ context ClassDiagrams
       @For slotText in displays do
         slotText.value.move(slotText.name.width() + slotText.separator(),slotText.value.y())
       end;
-      super()
+      let height = 3
+      in 
+         @For slotText in displays do
+           slotText.name.move(slotText.name.x(),height);
+           slotText.value.move(slotText.value.x(),height);
+           height := height + slotText.value.maxHeight() + 3 
+         end
+      end;
+      super()      
     end
     
     @Operation maxHeight()

@@ -53,6 +53,12 @@ context ClassDiagrams
         metaclass_.move(metaclass_.x,metaclass_.y-1)
       end
     end
+        
+    @Operation moveY(y)
+      instLevel.move(instLevel.x(),y);
+      name.move(name.x(),y);
+      metaclass_.move(metaclass_.x(),y)
+    end
     
     @Operation resized(display)
     

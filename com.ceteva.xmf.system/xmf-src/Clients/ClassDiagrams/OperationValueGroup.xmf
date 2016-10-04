@@ -12,7 +12,6 @@ context ClassDiagrams
     @Attribute name : OperationValueName end
     @Attribute value : OperationValueValue end
     @Attribute operation : Operation end
-//    @Attribute type : Element end
     
     @Constructor(name,value,operation,x,y) !
     
@@ -44,6 +43,11 @@ context ClassDiagrams
         value.move(value.x,value.y-1)
       end
     end
+            
+    @Operation moveY(y)
+      name.move(name.x(),y);
+      value.move(value.x(),y)
+    end
     
     @Operation name():String
       name.text
@@ -61,9 +65,10 @@ context ClassDiagrams
       if value.x() < (name.x() + name.width()) or
          value.x() > (name.x() + name.width() + self.separator())
       then 
-        value.move(name.x() + name.width() + self.separator(),value.y());
-        owner.resized(self)
-      end
+        value.move(name.x() + name.width() + self.separator(),value.y())
+      end;
+      // ??? should this be forwarded in any case?
+      owner.resized(self)
     end
     
     @Operation setName(name)
