@@ -134,7 +134,7 @@ context Class
       C + p.allConstructors())
   end
   
-context Class
+context Class // not needed anymore? Used in MetaClass
   @Operation allDirectInstances():Seq(Object)
     @Doc
       Return a list of all instances o for which o.of() = self
@@ -142,8 +142,8 @@ context Class
 	 Kernel_allInstances([self])
   end
   
-context Class
-  @Operation allInstances():Seq(Object)
+context Class // not needed anymore?
+  @Operation allInstances_OLD():Seq(Object)
     @Doc
       Return a list of all objects o for which o.of().inheritsFrom(self)
     end
@@ -151,6 +151,11 @@ context Class
   end
   
 context Class
+  @Operation allInstances():Seq(Object)
+    Kernel_allInstances(Kernel_allSubClasses(self))
+  end
+
+context Class // not needed anymore?
   @Operation allSubclasses():Seq(Object)
     @Doc
       Return a list of all classes c for which c.inheritsFrom(self)
@@ -158,7 +163,7 @@ context Class
     self.allClasses()->select(c|c.inheritsFrom(self)).asSeq()
   end
     
-context Class
+context Class // not needed anymore?
   @Operation allClasses():Set(Object)
     @Doc
       Return a list of all classes
