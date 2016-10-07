@@ -49,17 +49,62 @@ context ClassXNode
     self
   end
   
-    context ClassXNode	
-
-    // overwrite existing operation to avoid creation of slots on too high meta levels, and to exclude MetaAdaptor's attributes from slot creation 
+context ClassXNode	
+  // overwrite existing operation to avoid creation of slots on too high meta levels, and to exclude MetaAdaptor's attributes from slot creation 
     
-    @Operation generateMetaslots()
-      @For metaAttribute in class.of().allAttributes() do
-        if metaAttribute.underlyingType().isKindOf(DataType) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
-          @WithoutRendering(node.owner)
-            self.metaslotAdded(metaAttribute)
-          end
+  @Operation generateMetaslots()
+    @For metaAttribute in class.of().allAttributes() do
+      if metaAttribute.underlyingType().isKindOf(DataType) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
+        @WithoutRendering(node.owner)
+          self.metaslotAdded(metaAttribute)
         end
       end
-    end   
+    end
+  end   
+  
+context ClassXNode
+  @Operation nameChanged_classDiagramDaemon(obj,slot,newName,oldName) // model -> diagram
+    if node.name() <> newName.toString()
+    then 
+      node.setName(newName.toString());
+      self.daemon_changeButtonInToolbar();
+      self.daemon_changeOfFieldInstances(newName)
+      //;("ClassXNode::nameChanged_classDiagramDaemon(obj="+obj+",slot="+slot+",newName="+newName+",oldName="+oldName+")").println()
+    end
+  end   
+  
+context ClassXNode
+  @Operation nameChangedDaemon(text,slot,newName,oldName) // diagram -> model
+    if class.name.toString() <> newName
+    then 
+      class.setName(newName);
+      self.daemon_changeButtonInToolbar();
+      self.daemon_changeOfFieldInstances(newName)
+      //;("ClassXNode::nameChangedDaemon(text="+text+",slot="+slot+",newName="+newName+",oldName="+oldName+")").println()
+    end
+  end  
+  
+context ClassXNode
+  @Operation daemon_changeButtonInToolbar()
+    null//("_changeButtonInToolbar").println()
+  end  
+  
+context ClassXNode
+  @Operation daemon_changeOfFieldInstances(newName)
+    //("_changeOfFieldInstances").println();
+    //("class = " + self.class.name).println();
+    //("diagramMapping = " + self.owner).println();
+    let diagramMapping = self.owner in 
+      @For classMap in diagramMapping.classMaps do
+        if classMap.class.of() = self.class
+        then 
+          //("Instance found: " + classMap.class.name).println();
+          classMap.node.name.stereotypeText.setText(newName)//classMap.node.stereotype())
+        end
+      end
+    end
+  end
+  
+  
+  
   

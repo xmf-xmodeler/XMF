@@ -127,11 +127,14 @@ context Diagrams
       // if they stay where they are. Therefore x positions are
       // taken into account.
       
-      let maxWidth = 0
-      in @For display in displays do
-           maxWidth := maxWidth.max(display.maxWidth() + display.x())
-         end;
-         maxWidth
+      let right = 0 ; left = 0
+      in 
+        @For display in displays do
+           right := right.max(display.maxWidth() + display.x())
+        end; @For display in displays do
+           left := left.min(display.x())
+        end;
+        right - left
       end
     end
     

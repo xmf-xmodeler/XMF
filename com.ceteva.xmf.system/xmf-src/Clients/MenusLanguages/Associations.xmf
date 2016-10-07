@@ -6,8 +6,10 @@ import Clients::Menus;
 
 context Association
   @Operation delete_client()
-    self.deleteRecursive();
-    self.remove()
+    self.end1.deleteRecursive();
+    self.end2.deleteRecursive();
+//    self.deleteRecursive();
+    self.owner.remove(self)
   end
 
 context Associations::End

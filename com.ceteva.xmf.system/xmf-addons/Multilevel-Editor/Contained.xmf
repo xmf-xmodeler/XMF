@@ -27,7 +27,7 @@ Contained.removeOperation(Contained.getOperation("delete_client_check"));
   @Operation delete_client_check()
     let name = if self.isKindOf(NamedElement) then self.name() else self.toString() end
     in
-    	if self.isKindOf(Attribute)
+    	if self.isKindOf(Attribute) 
     	then 
     		if self.isIntrinsic
     		then
@@ -35,7 +35,7 @@ Contained.removeOperation(Contained.getOperation("delete_client_check"));
     		else
     			xmf.question("Are you sure you want to delete " + name + "?")
     		end
-    	elseif self.isKindOf(Constraint) or self.isKindOf(Operation) then
+    	elseif self.isKindOf(Constraint) or self.isKindOf(Operation) or self.isKindOf(Associations::Association) then
     		xmf.question("Are you sure you want to delete " + name + "?")
     	else
 			let ret = self.allInstances()

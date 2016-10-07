@@ -316,7 +316,8 @@ context ClassMapping
       association.end1.removeDaemonsWithTarget(self,true);
       association.end2.removeDaemonsWithTarget(self,true);
       edge.removeDaemonsWithTarget(self,true);
-      edge.name.removeDaemonsWithTarget(self,true);
+      //("edge.name.of =" + edge.name.of()).println();
+      //edge.name.removeDaemonsWithTarget(self,true);
       edge.end1.name.removeDaemonsWithTarget(self,true);
       edge.end2.name.removeDaemonsWithTarget(self,true)
 
