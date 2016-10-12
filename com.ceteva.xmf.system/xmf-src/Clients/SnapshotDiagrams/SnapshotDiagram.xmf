@@ -193,7 +193,7 @@ context SnapshotDiagrams
       end
     end
     
-    @Operation newEdge(type,sourcePort,targetPort) 
+    @Operation newEdge(type,sourcePort,targetPort,startX,startY,endX,endY) 
       @Case type of
         "Slot Value" do self.newSlotEdge(sourcePort,targetPort) end
         "Dependency" do self.newDependencyEdge(sourcePort,targetPort) end
