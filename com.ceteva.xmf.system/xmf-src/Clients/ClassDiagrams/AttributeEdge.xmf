@@ -13,8 +13,8 @@ context ClassDiagrams
     @Attribute mult     : Multiplicity end
     @Attribute typePath : Seq(String) end
   
-    @Constructor(name,source,target,typePath) 
-      self.init(Seq{null,source,target,0,Edge::arrow,Set{},Seq{},Color()});
+    @Constructor(name,source,target,typePath,xStart,yStart,xEnd,yEnd) 
+      self.init(Seq{null,source,target,0,Edge::arrow,Set{},Seq{},Color(),xStart,yStart,xEnd,yEnd});
       if name.isKindOf(String)
       then 
         // Calculate position of attribute label

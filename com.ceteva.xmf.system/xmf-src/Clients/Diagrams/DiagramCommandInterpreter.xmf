@@ -220,7 +220,28 @@ context Diagrams
     
     @Operation newEdgeCommand(parent,edge)
       let edgeId = self.allocateId(edge)
-      in @SendCommand(self)
+      in 
+         if edge.hasSlot("xStart") // then assume that edge also has the other three
+         then 
+         @SendCommand(self)
+           newEdge(parent.id(),
+                   edgeId,edge.source().id(),
+                   edge.target().id(),
+                   edge.refx(),
+                   edge.refy(),
+                   edge.sourceHead(),
+                   edge.targetHead(),
+                   edge.lineStyle(),
+                   edge.color().red(),
+                   edge.color().green(),
+                   edge.color().blue(),
+                   edge.xStart,
+                   edge.yStart,
+                   edge.xEnd,
+                   edge.yEnd)
+         end
+           else 
+         @SendCommand(self)
            newEdge(parent.id(),
                    edgeId,edge.source().id(),
                    edge.target().id(),
@@ -232,7 +253,7 @@ context Diagrams
                    edge.color().red(),
                    edge.color().green(),
                    edge.color().blue())
-         end;
+         end  end;
          edgeId
       end
     end

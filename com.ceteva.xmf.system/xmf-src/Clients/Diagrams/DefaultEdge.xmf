@@ -8,7 +8,7 @@ context Diagrams
 
   @Class DefaultEdge extends Edge
   
-    @Constructor(source,target,sourceHead,targetHead) 
+    @Constructor(source,target,sourceHead,targetHead,xStart,yStart,xEnd,yEnd) 
       let label1 = Label("start","start",5,5,true);
           label2 = Label("end","end",5,5,true)
       in self.add(label1);

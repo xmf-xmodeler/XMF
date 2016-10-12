@@ -67,7 +67,7 @@ context Diagrams
       self.find(id).move(x,y)
     end
     
-    @Operation newEdge(edgeType,sourcePortId,targetPortId)
+    @Operation newEdge(edgeType,sourcePortId,targetPortId,startX,startY,endX,endY)
       self.debug("newEdge[~S,~S,~S]~%",Seq{edgeType,sourcePortId,targetPortId});
       let sourcePort = self.find(sourcePortId);
           targetPort = self.find(targetPortId) then
@@ -87,7 +87,7 @@ context Diagrams
               owner := owner.owner
             end
           end;
-          owner.newEdge(edgeType,sourcePort,targetPort)
+          owner.newEdge(edgeType,sourcePort,targetPort,startX,startY,endX,endY)
         end
       end
     end
@@ -323,12 +323,15 @@ context Diagrams
     end
     
     @Operation readNewEdge(parameters)
-      let edgeType = parameters.at(0)
-      in let sourcePortId = parameters.at(1)
-         in let targetPortId = parameters.at(2)
-            in self.newEdge(edgeType,sourcePortId,targetPortId)
-            end
-         end
+      let 
+        edgeType = parameters.at(0); 
+        sourcePortId = parameters.at(1);
+        targetPortId = parameters.at(2);
+        startX = parameters.at(3);
+        startY = parameters.at(4);
+        endX   = parameters.at(5);
+        endY   = parameters.at(6)
+      in self.newEdge(edgeType,sourcePortId,targetPortId,startX,startY,endX,endY)
       end
     end
     

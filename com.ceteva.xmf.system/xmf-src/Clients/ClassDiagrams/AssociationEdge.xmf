@@ -14,10 +14,9 @@ context ClassDiagrams
     @Attribute end2      : AssociationEnd end
     @Attribute typePath  : Seq(String)    end
     @Attribute displayName1 : Label end
-    
   
-    @Constructor(name,end1,end2,source,target,typePath) 
-      self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{},Color()});
+    @Constructor(name,end1,end2,source,target,typePath,xStart,yStart,xEnd,yEnd) 
+      self.init(Seq{null,source,target,0,Edge::noArrow,Set{},Seq{/*WayPoint("start",1,xStart,yStart), WayPoint("end",2,xEnd,yEnd)*/},Color(),xStart,yStart,xEnd,yEnd});
       //if name.isKindOf(String)
       //then 
       //  self.name := Label(name,"",0,-53,true);

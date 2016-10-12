@@ -9,8 +9,8 @@ context ClassDiagrams
 
   @Class InheritanceEdge extends Edge
   
-    @Constructor(source,target) 
-      self.init(Seq{source,target,0,Edge::whiteArrow,Color()})
+    @Constructor(source,target,xStart,yStart,xEnd,yEnd) 
+      self.init(Seq{source,target,0,Edge::whiteArrow,Color(),xStart,yStart,xEnd,yEnd})
     end
     
     @Operation layoutId():String

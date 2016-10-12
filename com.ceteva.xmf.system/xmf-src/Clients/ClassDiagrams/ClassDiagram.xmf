@@ -175,8 +175,8 @@ context ClassDiagrams
       end
     end
     
-    @Operation defaultAssociationEdgeCommand(sourcePort,targetPort) 
-      let edge_new = self.newAssociationEdgeCommand(sourcePort,targetPort,Associations::Association.pathSeq())
+    @Operation defaultAssociationEdgeCommand(sourcePort,targetPort,x1,y1,x2,y2) 
+      let edge_new = self.newAssociationEdgeCommand(sourcePort,targetPort,Associations::Association.pathSeq(),x1,y1,x2,y2)
       in
       	@Find(asso, self.owner.associationMaps)
       	when asso.edge = edge_new
@@ -411,16 +411,16 @@ context ClassDiagrams
 	end
 
     
-    @Operation defaultAttributeEdge(sourcePort,targetPort)
-      self.newAttributeEdge(sourcePort,targetPort,XCore::Attribute.pathSeq()) 
+    @Operation defaultAttributeEdge(sourcePort,targetPort,x1,y1,x2,y2)
+      self.newAttributeEdge(sourcePort,targetPort,XCore::Attribute.pathSeq(),x1,y1,x2,y2)
     end
     
     @Operation defaultClassNode(x,y)
       self.newClassNode(x,y,XCore::Class.pathSeq()) 
     end
      
-    @Operation defaultDependencyEdgeCommand(sourcePort,targetPort)
-       self.newDependencyEdgeCommand(sourcePort,targetPort,XCore::Dependency.pathSeq())
+    @Operation defaultDependencyEdgeCommand(sourcePort,targetPort,x1,y1,x2,y2)
+       self.newDependencyEdgeCommand(sourcePort,targetPort,XCore::Dependency.pathSeq(),x1,y1,x2,y2)
     end
      
 //    @Operation defaultDelegationEdgeCommand(sourcePort,targetPort)
@@ -662,7 +662,7 @@ context ClassDiagrams
       self.makeAssociationEdge(name,end1,end2,sourceNode.ports->sel,targetNode.ports->sel,typePath)
     end
 
-    @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath)
+    @Operation newAssociationEdgeCommand(sourcePort,targetPort,typePath,xStart,yStart,xEnd,yEnd)
       let
       	assoName = xmf.getString("Association Name", "Please enter the association name", owner.package.newName("A"))
       in
@@ -692,7 +692,7 @@ context ClassDiagrams
 	          end2 = AssociationEnd(varName2,displayName2,
             	  Multiplicity("end",  10, (-yDiff)+(1*endy)), instLevel2) 
         	then
-    	      edge = AssociationEdge(assoName,end1,end2,sourcePort,targetPort,typePath)
+    	      edge = AssociationEdge(assoName,end1,end2,sourcePort,targetPort,typePath,xStart,yStart,xEnd,yEnd)
 	      in edge.new(self,false);
 	    	self.addEdge(edge);
 			edge.end2.displayName.hide();
@@ -704,10 +704,10 @@ context ClassDiagrams
       end
     end
     
-    @Operation newAssociationInstanceEdgeCommand(sourcePort,targetPort,typePath)
+    @Operation newAssociationInstanceEdgeCommand(sourcePort,targetPort,typePath,x1,y1,x2,y2)
     	let metaclass = typePath->ref([Root,self.owner.package]) then
     		name_label = Label("instance of " + metaclass.name,"",0,-16,true, Color(120,120,120),0+1) then
-			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort,typePath)
+			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort,typePath,x1,y1,x2,y2)
         in 
            edge.new(self,false);
            self.addEdge(edge);
@@ -715,11 +715,11 @@ context ClassDiagrams
         end
     end
     
-    @Operation newAttributeEdge(sourcePort,targetPort,typePath):AttributeEdge
+    @Operation newAttributeEdge(sourcePort,targetPort,typePath,x1,y1,x2,y2):AttributeEdge
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
-         then let edge = AttributeEdge("att",sourcePort,targetPort,typePath)
+         then let edge = AttributeEdge("att",sourcePort,targetPort,typePath,x1,y1,x2,y2)
               in edge.new(self,false);
                  self.addEdge(edge);
                  edge
@@ -729,30 +729,30 @@ context ClassDiagrams
       end
     end
     
-    @Operation newContainsEdgeCommand(sourcePort,targetPort)
-      let edge = ContainsEdge(sourcePort,targetPort)
+    @Operation newContainsEdgeCommand(sourcePort,targetPort,x1,y1,x2,y2)
+      let edge = ContainsEdge(sourcePort,targetPort,x1,y1,x2,y2)
       in 
         edge.new(self,false);
         self.addEdge(edge)
       end
     end
     
-    @Operation newDependencyEdgeCommand(sourcePort,targetPort,typePath)
-      let edge = DependencyEdge(sourcePort,targetPort,typePath)
+    @Operation newDependencyEdgeCommand(sourcePort,targetPort,typePath,x1,y1,x2,y2)
+      let edge = DependencyEdge(sourcePort,targetPort,typePath,x1,y1,x2,y2)
       in 
         edge.new(self,false);
         self.addEdge(edge)
       end
     end
     
-    @Operation newDelegationEdge(sourcePort,targetPort)
+    @Operation newDelegationEdge(sourcePort,targetPort,x1,y1,x2,y2)
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
                and sourceNode.of() = targetNode.of()
                and sourceNode <> targetNode
          then 
-           let edge = DelegationEdge(sourcePort,targetPort)
+           let edge = DelegationEdge(sourcePort,targetPort,x1,y1,x2,y2)
            in edge.new(self,false);
               self.addEdge(edge);
               edge
@@ -761,10 +761,10 @@ context ClassDiagrams
       end
     end
     
-    @Operation newIntrinsicAssociationConstraintEdgeCommand(sourcePort,targetPort,typePath)
+    @Operation newIntrinsicAssociationConstraintEdgeCommand(sourcePort,targetPort,typePath,x1,y1,x2,y2)
     	let metaclass = typePath->ref([Root,self.owner.package]) then
     		name_label = Label(metaclass.name,"",0,-16,true, Color(120,120,120),0-1) then
-			edge = IntrinsicAssociationConstraintEdge(name_label, sourcePort,targetPort,typePath)
+			edge = IntrinsicAssociationConstraintEdge(name_label, sourcePort,targetPort,typePath,x1,y1,x2,y2)
         in 
            edge.new(self,false);
            self.addEdge(edge);
@@ -775,7 +775,7 @@ context ClassDiagrams
     @Operation newSelfAttributeEdge(x,y,path:Seq(String))
       @Find(node,classNodes) when node.contains(x,y) do
         let port = node.ports->head
-        in self.newAttributeEdge(port,port,path)
+        in self.newAttributeEdge(port,port,path,x,y,x,y)
         end
       end
     end
@@ -783,7 +783,7 @@ context ClassDiagrams
     @Operation newSelfAssociationEdge(x,y,path:Seq(String))
       @Find(node,classNodes) when node.contains(x,y) do
         let port = node.ports->head
-        in self.newAssociationEdgeCommand(port,port,path)
+        in self.newAssociationEdgeCommand(port,port,path,x,y,x,y)
         end
       end
     end
@@ -837,21 +837,21 @@ context ClassDiagrams
       end
     end
     
-    @Operation newInheritance(sourceNode,targetNode)
+    @Operation newInheritance(sourceNode,targetNode,x1,y1,x2,y2)
       let sourcePort = sourceNode.ports()->sel;
           targetPort = targetNode.ports()->sel
-      in self.newInheritanceEdge(sourcePort,targetPort)
+      in self.newInheritanceEdge(sourcePort,targetPort,x1,y1,x2,y2)
       end
     end
     
-    @Operation newInheritanceEdge(sourcePort,targetPort)
+    @Operation newInheritanceEdge(sourcePort,targetPort,x1,y1,x2,y2)
       let sourceNode = sourcePort.owner;
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
                and sourceNode.of() = targetNode.of()
                and sourceNode <> targetNode
          then 
-           let edge = InheritanceEdge(sourcePort,targetPort)
+           let edge = InheritanceEdge(sourcePort,targetPort,x1,y1,x2,y2)
            in edge.new(self,false);
               self.addEdge(edge);
               edge

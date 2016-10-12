@@ -42,14 +42,33 @@ context Diagrams
     @Attribute selected   : Boolean = false (?,!)   end
     @Attribute color	  : Color = static Color() (?,!) end
     
+    @Attribute xStart : Integer end
+    @Attribute yStart : Integer end
+    @Attribute xEnd : Integer end
+    @Attribute yEnd : Integer end    
+    
     @Constructor(source,target,sourceHead,targetHead,color) 
+      self.lineStyle := Line::solidLine;
+      if source = target then
+        self.addSelfWaypoints()
+      end
+    end 
+    
+    @Constructor(source,target,sourceHead,targetHead,color,xStart,yStart,xEnd,yEnd) 
       self.lineStyle := Line::solidLine;
       if source = target then
         self.addSelfWaypoints()
       end
     end
    
-    @Constructor(id,source,target,sourceHead,targetHead,labels,wayPoints,color) ! 
+    @Constructor(id,source,target,sourceHead,targetHead,labels,wayPoints,color) !
+      self.lineStyle := Line::solidLine;
+      if source = target 
+      then self.addSelfWaypoints()
+      end
+    end 
+   
+    @Constructor(id,source,target,sourceHead,targetHead,labels,wayPoints,color,xStart,yStart,xEnd,yEnd) ! 
       self.lineStyle := Line::solidLine;
       if source = target 
       then self.addSelfWaypoints()

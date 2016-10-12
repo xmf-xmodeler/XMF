@@ -11,8 +11,8 @@ context ClassDiagrams
   
     @Attribute typePath : Seq(String) end
   
-    @Constructor(source,target,typePath) 
-      self.init(Seq{null,source,target,0,Edge::arrow,Set{},Seq{},Color()});
+    @Constructor(source,target,typePath,xStart,yStart,xEnd,yEnd)
+      self.init(Seq{null,source,target,0,Edge::arrow,Set{},Seq{},Color(),xStart,yStart,xEnd,yEnd});
       self.lineStyle := Line::dashLine;
       if typePath->asSet <> XCore::Dependency.pathSeq()->asSet
       then self.add(StereotypeLabel(typePath->last))
