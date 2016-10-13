@@ -150,8 +150,8 @@ context Types
       end.setOwner(null)
     end
     
-    @Operation newEdge(sourcePort,targetPort,tool)
-      let edge = Edge(sourcePort,targetPort,sourceHead,targetHead,self.parseColour(colour))
+    @Operation newEdge(sourcePort,targetPort,tool,startX,startY,endX,endY)
+      let edge = Edge(sourcePort,targetPort,sourceHead,targetHead,self.parseColour(colour),startX,startY,endX,endY)
       in edge.setType(self);
          edge.lineStyle := lineStyle;
          edge.setSourceChangedHandler(EdgeType::mkSourceChangedHandler(tool));

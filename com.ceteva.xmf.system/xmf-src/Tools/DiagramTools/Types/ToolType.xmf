@@ -374,7 +374,7 @@ context Types
            let name = edgeType.name().toString()
            in if not diagram.hasNewHandler(name)
               then 
-                let handler = @Operation(source,target) tool.newEdge(name,source,target) end
+                let handler = @Operation(source,target,startX,startY,endX,endY) tool.newEdge(name,source,target,startX,startY,endX,endY) end
                 in diagram.defineNewHandler(name,handler)
                 end
               end
@@ -385,14 +385,14 @@ context Types
       
     end
     
-    @Operation newEdge(name:String,sourcePort,targetPort,tool)
+    @Operation newEdge(name:String,sourcePort,targetPort,tool,startX,startY,endX,endY)
     
       // Called when a new edge has been requested on a diagram
       // via the mouse. Create and initialise the new edge.
       
       @Find(edgeType,self.supportedEdgeTypes() + tool.rootTool().type().recursiveEdgeTypes())
         when edgeType.name().toString() = name
-        do edgeType.new(sourcePort,targetPort,tool)
+        do edgeType.new(sourcePort,targetPort,tool,startX,startY,endX,endY)
       end
     end
 

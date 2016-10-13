@@ -31,7 +31,7 @@ context Types
       
     end
     
-    @Operation mkHandler(tool,isEdge,typeName,diagram)
+    @Operation mkHandlerOLD(tool,isEdge,typeName,diagram)
       @Operation[closure="Tools::DiagramTools::Types::ToolButton::mkHandler"](x,y)
       
         // Note that this handler is called whether we are creating a node
@@ -40,10 +40,29 @@ context Types
         // source and target ports for the edge.
                
         if isEdge
-        then tool.newEdge(typeName,x,y)
+        then tool.newEdge(typeName,x,y,startX,startY,endX,endY)
         else tool.newNode(typeName,x,y,diagram)
         end
       end.setOwner(null)
+    end 
+       
+    @Operation mkHandler(tool,isEdge,typeName,diagram)
+      
+        // Note that this handler is called whether we are creating a node
+        // or an edge. If creating a node then the args are the (x,y) position
+        // of the new node. When creating an edge then the arguments are the
+        // source and target ports for the edge.
+               
+        if isEdge
+        then 
+            @Operation[closure="Tools::DiagramTools::Types::ToolButton::mkHandler"](x,y,startX,startY,endX,endY)
+            tool.newEdge(typeName,x,y,startX,startY,endX,endY)
+        	end.setOwner(null)
+        else 
+	        @Operation[closure="Tools::DiagramTools::Types::ToolButton::mkHandler"](x,y)
+	        tool.newNode(typeName,x,y,diagram)
+	        end.setOwner(null)
+        end
     end
     
     @Operation new(group:ToolGroup,diagram,tool:Tool)
@@ -51,7 +70,8 @@ context Types
           typeName = if self.typeName <> "" then self.typeName else name end then
           handler = ToolButton::mkHandler(tool,isEdge,typeName,diagram);
           iconFilename = self.icon
-      in diagram.defineNewHandler(group.name(),name,typeName,isEdge,iconFilename,handler)
+      in 
+        diagram.defineNewHandler(group.name(),name,typeName,isEdge,iconFilename,handler)
       end
     end
     

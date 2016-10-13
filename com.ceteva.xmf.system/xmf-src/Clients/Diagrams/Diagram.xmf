@@ -644,10 +644,13 @@ context Diagrams
     end
     
     @Operation newEdge(type,sourcePort,targetPort,startX,startY,endX,endY)
+      ("type: " + type).println();
       @Undoable
         @WithoutRendering(self,100)
           if newHandlers.hasKey(type)
-          then newHandlers.get(type).invoke(self,Seq{sourcePort,targetPort,startX,startY,endX,endY})
+          then 
+          newHandlers.get(type).println();
+          newHandlers.get(type).invoke(self,Seq{sourcePort,targetPort,startX,startY,endX,endY})
           else
             let edge = DefaultEdge(sourcePort,targetPort,0,0)
             in self.addEdge(edge);

@@ -300,8 +300,10 @@ context Structure
       end;
       @For edgeType in self.type().supportedEdgeTypes() do
         let name = edgeType.name().toString();
-            tool = self
-        in diagram.defineNewHandler(name,@Operation(s,t) tool.newEdge(name,s,t) end)
+            tool = self;
+            diagram = self.diagram
+        in 
+        diagram.defineNewHandler(name,@Operation(s,t,startX,startY,endX,endY) tool.newEdge(name,s,t,startX,startY,endX,endY) end)
         end
       end
     end
@@ -319,7 +321,7 @@ context Structure
         @For edgeType in rootToolType.recursiveEdgeTypes() do
           let name = edgeType.name().toString();
               tool = self
-          in diagram.defineNewHandler(name,@Operation(s,t) tool.newEdge(name,s,t) end)
+          in diagram.defineNewHandler(name,@Operation(s,t,startX,startY,endX,endY) tool.newEdge(name,s,t,startX,startY,endX,endY) end)
           end
         end
       end
