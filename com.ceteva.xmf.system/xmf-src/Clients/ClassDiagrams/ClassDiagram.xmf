@@ -190,7 +190,7 @@ context ClassDiagrams
     end
     
     @Operation generateIntrinsicAssociationConstraintEdgeCreationMethod(end1, end2,asso)
-    	@Operation createIntrinsicAssociationConstraintEdge(sourcePort,targetPort)
+    	@Operation createIntrinsicAssociationConstraintEdge(sourcePort,targetPort,xStart,yStart,xEnd,yEnd)
     		@Find(source, self.owner.classMaps)
 	    	when source.node = sourcePort.owner do
       			@Find(target, self.owner.classMaps)
@@ -232,7 +232,7 @@ context ClassDiagrams
     				tc = target.class;
 	    			mappings = self.owner
     			in	
-	    			@Operation createAssociationInstanceEdge(sourceInstancePort,targetInstancePort)
+	    			@Operation createAssociationInstanceEdge(sourceInstancePort,targetInstancePort,xStart,yStart,xEnd,yEnd)
     						@Find(sourceInstance, mappings.classMaps)
 //    						@Find(sourceInstance, self.owner.classMaps)
 	     					when sourceInstance.node = sourceInstancePort.owner do
@@ -374,7 +374,7 @@ context ClassDiagrams
     																		class2.class.set(slot2.name,class1.class)
 																		end; 		
 //																		self.owner.associationInstanceAdded(class1.class,class2.class,slot1.name,slot2.name,sourceInstancePort,targetInstancePort,asso);
-																		self.newAssociationInstanceEdgeCommand(sourceInstancePort,targetInstancePort,asso.association.pathSeq());
+																		self.newAssociationInstanceEdgeCommand(sourceInstancePort,targetInstancePort,asso.association.pathSeq(),xStart,yStart,xEnd,yEnd);
     																	xmf.message("Association has been created successfully")
     																else
     																	xmf.warning("not successful: constraints are not satisfied!")

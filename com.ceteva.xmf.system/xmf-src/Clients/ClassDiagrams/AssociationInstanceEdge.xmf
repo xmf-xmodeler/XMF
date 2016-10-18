@@ -12,8 +12,8 @@ context ClassDiagrams
     @Attribute name      : Label          end
     @Attribute typePath  : Seq(String)    end
         
-    @Constructor(name,source,target,typePath) 
-      self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color(120,120,120)});
+    @Constructor(name,source,target,typePath,xStart,yStart,xEnd,yEnd)  
+      self.init(Seq{null,source,target,Edge::noArrow,Edge::noArrow,Set{},Seq{},Color(120,120,120),xStart,yStart,xEnd,yEnd});
       self.add(self.name);
       self.setStyle(Line::dashLine)      
     end
