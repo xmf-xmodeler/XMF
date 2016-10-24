@@ -18,6 +18,8 @@ context Root::Extensions
 
 	@Operation new():Object
 
+      if self.level < 1 then self.error("Level " + self.level + " does not allow instantiation.") end;
+
 	  // We instantiate a new object "obj", whereas the class is "self". Therefore: obj.of()=self
       let obj = Kernel_mkObj(); 
           // We prepare a set of all Attributes form the class and a set of all Operations
@@ -79,7 +81,8 @@ context Root::Extensions
                else
                    obj.level := level.asInt()
                end
-           end;          
+           end;
+           if obj.level < 1 then self.error("Level " + obj.level + " not allowed as metaclass.") end;          
            obj.addParent(FMML::MetaClass)
          else
            if obj.of().level > 2
