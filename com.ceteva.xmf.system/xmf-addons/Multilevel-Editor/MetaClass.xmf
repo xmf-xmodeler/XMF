@@ -10,22 +10,12 @@ context Root::FMML
 
     @Attribute model : 1..1 Model end
  
-    @Operation sendInstance(element,message,args):XCore::Element /*
-      ("Calling "+message+"/"+element+"/"+args+"...").println();
-      ("The operation큦 name:" + message).println();
-      ("The operation큦 name큦 of:" + message.of()).println();
-      ("The class: " + self).println();
-      ("The instance: ?").println();
-      ("The class큦 level: " + self.level).println();
-      ("The instance큦 level: " + (self.level-1)).println();
-      ("The args: " + args).println();
-      ("The arity: " + args.size()).println();
-      ("The args� type: " + args.of()).println();
-      ("The operation큦 level: ?").println();
-      ("The operation is available: ?").println();
-      ("The instance delegates: ?").println();*/
-      
-      // super(element,message,args)
+    
+    /* This Operation should've been named send-TO-Instance. 
+       It is invoked when an operation is invoked. 
+       This operation tries to find out where the operation is defined. 
+       It checks superclassed and rolefillers. */
+    @Operation sendInstance(element,message,args):XCore::Element 
 
       let 
         // String to Symbol if necessary
@@ -50,7 +40,8 @@ context Root::FMML
                Before we can invoke it,
                we must check if the intrinsic 
                level forbids us to do so.
-               We'll assume we didn't find it*/
+               We'll pretend we didn't find it 
+               if the intrinsic levels is too low */
             if 
               op.isIntrinsic andthen op.instLevel < (self.level-1)
             then
@@ -110,11 +101,6 @@ context Root::FMML
       self.allAttributes()->select(a |
         a.of() = Associations::End)
     end
-	
-/*	@Operation allInstances():Seq(Object)
-      Root.allContentsOf(self).asSeq() 
-//		Kernel_allInstances([self])
-    end */
 	
 	@Operation allMEMOAttributes():XCore::Element
       self.allAttributes()->select(a |
@@ -242,11 +228,6 @@ context Root::FMML
         true
       end
     end
-	
-//	@Constructor(name)
-//		self.checkForNeededConstraints();
-//		self
-//    end
 	
 	@Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
 		let tmp = self

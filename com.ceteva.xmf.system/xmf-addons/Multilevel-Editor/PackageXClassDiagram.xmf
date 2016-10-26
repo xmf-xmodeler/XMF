@@ -92,32 +92,7 @@ context ClassMapping::PackageXClassDiagram
 context ClassMapping::PackageXClassDiagram  
     
     @Operation addMetaClass(metaclass,group)
-		//self.updateToolGroup("Top Level");
-		//diagram.defineNewHandler(
-		//	"Top Level",	
-		//	metaclass.name.toString(),
-		//	false,
-		//	"XCore/Class.gif",
-		//	@Operation(x,y)
-		//		let class = metaclass(xmf.getString("Name","Type the name of the meta type:",package.newName(metaclass.name.toString())))
-		//		in 	
-		//			class.addParent(FMML::MetaClass);
-		//			package.add(class);
-		//			self.instantiationHandlerDispatcher(class,package,diagram,self)
-		//		end
-		//	end	
-		//)
-	
-		PackageXClassDiagram::instantiationHandlerDispatcher(metaclass,package,diagram,self)
-		
-//      diagram.defineToolGroup(group);
-      //self.updateToolGroup(group);
-      //diagram.defineNewHandler(
-       // group,
-       //  metaclass.name.toString(),
-       //  false,
-       //  "XCore/Class.gif",
-       //  PackageXClassDiagram::domainTypeHandler(metaclass,package,diagram,self))
+	  PackageXClassDiagram::instantiationHandlerDispatcher(metaclass,package,diagram,self)
     end
 
 context ClassMapping::PackageXClassDiagram  
@@ -212,7 +187,13 @@ context ClassMapping::PackageXClassDiagram
 
 context ClassMapping::PackageXClassDiagram  
 	
-	@Operation instantiationHandlerClass(metaclass,thePackage,theDiagram,theMapping)
+	@Operation instantiationHandlerClass(
+        metaclass  //:MetaAdaptor,
+        thePackage //:Package,
+        theDiagram //:MappingDiagram,
+        theMapping //:PackageXMappingDiagram
+        )
+        
 		let group = if metaclass = FMML::MetaClass 
 					then "X"
 					else (metaclass.level).toString()

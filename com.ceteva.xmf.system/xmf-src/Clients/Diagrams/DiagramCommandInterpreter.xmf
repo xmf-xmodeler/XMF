@@ -461,6 +461,13 @@ context Diagrams
       end
     end    
     
+    // Removes ANY Tool, Toggle or Action // to BE Used 161026
+    @Operation removeAnyCommand(diagram,toolName)
+      @SendCommand(self)
+        removeAny(diagram.id(),toolName)
+      end
+    end   
+        
     @Operation newToolCommand(diagram,groupName:String,label,toolName,isEdge:Boolean,iconPath)
       @SendCommand(self)
         newTool(diagram.id(),groupName,label,toolName,isEdge,iconPath)

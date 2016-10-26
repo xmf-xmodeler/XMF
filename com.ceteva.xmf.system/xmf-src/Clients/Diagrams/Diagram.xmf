@@ -397,6 +397,11 @@ context Diagrams
       @Command(self) newToolCommand(self,group,label,type,isEdge,iconFile) end  
     end
     
+    @Operation removeAnyHandler(group:String,name:String,handler:Operation)
+      self.removeAnyHandler(name,handler); //toBeImplemented 161026
+      @Command(self) removeAnyCommand(self,name) end  
+    end
+    
     @Operation defineToggleHandler(group:String,label:String,type:String,state:Boolean,icon:String,handler) 
       // When the toggle is pressed on the diagram the new state is supplied to 
       // the handler. It is then up to the handler to perform the appropriate action
@@ -647,8 +652,7 @@ context Diagrams
       @Undoable
         @WithoutRendering(self,100)
           if newHandlers.hasKey(type)
-          then 
-          newHandlers.get(type).invoke(self,Seq{sourcePort,targetPort,startX,startY,endX,endY})
+          then newHandlers.get(type).invoke(self,Seq{sourcePort,targetPort,startX,startY,endX,endY})
           else
             let edge = DefaultEdge(sourcePort,targetPort,0,0)
             in self.addEdge(edge);

@@ -119,10 +119,8 @@ context Root::Extensions
 		 end;
 
 		 if self.delegatesTo <> null	
-		 then self.selectRoleFiller(obj, self) end;
-		   //"Start Delegation Dialog".println();	   
-		   //xmf.select("Role-filler of type " + type + " required","Select role-filler",{"Choose this"},"Choose this",null)
-		   //end;
+		   then self.selectRoleFiller(obj, self) end;
+
          if Root.contents.keys().includes("TargetPackage".asSymbol())
          then
            TargetPackage.add(obj)
@@ -139,7 +137,7 @@ context Root::Extensions
 	  then size = list.size()
 	  in 
 		if size = 0 
-		then xmf.questionYesOnly("No instance of roll filler class found! This instance will behave erratically until the roleFiller slot is set to a non-null value.")
+		then xmf.questionYesOnly("No instance of role filler class found! This instance will behave erratically until the roleFiller slot is set to a non-null value.")
 		elseif size = 1
 		then xmf.questionYesOnly("The only known instance of the roll filler class (" + type.name + ") will be used as role filler.");
 				object.setDelegation(list.asSeq().head())

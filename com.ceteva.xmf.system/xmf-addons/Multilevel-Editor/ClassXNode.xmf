@@ -74,6 +74,9 @@ context ClassXNode
   end   
   
 context ClassXNode
+  /* If the name of a class changes, 
+       1) the button in the toolbar must be updated, 
+       2) the existing objects' of-label must be changed */
   @Operation nameChangedDaemon(text,slot,newName,oldName) // diagram -> model
     if class.name.toString() <> newName
     then 
@@ -91,19 +94,16 @@ context ClassXNode
   
 context ClassXNode
   @Operation daemon_changeOfFieldInstances(newName)
-    //("_changeOfFieldInstances").println();
-    //("class = " + self.class.name).println();
-    //("diagramMapping = " + self.owner).println();
     let diagramMapping = self.owner in 
       @For classMap in diagramMapping.classMaps do
         if classMap.class.of() = self.class
-        then 
-          //("Instance found: " + classMap.class.name).println();
-          classMap.node.name.stereotypeText.setText(newName)//classMap.node.stereotype())
+        then
+          classMap.node.name.setStereotypeText(newName)
         end
       end
     end
   end
+  
   
   
   

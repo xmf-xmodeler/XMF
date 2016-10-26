@@ -29,6 +29,11 @@ context Clients::ClassDiagrams::NameBox
   end
   
   context Clients::ClassDiagrams::NameBox
+  @Operation setStereotypeText(text)
+  	 self.stereotypeText.setText("^" + text + "^")
+  end
+  
+  context Clients::ClassDiagrams::NameBox
   @Operation addDisplays():XCore::Element
       if sourcePackage <> ""
       then
