@@ -1002,9 +1002,9 @@ context ClassMapping
       self.classNodeAdded(classNode)
     end
     
-    @Operation classNodeRemovedDaemon(diagram,slot,classNode)
+    /*@Operation classNodeRemovedDaemon(diagram,slot,classNode)
       self.classNodeRemoved(classNode)
-    end
+    end*/
     
     @Operation classRemoved(class)
       @For map in classMaps
@@ -1012,6 +1012,11 @@ context ClassMapping
         do
           map.node.delete();
           self.remove(map)
+      end;
+      
+      if class.isMetaClass() 
+        andthen class.level > 0 
+          then diagram.removeAnyHandler(null, class.name)
       end;
       
       // Elements (dropped using other) are stored in the classes
@@ -1026,13 +1031,13 @@ context ClassMapping
       end
     end
     
-    @Operation classNodeRemoved(classNode)
+    /*@Operation classNodeRemoved(classNode)
       
       // no longer used, node is now removed by removing the
       // model element first
       
       self
-    end
+    end*/
     
     @Operation classInheritanceMaps():Set(ClassXInheritanceEdge)
       inheritanceMaps->select(m | m.isKindOf(ClassXInheritanceEdge))

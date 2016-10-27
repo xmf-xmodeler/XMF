@@ -139,7 +139,7 @@ context Root::Extensions
 		if size = 0 
 		then xmf.questionYesOnly("No instance of role filler class found! This instance will behave erratically until the roleFiller slot is set to a non-null value.")
 		elseif size = 1
-		then xmf.questionYesOnly("The only known instance of the roll filler class (" + type.name + ") will be used as role filler.");
+		then xmf.questionYesOnly("The only known instance of the role filler class (" + type.name + ") will be used as role filler.");
 				object.setDelegation(list.asSeq().head())
 		else // if size > 1
 		  let choice = xmf.select("Role-filler of type " + type.name + " required","Select role-filler", list.asSeq(), list.asSeq().head(),null) 

@@ -226,7 +226,9 @@ context MappingMapping
       end
     end
     
+    // Is this used anywhere?
     @Operation classRemoved_mappingDiagramDaemon(package,slot,class)
+      ("classRemoved_mappingDiagramDaemon").println();
       if class.isReallyKindOf(XMap::Map)
       then self.mapRemoved(class)
       end
