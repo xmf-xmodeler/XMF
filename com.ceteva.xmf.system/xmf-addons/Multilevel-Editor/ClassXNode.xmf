@@ -93,7 +93,7 @@ context ClassXNode
     if class.isMetaClass() 
       andthen class.level > 0 
         then 
-        owner.diagram.renameAnyHandler(oldName,newName,true)
+        owner.diagram.renameAnyHandler(newName,oldName,true)
     end
   end  
   
