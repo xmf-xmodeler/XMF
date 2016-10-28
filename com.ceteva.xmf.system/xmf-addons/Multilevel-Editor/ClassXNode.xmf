@@ -81,16 +81,20 @@ context ClassXNode
     if class.name.toString() <> newName
     then 
       class.setName(newName);
-      self.daemon_changeButtonInToolbar();
+      self.daemon_changeButtonInToolbar(newName,oldName);
       self.daemon_changeOfFieldInstances(newName)
       //;("ClassXNode::nameChangedDaemon(text="+text+",slot="+slot+",newName="+newName+",oldName="+oldName+")").println()
     end
   end  
   
 context ClassXNode
-  @Operation daemon_changeButtonInToolbar()
-    null//("daemon_changeButtonInToolbar " + owner).println()
-    
+  @Operation daemon_changeButtonInToolbar(newName,oldName)
+    //("daemon_changeButtonInToolbar " + oldName + " --> " + newName).println();
+    if class.isMetaClass() 
+      andthen class.level > 0 
+        then 
+        owner.diagram.renameAnyHandler(oldName,newName,true)
+    end
   end  
   
 context ClassXNode

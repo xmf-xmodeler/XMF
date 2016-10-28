@@ -378,22 +378,53 @@ context Diagrams
       // new state...
       toggleHandlers.put(type,handler)
     end  
+    
+      @Operation renameAnyHandler(newName,oldName,withClientCommand)
+        // When any of the handlers added are renamed they are retrieved/renamed/deleted...
       
-    @Operation removeAnyHandler(name)
+        if actionHandlers.hasKey(oldName) 
+          then 
+          let value = actionHandlers.get(oldName)
+          in 
+            actionHandlers.remove(oldName);
+            actionHandlers.put(newName,value)
+          end
+        end;
+        
+        if newHandlers.hasKey(oldName) 
+          then 
+          let value = newHandlers.get(oldName)
+          in 
+            newHandlers.remove(oldName);
+            newHandlers.put(newName,value)
+          end
+        end;
+        
+       if toggleHandlers.hasKey(oldName) 
+          then 
+          let value = toggleHandlers.get(oldName)
+          in 
+            toggleHandlers.remove(oldName);
+            toggleHandlers.put(newName,value)
+          end
+        end
+        
+         if withClientCommand then 
+          @Command(self) renameAnyCommand(self,newName,oldName) end 
+        end
+      end
+      
+    @Operation removeAnyHandler(name,withClientCommand)
       // When any of the handlers added above becomes obsolete it is removed from 
       // the respective list
       
       if actionHandlers.hasKey(name) then actionHandlers.remove(name) end;
       if newHandlers.hasKey(name)    then newHandlers.remove(name) end;
-      if toggleHandlers.hasKey(name) then toggleHandlers.remove(name) end
-    end
-    
-    //                          Only needed 
-    //                          as diff to above.
-    //                          Use null
-    @Operation removeAnyHandler(group:String,name:String)//,handler:Operation)
-      self.removeAnyHandler(name); 
-      @Command(self) removeAnyCommand(self,name) end  
+      if toggleHandlers.hasKey(name) then toggleHandlers.remove(name) end;
+      
+        if withClientCommand then
+          @Command(self) removeAnyCommand(self,name) end 
+        end
     end
     
     @Operation defineActionHandler(group:String,label:String,type:String,icon:String,handler) 

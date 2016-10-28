@@ -1016,7 +1016,7 @@ context ClassMapping
       
       if class.isMetaClass() 
         andthen class.level > 0 
-          then diagram.removeAnyHandler(null, class.name)
+          then diagram.removeAnyHandler(class.name,true)
       end;
       
       // Elements (dropped using other) are stored in the classes

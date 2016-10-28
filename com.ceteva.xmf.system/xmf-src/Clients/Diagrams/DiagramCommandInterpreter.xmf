@@ -36,6 +36,7 @@ context Diagrams
           // [newToggleCommand(diagramId,groupName,label,typeName,state,iconPath)]
           // [newActionCommand(diagramId,groupName,label,typeName,iconPath)]
           // [removeAnyCommand(diagram,toolName)]
+          // [renameAnyCommand(diagram,toolName)]
           // [newToolGroupCommand(diagramId,groupId,toolName,isEdge)]
           // [newWayPointCommand(wayPoint)]
           // [resizeCommand(element,width,height)]
@@ -462,10 +463,17 @@ context Diagrams
       end
     end    
     
-    // Removes ANY Tool, Toggle or Action // to BE Used 161026
+    // Removes ANY Tool, Toggle or Action
     @Operation removeAnyCommand(diagram,toolName)
       @SendCommand(self)
         removeAny(diagram.id(),toolName)
+      end
+    end   
+            
+    // Renames ANY Tool, Toggle or Action
+    @Operation renameAnyCommand(diagram,newName,oldName)
+      @SendCommand(self)
+        renameAny(diagram.id(),newName,oldName)
       end
     end   
         
