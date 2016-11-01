@@ -22,11 +22,12 @@ context Diagrams
      
     @Operation delete(elementId) 
        self.debug("delete[~S]~%",Seq{elementId});
-       self.find(elementId).delete()
-    end  
+       ("delete " + elementId).println()
+       //self.find(elementId).delete()
+    end   
        
     @Operation deleteIfOfContained(elementId) 
-       self.find(elementId).delete_client_redirect()
+      self.find(elementId).delete_client_redirect()
     end
 
     @Operation edgeDeselected(id)
@@ -242,8 +243,19 @@ context Diagrams
     end
     
     @Operation readDeleteIfOfContained(parameters)
-      let elementId = parameters.at(0) in
-        self.find(elementId).delete_client_redirect()
+      let elementId = parameters.at(0) 
+      then node = self.find(elementId) // always a node?
+      then diagram = node.owner // should work anyway
+      then packageMapping = diagram.owner // :PackageXMappingDiagram
+      then nodeMaps = packageMapping.nodeMaps()
+      in
+        @Find(elementXnode, nodeMaps)
+          when elementXnode.node = node
+          do let class = elementXnode.class
+          in class.delete_client_redirect()
+          end
+        end
+        
       end
     end
     

@@ -79,12 +79,13 @@ context XMF
 
 context XMF
   @Operation input(title:String,question:String,value:String):String
-    let value = self.dialogClient().newInputDialog(title,question,value)
+    self.dialogClient().newInputDialog(title,question,value)
+    /*let value = self.dialogClient().newInputDialog(title,question,value)
     in if value <> "-1"
        then value
        else null
        end
-    end
+    end*/
   end
 
 context XMF
@@ -440,12 +441,13 @@ context XMF
 
 context XMF
   @Operation getString(title,question,value)
-    let value = self.dialogClient().newInputDialog(title,question,value)
+    self.dialogClient().newInputDialog(title,question,value)
+    /*let value = self.dialogClient().newInputDialog(title,question,value)
     in
       if value = "-1" then null
       else value
       end
-    end
+    end*/
   end
 
 context XMF

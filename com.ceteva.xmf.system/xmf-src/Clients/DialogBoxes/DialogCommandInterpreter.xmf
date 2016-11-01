@@ -81,7 +81,13 @@ context DialogBoxes
     end
     
     @Operation newInputDialog(dialog)
-      self.call("newInputDialog",Seq{dialog.title,dialog.question,dialog.value})
+      let result = self.call("newInputDialog",Seq{dialog.title,dialog.question,dialog.value})
+      in 
+        if result.of() = Boolean // OK Button returns a String, Cancel return Boolean
+        then null
+        else result
+        end
+      end
     end
     
     @Operation newOrderingDialog(dialog)
