@@ -789,18 +789,18 @@ let dm = xmf.diagramManager();
     snapshotDiagramTotalHandler = 
       @Operation (element,name) element.createSnapshotDiagram_raw(name,true) end
 in
-  dm.addContribution(DiagramContribution("Class Diagram",
-                                         XCore::Package,
-                                         classDiagramPartialHandler).setDropEnabled(true));
-  dm.addContribution(DiagramContribution("Class Diagram (Total View)",
+  dm.addContribution(DiagramContribution("Class Diagram", // (Default View)
                                          XCore::Package,
                                          classDiagramTotalHandler).setDropEnabled(true));
-  dm.addContribution(DiagramContribution("Snapshot Diagram",
+  dm.addContribution(DiagramContribution("Class Diagram (Partial View)",
+                                         XCore::Package,
+                                         classDiagramPartialHandler).setDropEnabled(true));
+  dm.addContribution(DiagramContribution("Snapshot Diagram", // (Default View)
                                          XCore::Snapshot,
-                                         snapshotDiagramPartialHandler).setDropEnabled(true));
-  dm.addContribution(DiagramContribution("Snapshot Diagram (Total View)",
+                                         snapshotDiagramTotalHandler).setDropEnabled(true));
+  dm.addContribution(DiagramContribution("Snapshot Diagram (Partial View)",
                                          XCore::Snapshot,
-                                         snapshotDiagramTotalHandler).setDropEnabled(true))
+                                         snapshotDiagramPartialHandler).setDropEnabled(true))
 end;
 
 

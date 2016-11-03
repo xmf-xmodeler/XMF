@@ -456,8 +456,8 @@ context XCore::Package
   @Operation createClassDiagram(name,total,showDiagram)
     let diagramType = 
       if total
-      then "Class Diagram (Total View)"
-      else "Class Diagram"
+      then "Class Diagram" // (Default View)
+      else "Class Diagram (Partial View)"
       end
     in xmf.diagramManager().newDiagram(self,name,diagramType,showDiagram)
     end
@@ -488,8 +488,8 @@ context XCore::Snapshot
   @Operation createSnapshotDiagram(name,total,showDiagram)
     let diagramType = 
       if total
-      then "Snapshot Diagram (Total View)"
-      else "Snapshot Diagram"
+      then "Snapshot Diagram" // (Default View)
+      else "Snapshot Diagram (Partial View)"
       end
     in xmf.diagramManager().newDiagram(self,name,diagramType,showDiagram)
     end
@@ -517,7 +517,7 @@ context Package
 
 context Package
   @Operation createAndLayoutDiagram(file,name,showDiagram)
-    let diagram = xmf.diagramManager().newDiagram(self,name,"Class Diagram (Total View)",showDiagram);
+    let diagram = xmf.diagramManager().newDiagram(self,name,"Class Diagram",showDiagram); // (Default View)
         layoutOp = 
           @Operation(d)
             @WithoutRendering(d)

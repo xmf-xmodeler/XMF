@@ -11,7 +11,7 @@ context XCore::Package
       self.add(snapshot);
       let name = diagramManager.newDiagramName(snapshot)
       in
-        diagramManager.newDiagram(snapshot,name,"Snapshot Diagram")
+        diagramManager.newDiagram(snapshot,name,"Snapshot Diagram (Partial View)")
       end
     end
   end
@@ -32,7 +32,7 @@ context XCore::NameSpace
           self.add(snapshot); 
       	  let name = diagramManager.newDiagramName(snapshot)
       	  in
-        	diagramManager.newDiagram(snapshot,name,"Snapshot Diagram")
+        	diagramManager.newDiagram(snapshot,name,"Snapshot Diagram (Partial View)") 
       	  end
         end
       end
@@ -72,7 +72,7 @@ context XCore::Snapshot
 
 context XCore::Snapshot
   @Operation createAndLayoutDiagram(file,name,showDiagram)
-    let diagram = xmf.diagramManager().newDiagram(self,name,"Snapshot Diagram (Total View)",showDiagram)
+    let diagram = xmf.diagramManager().newDiagram(self,name,"Snapshot Diagram",showDiagram)  // (Default View)
     in
       @WithoutRendering(diagram)
         diagram.loadLayout(file)
