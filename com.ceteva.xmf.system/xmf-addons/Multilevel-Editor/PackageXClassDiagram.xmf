@@ -97,9 +97,9 @@ context ClassMapping::PackageXClassDiagram
 
 context ClassMapping::PackageXClassDiagram  
     
-    @Operation updateToolGroup(group)
-    	let groupname = self.getToolGroupName(group)
-		in
+    @Operation updateToolGroup(groupname)
+    	//let groupname = self.getMetaToolGroupName(group)
+		//in
 			if self.paletteList->contains(groupname)
 			then
 				false
@@ -107,46 +107,28 @@ context ClassMapping::PackageXClassDiagram
 				self.paletteList := self.paletteList->including(groupname);
 				diagram.defineToolGroup(groupname)
 			end
-		end
+		//end
     end
 
 context ClassMapping::PackageXClassDiagram  
 	
-	@Operation getToolGroupName(group)
+	@Operation getMetaToolGroupName(group)
 		@Case group of
 				[ "X" ] do
 					"Top Level"
 				end
-				[ "0" ] do
-					"M0"
-           		end
-				[ "1" ] do
-					"M1"
-           		end
-				[ "2" ] do
-					"M2"
-           		end
-				[ "3" ] do
-					"M3"
-           		end
-				[ "4" ] do
-					"M4"
-           		end
-				[ "5" ] do
-					"M5"
-           		end
 				else 
 					if group.isKindOf(Integer) 
 					then "M" + group
 					else group
 					end	
-			end
+			    end
 	end
     
 context ClassMapping::PackageXClassDiagram  
 	
 	@Operation getElementIcon(group)
-		@Case group of
+		/*@Case group of
 				[ "X" ] do
 					"XCore/Class.gif"
 				end
@@ -170,8 +152,8 @@ context ClassMapping::PackageXClassDiagram
 				[ "5" ] do
 					"XCore/Class.gif"
            		end
-				else "XCore/Class.gif"
-			end
+				else */"XCore/Class.gif"/*
+			end*/
 	end
 
 context ClassMapping::PackageXClassDiagram  
@@ -196,12 +178,12 @@ context ClassMapping::PackageXClassDiagram
         
 		let group = if metaclass = FMML::MetaClass 
 					then "X"
-					else (metaclass.level).toString()
+					else metaclass.level
 					end
 		in
-			theMapping.updateToolGroup(group);
+			theMapping.updateToolGroup(theMapping.getMetaToolGroupName(group));
 			theDiagram.defineNewHandler(
-				theMapping.getToolGroupName(group),	
+				theMapping.getMetaToolGroupName(group),	
 				metaclass.name.toString(),
 				false,
 				theMapping.getElementIcon(group),//"XCore/Class.gif",
@@ -234,9 +216,9 @@ context ClassMapping::PackageXClassDiagram
 context ClassMapping::PackageXClassDiagram  
 	
 	@Operation instantiationHandlerObject(metaclass,thePackage,theDiagram,theMapping)
-		theMapping.updateToolGroup((metaclass.level).toString());
+		theMapping.updateToolGroup(theMapping.getMetaToolGroupName(metaclass.level));
 		theDiagram.defineNewHandler(
-			theMapping.getToolGroupName((metaclass.level).toString()),
+			theMapping.getMetaToolGroupName(metaclass.level),
 			metaclass.name.toString(),
 			false,
 			theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
@@ -277,10 +259,10 @@ context ClassMapping::PackageXClassDiagram
 											end
 						in 
 							thePackage.add(domainType);
-//                   		theDiagram.defineToolGroup("M0");
-							theMapping.updateToolGroup("M0");
+//                   		theDiagram.defineToolGroup(theMapping.getMetaToolGroupName(0));
+							theMapping.updateToolGroup(theMapping.getMetaToolGroupName(0));
 							theDiagram.defineNewHandler(
-								"M0",
+								theMapping.getMetaToolGroupName(0),
 								domainType.name.toString(),
 								false,
 								"XCore/Object.gif",
@@ -306,12 +288,12 @@ context ClassMapping::PackageXClassDiagram
 						map.node.showMetaslots(true)
 					else 
 						"No Map Found".println()
-				end; 
-//		   		theDiagram.defineToolGroup("M"+(class.level - 1));
-				theMapping.updateToolGroup("M"+(class.level - 1));
+				end; 				
+//		   		theDiagram.defineToolGroup(theMapping.getMetaToolGroupName(class.level - 1));
+				theMapping.updateToolGroup(theMapping.getMetaToolGroupName(class.level - 1));
 				theDiagram.defineNewHandler(
 //             	if isMeta then "Meta Types" else "Domain Types" end,
-					"M"+(class.level - 1),	
+					theMapping.getMetaToolGroupName(class.level - 1),	
 					class.name.toString(),
 					false,
 					"XCore/Class.gif",
