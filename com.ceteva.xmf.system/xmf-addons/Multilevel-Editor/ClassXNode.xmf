@@ -69,7 +69,6 @@ context ClassXNode
       node.setName(newName.toString());
       self.daemon_changeButtonInToolbar();
       self.daemon_changeOfFieldInstances(newName)
-      //;("ClassXNode::nameChanged_classDiagramDaemon(obj="+obj+",slot="+slot+",newName="+newName+",oldName="+oldName+")").println()
     end
   end   
   
@@ -83,7 +82,6 @@ context ClassXNode
       class.setName(newName);
       self.daemon_changeButtonInToolbar(newName,oldName);
       self.daemon_changeOfFieldInstances(newName)
-      //;("ClassXNode::nameChangedDaemon(text="+text+",slot="+slot+",newName="+newName+",oldName="+oldName+")").println()
     end
   end  
   
