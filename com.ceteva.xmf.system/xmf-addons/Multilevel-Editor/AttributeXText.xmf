@@ -54,14 +54,22 @@ context AttributeXText
         	newInstLevel.asInt();
         	if newInstLevel <> " "
         	then
-     	  		attribute.isIntrinsic := true	
+                if 0 <= newInstLevel.asInt() andthen newInstLevel.asInt() < attribute.owner.level
+                then attribute.instLevel := newInstLevel.asInt(); attribute.isIntrinsic := true
+                else text.instLevel.instLevel.setText(if attribute.isIntrinsic 
+                     	then attribute.instLevel.toString()
+                     	else " "
+                     	end);                     
+                     xmf.warning("Level " + newInstLevel + " not allowed")
+                end	
         	else
   	       		attribute.isIntrinsic := false	
         	end
         catch(x)
+            xmf.warning("Level " + newInstLevel + "not an integer number");
         	attribute.isIntrinsic := false
-        end;
-        attribute.instLevel := newInstLevel
+        end//;
+        //attribute.instLevel := newInstLevel
       else
         false
       end      
