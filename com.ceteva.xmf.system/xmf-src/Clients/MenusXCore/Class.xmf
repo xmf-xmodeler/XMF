@@ -31,6 +31,28 @@ context Class
   @Operation newOtherAttributeHandler()
     @Operation newOtherAttribute()
       let 
+        selectedClass = xmf.treeSelection(
+            "Select End",
+            Seq{"Classes","*",Snapshot().makePackageTree({self.owner})},
+            {},
+            null)
+      then
+        name = self.newName("att") 
+      then 
+        attribute = if selectedClass <> null then XCore::Attribute(name,selectedClass) else null end
+      in
+        if attribute <> null then 
+          self.add(attribute);
+          attribute.init() 
+        end
+      end
+    end
+  end
+  
+context Class
+  @Operation newOtherAttributeHandler_Old()
+    @Operation newOtherAttribute_Old()
+      let 
         metaClasses = self.owner.metaPackage.allContents()->select(c | c.isKindOf(Class) and c <> null) then
         metaClasses = metaClasses + self.owner.allContents()->select(c | c.isKindOf(Class) and c <> null) then
         attributes = metaClasses->select(a | a.allParents()->includes(Attribute))->asSeq then

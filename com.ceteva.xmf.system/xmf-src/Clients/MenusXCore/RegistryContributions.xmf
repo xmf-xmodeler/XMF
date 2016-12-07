@@ -198,6 +198,10 @@ end;
   XCore::Class::newOtherAttributeHandler()
 end;
 
+@Menu "Add Element":"Attribute":"Other (old)" on XCore::Class
+  XCore::Class::newOtherAttributeHandler_Old()
+end;
+
 @Menu "Create Snapshot" on XCore::Package
   XCore::Package::createSelfSnapshot
 end;
