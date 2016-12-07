@@ -190,21 +190,27 @@ context ClassMapping::PackageXClassDiagram
 				@Operation(x,y)
                     let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
                     in
-                        if not (name = null)
+                        if not name = null
                         then
-//                       metaclass.attributes->iterate(a ignore = null | a.name.println(); a.owner.println());
-//                            metaclass.attributes.browse();
-//"___".println();
-                            let class = metaclass(name)
-                            in
-                                                       //metaclass.attributes->iterate(a ignore = null | a.name.println(); a.owner.println());
-                                class.addParent(FMML::MetaClass);
-                                thePackage.add(class);
-                                theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
-                                @Find(map,theMapping.classMaps) when map.class = class do
-                                    map.node.move(x,y)
-                                end//;
-                                //class.checkForNeededConstraints()
+                            if not name.isValidName() 
+                              then xmf.warning(
+    						    "Cannot use name \"" + name + "\" as the name is illegal. "
+        						+ "A valid name must start with a letter, followed by letters, numbers or an underscore.")
+                            elseif thePackage.hasElement(name)
+                              then xmf.warning(
+								"Cannot use name \"" + name + "\" as an element "
+         						+ "already exists in " + thePackage.toString() + " with the same name.")
+                            else 
+                            	let class = metaclass(name)
+                            	in
+                                    class.addParent(FMML::MetaClass);
+                                	thePackage.add(class);
+                                	theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
+                                	@Find(map,theMapping.classMaps) when map.class = class do
+                                	    map.node.move(x,y)
+                                	end//;
+                                	//class.checkForNeededConstraints()
+                            	end
                             end
                         end
                     end 
@@ -215,35 +221,44 @@ context ClassMapping::PackageXClassDiagram
 
 context ClassMapping::PackageXClassDiagram  
 	
-	@Operation instantiationHandlerObject(metaclass,thePackage,theDiagram,theMapping)
-		theMapping.updateToolGroup(theMapping.getMetaToolGroupName(metaclass.level));
-		theDiagram.defineNewHandler(
-			theMapping.getMetaToolGroupName(metaclass.level),
-			metaclass.name.toString(),
-			false,
-			theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
-			@Operation(x,y)
-				//theMapping.dropInstanceOf(metaclass,x,y)
-				let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
-                    in
-                        if not (name = null)
-                        then
-                            let class = metaclass(name)
-                            in
-                                class.addParent(FMML::MetaClass);
-                                thePackage.add(class);
-                                //theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
-                                @Find(map,theMapping.classMaps) when map.class = class do
-                                    map.node.move(x,y);
-                                    map.node.showMetaslots(true);
-                                    map.node.showAttributes(false)
-                                end
-                            end
-                        end
-                    end
-			end
-		)
-	end
+@Operation instantiationHandlerObject(metaclass,thePackage,theDiagram,theMapping)
+	theMapping.updateToolGroup(theMapping.getMetaToolGroupName(metaclass.level));
+	
+    theDiagram.defineNewHandler(
+	  theMapping.getMetaToolGroupName(metaclass.level),
+	  metaclass.name.toString(),
+	  false,
+	  theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
+	  @Operation(x,y)
+		let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
+      in
+          if not name = null
+        then
+            if not name.isValidName() 
+              then xmf.warning(
+    			"Cannot use name \"" + name + "\" as the name is illegal. "
+        		+ "A valid name must start with a letter, followed by letters, numbers or an underscore.")
+            elseif thePackage.hasElement(name)
+              then xmf.warning(
+				"Cannot use name \"" + name + "\" as an element "
+         		+ "already exists in " + thePackage.toString() + " with the same name.")
+            else
+              let class = metaclass(name)
+            in
+              class.addParent(FMML::MetaClass);
+              thePackage.add(class);
+              @Find(map,theMapping.classMaps) when map.class = class do
+                map.node.move(x,y);
+                map.node.showMetaslots(true);
+                map.node.showAttributes(false)
+              end // @Find(
+            end // let class = metaclass(name)             
+            end // if not name.isValidName() / thePackage.hasElement(name)
+        end // if not name = null
+      end // name = xmf.getString...
+	  end // @Operation(x,y)...
+	) // defineNewHandler(...
+end // @Operation instantiationHandlerObject(...
 	
 /*    @Operation domainTypeHandler(metaclass,thePackage,theDiagram,theMapping)
 		@Operation(x,y)
