@@ -119,7 +119,7 @@ context ClassMapping
         @SlotValueChanged multi once ClassXNode::attributeTypeChangedDaemon(attribute,"type") end
       elseif attribute.underlyingType().isKindOf(DataType)
       then self.attributeAdded(attribute)
-      else owner.attributeAdded(attribute)
+      else self.attributeAdded(attribute)// TEST owner.attributeAdded(attribute)
       end
     end
     
@@ -608,4 +608,10 @@ context ClassMapping
         end
       end
     end
+    
+  /* Used for multi-Level. Does nothing otherwise */
+  @Operation daemon_changeButtonInToolbar(newName,oldName)
+    null
+  end  
+    
   end
