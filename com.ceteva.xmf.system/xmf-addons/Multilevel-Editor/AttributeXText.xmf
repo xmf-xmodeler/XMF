@@ -66,8 +66,9 @@ context AttributeXText
   	       		attribute.isIntrinsic := false	
         	end
         catch(x)
-            xmf.warning("Level " + newInstLevel + "not an integer number");
-        	attribute.isIntrinsic := false
+            xmf.warning("Level " + newInstLevel + " not an integer number");
+        	attribute.isIntrinsic := false;
+        	text.instLevel.instLevel.setText(" ")
         end//;
         //attribute.instLevel := newInstLevel
       else
