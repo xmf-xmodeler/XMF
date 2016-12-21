@@ -40,11 +40,11 @@ context ClassMapping
     end
  
     @Operation roleClassChangedDaemon(edge,slot,newPort,oldPort)
-      owner.delegationSourceChanged(self,newPort.owner)
+      owner.delegationSourceChanged(self,newPort.owner,oldPort.owner)
     end
     
     @Operation roleFillerClassChangedDaemon(edge,slot,newPort,oldPort)
-      owner.delegationTargetChanged(self,newPort.owner)
+      owner.delegationTargetChanged(self,newPort.owner,edge.source.owner)
     end
         
     @Operation hotLoaded()
