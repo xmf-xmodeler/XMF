@@ -1,0 +1,20 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Projects;
+import Clients::ExtensionPoints;
+
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Meta.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/Meta.o").loadBin(true);
+
+AuxiliaryClasses.browse();
+
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Meta2.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/Meta2.o").loadBin(true);
+
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Types.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/Types.o").loadBin(true);
+
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Types2.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/Types2.o").loadBin(true);
+
