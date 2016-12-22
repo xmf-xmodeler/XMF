@@ -58,7 +58,11 @@ context Diagrams
       self.lineStyle := Line::solidLine;
       if source = target then
         self.addSelfWaypoints()
-      end
+      end;
+      self.xStart := xStart - source.owner.x;
+      self.yStart := yStart - source.owner.y;
+      self.xEnd := xEnd - target.owner.x;
+      self.yEnd := yEnd - target.owner.y
     end
    
     @Constructor(id,source,target,sourceHead,targetHead,labels,wayPoints,color) !
@@ -72,8 +76,17 @@ context Diagrams
       self.lineStyle := Line::solidLine;
       if source = target 
       then self.addSelfWaypoints()
-      end
+      end;
+      self.xStart := xStart - source.owner.x;
+      self.yStart := yStart - source.owner.y;
+      self.xEnd := xEnd - target.owner.x;
+      self.yEnd := yEnd - target.owner.y
     end 
+    
+    @Operation get_xStart() xStart + source.owner.x end
+    @Operation get_yStart() yStart + source.owner.y end
+    @Operation get_xEnd()   xEnd   + target.owner.x end
+    @Operation get_yEnd()   yEnd   + target.owner.y end
     
     @Operation add(element)
       @TypeCase(element)

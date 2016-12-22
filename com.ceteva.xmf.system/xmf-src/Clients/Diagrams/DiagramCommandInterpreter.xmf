@@ -237,10 +237,10 @@ context Diagrams
                    edge.color().red(),
                    edge.color().green(),
                    edge.color().blue(),
-                   edge.xStart,
-                   edge.yStart,
-                   edge.xEnd,
-                   edge.yEnd)
+                   edge.get_xStart(),
+                   edge.get_yStart(),
+                   edge.get_xEnd(),
+                   edge.get_yEnd())
          end
            else 
          @SendCommand(self)
