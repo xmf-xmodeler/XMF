@@ -1,0 +1,264 @@
+parserImport XOCL;
+
+import Root::FMML;
+
+context Root
+
+@Package AuxiliaryClasses metapackage FMML extends FMML
+	
+//	@Enum ops (EnumChoice(m), EnumChoice(d) ) end
+	
+	@Class CompositionRelation metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		@Attribute elements : Unit end
+		@Attribute operator : String end
+		@Attribute result : Unit end
+	end
+
+	@Class ConversionRate metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		//@Attribute from : Unit end
+		@Attribute to : Unit end
+		@Attribute rate : Float end
+	end 
+
+/*	@Class VolatileConversionRate metaclass Root::FMML::MetaClass extends ConversionRate
+		//@Attribute from : Unit end
+		@Attribute from : Date end
+		@Attribute to : Date end
+	end */
+	
+	@Class Unit metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		@Attribute name : String end
+		@Attribute description : String end
+		@Attribute symbol : String end
+		@Attribute convertsTo : Seq(ConversionRate) end
+		@Attribute partOf : Seq(CompositionRelation) end
+		@Attribute composedOf : Seq(CompositionRelation) end
+		@Attribute value : Float end
+		
+/*		@Operation add(v : Element):XCore::Element
+		  if v.isKindOf(Unit)
+	      then
+			let n = self.copy()
+      		in n.value := v.value + self.value;
+         		n
+      		end
+	      else
+	       	super(n)
+    	  end
+	    end                                          */
+
+		@Operation calcConversionPath(u: Unit)
+			if u = self
+			then
+				[]
+			else
+				let pathSeq = [[self]];
+					omit = [self];
+					newPathSeq = [];
+					found = false
+				in		
+					@While (not pathSeq.isEmpty()) and (not found) do
+						let path	 = pathSeq.head();
+							convSeq	 = []
+						in
+							pathSeq := pathSeq.tail();
+							convSeq := path.last().convertsTo;
+							@While (not convSeq.isEmpty()) and (not found) do
+								let conv = convSeq.head()
+								in
+									convSeq := convSeq.tail();
+									if conv.to = u
+									then
+										newPathSeq := [path+[conv.to]];
+										found := true
+									else
+										if not omit.includes(conv.to)
+										then
+											newPathSeq := newPathSeq+[path+[conv.to]];
+											omit := omit.including(conv.to)
+										end
+									end		
+								end	
+							end
+						end;
+						pathSeq := newPathSeq;
+						newPathSeq := []
+					end;
+					if pathSeq.isEmpty()
+					then
+						[]
+					else
+						pathSeq.head()
+					end
+				end	
+			end
+		end
+	
+		@Operation toString():String
+	      self.name.toString() + " (" + self.symbol.toString() + ")"
+	    end
+
+		@Operation parseValue(value)
+			if value.hasSuffix(self.symbol)
+			then
+				value.reverse().drop(self.symbol.size()).reverse().asFloat()
+			else
+				value.asFloat()
+			end
+		end
+
+	end 
+
+	@Class ComposedType metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		@Attribute value : String end
+
+		@Operation toString():String
+		      self.name.toString()
+	    end
+	end
+
+	@Class M1ComposedType metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		@Operation toString():String
+		      self.value.toString()
+	    end
+
+	end
+
+	@Class M1Unit metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
+		@Operation add(v : Element):XCore::Element
+		  if v.of().of() = Unit
+	      then
+			try
+				let	element = v;
+					n = self.copy()
+				in	
+					if self.of() <> v.of()
+					then
+						element := element.convertTo(self.of())
+					end;
+					n.value := self.value + element.value;
+	         		n	
+				end
+			catch(exception)
+			  throw exception
+			end
+	      else
+	       	super(v)
+    	  end
+	    end       
+
+		@Operation sub(v : Element):XCore::Element
+			try
+				let	element = v;
+					n = self.copy()
+				in	
+					if self.of() <> v.of()
+					then
+						element := element.convertTo(self.of())
+					end;
+					n.value := self.value - element.value;
+	         		n	
+				end
+			catch(exception)
+			  throw exception
+			end
+	    end   
+
+		@Operation mul(v : Element):XCore::Element
+				let	element = v;
+					partOfSeq = self.of().partOf;
+					result = null
+				in	
+					@Find(compo, partOfSeq)
+					when compo.elements.includes(element.of()) and compo.operator = "m"
+					do
+						result := compo.result;
+						result := result();
+						result.value := self.value * element.value			
+					else
+						let	partOf = null
+						in
+							@While not partOfSeq.isEmpty() and result = null do
+								partOf := partOfSeq.head();
+								partOfSeq := partOfSeq.tail();
+								result := try
+									element := element.convertTo(partOf.elements.excluding(self.of()).head());
+									result := partOf.result;
+									result := result();
+									result.value := self.value * element.value;	
+									result
+								catch(exception)
+								  null
+								end 
+							end
+						end
+					end;
+	         		result
+				end
+	    end 
+
+		@Operation slash(v : Element):XCore::Element
+				let	element = v;
+					partOfSeq = self.of().partOf;
+					result = null
+				in	
+					@Find(compo, partOfSeq)
+					when compo.elements.includes(element.of()) and compo.operator = "d"
+					do
+						result := compo.result;
+						result := result();
+						result.value := self.value / element.value			
+					else
+						let	partOf = null
+						in
+							@While not partOfSeq.isEmpty() and result = null do
+								partOf := partOfSeq.head();
+								partOfSeq := partOfSeq.tail();
+								result := try
+									element := element.convertTo(partOf.elements.excluding(self.of()).head());
+									result := partOf.result;
+									result := result();
+									result.value := self.value / element.value;	
+									result
+								catch(exception)
+								  null
+								end 
+							end
+						end
+					end;
+	         		result
+				end
+	    end                                    
+
+		@Operation convertTo(u: Unit)
+			let path = self.of().calcConversionPath(u);
+				element = null;	
+				result = u()
+			in
+				if path.isEmpty()
+				then
+					self.error("Conversion from "+ self.of().name +" to "+u.name+ " not defined")
+				else
+					result.value := self.value;
+					@While not path.tail().isEmpty() do
+						element := path.head();
+						path := path.tail();
+
+						@Find(conv,element.convertsTo)
+						when conv.to = path.head()
+						do							
+							result.value := result.value * conv.rate
+						end
+					end;
+					result
+				end
+			end
+		end 
+
+		@Operation toString():String
+		      self.value.toString() + self.of().symbol.toString()
+	    end
+
+	end
+	
+end

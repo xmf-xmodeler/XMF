@@ -295,13 +295,52 @@ context Root::FMML
       then
         throw Exception(name + " is intrinsic and cannot be instantiated on this level.")
       else
-        if self.of().of() = XCore::Class
+/*      	if Root.hasElement("AuxiliaryClasses") andthen self.getInternal(name).of().of() = Root::AuxiliaryClasses::Unit
         then
-          Kernel_setSlotValue(self,name,value)
-        else
-          self.of().setInstanceSlot(self,name,value)
+          self.getInternal(name).set("value",value)
+        else */
+        	if self.of().of() = XCore::Class
+        	then
+          		Kernel_setSlotValue(self,name,value)
+        	else
+          		self.of().setInstanceSlot(self,name,value)
+          	//end
         end;
         self
       end
     end
+    
+    /*@Operation getInternal(name : String):Element
+      if self.of().of() = XCore::Class
+      then
+        if self.hasSlot(name)
+        then
+          Kernel_getSlotValue(self,name)
+        else
+          self.slotMissing(name)
+        end
+      else
+        self.of().getInstanceSlot(self,name)
+      end
+    end
+    
+    @Operation get(name : String):Element
+      	if Root.hasElement("AuxiliaryClasses") andthen self.getInternal(name).of().of() = Root::AuxiliaryClasses::Unit
+        then
+          self.getInternal(name).get("value")
+        else
+	      if self.of().of() = XCore::Class
+    	  then
+	        if self.hasSlot(name)
+    	    then
+        	  Kernel_getSlotValue(self,name)
+        	else
+          		self.slotMissing(name)
+	        end
+    	  else
+        	self.of().getInstanceSlot(self,name)
+      	end
+      end
+    end */
+    
   end

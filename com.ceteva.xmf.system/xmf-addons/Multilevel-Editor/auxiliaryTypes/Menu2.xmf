@@ -1,0 +1,11 @@
+parserImport XOCL;
+parserImport Clients::ModelClipboard;
+
+import Clients;
+import ExtensionPoints;
+import DiagramsMapping;
+import Root::FMML;
+
+@Menu "Add Element":"Attribute":"Auxiliary Type" on XCore::Class
+  XCore::Class::newAuxiliaryTypeHandler()
+end;

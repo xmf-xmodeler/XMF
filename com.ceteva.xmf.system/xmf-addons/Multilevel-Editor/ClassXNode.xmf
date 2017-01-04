@@ -54,7 +54,7 @@ context ClassXNode
     
   @Operation generateMetaslots()
     @For metaAttribute in class.of().allAttributes() do
-      if metaAttribute.underlyingType().isKindOf(DataType) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
+      if ( metaAttribute.underlyingType().isKindOf(DataType) or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::Unit) or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::ComposedType) ) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
         @WithoutRendering(node.owner)
           self.metaslotAdded(metaAttribute)
         end

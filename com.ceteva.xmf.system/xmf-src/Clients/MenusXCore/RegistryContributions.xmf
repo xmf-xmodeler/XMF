@@ -202,6 +202,10 @@ end;
   XCore::Class::newOtherAttributeHandler_Old()
 end;
 
+@Menu "Add Element":"Attribute":"Auxiliary Type" on XCore::Class
+  XCore::Class::newAuxiliaryTypeHandler()
+end;
+
 @Menu "Create Snapshot" on XCore::Package
   XCore::Package::createSelfSnapshot
 end;

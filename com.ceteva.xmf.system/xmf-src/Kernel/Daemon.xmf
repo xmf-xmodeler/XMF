@@ -117,7 +117,7 @@ context Daemon
       "persistent" do Kernel_daemonPersistent(self) end
       "traced"     do Kernel_daemonTraced(self)     end
       "target"     do Kernel_daemonTarget(self)     end
-      else         self.error(self.toString() + " has no slot named " + name)
+      else         "" //self.error(self.toString() + " has no slot named " + name)
     end
   end
 
@@ -383,7 +383,7 @@ context Daemon
       "persistent" do Kernel_daemonSetPersistent(self,value)      end
       "traced"     do Kernel_daemonSetTraced(self,value)          end
       "target"     do Kernel_daemonSetTarget(self,value)          end
-      else         self.error(self.toString() + " has no slot named " + name)
+      else         false //self.error(self.toString() + " has no slot named " + name)
     end
   end
   

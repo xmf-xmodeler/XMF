@@ -1,0 +1,385 @@
+parserImport XOCL;
+
+import Root::FMML;
+
+context AuxiliaryClasses
+	@Class DateTime metaclass AuxiliaryClasses::ComposedType extends AuxiliaryClasses::ComposedType
+		@Attribute year : AuxiliaryClasses::Year end
+		@Attribute month : AuxiliaryClasses::Month end
+		@Attribute day : AuxiliaryClasses::Day end
+		@Attribute hour : AuxiliaryClasses::Hour end
+		@Attribute minute : AuxiliaryClasses::Minute end
+		@Attribute second : AuxiliaryClasses::Second end
+		@Attribute millisecond : AuxiliaryClasses::Millisecond end
+
+		@Constructor() 
+			self.year := AuxiliaryClasses::Year(); 
+			self.month := AuxiliaryClasses::Month();
+			self.day := AuxiliaryClasses::Day(); 
+			self.hour := AuxiliaryClasses::Hour(); 
+			self.minute := AuxiliaryClasses::Minute(); 
+			self.second := AuxiliaryClasses::Second(); 
+			self.millisecond := AuxiliaryClasses::Millisecond() 
+		end
+
+		@Constructor(name) 
+			//super(name);
+			self.year := AuxiliaryClasses::Year(); 
+			self.month := AuxiliaryClasses::Month();
+			self.day := AuxiliaryClasses::Day(); 
+			self.hour := AuxiliaryClasses::Hour(); 
+			self.minute := AuxiliaryClasses::Minute(); 
+			self.second := AuxiliaryClasses::Second(); 
+			self.millisecond := AuxiliaryClasses::Millisecond() 
+		end
+
+		@Operation toString():String
+		      self.hour.value.round().toString() + ":" + self.minute.value.round().toString() + ":" + self.second.value.round().toString() + ":" + self.millisecond.value.round().toString() + ", " + self.day.value.round().toString() + "." + self.month.value.round().toString() + "." + self.year.value.round().toString()
+	    end
+
+		@Operation validate()
+			if self.month.value > 12 or self.month.value < 1 then
+				xmf.error(self.month.value+" is an invalid month")
+			end;
+			if self.day.value > 31 or self.day.value < 1 or
+			   ([1,3,5,7,8,10,12].contains(self.month.value) and self.day.value > 30) or
+			   (self.month.value = 2 and self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0) and self.day.value > 29 ) or	
+			   (self.month.value = 2 and not (self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0)) and self.day.value > 28 )	
+			then
+				xmf.error(self.day.value+" is an invalid day for the month "+self.month+" and the year "+self.year)
+			end;
+			if self.hour.value > 23 or self.hour.value < 0 then
+				xmf.error(self.hour.value+" is an invalid hour")
+			end;
+			if self.minute.value > 59 or self.minute.value < 0 then
+				xmf.error(self.minute.value+" is an invalid minute")
+			end;
+			if self.second.value > 59 or self.second.value < 0 then
+				xmf.error(self.second.value+" is an invalid second")
+			end;
+			if self.millisecond.value > 999 or self.millisecond.value < 0 then
+				xmf.error(self.millisecond.value +" is an invalid millisecond ")
+			end
+		end
+
+		@Operation setValue(value)
+			value.validate();
+			self.year := value.year;
+			self.month := value.month;
+			self.day := value.day;
+			self.hour := value.hour; 
+			self.minute := value.minute;
+			self.second := value.second;
+			self.millisecond := value.millisecond
+		end
+
+		@Operation setDay(day)
+			let newday = AuxiliaryClasses::Day()
+			in
+				newday.value := day;
+				self.day := newday;
+				self.day 	
+			end
+		end
+
+		@Operation setMonth(month)
+			let newmonth = AuxiliaryClasses::Month()
+			in
+				newmonth.value := month;
+				self.month := newmonth;
+				self.month 	
+			end
+		end
+
+		@Operation setYear(year)
+			let newyear = AuxiliaryClasses::Year()
+			in
+				newyear.value := year;
+				self.year := newyear;
+				self.year 	
+			end
+		end
+
+		@Operation setHour(hour)
+			let newhour = AuxiliaryClasses::Hour()
+			in
+				newhour.value := hour;
+				self.hour := newhour;
+				self.hour 	
+			end
+		end
+
+		@Operation setMinute(minute)
+			let newminute = AuxiliaryClasses::Minute()
+			in
+				newminute.value := minute;
+				self.minute := newminute;
+				self.minute 	
+			end
+		end
+
+		@Operation setSecond(second)
+			let newsecond = AuxiliaryClasses::Second()
+			in
+				newsecond.value := second;
+				self.second := newsecond;
+				self.second 	
+			end
+		end
+
+		@Operation setMillisecond(millisecond)
+			let newmillisecond = AuxiliaryClasses::Millisecond()
+			in
+				newmillisecond.value := millisecond;
+				self.millisecond := newmillisecond;
+				self.millisecond 	
+			end
+		end
+
+		@Operation parseValue(value)
+			let dtSeq = value.splitBy(",",0,0);
+				newDateTime = DateTime()
+			in
+				if dtSeq.size() <> 2
+				then
+					xmf.error("Conversion Failed")
+				else
+					let dSeq = dtSeq.at(1).splitBy(".",0,0)
+					in 
+						if dSeq.size() <> 3
+						then
+							xmf.error("Conversion Failed")
+						else
+							@For e in dSeq do
+								e.stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+							end;
+							newDateTime.year.value := dSeq.at(2).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+							newDateTime.month.value := dSeq.at(1).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+							newDateTime.day.value := dSeq.at(0).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+						end
+					end;
+					let tSeq = dtSeq.at(0).splitBy(":",0,0)
+					in 
+						if tSeq.size() <> 4
+						then
+							xmf.error("Conversion Failed")
+						else
+							@For e in tSeq do
+								e.stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+							end;
+							newDateTime.hour.value := tSeq.at(0).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+							newDateTime.minute.value := tSeq.at(1).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+							newDateTime.second.value := tSeq.at(2).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+							newDateTime.millisecond.value := tSeq.at(3).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+						end
+					end;
+					newDateTime.validate();
+					newDateTime
+				end
+			end
+		end
+	end
+
+context AuxiliaryClasses
+	@Class Date metaclass AuxiliaryClasses::ComposedType extends AuxiliaryClasses::M1ComposedType
+		@Attribute year : AuxiliaryClasses::Year end
+		@Attribute month : AuxiliaryClasses::Month end
+		@Attribute day : AuxiliaryClasses::Day end
+
+		@Constructor() 
+			self.year := AuxiliaryClasses::Year(); 
+			self.month := AuxiliaryClasses::Month();
+			self.day := AuxiliaryClasses::Day()
+		end
+
+		@Constructor(name) 
+			//super(name);
+			self.year := AuxiliaryClasses::Year(); 
+			self.month := AuxiliaryClasses::Month();
+			self.day := AuxiliaryClasses::Day()
+		end
+
+		@Operation toString():String
+		     self.day.value.round().toString() + "." + self.month.value.round().toString() + "." + self.year.value.round().toString()
+	    end
+		
+		@Operation validate()
+			if self.month.value > 12 or self.month.value < 1 then
+				xmf.error(self.month.value+" is an invalid month")
+			end;
+			if self.day.value > 31 or self.day.value < 1 or
+			   ([1,3,5,7,8,10,12].contains(self.month.value) and self.day.value > 30) or
+			   (self.month.value = 2 and self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0) and self.day.value > 29 ) or	
+			   (self.month.value = 2 and not (self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0)) and self.day.value > 28 )	
+			then
+				xmf.error(self.day.value+" is an invalid day for the month "+self.month+" and the year "+self.year)
+			end
+		end
+
+		@Operation setValue(value)
+			value.validate();
+			self.year := value.year;
+			self.month := value.month;
+			self.day := value.day
+		end
+
+		@Operation setDay(day)
+			let newday = AuxiliaryClasses::Day()
+			in
+				newday.value := day;
+				self.day := newday;
+				self.day 	
+			end
+		end
+
+		@Operation setMonth(month)
+			let newmonth = AuxiliaryClasses::Month()
+			in
+				newmonth.value := month;
+				self.month := newmonth;
+				self.month 	
+			end
+		end
+
+		@Operation setYear(year)
+			let newyear = AuxiliaryClasses::Year()
+			in
+				newyear.value := year;
+				self.year := newyear;
+				self.year 	
+			end
+		end
+
+		@Operation parseValue(value)
+			let eSeq = value.splitBy(".",0,0)
+			in 
+				if eSeq.size() <> 3
+				then
+					xmf.error("Conversion Failed")
+				else
+					@For e in eSeq do
+						e.stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+					end;
+					let newDate = Date()
+					in
+						newDate.year.value := eSeq.at(2).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newDate.month.value := eSeq.at(1).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newDate.day.value := eSeq.at(0).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newDate.validate();
+						newDate
+					end
+				end
+			end
+		end
+
+	end
+
+context AuxiliaryClasses
+	@Class Time metaclass AuxiliaryClasses::ComposedType extends AuxiliaryClasses::ComposedType
+		@Attribute hour : AuxiliaryClasses::Hour end
+		@Attribute minute : AuxiliaryClasses::Minute end
+		@Attribute second : AuxiliaryClasses::Second end
+		@Attribute millisecond : AuxiliaryClasses::Millisecond end
+
+		@Constructor() 
+			self.hour := AuxiliaryClasses::Hour(); 
+			self.minute := AuxiliaryClasses::Minute(); 
+			self.second := AuxiliaryClasses::Second(); 
+			self.millisecond := AuxiliaryClasses::Millisecond() 
+		end
+
+		@Constructor(name) 
+			//super(name);
+			self.hour := AuxiliaryClasses::Hour(); 
+			self.minute := AuxiliaryClasses::Minute(); 
+			self.second := AuxiliaryClasses::Second(); 
+			self.millisecond := AuxiliaryClasses::Millisecond() 
+		end
+
+		@Operation toString():String
+		      self.hour.value.round().toString() + ":" + self.minute.value.round().toString() + ":" + self.second.value.round().toString() + ":" + self.millisecond.value.round().toString()
+	    end
+	
+		@Operation validate()
+			if self.hour.value > 23 or self.hour.value < 0 then
+				xmf.error(self.hour+" is an invalid hour")
+			end;
+			if self.minute.value > 59 or self.minute.value < 0 then
+				xmf.error(self.minute+" is an invalid minute")
+			end;
+			if self.second.value > 59 or self.second.value < 0 then
+				xmf.error(self.second+" is an invalid second")
+			end;
+			if self.millisecond.value > 999 or self.millisecond.value < 0 then
+				xmf.error(self.millisecond +" is an invalid milllisecond ")
+			end
+		end
+
+		@Operation setValue(value)
+			value.validate();
+			self.hour := value.hour; 
+			self.minute := value.minute;
+			self.second := value.second;
+			self.millisecond := value.millisecond
+		end
+
+		@Operation setHour(hour)
+			let newhour = AuxiliaryClasses::Hour()
+			in
+				newhour.value := hour;
+				self.hour := newhour;
+				self.hour 	
+			end
+		end
+
+		@Operation setMinute(minute)
+			let newminute = AuxiliaryClasses::Minute()
+			in
+				newminute.value := minute;
+				self.minute := newminute;
+				self.minute 	
+			end
+		end
+
+		@Operation setSecond(second)
+			let newsecond = AuxiliaryClasses::Second()
+			in
+				newsecond.value := second;
+				self.second := newsecond;
+				self.second 	
+			end
+		end
+
+		@Operation setMillisecond(millisecond)
+			let newmillisecond = AuxiliaryClasses::Millisecond()
+			in
+				newmillisecond.value := millisecond;
+				self.millisecond := newmillisecond;
+				self.millisecond 	
+			end
+		end
+
+		@Operation parseValue(value)
+			let eSeq = value.splitBy(":",0,0)
+			in 
+				if eSeq.size() <> 4
+				then
+					xmf.error("Conversion Failed")
+				else
+					@For e in eSeq do
+						e.stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt()
+					end;
+					let newTime = Time()
+					in
+						newTime.hour.value := eSeq.at(0).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newTime.minute.value := eSeq.at(1).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newTime.second.value := eSeq.at(2).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newTime.millisecond.value := eSeq.at(3).stripLeadingWhiteSpace().stripTrailingWhiteSpace().asInt();
+						newTime.validate();
+						newTime
+					end
+				end
+			end
+		end
+
+	end

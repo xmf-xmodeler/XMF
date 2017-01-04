@@ -22,7 +22,13 @@ context ClassMapping
     
     @Operation checkDaemons()
       self.daemonPairs := Seq{};
-      @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object,metaAttribute.name().toString()) end;
+      if metaAttribute.type.of()=AuxiliaryClasses::Unit then
+          @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object.get(metaAttribute.name().toString()),"value") end
+      elseif metaAttribute.type.of()=AuxiliaryClasses::ComposedType then
+	      @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object.get(metaAttribute.name().toString()),"*") end
+      else 
+	      @SlotValueChanged multi once MetaslotXText::slotValueChanged_classDiagram_MetaslotXText(object,metaAttribute.name().toString()) end
+      end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
       @SlotValueChanged multi once MetaslotXText::textChanged_classDiagram_MetaslotXText(text.value.text,"text") end;
       self.daemonPairs := daemonPairs->prepend(Seq{object,object.daemons()->last});
@@ -43,7 +49,14 @@ context ClassMapping
             object.set(slotName,newText.asFloat())
           elseif type.inheritsFrom(Boolean) then
             object.set(slotName,newText.asBool())
+          elseif type.of()=AuxiliaryClasses::Unit then
+            object.get(slotName).set("value",type.parseValue(newText))
+          elseif type.of()=AuxiliaryClasses::ComposedType then
+            @WithoutDaemons(object.get(slotName))
+	            object.get(slotName).setValue(object.get(slotName).parseValue(newText))
+            end
           end
+          
         catch(exception)
           xmf.warning("Metaslot \"" + slotName + "\" expects a value of type " + type.name().toString() + ".\n"
                       + exception.message)
@@ -62,8 +75,12 @@ context ClassMapping
     end
     
     @Operation slotValueChanged_classDiagram_MetaslotXText(attribute,slot,newValue,oldValue)
-      if text.value.text.toString() <> newValue.toString() then
-        text.setValue(newValue.toString())  
+      if metaAttribute.type.of()=AuxiliaryClasses::Unit or metaAttribute.type.of()=AuxiliaryClasses::ComposedType then
+		text.setValue(object.get(metaAttribute.name().toString()).toString())  
+      else
+	      if text.value.text.toString() <> newValue.toString() then
+    	    text.setValue(newValue.toString())  
+    	  end
       end
     end
     

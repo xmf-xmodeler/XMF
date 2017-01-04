@@ -1,0 +1,36 @@
+parserImport XOCL;
+parserImport Clients::ModelClipboard;
+
+import Clients;
+import ExtensionPoints;
+import DiagramsMapping;
+import Root::FMML;
+
+context Class	
+	@Operation newAuxiliaryTypeHandler()
+	@Operation newAuxiliaryType()
+		let
+        	tmp = Seq{}
+        in
+			@For e in AuxiliaryClasses.classes->select(t | t.level = 1) do
+				tmp := tmp.including(Seq{e})	
+	 		end;  
+       		let 
+		        selectedClass = xmf.treeSelection(
+        	    "Select End",
+            	Seq{"Classes","*", tmp},
+            	{},
+	            null)
+    		then
+        		name = self.newName("att") 
+      		then 
+        		attribute = if selectedClass <> null then XCore::Attribute(name,selectedClass) else null end
+      		in
+        		if attribute <> null then 
+	          	self.add(attribute);
+    	      	attribute.init() 
+        		end
+      		end
+    	end
+    end
+    end	
