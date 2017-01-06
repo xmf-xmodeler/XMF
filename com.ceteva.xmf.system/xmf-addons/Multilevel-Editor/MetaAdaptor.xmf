@@ -70,7 +70,15 @@ context Root::Extensions
          
          obj.init();
          
-		 if self.of() = Extensions::MetaAdaptor
+/*         if self.hasStructuralFeature("level") andthen self.level > 0
+         then 
+	        if self.level > 1 //or self = FMML::MetaClass
+    	    then
+	   	    	obj.addParent(FMML::MetaClass)
+			end;
+			obj.level := self.level - 1
+         end; */
+		 /*if self.of() = Extensions::MetaAdaptor
          then
 		   let
                level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
@@ -99,6 +107,7 @@ context Root::Extensions
              obj.level := obj.of().level - 1
            end
          end;
+         */
          
          // Now copy the intrinsic attributes to the object
          @While not intrinsicA.isEmpty() do

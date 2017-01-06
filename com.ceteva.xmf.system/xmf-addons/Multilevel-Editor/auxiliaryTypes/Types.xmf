@@ -3,89 +3,89 @@ parserImport XOCL;
 import Root::FMML;
 
 context AuxiliaryClasses
-	@Class Euro metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Euro metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Dollar metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Dollar metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 context AuxiliaryClasses
-	@Class SwedishKrona metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass SwedishKrona metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 //-----Datum-----------------
 context AuxiliaryClasses
-	@Class Year metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Year metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Month metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Month metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 context AuxiliaryClasses
-	@Class Day metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Day metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Hour metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Hour metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Minute metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Minute metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Second metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Second metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Millisecond metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Millisecond metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 
 //-----------Länge
 
 context AuxiliaryClasses
-	@Class Meter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Meter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 context AuxiliaryClasses
-	@Class Centimeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Centimeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 	
 context AuxiliaryClasses
-	@Class Kilometer metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass Kilometer metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 //-----------Fläche
 
 context AuxiliaryClasses
-	@Class SquareMeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	@MetaClass SquareMeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
 
 //--- Conversion
 
 context AuxiliaryClasses
-	@Class DollarToEuro metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
+	@MetaClass DollarToEuro metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
 	end
 	
 context AuxiliaryClasses	
-	@Class EuroToDollar metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
+	@MetaClass EuroToDollar metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
 	end	
 
 context AuxiliaryClasses	
-	@Class EuroToSwedishKrona metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
+	@MetaClass EuroToSwedishKrona metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
 	end	
 
 context AuxiliaryClasses	
-	@Class CentimeterToMeter metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
+	@MetaClass CentimeterToMeter metaclass Root::AuxiliaryClasses::ConversionRate extends Root::FMML::MetaClass
 	end	
 
 //--- Composition
 
 context AuxiliaryClasses
-	@Class MeterXMeter metaclass Root::AuxiliaryClasses::CompositionRelation extends Root::FMML::MetaClass
+	@MetaClass MeterXMeter metaclass Root::AuxiliaryClasses::CompositionRelation extends Root::FMML::MetaClass
 	end
 	

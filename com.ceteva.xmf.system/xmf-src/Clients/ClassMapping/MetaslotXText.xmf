@@ -52,9 +52,12 @@ context ClassMapping
           elseif type.of()=AuxiliaryClasses::Unit then
             object.get(slotName).set("value",type.parseValue(newText))
           elseif type.of()=AuxiliaryClasses::ComposedType then
-            @WithoutDaemons(object.get(slotName))
-	            object.get(slotName).setValue(object.get(slotName).parseValue(newText))
-            end
+            let value = object.get(slotName).parseValue(newText)
+            in
+	            @WithoutDaemons(object.get(slotName))
+		            object.get(slotName).setValue(value)
+        	    end
+        	end
           end
           
         catch(exception)

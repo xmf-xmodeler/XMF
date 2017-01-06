@@ -6,7 +6,7 @@ Class.remove(Class.operations->select(c | c.name().toString() = "remove")->asSeq
 context Class
 @Operation addAttribute(a : Attribute):Classifier
       self.resolveNameClash(a.name,attributes);
-      if(a.isIntrinsic andthen a.owner.level > self.level)
+      if(a.isIntrinsic andthen a.owner <> null andthen a.owner.level > self.level)
 	  then
 		false
 	  else

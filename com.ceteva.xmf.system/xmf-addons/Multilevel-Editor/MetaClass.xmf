@@ -10,6 +10,60 @@ context Root::FMML
 
     @Attribute model : 1..1 Model end
  
+    @Constructor(name, level)
+    	if self.of() <> FMML::MetaClass then
+			self.error("This constructor is only allowed for instantiating FMML::MetaClass")
+       	end;
+/*       	if level = 0 then
+			self.removeParent(FMML::MetaClass)
+		end; */
+		if level > 0 
+		then self.addParent(FMML::MetaClass)
+		end;
+       	self
+    end
+    
+    @Constructor(name)
+    	if self.of() = FMML::MetaClass then
+	    	let	level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
+    	    in
+				if level = null then
+            		self.level := 3
+	            elseif level.asInt() < 1 then 
+    	        	self.error("Level " + level + " not allowed as metaclass.")
+        	    else
+            		self.level := level.asInt()
+	            end
+			end
+        else
+			self.level := self.of().level - 1
+        end;
+		if level > 0 
+		then self.addParent(FMML::MetaClass)
+		end;
+        self
+    end
+    
+    @Constructor()
+    	if self.of() <> FMML::MetaClass then
+        	self.level := self.of().level - 1;
+	    	if level > 0 
+			then self.addParent(FMML::MetaClass)
+			end
+		end
+    end
+    
+    @Operation setLevel(level)
+    	if self.of() <> FMML::MetaClass then
+			self.error("This operation can only be executed on direct instances of FMML::MetaClass")
+		else
+			self.level := level;
+			if level > 0 
+			then self.addParent(FMML::MetaClass)
+			else self.removeParent(FMML::MetaClass)
+			end
+       	end
+    end
     
     /* This Operation should've been named send-TO-Instance. 
        It is invoked when an operation is invoked. 

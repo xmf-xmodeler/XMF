@@ -1,0 +1,128 @@
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                        Class Definition Syntax                             *
+ *                        -----------------------                             *
+ *                                                                            *
+ *   The syntax of class definitions.                                         *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context MetaClass
+
+  @Grammar extends OCL::OCL.grammar
+  
+    MetaClass ::= 
+    
+      // The name of the class may be dropped...
+      
+      name = ClassName 
+      
+      // The type of the class may be different 
+      // from XCore::Class...
+      
+      metaClass = OptMetaClass 
+      
+      //Metalevel
+      level = Level
+      
+      // A class may optionally be abstract...
+      
+      isAbstract = IsAbstract 
+      
+      // A stand-alone class?
+      
+//      isOrphan = IsOrphan
+      
+      // The parents of a class default to 
+      // XCore::Object...
+      
+      parents = Parents 
+      
+      // Any expressions can be included as 
+      // definitions...
+      
+      defs = Defs
+      
+      'end'
+      
+      {  [| <MetaClass(name,metaClass,isAbstract,parents,defs,level).desugar()>.init() |]
+        }.
+      
+    ClassName ::= AName | '(' e=Exp ')' { e }.
+      
+    Defs ::= 
+    
+      // Definitions are sequences of expressions...
+    
+      Exp* 
+      
+      // Dropped sequence of  expressions...
+      
+    | '<*' e = Exp '*>' 
+    
+      { Drop(e) } 
+      
+      // If the class definition is used as a pattern...
+      
+    | '<*|' p = Pattern '|*>' 
+    
+      { DropPattern(p) }.
+      
+    OptMetaClass ::= 
+    
+      // Specify the meta-class as any expression
+      // or let it default...
+    
+      'metaclass' Exp 
+       
+    | { [| FMML::MetaClass |] }.
+      
+      Level ::=
+      
+      //Specify metalevel
+      
+      'at' i = Int { i }
+
+      | { 0 }.
+      
+    IsAbstract ::= 
+    
+      // By default a class is not abstract...
+    
+      'isabstract' { true } 
+      
+    | { false }.
+    
+//    IsOrphan ::= 
+    
+      // By default a class lives in a name-space and must be
+      // added to the name-space before it is usable...
+    
+//      'isOrphan' { true }
+      
+//    | { false }.
+    
+    Parents ::= 
+    
+      // The parents default to just Object.
+      // Careful with the parents of a class when
+      // there is more than 1 since the order is
+      // important and is right-to-left...
+    
+      'extends' 
+      
+      parent = Exp 
+      
+      parents = (',' Exp)* 
+      
+      { Seq{ parent | parents } } 
+      
+    | { Seq{} }.
+    
+  end
+  

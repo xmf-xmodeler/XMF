@@ -1,0 +1,249 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Attribute Syntax                              *
+ *                            --------------------                            *
+ *                                                                            *
+ *   Attributes have the general form:                                        *
+ *                                                                            *
+ *     @Attribute name : type end                                             *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import OCL;
+import XOCL;
+
+context XOCL::IntrinsicAttribute
+
+  @Grammar extends OCL::OCL.grammar
+    
+    IntrinsicAttribute ::= 
+    
+      // An attribute has a name...
+    
+      name = AttName 
+      
+      // Optionally some properties...
+      
+      ps = Properties 
+      
+      // May be an instance of a class other
+      // than XCore::Attribute...
+      
+      meta = MetaClass 
+      
+      // Has a type...
+      
+      ':' mult = AttMult type = AttType 
+      
+      // Optionally has an initial value...
+      
+      init = AttInit 
+      
+      // Optionally has some modifiers that
+      // define operations over the slots
+      // arising from the attribute...
+      
+      mods = AttMods 
+      
+      // Optionally has a number of expressions
+      // in the body...
+      
+      instLevel = InstLevel
+      
+      body = Exp* 
+      
+      'end' 
+      
+      { IntrinsicAttribute(name,mult,type,mods,init,null,meta,ps,instLevel).add(body) }.
+    
+    InstLevel ::=
+    	'instLevel' i = Int {i}.
+       
+    AttInit ::= 
+    
+      // the initial value of an attribute is optional and
+      // may be specified as static. If not static then the
+      // expression is evaluated each time a slot is created
+      // otherwise the value is created once and shared between
+      // the instances...
+    
+      '=' Exp 
+      
+    | '=' 'static' e = Exp { [| static(<e>) |] } 
+    
+    | { null }.
+    
+    AttMods ::= 
+    
+      // Attribute modifiers are optional and are used to
+      // define operations over the slots arising from the
+      // attribute definition...
+    
+      mods = { AttributeModifiers() } 
+      
+      [ '(' AttModifier^(mods) (',' AttModifier^(mods))* ')' ] 
+      
+      { mods }.
+      
+    AttModifier(mods) ::= 
+    
+      // A single modifier...
+    
+      mod = AttMod 
+      
+      { mods.defineModifier(mod) }.
+      
+    AttMod ::= 
+    
+      // An accessor operation...
+    
+      '?' { "?" } 
+      
+      // An updater operation...
+      
+    | '!' { "!" }
+    
+      // An extender operation...
+       
+    | '+' { "+" } 
+    
+      // A reducer operation...
+      
+    | '-' { "-" } 
+    
+      // A contained element modifier...
+      
+    | '^' { "^" } 
+    
+      // A guarded slot (in case the slot does
+      // not exist)...
+    
+    | GuardMod.
+    
+    AttType ::= 
+    
+      // An attribute type...
+    
+      n = AttTypeName 
+      
+      AttTypeTail^(n)
+      
+    | Drop.
+      
+    AttTypeName ::= 
+    
+      // An attribute type name is just a path...
+    
+      n = Name 
+      
+      ns = ('::' Name)* 
+      
+      { if ns->isEmpty then Var(n) else Path(Var(n),ns) end}.
+      
+    AttTypeTail(n) ::=
+    
+      // An attribute type path may optionally be followed
+      // by some arguments... 
+    
+      '(' args = CommaSepExps ')'
+      
+       { Apply(n,args) } 
+       
+    | { n }.
+    
+    GuardMod ::= 
+    
+      // A slot may not exist if a legacy file (XAR format) is
+      // loaded. This modifier allows the attribute to be
+      // guarded. providing all acce4ss goes through the
+      // accessor then the guard will catch an illegal access
+      // and evaluate the expression instead...
+    
+      '#' e = ( Exp | { null } ) 
+      
+      { Seq{e} }.
+      
+    AttName ::= 
+    
+      // Let the name of an attribute be a name or a literal
+      // string...
+    
+      AName 
+    | Str.
+    
+    MetaClass ::= 
+    
+      // Optionally specify a class that designates the
+      // class to instantiate for the attribute...
+    
+      'metaclass' Exp 
+      
+    | { null }.
+    
+    AttMult ::= 
+    
+      // Deprecated...
+    
+      Mandatory 
+    | Star 
+    | Ordered 
+    | LimitedSet 
+    | LimitedSeq 
+    | { "" }.
+    
+    Mandatory ::= 
+    
+      // Deprecated...
+    
+      '!' { "!" }.
+      
+    Star ::= 
+    
+      // Deprecated...
+    
+      '*' { "*" }.
+      
+    Ordered ::= 
+    
+      // Deprecated...
+    
+      '<<'   '>' '>' { "<< >>" }.
+      
+    LimitedSet ::= 
+    
+      // Deprecated...
+      
+      n = Int '.''.' m = (Int | '*' { "*" }) 
+      
+      { n + ".." + m }.
+      
+    LimitedSeq ::= 
+    
+      // Deprecated...
+      
+      n = Int '--' m = (Int | '*' { "*" }) 
+      
+      { n + "--" + m }.
+      
+    Properties ::= 
+    
+      // The properties of an attribute are optional and
+      // allow the user to annotate an attribute with any
+      // named values...
+      
+      '[' p = Property ps = (',' Property)* ']' 
+      
+      { Seq{p|ps} } 
+      
+    | { Seq{} }.
+    
+    Property ::= 
+    
+      n = Name '=' e = Exp 
+      
+      { Seq{n,e} }.
+      
+    end 

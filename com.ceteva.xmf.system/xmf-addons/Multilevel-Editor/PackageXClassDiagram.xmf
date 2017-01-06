@@ -203,7 +203,7 @@ context ClassMapping::PackageXClassDiagram
                             else 
                             	let class = metaclass(name)
                             	in
-                                    class.addParent(FMML::MetaClass);
+                                    //class.addParent(FMML::MetaClass);
                                 	thePackage.add(class);
                                 	theMapping.instantiationHandlerDispatcher(class,thePackage,theDiagram,theMapping);
                                 	@Find(map,theMapping.classMaps) when map.class = class do
