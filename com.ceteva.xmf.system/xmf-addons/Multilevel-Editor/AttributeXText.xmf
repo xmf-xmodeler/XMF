@@ -14,10 +14,6 @@ context AttributeXText
   @Operation init(args)
     super(args);
  
-    @SlotValueChanged multi once AttributeXText::levelChanged(attribute,"instLevel")  end;
-    
-    @SlotValueChanged multi once AttributeXText::instLevelChangedDaemon(text.instLevel.instLevel,"text") end; 
-	
 	if(self.attribute.isIntrinsic)
 	then
 	  self.text.instLevel.instLevel.text := self.attribute.instLevel.toString()
@@ -31,6 +27,10 @@ context AttributeXText
 	else
 		self.text.instLevel.instLevel.setEditable(false)
 	end;
+
+    @SlotValueChanged multi once AttributeXText::levelChanged(attribute,"instLevel")  end;
+    
+    @SlotValueChanged multi once AttributeXText::instLevelChangedDaemon(text.instLevel.instLevel,"text") end; 
 	
     self
   end
@@ -66,7 +66,7 @@ context AttributeXText
   	       		attribute.isIntrinsic := false	
         	end
         catch(x)
-            xmf.warning("Level " + newInstLevel + " not an integer number");
+        	xmf.warning("Level " + newInstLevel + " not an integer number");
         	attribute.isIntrinsic := false;
         	text.instLevel.instLevel.setText(" ")
         end//;
