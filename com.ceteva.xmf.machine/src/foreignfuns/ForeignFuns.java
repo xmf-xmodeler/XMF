@@ -2008,9 +2008,15 @@ public class ForeignFuns implements Value, Instr, Errors {
   }
 
   public static void Kernel_mod(Machine machine) {
-    int n = Machine.value(machine.frameLocal(0));
-    int m = Machine.value(machine.frameLocal(1));
-    machine.pushStack(Machine.mkInt(n % m));
+    int n = Machine.intValue(machine.frameLocal(0));
+    int m = Machine.value(machine.frameLocal(1)); //due to the mathematical definition, the sign is not relevant
+    System.out.println(n);
+    System.out.println(m);
+    int res = n % m;
+    if (res < 0) {
+    	res+=m;
+    }
+    machine.pushStack(Machine.mkInt(res));
     machine.popFrame();
   }
 
