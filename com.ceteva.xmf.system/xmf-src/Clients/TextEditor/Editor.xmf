@@ -20,6 +20,13 @@ context TextEditor
     @Attribute editable  : Boolean (?) end
     @Attribute dirty     : Boolean (?) end
     
+    @Constructor(element,name,tooltip,editable)
+      "test".println();
+      name.println();
+      tooltip.println();
+      editable.println()
+    end
+    
     @Constructor(name,tooltip,editable)
       self.element := self
     end
