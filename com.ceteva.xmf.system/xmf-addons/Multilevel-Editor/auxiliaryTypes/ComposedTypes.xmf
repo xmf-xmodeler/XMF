@@ -3,6 +3,12 @@ parserImport XOCL;
 import Root::FMML;
 
 context AuxiliaryClasses
+	@MetaClass TimeZone at 1 
+		@Attribute operator: String end
+		@Attribute deviation: Integer end
+	end
+
+context AuxiliaryClasses
 	@MetaClass DateTime metaclass AuxiliaryClasses::ComposedType extends AuxiliaryClasses::ComposedType
 		@Attribute year : AuxiliaryClasses::Year end
 		@Attribute month : AuxiliaryClasses::Month end
@@ -11,6 +17,7 @@ context AuxiliaryClasses
 		@Attribute minute : AuxiliaryClasses::Minute end
 		@Attribute second : AuxiliaryClasses::Second end
 		@Attribute millisecond : AuxiliaryClasses::Millisecond end
+		@Attribute timeZone: AuxiliaryClasses::TimeZone end
 
 		@Constructor() 
 			self.year := AuxiliaryClasses::Year(); 
@@ -19,7 +26,8 @@ context AuxiliaryClasses
 			self.hour := AuxiliaryClasses::Hour(); 
 			self.minute := AuxiliaryClasses::Minute(); 
 			self.second := AuxiliaryClasses::Second(); 
-			self.millisecond := AuxiliaryClasses::Millisecond() 
+			self.millisecond := AuxiliaryClasses::Millisecond(); 
+			self.timeZone := AuxiliaryClasses::TimeZone() 
 		end
 
 		@Constructor(name) 
@@ -30,7 +38,8 @@ context AuxiliaryClasses
 			self.hour := AuxiliaryClasses::Hour(); 
 			self.minute := AuxiliaryClasses::Minute(); 
 			self.second := AuxiliaryClasses::Second(); 
-			self.millisecond := AuxiliaryClasses::Millisecond() 
+			self.millisecond := AuxiliaryClasses::Millisecond(); 
+			self.timeZone := AuxiliaryClasses::TimeZone()  
 		end
 
 		@Operation toString():String
@@ -72,6 +81,10 @@ context AuxiliaryClasses
 			self.minute := value.minute;
 			self.second := value.second;
 			self.millisecond := value.millisecond
+		end
+
+		@Operation setTimeZone(timeZone)
+			self.timeZone := timeZone
 		end
 
 		@Operation setDay(day)
@@ -186,18 +199,21 @@ context AuxiliaryClasses
 		@Attribute year : AuxiliaryClasses::Year end
 		@Attribute month : AuxiliaryClasses::Month end
 		@Attribute day : AuxiliaryClasses::Day end
+		@Attribute timeZone: AuxiliaryClasses::TimeZone end
 
 		@Constructor() 
 			self.year := AuxiliaryClasses::Year(); 
 			self.month := AuxiliaryClasses::Month();
-			self.day := AuxiliaryClasses::Day()
+			self.day := AuxiliaryClasses::Day(); 
+			self.timeZone := AuxiliaryClasses::TimeZone() 
 		end
 
 		@Constructor(name) 
 			//super(name);
 			self.year := AuxiliaryClasses::Year(); 
 			self.month := AuxiliaryClasses::Month();
-			self.day := AuxiliaryClasses::Day()
+			self.day := AuxiliaryClasses::Day(); 
+			self.timeZone := AuxiliaryClasses::TimeZone() 
 		end
 
 		@Operation toString():String
@@ -209,7 +225,7 @@ context AuxiliaryClasses
 				xmf.error(self.month.value+" is an invalid month")
 			end;
 			if self.day.value > 31 or self.day.value < 1 or
-			   ([1,3,5,7,8,10,12].contains(self.month.value) and self.day.value > 30) or
+			   ([2,4,6,9,11].contains(self.month.value) and self.day.value > 30) or
 			   (self.month.value = 2 and self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0) and self.day.value > 29 ) or	
 			   (self.month.value = 2 and not (self.year.value.mod(4) = 0 and ((not self.year.value.mod(100) = 0) or self.year.value.mod(1000) = 0)) and self.day.value > 28 )	
 			then
@@ -222,6 +238,10 @@ context AuxiliaryClasses
 			self.year := value.year;
 			self.month := value.month;
 			self.day := value.day
+		end
+
+		@Operation setTimeZone(timeZone)
+			self.timeZone := timeZone
 		end
 
 		@Operation setDay(day)
