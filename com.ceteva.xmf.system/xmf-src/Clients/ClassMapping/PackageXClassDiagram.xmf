@@ -468,8 +468,10 @@ context ClassMapping
                 do let name = association.name.toString();
                   mult1 = Multiplicity(association.end1.mult.labelString(),"start");
                   mult2 = Multiplicity(association.end2.mult.labelString(),"end") then 
-                  instLevel1 = Label("Ø", "start", 40, 40, true, true, Color(0,0,0));
-                  instLevel2 = Label("Ø", "start", -40, -40, true, true, Color(0,0,0));
+//                  instLevel1 = Label("Ø", "start", 40, 40, true, true, Color(0,0,0));
+                  instLevel1 = Label("Ø", "start", 40, 40, true, Color(0,0,0));
+//                  instLevel2 = Label("Ø", "start", -40, -40, true, true, Color(0,0,0));
+                  instLevel2 = Label("Ø", "start", -40, -40, true, Color(0,0,0));
                   varName1 = Label(association.end1.name.toString(),"start",10,10,true);
                   varName2 = Label(association.end2.name.toString(),"end",-10,-10,true);
                   displayName1 = Label("displayName1","",0,-16,true, Color(0,0,0),0+1);

@@ -826,8 +826,11 @@ context ClassDiagrams
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
          then 
-           let edge = AssociationEdge(name,end1,end2,sourcePort,targetPort,typePath)
-           in edge.new(self);
+           let edge = AssociationEdge(name,end1,end2,sourcePort,targetPort,typePath,sourceNode.x+sourceNode.width()/2,sourceNode.y+sourceNode.height()/2,targetNode.x+targetNode.width()/2,targetNode.y+targetNode.height()/2)
+           in "sourceNode.x+sourceNode.width()/2".println();
+           sourceNode.width().println();
+           sourceNode.x.println();
+           	edge.new(self);
               edge
            end
          end
