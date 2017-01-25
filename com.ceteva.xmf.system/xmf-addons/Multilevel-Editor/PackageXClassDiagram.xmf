@@ -70,13 +70,13 @@ context ClassMapping::PackageXClassDiagram
                then self.add(type)
                end
             end
-          end//;
-          //@For parent in class.parents do
-          //  if not class.defaultParents()->includes(parent) andthen
-          //     not package.classes->includes(parent)
-          //   then self.add(parent)
-          // end
-          //end
+          end/*;
+          @For parent in class.parents do
+            if not class.defaultParents()->includes(parent) andthen
+               not package.classes->includes(parent)
+             then self.add(parent)
+           end
+          end*/
         end;
         @For package in package.packages do
           self.packageAdded(package);

@@ -813,8 +813,8 @@ context ClassDiagrams
                and sourceNode.of() = targetNode.of()
                and sourceNode <> targetNode
          then 
-           let edge = InheritanceEdge(sourcePort,targetPort)
-           in edge.new(self);
+           let edge = InheritanceEdge(sourcePort,targetPort,0,0,0,0)
+           in  edge.new(self);
               edge
            end
          end

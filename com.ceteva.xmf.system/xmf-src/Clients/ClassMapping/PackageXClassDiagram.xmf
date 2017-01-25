@@ -209,6 +209,8 @@ context ClassMapping
     end
     
     @Operation addClass(class)
+      diagram.selectedX().println();
+      diagram.selectedY().println();
       let package = 
             if package.classes->includes(class) 
             then "" 
@@ -901,7 +903,7 @@ context ClassMapping
       // @SlotValueChanged multi once - PackageXClassDiagram::packageNodeRemovedDaemon(diagram,"packageNodes")      end;
       @SlotValueChanged multi once - PackageXClassDiagram::elementNodeRemovedDaemon(diagram,"elementNodes")         end;
       @SlotValueChanged multi once + PackageXClassDiagram::inheritanceEdgeAddedDaemon(diagram,"inheritanceEdges")   end;
-      @SlotValueChanged multi once - PackageXClassDiagram::inheritanceEdgeRemovedDaemon(diagram,"inheritanceEdges") end;
+      // @SlotValueChanged multi once - PackageXClassDiagram::inheritanceEdgeRemovedDaemon(diagram,"inheritanceEdges") end;
       @SlotValueChanged multi once + PackageXClassDiagram::containsEdgeAddedDaemon(diagram,"containsEdges")         end;
       @SlotValueChanged multi once - PackageXClassDiagram::containsEdgeRemovedDaemon(diagram,"containsEdges")       end;
       @SlotValueChanged multi once + PackageXClassDiagram::dependencyEdgeAddedDaemon(diagram,"dependencyEdges")     end;
