@@ -35,7 +35,7 @@ AuxiliaryClasses::Millisecond.symbol := "ms";
 
 AuxiliaryClasses::Meter.description := "Meter";
 AuxiliaryClasses::Meter.symbol := "m";
-AuxiliaryClasses::Meter.partOf := [AuxiliaryClasses::MeterXMeter];
+AuxiliaryClasses::Meter.partOf := [AuxiliaryClasses::MeterXMeter,AuxiliaryClasses::SquareMeterXMeter];
 
 AuxiliaryClasses::Centimeter.description := "Centimeter";
 AuxiliaryClasses::Centimeter.symbol := "cm";
@@ -45,10 +45,13 @@ AuxiliaryClasses::Kilometer.description := "Kilometer";
 AuxiliaryClasses::Kilometer.symbol := "km";
 
 AuxiliaryClasses::SquareMeter.description := "Squaremeter";
-AuxiliaryClasses::SquareMeter.symbol := "qm";
+AuxiliaryClasses::SquareMeter.symbol := "m²";
 AuxiliaryClasses::SquareMeter.composedOf := [AuxiliaryClasses::MeterXMeter];
+AuxiliaryClasses::SquareMeter.partOf := [AuxiliaryClasses::SquareMeterXMeter];
 
-
+AuxiliaryClasses::CubicMeter.description := "Cubicmeter";
+AuxiliaryClasses::CubicMeter.symbol := "m³";
+AuxiliaryClasses::CubicMeter.composedOf := [AuxiliaryClasses::SquareMeterXMeter];
 
 AuxiliaryClasses::DollarToEuro.rate := 0.959103813;
 AuxiliaryClasses::DollarToEuro.to := AuxiliaryClasses::Euro;
@@ -66,3 +69,8 @@ AuxiliaryClasses::CentimeterToMeter.to := AuxiliaryClasses::Meter;
 AuxiliaryClasses::MeterXMeter.result := AuxiliaryClasses::SquareMeter;
 AuxiliaryClasses::MeterXMeter.operator := "m";
 AuxiliaryClasses::MeterXMeter.elements := [AuxiliaryClasses::Meter,AuxiliaryClasses::Meter];
+
+AuxiliaryClasses::SquareMeterXMeter.result := AuxiliaryClasses::CubicMeter;
+AuxiliaryClasses::SquareMeterXMeter.operator := "m";
+AuxiliaryClasses::SquareMeterXMeter.elements := [AuxiliaryClasses::SquareMeter,AuxiliaryClasses::Meter];
+

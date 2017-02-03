@@ -170,7 +170,7 @@ context Root
 					result = null
 				in	
 					@Find(compo, partOfSeq)
-					when compo.elements.includes(element.of()) and compo.operator = "m"
+					when compo.elements.excluding(self.of()).includes(element.of()) and compo.operator = "m"
 					do
 						result := compo.result;
 						result := result();

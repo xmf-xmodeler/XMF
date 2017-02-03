@@ -64,6 +64,11 @@ context AuxiliaryClasses
 	@MetaClass SquareMeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
 	end
 
+//-----------Volumen
+
+context AuxiliaryClasses
+	@MetaClass CubicMeter metaclass Root::AuxiliaryClasses::Unit extends Root::AuxiliaryClasses::M1Unit
+	end
 
 //--- Conversion
 
@@ -88,4 +93,7 @@ context AuxiliaryClasses
 context AuxiliaryClasses
 	@MetaClass MeterXMeter metaclass Root::AuxiliaryClasses::CompositionRelation extends Root::FMML::MetaClass
 	end
-	
+
+context AuxiliaryClasses
+	@MetaClass SquareMeterXMeter metaclass Root::AuxiliaryClasses::CompositionRelation extends Root::FMML::MetaClass
+	end	
