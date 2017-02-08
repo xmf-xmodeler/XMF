@@ -200,6 +200,7 @@ context CompiledOperation
       "supers"        do self.supers()     end
       "traced"        do self.traced()     end
       "type"          do Element           end
+      "roleFiller"    do "" end
       else self.error("No slot named " + name.toString())
     end
   end

@@ -117,7 +117,8 @@ context Daemon
       "persistent" do Kernel_daemonPersistent(self) end
       "traced"     do Kernel_daemonTraced(self)     end
       "target"     do Kernel_daemonTarget(self)     end
-      else         "" //self.error(self.toString() + " has no slot named " + name)
+      "roleFiller" do "" end
+      else self.error(self.toString() + " has no slot named " + name)
     end
   end
 

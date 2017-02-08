@@ -53,6 +53,7 @@ context ForeignOperation
       "documentation" do noDoc()           end
       "owner"         do self.owner()      end
       "type"          do Element           end
+      "roleFiller"	  do ""   end
       else self.error("No slot named " + name.toString())
     end
   end
