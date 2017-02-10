@@ -641,37 +641,44 @@ context ModelBrowsers
       end
     end
 
-    @Operation textChangedIn(newText)
-      if newText=element.nameString()
-      then
-        self.commandInterpreter().setNodeTextCommand(self,element.labelString())
-      elseif not self.changeLabelGuard(element,newText)
-      then
-        self.textChangedOut(element.labelString())
-      else
-        if element.isKindOf(CompiledOperation)
-        then
-          let 
-            source = element.source() then
-            modifiedSource = source.subst(newText,element.name(),false)
-          in
-            Clients::setSource(element,modifiedSource)
-          end
-        elseif self.element.isKindOf(Clause)
-        then
-          let
-            source = self.element.source then
-            modifiedSource = source.subst(newText,self.element.name(),false)
-          in
-            xmf.clientManager().setRecompilingClause(self.element);
-            clause.setSource(modifiedSource);
-            xmf.clientManager().setRecompilingClause(null)
-          end
-        else
-          self.changeLabel(Symbol(newText.toString()))
-        end;
-        self
-      end
+    @Operation textChangedIn(newTextIn)
+      let newText = newTextIn       	
+      in
+		  if element.isKindOf(Attribute) 
+		  then
+			newText := newText.splitBy(":",0,0).head().stripTrailingWhiteSpace().stripLeadingWhiteSpace()
+		  end;
+	      if newText=element.nameString()
+    	  then
+	        self.commandInterpreter().setNodeTextCommand(self,element.labelString())
+    	  elseif not self.changeLabelGuard(element,newText)
+	      then
+    	    self.textChangedOut(element.labelString())
+	      else
+    	    if element.isKindOf(CompiledOperation)
+        	then
+	          let 
+    	        source = element.source() then
+        	    modifiedSource = source.subst(newText,element.name(),false)
+	          in
+    	        Clients::setSource(element,modifiedSource)
+	          end
+        	elseif self.element.isKindOf(Clause)
+    	    then
+        	  let
+            	source = self.element.source then
+	            modifiedSource = source.subst(newText,self.element.name(),false)
+    	      in
+        	    xmf.clientManager().setRecompilingClause(self.element);
+            	clause.setSource(modifiedSource);
+	            xmf.clientManager().setRecompilingClause(null)
+    	      end
+        	else
+	          self.changeLabel(Symbol(newText.toString()))
+    	    end;
+        	self
+	      end
+		end
     end
 
     @Operation textChangedOut()
