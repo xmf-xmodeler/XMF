@@ -12,7 +12,7 @@ set MAXJAVASTACK=-Xss5m
 set VERSION=2.2
 set JAVA=java
 set LOCALE=-Duser.country=UK
-set BOOTFILE="Boot/CompileAll.o"
+set BOOTFILE=%XMFHOME%/Boot/CompileAll.o
 
 %JAVA% %LOCALE% %MAXJAVAHEAP% -cp %LIB% xos.OperatingSystem -image %EVALUATOR% -heapSize %HEAPSIZE% -heapSize %HEAPSIZE% -stackSize %STACKSIZE% -arg filename:%BOOTFILE% -arg user:"%USERNAME%" -arg home:"%XMFHOME%" -arg license:license.lic -arg version:"%VERSION%" %2 %3 %4 %5 %6 %7 %8 %9
 
