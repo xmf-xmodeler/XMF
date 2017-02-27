@@ -1,9 +1,68 @@
 parserImport XOCL;
 
-  @Package Manipulator
+context Root
+
+@Class Manipulator
+
+  @Attribute model:Package end
+  @Attribute project:Projects::Project end
   
-    @Doc
-       This package defines a manipulator.
-     end
-     
+  @Constructor()
+    self.model := Package("MyPackage");
+    self.model.addParent(FMML);
+    self.project := Projects::Project(self.model, "MyProject", null);
+    xmf.projectManager("MyProjects").add(self.project);
+    Root.add(self.model)
   end
+      
+  @Operation addMetaClass(name:String, level:Integer)
+    self.model.add(FMML::MetaClass(name, level))
+  end
+   
+  @Operation addInstance(name:String, class:FMML::MetaClass)
+    self.model.add(class(name))
+  end
+  
+  @Operation removeElement(element:Element)
+    if element.level > 0 
+    then 
+      @For instance in element.allInstances() do
+        self.removeElement(instance) 
+      end
+    end;
+    self.model.remove(element)
+  end
+  
+  @Operation addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)
+    if class.level < 1 then error("Cannot add attribute to object (level 0)") end;
+    if instLevel < 0 then error("instLevel must not be negative") end;
+    if class.level <= instLevel then error("instLevel must be less than class level") end;
+    if class.hasAttribute(name) then error("Cannot use duplicate name") end;
+    
+    let 
+      a = Attribute(name)
+    in 
+      a.isIntrinsic := true;
+      a.type := type;
+      a.instLevel := instLevel;
+      
+      class.addAttribute(a)
+    end
+  end
+  
+  @Operation help()
+    "The following operations are available:".println();
+    "addMetaClass(name:String, level:Integer)".println();
+    "addInstance(name:String, class:FMML::MetaClass)".println();
+    "addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)".println();
+    "removeElement(element:Element)".println()
+  end
+  
+  @Operation test1()
+    self.addMetaClass("Vier",4);
+    self.addInstance("Drei",MyPackage::Vier);
+    self.addInstance("Zwei",MyPackage::Drei);
+    self.addInstance("Eins",MyPackage::Zwei)
+  end
+  
+end

@@ -4,12 +4,15 @@ import Projects;
 import Clients::ExtensionPoints;
 
 (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
-					
+						
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
+			
+//Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.xmf",true,true);
+//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.o").loadBin(true);
+
+Root::manipulator := Manipulator();
+Root::mp := Root::manipulator;
+
 Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.xmf",true,true);
 (xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.o").loadBin(true);		
-			
-//Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
-//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
-			
-Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.xmf",true,true);
-(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.o").loadBin(true);
