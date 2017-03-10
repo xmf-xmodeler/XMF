@@ -299,6 +299,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setForeignSlot", 3));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setForwardRefs", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setSlotValue", 3));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setSlotVisibility", 3));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setTypes", 26));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_setUndoSize", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_size", 1));
@@ -2440,6 +2441,17 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
     machine.popStack();
     machine.setSlot(object, Machine.isSymbol(name) ? name : machine.mkSymbol(name), value);
+  }
+  
+  public static void Kernel_setSlotVisibility(Machine machine) {
+    int object = machine.frameLocal(0);
+    int name = machine.frameLocal(1);
+    int visibility = machine.frameLocal(2);
+//    System.err.println("Kernel_setSlotVisibility");
+//    System.err.println("   object:     " + object + "(" +(object >> 24) + "/" + (object & 0x00ffffff) + ")");
+//    System.err.println("   name:       " + name + "(" +(name >> 24) + "/" + (name & 0x00ffffff) + ")");
+//    System.err.println("   visibility: " + visibility + "(" +(visibility >> 24) + "/" + (visibility & 0x00ffffff) + ")");
+    machine.popFrame();
   }
 
   public static void Kernel_setTypes(Machine machine) {

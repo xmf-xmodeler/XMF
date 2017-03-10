@@ -843,13 +843,58 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public int attributeName(int field) {
-    return consHead(field);
+	int head = consHead(field);
+    return isSymbol(head)?consHead(field):consHead(consHead(field));
   }
 
   public void attributeSetName(int field, int name) {
+	if(isSymbol(consHead(field)) || undefinedValue == consHead(field)) {
+		consSetHead(field, name);
+	} else {
+		consSetHead(consHead(field), name);
+	}
     consSetHead(field, name);
   }
 
+  private static final int PUBLIC_VISIBILITY = UNDEFINED;
+  private static final int PRIVATE_VISIBILITY = mkInt(1);
+
+  private static final int NO_SLOT_FOUND = -1;
+  private static final int SLOT_ACCESS_DENIED = -2;
+  private static final int SLOT_ACCESS_XMF = -3;
+  
+  private boolean visibilityIsPublic(int visibility) {
+	  return visibility == PUBLIC_VISIBILITY;
+  }
+  
+  private boolean visibilityIsPrivate(int visibility) {
+	  return visibility == PRIVATE_VISIBILITY;
+  }
+  
+  public void attributeSetVisibility(int field, int visibility) {
+	System.err.println("Visibility Type = " + (visibility >> 24));
+	if(isSymbol(consHead(field))) {
+      if(visibilityIsPublic(visibility)) {
+			// DO NOTHING
+		} else {
+			// REMOVE VISIBILITY
+			consSetHead(field, consHead(consHead(field)));
+		}
+	} else {
+	  if(visibilityIsPublic(visibility)) {
+			// ADD VISIBILITY
+		  consSetHead(field, mkCons(consHead(field), visibility));
+	  } else {
+			// CHANGE VISIBILITY
+		  consSetTail(consHead(field), visibility);
+      }
+	}
+  }
+  
+  public int attributeVisibility(int field) {
+    return isSymbol(consHead(field)) ? PUBLIC_VISIBILITY : consTail(consHead(field));
+  }
+  
   public void attributeSetValue(int field, int value) {
     consSetTail(field, value);
   }
@@ -3074,9 +3119,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
         found = true;
       else atts = consTail(atts);
     }
-    if (found)
+    if (found) {
+      //int attVis = attributeVisibility(field)
       return att;
-    else return -1;
+    }
+      
+    else return NO_SLOT_FOUND;
   }
 
   public int objAttributes(int word) {
@@ -3095,7 +3143,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // exist then -1 is returned...
 
     int att = objAttribute(obj, name);
-    if (att == -1)
+    if (att == NO_SLOT_FOUND)
       return -1;
     else return attributeValue(att);
   }
@@ -3149,7 +3197,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Return true when the object has an attribute with the supplied
     // name. The name should be a symbol...
 
-    return objAttribute(obj, name) != -1;
+    return objAttribute(obj, name) != NO_SLOT_FOUND;
   }
 
   public int objHotLoad(int obj) {
@@ -3196,7 +3244,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     if (isString(name)) name = mkSymbol(name);
     int att = objAttribute(obj, name);
     int atts = objAttributes(obj);
-    if (att != -1) {
+    if (att != NO_SLOT_FOUND) {
       objSetAttributes(obj, this.consRemove(atts, att));
     }
   }
@@ -3210,10 +3258,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int objSetAttValue(int obj, int name, int value) {
 
-    // Set the value of an attributein an object...
+    // Set the value of an attribute in an object...
 
     int att = objAttribute(obj, name);
-    if (att == -1)
+    if (att == NO_SLOT_FOUND)
       return -1;
     else {
       undo.setSlot(obj, name, value, attributeValue(att));
@@ -4982,7 +5030,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int type = type(obj);
     int meta = type(type);
     if (meta == theClassClass) {
-      if (this.objAttribute(obj, slot) == -1)
+      if (this.objAttribute(obj, slot) == NO_SLOT_FOUND)
         pushStack(falseValue);
       else pushStack(trueValue);
     } else {
@@ -5509,9 +5557,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     if (standardSlotAccessProtocol(obj) || isDefaultGetMOP(type(obj))) {
       int att = objAttribute(obj, name);
-      if (att == -1)
-        sendSlotMissing(obj, name);
-      else valueStack.push(attributeValue(att));
+//      System.err.println("dotObj("+name+","+obj+") --> " + att);
+      if (att == NO_SLOT_FOUND) {
+        sendSlotMissing(obj, name); 
+//      } else if (att == SLOT_ACCESS_DENIED) {
+//    	sendSlotMissing(obj, name); // Use other error message?
+//      } else if (att == SLOT_ACCESS_XMF) {
+//    	sendSlotAccess(obj, name);
+      } else 
+    	valueStack.push(attributeValue(att));
     } else {
       sendSlotAccess(obj, name);
     }
