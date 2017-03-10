@@ -872,21 +872,25 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
   
   public void attributeSetVisibility(int field, int visibility) {
-	System.err.println("Visibility Type = " + (visibility >> 24));
-	if(isSymbol(consHead(field))) {
-      if(visibilityIsPublic(visibility)) {
+//    System.err.println((consHead(field) >> 24) + " ---> " + (visibility >> 24));
+	if(isSymbol(consHead(field))) { // has no visibility field before
+      if(visibilityIsPublic(visibility)) { // will have no visibility field 
 			// DO NOTHING
-		} else {
-			// REMOVE VISIBILITY
-			consSetHead(field, consHead(consHead(field)));
-		}
-	} else {
-	  if(visibilityIsPublic(visibility)) {
-			// ADD VISIBILITY
-		  consSetHead(field, mkCons(consHead(field), visibility));
-	  } else {
+//    	System.err.println("attributeSetVisibility: DO NOTHING");
+      } else { // will have a visibility field 
+			// ADD VISIBILITY FIELD
+//    	System.err.println("attributeSetVisibility: ADD VISIBILITY FIELD");
+	    consSetHead(field, mkCons(consHead(field), visibility));
+	  }
+	} else { // has a visibility field before
+	  if(visibilityIsPublic(visibility)) { // will have no visibility field 
+			// REMOVE VISIBILITY FIELD
+	    consSetHead(field, consHead(consHead(field)));
+//  	    System.err.println("attributeSetVisibility: REMOVE VISIBILITY FIELD");
+	  } else { // will have a visibility field 
 			// CHANGE VISIBILITY
-		  consSetTail(consHead(field), visibility);
+	    consSetTail(consHead(field), visibility);
+//  	    System.err.println("attributeSetVisibility: CHANGE VISIBILITY");
       }
 	}
   }
@@ -3268,6 +3272,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       attributeSetValue(att, value);
       return value;
     }
+  }
+  
+  public void objSetAttVisibility(int object, int name, int visibility) {
+
+	int att = objAttribute(object, name);
+    if (att == NO_SLOT_FOUND) {
+    	sendSlotMissing(object, name, visibility);
+        return; }
+    attributeSetVisibility(att, visibility);
   }
 
   public void objSetDaemons(int obj, int daemons) {
@@ -11263,6 +11276,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public void setOpenFrame(int frame) {
     openFrame = frame;
   }
+
 
 
 }
