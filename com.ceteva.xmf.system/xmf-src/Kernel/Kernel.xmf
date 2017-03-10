@@ -515,12 +515,12 @@ let
      mkClass(Attribute,
              Set{StructuralFeature,DocumentedElement},
              false,
-             Set{mkAtt("init",Op,Attribute,false),
+             Set{mkAtt("visibility",Object,Attribute,false),
+                 mkAtt("init",Op,Attribute,false),
                  mkAtt("isComposite",Boolean,Attribute,false),
                  mkAtt("properties",mkSeqType(Element),Attribute,false),
                  mkAtt("isIntrinsic",Boolean,Attribute,false),
-                 mkAtt("instLevel",Integer,Attribute,false),
-                 mkAtt("visibility",Object,Attribute,false)
+                 mkAtt("instLevel",Integer,Attribute,false)
              },
              "Attribute",
              Set{},

@@ -42,7 +42,8 @@ context Root::Extensions
                   Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
                 else
                   Kernel_addAtt(obj,a.name,a.type.default())
-                end
+                end;
+                Kernel_setSlotVisibility(obj,a.name,a.visibility)
               end;
               A := A->excluding(a) // we remove that attribute from the list as it has been handled
            end
