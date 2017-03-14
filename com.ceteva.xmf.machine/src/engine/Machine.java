@@ -3124,8 +3124,18 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       else atts = consTail(atts);
     }
     if (found) {
-      //int attVis = attributeVisibility(field)
-      return att;
+      int attVis = attributeVisibility(att);
+      if(attVis == PUBLIC_VISIBILITY) {
+    	  return att;
+      } else if(attVis == PRIVATE_VISIBILITY) {
+	  if(obj == frameSelf()) {
+		  return att;
+		} else {
+		  return SLOT_ACCESS_DENIED;
+		}
+      } else { // must be fancy
+    	  return SLOT_ACCESS_XMF;
+      }
     }
       
     else return NO_SLOT_FOUND;
@@ -5570,13 +5580,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     if (standardSlotAccessProtocol(obj) || isDefaultGetMOP(type(obj))) {
       int att = objAttribute(obj, name);
-//      System.err.println("dotObj("+name+","+obj+") --> " + att);
       if (att == NO_SLOT_FOUND) {
         sendSlotMissing(obj, name); 
-//      } else if (att == SLOT_ACCESS_DENIED) {
-//    	sendSlotMissing(obj, name); // Use other error message?
-//      } else if (att == SLOT_ACCESS_XMF) {
-//    	sendSlotAccess(obj, name);
+      } else if (att == SLOT_ACCESS_DENIED) {
+    	sendSlotMissing(obj, name); // Use other error message?
+      } else if (att == SLOT_ACCESS_XMF) {
+    	sendSlotAccess(obj, name);
       } else 
     	valueStack.push(attributeValue(att));
     } else {
