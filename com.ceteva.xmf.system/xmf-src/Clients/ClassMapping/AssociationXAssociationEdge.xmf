@@ -88,15 +88,16 @@ context ClassMapping
       @SlotValueChanged multi once AssociationXAssociationEdge::delete_classDiagramDaemon(association,"owner") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1NameChanged_classDiagramDaemon(association.end1,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1MultChanged_classDiagramDaemon(association.end1,"mult") end;
-      @SlotValueChanged multi once AssociationXAssociationEdge::end1InstLevelChanged_classDiagramDaemon(association.end1,"instLevel") end;
+      	@SlotValueChanged multi once AssociationXAssociationEdge::end1InstLevelChanged_classDiagramDaemon(association.end1,"instLevel") end;
+          @SlotValueChanged multi once AssociationXAssociationEdge::end1IsIntrinsicChanged_classDiagramDaemon(association.end1,"isIntrinsic") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2NameChanged_classDiagramDaemon(association.end2,"name") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2MultChanged_classDiagramDaemon(association.end2,"mult") end;
-      @SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged_classDiagramDaemon(association.end2,"instLevel") end;
+      	@SlotValueChanged multi once AssociationXAssociationEdge::end2InstLevelChanged_classDiagramDaemon(association.end2,"instLevel") end;
+          @SlotValueChanged multi once AssociationXAssociationEdge::end2IsIntrinsicChanged_classDiagramDaemon(association.end2,"isIntrinsic") end;      
       @SlotValueChanged multi once AssociationXAssociationEdge::end1ShowDisplayName_classDiagramDaemon(association,"showLabel") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowDisplayName_classDiagramDaemon(association,"showInverseLabel") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end1ShowVarName_classDiagramDaemon(association,"showVarName") end;
       @SlotValueChanged multi once AssociationXAssociationEdge::end2ShowVarName_classDiagramDaemon(association,"showInverseVarName") end
-      
     end
 
 
@@ -163,16 +164,51 @@ context ClassMapping
     end
 
     @Operation end1InstLevelChanged_classDiagramDaemon(assocEnd,slot,newInstLevel,oldInstLevel)
+            ("end1InstLevelChanged_classDiagramDaemon: " +  oldInstLevel + "-->" + newInstLevel).println();
       if newInstLevel <> oldInstLevel and newInstLevel.isReallyKindOf(Integer)
       then edge.end1.setInstLevel(newInstLevel)
       end
     end
+    
+    @Operation end1IsIntrinsicChanged_classDiagramDaemon(assocEnd,slot,newIsIntrinsic,oldIsIntrinsic)
+              ("end1IsIntrinsicChanged_classDiagramDaemon: " +  oldIsIntrinsic + "-->" + newIsIntrinsic).println();
+              if oldIsIntrinsic <> newIsIntrinsic then
+	  		if newIsIntrinsic = false
+   			then
+                    //edge.end1.setInstLevel(" ");
+   				@WithoutDaemons(self)
+   					edge.end1.instLevel.text := " ";
+   					edge.end1.instLevel.renew(edge.end1.instLevel)
+   				end;
+			   	edge.end1.instLevel.setFill(false);
+			    edge.end1.instLevel.setColor(Clients::Diagrams::Color(0,0,0))
+			else
+			    edge.end1.instLevel.setFill(true);
+				edge.end1.instLevel.setColor(Clients::Diagrams::Color(255,255,255))
+			end
+		  end
+          end
 
     @Operation end2InstLevelChanged_classDiagramDaemon(assocEnd,slot,newInstLevel,oldInstLevel)
       if newInstLevel <> oldInstLevel and newInstLevel.isReallyKindOf(Integer)
       then edge.end2.setInstLevel(newInstLevel)
       end
     end
+
+    	  @Operation end2IsIntrinsicChanged_classDiagramDaemon(assocEnd,slot,newIsIntrinsic,oldIsIntrinsic)
+	  		if newIsIntrinsic = false
+   			then
+   				@WithoutDaemons(edge.end1.instLevel)
+   					edge.end2.instLevel.text := " ";
+   					edge.end2.instLevel.renew(edge.end2.instLevel)
+   				end;
+			   	edge.end2.instLevel.setFill(false);
+			    edge.end2.instLevel.setColor(Clients::Diagrams::Color(0,0,0))
+			else
+			    edge.end2.instLevel.setFill(true);
+				edge.end2.instLevel.setColor(Clients::Diagrams::Color(255,255,255))
+			end
+		  end
 
     @Operation calcMultLabelString(mult):String
       @TypeCase(mult)

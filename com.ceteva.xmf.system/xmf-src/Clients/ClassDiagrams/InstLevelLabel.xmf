@@ -14,8 +14,8 @@ context ClassDiagrams
     @Attribute borderColor : Color end
       
     @Constructor(text,attachedTo,relx,rely,borderColor,editable)
-      self.init(Seq{text,attachedTo,relx,rely,editable})
-      ;self.border := true;
+      self.init(Seq{text,attachedTo,relx,rely,editable});
+      self.border := true;
       self.checkDaemons()
     end
     
@@ -35,12 +35,14 @@ context ClassDiagrams
       borderColor
     end
     
-     @Operation checkDaemons()
-  			@SlotValueChanged multi once Clients::ClassDiagrams::InstLevelLabel::valueChanged(self,"text") end		
-  	end
+    @Operation checkDaemons()
+  	@SlotValueChanged multi once Clients::ClassDiagrams::InstLevelLabel::valueChanged(self,"text") end		
+    end
   		
-  		@Operation valueChanged(obj, slot, new, old)
-  			if new = " " or new = ""
+    @Operation valueChanged(obj, slot, new, old)
+        ("valueChanged: " +  old + "-->" + new).println();
+             if old <> new then
+  		if new = " " or new = ""
    			then
    				@WithoutDaemons(obj)
    					obj.text := " ";
@@ -48,10 +50,12 @@ context ClassDiagrams
    				end;
 			   	obj.setFill(false);
 			    obj.setColor(Clients::Diagrams::Color(0,0,0))
+                ; "soll jetzt weiﬂ sein".println()
 			else
 			    obj.setFill(true);
 				obj.setColor(Clients::Diagrams::Color(255,255,255))
 			end
-	  	end
+            end
+	  end
     
   end

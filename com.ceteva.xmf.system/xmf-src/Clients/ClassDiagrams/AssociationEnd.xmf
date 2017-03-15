@@ -46,6 +46,12 @@ context ClassDiagrams
     end
     
     @Operation setInstLevel(instLevel)
+/*		    if instLevel = " " or instLevel = ""
+   			then
+			   	self.instLevel.setColor(Clients::Diagrams::Color())
+			else
+			    self.instLevel.setColor(Clients::Diagrams::Color(0,0,0))
+			end; */
       self.instLevel.textChanged(instLevel+"")
     end
     
