@@ -23,7 +23,7 @@ context ClassXNode
     elseif level = 3
     then node.name.name.setColor(white); node.name.setFillColor(blue); if node.name.stereotypeText <> null  then node.name.stereotypeText.setColor(grey) end
     elseif level = 2
-    then node.name.name.setColor(white); node.name.setFillColor(black);  if node.name.stereotypeText <> null  then node.name.stereotypeText.setColor(grey) end
+    then node.name.name.setColor(white); node.name.setFillColor(black); if node.name.stereotypeText <> null  then node.name.stereotypeText.setColor(grey) end
     elseif level = 1
     then node.name.name.setColor(black); node.name.setFillColor(white); if node.name.stereotypeText <> null  then node.name.stereotypeText.setColor(grey) end
     elseif level = 0
@@ -54,7 +54,13 @@ context ClassXNode
     
   @Operation generateMetaslots()
     @For metaAttribute in class.of().allAttributes() do
-      if ( metaAttribute.underlyingType().isKindOf(DataType) or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::Unit) or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::ComposedType) ) and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) and ( (not metaAttribute.isIntrinsic) or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
+      if (metaAttribute.underlyingType().isKindOf(DataType) 
+          or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::Unit) 
+          or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::ComposedType) ) 
+      and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) 
+      and metaAttribute.visibility = null
+      and ( (not metaAttribute.isIntrinsic) 
+          or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
         @WithoutRendering(node.owner)
           self.metaslotAdded(metaAttribute)
         end
