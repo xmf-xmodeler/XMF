@@ -45,8 +45,8 @@ context ClassDiagrams
   		if new = " " or new = ""
    			then
    				@WithoutDaemons(obj)
-   					obj.text := " ";
-   					obj.renew(obj.owner)
+   					obj.text := " "//;
+   					//obj.renew(obj.owner)
    				end;
 			   	obj.setFill(false);
 			    obj.setColor(Clients::Diagrams::Color(0,0,0))

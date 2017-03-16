@@ -177,8 +177,8 @@ context ClassMapping
    			then
                     //edge.end1.setInstLevel(" ");
    				@WithoutDaemons(self)
-   					edge.end1.instLevel.text := " ";
-   					edge.end1.instLevel.renew(edge.end1.instLevel)
+   					edge.end1.instLevel.text := " "//;
+   					//edge.end1.instLevel.renew(edge.end1.instLevel)
    				end;
 			   	edge.end1.instLevel.setFill(false);
 			    edge.end1.instLevel.setColor(Clients::Diagrams::Color(0,0,0))
@@ -198,9 +198,9 @@ context ClassMapping
     	  @Operation end2IsIntrinsicChanged_classDiagramDaemon(assocEnd,slot,newIsIntrinsic,oldIsIntrinsic)
 	  		if newIsIntrinsic = false
    			then
-   				@WithoutDaemons(edge.end1.instLevel)
-   					edge.end2.instLevel.text := " ";
-   					edge.end2.instLevel.renew(edge.end2.instLevel)
+   				@WithoutDaemons(self)
+   					edge.end2.instLevel.text := " "//;
+   					//edge.end2.instLevel.renew(edge.end2.instLevel)
    				end;
 			   	edge.end2.instLevel.setFill(false);
 			    edge.end2.instLevel.setColor(Clients::Diagrams::Color(0,0,0))
