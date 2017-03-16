@@ -40,7 +40,7 @@ context ClassDiagrams
     end
   		
     @Operation valueChanged(obj, slot, new, old)
-        ("valueChanged: " +  old + "-->" + new).println();
+//        ("valueChanged: " +  old + "-->" + new).println();
              if old <> new then
   		if new = " " or new = ""
    			then
@@ -50,7 +50,7 @@ context ClassDiagrams
    				end;
 			   	obj.setFill(false);
 			    obj.setColor(Clients::Diagrams::Color(0,0,0))
-                ; "soll jetzt weiﬂ sein".println()
+             //   ; "soll jetzt weiﬂ sein".println()
 			else
 			    obj.setFill(true);
 				obj.setColor(Clients::Diagrams::Color(255,255,255))

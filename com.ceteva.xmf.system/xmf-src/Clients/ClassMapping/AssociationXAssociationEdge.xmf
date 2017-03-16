@@ -164,14 +164,14 @@ context ClassMapping
     end
 
     @Operation end1InstLevelChanged_classDiagramDaemon(assocEnd,slot,newInstLevel,oldInstLevel)
-            ("end1InstLevelChanged_classDiagramDaemon: " +  oldInstLevel + "-->" + newInstLevel).println();
+            //("end1InstLevelChanged_classDiagramDaemon: " +  oldInstLevel + "-->" + newInstLevel).println();
       if newInstLevel <> oldInstLevel and newInstLevel.isReallyKindOf(Integer)
       then edge.end1.setInstLevel(newInstLevel)
       end
     end
     
     @Operation end1IsIntrinsicChanged_classDiagramDaemon(assocEnd,slot,newIsIntrinsic,oldIsIntrinsic)
-              ("end1IsIntrinsicChanged_classDiagramDaemon: " +  oldIsIntrinsic + "-->" + newIsIntrinsic).println();
+              //("end1IsIntrinsicChanged_classDiagramDaemon: " +  oldIsIntrinsic + "-->" + newIsIntrinsic).println();
               if oldIsIntrinsic <> newIsIntrinsic then
 	  		if newIsIntrinsic = false
    			then
@@ -260,10 +260,10 @@ context ClassMapping
 
     @Operation end1InstLevelChanged(obj,slot,newInstLevel,oldInstLevel)
       if newInstLevel <> oldInstLevel
-      then association.end1.instLevel := newInstLevel.asInt();
-            if newInstLevel <> " " and newInstLevel <> ""
+      then if newInstLevel <> " " and newInstLevel <> ""
         	then
-     	  		association.end1.isIntrinsic := true	
+				     association.end1.instLevel := newInstLevel.asInt();
+           		association.end1.isIntrinsic := true	
         	else
   	       		association.end1.isIntrinsic := false	
         	end
@@ -272,10 +272,11 @@ context ClassMapping
 
     @Operation end2InstLevelChanged(obj,slot,newInstLevel,oldInstLevel)
       if newInstLevel <> oldInstLevel
-      then  association.end2.instLevel := newInstLevel.asInt();
+      then  
             if newInstLevel <> " " and newInstLevel <> ""
         	then
-     	  		association.end2.isIntrinsic := true	
+				association.end2.instLevel := newInstLevel.asInt();     	  		
+			     association.end2.isIntrinsic := true	
         	else
   	       		association.end2.isIntrinsic := false	
         	end
