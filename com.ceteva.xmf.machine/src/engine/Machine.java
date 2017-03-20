@@ -3125,14 +3125,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     }
     if (found) {
       int attVis = attributeVisibility(att);
-      if(attVis == PUBLIC_VISIBILITY) {
+	  if(attVis == PUBLIC_VISIBILITY) {
     	  return att;
       } else if(attVis == PRIVATE_VISIBILITY) {
 	  if(obj == frameSelf()) {
 		  return att;
 		} else {
-		  return SLOT_ACCESS_DENIED;
-		}
+    	  System.err.println("private.other");
+	      return SLOT_ACCESS_DENIED;
+	    }
       } else { // must be fancy
     	  return SLOT_ACCESS_XMF;
       }
@@ -3273,11 +3274,21 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public int objSetAttValue(int obj, int name, int value) {
 
     // Set the value of an attribute in an object...
-
     int att = objAttribute(obj, name);
-    if (att == NO_SLOT_FOUND)
-      return -1;
-    else {
+//    if(value == 0x3000011) 
+//	  System.err.println(
+////		  Integer.toHexString(result) + "/" +
+//          Integer.toHexString(obj) + "<>" +
+//          Integer.toHexString(frameSelf()) + ":" +
+////          Integer.toHexString(name) + "/" +
+//          Integer.toHexString(value) + "/" +
+//          Integer.toHexString(att) + "->" +
+//          Integer.toHexString(attributeVisibility(att)));
+	  
+    if (att == NO_SLOT_FOUND || att == SLOT_ACCESS_DENIED || att == SLOT_ACCESS_XMF) {
+      System.err.println("att == NO_SLOT_FOUND || att == SLOT_ACCESS_DENIED || att == SLOT_ACCESS_XMF");
+      return att;
+    } else {
       undo.setSlot(obj, name, value, attributeValue(att));
       attributeSetValue(att, value);
       return value;
@@ -5583,7 +5594,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       if (att == NO_SLOT_FOUND) {
         sendSlotMissing(obj, name); 
       } else if (att == SLOT_ACCESS_DENIED) {
-    	sendSlotMissing(obj, name); // Use other error message?
+    	sendSlotDenied(obj, name); // Use other error message? YES
       } else if (att == SLOT_ACCESS_XMF) {
     	sendSlotAccess(obj, name);
       } else 
@@ -5601,6 +5612,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     send(2, mkSymbol("getInstanceSlot"));
   }
 
+  public void sendSlotDenied(int obj, int name) {
+    openFrame();
+    valueStack.push(name);
+    valueStack.push(obj);
+    send(1, mkSymbol("slotDenied"));
+  }
+  
   public void sendSlotMissing(int obj, int name) {
     openFrame();
     valueStack.push(name);
@@ -5608,6 +5626,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     send(1, mkSymbol("slotMissing"));
   }
 
+  public void sendSlotDenied(int obj, int name, int value) {
+	System.err.println("sendSlotDenied");
+    openFrame();
+    valueStack.push(name);
+    valueStack.push(value);
+    valueStack.push(obj);
+    send(2, mkSymbol("slotDenied"));
+  }
+  
   public void sendSlotMissing(int obj, int name, int value) {
     openFrame();
     valueStack.push(name);
@@ -6564,7 +6591,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       // a specialized slot update protocol defined via 'setInstanceSlot'
       // in the class of the object.
 
-      if (standardSlotAccessProtocol(obj) || isDefaultSetMOP(type(obj)))
+      if (standardSlotAccessProtocol(obj) || isDefaultSetMOP(type(obj))) 
         setObjSlot(obj, name, value);
       else sendSlotUpdate(obj, name, value);
       break;
@@ -6638,7 +6665,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     if ((objDaemonsActive(obj) == trueValue) && (objDaemons(obj) != nilValue)) {
       int oldValue = objAttValue(obj, name);
-      if (objSetAttValue(obj, name, value) == -1) sendSlotMissing(obj, name, value);
+      int result = objSetAttValue(obj, name, value);
+      if (result == NO_SLOT_FOUND) sendSlotMissing(obj, name, value);
+      if (result == SLOT_ACCESS_DENIED) sendSlotDenied(obj, name, value);
       openFrame();
       valueStack.push(name);
       valueStack.push(value);
@@ -6646,7 +6675,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       valueStack.push(obj);
       send(3, theSymbolFire);
     } else {
-      if (objSetAttValue(obj, name, value) == -1) sendSlotMissing(obj, name, value);
+      int result = objSetAttValue(obj, name, value);
+      if (result == NO_SLOT_FOUND) sendSlotMissing(obj, name, value);
+      if (result == SLOT_ACCESS_DENIED) sendSlotDenied(obj, name, value);
       valueStack.push(obj);
     }
   }
@@ -7617,8 +7648,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int self = frameSelf();
     int value = objAttValue(self, slot);
-    if (value == -1)
-      throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
+    if (value == NO_SLOT_FOUND)
+        throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
+    if (value == SLOT_ACCESS_DENIED)
+        throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
     else objSetAttValue(self, slot, mkInt(intValue(value) + 1));
     pushStack(self);
   }
@@ -7629,8 +7662,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int self = frameSelf();
     int value = objAttValue(self, slot);
-    if (value == -1)
-      throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
+    if (value == NO_SLOT_FOUND)
+        throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
+    if (value == SLOT_ACCESS_DENIED)
+        throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
     else objSetAttValue(self, slot, mkInt(intValue(value) - 1));
     pushStack(self);
   }

@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+context Exceptions
+
+  @Class SlotAccessDenied extends Exception
+     
+    @Attribute object : Object end
+    @Attribute name : String end
+    
+    @Constructor(object,name) !
+       self.setBacktrace();
+       self.message :=
+         object.toString() + 
+         "." + name + " is not accessible from here"
+    end
+    
+  end
+      
+    
