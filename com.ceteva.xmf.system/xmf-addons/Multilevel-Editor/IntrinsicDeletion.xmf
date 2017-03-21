@@ -21,7 +21,7 @@ context Class
 @Operation remove(n : NamedElement):Classifier
       if n.isKindOf(Attribute)
       then
-        if n.isIntrinsic
+        if not n.isKindOf(Associations::End) andthen n.isIntrinsic
 		then
 			let sd = xmf.javaClass("de.unidue.icb.xmf.multilevel.gui.SpecificDeletionDialog").showDialog(n.owner.level.asInt(),n.instLevel.asInt())
 			in
