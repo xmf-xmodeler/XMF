@@ -5204,11 +5204,17 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public int addInts(int i, int j) {
-    // return mkInt(i + j);
-    long l = i + j;
-    if (l > MAXINT)
+    int l = i + j; // adding two 24 bit integers wont overflow 32 bit, so long is not required
+    if (l > MAXINT || l < -MAXINT) // may overflow in any direction: i.e. (-10) + (-10) = -20
       return mkBigInt(l);
     else return mkInt(i + j);
+  }
+  
+  public int subInts(int i, int j) {
+    int l = i - j; // subtracting two 24 bit integers wont overflow 32 bit, so long is not required
+    if (l > MAXINT || l < -MAXINT) // may overflow in any direction: i.e. 10 - (-10) = 20
+      return mkBigInt(l);
+	else return mkInt(i - j);
   }
 
   public void overloadedBinOp(int v1, int v2, String op) {
@@ -5252,7 +5258,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int v1 = valueStack.pop();
     int v2 = valueStack.pop();
     if (isInt(v1) && isInt(v2))
-      valueStack.push(mkInt(intValue(v2) - intValue(v1)));
+      valueStack.push(subInts(intValue(v2),intValue(v1)));
     else if (isFloat(v1) && isFloat(v2))
       valueStack.push(floatSub(v2, v1));
     else if (isSet(v1) && isSet(v2))
@@ -5290,7 +5296,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public int mulInts(boolean isNegative, int i, int j) {
-    long l = i * j;
+    long l = ((long)i) * ((long)j); // we must cast before multiplying
     if (l > MAXINT)
       if (isNegative)
         return mkBigInt(-l);
