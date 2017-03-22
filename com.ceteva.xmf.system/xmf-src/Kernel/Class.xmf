@@ -333,7 +333,7 @@ context Class
             then Kernel_addAtt(o,a.name,a.init.invoke(o,Seq{}))
             else Kernel_addAtt(o,a.name,a.type.default())
             end;
-            Kernel_setSlotVisibility(o,a.name,a.visibility);
+            if a.hasProperty("visibility") then Kernel_setSlotVisibility(o,a.name,a.getProperty("visibility")) end;
             A := A->excluding(a)
          end
        end;

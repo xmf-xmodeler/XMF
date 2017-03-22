@@ -534,6 +534,15 @@ context Object
     end
     throw Exceptions::NoSlot(self,slot)
   end
+
+context Object
+  @Operation slotDenied(slot:Symbol)
+    @Doc
+      Called when an we request the slot of an object and the
+      slot is inaccesible for the se'nder.
+    end
+    throw Exceptions::SlotAccessDenied(self,slot)
+  end
   
 context Object
   @Operation slotMissing(slot:Symbol,value:Element)
@@ -542,6 +551,15 @@ context Object
       slot does not exist.
     end
     throw Exceptions::NoSlot(self,slot)
+  end
+
+context Object
+  @Operation slotMissing(slot:Symbol,value:Element)
+    @Doc
+      Called when an we update the slot of an object and the
+      slot does not exist.
+    end
+    throw Exceptions::SlotAccessDenied(self,slot)
   end
 
 context Object
