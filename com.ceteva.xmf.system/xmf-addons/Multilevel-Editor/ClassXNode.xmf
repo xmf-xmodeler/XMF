@@ -58,7 +58,7 @@ context ClassXNode
           or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::Unit) 
           or metaAttribute.underlyingType().isKindOf(AuxiliaryClasses::ComposedType) ) 
       and (not Root::Extensions::MetaAdaptor.allAttributes().contains(metaAttribute)) 
-      and metaAttribute.visibility = null
+      and not (metaAttribute.hasProperty("visibility") andthen metaAttribute.getProperty("visibility") = null)
       and ( (not metaAttribute.isIntrinsic) 
           or (metaAttribute.instLevel.asInt() >= class.level.asInt())) then
         @WithoutRendering(node.owner)
