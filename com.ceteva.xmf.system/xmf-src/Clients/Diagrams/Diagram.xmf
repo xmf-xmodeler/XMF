@@ -379,40 +379,40 @@ context Diagrams
       toggleHandlers.put(type,handler)
     end  
     
-      @Operation renameAnyHandler(newName,oldName,withClientCommand)
+    @Operation renameAnyHandler(newName,oldName,withClientCommand)
         // When any of the handlers added are renamed they are retrieved/renamed/deleted...
+           
+      if actionHandlers.hasKey(oldName) 
+        then 
+        let value = actionHandlers.get(oldName)
+        in 
+          actionHandlers.remove(oldName);
+          actionHandlers.put(newName,value)
+        end
+      end;
+        
+      if newHandlers.hasKey(oldName) 
+        then 
+        let value = newHandlers.get(oldName)
+        in 
+          newHandlers.remove(oldName);
+          newHandlers.put(newName,value)
+        end
+      end;
+        
+      if toggleHandlers.hasKey(oldName) 
+        then 
+        let value = toggleHandlers.get(oldName)
+        in 
+          toggleHandlers.remove(oldName);
+          toggleHandlers.put(newName,value)
+        end
+      end;
       
-        if actionHandlers.hasKey(oldName) 
-          then 
-          let value = actionHandlers.get(oldName)
-          in 
-            actionHandlers.remove(oldName);
-            actionHandlers.put(newName,value)
-          end
-        end;
-        
-        if newHandlers.hasKey(oldName) 
-          then 
-          let value = newHandlers.get(oldName)
-          in 
-            newHandlers.remove(oldName);
-            newHandlers.put(newName,value)
-          end
-        end;
-        
-       if toggleHandlers.hasKey(oldName) 
-          then 
-          let value = toggleHandlers.get(oldName)
-          in 
-            toggleHandlers.remove(oldName);
-            toggleHandlers.put(newName,value)
-          end
-        end
-        
-         if withClientCommand then 
-          @Command(self) renameAnyCommand(self,newName,oldName) end 
-        end
+      if withClientCommand then 
+        @Command(self) renameAnyCommand(self,newName,oldName) end 
       end
+    end
       
     @Operation removeAnyHandler(name,withClientCommand)
       // When any of the handlers added above becomes obsolete it is removed from 
