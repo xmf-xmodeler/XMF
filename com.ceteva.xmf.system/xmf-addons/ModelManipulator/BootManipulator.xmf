@@ -3,6 +3,7 @@ parserImport XOCL;
 import Projects;
 import Clients::ExtensionPoints;
 
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.xmf",true,true);
 (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
 						
 Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);

@@ -16,7 +16,27 @@ context Root
   end
       
   @Operation addMetaClass(name:String, level:Integer)
-    self.model.add(FMML::MetaClass(name, level))
+    self.checkNewClassPreconditions(name, level); // precondition
+    let classesPre = self.model.classes + {} in // store @pre values
+      self.model.add(FMML::MetaClass(name, level));
+      self.checkNewClassPostconditions(name, level, classesPre) // postcondition
+    end
+  end
+  
+  @Operation checkNewClassPreconditions(name:String, level:Integer)
+    // classes -> not exists (c|c. name = name )
+    not (self.model.classes->exists(c|c.name=Symbol(name))) andthen
+    // level >= 1
+    level >= 1
+  end
+  
+  @Operation checkNewClassPostconditions(name:String, level:Integer, classesPre:Set)
+    //classes = classes@pre -> including (c |c. name = name and c. level = level )
+    (self.model.classes-classesPre)->exists(c|c.name=Symbol(name) and c.level = level)
+    andthen 
+    {}.equals(classesPre-self.model.classes)
+    andthen
+    (self.model.classes-classesPre).size()=1
   end
    
   @Operation addInstance(name:String, class:FMML::MetaClass)
