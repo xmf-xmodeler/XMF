@@ -441,7 +441,8 @@ context XCore::Package
     let mappingClient = xmf.findClient(Clients::MappingMapping::MappingClient)
     in
       if mappingClient <> null
-      then mappingClient.createDiagram(self,name,total)
+      then 
+      	mappingClient.createDiagram(self,name,total)       
       else format(stdout,"Class diagram client not available.~%")
       end
     end 

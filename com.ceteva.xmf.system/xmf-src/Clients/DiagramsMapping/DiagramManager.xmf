@@ -37,7 +37,7 @@ context DiagramsMapping
     end
 
     @Operation addDiagram(element,diagram)
-      diagram.isOpen := false;
+      //diagram.isOpen := false;
       self.registerWithDiagram(diagram);
       self.addModelDaemons(element);
       if diagram <> null
