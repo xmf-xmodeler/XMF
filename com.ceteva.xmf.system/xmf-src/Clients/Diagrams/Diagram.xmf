@@ -1090,14 +1090,16 @@ context Diagrams
     end
     
     @Operation updateValues()
-              //owner.classMaps // PackageXMappingDiagram --> ClassXNode
-      //"Update Diagram from Model".println();
-      // graph.nodes.println();
-      @For node in owner.classMaps do
-        node.refresh()
-      end
+             // This appears to assume that the owner is a mapping diagram.
+             // That is not the case in general since a diagram can exist
+             // in isolation. Moving the owner.classMaps code down into a
+             // mapping diagram.
+      // @For node in owner.classMaps do
+      //  node.refresh()
+      // end
       //"Update Diagram from Model".println()
       //@Command(self) updateValues(self) end
+             null
     end
     
     @Operation zoomToFit()

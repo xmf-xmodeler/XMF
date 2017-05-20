@@ -50,7 +50,7 @@ context Transition
         target = tool.find(target) then
         sourcePort = source.port();
         targetPort = target.port() then
-        edge = StateMachine::StateDiagrams::StateEditor.edgeType("Transition").new(sourcePort,targetPort,tool) then
+        edge = StateMachine::StateDiagrams::StateEditor.edgeType("Transition").newEdge(sourcePort,targetPort,tool,sourcePort.x,sourcePort.y,targetPort.x,targetPort.y) then
         nameLabel = edge.ref("name");
         guardLabel = edge.ref("guard");
         actionLabel = edge.ref("action") then

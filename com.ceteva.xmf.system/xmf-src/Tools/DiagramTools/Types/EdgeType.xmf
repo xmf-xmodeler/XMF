@@ -44,7 +44,7 @@ context Types
         sourceName = Name '->' targetName = Name 
         sourceHead = SourceHead 
         targetHead = TargetHead 
-        lineStyle = LineStyle 
+        lineStyle = LineStyleDef 
         lineColour = LineColour
         defs = Exp* 'end' {
           defs->iterate(def exp = [| Tools::DiagramTools::Types::EdgeType(
@@ -59,7 +59,7 @@ context Types
       
       SourceHead ::= 'sourceHead' '=' EdgeEnd | { 0 }.
       TargetHead ::= 'targetHead' '=' EdgeEnd | { 0 }.
-      LineStyle ::= 'lineStyle' '=' LineStyle | { solidLine }.
+      LineStyleDef ::= 'lineStyle' '=' LineStyle | { solidLine }.
       LineColour ::= 'lineColour' '=' Str | { "" }.
       
       EdgeEnd ::= 
@@ -102,8 +102,8 @@ context Types
     
       // Replace references to node types with the node type object.
       
-      self.source := env.lookup(source.name().toString());
-      self.target := env.lookup(target.name().toString())
+      self.source := env.lookup(source);
+      self.target := env.lookup(target)
     end
     
     @Operation edgeLegal(tool,sourcePort,targetPort):Boolean

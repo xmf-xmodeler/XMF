@@ -129,4 +129,5 @@ context GraphManager
   end
 
 Root::tool := Tool(GraphEditor,"Graph Editor",GraphManager,Graphs::Graph());
+xmf.toolManager().addTool(tool);
 tool.element().observeBy(tool);

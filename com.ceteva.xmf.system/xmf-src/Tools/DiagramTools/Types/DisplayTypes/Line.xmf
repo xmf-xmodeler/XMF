@@ -25,13 +25,12 @@ context DisplayTypes
       self.setName(name)
     end
     
-    /*
     
     @Grammar extends DisplayType.grammar
     
-      Line ::= name = Name '(' x1 = Int ',' y1 = Int ',' x2 = Int ',' y2 = Int atts = (',' Name)* ')'  lineStyle = LineStyle dsplAtts = Atts 'end' {
+      Line0 ::= name = Name '(' x1 = Int ',' y1 = Int ',' x2 = Int ',' y2 = Int atts = (',' Name)* ')'  lineStyle = LineStyle dsplAtts = Atts 'end' {
       
-        [| let line = Tools::DiagramTools::Types::DisplayTypes::Line(<OCL::StrExp(name)>,<OCL::IntExp(x1)>,<OCL::IntExp(y1)>,<OCL::IntExp(x2)>,<OCL::IntExp(y2)>) 
+        [| let line = Tools::DiagramTools::Types::DisplayTypes::mkLine(<OCL::StrExp(name)>,<OCL::IntExp(x1)>,<OCL::IntExp(y1)>,<OCL::IntExp(x2)>,<OCL::IntExp(y2)>) 
            in line.hasPort     := <OCL::BoolExp(atts->includes("hasport"))>;
               line.layout      := <OCL::StrExp(filterLayout(atts))>;
               //line.style       := <OCL::IntExp(lineStyle)>;
@@ -52,8 +51,6 @@ context DisplayTypes
        'dashDotDotLine' { 5 }.
       
     end
-
-*/
     
     @Operation new(root,parent,path,tool,env)
       let line = Diagrams::Line(x1,y1,x2,y2)
@@ -67,3 +64,8 @@ context DisplayTypes
     end
     
   end
+  
+  context Tools::DiagramTools::Types::DisplayTypes
+    @Operation mkLine(name,x1,y1,x2,y2) 
+       Tools::DiagramTools::Types::DisplayTypes::Line(name,x1,y1,x2,y2)
+    end

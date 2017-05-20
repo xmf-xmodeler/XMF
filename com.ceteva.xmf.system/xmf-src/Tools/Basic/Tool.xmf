@@ -161,7 +161,7 @@ context Basic
     @Operation rootTool()
       if owner = null
       then null
-      elseif owner = xmf.toolManager()
+      elseif not(owner.isKindOf(Basic::Tool)) //owner = xmf.toolManager()
       then self
       else owner.rootTool()
       end

@@ -20,5 +20,7 @@ parserImport Manifests;
                  @File Point        end
                  @File Shape        end
                  @File Ref          end
-do DisplayTypes
+do 
+       Tools::DiagramTools::Types::DisplayTypes::Line.grammar.startingSymbol := "Line0";
+       DisplayTypes
 end;

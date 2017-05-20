@@ -72,6 +72,33 @@ context Types
       end
     end
     
+    @Operation addSimple(element)
+      @TypeCase(element)
+        EdgeType do
+          self.addToEdgeTypes(element)
+        end
+        Menu do
+          self.menu := element
+        end
+        NodeType do
+          self.addToNodeTypes(element)
+        end
+        ToolBar do
+          self.toolBar := element
+        end
+        IntelliLinkType do
+          self.addToIntelliLinkTypes(element)
+        end
+        AllEdgesIntelliLinkType do
+          self.addToIntelliLinkTypes(element)
+        end
+        DisplayType do
+          self.addToDisplays(element)
+        end
+        else self.error("Unknown tool type component: " + element.toString())
+      end
+    end
+    
     @Operation addMenuItems(tool)
     
       // Called when the menu items are to be added to the 
@@ -92,7 +119,8 @@ context Types
         when toolType.handlesNewEdgeEvents(edgeType)
         do toolType.addToEdgeTypes(edgeType)
         else self.error("Cannot find new edge handler for " + edgeType.toString())
-      end
+      end;
+      self
     end
     
     @Operation addNodeType(nodeType)
@@ -105,7 +133,8 @@ context Types
         if not toolType.nodeTypes()->includes(nodeType)
         then toolType.addToNodeTypes(nodeType)
         end
-      end
+      end;
+      self
     end
 
     @Operation allDisplayTypes(T:Seq(AbstractDisplayType)):Seq(AbstractDisplayType)
@@ -259,7 +288,7 @@ context Types
       let name = sig->last then
           body =
            [| let toolType = <defs->iterate(def exp = [| Tools::DiagramTools::Types::ToolType(<OCL::StrExp(name)>,<parents>) |] |
-                              [| <exp>.add(<def>) |])>
+                              [| <exp>.addSimple(<def>) |])>
               in toolType.deref();
                  toolType.mergeParents();
                  toolType

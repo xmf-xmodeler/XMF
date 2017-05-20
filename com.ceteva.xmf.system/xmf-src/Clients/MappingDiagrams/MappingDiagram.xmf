@@ -207,4 +207,10 @@ context MappingDiagrams
       self.scopeEdges := scopeEdges.excluding(edge)
     end
     
+    @Operation updateValues()
+      @For node in owner.classMaps do
+        node.refresh()
+      end
+    end
+    
   end

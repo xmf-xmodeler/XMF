@@ -49,7 +49,9 @@ Root::type :=
 end;
 
 Root::manager :=
-@ElementManager
+@ElementManager OrManager
 end;
 
 Root::tool := Tool(type,"State Editor",manager,null);
+
+xmf.toolManager().addTool(tool);

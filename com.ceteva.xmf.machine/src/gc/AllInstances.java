@@ -5,6 +5,11 @@ import java.util.Arrays;
 import engine.Machine;
 
 public class AllInstances extends GC {
+	
+	// This GC plugin calculates all the direct instances of a collection of
+	// classes. A direct instance is an object whose .of() value is a member
+	// of the supplied classes. The plugin is designed to work with the minimum
+	// amount of allocation.
 
   int[] classes;
 
@@ -14,6 +19,10 @@ public class AllInstances extends GC {
   }
 
   public int gcObj(int obj) {
+  	
+  	// Called when an object is encountered by GC. The object is pushed on 
+  	// the stack if its type is a member of the supplied list of classes...
+  	
     int objType = machine.objType(obj);
     if (isClass(objType)) {
       int newObj = super.gcObj(obj);
@@ -29,6 +38,12 @@ public class AllInstances extends GC {
   }
 
   public void gcPopStack() {
+  	
+  	// Called when the GC is complete. The instances of the classes are
+  	// on the stack. They are popped off and consed into a list that is 
+  	// returned. Note that hash tables need to be rehashed post GC and
+  	// are pushed onto the stack for that purpose...
+  	
     int allInstances = Machine.nilValue;
     while (machine.getStack().getTOS() != machine.getGCTOS()) {
       int value = machine.getStack().pop();

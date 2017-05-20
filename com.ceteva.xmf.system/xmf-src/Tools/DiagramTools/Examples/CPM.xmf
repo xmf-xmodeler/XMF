@@ -29,14 +29,6 @@ context Root
 context Root
 
 @ToolType CPM
-  @EdgeType Activity Event -> Event targetHead = arrow 
-    @Label name(end,20,20) "name" end
-    @Label duration(middle,10,10) "0" end 
-    @Menu 
-      @MenuAction Delete self.delete() end 
-      @MenuAction Edit tool.find(self).edit() end
-    end
-  end
   @NodeType Event(OVERLAY,hasport)
     @Box box(OVERLAY,ALIGN,nofill,hideTop,hideRight,hideLeft,hideBottom)
       @Ellipse ellipse(ALIGN)   width = 20 height = 20 end
@@ -50,6 +42,14 @@ context Root
       @MenuAction Edit tool.find(self).edit() end
     end
   end
+       @EdgeType Activity Event -> Event targetHead = arrow 
+         @Label name(end,20,20) "name" end
+         @Label duration(middle,10,10) "0" end 
+         @Menu 
+           @MenuAction Delete self.delete() end 
+           @MenuAction Edit tool.find(self).edit() end
+         end
+       end
   @ToolBar 
     @ToolGroup Operations
       @ToolButton Activity isEdge icon = "Tools/Attribute.gif" end
@@ -244,3 +244,5 @@ context Root
   end
 
 Root::tool := CPMTool(CPM,"CPM Editor",CPMManager,Graph());
+
+xmf.toolManager().addTool(tool);

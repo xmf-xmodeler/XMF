@@ -147,5 +147,8 @@ end;
 
 context Root
   @Operation tankDemo()
-    Tool(type,"State Editor",manager,Graphs::Graph()).showDiagram()
+    let t = Tool(type,"State Editor",manager,Graphs::Graph())
+          in xmf.toolManager().addTool(t);
+             t.showDiagram()
+          end
   end
