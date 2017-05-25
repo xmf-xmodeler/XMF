@@ -33,9 +33,14 @@ context Structure
       
       @Find(client,xmf.clientManager().clients)
         when client.name = "com.ceteva.forms"
-        do if not client.hasForm(form) then type.new(self) end;
-           client.showForm(form);
-           self.layout()
+        do if not client.hasForm(self.form) 
+          then 
+            self.form := Form(self.id); 
+            self.form.setType(self.type); 
+            self.type.new(self) 
+          end;
+          client.showForm(self.form);
+          self.form.layout(0,0)
       end
     end       
     

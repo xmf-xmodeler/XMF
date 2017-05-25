@@ -21,13 +21,14 @@ context Types
       [| let comboBoxType = <defs->iterate(t e = [| Tools::FormTools::Types::ComboBox(<name>) |] | [| <e>.add(<t>) |])>
          in comboBoxType.setMinWidth(<OCL::IntExp(FormElement::lookup(natts,"minWidth",0))>);
             comboBoxType.setMaxWidth(<OCL::IntExp(FormElement::lookup(natts,"maxWidth",9999))>);
-            comboBoxType.setMinHeight(<OCL::IntExp(FormElement::lookup(natts,"minHeight",0))>);
+            comboBoxType.setMinHeight(<OCL::IntExp(FormElement::lookup(natts," ",0))>);
             comboBoxType.setMaxHeight(<OCL::IntExp(FormElement::lookup(natts,"maxHeight",9999))>);
             comboBoxType.setPadLeft(<OCL::IntExp(FormElement::lookup(natts,"padLeft",0))>);
             comboBoxType.setPadRight(<OCL::IntExp(FormElement::lookup(natts,"padRight",0))>);
             comboBoxType.setPadTop(<OCL::IntExp(FormElement::lookup(natts,"padTop",0))>);
             comboBoxType.setPadBottom(<OCL::IntExp(FormElement::lookup(natts,"padBottom",0))>);
             comboBoxType.setLayout(<OCL::StrExp(FormElement::filterLayout(patts))>);
+            //("ComboBox::Grammar: " + name).println();
             comboBoxType
          end
       |]
@@ -49,6 +50,7 @@ context Types
     // Create but do not new the combo box since the parent
     // may not have been newed yet.
     
+    ("ComboBox::new: " + name).println();
     let comboBox = Forms::ComboBox(values)
     in comboBox.setType(self);
        comboBox.setSelectedHandler(@Operation(box,new,old) tool.raise(ComboChanged(path + Seq{name.toString()},comboBox,new,old)) end);

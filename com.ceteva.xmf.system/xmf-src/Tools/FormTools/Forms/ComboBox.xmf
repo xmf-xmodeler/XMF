@@ -11,7 +11,33 @@ context Forms
   
     @Attribute selectedHandler : Operation (?,!) end
   
+    @Constructor() 
+      "Constructor:0".println();
+      self.addDaemon()
+    end
+    
     @Constructor(contents) 
+      "Constructor:1".println();
+      self.addDaemon()
+    end
+    
+    @Constructor(a,b) 
+      "Constructor:2".println();
+      self.addDaemon()
+    end
+    
+    @Constructor(a,b,c) 
+      "Constructor:3".println();
+      self.addDaemon()
+    end
+    
+    @Constructor(x,y,width,height) 
+      "Constructor:4".println();
+      self.addDaemon()
+    end
+    
+    @Constructor(id,x,y,width,height) 
+      "Constructor:5".println();
       self.addDaemon()
     end
   
