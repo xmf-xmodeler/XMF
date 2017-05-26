@@ -45,13 +45,13 @@ context Types
   end
   
   @Operation add(element)
-    @TypeCase(element)
+      @TypeCase(element)
       Menu do
         self.setMenu(element)
       end
       Seq(Element) do
         @For e in element do
-          self.add(e)
+          self.add(e.toString())
         end;
         self
       end

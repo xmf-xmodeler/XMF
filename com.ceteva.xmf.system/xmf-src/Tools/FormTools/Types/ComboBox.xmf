@@ -14,18 +14,18 @@ context Types
 
   @Attribute values : Seq(String) (!,?,+,-) end
   
-  @Constructor(values) 
+  @Constructor(name) 
     ("ComboBox Constructor 1: " + values.of()).println()
   end  
   
   @Constructor(name,values) 
-    ("ComboBox Constructor 2: " + values).println();
+    //("ComboBox Constructor 2: " + values).println();
     self.setName(name)
   end
   
   @Grammar extends FormElement.grammar
   
-    ComboBox ::= name = EName patts = PosAtts values = Exp natts = NamedAtts defs = Exp * 'end' {
+    ComboBox ::= name = EName patts = PosAtts natts = NamedAtts defs = Exp * 'end' {
     
       [| let comboBoxType = <defs->iterate(t e = [| Tools::FormTools::Types::ComboBox(<name>) |] | [| <e>.add(<t>) |])>
          in comboBoxType.setMinWidth(<OCL::IntExp(FormElement::lookup(natts,"minWidth",0))>);
@@ -46,9 +46,16 @@ context Types
   end
   
   @Operation add(element)
-    @TypeCase(element)
+		@TypeCase(element)
       String do
         self.addToValues(element)
+	     end
+		Seq(Element) do
+        @For e in element do
+          self.addToValues(e)
+        end;
+        values.println();
+        self
       end
       else super(element)
     end
@@ -59,7 +66,6 @@ context Types
     // Create but do not new the combo box since the parent
     // may not have been newed yet.
     
-    ("ComboBox::new: " + values).println();
     let comboBox = Forms::ComboBox(values)
     in comboBox.setType(self);
        comboBox.setSelectedHandler(@Operation(box,new,old) tool.raise(ComboChanged(path + Seq{name.toString()},comboBox,new,old)) end);
