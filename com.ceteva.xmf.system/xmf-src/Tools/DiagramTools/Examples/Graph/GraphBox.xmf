@@ -49,6 +49,7 @@ end
 context Root
   @ElementManager GraphManager
     @EventHandler New_Node()
+    format(stdout, "NEW NODE%n",Seq{});
       let node = Graphs::Node("label")
       in register(event.node(),node);
          register(node,event.node());
@@ -59,6 +60,7 @@ context Root
   
 context GraphManager
   @EventHandler New_Edge()
+    format(stdout, "NEW EDGE%n",Seq{});
     let edge = Graphs::Edge("label",find(event.source()),find(event.target()))
     in register(edge,event.edge());
        register(event.edge(),edge);

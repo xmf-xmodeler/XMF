@@ -16,9 +16,9 @@ context BrowserInterface
     
     @Grammar 
     
-      Args ::= '(' (a = Name as = (',' Name)* ')' 'end' { Seq{a|as} } | ')' { Seq{} }).
+      Args ::= '(' (a = Name as = (',' Name)* ')' { Seq{a|as} } | ')' { Seq{} }).
     
-      Extend ::= path = Path name = Path  '->' 'including' '(' class = Path args = Args ')' { 
+      Extend ::= path = Path name = Path  '->' 'including' '(' class = Path args = Args ')' 'end' { 
         Extend(path,name,class,args) 
       }.
       

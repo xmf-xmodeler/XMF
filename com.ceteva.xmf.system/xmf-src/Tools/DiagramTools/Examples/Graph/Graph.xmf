@@ -132,7 +132,7 @@ end;
       @For newNode in new do
         if find(newNode) = null
         then 
-          let toolNode = tool.newNode("Node",10,10)
+          let toolNode = tool.newNode("Node",10,10,tool.diagram)
           in register(newNode,toolNode);
              register(toolNode,newNode);
              newNode.observeBy(tool);
@@ -164,7 +164,7 @@ end;
         then 
           let source = find(newEdge.source()).port();
               target = find(newEdge.target()).port() then
-              toolEdge = tool.newEdge("Edge",source,target)
+              toolEdge = tool.newEdge("Edge",source,target,source.x,source.y,target.x,target.y)
           in register(newEdge,toolEdge);
              register(toolEdge,newEdge);
              newEdge.observeBy(tool);
@@ -247,7 +247,7 @@ context Graph
 context Graphs::Node
   @Operation toTool(tool:Tool)
     // Create a new instance of the Node type in the tool...
-    let node = Graph::GraphEditor::Editor.nodeType("Node").new(10,10,tool);
+    let node = xmf.toolManager().getNameSpace(Graphs::Graph).getElement("GraphEditor").getElement("Editor").nodeType("Node").new(10,10,tool);
         // The env is used to pass in a context of types...
         env = Env::NullEnv()
     in // Set the node label...
@@ -266,7 +266,7 @@ context Graphs::Edge
     // is supplied with a source and target port and the tool...
     let source = tool.find(source).port();
         target = tool.find(target).port() then
-        edge = Graph::GraphEditor::Editor.edgeType("Edge").new(source,target,tool)
+        edge = xmf.toolManager().getNameSpace(Graphs::Graph).getElement("GraphEditor").getElement("Editor").edgeType("Edge").new(source,target,tool)
     in // Set the label on the edge...
        edge.ref("label").textChanged(data);
        // Register the elemnts with the tool...

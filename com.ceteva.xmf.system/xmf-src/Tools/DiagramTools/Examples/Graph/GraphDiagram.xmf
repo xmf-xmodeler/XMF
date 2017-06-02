@@ -106,7 +106,7 @@ end;
   end
 end;
   
-@EventHandler Graph::GraphEditor::Manager::NewEdge()
+@EventHandler Graph::GraphEditor::Manager::New_Edge()
     let edge = Graphs::Edge("label",find(event.source()),find(event.target()))
     in register(edge,event.edge());
        register(event.edge(),edge);
@@ -154,11 +154,10 @@ end;
       @For newNode in new do
         if find(newNode) = null
         then 
-          let toolNode = tool.newNode("Node",10,10)
+          let toolNode = tool.newNode("Node",10,10,tool.diagram)
           in register(newNode,toolNode);
              register(toolNode,newNode);
-             newNode.observeBy(tool);
-             toolNode.ref1(Seq{"label"}).setText(newNode.data())
+             newNode.observeBy(tool)
           end
         end
       end
