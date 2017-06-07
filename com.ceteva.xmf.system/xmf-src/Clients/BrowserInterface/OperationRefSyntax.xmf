@@ -15,7 +15,7 @@ context BrowserInterface
     @Constructor(opRef) ! end
     
     @Grammar
-      Path ::= n = Name ns = ('::' Name)* 'end' { Seq{n|ns} }.
+      Path ::= n = Name ns = ('::' Name)* { Seq{n|ns} }.
     end
     
     @AbstractOp register(class:Class)

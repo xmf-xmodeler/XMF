@@ -39,7 +39,7 @@ context Evaluator
        OCL::OCL.grammar.parseFile(file,"EvaluationUnit",Seq{})
      catch(x)
        @TypeCase(x)
-         ParseError do
+         Parser::ParseError do
            // This should be an evaluator error.
            Compiler::compilationError(x.pprint(),file,x);
            null

@@ -97,12 +97,19 @@ end;
 
 @ElementManager Graph::GraphEditor::Manager
   @EventHandler New_Node()
+    event.println();
     let node = Graphs::Node("label")
     in register(event.node(),node);
        register(node,event.node());
        node.observeBy(event.tool());
        event.tool().element().add(node)
      end
+  end
+end;
+
+@ElementManager Graph::GraphEditor::Manager
+  @EventHandler New_Activity()
+    "HOORAY".println()
   end
 end;
   
@@ -259,7 +266,8 @@ context Graph
              edge.toTool(tool)
            end;
            // Restart events...
-           tool.setHandleEvents(true)
+           tool.setHandleEvents(true);
+           tool
          end
        end
     end
@@ -297,3 +305,9 @@ context Graphs::Edge
        self.observeBy(tool)
     end
   end
+  
+  context Root
+    @Operation test()
+      Root::g := Graphs::Graph();
+      g.showDiagram()
+    end
