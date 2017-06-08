@@ -3,23 +3,114 @@ parserImport Clients::BrowserInterface;
 
 import Clients::BrowserInterface;
 
+// This file provides an example of how to write a browser interface.
+// A browser interface controls how instances of classes are displayed
+// in the browser tree and adds menu-based functionality to the tree
+// for the instances and their components. A class whose instances have
+// browser interfaces are defined with the meta-class BrowsedClass and
+// contain an instance of the syntax-class Clients::BrowserInterface::Interface.
+// The elements defined within the Interface control how instances of 
+// the browser class are displayed. The rest of this file provides a simple
+// example of a modelling language whose functionality is defined via
+// its interface.
+//
+// The demonstration shows how a simple browser-based application can be
+// used to construct models and model-patterns. The interface functionality
+// implements full access to creation and deletion of models. In addition
+// model-patterns can be defined where a pattern contains variables where
+// element names can occur. When a pattern is applied to an existing model
+// the new model elements in the pattern are added to the target model. 
+// During application the modeller has the option of providing concrete 
+// names for the variables.
+//
+// An example pattern might be ownership which has the form:
+//
+// @Class *Contained
+//   @Attribute owner:*Container end
+// end
+//
+// that can be applied to a model containing two classes:
+//
+// @Class A end
+// @Class B end
+//
+// and by making *Contained = B and *Container = A we get:
+//
+// @Class A end
+// @Class B
+//   @Attribute owner:A end
+// end
+
 context Root
+
   @Package Patterns
   
+    // The modellong language Patterns defines standard packages
+    // conatining associations and classes. In addition 'patterns'
+    // are model fragments that can be applied to a package to
+    // add the pattern elements to the package.
+  
     @Class Models metaclass BrowsedClass
+    
+      // Instances of this class are containers of packages
+      // and patterns. The elements are created via menus on
+      // the container and its contents.
+      
+      // These attributes are defined with the modifiers:
+      // ^ meaning container of elements with a back-link
+      // via parent, ? meaning an accessor and + meaning an
+      // extender.
     
       @Attribute packages : Set(Package) (^,?,+) end
       @Attribute patterns : Set(Pattern) (^,?,+) end
       
       @Interface
+      
+        // The interface image references an image that 
+        // is used in the browser for instances of the class...
   
         @Image "User/BookClosed" end
+        
+        // A Child declaration references the elements that
+        // are displayed directly below the parent in the
+        // browser. A child construct contains a path with infix '.'
+        // that navigates to an object that is positioned in
+        // the browser below the parent. A simple example of
+        // a path is just the name of an attribute. Paths
+        // may navigate through the children to their attributes,
+        // and the objects found at different paths may be
+        // appended using infix '+'...
     
         @Child packages end
         @Child patterns end
+        
+        // A menu root declares an element that will have a menu on it.
+        // The menu items that are declared in the interface are added
+        // to the root menu...
     
         @MenuRoot Patterns::Models end
-        @Menu Edit Element::edit_redirect end
+        
+        // A menu item declares a path to the mouse-selected menu item 
+        // from the root menu and declares a path to the 0-arity operation
+        // that will be invoked when the menu item is selected...
+        
+        @Menu Edit Element::edit_redirect 
+        
+          // edit_redirect is used in case Element::edit is extended in
+          // a subclass. Using this operation guarantees the most specific
+          // definition of edit() is used.
+          
+        end
+        
+        // Extend interface items are used to add menu items that
+        // create new elements to the attributes of the browsed class.
+        // The syntax invlves the name of the menu item, the name
+        // of the attribute to extend, the class to instantiate 
+        // and the attributes to initialise when the new instance 
+        // is created. For example, the first extend below defines 
+        // that a new instance of Package is created, its name attribute
+        // is set (via a dialog) and then it is added to the packages
+        // attribute...
 
         @Extend Package packages->including(Patterns::Package(name)) end
         @Extend Pattern patterns->including(Patterns::Pattern(name)) end
@@ -28,16 +119,28 @@ context Root
     end
     
     @Class Named extends Contained
+    
+      // Any type that is used in an attribute with a ^ modifier must have
+      // an owner attribute. The easiest way of achieving that is to inherit
+      // from the class Contained. Otherwise, a named element has a name...
+      
       @Attribute name : String (?) end
       @Constructor(name) ! end
     end
     
     @Class Package metaclass BrowsedClass extends Named
     
+      // Another browsed class that represents a model that contains
+      // classes and associations...
+    
       @Attribute classes : Set(Class) (^,+,-,?) end
       @Attribute associations : Set(Association) (^,+,?) end
       
       @Interface
+      
+        // The interface specifies that the a package uses the default
+        // package icon and the children in the browser are constructed from
+        // the classes and the associations...
   
         @Image "XCore/Package" end
     
@@ -50,11 +153,21 @@ context Root
         @Extend Class classes->including(Patterns::Class(name)) end
         @Extend Association associations->including(Patterns::Association(name)) end
         
+        // A delete interface item is used in a child contained element
+        // to remove it from its parent. The name in the delete is the name
+        // of the parent attribute from which the child is removed...
+        
         @Delete packages end
     
       end
       
       @Operation apply(source:Package)
+      
+        // A package can be applied to another package in order to 
+        // add classes and associations. The source package contains
+        // classes that are added or that extend existing classes
+        // with the same name. Similarly with associations.
+        
         @For newc in source.classes() do
           let oldc = self.classNamed(newc.name())
           in if oldc = null
@@ -97,7 +210,20 @@ context Root
     
     @Class Pattern metaclass BrowsedClass extends Package
     
+      // A pattern is a package that can be applied to another package
+      // to affect its contents. When a pattern is applied via a menu
+      // the user is offered all the packages in the group of models
+      // to select the target of the application. Where the name of a
+      // model element in a pattern starts with a '*' it is considered 
+      // to be a variable. When the pattern is applied to a package, the
+      // user must provide names for the variables. The instantiation 
+      // process will arrange for the target package to be organised 
+      // so that the named elements are added.
+    
       @Interface
+      
+        // Provide a menu item for pattern application and support
+        // deletion of the pattern...
   
         @Menu Apply Patterns::Pattern::applyPattern end
 
@@ -106,6 +232,11 @@ context Root
       end
         
         @Operation applyPattern()
+        
+          // This is called from a menu item and then offers up the
+          // list of packages for selection as the target of the 
+          // application...
+          
           let M = owner.packages()->asSeq
           in if not M->isEmpty
              then 
@@ -119,6 +250,12 @@ context Root
         end
         
         @Operation apply(target:Package)
+        
+          // Application of a pattern must fill in the variables. This
+          // is achieved by providing the names of the elements in the 
+          // target package (possibly names that already exist or names
+          // of elements that are created as part of the application)...
+          
           let V = self.vars();
               e = Env::NullEnv();
               cancel = false
@@ -144,6 +281,11 @@ context Root
          end
          
          @Operation instantiate(env)
+         
+           // Instantiation takes an environment of variable name and concrete
+           // name bindings and creates a temporary package by copying the
+           // pattern and replacing the variables according to the environment...
+           
            let p = Package("Temp")
            in @For c in classes do
                 if env.binds(c.name())
@@ -181,6 +323,12 @@ context Root
            (attributes + classes + associations)->iterate(ne V = Set{} |
              if ne.name()->at(0) = "*"->at(0)
              then V->including(ne.name())
+             elseif ne.isKindOf(Attribute)
+             then 
+               if ne.type->at(0) = "*"->at(0)
+               then V->including(ne.type)
+               else V
+               end
              else V
              end
            )
@@ -192,6 +340,10 @@ context Root
     
     
     @Class Class metaclass BrowsedClass extends Named
+    
+      // A class is a browsed model element. See Package above
+      // for the description of the features that are used in
+      // its definition...
     
       @Attribute attributes : Set(Attribute) (^,+,?) end
       
@@ -232,10 +384,8 @@ context Root
       @Operation instantiate(env)
         let newc = Class(name)
         in @For a in attributes do
-             if env.binds(a.name())
-             then newc.addToAttributes(Attribute(env.lookup(a.name()),a.type()))
-             else newc.addToAttributes(Attribute(a.name(),a.type()))
-             end
+             newc.addToAttributes(a.instantiate(env))
+             
            end;
            newc
         end
@@ -243,6 +393,8 @@ context Root
     end
     
     @Class Attribute metaclass BrowsedClass extends Named 
+    
+      // Attributes are shown in the browser as defined below...
     
       @Attribute type : String (?,!) end
       
@@ -259,9 +411,18 @@ context Root
     
       end
       
+      @Operation instantiate(env)
+        let name = if env.binds(name) then env.lookup(name) else name end;
+            type = if env.binds(type) then env.lookup(type) else type end
+        in Attribute(name,type)
+        end
+      end
+      
     end
     
     @Class Association metaclass BrowsedClass extends Named
+    
+      // Associations are shown in the browser as dhown below...
     
       @Attribute source : Class (?,!) end
       @Attribute target : Class (?,!) end
@@ -283,3 +444,7 @@ context Root
     
   end
   
+context Root
+  @Operation test()
+    Patterns::Models().browse()
+  end
