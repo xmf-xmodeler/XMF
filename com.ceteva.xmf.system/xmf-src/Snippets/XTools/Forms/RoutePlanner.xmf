@@ -1,0 +1,311 @@
+parserImport XOCL;
+parserImport Tools::FormTools::Types;
+parserImport Tools::Menus;
+parserImport Tools::Events;
+parserImport Snippets;
+
+import Tools;
+import FormTools;
+import Types;
+import Structure;
+import Events;
+
+@Snippet "A form tool for route planning using a map.";
+
+// This file contains an example of an XForm tool to maintain and use a
+// simple map consisting of locations and roads between them. The tool 
+// allows new locations and roads to be added and to calculate routes between
+// the locations. It is an example of an XTool that uses only events, i.e.
+// there are no model observers.
+
+context Root
+  @Package Routes
+  
+    // This is the model used by the tool. It consists of a map
+    // of locations and roads between them. The package Routes
+    // also defines a number of utility operations...
+    
+    @Class Map 
+    
+      // A map has locations and roads between them. The class
+      // map provides operations to manipulate the map...
+      
+      @Attribute locations : Seq(Location) (?)   end
+      @Attribute roads : Seq(Road)         (?)   end
+      @Attribute start : String            (?,!) end
+      @Attribute finish : String           (?,!) end
+      
+      @Operation addLocation(name:String) self.locations := locations + [Location(name)] end
+      @Operation hasLocation(name:String):Boolean locations->exists(l | l.name() = name) end
+      @Operation addRoad(start:String,finish:String,length:Integer) self.roads := roads + [Road(start,finish,length)] end
+      
+      @Operation route(start:String,finish:String):Seq(Road)
+      
+        // Calculate a route from the start to the finish. The result
+        // is a list of roads that lead from the named start location
+        // to the named finish location. The strategy is not very clever
+        // since it does not find the shortest route, but it will find
+        // one ifit exists. The strategy uses backtracking via continuation
+        // passing (succ and fail)...
+        
+        @Letrec getRoute(start,route,succ,fail) = selectRoad(roads,start,route,succ,fail);
+                visited(location,roads) = 
+                  @Find(r,roads) when r.start()=location do true else false end;
+                selectRoad(roads,start,route,succ,fail) = 
+                  if roads=[] 
+                  then fail() 
+                  elseif visited(start,route)
+                  then selectRoad(roads->tail,start,route,succ,fail)
+                  elseif roads->head.start() = start
+                  then 
+                    if roads->head.finish() = finish
+                    then succ(route+[roads->head],@Operation() selectRoad(roads->tail,start,route,succ,fail) end)
+                    else getRoute(roads->head.finish(),route+[roads->head],succ,@Operation() selectRoad(roads->tail,start,route,succ,fail) end)
+                    end
+                  elseif roads->head.finish() = start
+                  then 
+                    if roads->head.start() = finish
+                    then succ(route+[roads->head.swap()],@Operation() selectRoad(roads->tail,start,route,succ,fail) end)
+                    else getRoute(roads->head.start(),route+[roads->head.swap()],succ,@Operation() selectRoad(roads->tail,start,route,succ,fail) end)
+                    end
+                  else selectRoad(roads->tail,start,route,succ,fail)
+                  end;
+                checkRoad(start) = @Operation(r) r.start()=start end
+        in getRoute(start,[],@Operation(route,fail) route end,@Operation() null end)
+        end
+          
+      end
+      
+      @Operation pprint():String
+        roads->iterate(road s="" | s + road.pprint() + "\n") +
+        locations->iterate(location s="" | s + location.pprint() + "\n")
+      end
+    end
+    
+    @Operation pprintRoute(route:Seq(Road)):String
+      if route->isEmpty
+      then "... you arrive."
+      else
+        let root = route->head
+        in "Go from " + root.start() + " to " + root.finish() + " for " + root.length() + " miles\n" +
+           pprintRoute(route->tail)
+        end
+      end
+    end
+    
+    @Class Location 
+      @Attribute name : String (?) end
+      @Constructor(name) ! end
+      @Operation pprint() "Location("+name+")" end
+    end
+    
+    @Class Road 
+      @Attribute start : String (?) end
+      @Attribute finish : String (?) end
+      @Attribute length : Integer (?) end
+      @Constructor(start,finish,length) ! end
+      @Operation pprint() "Road("+start+","+finish+","+length+")" end
+      @Operation swap() Road(finish,start,length) end
+    end
+  end
+
+context Root
+  @Bind testMap =
+    let map = Routes::Map()
+    in map.addLocation("Edinburgh");
+       map.addLocation("Durham");
+       map.addLocation("Newcastle");
+       map.addLocation("Leeds");
+       map.addLocation("Glasgow");
+       map.addLocation("Carlisle");
+       map.addLocation("Manchester");
+       map.addLocation("Leeds");
+       map.addLocation("Liverpool");
+       map.addLocation("Sheffield");
+       map.addLocation("York");
+       map.addLocation("Birmingham");
+       map.addLocation("Nottingham");
+       map.addLocation("Oxford");
+       map.addLocation("London");
+       map.addRoad("Edinburgh","Glasgow",30);
+       map.addRoad("Edinburgh","Newcastle",60);
+       map.addRoad("Glasgow","Carlisle",50);
+       map.addRoad("Carlisle","Durham",30);
+       map.addRoad("Carlisle","Manchester",70);
+       map.addRoad("Carlisle","Liverpool",70);
+       map.addRoad("Newcastle","Durham",20);
+       map.addRoad("Liverpool","Manchester",20);
+       map.addRoad("Manchester","Sheffield",30);
+       map.addRoad("Sheffield","Leeds",20);
+       map.addRoad("Durham","Leeds",40);
+       map.addRoad("Durham","York",35);
+       map.addRoad("Leeds","London",100);
+       map.addRoad("York","Leeds",20);
+       map.addRoad("Sheffield","Nottingham",20);
+       map.addRoad("Nottingham","Birmingham",20);
+       map.addRoad("Manchester","Birmingham",30);
+       map.addRoad("Birmingham","Oxford",30);
+       map.addRoad("Oxford","London",30);
+       map.addRoad("Nottingham","London",50);
+       map
+     end
+  end
+
+context Root
+  @Operation createToolType(map:Routes::Map):ToolType
+  
+    // Create a tool type given a map...
+    
+    @ToolType RoutePlanner(HORIZONTAL) 
+      @Box Output(VERTICAL)
+      
+        // The output describing the current route is
+        // shown in a text box...
+        
+        @TextBox Route "No Current Route"
+          minWidth = 300
+          minHeight = 200
+        end
+        @Label Title(CENTRE) "Route Calculation" end
+      end
+      
+      @Box Controls(VERTICAL)
+        
+        // This box contains the control items for the tool...
+        
+        @Box Spacer1 minHeight = 10 end
+        
+        @Box StartChoice(HORIZONTAL)
+        
+          // Select the starting location ...
+          
+          @Label StartLabel "Start: " end
+          @ComboBox Start minWidth = 100 
+          
+            // The items in a combo box should be expressions
+            // that produce strings or lists of strings...
+            
+            map.locations().map("name")
+          end
+        end
+        
+        @Box Spacer2 minHeight = 10 end
+        
+        @Box EndChoice(HORIZONTAL)
+        
+          // Select the finish location ...
+          
+          @Label StartLabel "End:   " end
+          @ComboBox End minWidth = 100
+            map.locations().map("name")
+          end
+        end
+        
+        @Box Spacer3 minHeight = 20 end
+        
+        // Having selected the start and finish locations, press this
+        // button to calculate the route if one exists...
+        
+        @Button Calculate minHeight=50
+        
+          // The 'do' part of the button is performed when the button is
+          // pressed. The variable 'tool' can be used to reference the
+          // tool and its associated components. The form is tool.form()
+          // and the operation 'ref1' can be given a sequence of strings
+          // that represents a path of names to index elements of the form
+          // based on the named given in the type...
+          
+          do let route = map.route(tool.element().start(),tool.element().finish())
+             in if route = false
+                then tool.form().ref1(["Output","Route"]).setTextIn("No Route Found")
+                else tool.form().ref1(["Output","Route"]).setTextIn(Routes::pprintRoute(route))
+                end
+             end
+        end  
+        
+        @Box Spacer4 minHeight = 20 end
+        
+        @Button NewLocation do 
+        
+          // Use this button to create a new location in the map...
+          
+          let name = xmf.getString("Location Name","Type the name of the new location","Name")
+          in if map.hasLocation(name)
+             then tool.form().ref1(["Output","Route"]).setTextIn("Map already has a location named " + name)
+             else 
+               map.addLocation(name);
+               
+               // The combo-boxes need to be updated with the new location name...
+               
+               tool.form().ref1(["Controls","StartChoice","Start"]).addItem(name);
+               tool.form().ref1(["Controls","EndChoice","End"]).addItem(name);
+               
+               // Refresh the complete map...
+               
+               tool.form().ref1(["Map"]).setTextIn(map.pprint())
+             end
+           end
+        end
+        
+        @Box Spacer5 minHeight = 10 end
+        
+        @Button NewRoad do 
+        
+          // Use this button to create a new road...
+          
+          let getName(l) = l.name();
+              locations = map.locations() then
+              start = xmf.select("Start","Type the name of the start location",locations,locations->at(0),getName) then 
+              finish = xmf.select("End","Type the name of the end location",locations,locations->at(0),getName) then
+              length = xmf.getInteger("Length","Type the length of the road",0)
+          in if start <> null and finish <> null and length <> 0 
+             then 
+               map.addRoad(start.name(),finish.name(),length);
+               tool.form().ref1(["Map"]).setTextIn(map.pprint())
+             end
+          end
+        end
+      end
+      
+      @TextBox Map 
+      
+        // The initial text for a textbox can either be a string literal or can be
+        // computed from an expression when placed between '<' and '>'...
+        
+        < (map.pprint()) >
+        minWidth = 300
+        maxHeight = 200
+      end
+    end
+  end
+  
+context Root
+  @ElementManager RouteManager
+  
+    // An element manager is used to define event handlers for a tool.
+    // The names of the event handlers correspond to the types of
+    // events that can be produced based on a standard set of event types
+    // and the paths to the tool type elements...
+    //
+    // Path_Changed     means that a selectable element has changed.
+    // 
+    
+    @EventHandler RoutePlanner_Controls_StartChoice_Start_Changed()
+      event.tool().element().setStart(event.new())
+    end
+    @EventHandler RoutePlanner_Controls_EndChoice_End_Changed()
+      event.tool().element().setFinish(event.new())
+    end
+  end
+    
+    
+context Root
+  @Operation test()
+    let tool = Tool(createToolType(testMap),"Route Planner",RouteManager,testMap) 
+    in tool.showForm();
+       tool.form().layout(0,0);
+       tool
+    end
+  end
+  
+test();

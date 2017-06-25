@@ -19,7 +19,7 @@ context Types
   
   @Grammar extends FormElement.grammar
   
-    Label ::= name = EName patts = PosAtts label = Label natts = NamedAtts defs = Exp* 'end' {
+    Label ::= name = EName patts = PosAtts label = MyLabel natts = NamedAtts defs = Exp* 'end' {
     
       [| let labelType = <defs->iterate(t e = [| Tools::FormTools::Types::Label(<name>) |] | [| <e>.add(<t>) |])>
          in labelType.setText(<label>);
@@ -37,7 +37,7 @@ context Types
       |]
     }.
     
-    Label ::= n = Name { OCL::StrExp(n) } | s = Str { OCL::StrExp(s) } | '<' e = Exp '>' { e }.
+    MyLabel ::= n = Name { OCL::StrExp(n) } | s = Str { OCL::StrExp(s) } | '<' e = Exp '>' { e }.
     
   end
   

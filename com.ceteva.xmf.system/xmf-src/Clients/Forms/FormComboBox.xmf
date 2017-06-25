@@ -30,7 +30,9 @@ context Forms
     end
     
     @Operation addItem(item:String)
-      self.contents := self.contents + Seq{item}
+      self.contents := self.contents + Seq{item};
+      self.commandInterpreter().addComboBoxItem(self,item);
+      self
     end
     
     @Operation clear()

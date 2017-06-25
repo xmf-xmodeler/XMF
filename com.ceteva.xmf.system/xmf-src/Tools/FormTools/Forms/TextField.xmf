@@ -12,11 +12,11 @@ context Forms
     @Attribute textChangedHandler : Operation (!) end
   
     @Operation actualHeight():Integer
-      self.getTextDimension(text)->at(1)
+      self.getTextDimension(text)->at(1) + 5
     end
     
     @Operation actualWidth():Integer
-      self.getTextDimension(text)->at(0)
+      self.getTextDimension(text)->at(0) + 5
     end
     
     @Operation init(args:Seq(Element))

@@ -42,11 +42,20 @@ context Forms
     end
   
     @Operation actualHeight():Integer
-      50
+      if not(self.hasCommandInterpreter()) or contents->isEmpty
+      then 50
+      else self.getTextDimension(contents->at(0))->at(1) + 5
+      end
     end
     
     @Operation actualWidth():Integer
-      100
+      if not(self.hasCommandInterpreter()) or contents->isEmpty
+      then 100
+      else 
+        let SELECTOR = 20
+        in contents->collect(c | self.getTextDimension(c)->at(0)).max() + SELECTOR
+        end
+      end
     end
     
     @Operation addDaemon()

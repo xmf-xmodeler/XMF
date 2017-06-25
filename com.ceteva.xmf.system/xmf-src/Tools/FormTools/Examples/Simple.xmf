@@ -1,0 +1,134 @@
+parserImport XOCL;
+parserImport Tools::FormTools::Types;
+parserImport Tools::Events;
+parserImport Tools::Menus;
+
+import Tools;
+import FormTools;
+import Types;
+import Structure;
+import Events;
+
+// This file contains a simple example of a form tool that exercises (almost) all 
+// of the key features. It shows how to create a tool type and an element manager
+// that catches the events occurring on the form.
+
+context Root
+  @Operation test()
+    let type = 
+          @ToolType Test(HORIZONTAL) 
+            @CheckBox Check true end
+            @Box Atts(VERTICAL)
+              @Star 
+                @Box Att(HORIZONTAL)
+                  @Label name Name 
+                    minWidth = 50 
+                    minHeight = 30
+                  end
+                  @TextField value Value 
+                    minWidth = 50 
+                    minHeight = 30
+                  end
+                end
+              end
+            end
+            @Tree Tree 
+              minWidth = 400
+              minHeight = 400
+              @TreeNode NodeA(readonly) "A Node" 
+                icon = "Exceptions/Exception.gif"
+                @Nodes Children
+                  @Ref NodeA end
+                end
+                @Menu
+                  @MenuAction Delete self.delete() end
+                  @MenuAction NewA self.newNode("Children:NodeA") end
+                end
+              end
+              @Nodes Bs
+                @TreeNode NodeB "A Node" 
+                  icon = "Exceptions/Self.gif"
+                  @Menu
+                    @MenuAction Delete self.delete() end
+                  end
+                end
+              end
+            end
+            
+            @Box Box(VERTICAL) 
+              @Button NewAtt
+                do self.owner().ref1(["Atts"]).addNew("Att")
+              end
+              @Button NewA
+                minWidth = 100 
+                minHeight = 30
+                do self.owner().ref1(["Tree","NodeA"]).newNode("Children:NodeA")
+              end
+              @Button NewB
+                // BUG: Max height does not seem to work.
+                maxWidth = 100 
+                maxHeight = 30
+                do self.owner().ref1(["Tree"]).newNode("Bs:NodeB")
+              end
+            end
+            
+            @ComboBox combo
+              "Option1"
+              "Option2"
+              "Option3"
+            end
+            
+            @List list
+              // BUG: Currently Not Implemented.
+              "Element1"
+              "Element2"
+              "Element3"
+            end
+            
+            @TextBox textBox
+              "This is some text."
+              @Menu
+                @MenuAction Commit
+                  self.changesMade(false) 
+                end
+              end
+            end
+            
+          end;
+       manager = 
+         @ElementManager TestFormManager !
+           @EventHandler Test_combo_Changed()
+             xmf.message("You selected: " + event.new)
+           end
+           @EventHandler Test_Check_Changed()
+             xmf.message("You checked: " + event.new)
+           end
+           @EventHandler Test_Atts_Att_value_Changed()
+             xmf.message("You entered a value of: " + event.new)
+           end
+           @EventHandler "New_Test_Tree_(NodeA_)*NodeA"()
+             xmf.message("You created a node of type A")
+           end
+           @EventHandler "Delete_Test_Tree_(NodeA_)*NodeA"()
+             xmf.message("You created a node of type A")
+           end
+           @EventHandler New_Test_Tree_NodeB()
+             xmf.message("You created a node of type B")
+           end
+           @EventHandler Delete_Test_Tree_NodeB()
+             xmf.message("You deleted a node of type B")
+           end
+           @EventHandler Test_Tree_NodeB_DoubleClick()
+             xmf.message("You double clicked on " + event.value)
+           end
+           @EventHandler "Test_Tree_(NodeA_)*DoubleClick"()
+             xmf.message("You double clicked on " + event.value)
+           end
+         end
+    in let tool = Tool(type,"Example Form Tool",manager,null)
+       in tool.showForm();
+          tool.form().layout(0,0);
+          tool
+       end
+    end
+  end

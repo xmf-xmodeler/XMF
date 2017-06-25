@@ -1,0 +1,78 @@
+parserImport XOCL;
+parserImport Tools::FormTools::Types;
+parserImport Tools::Events;
+parserImport Tools::Menus;
+
+import Tools;
+import FormTools;
+import Types;
+import Structure;
+import Events;
+
+context Root
+  @Operation test()
+    let type = 
+          @ToolType CPMForm(HORIZONTAL) 
+            @Tree Tree 
+              minWidth = 400
+              minHeight = 200
+              @TreeNode Events(readonly) "Events" 
+                icon = "Exceptions/Exception.gif"
+                @Nodes Children
+                  @TreeNode Event "An Event"
+                    icon = "Exceptions/Self.gif"
+                    @Menu
+                      @MenuAction Delete self.delete() end
+                    end
+                  end
+                end
+                @Menu
+                  @MenuAction NewEvent self.newNode("Children:Event") end
+                end
+              end
+              @Nodes Bs
+                @TreeNode NodeB "A Node" 
+                  icon = "Exceptions/Self.gif"
+                  @Menu
+                    @MenuAction Delete self.delete() end
+                  end
+                end
+              end
+            end
+            @Box Properties(VERTICAL)
+              minWidth=200
+              @Star 
+                @Box Property(HORIZONTAL)
+                  @Label name Name 
+                    minWidth = 50 
+                    minHeight = 30
+                  end
+                  @TextField value Value 
+                    minWidth = 50 
+                    minHeight = 30
+                  end
+                end
+              end
+            end
+            
+          end;
+       manager = 
+         @ElementManager TestFormManager !
+           @EventHandler CPMForm_Tree_Events_Event_DoubleClick()
+             let propertyBox = event.value.owner().owner().owner().ref1(["Properties"])
+             in @For property in propertyBox.contents() do
+                  property.delete()
+                end;
+                let property = propertyBox.addNew("Property")
+                in property.edit()
+                end
+             end
+           end
+         end
+    in let tool = Tool(type,"Example Form Tool",manager,null)
+       in tool.showForm();
+          tool.form().layout(0,0);
+          tool
+       end
+    end
+  end

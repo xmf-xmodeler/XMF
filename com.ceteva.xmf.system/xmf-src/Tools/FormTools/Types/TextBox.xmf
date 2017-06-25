@@ -39,7 +39,7 @@ context Types
       |]
     }.
     
-    Text ::= n = Name { OCL::StrExp(n) } | s = Str { OCL::StrExp(s) } | '<' e = Exp '>' { e }.
+    Text ::= n = Name { OCL::StrExp(n) } | s = Str { OCL::StrExp(s) } | '<' e = DropExp '>' { e }.
     
   end
   

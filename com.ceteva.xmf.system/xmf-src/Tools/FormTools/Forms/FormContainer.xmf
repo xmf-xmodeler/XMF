@@ -65,6 +65,9 @@ context Forms
     end
     
     @Operation horizontalLayout(x,y,width,height)
+    
+      // This does not look right to me. Particularly ALIGN which should spread the gaps.
+      
       let p = Point(x,y)
       in @For element in self.contents() do
            @Case element.layout() of
@@ -76,6 +79,7 @@ context Forms
                element.layout(p.x + element.padLeft(),self.layoutHeight() - element.layoutHeight());
                p.x := p.x + element.layoutWidth()
              end
+             /*
              "ALIGN" do
                if isLast 
                then 
@@ -86,6 +90,7 @@ context Forms
                  p.x := p.x + element.layoutWidth()
                end
              end
+             */
             "CENTRE" do
                element.layout(p.x + element.padLeft(),p.y + (self.layoutHeight() - element.layoutHeight()).div(2));
                p.x := p.x + element.layoutWidth()

@@ -18,7 +18,7 @@ context Types
   
     List ::= name = EName patts = PosAtts natts = NamedAtts defs = Exp * 'end' {
     
-      [| let comboBoxType = <defs->iterate(t e = [| Tools::FormTools::Types::List(<name>) |] | [| <e>.add(<t>) |])>
+      [| let comboBoxType = <defs->iterate(t e = [| Tools::FormTools::Types::List(<name>) |] | [| <e>.addElement(<t>) |])>
          in comboBoxType.setMinWidth(<OCL::IntExp(FormElement::lookup(natts,"minWidth",0))>);
             comboBoxType.setMaxWidth(<OCL::IntExp(FormElement::lookup(natts,"maxWidth",9999))>);
             comboBoxType.setMinHeight(<OCL::IntExp(FormElement::lookup(natts,"minHeight",0))>);
@@ -35,12 +35,12 @@ context Types
     
   end
   
-  @Operation add(element)
+  @Operation addElement(element)
     @TypeCase(element)
       String do
         self.addToValues(element)
       end
-      else super(element)
+      else self.add(element)
     end
   end
   
