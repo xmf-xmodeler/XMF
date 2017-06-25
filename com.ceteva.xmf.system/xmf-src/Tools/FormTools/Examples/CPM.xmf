@@ -41,8 +41,9 @@ context Root
             end
             @Box Properties(VERTICAL)
               minWidth=200
-              @Star 
-                @Box Property(HORIZONTAL)
+              @Or EventOrActivity 
+                @Box Nothing maxWidth=10 maxHeight=10 end
+                @Box Event(HORIZONTAL)
                   @Label name Name 
                     minWidth = 50 
                     minHeight = 30
@@ -60,12 +61,7 @@ context Root
          @ElementManager TestFormManager !
            @EventHandler CPMForm_Tree_Events_Event_DoubleClick()
              let propertyBox = event.value.owner().owner().owner().ref1(["Properties"])
-             in @For property in propertyBox.contents() do
-                  property.delete()
-                end;
-                let property = propertyBox.addNew("Property")
-                in property.edit()
-                end
+             in propertyBox.switchTo("EventOrActivity","Event")
              end
            end
          end
