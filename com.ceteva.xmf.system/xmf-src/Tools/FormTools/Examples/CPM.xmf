@@ -1,5 +1,8 @@
 parserImport XOCL;
+parserImport Tools::Basic;
+parserImport Tools::Events;
 parserImport Tools::FormTools::Types;
+parserImport Tools::FormTools::Structure;
 parserImport Tools::Events;
 parserImport Tools::Menus;
 
@@ -8,11 +11,14 @@ import FormTools;
 import Types;
 import Structure;
 import Events;
+import Graphs;
+
+@ToolDescriptor Graphs::CPMTool
+end;
 
 context Root
-  @Operation test()
-    let type = 
-          @ToolType CPMForm(HORIZONTAL) 
+  @Operation CPMForm(graph)
+    @ToolType CPMForm(HORIZONTAL) 
             @Tree Tree 
               minWidth = 400
               minHeight = 200
@@ -30,12 +36,18 @@ context Root
                   @MenuAction NewEvent self.newNode("Children:Event") end
                 end
               end
-              @Nodes Bs
-                @TreeNode NodeB "A Node" 
-                  icon = "Exceptions/Self.gif"
-                  @Menu
-                    @MenuAction Delete self.delete() end
+              @TreeNode Activities(readonly) "Activities" 
+                icon = "Exceptions/Exception.gif"
+                @Nodes Children
+                  @TreeNode Activity "An Activity"
+                    icon = "Exceptions/Self.gif"
+                    @Menu
+                      @MenuAction Delete self.delete() end
+                    end
                   end
+                end
+                @Menu
+                  @MenuAction NewActivity self.newNode("Children:Activity") end
                 end
               end
             end
@@ -48,27 +60,124 @@ context Root
                     minWidth = 50 
                     minHeight = 30
                   end
-                  @TextField value Value 
+                  @TextField value EventName 
                     minWidth = 50 
                     minHeight = 30
                   end
                 end
+                @Box Activity(VERTICAL)
+                  @Box ActivityDuration (HORIZONTAL)
+                    @Label duration Duration 
+                      minWidth = 50 
+                      minHeight = 30
+                    end
+                    @TextField activityDuration ActivityDuration
+                      minWidth = 50 
+                      minHeight = 30
+                    end
+                  end
+                  @Box ActivitySource(HORIZONTAL)
+                    @Label source Source 
+                      minWidth = 50 
+                      minHeight = 30
+                    end
+                    @Delay 
+                      @ComboBox sourceName  
+                        minWidth = 50 
+                        minHeight = 30
+                        graph.nodes()->asSeq->collect(n | n.data())
+                      end
+                    end
+                  end
+                  @Box ActivityTarget(HORIZONTAL)
+                    @Label target Target 
+                      minWidth = 50 
+                      minHeight = 30
+                    end
+                    @Delay 
+                      @ComboBox targetName  
+                        minWidth = 50 
+                        minHeight = 30
+                        graph.nodes()->asSeq->collect(n | n.data())
+                      end
+                    end
+                  end
+                end
               end
             end
-            
-          end;
-       manager = 
-         @ElementManager TestFormManager !
-           @EventHandler CPMForm_Tree_Events_Event_DoubleClick()
-             let propertyBox = event.value.owner().owner().owner().ref1(["Properties"])
-             in propertyBox.switchTo("EventOrActivity","Event")
+          end
+        end
+
+context Root
+  @ElementManager Graphs::CPMTool::CPMFormManager !
+           @EventHandler CPMForm_Tree_Events_Event_Selection_Changed()
+             if event.new 
+             then 
+               let propertyBox = event.value.owner().owner().owner().ref1(["Properties"]) then
+                   eventBox = propertyBox.changeTo("EventOrActivity","Event")
+               in eventBox.ref1(["value"]).setText(event.value.text)
+               end
              end
            end
-         end
-    in let tool = Tool(type,"Example Form Tool",manager,null)
-       in tool.showForm();
-          tool.form().layout(0,0);
-          tool
-       end
+           @EventHandler CPMForm_Tree_Activities_Activity_Selection_Changed()
+             if event.new 
+             then 
+               let propertyBox = event.value.owner().owner().owner().ref1(["Properties"]) then
+                   property = propertyBox.changeTo("EventOrActivity","Activity")
+               in register(property.ref1(["ActivitySource","sourceName"]),event.value)
+               end
+             end
+           end
+           @EventHandler New_CPMForm_Tree_Events_Event()
+             let node = Graphs::Node("EventName")
+             in event.tool().element().add(node);
+                register(node,event.value);
+                node.observeBy(event.tool())
+             end
+           end
+           @EventHandler CPMForm_Properties_Event_value_Changed()
+             let old = event.old;
+                 new = event.new
+             in @Find (node,event.tool().element().nodes) 
+                  when node.data() = old 
+                  do node.setData(new)
+                  else format(stdout, "No event named ~S in ~S~%",Seq{old,event.tool().element().nodes})  
+                end
+             end
+           end
+           @EventHandler CPMForm_Properties_Activity_ActivitySource_sourceName_Changed()
+            find(event.value()).edit();
+             let edge = find(find(event.value));
+                 sourceNode = @Find(node,event.tool().element().nodes()) when node.data() = event.new end
+             in edge.setSource(sourceNode);
+                event.tool().element().edit()
+             end
+           end
+           @EventHandler CPMForm_Properties_Activity_ActivityTarget_targetName_Changed()
+             event.value.owner().owner().println()
+           end
+           @EventHandler New_CPMForm_Tree_Activities_Activity()
+             let edge = Graphs::Edge(0,null,null)
+             in event.tool().element().add(edge);
+                register(edge,event.value);
+                register(event.value,edge)
+             end
+           end
+         end 
+         
+@Observer Graphs::CPMTool::CPMFormManager(Graphs::Node) data !
+  // Change the label on the node in the tree...
+  @WithoutEvents(tool)
+    find(object).setText(object.data())
+  end
+end;
+  
+context Root
+  @Operation test()
+    let graph = Graph() then
+        tool = Tool(CPMForm(graph),"Example Form Tool",CPMFormManager,graph)
+    in tool.showForm();
+       tool.form().layout(0,0);
+       tool
     end
   end

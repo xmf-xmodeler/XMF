@@ -32,6 +32,7 @@ context Forms
     end
     
     @Operation new(parent)
+      self.setOwner(parent);
       @For element in contents do
         element.new(self)
       end

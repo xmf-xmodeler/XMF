@@ -1,0 +1,36 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import Tools;
+import FormTools;
+import Types;
+
+context Types
+
+@Class Delay extends FormElement
+
+  @Attribute delayedType:Operation end
+  
+  @Constructor(delayedType) ! end
+
+  @Grammar extends OCL::OCL.grammar
+  
+    Delay ::= e = Exp 'end' { 
+      [| Tools::FormTools::Types::Delay(@Operation() <e> end) |]
+    }.
+    
+  end
+  
+  @Operation bind(env)
+    env
+  end
+  
+  @Operation new(parent,path,env,tool)
+    delayedType().new(parent,path,env,tool)
+  end
+  
+  @Operation underlyingTypes(env):Set(Object) 
+    env.lookup(name.toString()).underlyingTypes(env)
+  end
+  
+end

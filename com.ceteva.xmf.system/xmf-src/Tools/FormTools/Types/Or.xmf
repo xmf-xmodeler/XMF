@@ -45,7 +45,7 @@ context Types
       self.typeNamed(name) <> null
     end
     
-    @Operation new(parent,path,env,tool)
+    @Operation new(parent,path,env,tool) 
       let display = types->at(0).new(parent,path + Seq{name.toString()},env,tool);
           env = types->iterate(t env = env | t.bind(env))
       in parent.setOrHandler(self,parent,path,tool,display);

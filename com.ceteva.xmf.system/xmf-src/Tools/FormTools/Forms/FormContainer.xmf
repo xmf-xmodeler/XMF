@@ -167,7 +167,7 @@ context Forms
       end
     end
     
-    @Operation setOrHandler(orType,parent,path,tool,element)
+    @Operation setOrHandler(orType,elementParent,path,tool,element)
       
       // An or handler is used to support switching between disjoint types
       // using changeTo.
@@ -178,13 +178,10 @@ context Forms
           then 
             element.delete();
             let newType = orType.typeNamed(name) then
-                newElement = newType.new(parent,path,tool)
-            in newElement.new(parent);
-               //self.orderContents();
-               //root.layout();
-               self.setOrHandler(orType,parent,path,tool,newElement);
+                newElement = newType.new(elementParent,path,Env::NullEnv(),tool)
+            in newElement.new(elementParent);
+               self.setOrHandler(orType,elementParent,path,tool,newElement);
                tool.layout();
-               "RAISE EVENT".println(); //tool.raise(FormEvents::ChangeTo(path,orType.name().toString(),parent,name,newElement,element))
                newElement
             end
           else self.error("There is no type called " + name + " in " + orType.toString())
