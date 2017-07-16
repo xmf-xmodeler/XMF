@@ -5,6 +5,7 @@ parserImport Tools::FormTools::Types;
 parserImport Tools::FormTools::Structure;
 parserImport Tools::Events;
 parserImport Tools::Menus;
+parserImport Snippets;
 
 import Tools;
 import FormTools;
@@ -12,6 +13,8 @@ import Types;
 import Structure;
 import Events;
 import Graphs;
+
+@Snippet "A form tool for managing a graph.";
 
 // This file provides a simple example of a form tool for managing a graph.
 // The nodes fo the graph have labels that name the node. The edges of the
@@ -409,3 +412,5 @@ context Root
        tool
     end
   end
+  
+test();
