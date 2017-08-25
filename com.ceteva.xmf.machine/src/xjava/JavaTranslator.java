@@ -8,7 +8,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
+//import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import engine.Machine;
 
