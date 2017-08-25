@@ -1,0 +1,411 @@
+parserImport XOCL;
+parserImport Tools::Basic;
+parserImport Tools::Events;
+parserImport Tools::FormTools::Types;
+parserImport Tools::FormTools::Structure;
+parserImport Tools::Events;
+parserImport Tools::Menus;
+
+import Tools;
+import FormTools;
+import Types;
+import Structure;
+import Events;
+import Graphs;
+
+// This file provides a simple example of a form tool for managing a graph.
+// The nodes fo the graph have labels that name the node. The edges of the
+// graph have numeric 'distance' labels. The form tool provides examples of
+// the use of a tree to manage the graph and a property sheet to manage
+// the nodes and edges. In particular the edges provide drop-down combo boxes
+// to select the source and target from the available nodes. When the label
+// on a node is changed, the change is propagated to the edges in the
+// tree.
+//
+// The tool provdies an example of how to manage a graph using a form tool.
+// The graph has no specific functionality, however it can be used as the
+// basis of a wide variety of graph-based form-tool applications.
+
+@ToolDescriptor Graphs::GraphTool
+end;
+
+context Root
+  @Operation GraphForm(graph)
+  
+    // Supply the graph so that any form elements can be initialised.
+    // In particular, the use of @Delay ... end can refer to elements 
+    // of the graph when the delayed form element is dynamically created
+    // via a choice within an @Or ... end.
+    
+    @ToolType GraphForm(HORIZONTAL) 
+    
+      // The tool type defines a tree for the creation and selection of
+      // nodes and edges. When a node or edge is selected the property
+      // sheet is created for the tree element...
+      
+      @Tree Tree 
+         minWidth = 400
+         minHeight = 200
+         @TreeNode Nodes(readonly) "Nodes" 
+         
+           // A tree node is created within the tree and is used as the
+           // anchor of a menu for node creation...
+           
+           icon = "Exceptions/Exception.gif"
+           @Nodes Children
+           
+             // This is a container for a collection of nodes in the
+             // tree. Use Children as the anchor for adding new nodes...
+             
+             @TreeNode Node "A Node"
+             
+                // A node type that represents a graph-node. The menu
+                // on the tree node is used to delete it...
+                
+                icon = "Exceptions/Self.gif"
+                @Menu
+                  @MenuAction Delete self.delete() end
+                end
+              end
+           end
+           @Menu
+           
+             // The menu on the tree-node for all nodes is used to add
+             // an element to the container Children...
+             
+             @MenuAction NewNode self.newNode("Children:Node") end
+           end
+         end
+       @TreeNode Edges(readonly) "Edges" 
+       
+         // A tree-node that is used to contain tree-nodes that represent
+         // edges. This works the same as the graph nodes above...
+         
+         icon = "Exceptions/Exception.gif"
+         @Nodes Children
+            @TreeNode Edge "An Edge"
+              icon = "Exceptions/Self.gif"
+              @Menu
+                @MenuAction Delete self.delete() end
+              end
+            end
+         end
+         @Menu
+           @MenuAction NewEdge self.newNode("Children:Edge") end
+         end
+       end
+     end
+     @Box Properties(VERTICAL)
+     
+       // The properties box contains the properties of the currently
+       // selected item in the tree. The mechanism used for this is
+       // to create an @Or ... end element that contains the named
+       // alternative property sheets for the different types of 
+       // selectable tree element and to switch between them by name
+       // depending on what has been selected in the tree. The
+       // individual alternative elements are protected by a @Delay
+       /// ... end element that means thet are evaluated each time the
+       // they are selected. This allows dynamic form-element content...
+       
+       minWidth=200
+       @Button Show do tool.element.pprint().edit() end
+       @Or NodeOrEdge 
+       
+         // Use nothing as the initial alternative. After that something
+         // should be selected and one of the other choices will be 
+         // used...
+         
+         @Box Nothing maxWidth=10 maxHeight=10 end
+         
+         @Box Node(HORIZONTAL)
+         
+           // This alternative is used if a node is selected.
+           
+           @Label name Name 
+             minWidth = 50 
+             minHeight = 30
+           end
+           
+           @TextField value NodeName 
+             minWidth = 50 
+             minHeight = 30
+           end
+         end
+                
+         @Box Edge(VERTICAL)
+         
+           //This alternative is used if an edge is selected.
+           
+           @Box EdgeDuration (HORIZONTAL)
+             @Label duration Duration 
+               minWidth = 50 
+               minHeight = 30
+             end
+           
+             @TextField activityDuration EdgeDuration
+             
+               // Enter a number for the duration on the edge.
+               
+               minWidth = 50 
+               minHeight = 30
+             end
+           end
+          
+           @Box EdgeSource(HORIZONTAL)
+           
+             // A labelled combo-box for the source of an edge.
+             // Ths idea is that when this is selected the combo-box
+             // is populated by all the names of the available nodes.
+             // In order to achieve this, the combo-box is wrapped
+             // in a @Delay ... end which means that it is re-generated
+             // each time the choice is selected...
+             
+             @Label source Source 
+               minWidth = 50 
+               minHeight = 30
+             end
+            
+             @Delay 
+               @ComboBox sourceName  
+                 minWidth = 50 
+                 minHeight = 30
+                 graph.nodes()->asSeq->collect(n | n.data())
+               end
+             end
+           end
+                  
+           @Box EdgeTarget(HORIZONTAL)
+           
+             // Same idea as the edge-source box above.
+            
+             @Label target Target 
+               minWidth = 50 
+               minHeight = 30
+             end
+             
+             @Delay 
+               @ComboBox targetName  
+                 minWidth = 50 
+                 minHeight = 30
+                 graph.nodes()->asSeq->collect(n | n.data())
+               end
+             end
+           end
+         end
+       end
+     end   
+   end
+ end
+
+context Root
+  @ElementManager Graphs::GraphTool::GraphFormManager !
+  
+    // An elemen manager is used as a name-space for the 
+    // event handlers. Add the element manager to the tool
+    // manager called GraphTool so that it is registered.
+    
+    @EventHandler GraphForm_Tree_Nodes_Node_Selection_Changed()
+    
+      // This event occurs when a tree node selection has changed.
+      // The particular node is event.value and its selection status
+      // is either unselected when event.old is true or arriving
+      // when event.new is true...
+      
+      if event.new 
+      then 
+      
+        // Navigate to the root owner and select the properties sheet.
+        // This is an OR element whose status can be changed using the
+        // changeTo operation...
+        
+        let propertyBox = event.value.owner().owner().owner().ref1(["Properties"]) then
+            eventBox = propertyBox.changeTo("NodeOrEdge","Node")
+        in eventBox.ref1(["value"]).setText(event.value.text)
+        end
+      end
+    end
+    
+    @EventHandler GraphForm_Tree_Edges_Edge_Selection_Changed()
+    
+      // As above, if a tree-node representing an edge is selected
+      // then switch to the property sheet for the edge. The
+      // properties are a bit more involved since there are three
+      // and they need to be registered with the tool in order to
+      // allow the graph-edge to be changed when the property
+      // changes...
+     
+      if event.new 
+      then 
+        @WithoutEvents(event.tool())
+          let propertyBox = event.value.owner().owner().owner().ref1(["Properties"]) then
+              property = propertyBox.changeTo("NodeOrEdge","Edge")
+          in register(property.ref1(["EdgeSource","sourceName"]),event.value);
+             register(property.ref1(["EdgeTarget","targetName"]),event.value);
+             register(property.ref1(["EdgeDuration","activityDuration"]),event.value);
+             let edge = find(event.value) then
+                 source = edge.source();
+                 target = edge.target()
+             in if source <> null then property.ref1(["EdgeSource","sourceName"]).setSelected(source.data()) end;
+                if target <> null then property.ref1(["EdgeTarget","targetName"]).setSelected(target.data()) end;
+                property.ref1(["EdgeDuration","activityDuration"]).setText(edge.data().toString())
+             end
+          end
+        end
+      end
+    end
+    
+    @EventHandler New_GraphForm_Tree_Nodes_Node()
+    
+      // A tree-node that represents a graph-node has been added.
+      // A graph-node must be added to the graph...
+      
+      let node = Graphs::Node("NodeName")
+      in event.tool().element().add(node);
+         register(node,event.value);
+         register(event.value,node);
+         node.observeBy(event.tool())
+      end
+    end
+    
+    @EventHandler Delete_GraphForm_Tree_Nodes_Node()
+    
+      // A tree-node that represents a graph-node has been deleted.
+      // A graph-node must be deleted from the graph...
+      
+      let node = find(event.value)
+      in event.tool().element().remove(node)
+      end
+    end
+    
+    @EventHandler Delete_GraphForm_Tree_Edges_Edge()
+    
+      // A tree-node that represents a graph-edge has been deleted.
+      // A graph-edge must be deleted from the graph...
+      
+      let edge = find(event.value)
+      in event.tool().element().remove(edge)
+      end
+    end
+           
+    @EventHandler GraphForm_Properties_Node_value_Changed()
+    
+      // The property sheet associated with a tree-node for a
+      // graph-node has changed. Update the assosiated graph-node
+      // which is found by selecting the graph-node whose data is
+      // the old value supplied with the event...
+      
+      let old = event.old;
+          new = event.new
+      in @Find (node,event.tool().element().nodes) 
+           when node.data() = old 
+           do node.setData(new)
+           else format(stdout, "No event named ~S in ~S~%",Seq{old,event.tool().element().nodes})  
+         end
+      end
+    end
+    
+    @EventHandler GraphForm_Properties_Edge_EdgeSource_sourceName_Changed()
+    
+      // The combo-box associated with the edge source has been changed.
+      // Update the graph-edge...
+      
+      let edge = find(find(event.value));
+          sourceNode = @Find(node,event.tool().element().nodes()) when node.data() = event.new end
+      in edge.setSource(sourceNode)
+      end
+    end
+    
+    @EventHandler GraphForm_Properties_Edge_EdgeTarget_targetName_Changed()
+    
+      // The combo-box associated with the edge target has been changed.
+      // Update the graph-edge...
+      
+      let edge = find(find(event.value));
+           targetNode = @Find(node,event.tool().element().nodes()) when node.data() = event.new end
+      in edge.setTarget(targetNode)
+      end
+    end
+    
+    @EventHandler New_GraphForm_Tree_Edges_Edge()
+    
+      // An tree-node representing a graph-edge has been created...
+      
+      let edge = Graphs::Edge(0,null,null)
+      in event.tool().element().add(edge);
+         register(edge,event.value);
+         register(event.value,edge);
+         edge.observeBy(event.tool())
+      end
+    end
+    
+    @EventHandler GraphForm_Properties_Edge_EdgeDuration_activityDuration_Changed()
+    
+      // The text-field for the property representing the duration of an edge
+      // has been changed. Update the data on the associated graph-edge...
+      
+      let edge = find(find(event.value));
+          value = event.new.asInt()
+      in edge.setData(value)
+      end
+    end
+  end 
+         
+@Observer Graphs::GraphTool::GraphFormManager(Graphs::Node) data !
+
+  // Change the label on the node in the tree...
+  
+  @WithoutEvents(tool)
+    find(object).setText(object.data());
+    // Refresh the edges...
+    @For edge in tool.element().edges() do
+      edge.setSource(edge.source());
+      edge.setTarget(edge.target())
+    end
+  end
+end;
+         
+@Observer Graphs::GraphTool::GraphFormManager(Graphs::Edge) data !
+
+  // Change the label on the node in the tree...
+  
+  @WithoutEvents(tool)
+    let source = if object.source() = null then "?" else object.source().data() end;
+        target = if object.target() = null then "?" else object.target().data() end
+    in find(object).setText(source + "-(" + object.data() + ")->" + target)
+    end
+  end
+end;
+         
+@Observer Graphs::GraphTool::GraphFormManager(Graphs::Edge) source !
+
+  // Change the label on the node in the tree...
+  
+  @WithoutEvents(tool)
+    let source = if object.source() = null then "?" else object.source().data() end;
+        target = if object.target() = null then "?" else object.target().data() end
+    in find(object).setText(source + "-(" + object.data() + ")->" + target)
+    end
+  end
+end;
+         
+@Observer Graphs::GraphTool::GraphFormManager(Graphs::Edge) target !
+
+  // Change the label on the node in the tree...
+  
+  @WithoutEvents(tool)
+    let source = if object.source() = null then "?" else object.source().data() end;
+        target = if object.target() = null then "?" else object.target().data() end
+    in find(object).setText(source + "-(" + object.data() + ")->" + target)
+    end
+  end
+end;
+  
+context Root
+  @Operation test()
+    let graph = Graph() then
+        tool = Tool(GraphForm(graph),"A Graph Form Tool",GraphFormManager,graph)
+    in tool.showForm();
+       tool.form().layout(0,0);
+       tool
+    end
+  end
