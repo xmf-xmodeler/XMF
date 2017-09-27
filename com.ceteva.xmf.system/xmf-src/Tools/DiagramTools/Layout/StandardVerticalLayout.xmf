@@ -41,7 +41,7 @@ context StandardLayoutManager
       in @For value in container.contents() do
            @Case value.type().layout() of
              "ALIGN" do
-               let height = ((height - y) - self.remainingHeight(container,value)).min(value.maxLayoutHeight());
+               let height = height.max(((height - y) - self.remainingHeight(container,value)).min(value.maxLayoutHeight())); // height.max( only tested in ALIGN
                    padTop = value.padTop();
                    topAbutt =  if value.needsTopAbutt() and y > 0 then 1 else 0 end
                in value.type().layout(value,value.padLeft(),y + padTop - topAbutt,width - value.padWidth(),height - value.padHeight());
@@ -51,20 +51,20 @@ context StandardLayoutManager
              "CENTRE" do
                let maxWidth = value.layoutWidth() then
                    x = if width > maxWidth then (width - maxWidth).div(2) else 0 end;
-                   height = ((height - y) - self.remainingHeight(container,value)).min(value.maxLayoutHeight())
+                   height = height.max(((height - y) - self.remainingHeight(container,value)).min(value.maxLayoutHeight()))
                in value.type().layout(value,x + value.padLeft(),y + value.padTop(),maxWidth - value.padWidth(),height - value.padHeight());
                   y := y + height - if value.needsBaseAbutt() then 1 else 0 end
                end
              end
              "LEFT" do
-               let height = value.layoutHeight() + padding;
+               let height = height.max(value.layoutHeight() + padding);
                    maxWidth = value.layoutWidth() 
                in value.type().layout(value,value.padLeft(),y + value.padTop(),maxWidth - value.padWidth(),height - value.padHeight());
                   y := y + height - if value.needsBaseAbutt() then 1 else 0 end
                end
              end
              "RIGHT" do
-               let height = value.layoutHeight() + padding;
+               let height = height.max(value.layoutHeight() + padding);
                    maxWidth = value.layoutWidth() then
                    x = if width > maxWidth then width - maxWidth else maxWidth - width end
                in value.type().layout(value,x - value.padRight(),y + value.padTop(),maxWidth - value.padWidth(),height - value.padHeight());
