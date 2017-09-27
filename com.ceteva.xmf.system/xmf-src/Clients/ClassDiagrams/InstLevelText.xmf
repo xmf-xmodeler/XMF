@@ -63,11 +63,9 @@ context Clients::ClassDiagrams
   		end
   		
   	@Operation valueChanged(obj, slot, new, old)
-  			("valueChanged Listener: " + obj + "." + slot +": " + old + "-->" + new).println();
   			if new = " " or new = ""
    			then
    				referringTo.isIntrinsic := false;
-   				"isIntrinsic := false;".println();
    				@WithoutDaemons(instLevel)
    					obj.text := " ";
    					obj.renew(obj.owner)
@@ -77,8 +75,6 @@ context Clients::ClassDiagrams
 				try 
   					referringTo.isIntrinsic := true;
   					referringTo.instLevel := new.asInt();
-  					"isIntrinsic := true;".println();
-  					("instLevel := "+new.asInt()+";").println();
   					obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
 				catch(exception)
    				  @WithoutDaemons(instLevel)
@@ -89,32 +85,6 @@ context Clients::ClassDiagrams
 			end
 	  	end
 
-/*  	@Operation valueChanged(obj, slot, new, old)
-  			("valueChanged Listener: " + obj + "." + slot +": " + old + "-->" + new).println();
-  			if new = " " or new = ""
-   			then
-   				referringTo.isIntrinsic := false;
-   				"isIntrinsic := false;".println();
-   				@WithoutDaemons(instLevel)
-   					obj.text := " ";
-   					obj.renew(obj.owner)
-   				end;
-			   	obj.owner.setFillColor(Clients::Diagrams::Color())
-			else
-				try 
-  					referringTo.isIntrinsic := true;
-  					referringTo.instLevel := new.asInt();
-  					"isIntrinsic := true;".println();
-  					("instLevel := "+new.asInt()+";").println();
-  					obj.owner.setFillColor(Clients::Diagrams::Color(0,0,0))
-				catch(exception)
-   				  @WithoutDaemons(instLevel)
-   					obj.text := old;
-   					obj.renew(obj.owner)
-   				  end
-				end
-			end
-	  	end*/
 	  @Operation expandWidth()
     
       	if self.width <> self.instLevel.width + 2 then
