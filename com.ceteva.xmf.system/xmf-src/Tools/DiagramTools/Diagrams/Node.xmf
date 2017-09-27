@@ -76,6 +76,11 @@ context Diagrams
            port.resize(display.width,display.height)
         end
       end
+      
+      // TEST (I lost track of who invokes layout and or resize)
+      
+      ;self.resize(width,height,false)
+      
     end
     
     @Operation layoutResize(width:Integer,height:Integer)
