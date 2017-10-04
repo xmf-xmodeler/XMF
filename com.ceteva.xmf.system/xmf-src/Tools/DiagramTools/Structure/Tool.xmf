@@ -186,12 +186,11 @@ context Structure
       type.new(self)
     end
 
-    @Operation newEdge(name:String,sourcePort,targetPort,startX,startY,endX,endY)
-      
+    @Operation newEdge(name:String,sourcePort,targetPort,startX,startY,endX,endY,diagram)
       // Called when the user has created a new edge bwteen two ports
       // using the mouse on the diagram.
       
-      type.newEdge(name,sourcePort,targetPort,self,startX,startY,endX,endY)
+      type.newEdge(name,sourcePort,targetPort,self,startX,startY,endX,endY,diagram)
       
     end
     

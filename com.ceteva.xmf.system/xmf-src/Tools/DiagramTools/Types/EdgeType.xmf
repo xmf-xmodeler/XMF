@@ -150,7 +150,7 @@ context Types
       end.setOwner(null)
     end
     
-    @Operation newEdge(sourcePort,targetPort,tool,startX,startY,endX,endY)
+    @Operation newEdge(sourcePort,targetPort,tool,startX,startY,endX,endY,diagram)
       let edge = Edge(sourcePort,targetPort,sourceHead,targetHead,self.parseColour(colour),startX,startY,endX,endY)
       in edge.setType(self);
          edge.lineStyle := lineStyle;
@@ -161,12 +161,14 @@ context Types
          end;
          // Go through the labels and lay them out
          self.setLabels(edge,sourcePort,targetPort);
-         edge.new(tool.diagram());
+         //edge.new(tool.diagram());
+         edge.new(diagram);
          self.setGlobalMenu(edge,tool,Seq{self.name.toString()});
          edge.setSelectionHandler(EdgeType::mkSelectionHandler(tool,edge));
          edge.setDeselectionHandler(EdgeType::mkDeselectionHandler(tool,edge));
          edge.setClickHandler(EdgeType::mkClicksHandler(tool,edge));
-         tool.diagram().add(edge);
+         //tool.diagram().add(edge);
+         diagram.add(edge);
          edge
       end
     end

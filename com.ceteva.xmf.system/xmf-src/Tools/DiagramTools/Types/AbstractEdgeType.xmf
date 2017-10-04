@@ -23,13 +23,13 @@ context Types
     
     end
     
-    @Operation new(sourcePort,targetPort,tool,startX,startY,endX,endY)
+    @Operation new(sourcePort,targetPort,tool,startX,startY,endX,endY,diagram)
     
       // Create the edge only if the source and target node types
       //match up. Otherwise display a warning.
       
       if self.edgeLegal(tool,sourcePort,targetPort)
-      then self.newEdge(sourcePort,targetPort,tool,startX,startY,endX,endY)
+      then self.newEdge(sourcePort,targetPort,tool,startX,startY,endX,endY,diagram)
       else 
         let sourceName = sourcePort.owner().type().name();
             targetName = targetPort.owner().type().name()

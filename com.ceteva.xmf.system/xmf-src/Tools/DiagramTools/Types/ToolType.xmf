@@ -414,14 +414,14 @@ context Types
       
     end
     
-    @Operation newEdge(name:String,sourcePort,targetPort,tool,startX,startY,endX,endY)
+    @Operation newEdge(name:String,sourcePort,targetPort,tool,startX,startY,endX,endY,diagram)
     
       // Called when a new edge has been requested on a diagram
       // via the mouse. Create and initialise the new edge.
       
       @Find(edgeType,self.supportedEdgeTypes() + tool.rootTool().type().recursiveEdgeTypes())
         when edgeType.name().toString() = name
-        do edgeType.new(sourcePort,targetPort,tool,startX,startY,endX,endY)
+        do edgeType.new(sourcePort,targetPort,tool,startX,startY,endX,endY,diagram)
       end
     end
 
