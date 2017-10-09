@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import Clients;
+import ScreenGeneration;
+
+context ScreenGeneration
+
+  @Class ScreenControllerRegistryEntry extends ContainedClientElement
+  
+    @Attribute element : Element end
+    @Attribute mbc : ElementXWidget end
+    @Attribute screenControllerType : ScreenControllerType end
+     
+     @Constructor(element,mbc,screenControllerType) ! end
+  end

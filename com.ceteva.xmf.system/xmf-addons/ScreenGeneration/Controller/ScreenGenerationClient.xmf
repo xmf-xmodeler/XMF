@@ -1,0 +1,373 @@
+parserImport XOCL;
+
+import Clients;
+import IO;
+import ScreenGeneration;
+
+context ScreenGeneration
+
+  @Class ScreenGenerationClient extends Client
+ 
+ 		@Attribute eventManager : EventManager (?,!) end
+ 
+	    @Attribute mbcRegistry 				: *MbcRegistryEntry (?,!,+,-) end
+	    @Attribute screenControllerRegistry : *ScreenControllerRegistryEntry (?,!,+,-) end
+		@Attribute screenControllerTypes	: *ScreenControllerType (?,!,+,-) end
+     @Attribute screenControllers			: *ScreenControllerM1Inherit (?,!,+,-) end
+  
+    @Constructor(name) !
+      self.setCommandInterpreter(ScreenGenerationCommandInterpreter());
+      self.setEventHandler(ScreenGenerationEventHandler());
+      self.eventManager := EventManager();
+      self.eventManager.owner := self
+    end
+    
+    @Operation add(element)
+      if element.isKindOf(ScreenControllerM1Inherit) then
+			self.addScreenController(element)      
+      elseif element.isKindOf(ScreenControllerType) then
+      	self.addScreenControllerType(element)
+      elseif element.isKindOf(ScreenControllerRegistryEntry) then
+          self.addScreenControllerRegistryEntry(element)
+      elseif element.isKindOf(MbcRegistryEntry) then
+          self.addMbcRegistryEntry(element)
+      end
+    end
+
+    @Operation addScreenController(screenController:ScreenController)
+    	self.addToScreenControllers(screenController);
+      screenController.owner := self
+    end
+
+    @Operation addScreenControllerType(screenControllerType:ScreenControllerType)
+     	self.addToScreenControllerTypes(screenControllerType);
+      screenControllerType.owner := self
+    end
+
+    @Operation addScreenControllerRegistryEntry(screenControllerRegistryEntry:ScreenControllerRegistryEntry)
+     	self.addToScreenControllerRegistry(screenControllerRegistryEntry);
+      screenControllerRegistryEntry.owner := self
+    end
+
+    @Operation addMbcRegistryEntry(mbcRegistryEntry:MbcRegistryEntry)
+     	self.addToMbcRegistry(mbcRegistryEntry);
+      mbcRegistryEntry.owner := self
+    end
+
+	  @Operation createModelBoundController(class: Element)
+		let c = ClassXWidget(class.name+"XWidget")
+		in
+			self.add(MbcRegistryEntry(class,c));
+			//ScreenGeneration.add(c); //Package
+			c.metaClass := class;
+			@For att in class.attributes do
+				if att.isIntrinsic = false or class.level - 1 = att.instLevel 
+				then 
+					let a = AttributeXWidget(att.name+"XWidget")
+					in
+		//				ScreenGeneration.add(a); //Package
+						a.attribute := att;
+						c.hasAttributeTypes := c.hasAttributeTypes+[a]
+					end
+				end
+			end;
+			let o = class.getOperation("of");
+				a = class.getOperation("allInstances");
+				as = class.getOperation("allSiblings");
+				oxw = null
+			in
+				if o <> null
+				then
+					oxw := OperationXWidget(o.name+"XWidget");
+	//				ScreenGeneration.add(oxw); //Package
+					oxw.operation := o;
+					c.hasOperationTypes := c.hasOperationTypes+[oxw]
+				end;
+				if a <> null
+				then
+					oxw := OperationXWidget(a.name+"XWidget");
+//					ScreenGeneration.add(oxw); //Package
+					oxw.operation := a;
+					c.hasOperationTypes := c.hasOperationTypes+[oxw]
+				end;
+				if as <> null
+				then
+					oxw := OperationXWidget(as.name+"XWidget");
+//					ScreenGeneration.add(oxw); //Package
+					oxw.operation := as;
+					c.hasOperationTypes := c.hasOperationTypes+[oxw]
+				end
+			end;
+			c
+		end
+	  end
+
+	  @Operation createFormController(class:Element)  //(mbc: Element) //Form creation
+		let mbc = self.getMbc(class) then
+			c = mbc(mbc.metaClass.name+"XForm") then
+			s = ScreenControllerType(c.name+"Screen");
+			wr = null
+		in
+//			ScreenGeneration.add(s); //Package
+			s.rootElementType := c;
+			s.screenType := WidgetLibrary::WindowTab;
+			self.add(s);
+			self.add(ScreenControllerRegistryEntry(class,mbc,s));
+		//	ScreenGeneration.add(c);
+			wr := WidgetRelation();
+			wr.widget := WidgetLibrary::FormContainer;
+			c.hasViewTypes := c.hasViewTypes + [wr];
+			c.addParent(ClassXWidgetM1Inherit);
+			@For att in mbc.hasAttributeTypes do
+				let a = att(att.attribute.name+"XField")
+				in
+	//				ScreenGeneration.add(a);
+					c.displaysAttributeTypes := c.displaysAttributeTypes+[a];
+					wr := WidgetRelation();
+					wr.widget := WidgetLibrary::SingleField;
+					a.hasViewTypes := a.hasViewTypes + [wr];
+					a.addParent(AttributeXWidgetM1Inherit)
+				end	
+			end;
+			s
+		end
+	  end
+
+	  @Operation createMultiController(class:Element)  
+		let mbc = self.getMbc(class) then
+			c = mbc(mbc.metaClass.name+"XForm") then
+			s = ScreenControllerType(c.name+"Screen");
+			wr = null
+		in
+			//ScreenGeneration.add(s); //Package
+			s.rootElementType := c;
+			s.screenType := WidgetLibrary::WindowTab;
+			self.add(s);
+			self.add(ScreenControllerRegistryEntry(class,mbc,s));
+			//ScreenGeneration.add(c);
+			wr := WidgetRelation();
+			wr.widget := WidgetLibrary::MultilevelFormContainer;
+			c.hasViewTypes := c.hasViewTypes + [wr];
+			c.addParent(ClassXWidgetM1Inherit);
+			@For att in mbc.hasAttributeTypes do
+				let a = att(att.attribute.name+"XField")
+				in
+					//ScreenGeneration.add(a);
+					c.displaysAttributeTypes := c.displaysAttributeTypes+[a];
+					wr := WidgetRelation();
+					if att.attribute.type = Boolean then
+						wr.widget := WidgetLibrary::CheckBox
+					elseif att.attribute.type.isKindOf(Set) or att.attribute.type.isKindOf(Seq) then 
+						wr.widget := WidgetLibrary::SelectBox
+					elseif att.attribute.type.isKindOf(Class) then
+						wr.widget := WidgetLibrary::ComplexElementBox;
+						wr.addToEventHandling(EventHandling(WidgetLibrary::EventDoubleClick,null))
+					else
+						wr.widget := WidgetLibrary::TextBox
+					end;
+					a.hasViewTypes := a.hasViewTypes + [wr];
+					a.addParent(AttributeXWidgetM1Inherit)
+				end	
+			end;
+			@For op in mbc.hasOperationTypes do
+				if op.operation.name.toString() = "of" then
+					let o = op(op.operation.name+"XField")
+					in
+						c.displaysOperationTypes := c.displaysOperationTypes+[o];
+						wr := WidgetRelation();
+						wr.widget := WidgetLibrary::ClassTextBox;
+						o.hasViewTypes := o.hasViewTypes + [wr];
+						o.addParent(OperationXWidgetM1Inherit);
+						wr.addToEventHandling(EventHandling(WidgetLibrary::EventDoubleClick,null)) 
+					end
+				end; 
+				if op.operation.name.toString() = "allInstances" then
+					let o = op(op.operation.name+"XField")
+					in
+						c.displaysOperationTypes := c.displaysOperationTypes+[o];
+						wr := WidgetRelation();
+						wr.widget := WidgetLibrary::InstanceSelectBox;  
+						o.hasViewTypes := o.hasViewTypes + [wr];
+						o.addParent(OperationXWidgetM1Inherit);
+						wr.addToEventHandling(EventHandling(WidgetLibrary::EventDoubleClick,null))
+					end
+				end; 
+				if op.operation.name.toString() = "allSiblings" then
+					let o = op(op.operation.name+"XField")
+					in
+						c.displaysOperationTypes := c.displaysOperationTypes+[o];
+						wr := WidgetRelation();
+						wr.widget := WidgetLibrary::SiblingSelectBox;  
+						o.hasViewTypes := o.hasViewTypes + [wr];
+						o.addParent(OperationXWidgetM1Inherit);
+						wr.addToEventHandling(EventHandling(WidgetLibrary::EventDoubleClick,null))
+					end
+				end
+			end;
+			s
+		end
+	  end
+
+		@Operation createMultiScreen(element:Element)
+			@Find(entry,screenControllerRegistry)
+			when entry.element = element.of()
+			do true
+			else self.createMultiController(element.of())
+			end;  
+			self.createScreen(element)
+		end
+
+    @Operation createScreen(element:Element)//sct:ScreenControllerType) //  
+    	let sc = self.getScreenController(element) then
+    		sci = sc()
+    	in
+    		self.add(sci);
+    		sci.create(element);//"test");
+    		sci.show()
+    	end
+    end
+
+    @Operation hasScreenControllerType(screenControllerType:ScreenControllerType):Boolean
+      screenControllerTypes->includes(screenControllerType)
+    end
+
+	  @Operation getMbc(class:Element)
+		@Find(entry,mbcRegistry)
+		when entry.element = class
+		do entry.mbc
+		else self.createModelBoundController(class)
+		end
+	  end
+
+	  @Operation getScreenController(element:Element)
+		@Find(entry,screenControllerRegistry)
+		when entry.element = element.of()
+		do entry.screenControllerType
+		else self.error("Not screen defined for "+element)
+		end
+	  end
+
+    @Operation newScreenControllerType(name:String)
+    	let screenControllerType = ScreenControllerType(name)
+    	in self.add(screenControllerType);
+    		screenControllerType
+    	end
+    end
+
+    @Operation newScreenController(screenController:ScreenController)
+    
+      // Call this when the form is new to the client. This will 
+      // cause the form to be displayed.
+     
+      @AsPacket(commandInterpreter,15)
+        //form.handleClientNewForm(self); // different types of forms handle newForm differently.
+        self.add(screenController);
+        screenController.new();
+        commandInterpreter.setVisible(screenController);
+        screenController
+      end
+    end
+
+//    @Operation newScreenDefinitely(screen:Screen)
+//      self.add(screen);
+//      screen.new()
+//    end
+
+    @Operation preSave()
+     /* @For screen in screens do
+        screen.setOwner(null)
+      end */ true
+    end
+    
+    @Operation postSave()
+/*      @For screen in screens do
+        screen.setOwner(self)
+      end */ true
+    end
+
+    @Operation removeScreen()
+    	 self.commandInterpreter().deleteElement(self.screenControllers.asSeq().head().screen,null,"closeWindow",[]);
+	     self.screenControllers.asSeq().head().screen.dispose();
+      self.screenControllers := {}
+
+    end
+            
+    @Operation remove(screenController:screenControllers)
+      self.screenControllers := self.screenControllers.excluding(screenController);
+      screenController.screen.dispose()
+    end
+    
+    @Operation renew()
+      @For screenController in screenControllers do
+        screenController.renew()
+      end
+    end
+    
+    @Operation replaceScreenController(oldScreenController:ScreenController,newScreenController:ScreenController,regenerate:Boolean)
+      let id = oldScreenController.id()
+      in
+        self.add(newScreenController);
+        self.updateScreenController(oldScreenController,newScreenController,regenerate);
+        self.remove(oldScreenController);
+        xmf.clientManager().idManager().reallocateId(newScreenController,id)
+      end
+    end
+    
+    @Operation save(screenController:ScreenController,fileName)
+      let out = ElementOutputChannel(FileOutputChannel(fileName))
+      in try
+           // The form must be de-linked from its
+           // parent in order to define the save boundary.
+           screenController.setOwner(null);
+           out.write(screenController,Seq{XCore,Root,Clients,ScreenControllerGeneration});
+           out.close();
+           screenController.setOwner(self)
+         catch(exception)
+           format(stdout,"~S~%",Seq{exception});
+           screenController.setOwner(self)
+         end
+      end
+    end
+    
+    @Operation showScreenController(screenController:ScreenController)
+    
+      // Call this to display the form. It will add the form
+      // to the list of forms available in the client if
+      // necessary.
+      
+      if self.hasScreenController(screenController)
+      then self.commandInterpreter().setVisible(screenController)
+      else self.newScreenController(screenController)
+      end
+    end
+
+    @Operation updateScreenController(oldScreenController:ScreenController,newScreenController:ScreenController,regenerate:Boolean)
+      let id = oldScreenController.id()
+      in
+        xmf.clientManager().idManager().reallocateId(newScreenController,id);
+        commandInterpreter.clearScreenControllerCommand(newScreenController);
+        commandInterpreter.setScreenControllerText(newScreenController,newScreenController.name());
+        if regenerate
+        then newScreenController.clearContents();
+             newScreenController.refresh()
+        else newScreenController.renew(false)
+        end;
+        commandInterpreter.setVisible(newScreenController)
+      end
+    end
+    
+    /* @Operation synchronise()
+      
+      // Produces an XML document of the forms client's state
+      // this is communicated and the remote client is expected
+      // it to use as a basis for synchronising its state
+
+      @Command(self) startDocument() end;
+      @For form in forms
+      do
+        form.synchronise()
+      end;
+      @Command(self) endDocument() end
+    end */
+
+  end

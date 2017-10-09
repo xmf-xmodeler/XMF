@@ -1,0 +1,46 @@
+parserImport XOCL;
+
+import Clients;
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass WindowTab metaclass Root::Visualization::ScreenType extends ScreenM1Inherit
+		@Attribute text: String end
+
+		@Constructor(name, text) end
+		@Constructor(id) ! end
+
+		@Operation add(element:Element)
+			self.rootElement := element;
+			element.setOwner(self);
+			//element.new();
+			self
+		end
+		
+		@Operation closeCommand()
+      self.commandInterpreter().closeFormCommand(self);
+      self.close()
+    	end
+
+	/*	@Operation forwardCommand(message,args)
+			 self.commandInterpreter().forwardCommand(self.id,message,args)
+		end */
+		
+		@Operation new()
+			//self.commandInterpreter().newWindowCommand(self);
+			self.commandInterpreter().newElement(self,null,"newWindow",[1,text]);
+			self.rootElement.new()
+		end
+
+
+		@Operation setText(text)
+			self.text := text;
+			if id <> null then
+			self.commandInterpreter().command(self,"changeText",[text])
+			end
+		end
+
+	end

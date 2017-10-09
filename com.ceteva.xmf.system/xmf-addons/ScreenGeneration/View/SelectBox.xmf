@@ -1,0 +1,63 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass SelectBox metaclass Root::Visualization::Widget extends ContentElement	
+		@Attribute label : String (?,!) end
+		@Attribute elements : *Element = {} (?,!) end
+
+		@Slot Widget::triggers = {WidgetLibrary::EventDoubleClick} end
+
+		@Constructor(label, elements) end
+		
+		@Constructor(id, label, elements) ! end
+
+		@Operation getValueField()
+			"elements"
+		end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+     	let //id = self.commandInterpreter().allocateId(self);
+    		  es = []
+     in
+		    @For e in elements do
+          	es := es + [e.toString()]
+          end;
+ 			self.commandInterpreter().newElement(self,self.owner.id,"addSelectBox",[label, es])
+			//self.owner.forwardCommand("addSelectBox",[id, label, es]);
+         	//id
+      end
+      
+      
+      end
+      
+    
+  /*   @Operation textChanged(newText:String)
+			if newText <> self.text
+		    then
+				self.text := newText
+			end
+     end */
+     
+          	@Operation command(command,values)
+  			@Find (event, self.of().triggers)
+				 when event.command = command
+				 do self.eventManager().raiseEvent(event(self))
+				 else super(command,values)
+				 end
+   	end
+		
+	end
+
+

@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import Clients;
+import ScreenGeneration;
+
+context ScreenGeneration
+
+  @Class MbcRegistryEntry extends ContainedClientElement
+  
+    @Attribute element : Element end
+    @Attribute mbc : ElementXWidget end
+     
+     @Constructor(element,mbc) ! end
+  end

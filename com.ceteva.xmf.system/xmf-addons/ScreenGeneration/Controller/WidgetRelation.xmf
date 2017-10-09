@@ -1,0 +1,13 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@Class WidgetRelation extends ViewRelation
+		@Attribute widget: Widget end
+		@Attribute hasConfigurations: Configuration end
+		@Attribute eventHandling : *EventHandling (?,!,+,-) end
+	end

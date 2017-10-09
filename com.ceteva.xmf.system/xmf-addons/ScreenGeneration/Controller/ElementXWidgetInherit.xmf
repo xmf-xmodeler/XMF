@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass ElementXWidgetInherit at 2 
+		@Operation addWidget(widget:Widget)
+		  let relation = WidgetRelation()
+		  in
+			relation.widget := widget;
+			self.addToHasViewTypes(relation);
+			relation
+		  end
+		end
+	end

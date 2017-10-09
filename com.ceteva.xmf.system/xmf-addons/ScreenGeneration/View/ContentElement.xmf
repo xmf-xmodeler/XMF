@@ -1,0 +1,20 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass ContentElement metaclass Root::Visualization::Widget extends Clients::ContainedClientElement	
+  	@Operation command(command,values)
+  		("missing command: "+command).println()
+  	end
+		
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+	end
+
+

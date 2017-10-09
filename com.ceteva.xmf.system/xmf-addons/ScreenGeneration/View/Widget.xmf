@@ -1,0 +1,22 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+
+context Root::Visualization
+
+	@MetaClass Widget at 2 extends VisualizationElement
+		@IntrinsicAttribute x: Integer instLevel 0 end
+		@IntrinsicAttribute y: Integer instLevel 0 end
+		@IntrinsicAttribute length: Integer instLevel 0 end
+		@IntrinsicAttribute height: Integer instLevel 0 end
+		@IntrinsicAttribute isDisplayed: Boolean instLevel 0 end
+	
+		@Attribute requiresFeatureType: VisualizationFeature end	
+		@IntrinsicAttribute hasFeature: VisualizationFeature instLevel 0 end
+
+		@Attribute triggers : *EventType end
+	end
+
+

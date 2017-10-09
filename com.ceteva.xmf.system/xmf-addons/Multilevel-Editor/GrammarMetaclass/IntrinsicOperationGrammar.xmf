@@ -1,0 +1,126 @@
+parserImport Parser::BNF;
+
+/******************************************************************************
+ *                                                                            *
+ *                              Operation Grammar                             *
+ *                         ---------------------------                        *
+ *                                                                            *
+ *  The syntax of operations. A basic operation has the form:                 *
+ *                                                                            *
+ *    @IntrinsicOperation name(arg1,arg2,...) instlevel level                          *
+ *       body                                                                 *
+ *    end                                                                     *
+ *                                                                            *
+ *  Optional features include:                                                *
+ *                                                                            *
+ *    o Properties expressed after the name:                                  *
+ *                                                                            *
+ *        @Operation name[p1=v1,p2=v2,...](arg1,arg2,...) body end            *
+ *                                                                            *
+ *    o Arg types and return types:                                           *
+ *                                                                            *
+ *        @Operation name(n1:t1,b2:t2,...):t body end                         *
+ *                                                                            *
+ *    o Variable number of arguments:                                         *
+ *                                                                            *
+ *        @Operation name(arg1,arg2 . rest) body end                          *
+ *                                                                            *
+ *    o Operation documentation:                                              *
+ *                                                                            *
+ *        @Operation name(n1:t1,b2:t2,...):t @Doc text end body end           *
+ *                                                                            *
+ ******************************************************************************/
+ 
+import OCL;
+
+context XCore::IntrinsicOperation
+
+  @Grammar extends OCL::OCL.grammar
+  
+    IntrinsicOperation ::= 
+    
+      // The name of an operation is optional. If
+      // specified it can be a dropped string...
+      
+      name = OpName 
+      
+      // Properties are optional in [ and ]...
+      
+      ps = Properties 
+      
+      // Args must be specified, but may have optional
+      // types and the optional multiple argument at the
+      // end after a '.' ...
+      
+      '(' args = OpArgs multi = OpMulti ')'
+      
+      // The return type of an operation is optional...
+      
+      type = ReturnType
+      
+      // The body of an operation is a sequence of 
+      // expressions...
+      
+      instLevel = InstLevel
+      
+      body = Exp+ 
+      
+      'end'
+      
+      // Get the current parse state so that we can get 
+      // hold of the current imports...
+      
+      p = pState
+      
+      // Create the operation...
+      
+      { ps->iterate(p x = XCore::IntrinsicOperation(name,args + multi,type,instLevel).add(body).setIsMultiArgs(not multi->isEmpty).setImports(p.imports->excluding(XCore)->excluding(Root)->map("pathSeq")).setProperties(ps) |
+            [| <x>.setProperty(<StrExp(p->at(0))>,<p->at(1)>) |]
+        )
+      }.
+      
+    OpName ::= 
+    
+      // An operation name is optional. It may be a
+      // dropped string or just a name. If a name is
+      // not specified then the name anonymous is used...
+    
+      name = AName { if name.isKindOf(String) then Symbol(name) else name end } 
+    | { Symbol("anonymous") }.
+    
+    OpArgs ::= 
+    
+      arg = OpArg args = (',' OpArg)* { Seq{arg | args } }   
+    | { Seq{} }.
+    
+    OpArg ::= 
+    
+      // Operation arguments are patterns. If you 
+      // want to drop a pattern in then it requires a ! in front...
+      
+      Pattern   
+    | '!' Drop. 
+    
+    OpMulti ::= 
+    
+      // Multi-arg operations have the final argument after
+      // a '.'. At run-time the rest of the supplied arguments
+      // are supplied as a sequence...
+    
+      '.' multi = Pattern { Seq{multi} } 
+    | { Seq{} }.
+    
+    ReturnType ::= 
+    
+      ':' TypeExp 
+    | { NamedType() }.
+    
+    Properties ::= 
+    
+      '[' p = Property ps = (',' Property)* ']' { Seq{p|ps} } 
+    | { Seq{} }.
+    
+    Property ::= n = Name '=' e = Exp { [n,e] } | n = Name { [ n,[| true |] ] }.
+    
+    InstLevel ::= 'instLevel' i = Int {i}.
+  end

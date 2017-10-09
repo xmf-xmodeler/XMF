@@ -1,0 +1,53 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass CheckBox metaclass Root::Visualization::Widget extends ContentElement
+		@Attribute label : String (?,!) end
+		@Attribute checked : Boolean (?,!) end
+
+		@Constructor(label, checked) end
+		
+		@Constructor(id, label, checked) ! end
+
+		@Operation getValueField()
+			"checked"
+		end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+//     	let id = self.commandInterpreter().allocateId(self) in	
+//		    self.owner.forwardCommand("addCheckBox",[id, label, checked]);
+			self.commandInterpreter().newElement(self,self.owner.id,"addCheckBox",[label, checked])
+//         	id
+//      end
+      end
+      
+/*     @Operation textChanged(newText:String)
+			if newText <> self.text
+		    then
+				self.text := newText
+			end
+     end */
+     
+    	@Operation command(command,values)
+  		if command = "valueChanged" then
+  			self.checked := values.ref(0)
+  		else 
+				super(command,values)
+    		end
+   	end
+		
+	end
+
+

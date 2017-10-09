@@ -1,0 +1,12 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass EventHandler at 2
+		@Attribute eventTypes: EventType end
+		@Attribute nextScreen: FollowingScreenRelation end
+	end

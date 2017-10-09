@@ -1,0 +1,153 @@
+parserImport XOCL;
+
+import Clients;
+
+context ScreenGeneration
+
+  @Class ScreenGenerationCommandInterpreter extends XMLCommandInterpreter
+   
+   @Operation testIt(args)
+       @SendCommand(self)
+         testIt(args)
+       end;
+       true
+    end
+   
+    @Operation newElement(element,parentId,command,values)
+		let newId = self.allocateId(element) in	
+	       @SendCommand(self)
+  	       newElement(parentId,command,newId,values)
+      	 end;
+	       newId
+      end
+    end
+
+    @Operation deleteElement(element,parentId,command,values)
+      @SendCommand(self)
+ 	       deleteElement(parentId,command,element.id,values)
+     	 end
+    end
+
+    @Operation command(element,command,values)
+	       @SendCommand(self)
+  	       command(element.id,command,values)
+      	 end;
+      element.id
+    end
+         
+   @Operation newWindowCommand(window:WindowTab)
+		let windowId = self.allocateId(window) in	
+   		@SendCommand(self)
+          	newWindow(windowId,1,"Not set")
+      	end;
+      	windowId
+      end
+   end
+
+	 @Operation newWindowCommandtest()
+ 		@SendCommand(self)
+        	newElement(0,"newWindow","12345",[1,"Not set"])
+     	end
+   end
+
+   @Operation newMultiViewCommand()
+   	@SendCommand(self)
+          newElement("12345","newMultiView","12346",[])
+      end
+   end
+   
+   @Operation createNavigationClass()
+   	@SendCommand(self)
+		     newElement("12346","createNavigationClass","123457",["Klaus"])
+      end
+   end
+
+   @Operation createNavigationInstances()
+   	@SendCommand(self)
+		     newElement("12345","messageForward",["12346","createNavigationInstances",["123458",["test1","test2"]]])
+      end
+   end
+   
+   @Operation createNavigationSiblings()
+   	@SendCommand(self)
+		     newElement("12345","messageForward",["12346","createNavigationSiblings",["123459",["test1","test2"]]])
+      end
+   end
+      
+   @Operation addContent(id,text)
+   	@SendCommand(self)
+		     newElement("12345","messageForward",["12346","addContent",[id,text]])
+      end;
+      id
+   end
+                
+	 @Operation addCheckbox(id,name,checked)
+   	@SendCommand(self)
+		     newElement("12345","messageForward",["12346","messageForward",["1234568","addCheckBox",[id,name,checked]]])
+      end;
+      id
+   end         
+		
+  @Operation forwardCommand(id,message,args)
+		@SendCommand(self)
+  		messageForward(id,message,args)
+  	end
+  end
+           
+             
+    @Operation clearFormCommand(form:Form)
+      let formId = form.id() in
+        @SendCommand(self)
+          clearForm(formId)
+        end;
+        formId
+      end
+    end
+
+    @Operation closeFormCommand(form:Form)
+      let formId = form.id() in
+        @SendCommand(self)
+          closeForm(formId)
+        end;
+        formId
+      end
+    end
+   
+    @Operation getText(textBox:FormTextBox)
+      self.call("getText",Seq{textBox.id()})
+    end
+    
+    @Operation setComboBoxSelection(combo:FormComboBox,pos:Integer)
+      let comboId = combo.id() in
+        @SendCommand(self)
+          setSelection(comboId,pos)
+        end;
+        comboId
+      end
+    end
+
+   @Operation setFormText(form:Form,text:String)
+      let formId=form.id() in
+        @SendCommand(self)
+          setText(formId,text)
+        end;
+        formId
+      end
+    end
+
+    @Operation setText(textcomponent,text:String)
+      let textcomponentId=textcomponent.id() in
+        @SendCommand(self)
+          setText(textcomponentId,text)
+        end;
+        textcomponentId
+      end
+    end
+
+    @Operation setVisible(form:Form)
+      @SendCommand(self)
+        setVisible(form.id())
+      end
+    end
+
+  end

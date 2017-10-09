@@ -1,0 +1,14 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+
+context Root::ScreenGeneration
+  @MetaClass OperationXWidget at 3 extends ElementXWidget
+		@Attribute operation : CompiledOperation (+,-) end
+		@IntrinsicAttribute instance: Element (+,-) instLevel 0 end
+	end
+
+
+

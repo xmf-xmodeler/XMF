@@ -1,0 +1,85 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass FormContainer metaclass Root::Visualization::Widget extends Clients::ContainedClientElement
+		@Attribute singleFields: *SingleField (?,!,+,-) end	
+		@Attribute multipleFields: *MultipleField (?,!,+,-) end	
+
+		@Slot Widget::triggers = EventDoubleClick end
+
+		@Constructor(name) end
+		@Constructor(id, name) ! end
+
+		@Operation add(element:Widget)
+			element.println();
+			if element.isKindOf(SingleField)
+      	then
+	    	    self.addSingleField(element)
+		    elseif element.isKindOf(MultipleField)
+      	then
+      		self.addMultipleField(element)
+      	else
+      	  "error".println()
+		      end
+		end
+
+		@Operation addSingleField(singleField: SingleField)
+//			singleFields.addToSingleFields(singleField);
+			self.singleFields := self.singleFields + {singleField};
+			singleField.setOwner(self);
+			//singleField.new();
+			self
+		end
+
+		@Operation addMultipleField(multipleField: MultipleField)
+//			multipleFields.addToMultipleFields(multipleField);
+			self.multipleFields := self.multipleFields + {multipleField};
+     		multipleField.setOwner(self);
+			//multipleField.new();
+			self
+		end
+
+		@Operation close()
+			true
+		end
+
+		@Operation forwardCommand(message,args)
+			 self.owner.forwardCommand("messageForward",[self.id,message,args])
+		end
+
+    	@Operation dispose()
+    	//TODO
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+     	let windowId = self.commandInterpreter().allocateId(self) in	
+		    self.owner.forwardCommand("newFormView",[windowId]);
+			@For sf in singleFields do
+				sf.new()
+			end;   
+			@For mf in multipleFields do
+				mf.new()
+			end;
+         	windowId
+      end
+      end
+      
+   /*   @Operation newSingleField(label,text)
+        self.add(SingleField(label,text))        
+      end
+      
+ 		@Operation newMultipleField(name,values)
+        self.add(MultipleField(name,values))        
+      end */
+	end
+
+

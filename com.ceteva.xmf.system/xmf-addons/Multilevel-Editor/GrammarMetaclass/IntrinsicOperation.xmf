@@ -1,0 +1,193 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                  Operations                                *
+ *                           ---------------------------                      *
+ *                                                                            *
+ *                                                                            *  
+ *  An operation is a parameterized performable expression. An operation has  *
+ *  a name, some parameters, a return type, a performable body and a doc      *
+ *  string. The class OCL::Operation defines the abstract syntax of an        *
+ *  operation. When an instance of OCL::Operation is performed it is          *
+ *  translated into an instance of XCore::Operation (typically either a       *
+ *  CompiledOperation or an InterpretedOperation). Typically you will not     *
+ *  create an instance of OCL::Operation directly, rather you will use the    *
+ *  concrete syntax @Operation ... end.                                       *    
+ *                                                                            *
+ ******************************************************************************/
+
+import OCL;
+import Instrs;
+import Exceptions;
+
+context XCore
+
+  @Class IntrinsicOperation extends OCL::Operation 
+  
+   /* @Attribute name          : String                 end
+    @Attribute parameters    : Seq(Pattern)           end
+    @Attribute isMultiArgs   : Boolean (!)            end
+    @Attribute type          : TypeExp                end
+    @Attribute performable   : Performable            end
+    @Attribute documentation : Performable            end
+    @Attribute imports       : Seq(Seq(String)) (!,?) end
+    @Attribute properties    : Seq(Object) (!,?)      end */
+    @Attribute instLevel    : Integer (!,?)      end
+    
+    @Constructor(name,parameters,type,instLevel)
+    	self.edit();
+    self
+     end
+    
+  /*  @Constructor(name,parameters,type,performable) end
+    
+    @Constructor(name,parameters,type,performable,documentation) end
+    
+    @Constructor(name,parameters,type,performable,documentation,isMultiArgs) end
+    
+    @Constructor(name,parameters,type,performable,documentation,isMultiArgs,imports) end */
+    
+    @Constructor(name,parameters,type,performable,documentation,isMultiArgs,imports,properties,instLevel) ! end
+    
+    /* @Operation add(element)
+    
+      // The body of an operation definition is a sequence of things.
+      // They are added to the operation definition. Typically you
+      // just define some documentation and a body...
+      
+      @TypeCase(element)
+        XOCL::AbstractDoc do 
+          self.documentation := element 
+        end
+        Performable do
+          self.performable := element
+        end
+        Seq(Element) do
+          @For e in element do
+            self.add(e)
+          end;
+          self
+        end
+      end
+    end
+    
+    @Operation arity():Integer
+      parameters->size
+    end
+    
+    @Operation doc():Performable
+      if documentation = null
+      then [| null |]
+      else documentation 
+      end
+    end */
+
+  @Operation compile(env:Element,frame:Element,isLast:Element,saveSource:Element):Element
+    
+    // Compiles an operation in the supplied environment. The frame argument defines the level
+    // of lexical nesting scope for the operation where 0 is at the top level. The parameter
+    // names are added to the environment as local variables. We calculate the free variables
+    // of the operation and these are pushed onto the stack before the operation is created
+    // (using the MkOp instruction). The free variables will wind up in the globals list of the
+    // operation. The globals list of the new operation is linked to the globals list of 
+    // the lexically surrounding operation...
+    
+    let newParams = self.newParams() then
+        paramNames = newParams.name;
+        matchBody = self.matchCode(newParams.name,parameters,performable) then
+        matchBody = self.checkTypes(matchBody) then
+        freeVars = matchBody.FV()->reject(v | paramNames->includes(v)); 
+        localVars = env.locals();   
+        globalVars = Seq{} then
+        freeVars = freeVars->intersection(localVars+globalVars)->reject(fv | paramNames->includes(fv))->asSeq then
+        funEnv = env.deleteLocals().newFrame().newGlobals(freeVars).newArgLocals(paramNames) then
+        globalRefs = env.refs(freeVars); 
+        docCode = self.doc().compile(env,frame,false,true);
+        bodyCode = matchBody.compile(funEnv,frame + 1,true,saveSource);
+        source = if saveSource and Compiler::saveSource then self.pprint(4) else "" end;
+        properties = self.parserImportProperty()
+    in 
+    	let op = MkOp(name,parameters->size,isMultiArgs,freeVars->size,matchBody.maxLocals(),source,bodyCode + Seq{Return()})
+    	in 
+    		op.setInstLevel(self.instLevel);
+    		Seq{Const(self.toSig() + properties)} +
+       docCode + 
+       globalRefs + 
+       Seq{op} 
+      end
+    end
+            
+  end
+            
+    @Operation eval(target,env,imports)
+    	self.edit();
+    	XCore::InterpretedIntrinsicOperation(name,parameters,isMultiArgs,env,target,imports,self.doc().eval(target,env,imports),performable,instLevel) 
+  	end
+    
+    /*@Operation pprint(out,indent)
+      let index = 0
+      in 
+         format(out,"@Operation ~S",Seq{name});
+         if properties->size > 0 then 
+           format(out,"[");
+           @For p in properties do
+             let 
+               pName = p->head() ; pExp = p->tail()->head()
+             in 
+               format(out,"~S=",Seq{pName});
+               pExp.pprint(out,0)
+             end;
+             index := index + 1;
+             if index < properties->size then format(out,",") end
+           end;
+           format(out,"]")
+         end;
+         index := 0;
+         format(out,"(");
+         @For p in parameters do
+           p.pprint(out);
+           index := index + 1;
+           if index < parameters->size then format(out,",") end
+         end;
+         format(out,"):");
+         type.pprint(out,0);
+         format(out,"~%~V",Seq{indent + 2});
+         if documentation <> null and documentation.isKindOf(Doc)
+         then
+           documentation.pprint(out,indent);
+           format(out,"~%~V",Seq{indent})
+         end;
+         performable.pprint(out,indent + 2);
+         format(out,"~%~Vend",Seq{indent})
+      end
+    end
+    
+    @Operation paramList():Seq(Parameter)
+      parameters->collect(p | p.newParam())
+    end
+    
+    @Operation toSig()
+    
+      // Returns the signature of the receiver in the 
+      // following format:
+      //
+      // Seq{ARG,ARG,...,TYPE}
+      //
+      // where each arg is of the form:
+      // 
+      // Seq{NAME,TYPE}
+      //
+      // A TYPE is in the form returned by TypeExp::toSig.
+      
+      let names = parameters->map("newVar");
+          types = parameters->map("toSig") then
+          psig = names->collect(n | Seq{n,types->at(names->indexOf(n))});
+          rsig = if type.isKindOf(TypeExp) then type.toSig() else NamedType().toSig() end
+      in psig + Seq{rsig}
+      end
+    end
+      */
+    
+  end
+ 

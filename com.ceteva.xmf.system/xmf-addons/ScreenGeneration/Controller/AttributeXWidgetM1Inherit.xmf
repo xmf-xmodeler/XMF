@@ -1,0 +1,103 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+parserImport XMap;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+
+context Root::ScreenGeneration
+
+	@MetaClass AttributeXWidgetM1Inherit at 1 
+		@Operation create(parent:Element,element:Element)
+			let t = self.of().hasViewTypes.head().widget;
+				att = self.of().of().attribute
+			in
+				self.instance := element;
+				self.attributeName := att.name;
+				let es = {};
+					e = null
+				in
+					if att.type.isKindOf(Set) or att.type.isKindOf(Seq)
+					then
+						es :=  element.get(att.name).asSet()
+					elseif att.type = Boolean then
+						es := element.get(att.name) 
+					elseif att.type = String then
+						es := element.get(att.name).toString()
+					else 
+						es := element.get(att.name)
+					end;
+					self.hasViews := t(att.name,es)
+				end;
+				self.hasViews.setOwner(self);
+				parent.add(self.hasViews);
+				@For handling in self.of().hasViewTypes.head().eventHandling do
+					self.eventManager().registerHandler(self.hasViews,handling.eventType,null)
+				end;
+ 		        @SlotValueChanged multi once AttributeXWidgetM1Inherit::ViewValueChanged(hasViews,hasViews.getValueField())  end;
+	     	    @SlotValueChanged multi once AttributeXWidgetM1Inherit::ModelValueChanged(instance,attributeName)  end
+			end
+		end
+
+		@Operation ViewValueChanged(element,attribute,newValue,oldValue)
+		/*	"ViewValueChanged".println();
+			self.instance.get(attributeName).println();
+			self.instance.get(attributeName).of().println();
+			newValue.println();
+			newValue.of().println(); */
+//			"--------------".println();
+			if self.instance.get(attributeName) <> newValue 
+		    then
+				"drin".println();
+//    			@WithoutDaemons(self)
+				if self.of().of().attribute.type = Float then
+					newValue := newValue.asFloat()
+				elseif self.of().of().attribute.type = Integer then
+					newValue := newValue.asInt()
+				elseif self.of().of().attribute.type = Boolean then
+	    			newValue := newValue.asBool()
+				end;
+				self.instance.set(attributeName,newValue)
+//     			end
+		    else 
+		     false
+		    end
+	    end
+		
+		@Operation ModelValueChanged(element,attribute,newValue,oldValue)
+		/*	"ModelValueChanged".println();
+			self.hasViews.get(self.hasViews.getValueField()).println();
+			self.hasViews.get(self.hasViews.getValueField()).of().println();
+			newValue.println();
+			newValue.of().println(); */
+	//		"--------------".println();
+			if self.hasViews.get(self.hasViews.getValueField()) <> newValue 
+		    then
+				"drin".println();
+				self.hasViews.set(self.hasViews.getValueField(),newValue);
+				let es = newValue
+     			in
+		    		if newValue.of().isKindOf(Set) or newValue.of().isKindOf(Seq)
+					then
+						es := []; 
+						@For e in newValue do
+          				es := es + [e.toString()] 
+          			end
+          		end; 
+          		/*es.println();
+          		newValue.println();
+          		newValue.of(); */
+					self.hasViews.commandInterpreter().command(self.hasViews,"changeValue",[es])
+				end
+		    else 
+		     false
+		    end
+	    end
+
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+
+	end
+
+

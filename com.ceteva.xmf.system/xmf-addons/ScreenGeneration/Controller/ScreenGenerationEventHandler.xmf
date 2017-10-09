@@ -1,0 +1,43 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+
+context ScreenGeneration
+
+  @Class ScreenGenerationEventHandler extends EventHandler
+  
+    @Doc
+      This class defines operations to handle the following incoming
+      events from the client. In each case the event is a sequence of strings
+      and integers. Each event has a fixed arity. Raising an event in the mapping
+      causes the appropriate diagram element (usually the containing element) to be
+      sent a message with the supplied arguments + the mapping. The diagram element
+      is then responsible for updating the diagram model and using the commands
+      listed above to update the client. Users of the mapping should always raise
+      events and not perform the commands directly. New types of diagram element can
+      handle the events in different ways. New types of diagram mapping can exten-d
+      the interface of events that can be raised.
+     end
+     
+    @Operation textChanged(textId,newText)
+      //self.debug("textChanged[~S,~S]~%",Seq{textId,newText});
+       self.find(textId).textChanged(newText)
+    end
+    
+    @Operation dispatchEvent(message,parameters) 
+      @Case message.name of
+        "command"            do self.dispatchCommand(parameters)            end
+      end
+    end
+ 
+    @Operation dispatchCommand(parameters)
+      let	textId = parameters.at(0);
+      	command = parameters.at(1);
+		    values = parameters.at(2)
+      in 
+         self.find(textId).command(command,values)
+      end
+    end
+  
+  end

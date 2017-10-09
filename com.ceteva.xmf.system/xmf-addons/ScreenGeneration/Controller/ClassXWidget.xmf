@@ -1,0 +1,22 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+
+context Root::ScreenGeneration
+
+	@MetaClass ClassXWidget at 3 extends ElementXWidget
+		@Attribute metaClass : MetaClass (+,-) end
+		@IntrinsicAttribute instance: Element (+,-) instLevel 0 end
+
+		@Attribute hasAttributeTypes: Seq(AttributeXWidget) = Seq{} (+,-) end
+		@IntrinsicAttribute displaysAttributeTypes: Seq(AttributeXWidget) = Seq{} (+,-) instLevel 1 end
+		@IntrinsicAttribute displaysAttributes: Seq(AttributeXWidget) = Seq{} (+,-) instLevel 0 end
+
+		@Attribute hasOperationTypes: Seq(OperationXWidget) = Seq{} (+,-) end
+		@IntrinsicAttribute displaysOperationTypes: Seq(OperationXWidget) = Seq{} (+,-) instLevel 1 end
+		@IntrinsicAttribute displaysOperations: Seq(OperationXWidget) = Seq{} (+,-) instLevel 0 end
+	end
+
+

@@ -1,0 +1,23 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass ClassTextBox metaclass Root::Visualization::Widget extends TextBox	
+     
+     		@Slot Widget::triggers = {WidgetLibrary::EventDoubleClick} end
+     
+     @Operation new()
+           /*	let id = self.commandInterpreter().allocateId(self) in	
+			self.owner.forwardCommand("createNavigationClass",[id, text.name]);
+  		id
+       end */
+      self.commandInterpreter().newElement(self,self.owner.id,"createNavigationClass",[text.name])
+      end
+	end
+
+
