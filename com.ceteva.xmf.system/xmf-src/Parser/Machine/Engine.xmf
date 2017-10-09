@@ -129,6 +129,12 @@ context Machine
     
     @Attribute consumeToken : Boolean                        end  
     
+    // The current characte position is recorded by PushChar and is
+    // Forotten by PopChar. When an instance of OCL::Located is synthesized
+    // the top of the charPosStack is recorded as the location.
+    
+    @Attribute charPosStack : Seq(Integer)                   end
+    
     @Constructor() ! end
       
     @Operation atClassifier()
@@ -636,6 +642,7 @@ context Machine
               // Perform the action and set the RESULT register...
               
               self.RESULT := action(callStack,frame);
+              self.setLocation(RESULT);
               self.debug1("Action: ",RESULT)
             end
             
@@ -799,6 +806,22 @@ context Machine
               self.RESULT := self.linePos()
             end
             
+            PushChar[ ] do
+            
+              // Push the current character position...
+              
+              self.pushChar()
+              
+            end
+            
+            PopChar[ ] do
+            
+              // Pop the current character position...
+              
+              self.popChar()
+              
+            end
+            
             // A user defined token...
             
             NewToken[name,tokenNumber] do
@@ -847,7 +870,8 @@ context Machine
           target = failStack.ref(fail + FAIL_TARGET);
           cut = failStack.ref(fail + FAIL_CUT);
           name = failStack.ref(fail + FAIL_NAME);
-          charPos = failStack.ref(fail + FAIL_CHARPOS)
+          charPos = failStack.ref(fail + FAIL_CHARPOS);
+          oldCharPosStack = failStack.ref(fail + FAIL_CS_SIZE)
       in 
          // Remove the head block...
          
@@ -878,7 +902,8 @@ context Machine
          
          // Reset the tokenizer...
          
-         tokenizer.setCharPos(charPos)
+         tokenizer.setCharPos(charPos);
+         self.charPosStack := oldCharPosStack
       end
     end
     
@@ -992,6 +1017,7 @@ context Machine
       failStack.put(TOFS + FAIL_TOKEN,token);
       failStack.put(TOFS + FAIL_TYPE,type);
       failStack.put(TOFS + FAIL_NAME,name);
+      failStack.put(TOFS + FAIL_CS_SIZE,charPosStack);
       failStack.put(TOFS + FAIL_ARGS,argMap->size);
       @Count i from 0 to argMap->size do
         let arg = callStack.ref(prev + LOC0 + argMap->at(i))
@@ -1000,6 +1026,14 @@ context Machine
       end;
       self.fail := TOFS;
       self.TOFS := TOFS + FAIL_ARG0 + argMap->size
+    end
+    
+    @Operation popChar()
+      self.charPosStack := charPosStack->tail
+    end
+    
+    @Operation pushChar()
+      self.charPosStack := Seq{tokenizer.charPos() - token->size | charPosStack}
     end
     
     @Operation readChar()
@@ -1076,7 +1110,24 @@ context Machine
       self.TOFS := 0;
       self.TOCS := 0;
       self.imports := Seq{};
-      self.consumeToken := true
+      self.consumeToken := true;
+      self.charPosStack := []
+    end
+    
+    @Operation setLocation(value)
+    
+      // If the value is an instance of Located then set the
+      // start and end character position if it is available...
+      
+      if value.isKindOf(Located)
+      then
+        if not(charPosStack->isEmpty)
+        then
+          value.charStart := charPosStack->head;
+          value.charEnd := tokenizer.charPos()
+        end
+      end
+    
     end
       
     @Operation startAt(classifier)

@@ -153,16 +153,22 @@ context BNF
   
 context BNF
 
+  // The size of the char pos stack...
+  
+  @Bind FAIL_CS_SIZE = 11 end
+  
+context BNF
+
   // When the choice point is created, the current
   // args are saved, to be reset on fail...
   
-  @Bind FAIL_ARGS    = 11 end
+  @Bind FAIL_ARGS    = 12 end
   
 context BNF
 
   // Start of saved args..
   
-  @Bind FAIL_ARG0    = 12 end
+  @Bind FAIL_ARG0    = 13 end
   
 context BNF
 

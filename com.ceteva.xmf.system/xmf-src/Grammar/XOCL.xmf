@@ -50,7 +50,7 @@ context OCL::OCL
       // followed by some arguments and then optionally
       // followed by an arrow ->... 
     
-      a = Atom e = ApplyTail^(a) Arrow^(e).
+      a = <<Atom>> e = ApplyTail^(a) Arrow^(e).
     
     ApplyTail(a) ::= 
     
@@ -72,7 +72,7 @@ context OCL::OCL
     
       ')' { Seq{} } 
       
-    | arg = Expr args = (',' Expr)* ')' { Seq{arg | args} }.
+    | arg = <<Expr>> args = (',' <<Expr>>)* ')' { Seq{arg | args} }.
     
     ArrowTail(c) ::= 
     
@@ -85,23 +85,23 @@ context OCL::OCL
       // to be deterministic in case any of the different types 
       // of atomic expression start with the same terminals...
     
-      VarExp! 
-    | Self! 
-    | StrExp! 
-    | IntExp! 
-    | IfExp! 
-    | BoolExp! 
-    | LetExp! 
-    | CollExp! 
+      <<VarExp>>   ! 
+    | <<Self>>     ! 
+    | <<StrExp>>   ! 
+    | <<IntExp>>   ! 
+    | <<IfExp>>    ! 
+    | <<BoolExp>>  ! 
+    | <<LetExp>>   ! 
+    | <<CollExp>>  ! 
     | Parentheses 
-    | Drop 
-    | Lift 
-    | Throw 
-    | Try 
-    | ImportIn 
-    | FloatExp 
-    | LocalParserImport 
-    | AtExp.
+    | <<Drop>>
+    | <<Lift>> 
+    | <<Throw>>
+    | <<Try>>
+    | <<ImportIn>>
+    | <<FloatExp>>
+    | <<LocalParserImport>>
+    | <<AtExp>>.
     
     AtExp ::=
     
@@ -142,7 +142,7 @@ context OCL::OCL
     
     BindFun(name) ::= 
     
-      args = BindFunArgs type = OptType '=' value = SimpleExp { FunBinding(name,args,type,value) }.
+      args = BindFunArgs type = OptType '=' value = <<SimpleExp>> { FunBinding(name,args,type,value) }.
     
     BindFunArgs ::= 
     
@@ -216,16 +216,16 @@ context OCL::OCL
       
     CmpClause ::= 
     
-      n = Name t = OptType '<-' e = Exp { Comprehensions::Bind(n,t.toExp(),e) }
+      n = Name t = OptType '<-' e = <<Exp>> { Comprehensions::Bind(n,t.toExp(),e) }
       
-    | '?' e = Exp { Comprehensions::Filter(e) }.
+    | '?' e = <<Exp>> { Comprehensions::Filter(e) }.
 
     CollExp ::= 
     
-      SetExp! 
-    | SeqExp!
-    | SetCmpExp!
-    | SeqCmpExp!.
+      <<SetExp>>    ! 
+    | <<SeqExp>>    !
+    | <<SetCmpExp>> !
+    | <<SeqCmpExp>> !.
     
     CollOp(c,n) ::= 
     
@@ -243,11 +243,11 @@ context OCL::OCL
     
     Collect(c,n) ::= 
     
-      '(' v = AName '|' e = Expr ')' { IterExp(c,n,v,e) }.
+      '(' v = AName '|' e = <<Expr>> ')' { IterExp(c,n,v,e) }.
     
     CommaSepExps ::= 
     
-      e = Expr es = (',' Expr)* { Seq{e | es} } 
+      e = <<Expr>> es = (',' <<Expr>>)* { Seq{e | es} } 
     | { Seq{} }.
   
     CompilationUnit ::= 
@@ -326,7 +326,7 @@ context OCL::OCL
       // The value of the expression is added to
       // the container...
       
-      exp = Exp { ContextDef(path,exp,isForward) }. 
+      exp = <<Exp>> { ContextDef(path,exp,isForward) }. 
  
     Drop ::= 
     
@@ -346,7 +346,7 @@ context OCL::OCL
       // operator...
     
       'not' e = DropExp { Negate(e) } 
-    | a = Apply DropExpTail^(a). 
+    | a = <<Apply>> DropExpTail^(a). 
     
     DropExpTail(a) ::= 
     
@@ -418,7 +418,7 @@ context OCL::OCL
       // clause as your entry point then you may need 
       // to call these explicitly yourself...
     
-      e = Expr! { resolve(order(e)) }.
+      e = <<Expr>> ! { resolve(order(e)) }.
     
     Expr ::= 
     
@@ -428,15 +428,15 @@ context OCL::OCL
       // operations are *not* called by Expr since these
       // need only be called once for the root expression...
     
-      'not' e = Expr { Negate(e) }
+      'not' e = <<Expr>> { Negate(e) }
       
-    | '-' e = SimpleExp { BinExp(IntExp(0),"-",e) }
+    | '-' e = <<SimpleExp>> { BinExp(IntExp(0),"-",e) }
     
-    | a = Apply ExpTail^(a).
+    | a = <<Apply>> ExpTail^(a).
     
     ExpTail(a) ::= 
     
-      o = Op! e = Expr { BinExp(a,o,e) } 
+      o = Op! e = <<Expr>> { BinExp(a,o,e) } 
     | { a }.
     
     Exp1 ::=
@@ -444,7 +444,7 @@ context OCL::OCL
       // Use Exp1 if you require all of the input to be
       // consumed by the parser... 
     
-      Exp EOF.
+      <<Exp>> EOF.
     
     Expp ::= 
     
@@ -452,7 +452,7 @@ context OCL::OCL
       // and then compares the result with the supplied
       // value...
     
-      '[' exp = Exp ']' 
+      '[' exp = <<Exp>> ']' 
       
        { Constp(exp) }.
     
@@ -470,9 +470,9 @@ context OCL::OCL
     
       l = LinePos 
       
-      'if' e1 = Expr 
+      'if' e1 = <<Expr>>
       
-      'then' e2 = Expr 
+      'then' e2 = <<Expr>>
       
       e3 = IfTail 
       
@@ -483,9 +483,9 @@ context OCL::OCL
       // An if-expression may have an optional 'else'
       // and may nest using 'elseif'...
     
-      'else' Expr 'end' 
+      'else' <<Expr>> 'end' 
       
-    | l = LinePos 'elseif' e1 = Expr 'then' e2 = Expr e3 = IfTail { If(l,e1,e2,e3) } 
+    | l = LinePos 'elseif' e1 = <<Expr>> 'then' e2 = <<Expr>> e3 = IfTail { If(l,e1,e2,e3) } 
     
     | 'end' { BoolExp(false) }.
 
@@ -499,7 +499,7 @@ context OCL::OCL
 
     ImportIn ::= 
     
-      'import' path = ImportPath 'in' body = Exp 'end' { ImportIn(path,body) }. 
+      'import' path = ImportPath 'in' body = <<Exp>> 'end' { ImportIn(path,body) }. 
 
     IntExp ::= 
     
@@ -511,7 +511,7 @@ context OCL::OCL
 
     Iterate(c,n) ::= 
     
-      '(' v1 = AName v2 = AName '=' init = Expr '|' body = Expr ')' 
+      '(' v1 = AName v2 = AName '=' init = <<Expr>> '|' body = <<Expr>> ')' 
       
       { Iterate(c,v1,v2,init,body) }.
     
@@ -526,7 +526,7 @@ context OCL::OCL
     
     KeyArg ::= 
     
-      name = Name '=' exp = Expr 
+      name = Name '=' exp = <<Expr>> 
       
       { KeyArg(name,exp) }.
     
@@ -559,7 +559,7 @@ context OCL::OCL
       // the 'then' keyword. These are flattened in the parser
       // by nesting let-expressions...
     
-      'in' body = Expr { body } 
+      'in' body = <<Expr>> { body } 
       
     | 'then' bindings = Bindings body = LetBody { Let(bindings,body) }.
 
@@ -581,7 +581,7 @@ context OCL::OCL
     
       l = LinePos 
       
-      '[|' e = Exp '|]' 
+      '[|' e = <<Exp>> '|]' 
       
       { Lift(l,e) }.
 
@@ -599,7 +599,7 @@ context OCL::OCL
       
       ImportAt 
       
-      'in' e = Expr 'end' 
+      'in' e = <<Expr>> 'end' 
       
       { ParserImport(Seq{name | names},e) }.
     
@@ -608,13 +608,13 @@ context OCL::OCL
       // Sometimes used as an entry point to avoid the use
       // of ';'... 
     
-      e = SimpleExp 
+      e = <<SimpleExp>> 
       
       { resolve(order(e)) }.
     
     NonEmptySeqTail(l) ::= 
     
-      e = Expr 
+      e = <<Expr>> 
       
       PairOrElements^(l,e).
     
@@ -658,11 +658,11 @@ context OCL::OCL
     
     PairOrElements(l,e) ::= 
     
-      '|' t = Expr '}' 
+      '|' t = <<Expr>> '}' 
       
       { ConsExp(e,t) } 
       
-    | es = (',' Expr)* '}' 
+    | es = (',' <<Expr>>)* '}' 
     
       { SetExp(l,"Seq",Seq{e|es}) }.
     
@@ -697,7 +697,7 @@ context OCL::OCL
       // when processing the syntax tree with respect to associativity 
       // and precedence rules...
     
-      '(' e = Expr ')' 
+      '(' e = <<Expr>> ')' 
       
       { Parentheses(e) }.
     
@@ -706,7 +706,7 @@ context OCL::OCL
       // A path expression is rooted in an atom (usually a variable)
       // and followed by a sequence of names...
     
-      atom = Atom 
+      atom = <<Atom>>
       
       ( '::'  name = AName names = ('::' AName)* 
       
@@ -728,7 +728,7 @@ context OCL::OCL
     
       'when' 
       
-      e = Exp 
+      e = <<Exp>>
       
       { Condp(p,e) } 
       
@@ -836,15 +836,15 @@ context OCL::OCL
     
     SimpleExp ::= 
     
-      'not' e = SimpleExp { Negate(e) } 
+      'not' e = <<SimpleExp>> { Negate(e) } 
       
-    | '-' e = SimpleExp { BinExp(IntExp(0),"-",e) }
+    | '-' e = <<SimpleExp>> { BinExp(IntExp(0),"-",e) }
       
-    | a = Apply SimpleExpTail^(a).
+    | a = <<Apply>> SimpleExpTail^(a).
     
     SimpleExpTail(a) ::= 
     
-      o = BinOp! e = SimpleExp { BinExp(a,o,e) } 
+      o = BinOp! e = <<SimpleExp>> { BinExp(a,o,e) } 
       
     | { a }.
     
@@ -864,7 +864,7 @@ context OCL::OCL
    
     Syntaxp ::= 
     
-      '[|' e = Exp '|]' 
+      '[|' e = <<Exp>> '|]' 
       
       { Syntaxp(e) }.
 
@@ -874,19 +874,19 @@ context OCL::OCL
       
       'throw' 
       
-      value = SimpleExp 
+      value = <<SimpleExp>>
       
       { Throw(l,value) }.
 
     TopLevelExp ::= 
     
-      s = SimpleExp ';' 
+      s = <<SimpleExp>> ';' 
       
       { resolve(order(s)) }.
     
     TopLevelCommand ::= 
     
-      c = SimpleExp 
+      c = <<SimpleExp>>
       
       p = pState 
       
@@ -928,13 +928,13 @@ context OCL::OCL
       
       'try' 
       
-      body = Expr 
+      body = <<Expr>>
       
       'catch' 
       
       '(' name = Name ')' 
       
-      handler = Expr 
+      handler = <<Expr>>
       
       'end' 
       

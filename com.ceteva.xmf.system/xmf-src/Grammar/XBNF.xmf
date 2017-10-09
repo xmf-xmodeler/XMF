@@ -35,7 +35,8 @@ context Grammar
     | XBNF_Literal   
     | XBNF_Call      
     | XBNF_Not       
-    | '(' XBNF_Disjunction ')'.
+    | '(' XBNF_Disjunction ')'
+    | '<<' d=XBNF_Disjunction '>>' { And(PushChar(),And(d,PopChar())) }.
   
     XBNF_Binding ::= 
     
@@ -187,7 +188,7 @@ context Grammar
     
       // Get the current line position...
       
-    | 'LinePos'    { (Parser::BNF.getElement("LinePos"))() }  
+    | 'LinePos'    { (Parser::BNF.getElement("LinePos"))() } 
     
       // Define a new terminal in the form NewToken(NAME,ID)...
       

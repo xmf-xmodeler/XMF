@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                             Access to Char Position                        *
+ *                             -----------------------                        *
+ *                                                                            *
+ *  XBNF provides a built-in non-terminal that provides access to the current *
+ *  char position in the parse.                                               *
+ *                                                                            *
+ ******************************************************************************/
+
+import Parser::BNF;
+import OCL;
+
+context Parser::BNF
+
+  @Class PushChar extends Recognizer
+    
+    @Operation code(outputChannel)
+      format(outputChannel," PushChar ")
+    end
+    
+    @Operation FV():Set(String)
+      Set{}
+    end
+    
+    @Operation toExp(FV:Set(String))
+      [| Root::Parser::BNF::PushChar() |]
+    end
+    
+    @Operation transform(FV:Set(String),grammar):Recognizer
+      self
+    end
+    
+  end

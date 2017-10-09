@@ -36,7 +36,7 @@ context Walkers
       then self.walkVar(o,arg)
       else 
         let path = o.of().pathSeq() then
-            slotNames = o.getStructuralFeatureNames()->asSeq then
+            slotNames = o.getStructuralFeatureNames()->asSeq - ["charStart","charEnd","line","endLine" ] then
             keyps = slotNames->collect(s | Keyp(s,self.walk(o.get(s),arg)))
         in Keywordp(path->head,path->tail,keyps)
         end

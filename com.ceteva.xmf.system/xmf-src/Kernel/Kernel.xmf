@@ -55,6 +55,7 @@ let
     ForwardRef            = Kernel_mkObj();
     IndexedContainer      = Kernel_mkObj();
     Integer               = Kernel_mkObj();
+    Located               = Kernel_mkObj();
     MachineException      = Kernel_mkObj();
     NamedElement          = Kernel_mkObj();
     NameSpace             = Kernel_mkObj();
@@ -803,7 +804,18 @@ let
              null,
              XCore);
              
-     mkDataType(Integer,Set{Number},"Integer",Set{Integer_to},Set{},0,XCore);
+     mkDataType(Integer,Set{Number},"Integer",Set{Integer_to},Set{},0,XCore); 
+             
+     mkClass(Located,
+             Set{Object},
+             false,
+             Set{mkAtt("charStart",Integer,Located,false),
+                 mkAtt("charEnd",Integer,Located,false)},
+             "Located",
+             Set{},
+             Set{},
+             null,
+             XCore);
      
      mkClass(MachineException,
              Set{Exception},
@@ -876,7 +888,7 @@ let
              XCore);
              
      mkClass(Performable,
-             Set{Object},
+             Set{Located},
              true,
              Set{mkAtt("line",Integer,Performable,false),
                  mkAtt("endLine",Integer,Performable,false)},
@@ -1071,6 +1083,7 @@ let
              ForwardRef,
              IndexedContainer, 
              Integer,
+             Located,
              MachineException,
              NamedElement,
              NameSpace,

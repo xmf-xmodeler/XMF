@@ -404,8 +404,17 @@ context Code
         type=self.walk(type,arg)
       ]
     end
-
+    
     @Operation walkObject(o,arg)
+      let walked = self.walkDispatchObject(o,arg)
+      in if o.isKindOf(Located) and walked.isKindOf(Located)
+         then (walked.charStart := o.charStart).charEnd := o.charEnd
+         else walked
+         end
+      end
+    end
+
+    @Operation walkDispatchObject(o,arg)
       @CaseObj o of
         Addp[left,right] do
           self.walkAddp(left,right,arg)
