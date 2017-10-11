@@ -84,6 +84,8 @@ context TextEditor
       end
     end
     
+    /*
+    
     @Operation search(pattern:String,dir:Directory)
       Root::dir := dir;
       let dialog = xmf.busy("Searching") then
@@ -97,7 +99,7 @@ context TextEditor
            xmf.message("No results found for \"" + pattern + "\"")
         end
       end
-    end
+    end */
 
     @Operation searchWeb(query:String)
       self.requestURL("http://www.google.com/search?as_q="+query)

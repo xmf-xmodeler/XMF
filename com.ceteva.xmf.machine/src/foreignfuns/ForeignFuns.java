@@ -333,6 +333,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_timeDifference", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_tokenChannelTextTo", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_toJava", 2));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_tos", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_usedHeap", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_undoStackSize", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_unify", 4));
@@ -2753,6 +2754,14 @@ public class ForeignFuns implements Value, Instr, Errors {
         machine.popFrame();
       } else error(TYPE, machine, "expecting a Java class in toJava: " + machine.valueToString(type));
     }
+  }
+
+  public static void Kernel_tos(Machine machine) {
+    int index = machine.frameLocal(0);
+    machine.pushStack(machine.theClassClass);
+    machine.popFrame();
+    machine.popStack();
+    machine.pushStack(machine.tos(machine.intValue(index)));
   }
 
   public static void Kernel_tokenChannelTextTo(Machine machine) {

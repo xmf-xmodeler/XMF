@@ -1,0 +1,15 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@Class EventManagerRegistryEntry
+		@Attribute sender: Element end
+		@Attribute event: EventType end
+		@Attribute handler: ControllerType end
+
+		@Constructor(sender,event,handler) ! end
+	end

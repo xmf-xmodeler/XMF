@@ -1,0 +1,18 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass EventDoubleClick metaclass Root::Visualization::EventType
+		@Slot EventType::command = "doubleClick" end
+		
+		@Attribute target : Element end
+
+		@Constructor(sender, target) ! end
+	end
+
+

@@ -1,0 +1,28 @@
+parserImport XOCL;
+
+import Clients;
+import Root::FMML;
+import Root::Visualization;
+
+context Root::Visualization
+
+	@MetaClass ScreenM1Inherit at 1 extends Clients::ContainedClientElement 
+		
+/*		@Operation createScreen(name:String)
+			self.window := self.of().windowType(name);
+			self.window.setOwner(self.owner);
+			self.new()
+		end */
+
+/*		@Operation show() 
+			
+		end */
+		
+		@Operation forwardCommand(message,args)
+			 self.owner.owner.commandInterpreter().forwardCommand(self.id,message,args)
+		end
+
+		@Operation eventManager()
+			self.owner.owner.eventManager()
+		end
+	end

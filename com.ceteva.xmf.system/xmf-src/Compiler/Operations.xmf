@@ -81,6 +81,10 @@ context Compiler
          end
        end
      end
+     
+     @Operation FV()
+       Set{}
+     end
        
      @Operation matchCode(paramNames:Seq(String),patterns:Seq(Pattern),success:Performable,fail:Performable):Performable
        if paramNames->isEmpty

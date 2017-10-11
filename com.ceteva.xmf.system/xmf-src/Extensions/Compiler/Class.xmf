@@ -25,7 +25,7 @@ context Class
        // of a compiled class will perform the operation and thereby
        // construct the parents. The delay is necessary to allow classes
        // to involve forward references in a package.
-       
+        
        let parents = 
              if parents->isEmpty 
              then [| @Operation <name.toString() + "DelayedDefaultParents">() newClass.defaultParents() end |] 
@@ -56,11 +56,13 @@ context Class
        // Compile the elements and add them to the class at the head
        // of the stack.
        let env = env.incNameSpaceRefs().consNameSpaceRef(name.toString(),1);  // The class is defined wrt its container.
-           add = Compiler::Symbol("add")
+           addDelayed = Compiler::Symbol("addDelayed");
+           // Wrap an operation round this so that we can bind 'self' via invoke...
+           wrapOp(def) = [| @Operation() <def> end |]
        in self.allDefs()->iterate(def instrs = classInstrs |
-            Seq{Instrs::StartCall() | def.compile(env,frame,false,saveSource)} + 
+            Seq{Instrs::StartCall() | wrapOp(def).compile(env,frame,false,saveSource)} + 
             instrs + 
-            Seq{Instrs::Send(add,1)})
+            Seq{Instrs::Send(addDelayed,1)})
        end
      end 
 

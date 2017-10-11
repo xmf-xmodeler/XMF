@@ -1,0 +1,68 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+  
+	@MetaClass TextBox metaclass Root::Visualization::Widget extends ContentElement	
+		@Attribute label : String (?,!) end
+		@Attribute text : String (?,!) end
+
+		@Slot Widget::triggers = {WidgetLibrary::EventDoubleClick} end
+
+		@Constructor(label, text) end
+		
+		@Constructor(id, label, text) ! end
+		
+		@Operation getValueField()
+			"text"
+		end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+/*     	let id = self.commandInterpreter().allocateId(self) in	
+			self.owner.forwardCommand("addTextBox",[id, label, text]);
+  		id
+      end */
+      	self.commandInterpreter().newElement(self,self.owner.id,"addTextBox",[self.label, self.text])
+      end
+      
+/*     @Operation newAsNavClass()
+           	let id = self.commandInterpreter().allocateId(self) in	
+			self.owner.forwardCommand("createNavigationClass",[id, text]);
+  		id
+      end
+      end */
+      
+     @Operation textChanged(newText:String)
+			if newText <> self.text
+		    then
+				self.text := newText
+			end
+     end
+     
+  	@Operation command(command,values)
+  		if command = "valueChanged" then
+  			self.text := values.ref(0)
+  		//elseif command = "doubleClick" then
+  			
+  		else
+  			@Find (event, self.of().triggers)
+				 when event.command = command
+				 do self.eventManager().raiseEvent(event(self,text))
+				 else super(command,values)
+				 end
+    		end
+   	end
+		
+	end
+
+

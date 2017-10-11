@@ -1,0 +1,42 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass SingleField metaclass Root::Visualization::Widget extends Clients::ContainedClientElement	
+		@Attribute label : String (?,!) end
+		@Attribute text : String (?,!) end
+
+		@Constructor(label, text) end
+		
+		@Constructor(id, label, text) ! end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+     	let singleFieldId = self.commandInterpreter().allocateId(self) in	
+		    self.owner.forwardCommand("addSingleElement",[singleFieldId, label, text]);
+         	singleFieldId
+      end
+      end
+      
+     @Operation textChanged(newText:String)
+			if newText <> self.text
+		    then
+				self.text := newText
+			end
+     end
+     
+  
+		
+	end
+
+

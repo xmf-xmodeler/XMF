@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass Configuration at 1
+		@Attribute hasFeatures: VisualizationFeature end
+	end

@@ -80,7 +80,7 @@ context XOCL
        defs->select(d | d.isKindOf(Constructor))
      end
      
-     @Operation desugar()
+     @Operation oldDesugar()
      
        // A simple-minded desugaring of the class-definition...
        
@@ -90,6 +90,22 @@ context XOCL
              [| <class>.addParent(<parent>) |]) |
          [| <class>.add(<def>) |])
      end
+     
+     @Operation desugar():Performable
+     
+       // Updated to include Self bound to the class for the
+       // scope of its body.
+       
+       [| let Self = <metaClass>(<self.desugarName()>) in <self.desugarBody([| Self |])> end |]
+     end
+     
+     @Operation desugarBody(theClass:Performable):Performable
+       defs->iterate(def 
+         class = parents->iterate(parent 
+           class = theClass |
+             [| <class>.addParent(<parent>) |]) |
+         [| <class>.add(<def>) |])
+      end
      
      @Operation desugarName()
        if name.isKindOf(Drop)

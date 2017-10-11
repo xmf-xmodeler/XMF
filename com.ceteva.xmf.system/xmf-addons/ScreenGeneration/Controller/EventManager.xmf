@@ -1,0 +1,37 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@Class EventManager extends Contained
+		@Attribute eventManagerRegistry: *EventManagerRegistryEntry (?,!,+,-) end
+		
+		@Constructor(eventManagerRegistry) ! end
+
+		@Operation raiseEvent(event : EventType)
+			@Find ( entry, eventManagerRegistry )
+			when entry.sender = event.sender and entry.event = event.of()
+			do
+				self.dispatchEvent(entry,event)
+			else
+				"no handler registered".println()
+			end
+		end
+
+		@Operation dispatchEvent(entry: EventManagerRegistryEntry,event)
+			if entry.handler <> null then
+				entry.handler.handleEvent(event)
+			else
+				//self.owner.createMultiScreen(event.sender.get(event.sender.getValueField()))
+			   self.owner.removeScreen();
+				self.owner.createMultiScreen(event.target)
+			end
+		end
+
+		@Operation registerHandler(sender,event,handler)
+			self.addToEventManagerRegistry(EventManagerRegistryEntry(sender,event,handler))
+		end
+	end

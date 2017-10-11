@@ -1,0 +1,39 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+parserImport XMap;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+
+context Root::ScreenGeneration
+
+	@MetaClass OperationXWidgetM1Inherit at 1 
+		@Operation create(parent:Element,element:Element)
+			let t = self.of().hasViewTypes.head().widget;
+				op = self.of().of().operation
+			in
+				self.instance := element;
+				let res = op.invoke(element,[]);
+					e = null
+				in
+					if res.of().isKindOf(Set) or res.of().isKindOf(Seq)  
+					then
+					res :=  res.asSet()
+					end;
+					self.hasViews := t(op.name,res)
+				end;
+				self.hasViews.setOwner(self);
+				parent.add(self.hasViews);
+				@For handling in self.of().hasViewTypes.head().eventHandling do
+					self.eventManager().registerHandler(self.hasViews,handling.eventType,null)
+				end
+			end
+		end
+
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+
+	end
+
+

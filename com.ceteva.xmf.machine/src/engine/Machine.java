@@ -101,88 +101,88 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // loaded requires a larger heap. Note that since XMF has a stop-and-
   // copy garbage collector then the actual allocation is twice heapSize...
 
-  public int                         heapSize                  = HEAPSIZE;
+  public int                                                              heapSize                  = HEAPSIZE;
 
   // The stack is allocated to be stackSize words. Increasing this will
   // allow increasing depths of call chains. Note that since XOCL supports
   // tail calling you should not need to make this too large...
 
-  public int                         stackSize                 = STACKSIZE;
+  public int                                                              stackSize                 = STACKSIZE;
 
   // The amount of heap that is used before a garbage collect is invoked...
 
-  public int                         gcLimit                   = HEAPSIZE - K;
+  public int                                                              gcLimit                   = HEAPSIZE - K;
 
   // The amount of heap we would like to keep free...
 
-  public int                         freeHeap                  = 10 * K;
+  public int                                                              freeHeap                  = 10 * K;
 
   // the amount of heap that is increased if necessary...
 
-  public int                         incHeap                   = 10 * K;
+  public int                                                              incHeap                   = 10 * K;
 
   // When messages are sent, the VM will cache the operator found for a
   // given class and arity. This double level caching mechanism is implemented
   // using an operator table. The size of the operator table is set here...
 
-  public int                         operatorTableSize         = K;
+  public int                                                              operatorTableSize         = K;
 
   // The VM will handle class instantiation if the class meets the
   // appropriate criteria. The constructor table is used to cache
   // information about the constructors for classes...
 
-  public int                         constructorTableSize      = 100;
+  public int                                                              constructorTableSize      = 100;
 
   // Set to be the file to load on startup. Should be a binary file...
 
-  public String                      initFile                  = null;
+  public String                                                           initFile                  = null;
 
   // Set to the image file to load on startup...
 
-  public String                      imageFile                 = null;
+  public String                                                           imageFile                 = null;
 
   // Image args are supplied on startup in the form NAME:VALUE. These are
   // parsed and placed in a vector for processing...
 
-  public Vector<String>              imageArgs                 = new Vector<String>();
+  public Vector<String>                                                   imageArgs                 = new Vector<String>();
 
   // The interrupt flag is set when the user causes an interrupt (usually
   // ^C). The VM handles the flag approprately...
 
-  public static boolean /*static for testing because of infinity loop */                    interrupt                 = false;
+  public static boolean /* static for testing because of infinity loop */  interrupt                 = false;
 
   // Lots of occurrences of the empty array - so preallocate and reuse...
 
-  public int                         emptyArray                = mkUndefined();
+  public int                                                              emptyArray                = mkUndefined();
 
   // Lots of occurrences of the empty set - so preallocate and reuse...
 
-  public int                         emptySet                  = mkUndefined();
+  public int                                                              emptySet                  = mkUndefined();
 
   // Not used...
 
-  public boolean                     stats                     = false;
+  public boolean                                                          stats                     = false;
 
   // Not used...
 
-  public boolean                     stackDump                 = false;
+  public boolean                                                          stackDump                 = false;
 
   // Used to control the maximum size of a string when the system uses
   // the varioous toString methods...
 
-  public int                         maxPrintElements          = 30;
+  public int                                                              maxPrintElements          = 30;
 
   // Not used...
 
-  public int                         maxPrintDepth             = 20;
+  public int                                                              maxPrintDepth             = 20;
 
   // Used to calculate relative time...
 
-  public long                        time                      = System.currentTimeMillis();
+  public long                                                             time                      = System.currentTimeMillis();
 
   // The start of time as far as the VM is concerned...
 
-  private long                       time0                     = System.currentTimeMillis();
+  private long                                                            time0                     = System.currentTimeMillis();
 
   // The following argument specifications define the VM arguments that will
   // be
@@ -190,64 +190,64 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // specifies the name of a command line argument and the number of arguments
   // that are supplied...
 
-  private String[]                   XVMargSpecs               = { "-instr:0", "-frames:0", "-stats:0", "-heapSize:1", "-stackSize:1", "-initFile:1", "-freeHeap:1", "-stackDump:0", "-image:1", "-arg:1" };
+  private String[]                                                        XVMargSpecs               = { "-instr:0", "-frames:0", "-stats:0", "-heapSize:1", "-stackSize:1", "-initFile:1", "-freeHeap:1", "-stackDump:0", "-image:1", "-arg:1" };
 
   // VM can be prined showing how many items of a given type have
   // been allocated. The memory table is used toc ontain the amount of
   // memory allocated to each type of data...
 
-  public Memory                      memory                    = new Memory(time, null);
+  public Memory                                                           memory                    = new Memory(time, null);
 
   // The number of instructions performed since startup...
 
-  public int                         instrsPerformed           = 0;
+  public int                                                              instrsPerformed           = 0;
 
   // The number of dynamic lookup steps performed since startup...
 
-  public int                         dynamicLookupSteps        = 0;
+  public int                                                              dynamicLookupSteps        = 0;
 
   // The number of calls since startup...
 
-  public int                         calls                     = 0;
+  public int                                                              calls                     = 0;
 
   // The heap is an integer array represented as heap. Memory is
   // allocated (but not freed) until the heap is exhausted when a
   // garbage collect happens. The garbage collector swaps over
   // the heap and copies the used data into the new heap...
 
-  private int[]                      words;
+  private int[]                                                           words;
 
   // A pointer into the heap showing the next freely available
   // word...
 
-  private int                        freePtr                   = 0;
+  private int                                                             freePtr                   = 0;
 
   // The gcWords is a heap used to copy the current heap into
   // when the system garbage collects...
 
-  private int[]                      gcWords;
+  private int[]                                                           gcWords;
 
   // The free pointer into the garbage collecting heap...
 
-  private int                        gcFreePtr                 = 0;
+  private int                                                             gcFreePtr                 = 0;
 
   // Used by the garbage collector...
 
-  private int                        gcCopiedPtr               = 0;
+  private int                                                             gcCopiedPtr               = 0;
 
   // Thegarbage collector must record the top of the stack at the start
   // of a gc() since it uses the stack as a means of temporary
   // storage. When it exits the collector must ensure that the stack
   // is reset to the original TOS...
 
-  private int                        gcTOS                     = 0;
+  private int                                                             gcTOS                     = 0;
 
   // Symbols are maintained in the symbol table where the keys are
   // the names of the symbols. When a new symbol is required, the
   // VM looks into the symbol table to see if there is already a
   // symbol with the required name...
 
-  public int                         symbolTable;
+  public int                                                              symbolTable;
 
   // The loader may encounter name lookups which existed when the
   // object was serialized, but does not exist when the value is loaded.
@@ -255,7 +255,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // on the forwardRefs list. The upper levels can then process the
   // forward refs and replace the values appropriately...
 
-  private int                        forwardRefs               = Machine.nilValue;
+  private int                                                             forwardRefs               = Machine.nilValue;
 
   // The underlying operating system is XOS. This supplies all
   // the machinery for handling threads and IO. The VM runs a thread
@@ -264,42 +264,42 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // starts the machine performing the instructions. When the VM is
   // requested to perform IO it asks the operating system to do it...
 
-  private OperatingSystem            XOS;
+  private OperatingSystem                                                 XOS;
 
   // The threads that are currently running on the VM...
 
-  private Thread                     threads;
+  private Thread                                                          threads;
 
   // Set by a thread when it wants to yield. The VM will simply stop
   // and return to the operating system ...
 
-  private boolean                    yield                     = false;
+  private boolean                                                         yield                     = false;
 
   // The call stack...
 
-  private ValueStack                 valueStack;
+  private ValueStack                                                      valueStack;
 
   // The current frame executing on the call stack...
 
-  private int                        currentFrame              = -1;
+  private int                                                             currentFrame              = -1;
 
   // The frame currently under construction on the call stack...
 
-  private int                        openFrame                 = -1;
+  private int                                                             openFrame                 = -1;
 
-  private Stack<ForeignFun>          foreignFuns               = new Stack<ForeignFun>();
+  private Stack<ForeignFun>                                               foreignFuns               = new Stack<ForeignFun>();
 
-  private Stack<ForeignObject>       foreignObjects            = new Stack<ForeignObject>();
+  private Stack<ForeignObject>                                            foreignObjects            = new Stack<ForeignObject>();
 
   // A serializer encodes a VM data structure to an output stream.
   // The encoding is in the XMF byte coded serialization language...
 
-  private Serializer                 serializer                = new Serializer(this);
+  private Serializer                                                      serializer                = new Serializer(this);
 
   // The garbage collector provides a mechanism for weeping the heap. This defaults
   // to a mark-and-sweep, but can be modified and extended...
 
-  private GC                         gc                        = new GC(this, false);
+  private GC                                                              gc                        = new GC(this, false);
 
   // Various classes and types are known to the VM. Many of these are
   // simply so that VM managed data structures can return a particular
@@ -307,141 +307,141 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // used to manage message passing and slot access (the MOP for example).
   // These variables are setup as part of the boot process by Kernel.xmf...
 
-  public int                         theClassElement           = mkUndefined();
+  public int                                                              theClassElement           = mkUndefined();
 
-  public int                         theClassException         = mkUndefined();
+  public int                                                              theClassException         = mkUndefined();
 
-  public int                         theClassForeignObject     = mkUndefined();
+  public int                                                              theClassForeignObject     = mkUndefined();
 
-  public int                         theClassForeignOperation  = mkUndefined();
+  public int                                                              theClassForeignOperation  = mkUndefined();
 
-  public int                         theClassForwardRef        = mkUndefined();
+  public int                                                              theClassForwardRef        = mkUndefined();
 
-  public int                         theClassBind              = mkUndefined();
+  public int                                                              theClassBind              = mkUndefined();
 
-  public int                         theClassBuffer            = mkUndefined();
+  public int                                                              theClassBuffer            = mkUndefined();
 
-  public int                         theClassCodeBox           = mkUndefined();
+  public int                                                              theClassCodeBox           = mkUndefined();
 
-  public int                         theClassClass             = mkUndefined();
+  public int                                                              theClassClass             = mkUndefined();
 
-  public int                         theClassPackage           = mkUndefined();
+  public int                                                              theClassPackage           = mkUndefined();
 
-  public int                         theClassDataType          = mkUndefined();
+  public int                                                              theClassDataType          = mkUndefined();
 
-  public int                         theClassDaemon            = mkUndefined();
+  public int                                                              theClassDaemon            = mkUndefined();
 
-  public int                         theClassCompiledOperation = mkUndefined();
+  public int                                                              theClassCompiledOperation = mkUndefined();
 
-  public int                         theClassSymbol            = mkUndefined();
+  public int                                                              theClassSymbol            = mkUndefined();
 
-  public int                         theClassTable             = mkUndefined();
+  public int                                                              theClassTable             = mkUndefined();
 
-  public int                         theClassThread            = mkUndefined();
+  public int                                                              theClassThread            = mkUndefined();
 
-  public int                         theClassVector            = mkUndefined();
+  public int                                                              theClassVector            = mkUndefined();
 
-  public int                         theTypeBoolean            = mkUndefined();
+  public int                                                              theTypeBoolean            = mkUndefined();
 
-  public int                         theTypeInteger            = mkUndefined();
+  public int                                                              theTypeInteger            = mkUndefined();
 
-  public int                         theTypeFloat              = mkUndefined();
+  public int                                                              theTypeFloat              = mkUndefined();
 
-  public int                         theTypeString             = mkUndefined();
+  public int                                                              theTypeString             = mkUndefined();
 
-  public int                         theTypeSeqOfElement       = mkUndefined();
+  public int                                                              theTypeSeqOfElement       = mkUndefined();
 
-  public int                         theTypeSetOfElement       = mkUndefined();
+  public int                                                              theTypeSetOfElement       = mkUndefined();
 
-  public int                         theTypeSeq                = mkUndefined();
+  public int                                                              theTypeSeq                = mkUndefined();
 
-  public int                         theTypeSet                = mkUndefined();
+  public int                                                              theTypeSet                = mkUndefined();
 
-  public int                         theTypeNull               = mkUndefined();
+  public int                                                              theTypeNull               = mkUndefined();
 
   // Various symbols are used by the VM. Rather than create them each time
   // they are used, they are cached in the following variables...
 
-  public int                         theSymbolArity            = mkUndefined();
+  public int                                                              theSymbolArity            = mkUndefined();
 
-  public int                         theSymbolAttributes       = mkUndefined();
+  public int                                                              theSymbolAttributes       = mkUndefined();
 
-  public int                         theSymbolContents         = mkUndefined();
+  public int                                                              theSymbolContents         = mkUndefined();
 
-  public int                         theSymbolDefault          = mkUndefined();
+  public int                                                              theSymbolDefault          = mkUndefined();
 
-  public int                         theSymbolDot              = mkUndefined();
+  public int                                                              theSymbolDot              = mkUndefined();
 
-  public int                         theSymbolInvoke           = mkUndefined();
+  public int                                                              theSymbolInvoke           = mkUndefined();
 
-  public int                         theSymbolInit             = mkUndefined();
+  public int                                                              theSymbolInit             = mkUndefined();
 
-  public int                         theSymbolMachineInit      = mkUndefined();
+  public int                                                              theSymbolMachineInit      = mkUndefined();
 
-  public int                         theSymbolName             = mkUndefined();
+  public int                                                              theSymbolName             = mkUndefined();
 
-  public int                         theSymbolOperations       = mkUndefined();
+  public int                                                              theSymbolOperations       = mkUndefined();
 
-  public int                         theSymbolOwner            = mkUndefined();
+  public int                                                              theSymbolOwner            = mkUndefined();
 
-  public int                         theSymbolParents          = mkUndefined();
+  public int                                                              theSymbolParents          = mkUndefined();
 
-  public int                         theSymbolType             = mkUndefined();
+  public int                                                              theSymbolType             = mkUndefined();
 
-  public int                         theSymbolFire             = mkUndefined();
+  public int                                                              theSymbolFire             = mkUndefined();
 
-  public int                         theSymbolValue            = mkUndefined();
+  public int                                                              theSymbolValue            = mkUndefined();
 
-  public int                         theSymbolDocumentation    = mkUndefined();
+  public int                                                              theSymbolDocumentation    = mkUndefined();
 
-  public int                         theSymbolHead             = mkUndefined();
+  public int                                                              theSymbolHead             = mkUndefined();
 
-  public int                         theSymbolTail             = mkUndefined();
+  public int                                                              theSymbolTail             = mkUndefined();
 
-  public int                         theSymbolIsEmpty          = mkUndefined();
+  public int                                                              theSymbolIsEmpty          = mkUndefined();
 
-  public int                         theSymbolNewListener      = mkUndefined();
+  public int                                                              theSymbolNewListener      = mkUndefined();
 
   // Functions have a dynamics structure that contains the imported names.
   // When a function is initially created it has a default dynamics that
   // contains globals. This is predefined and shared between all functions...
 
-  public int                         globalDynamics            = nilValue;
+  public int                                                              globalDynamics            = nilValue;
 
   // The operator table contains cached operators against classes. It is
   // used to enhance lookup performance. When a message is sent to an object
   // if the object's classifier is in the table then the operator name is
   // looked up without having to process the classifier and its operators...
 
-  public int                         operatorTable             = mkUndefined();
+  public int                                                              operatorTable             = mkUndefined();
 
   // Class instantiation can be optimized when a class has simple
   // constructors and does not implement any init operations. If so then
   // the constructors are cached in this table against the class...
 
-  public int                         constructorTable          = mkUndefined();
+  public int                                                              constructorTable          = mkUndefined();
 
   // Not used...
 
-  private int                        newListenersTableSize     = K;
+  private int                                                             newListenersTableSize     = K;
 
   // Not used...
 
-  public int                         newListenersTable         = mkUndefined();
+  public int                                                              newListenersTable         = mkUndefined();
 
   // Used to manage zip files...
 
-  private Hashtable<String, ZipFile> zipFiles                  = new Hashtable<String, ZipFile>();
+  private Hashtable<String, ZipFile>                                      zipFiles                  = new Hashtable<String, ZipFile>();
 
   // A saved image contains a header that includes various properties of the
   // image. When the system starts up a default header is created and then
   // saved. This can be modified, before the image is re-saved...
 
-  private Header                     header                    = defaultHeader();
+  private Header                                                          header                    = defaultHeader();
 
   // Where to save a panic dump...
 
-  private String                     backtraceDumpFile         = "XMFDump";
+  private String                                                          backtraceDumpFile         = "XMFDump";
 
   // Updates to data structures in the machine can be undone within an
   // undoable transaction. When the transaction is active, the heap
@@ -451,22 +451,22 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // to their state before the transaction started. Undoable transactions are
   // saved on the undo engine...
 
-  public UndoEngine                  undo                      = new UndoEngine();
+  public UndoEngine                                                       undo                      = new UndoEngine();
 
   // the client name buffer is used to store a client name for communication
   // via the operating system. It is done this way so that XMF strings do not
   // have to be translated into Java strings with the ensuing resource
   // implications...
 
-  private StringBuffer               clientName                = new StringBuffer();
+  private StringBuffer                                                    clientName                = new StringBuffer();
 
   // Call back from Java is provided via the client interface. The client
   // interface table is a table mapping Java-exposed client names to
   // operations that will handle the call back...
 
-  public int                         clientInterface           = undefinedValue;
+  public int                                                              clientInterface           = undefinedValue;
 
-  private static final int           clientInterfaceSize       = 100;
+  private static final int                                                clientInterfaceSize       = 100;
 
   // Instances of Java classes are implemented as foreign objects. By default
   // the classifier for these objects is ForeignObject, however the VM can
@@ -474,9 +474,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // table with a mapping from the Java class name to the XMF class that
   // should be returned by of().
 
-  public int                         foreignTypeMapping        = undefinedValue;
+  public int                                                              foreignTypeMapping        = undefinedValue;
 
-  private static final int           foreignTypeMappingSize    = 100;
+  private static final int                                                foreignTypeMappingSize    = 100;
 
   // Instances of Java classes are foreign objects that implement the slot
   // access, update and message passing via a MOP. There is a default MOP
@@ -484,11 +484,11 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // and registered against the Java class name whose instances should use the
   // MOP in the MOP mapping table...
 
-  public int                         foreignMOPMapping         = undefinedValue;
+  public int                                                              foreignMOPMapping         = undefinedValue;
 
-  private static final int           foreignMOPMappingSize     = 100;
+  private static final int                                                foreignMOPMappingSize     = 100;
 
-  private static StringBuffer        buffer                    = new StringBuffer();
+  private static StringBuffer                                             buffer                    = new StringBuffer();
 
   // The VM may be used as a service by the outside world. This occurs, for
   // example when Java code uses the clientSend call-back service. Startup
@@ -497,12 +497,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // The following boolean flag can be queried by Java code and can be set
   // from user code via Kernel_ready.
 
-  private boolean                    ready                     = false;
+  private boolean                                                         ready                     = false;
 
   // The VM manages a debug interface that can be used by external tools
   // to handle debugging...
 
-  private Debugger                   debugger                  = new Debugger();
+  private Debugger                                                        debugger                  = new Debugger();
 
   public Machine(OperatingSystem XOS) {
     this.XOS = XOS;
@@ -843,62 +843,62 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public int attributeName(int field) {
-	int head = consHead(field);
-    return isSymbol(head)?consHead(field):consHead(consHead(field));
+    int head = consHead(field);
+    return isSymbol(head) ? consHead(field) : consHead(consHead(field));
   }
 
   public void attributeSetName(int field, int name) {
-	if(isSymbol(consHead(field)) || undefinedValue == consHead(field)) {
-		consSetHead(field, name);
-	} else {
-		consSetHead(consHead(field), name);
-	}
+    if (isSymbol(consHead(field)) || undefinedValue == consHead(field)) {
+      consSetHead(field, name);
+    } else {
+      consSetHead(consHead(field), name);
+    }
     consSetHead(field, name);
   }
 
-  private static final int PUBLIC_VISIBILITY = UNDEFINED;
+  private static final int PUBLIC_VISIBILITY  = UNDEFINED;
   private static final int PRIVATE_VISIBILITY = mkInt(1);
 
-  private static final int NO_SLOT_FOUND = -1;
+  private static final int NO_SLOT_FOUND      = -1;
   private static final int SLOT_ACCESS_DENIED = -2;
-  private static final int SLOT_ACCESS_XMF = -3;
-  
+  private static final int SLOT_ACCESS_XMF    = -3;
+
   private boolean visibilityIsPublic(int visibility) {
-	  return visibility == PUBLIC_VISIBILITY;
+    return visibility == PUBLIC_VISIBILITY;
   }
-  
+
   private boolean visibilityIsPrivate(int visibility) {
-	  return visibility == PRIVATE_VISIBILITY;
+    return visibility == PRIVATE_VISIBILITY;
   }
-  
+
   public void attributeSetVisibility(int field, int visibility) {
-//    System.err.println((consHead(field) >> 24) + " ---> " + (visibility >> 24));
-	if(isSymbol(consHead(field))) { // has no visibility field before
-      if(visibilityIsPublic(visibility)) { // will have no visibility field 
-			// DO NOTHING
-//    	System.err.println("attributeSetVisibility: DO NOTHING");
-      } else { // will have a visibility field 
-			// ADD VISIBILITY FIELD
-//    	System.err.println("attributeSetVisibility: ADD VISIBILITY FIELD");
-	    consSetHead(field, mkCons(consHead(field), visibility));
-	  }
-	} else { // has a visibility field before
-	  if(visibilityIsPublic(visibility)) { // will have no visibility field 
-			// REMOVE VISIBILITY FIELD
-	    consSetHead(field, consHead(consHead(field)));
-//  	    System.err.println("attributeSetVisibility: REMOVE VISIBILITY FIELD");
-	  } else { // will have a visibility field 
-			// CHANGE VISIBILITY
-	    consSetTail(consHead(field), visibility);
-//  	    System.err.println("attributeSetVisibility: CHANGE VISIBILITY");
+    // System.err.println((consHead(field) >> 24) + " ---> " + (visibility >> 24));
+    if (isSymbol(consHead(field))) { // has no visibility field before
+      if (visibilityIsPublic(visibility)) { // will have no visibility field
+        // DO NOTHING
+        // System.err.println("attributeSetVisibility: DO NOTHING");
+      } else { // will have a visibility field
+        // ADD VISIBILITY FIELD
+        // System.err.println("attributeSetVisibility: ADD VISIBILITY FIELD");
+        consSetHead(field, mkCons(consHead(field), visibility));
       }
-	}
+    } else { // has a visibility field before
+      if (visibilityIsPublic(visibility)) { // will have no visibility field
+        // REMOVE VISIBILITY FIELD
+        consSetHead(field, consHead(consHead(field)));
+        // System.err.println("attributeSetVisibility: REMOVE VISIBILITY FIELD");
+      } else { // will have a visibility field
+        // CHANGE VISIBILITY
+        consSetTail(consHead(field), visibility);
+        // System.err.println("attributeSetVisibility: CHANGE VISIBILITY");
+      }
+    }
   }
-  
+
   public int attributeVisibility(int field) {
     return isSymbol(consHead(field)) ? PUBLIC_VISIBILITY : consTail(consHead(field));
   }
-  
+
   public void attributeSetValue(int field, int value) {
     consSetTail(field, value);
   }
@@ -2781,10 +2781,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public int funInstLevel(int fun) {
 
     // The number of arguments required by a function...
-     int instLevel = funGetStringProperty(fun, "instLevel");
+    int instLevel = funGetStringProperty(fun, "instLevel");
     return instLevel;
   }
-  
+
   public int funIsIntrinsic(int fun) {
 
     int isIntrinsic = funGetStringProperty(fun, "Intrinsic");
@@ -2792,18 +2792,18 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       return falseValue;
     else return isIntrinsic;
   }
-  
+
   public int funIsVarArgs(int fun) {
 
-	    // A function may have var=args in which case extra argument
-	    // that are supplied tothe function are packaged up as a single
-	    // sequence and supplied as the last argument to the function...
+    // A function may have var=args in which case extra argument
+    // that are supplied tothe function are packaged up as a single
+    // sequence and supplied as the last argument to the function...
 
-	    int varArgs = funGetStringProperty(fun, "VarArgs");
-	    if (varArgs == -1)
-	      return falseValue;
-	    else return varArgs;
-	  }
+    int varArgs = funGetStringProperty(fun, "VarArgs");
+    if (varArgs == -1)
+      return falseValue;
+    else return varArgs;
+  }
 
   public int funName(int fun) {
 
@@ -2897,14 +2897,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     set(ptr(fun) + 1, globals);
   }
 
-  
   public void funSetInstLevel(int fun, int instLevel) {
 
     // Change the InstLevel...
-	  funSetStringProperty(fun, "instLevel", instLevel);
-//    set(ptr(fun), mkInt(value(instLevel)));
+    funSetStringProperty(fun, "instLevel", instLevel);
+    // set(ptr(fun), mkInt(value(instLevel)));
   }
-  
+
   public void funSetIsIntrinsic(int fun, int isIntrinsic) {
 
     // Set the boolean to be isIntrinsic...
@@ -2922,6 +2921,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       funRemoveStringProperty(fun, "VarArgs");
     else funSetStringProperty(fun, "VarArgs", isVarArgs);
   }
+
   public void funSetName(int fun, int name) {
 
     // Set the name in the code box...
@@ -3125,20 +3125,20 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     }
     if (found) {
       int attVis = attributeVisibility(att);
-	  if(attVis == PUBLIC_VISIBILITY) {
-    	  return att;
-      } else if(attVis == PRIVATE_VISIBILITY) {
-	  if(obj == frameSelf()) {
-		  return att;
-		} else {
-    	  System.err.println("private.other");
-	      return SLOT_ACCESS_DENIED;
-	    }
+      if (attVis == PUBLIC_VISIBILITY) {
+        return att;
+      } else if (attVis == PRIVATE_VISIBILITY) {
+        if (obj == frameSelf()) {
+          return att;
+        } else {
+          System.err.println("private.other");
+          return SLOT_ACCESS_DENIED;
+        }
       } else { // must be fancy
-    	  return SLOT_ACCESS_XMF;
+        return SLOT_ACCESS_XMF;
       }
     }
-      
+
     else return NO_SLOT_FOUND;
   }
 
@@ -3275,16 +3275,16 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     // Set the value of an attribute in an object...
     int att = objAttribute(obj, name);
-//    if(value == 0x3000011) 
-//	  System.err.println(
-////		  Integer.toHexString(result) + "/" +
-//          Integer.toHexString(obj) + "<>" +
-//          Integer.toHexString(frameSelf()) + ":" +
-////          Integer.toHexString(name) + "/" +
-//          Integer.toHexString(value) + "/" +
-//          Integer.toHexString(att) + "->" +
-//          Integer.toHexString(attributeVisibility(att)));
-	  
+    // if(value == 0x3000011)
+    // System.err.println(
+    //// Integer.toHexString(result) + "/" +
+    // Integer.toHexString(obj) + "<>" +
+    // Integer.toHexString(frameSelf()) + ":" +
+    //// Integer.toHexString(name) + "/" +
+    // Integer.toHexString(value) + "/" +
+    // Integer.toHexString(att) + "->" +
+    // Integer.toHexString(attributeVisibility(att)));
+
     if (att == NO_SLOT_FOUND || att == SLOT_ACCESS_DENIED || att == SLOT_ACCESS_XMF) {
       System.err.println("att == NO_SLOT_FOUND || att == SLOT_ACCESS_DENIED || att == SLOT_ACCESS_XMF");
       return att;
@@ -3294,13 +3294,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       return value;
     }
   }
-  
+
   public void objSetAttVisibility(int object, int name, int visibility) {
 
-	int att = objAttribute(object, name);
+    int att = objAttribute(object, name);
     if (att == NO_SLOT_FOUND) {
-    	sendSlotMissing(object, name, visibility);
-        return; }
+      sendSlotMissing(object, name, visibility);
+      return;
+    }
     attributeSetVisibility(att, visibility);
   }
 
@@ -3647,15 +3648,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int asSet(int value) {
     switch (tag(value)) {
-    case SET:
-      return value;
-    case CONS:
-    case NIL:
-      return mkSet(removeDuplicates(value));
-    case STRING:
-      return stringAsSet(value);
-    default:
-      throw new MachineError(TYPE, "asSet: expecting a collection.", value, theTypeSetOfElement);
+      case SET:
+        return value;
+      case CONS:
+      case NIL:
+        return mkSet(removeDuplicates(value));
+      case STRING:
+        return stringAsSet(value);
+      default:
+        throw new MachineError(TYPE, "asSet: expecting a collection.", value, theTypeSetOfElement);
     }
   }
 
@@ -4084,38 +4085,38 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // dispatches to type-specific copy operations...
 
     switch (tag(value)) {
-    case ARRAY:
-      return copyArray(value);
-    case INT:
-    case BOOL:
-    case FLOAT:
-    case CLIENT:
-    case INPUT_CHANNEL:
-    case OUTPUT_CHANNEL:
-    case DAEMON:
-      return value;
-    case OBJ:
-      return copyObj(value);
-    case FUN:
-      return copyFun(value);
-    case STRING:
-      return copyString(value);
-    case CODEBOX:
-      return copyCodeBox(value);
-    case CONS:
-      return mkCons(consHead(value), copy(consTail(value)));
-    case NIL:
-      return value;
-    case SET:
-      return value;
-    case HASHTABLE:
-      return copyHashTable(value);
-    case BUFFER:
-      return copyBuffer(value);
-    case UNDEFINED:
-      return value;
-    default:
-      throw new MachineError(ERROR, "machine.copy: unknown type to copy. " + tag(value));
+      case ARRAY:
+        return copyArray(value);
+      case INT:
+      case BOOL:
+      case FLOAT:
+      case CLIENT:
+      case INPUT_CHANNEL:
+      case OUTPUT_CHANNEL:
+      case DAEMON:
+        return value;
+      case OBJ:
+        return copyObj(value);
+      case FUN:
+        return copyFun(value);
+      case STRING:
+        return copyString(value);
+      case CODEBOX:
+        return copyCodeBox(value);
+      case CONS:
+        return mkCons(consHead(value), copy(consTail(value)));
+      case NIL:
+        return value;
+      case SET:
+        return value;
+      case HASHTABLE:
+        return copyHashTable(value);
+      case BUFFER:
+        return copyBuffer(value);
+      case UNDEFINED:
+        return value;
+      default:
+        throw new MachineError(ERROR, "machine.copy: unknown type to copy. " + tag(value));
     }
   }
 
@@ -4466,566 +4467,566 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
       switch (tag) {
 
-      case MKCONS:
-        // Push a cons pair...
-        cons();
-        break;
-      case MKSEQ:
-        // Pop elements and create a sequence...
-        mkSeqFrom(value(instr));
-        break;
-      case MKSET:
-        // Pop elements and create a set...
-        mkSetFrom(value(instr));
-        break;
-      case PUSHINT:
-        // Push a constant positive integer...
-        valueStack.elements[valueStack.index++] = INT_MASK | (instr & DATA);
-        break;
-      case PUSHTRUE:
-        // Push the value true...
-        valueStack.elements[valueStack.index++] = trueValue;
-        break;
-      case PUSHFALSE:
-        // Push the value false...
-        valueStack.elements[valueStack.index++] = falseValue;
-        break;
-      case PUSHSTR:
-        // Push a string found in the constants box...
-        R0 = words[(valueStack.elements[currentFrame + FRAMECODEBOX] & DATA) + 1];
-        valueStack.elements[valueStack.index++] = arrayRef(R0, instr & DATA);
-        break;
-      case RETURN:
-        // Return from the current frame, passing back the value at
-        // TOS...
-        popFrame();
-        break;
-      case ADD:
-        // Add various data structures...
-        add();
-        break;
-      case SUB:
-        // Subtract various data structures...
-        sub();
-        break;
-      case MUL:
-        // Multiply various data structures...
-        mul();
-        break;
-      case DIV:
-        // Divide various data structures...
-        div();
-        break;
-      case GRE:
-        // Numeric >.
-        gre();
-        break;
-      case LESS:
-        // < on various data structures...
-        less();
-        break;
-      case EQL:
-        // The same machine value...
-        eql();
-        break;
-      case AND:
-        // And various data structures...
-        and();
-        break;
-      case IMPLIES:
-        // Boolean implies...
-        implies();
-        break;
-      case OR:
-        // Or various data structures...
-        or();
-        break;
-      case NOT:
-        // Boolean not...
-        not();
-        break;
-      case DOT:
-        // Field reference. Object is at the TOS, name
-        // is in frame constants...
-        dot(frameConstant(value(instr)));
-        break;
-      case SELF:
-        // The current target of the message in the
-        // stack frame...
-        valueStack.elements[valueStack.index++] = frameSelf();
-        break;
-      case SKPF:
-        // Skip instructions if the TOS is false...
-        // skpf(value(instr));
-        R0 = valueStack.elements[--valueStack.index];
-        if ((R0 >> 24) == BOOL) {
-          if (R0 == falseValue) valueStack.elements[currentFrame + FRAMECODEINDEX] = (valueStack.elements[currentFrame + FRAMECODEINDEX] & DATA) + (instr & DATA);
-        } else throw new MachineError(TYPE, "Machine.skpf: expecting a boolean", R0, theTypeBoolean);
-        break;
-      case SKP:
-        // Skip froward a number of instructions...
-        // skp(value(instr));
-        valueStack.elements[currentFrame + FRAMECODEINDEX] += (instr & DATA);
-        break;
-      case DYNAMIC:
-        // Push the value of a dynamic variable...
-        dynamic(frameConstant(value(instr)));
-        break;
-      case MKFUN:
-        // Make a function. The global variable values are the top n
-        // stack values...
-        if (needsGC()) gc();
-        mkfun(value(instr));
-        break;
-      case MKFUNE:
-        // Make a function. The global variable values are the top n
-        // stack values...
-        if (needsGC()) gc();
-        mkfune(byte3(instr), byte2(instr));
-        break;
-      case LOCAL:
-        // Refer to a local variable value in the current stack
-        // frame.
-        valueStack.elements[valueStack.index++] = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
-        break;
-      case STARTCALL:
-        // Set up a stack frame. The fixed size part of the frame is
-        // pushed ready for the argument values.
-        if (needsGC()) gc();
-        openFrame();
-        break;
-      case ENTER:
-        // The current open frame is complete, make it current...
-        enter(value(instr));
-        break;
-      case TAILENTER:
-        // The arguments and function of the last call have been pushed.
-        // Overwrite the current frame...
-        tailEnter(value(instr));
-        break;
-      case SETLOC:
-        // Set the value of a local variable in the current frame...
-        setFrameLocal(value(instr), valueStack.top());
-        break;
-      case SEND:
-        // Send the object at the top of the stack a message...
-        send(popStack(), byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
-        break;
-      case SENDSELF:
-        // Send self a message...
-        send(frameSelf(), byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
-        break;
-      case SENDLOCAL:
-        // Send a local a message...
-        send(frameLocal(byte1(instr)), byte3(instr), frameConstant(byte2(instr)));
-        break;
-      case TAILSEND:
-        // Send the object at the top of the stack a tail message...
-        tailSend(byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
-        break;
-      case SEND0:
-        // Send the object at the top of the stack a message with 0
-        // args...
-        send0(frameConstant(value(instr)));
-        break;
-      case TAILSEND0:
-        // Send the object at the top of the stack a tail message with 0
-        // args...
-        tailSend0(frameConstant(value(instr)));
-        break;
-      case POP:
-        // Pop the TOS...
-        valueStack.index--;
-        break;
-      case GLOBAL:
-        // Push the value of a global variable in the current stack
-        // frame...
-        global(value(instr));
-        break;
-      case SETSLOT:
-        // Set the value of the named attribute to be the TOS value...
-        setSlot(frameConstant(value(instr)));
-        break;
-      case SETGLOB:
-        // Set the value of the global to be the TOS value...
-        setGlob(byte2(instr), byte1(instr));
-        break;
-      case MKARRAY:
-        // Create a new array initialised from stack values...
-        mkFixedArray(value(instr));
-        break;
-      case SUPER:
-        // Continue the current lookup with possibly different args...
-        sendSuper(value(instr));
-        break;
-      case TAILSUPER:
-        // As for SUPER, but reuse the call frame...
-        tailSuper(value(instr));
-        break;
-      case NAMESPACEREF:
-        // Refer to a name in a containing namespace...
-        nameSpaceRef(byte3(instr), frameConstant(byte1(instr) << 8 | byte2(instr)));
-        break;
-      case HEAD:
-        // Push head of sequence...
-        head();
-        break;
-      case TAIL:
-        // Push tail of sequence...
-        tail();
-        break;
-      case SIZE:
-        // Push size of sequence...
-        size();
-        break;
-      case DROP:
-        // Drop elements from sequence...
-        drop();
-        break;
-      case ISEMPTY:
-        // Check whether sequence is empty...
-        isEmpty();
-        break;
-      case INCLUDES:
-        // Check whether a sequence includes an element...
-        includes();
-        break;
-      case EXCLUDING:
-        // Remove an element from a sequence...
-        excluding();
-        break;
-      case INCLUDING:
-        // Add an element to a collection...
-        including();
-        break;
-      case SEL:
-        // Select an element from a collection...
-        sel();
-        break;
-      case UNION:
-        // Form the union of two sets...
-        union();
-        break;
-      case ASSEQ:
-        // Transform a collection to a sequence...
-        asSeq();
-        break;
-      case AT:
-        // Index a sequence...
-        at();
-        break;
-      case SKPBACK:
-        // Jump back through the instruction stream.
-        // Take into account that we have moved on by 1 instruction...
-        // skpBack(value(instr) + 1);
-        R0 = valueStack.elements[currentFrame + FRAMECODEINDEX] & DATA;
-        valueStack.elements[currentFrame + FRAMECODEINDEX] = R0 - ((instr & DATA) + 1);
-        break;
-      case NULL:
-        // The constant....
-        valueStack.elements[valueStack.index++] = undefinedValue;
-        break;
-      case OF:
-        // Pop an element, push its classifier...
-        valueStack.push(type(valueStack.pop()));
-        break;
-      case THROW:
-        // Pop an element and throw to nearest catch...
-        throwIt();
-        break;
-      case TRY:
-        // Pop handler, pop free vars, call code box...
-        tryIt(byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
-        break;
-      case ISKINDOF:
-        // Test whether an element is of a given type...
-        isKindOf();
-        break;
-      case SOURCEPOS:
-        // Deprecated...
-        break;
-      case GETELEMENT:
-        // Get a named element from a name space...
-        getElement(frameConstant(value(instr)));
-        break;
-      case SETHEAD:
-        // Set the head of a pair...
-        setHead();
-        break;
-      case SETTAIL:
-        // Set the tail of a pair...
-        setTail();
-        break;
-      case READ:
-        // Read from an input channel. Note that the read
-        // instruction will cause the current thread to yield
-        // if the input channel would block...
-        read();
-        break;
-      case ACCEPT:
-        // Accept a socket connection. Note that the accept
-        // instruction will cause the current thread to yield
-        // if the connection would block...
-        accept();
-        break;
-      case ARRAYREF:
-        // Index into an array...
-        arrayRef();
-        break;
-      case ARRAYSET:
-        // Update an array...
-        arraySet();
-        break;
-      case TABLEGET:
-        // Access a hash table...
-        tableGet();
-        break;
-      case TABLEPUT:
-        // Update a hash table...
-        tablePut();
-        break;
-      case NOOP:
-        // Do nothing...
-        break;
-      case SLEEP:
-        // Put a thread to sleep...
-        sleep();
-        break;
-      case CONST:
-        // Push a constant onto the stack...
-        pushStack(frameConstant(value(instr)));
-        break;
-      case SYMBOLVALUE:
-        // Acces a symbol value...
-        pushStack(symbolValue(frameConstant(value(instr))));
-        break;
-      case SETLOCPOP:
-        // Set the value of a local variable in the current
-        // frame and remove the value from the top of the stack.
-        valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)] = valueStack.elements[--valueStack.index];
-        break;
-      case DISPATCH:
-        // Perform an indexed jump using a jump table from the
-        // constants area. The top of the stack should be an
-        // integer suitable as an index into the table...
-        dispatch(frameConstant(value(instr)), valueStack.pop());
-        break;
-      case INCSELFSLOT:
-        // Increment the named slot in the value of self...
-        incSelfSlot(frameConstant(value(instr)));
-        break;
-      case DECSELFSLOT:
-        // Decrement the named slot in the value of self...
-        decSelfSlot(frameConstant(value(instr)));
-        break;
-      case INCLOCAL:
-        // Increment the specified local by 1...
-        // setFrameLocal(instr & DATA, mkInt(intValue(frameLocal(instr &
-        // DATA)) + 1));
-        R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
-        if ((R0 >> 24) == INT)
-          R0 = R0 & DATA;
-        else R0 = -(R0 & DATA);
-        R0++;
-        if (R0 < 0)
-          R0 = NEGINT_MASK | -R0;
-        else R0 = INT_MASK | R0;
-        valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)] = R0;
-        valueStack.elements[valueStack.index++] = R0;
-        break;
-      case DECLOCAL:
-        // Decrement the specified local by 1...
-        setFrameLocal(value(instr), mkInt(intValue(frameLocal(value(instr))) - 1));
-        pushStack(frameLocal(value(instr)));
-        break;
-      case ADDLOCAL:
-        // Add to the value of a local...
-        pushStack(mkInt(intValue(frameLocal(value(instr))) + 1));
-        break;
-      case SUBLOCAL:
-        // Subtract 1 from the value of a local...
-        pushStack(mkInt(intValue(frameLocal(value(instr))) - 1));
-        break;
-      case PREPEND:
-        // Like CONS except TOS must be a sequence...
-        prepend();
-        break;
-      case ENTERDYN:
-        // The args are at the top of the stack. Close the call frame
-        // and
-        // enter the dynamic variable...
-        enterDynamic(frameConstant(byte3(instr) << 8 | byte1(instr)), byte2(instr));
-        break;
-      case TAILENTERDYN:
-        // The args are at the top of the stack. Close the call frame
-        // and
-        // enter the dynamic variable...
-        tailEnterDynamic(frameConstant(byte3(instr) << 8 | byte1(instr)), byte2(instr));
-        break;
-      case ISNOTEMPTY:
-        // Equivalent to not S->isEmpty...
-        // isNotEmpty();
-        R0 = valueStack.elements[--valueStack.index];
-        R1 = (R0 >> 24);
-        switch (R1) {
-        case CONS:
-        case NIL:
-          valueStack.elements[valueStack.index++] = R0 == nilValue ? falseValue : trueValue;
+        case MKCONS:
+          // Push a cons pair...
+          cons();
           break;
-        case SET:
-          valueStack.elements[valueStack.index++] = setElements(R0) == nilValue ? falseValue : trueValue;
+        case MKSEQ:
+          // Pop elements and create a sequence...
+          mkSeqFrom(value(instr));
           break;
-        case HASHTABLE:
-          valueStack.push(hashTableIsEmpty(R0) ? falseValue : trueValue);
+        case MKSET:
+          // Pop elements and create a set...
+          mkSetFrom(value(instr));
           break;
-        case OBJ:
+        case PUSHINT:
+          // Push a constant positive integer...
+          valueStack.elements[valueStack.index++] = INT_MASK | (instr & DATA);
+          break;
+        case PUSHTRUE:
+          // Push the value true...
+          valueStack.elements[valueStack.index++] = trueValue;
+          break;
+        case PUSHFALSE:
+          // Push the value false...
+          valueStack.elements[valueStack.index++] = falseValue;
+          break;
+        case PUSHSTR:
+          // Push a string found in the constants box...
+          R0 = words[(valueStack.elements[currentFrame + FRAMECODEBOX] & DATA) + 1];
+          valueStack.elements[valueStack.index++] = arrayRef(R0, instr & DATA);
+          break;
+        case RETURN:
+          // Return from the current frame, passing back the value at
+          // TOS...
+          popFrame();
+          break;
+        case ADD:
+          // Add various data structures...
+          add();
+          break;
+        case SUB:
+          // Subtract various data structures...
+          sub();
+          break;
+        case MUL:
+          // Multiply various data structures...
+          mul();
+          break;
+        case DIV:
+          // Divide various data structures...
+          div();
+          break;
+        case GRE:
+          // Numeric >.
+          gre();
+          break;
+        case LESS:
+          // < on various data structures...
+          less();
+          break;
+        case EQL:
+          // The same machine value...
+          eql();
+          break;
+        case AND:
+          // And various data structures...
+          and();
+          break;
+        case IMPLIES:
+          // Boolean implies...
+          implies();
+          break;
+        case OR:
+          // Or various data structures...
+          or();
+          break;
+        case NOT:
+          // Boolean not...
+          not();
+          break;
+        case DOT:
+          // Field reference. Object is at the TOS, name
+          // is in frame constants...
+          dot(frameConstant(value(instr)));
+          break;
+        case SELF:
+          // The current target of the message in the
+          // stack frame...
+          valueStack.elements[valueStack.index++] = frameSelf();
+          break;
+        case SKPF:
+          // Skip instructions if the TOS is false...
+          // skpf(value(instr));
+          R0 = valueStack.elements[--valueStack.index];
+          if ((R0 >> 24) == BOOL) {
+            if (R0 == falseValue) valueStack.elements[currentFrame + FRAMECODEINDEX] = (valueStack.elements[currentFrame + FRAMECODEINDEX] & DATA) + (instr & DATA);
+          } else throw new MachineError(TYPE, "Machine.skpf: expecting a boolean", R0, theTypeBoolean);
+          break;
+        case SKP:
+          // Skip froward a number of instructions...
+          // skp(value(instr));
+          valueStack.elements[currentFrame + FRAMECODEINDEX] += (instr & DATA);
+          break;
+        case DYNAMIC:
+          // Push the value of a dynamic variable...
+          dynamic(frameConstant(value(instr)));
+          break;
+        case MKFUN:
+          // Make a function. The global variable values are the top n
+          // stack values...
+          if (needsGC()) gc();
+          mkfun(value(instr));
+          break;
+        case MKFUNE:
+          // Make a function. The global variable values are the top n
+          // stack values...
+          if (needsGC()) gc();
+          mkfune(byte3(instr), byte2(instr));
+          break;
+        case LOCAL:
+          // Refer to a local variable value in the current stack
+          // frame.
+          valueStack.elements[valueStack.index++] = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
+          break;
+        case STARTCALL:
+          // Set up a stack frame. The fixed size part of the frame is
+          // pushed ready for the argument values.
+          if (needsGC()) gc();
+          openFrame();
+          break;
+        case ENTER:
+          // The current open frame is complete, make it current...
+          enter(value(instr));
+          break;
+        case TAILENTER:
+          // The arguments and function of the last call have been pushed.
+          // Overwrite the current frame...
+          tailEnter(value(instr));
+          break;
+        case SETLOC:
+          // Set the value of a local variable in the current frame...
+          setFrameLocal(value(instr), valueStack.top());
+          break;
+        case SEND:
+          // Send the object at the top of the stack a message...
+          send(popStack(), byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
+          break;
+        case SENDSELF:
+          // Send self a message...
+          send(frameSelf(), byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
+          break;
+        case SENDLOCAL:
+          // Send a local a message...
+          send(frameLocal(byte1(instr)), byte3(instr), frameConstant(byte2(instr)));
+          break;
+        case TAILSEND:
+          // Send the object at the top of the stack a tail message...
+          tailSend(byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
+          break;
+        case SEND0:
+          // Send the object at the top of the stack a message with 0
+          // args...
+          send0(frameConstant(value(instr)));
+          break;
+        case TAILSEND0:
+          // Send the object at the top of the stack a tail message with 0
+          // args...
+          tailSend0(frameConstant(value(instr)));
+          break;
+        case POP:
+          // Pop the TOS...
+          valueStack.index--;
+          break;
+        case GLOBAL:
+          // Push the value of a global variable in the current stack
+          // frame...
+          global(value(instr));
+          break;
+        case SETSLOT:
+          // Set the value of the named attribute to be the TOS value...
+          setSlot(frameConstant(value(instr)));
+          break;
+        case SETGLOB:
+          // Set the value of the global to be the TOS value...
+          setGlob(byte2(instr), byte1(instr));
+          break;
+        case MKARRAY:
+          // Create a new array initialised from stack values...
+          mkFixedArray(value(instr));
+          break;
+        case SUPER:
+          // Continue the current lookup with possibly different args...
+          sendSuper(value(instr));
+          break;
+        case TAILSUPER:
+          // As for SUPER, but reuse the call frame...
+          tailSuper(value(instr));
+          break;
+        case NAMESPACEREF:
+          // Refer to a name in a containing namespace...
+          nameSpaceRef(byte3(instr), frameConstant(byte1(instr) << 8 | byte2(instr)));
+          break;
+        case HEAD:
+          // Push head of sequence...
+          head();
+          break;
+        case TAIL:
+          // Push tail of sequence...
+          tail();
+          break;
+        case SIZE:
+          // Push size of sequence...
+          size();
+          break;
+        case DROP:
+          // Drop elements from sequence...
+          drop();
+          break;
+        case ISEMPTY:
+          // Check whether sequence is empty...
+          isEmpty();
+          break;
+        case INCLUDES:
+          // Check whether a sequence includes an element...
+          includes();
+          break;
+        case EXCLUDING:
+          // Remove an element from a sequence...
+          excluding();
+          break;
+        case INCLUDING:
+          // Add an element to a collection...
+          including();
+          break;
+        case SEL:
+          // Select an element from a collection...
+          sel();
+          break;
+        case UNION:
+          // Form the union of two sets...
+          union();
+          break;
+        case ASSEQ:
+          // Transform a collection to a sequence...
+          asSeq();
+          break;
+        case AT:
+          // Index a sequence...
+          at();
+          break;
+        case SKPBACK:
+          // Jump back through the instruction stream.
+          // Take into account that we have moved on by 1 instruction...
+          // skpBack(value(instr) + 1);
+          R0 = valueStack.elements[currentFrame + FRAMECODEINDEX] & DATA;
+          valueStack.elements[currentFrame + FRAMECODEINDEX] = R0 - ((instr & DATA) + 1);
+          break;
+        case NULL:
+          // The constant....
+          valueStack.elements[valueStack.index++] = undefinedValue;
+          break;
+        case OF:
+          // Pop an element, push its classifier...
+          valueStack.push(type(valueStack.pop()));
+          break;
+        case THROW:
+          // Pop an element and throw to nearest catch...
+          throwIt();
+          break;
+        case TRY:
+          // Pop handler, pop free vars, call code box...
+          tryIt(byte2(instr), frameConstant(byte3(instr) << 8 | byte1(instr)));
+          break;
+        case ISKINDOF:
+          // Test whether an element is of a given type...
+          isKindOf();
+          break;
+        case SOURCEPOS:
+          // Deprecated...
+          break;
+        case GETELEMENT:
+          // Get a named element from a name space...
+          getElement(frameConstant(value(instr)));
+          break;
+        case SETHEAD:
+          // Set the head of a pair...
+          setHead();
+          break;
+        case SETTAIL:
+          // Set the tail of a pair...
+          setTail();
+          break;
+        case READ:
+          // Read from an input channel. Note that the read
+          // instruction will cause the current thread to yield
+          // if the input channel would block...
+          read();
+          break;
+        case ACCEPT:
+          // Accept a socket connection. Note that the accept
+          // instruction will cause the current thread to yield
+          // if the connection would block...
+          accept();
+          break;
+        case ARRAYREF:
+          // Index into an array...
+          arrayRef();
+          break;
+        case ARRAYSET:
+          // Update an array...
+          arraySet();
+          break;
+        case TABLEGET:
+          // Access a hash table...
+          tableGet();
+          break;
+        case TABLEPUT:
+          // Update a hash table...
+          tablePut();
+          break;
+        case NOOP:
+          // Do nothing...
+          break;
+        case SLEEP:
+          // Put a thread to sleep...
+          sleep();
+          break;
+        case CONST:
+          // Push a constant onto the stack...
+          pushStack(frameConstant(value(instr)));
+          break;
+        case SYMBOLVALUE:
+          // Acces a symbol value...
+          pushStack(symbolValue(frameConstant(value(instr))));
+          break;
+        case SETLOCPOP:
+          // Set the value of a local variable in the current
+          // frame and remove the value from the top of the stack.
+          valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)] = valueStack.elements[--valueStack.index];
+          break;
+        case DISPATCH:
+          // Perform an indexed jump using a jump table from the
+          // constants area. The top of the stack should be an
+          // integer suitable as an index into the table...
+          dispatch(frameConstant(value(instr)), valueStack.pop());
+          break;
+        case INCSELFSLOT:
+          // Increment the named slot in the value of self...
+          incSelfSlot(frameConstant(value(instr)));
+          break;
+        case DECSELFSLOT:
+          // Decrement the named slot in the value of self...
+          decSelfSlot(frameConstant(value(instr)));
+          break;
+        case INCLOCAL:
+          // Increment the specified local by 1...
+          // setFrameLocal(instr & DATA, mkInt(intValue(frameLocal(instr &
+          // DATA)) + 1));
+          R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
+          if ((R0 >> 24) == INT)
+            R0 = R0 & DATA;
+          else R0 = -(R0 & DATA);
+          R0++;
+          if (R0 < 0)
+            R0 = NEGINT_MASK | -R0;
+          else R0 = INT_MASK | R0;
+          valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)] = R0;
+          valueStack.elements[valueStack.index++] = R0;
+          break;
+        case DECLOCAL:
+          // Decrement the specified local by 1...
+          setFrameLocal(value(instr), mkInt(intValue(frameLocal(value(instr))) - 1));
+          pushStack(frameLocal(value(instr)));
+          break;
+        case ADDLOCAL:
+          // Add to the value of a local...
+          pushStack(mkInt(intValue(frameLocal(value(instr))) + 1));
+          break;
+        case SUBLOCAL:
+          // Subtract 1 from the value of a local...
+          pushStack(mkInt(intValue(frameLocal(value(instr))) - 1));
+          break;
+        case PREPEND:
+          // Like CONS except TOS must be a sequence...
+          prepend();
+          break;
+        case ENTERDYN:
+          // The args are at the top of the stack. Close the call frame
+          // and
+          // enter the dynamic variable...
+          enterDynamic(frameConstant(byte3(instr) << 8 | byte1(instr)), byte2(instr));
+          break;
+        case TAILENTERDYN:
+          // The args are at the top of the stack. Close the call frame
+          // and
+          // enter the dynamic variable...
+          tailEnterDynamic(frameConstant(byte3(instr) << 8 | byte1(instr)), byte2(instr));
+          break;
+        case ISNOTEMPTY:
+          // Equivalent to not S->isEmpty...
+          // isNotEmpty();
+          R0 = valueStack.elements[--valueStack.index];
+          R1 = (R0 >> 24);
+          switch (R1) {
+            case CONS:
+            case NIL:
+              valueStack.elements[valueStack.index++] = R0 == nilValue ? falseValue : trueValue;
+              break;
+            case SET:
+              valueStack.elements[valueStack.index++] = setElements(R0) == nilValue ? falseValue : trueValue;
+              break;
+            case HASHTABLE:
+              valueStack.push(hashTableIsEmpty(R0) ? falseValue : trueValue);
+              break;
+            case OBJ:
+            default:
+              valueStack.push(R0);
+              send0(mkSymbol("isNotEmpty"));
+              break;
+          }
+          break;
+        case LOCALHEAD:
+          // Refer to a local variable value in the current stack
+          // frame and push head...
+          R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
+          switch (R0 >> 24) {
+            case NIL:
+              throw new MachineError(TYPE, "Cannot take the head of Seq{}", nilValue, theTypeSeqOfElement);
+            case CONS:
+              valueStack.elements[valueStack.index++] = consHead(R0);
+              break;
+            default:
+              valueStack.push(R0);
+              send0(theSymbolHead);
+          }
+          break;
+        case LOCALTAIL:
+          // Refer to a local variable value in the current stack frame
+          // and push tail...
+          // pushTail(frameLocal(value(instr)));
+          R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
+          switch (R0 >> 24) {
+            case NIL:
+              throw new MachineError(TYPE, "Cannot take the tail of Seq{}", nilValue, theTypeSeqOfElement);
+            case CONS:
+              valueStack.elements[valueStack.index++] = consTail(R0);
+              break;
+            default:
+              valueStack.push(R0);
+              send0(theSymbolTail);
+          }
+          break;
+        case LOCALASSEQ:
+          // Push the indexed local as a sequence...
+          pushAsSeq(frameLocal(value(instr)));
+          break;
+        case LOCALISEMPTY:
+          // Push whether the local is empty...
+          // pushIsEmpty(frameLocal(value(instr)));
+          R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
+          switch (R0 >> 24) {
+            case CONS:
+            case NIL:
+              valueStack.elements[valueStack.index++] = (R0 == nilValue ? trueValue : falseValue);
+              break;
+            case SET:
+              valueStack.elements[valueStack.index++] = (setElements(R0) == nilValue ? trueValue : falseValue);
+              break;
+            case HASHTABLE:
+              valueStack.push(hashTableIsEmpty(R0) ? trueValue : falseValue);
+              break;
+            case OBJ:
+            default:
+              valueStack.push(R0);
+              send0(theSymbolIsEmpty);
+              break;
+          }
+          break;
+        case DOTSELF:
+          // Reference the slot via self...
+          // dot(frameConstant(instr & DATA), frameSelf());
+          dot(frameConstant(instr & DATA), valueStack.elements[currentFrame + FRAMESELF]);
+          break;
+        case DOTLOCAL:
+          // Reference a slot of a local...
+          dot(frameConstant(byte2(instr) << 8 | byte1(instr)), frameLocal(byte3(instr)));
+          break;
+        case SETLOCALSLOT:
+          // Update the value of a slot in a local...
+          setSlot(frameLocal(byte3(instr)), frameConstant(byte2(instr) << 8 | byte1(instr)), valueStack.pop());
+          break;
+        case SETSELFSLOT:
+          // Update the value of a slot in self...
+          setSlot(frameSelf(), frameConstant(value(instr)), valueStack.pop());
+          break;
+        case LOCALREFPOS:
+          // References the local and records the line in the
+          // original source code...
+          valueStack.elements[valueStack.index++] = valueStack.elements[currentFrame + FRAMELOCAL0 + byte3(instr)];
+          valueStack.elements[currentFrame + FRAMELINECOUNT] = INT_MASK | ((byte2(instr) << 8) | byte1(instr));
+          valueStack.elements[currentFrame + FRAMECHARCOUNT] = INT_MASK;
+          break;
+        case DYNREFPOS:
+          // References a dynamic and sets the line count...
+          dynamic(frameConstant(value(byte3(instr))));
+          valueStack.elements[currentFrame + FRAMELINECOUNT] = INT_MASK | ((byte2(instr) << 8) | byte1(instr));
+          valueStack.elements[currentFrame + FRAMECHARCOUNT] = INT_MASK;
+          break;
+        case ASSOC:
+          // Looks up a key in a sequence of pairs and returns the
+          // sequence
+          // from the position where the pair occurs...
+          assoc();
+          break;
+        case RETDOTSELF:
+          // Return the value of a slot via self...
+          dot(frameConstant(instr & DATA), valueStack.elements[currentFrame + FRAMESELF]);
+          popFrame();
+          break;
+        case TOSTRING:
+          // Turn the value into a string...
+          if (needsGC()) gc();
+          toStringInstr();
+          break;
+        case ARITY:
+          // Get the number of expected arguments...
+          arity();
+          break;
+        case STRINGEQL:
+          // A string equal to the first argument...
+          stringEqual();
+          break;
+        case GET:
+          // Tables or objects...
+          get();
+          break;
+        case PUT:
+          // Tables...
+          put();
+          break;
+        case HASKEY:
+          // Tables...
+          hasKey();
+          break;
+        case LOCALNAME:
+          // Set the name...
+          localName(frameConstant(0), byte2(instr) << 8 | byte1(instr), byte3(instr));
+          break;
+        case UNSETLOCAL:
+          // Name goes out of scope ...
+          unsetLocal(value(instr));
+          break;
+        case LINE:
+          // Set the line position in the current stack frame...
+          line(value(instr));
+          break;
+        case HASSLOT:
+          // Check whether an element has a slot...
+          hasSlot();
+          break;
         default:
-          valueStack.push(R0);
-          send0(mkSymbol("isNotEmpty"));
-          break;
-        }
-        break;
-      case LOCALHEAD:
-        // Refer to a local variable value in the current stack
-        // frame and push head...
-        R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
-        switch (R0 >> 24) {
-        case NIL:
-          throw new MachineError(TYPE, "Cannot take the head of Seq{}", nilValue, theTypeSeqOfElement);
-        case CONS:
-          valueStack.elements[valueStack.index++] = consHead(R0);
-          break;
-        default:
-          valueStack.push(R0);
-          send0(theSymbolHead);
-        }
-        break;
-      case LOCALTAIL:
-        // Refer to a local variable value in the current stack frame
-        // and push tail...
-        // pushTail(frameLocal(value(instr)));
-        R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
-        switch (R0 >> 24) {
-        case NIL:
-          throw new MachineError(TYPE, "Cannot take the tail of Seq{}", nilValue, theTypeSeqOfElement);
-        case CONS:
-          valueStack.elements[valueStack.index++] = consTail(R0);
-          break;
-        default:
-          valueStack.push(R0);
-          send0(theSymbolTail);
-        }
-        break;
-      case LOCALASSEQ:
-        // Push the indexed local as a sequence...
-        pushAsSeq(frameLocal(value(instr)));
-        break;
-      case LOCALISEMPTY:
-        // Push whether the local is empty...
-        // pushIsEmpty(frameLocal(value(instr)));
-        R0 = valueStack.elements[currentFrame + FRAMELOCAL0 + (instr & DATA)];
-        switch (R0 >> 24) {
-        case CONS:
-        case NIL:
-          valueStack.elements[valueStack.index++] = (R0 == nilValue ? trueValue : falseValue);
-          break;
-        case SET:
-          valueStack.elements[valueStack.index++] = (setElements(R0) == nilValue ? trueValue : falseValue);
-          break;
-        case HASHTABLE:
-          valueStack.push(hashTableIsEmpty(R0) ? trueValue : falseValue);
-          break;
-        case OBJ:
-        default:
-          valueStack.push(R0);
-          send0(theSymbolIsEmpty);
-          break;
-        }
-        break;
-      case DOTSELF:
-        // Reference the slot via self...
-        // dot(frameConstant(instr & DATA), frameSelf());
-        dot(frameConstant(instr & DATA), valueStack.elements[currentFrame + FRAMESELF]);
-        break;
-      case DOTLOCAL:
-        // Reference a slot of a local...
-        dot(frameConstant(byte2(instr) << 8 | byte1(instr)), frameLocal(byte3(instr)));
-        break;
-      case SETLOCALSLOT:
-        // Update the value of a slot in a local...
-        setSlot(frameLocal(byte3(instr)), frameConstant(byte2(instr) << 8 | byte1(instr)), valueStack.pop());
-        break;
-      case SETSELFSLOT:
-        // Update the value of a slot in self...
-        setSlot(frameSelf(), frameConstant(value(instr)), valueStack.pop());
-        break;
-      case LOCALREFPOS:
-        // References the local and records the line in the
-        // original source code...
-        valueStack.elements[valueStack.index++] = valueStack.elements[currentFrame + FRAMELOCAL0 + byte3(instr)];
-        valueStack.elements[currentFrame + FRAMELINECOUNT] = INT_MASK | ((byte2(instr) << 8) | byte1(instr));
-        valueStack.elements[currentFrame + FRAMECHARCOUNT] = INT_MASK;
-        break;
-      case DYNREFPOS:
-        // References a dynamic and sets the line count...
-        dynamic(frameConstant(value(byte3(instr))));
-        valueStack.elements[currentFrame + FRAMELINECOUNT] = INT_MASK | ((byte2(instr) << 8) | byte1(instr));
-        valueStack.elements[currentFrame + FRAMECHARCOUNT] = INT_MASK;
-        break;
-      case ASSOC:
-        // Looks up a key in a sequence of pairs and returns the
-        // sequence
-        // from the position where the pair occurs...
-        assoc();
-        break;
-      case RETDOTSELF:
-        // Return the value of a slot via self...
-        dot(frameConstant(instr & DATA), valueStack.elements[currentFrame + FRAMESELF]);
-        popFrame();
-        break;
-      case TOSTRING:
-        // Turn the value into a string...
-        if (needsGC()) gc();
-        toStringInstr();
-        break;
-      case ARITY:
-        // Get the number of expected arguments...
-        arity();
-        break;
-      case STRINGEQL:
-        // A string equal to the first argument...
-        stringEqual();
-        break;
-      case GET:
-        // Tables or objects...
-        get();
-        break;
-      case PUT:
-        // Tables...
-        put();
-        break;
-      case HASKEY:
-        // Tables...
-        hasKey();
-        break;
-      case LOCALNAME:
-        // Set the name...
-        localName(frameConstant(0), byte2(instr) << 8 | byte1(instr), byte3(instr));
-        break;
-      case UNSETLOCAL:
-        // Name goes out of scope ...
-        unsetLocal(value(instr));
-        break;
-      case LINE:
-        // Set the line position in the current stack frame...
-        line(value(instr));
-        break;
-      case HASSLOT:
-        // Check whether an element has a slot...
-        hasSlot();
-        break;
-      default:
-        throw new MachineError(INSTR, "Machine.perform: unknown instruction " + tag(instr));
+          throw new MachineError(INSTR, "Machine.perform: unknown instruction " + tag(instr));
       }
     }
 
@@ -5039,19 +5040,19 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int element = popStack();
     if (isString(name)) name = mkSymbol(name);
     switch (tag(element)) {
-    case OBJ:
-      objHasSlot(element, name);
-      break;
-    case FOREIGNOBJ:
-      if (foreignObjHasSlot(element, name))
-        pushStack(trueValue);
-      else pushStack(falseValue);
-      break;
-    default:
-      openFrame();
-      valueStack.push(name);
-      valueStack.push(element);
-      send(1, mkSymbol("hasSlot"));
+      case OBJ:
+        objHasSlot(element, name);
+        break;
+      case FOREIGNOBJ:
+        if (foreignObjHasSlot(element, name))
+          pushStack(trueValue);
+        else pushStack(falseValue);
+        break;
+      default:
+        openFrame();
+        valueStack.push(name);
+        valueStack.push(element);
+        send(1, mkSymbol("hasSlot"));
     }
   }
 
@@ -5209,12 +5210,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       return mkBigInt(l);
     else return mkInt(i + j);
   }
-  
+
   public int subInts(int i, int j) {
     int l = i - j; // subtracting two 24 bit integers wont overflow 32 bit, so long is not required
     if (l > MAXINT || l < -MAXINT) // may overflow in any direction: i.e. 10 - (-10) = 20
       return mkBigInt(l);
-	else return mkInt(i - j);
+    else return mkInt(i - j);
   }
 
   public void overloadedBinOp(int v1, int v2, String op) {
@@ -5258,7 +5259,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int v1 = valueStack.pop();
     int v2 = valueStack.pop();
     if (isInt(v1) && isInt(v2))
-      valueStack.push(subInts(intValue(v2),intValue(v1)));
+      valueStack.push(subInts(intValue(v2), intValue(v1)));
     else if (isFloat(v1) && isFloat(v2))
       valueStack.push(floatSub(v2, v1));
     else if (isSet(v1) && isSet(v2))
@@ -5296,7 +5297,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public int mulInts(boolean isNegative, int i, int j) {
-    long l = ((long)i) * ((long)j); // we must cast before multiplying
+    long l = ((long) i) * ((long) j); // we must cast before multiplying
     if (l > MAXINT)
       if (isNegative)
         return mkBigInt(-l);
@@ -5487,34 +5488,34 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // OCL...
 
     switch (obj >> 24) {
-    case FOREIGNOBJ:
-      dotForeignObj(name, obj);
-      break;
-    case OBJ:
-      dotObj(name, obj);
-      break;
-    case SET:
-    case CONS:
-    case NIL:
-      dotCollection(name, obj);
-      break;
-    case FUN:
-      dotFun(name, obj);
-      break;
-    case FOREIGNFUN:
-      dotForeignFun(name, obj);
-      break;
-    case SYMBOL:
-      dotSymbol(name, obj);
-      break;
-    case HASHTABLE:
-      dotCollection(name, hashTableContents(obj));
-      break;
-    case DAEMON:
-      dotDaemon(name, obj);
-      break;
-    default:
-      throw new MachineError(ERROR, "Dot: unknown type of value " + valueToString(obj) + "." + valueToString(name));
+      case FOREIGNOBJ:
+        dotForeignObj(name, obj);
+        break;
+      case OBJ:
+        dotObj(name, obj);
+        break;
+      case SET:
+      case CONS:
+      case NIL:
+        dotCollection(name, obj);
+        break;
+      case FUN:
+        dotFun(name, obj);
+        break;
+      case FOREIGNFUN:
+        dotForeignFun(name, obj);
+        break;
+      case SYMBOL:
+        dotSymbol(name, obj);
+        break;
+      case HASHTABLE:
+        dotCollection(name, hashTableContents(obj));
+        break;
+      case DAEMON:
+        dotDaemon(name, obj);
+        break;
+      default:
+        throw new MachineError(ERROR, "Dot: unknown type of value " + valueToString(obj) + "." + valueToString(name));
     }
   }
 
@@ -5598,13 +5599,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     if (standardSlotAccessProtocol(obj) || isDefaultGetMOP(type(obj))) {
       int att = objAttribute(obj, name);
       if (att == NO_SLOT_FOUND) {
-        sendSlotMissing(obj, name); 
+        sendSlotMissing(obj, name);
       } else if (att == SLOT_ACCESS_DENIED) {
-    	sendSlotDenied(obj, name); // Use other error message? YES
+        sendSlotDenied(obj, name); // Use other error message? YES
       } else if (att == SLOT_ACCESS_XMF) {
-    	sendSlotAccess(obj, name);
-      } else 
-    	valueStack.push(attributeValue(att));
+        sendSlotAccess(obj, name);
+      } else valueStack.push(attributeValue(att));
     } else {
       sendSlotAccess(obj, name);
     }
@@ -5624,7 +5624,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     valueStack.push(obj);
     send(1, mkSymbol("slotDenied"));
   }
-  
+
   public void sendSlotMissing(int obj, int name) {
     openFrame();
     valueStack.push(name);
@@ -5633,14 +5633,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   }
 
   public void sendSlotDenied(int obj, int name, int value) {
-	System.err.println("sendSlotDenied");
+    System.err.println("sendSlotDenied");
     openFrame();
     valueStack.push(name);
     valueStack.push(value);
     valueStack.push(obj);
     send(2, mkSymbol("slotDenied"));
   }
-  
+
   public void sendSlotMissing(int obj, int name, int value) {
     openFrame();
     valueStack.push(name);
@@ -5678,31 +5678,31 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public int dynamicSlotReference(int name) {
     int object = frameSelf();
     switch (tag(object)) {
-    case OBJ:
-      int attributes = objAttributes(object);
-      while (attributes != nilValue) {
-        int attribute = consHead(attributes);
-        int attName = attributeName(attribute);
-        if (name == attName)
-          return attributeValue(attribute);
-        else attributes = consTail(attributes);
-      }
-      return -1;
-    case FUN:
-      if (name == theSymbolName) return funName(object);
-      if (name == theSymbolOwner) return funOwner(object);
-      return -1;
-    case FOREIGNFUN:
-      if (name == theSymbolName) return foreignFunName(object);
-      return -1;
-    case FOREIGNOBJ:
-      ForeignObject fobj = getForeignObject(object);
-      if (fobj.getMop().hasSlot(this, object, name)) {
-        fobj.getMop().dot(this, object, name);
-        return valueStack.pop();
-      } else return -1;
-    default:
-      return -1;
+      case OBJ:
+        int attributes = objAttributes(object);
+        while (attributes != nilValue) {
+          int attribute = consHead(attributes);
+          int attName = attributeName(attribute);
+          if (name == attName)
+            return attributeValue(attribute);
+          else attributes = consTail(attributes);
+        }
+        return -1;
+      case FUN:
+        if (name == theSymbolName) return funName(object);
+        if (name == theSymbolOwner) return funOwner(object);
+        return -1;
+      case FOREIGNFUN:
+        if (name == theSymbolName) return foreignFunName(object);
+        return -1;
+      case FOREIGNOBJ:
+        ForeignObject fobj = getForeignObject(object);
+        if (fobj.getMop().hasSlot(this, object, name)) {
+          fobj.getMop().dot(this, object, name);
+          return valueStack.pop();
+        } else return -1;
+      default:
+        return -1;
     }
   }
 
@@ -6171,23 +6171,23 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // to an appropriate handler...
 
     switch (tag(fun)) {
-    case FUN:
-      enterFun(fun, arity);
-      break;
-    case FOREIGNFUN:
-      enterForeignFun(fun, arity);
-      break;
-    case OBJ:
-      enterObj(fun, arity);
-      break;
-    case CONT:
-      enterCont(fun, arity);
-      break;
-    case FOREIGNOBJ:
-      invokeObj(fun, fun, arity);
-      break;
-    default:
-      error(ERROR, "Trying to apply a non-applicable value: " + valueToString(fun));
+      case FUN:
+        enterFun(fun, arity);
+        break;
+      case FOREIGNFUN:
+        enterForeignFun(fun, arity);
+        break;
+      case OBJ:
+        enterObj(fun, arity);
+        break;
+      case CONT:
+        enterCont(fun, arity);
+        break;
+      case FOREIGNOBJ:
+        invokeObj(fun, fun, arity);
+        break;
+      default:
+        error(ERROR, "Trying to apply a non-applicable value: " + valueToString(fun));
     }
   }
 
@@ -6476,18 +6476,18 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       boolean arityMatch = (arity == funArity) || (isVarArgs && (arity >= (funArity - 1)));
 
       switch (tag(op)) {
-      case FUN:
-        if (funName(op) == message && arityMatch)
-          found = true;
-        else ops = consTail(ops);
-        break;
-      case OBJ:
-        if (objGetName(op) == message)
-          found = true;
-        else ops = consTail(ops);
-        break;
-      default:
-        ops = consTail(ops);
+        case FUN:
+          if (funName(op) == message && arityMatch)
+            found = true;
+          else ops = consTail(ops);
+          break;
+        case OBJ:
+          if (objGetName(op) == message)
+            found = true;
+          else ops = consTail(ops);
+          break;
+        default:
+          ops = consTail(ops);
       }
     }
     return ops;
@@ -6590,32 +6590,32 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     switch (tag(obj)) {
 
-    case OBJ:
+      case OBJ:
 
-      // If the object has a standard slot access protocol then just
-      // update the slot and fire any daemons. Otherwise there may be
-      // a specialized slot update protocol defined via 'setInstanceSlot'
-      // in the class of the object.
+        // If the object has a standard slot access protocol then just
+        // update the slot and fire any daemons. Otherwise there may be
+        // a specialized slot update protocol defined via 'setInstanceSlot'
+        // in the class of the object.
 
-      if (standardSlotAccessProtocol(obj) || isDefaultSetMOP(type(obj))) 
-        setObjSlot(obj, name, value);
-      else sendSlotUpdate(obj, name, value);
-      break;
+        if (standardSlotAccessProtocol(obj) || isDefaultSetMOP(type(obj)))
+          setObjSlot(obj, name, value);
+        else sendSlotUpdate(obj, name, value);
+        break;
 
-    case FUN:
-      setFunSlot(obj, name, value);
-      break;
+      case FUN:
+        setFunSlot(obj, name, value);
+        break;
 
-    case DAEMON:
-      setDaemonSlot(obj, name, value);
-      break;
+      case DAEMON:
+        setDaemonSlot(obj, name, value);
+        break;
 
-    case FOREIGNOBJ:
-      setForeignObjectSlot(obj, name, value);
-      break;
+      case FOREIGNOBJ:
+        setForeignObjectSlot(obj, name, value);
+        break;
 
-    default:
-      throw new MachineError(TYPE, "Machine.setSlot: Don't know how to set the " + valueToString(name) + " slot of " + valueToString(obj) + " to " + valueToString(value), obj);
+      default:
+        throw new MachineError(TYPE, "Machine.setSlot: Don't know how to set the " + valueToString(name) + " slot of " + valueToString(obj) + " to " + valueToString(value), obj);
     }
   }
 
@@ -6875,24 +6875,24 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int size(int collection) {
     switch (tag(collection)) {
-    case BUFFER:
-      return value(bufferSize(collection));
-    case CONS:
-      return consLength(collection);
-    case NIL:
-      return 0;
-    case SET:
-      return consLength(setElements(collection));
-    case STRING:
-      return stringLength(collection);
-    case SYMBOL:
-      return stringLength(symbolName(collection));
-    case ARRAY:
-      return arrayLength(collection);
-    case HASHTABLE:
-      return arrayLength(collection);
-    default:
-      throw new MachineError(TYPE, "Size: expecting a collection.", collection);
+      case BUFFER:
+        return value(bufferSize(collection));
+      case CONS:
+        return consLength(collection);
+      case NIL:
+        return 0;
+      case SET:
+        return consLength(setElements(collection));
+      case STRING:
+        return stringLength(collection);
+      case SYMBOL:
+        return stringLength(symbolName(collection));
+      case ARRAY:
+        return arrayLength(collection);
+      case HASHTABLE:
+        return arrayLength(collection);
+      default:
+        throw new MachineError(TYPE, "Size: expecting a collection.", collection);
     }
   }
 
@@ -6923,24 +6923,24 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public void pushIsEmpty(int collection) {
     switch (tag(collection)) {
-    case CONS:
-    case NIL:
-      valueStack.push(collection == nilValue ? trueValue : falseValue);
-      break;
-    case SET:
-      valueStack.push(setElements(collection) == nilValue ? trueValue : falseValue);
-      break;
-    case OBJ:
-      valueStack.push(collection);
-      send0(theSymbolIsEmpty);
-      break;
-    case HASHTABLE:
-      valueStack.push(hashTableIsEmpty(collection) ? trueValue : falseValue);
-      break;
-    default:
-      openFrame();
-      valueStack.push(collection);
-      send(0, mkSymbol("isEmpty"));
+      case CONS:
+      case NIL:
+        valueStack.push(collection == nilValue ? trueValue : falseValue);
+        break;
+      case SET:
+        valueStack.push(setElements(collection) == nilValue ? trueValue : falseValue);
+        break;
+      case OBJ:
+        valueStack.push(collection);
+        send0(theSymbolIsEmpty);
+        break;
+      case HASHTABLE:
+        valueStack.push(hashTableIsEmpty(collection) ? trueValue : falseValue);
+        break;
+      default:
+        openFrame();
+        valueStack.push(collection);
+        send(0, mkSymbol("isEmpty"));
     }
   }
 
@@ -6955,16 +6955,16 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public boolean includes(int collection, int element) {
     switch (tag(collection)) {
-    case SET:
-      return seqIncludes(setElements(collection), element);
-    case CONS:
-      return seqIncludes(collection, element);
-    case NIL:
-      return false;
-    case STRING:
-      return stringIncludes(collection, value(element));
-    default:
-      throw new MachineError(TYPE, "includes: expecting a collection", collection);
+      case SET:
+        return seqIncludes(setElements(collection), element);
+      case CONS:
+        return seqIncludes(collection, element);
+      case NIL:
+        return false;
+      case STRING:
+        return stringIncludes(collection, value(element));
+      default:
+        throw new MachineError(TYPE, "includes: expecting a collection", collection);
     }
   }
 
@@ -6976,30 +6976,30 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int collection = valueStack.pop();
     int element = valueStack.pop();
     switch (tag(collection)) {
-    case SET:
-      valueStack.push(setExcluding(collection, element));
-      break;
-    case CONS:
-    case NIL:
-      valueStack.push(seqExcluding(collection, element));
-      break;
-    default:
-      openFrame();
-      valueStack.push(element);
-      valueStack.push(collection);
-      send(1, mkSymbol("excluding"));
+      case SET:
+        valueStack.push(setExcluding(collection, element));
+        break;
+      case CONS:
+      case NIL:
+        valueStack.push(seqExcluding(collection, element));
+        break;
+      default:
+        openFrame();
+        valueStack.push(element);
+        valueStack.push(collection);
+        send(1, mkSymbol("excluding"));
     }
   }
 
   public int excluding(int collection, int value) {
     switch (tag(collection)) {
-    case SET:
-      return setExcluding(collection, value);
-    case CONS:
-    case NIL:
-      return seqExcluding(collection, value);
-    default:
-      throw new MachineError(ERROR, "Excluding: " + valueToString(collection));
+      case SET:
+        return setExcluding(collection, value);
+      case CONS:
+      case NIL:
+        return seqExcluding(collection, value);
+      default:
+        throw new MachineError(ERROR, "Excluding: " + valueToString(collection));
     }
   }
 
@@ -7015,13 +7015,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int including(int collection, int element) {
     switch (tag(collection)) {
-    case SET:
-      return setIncluding(collection, element);
-    case CONS:
-    case NIL:
-      return consAppend(collection, mkCons(element, nilValue));
-    default:
-      throw new MachineError(TYPE, "including expecting a collection: ", collection);
+      case SET:
+        return setIncluding(collection, element);
+      case CONS:
+      case NIL:
+        return consAppend(collection, mkCons(element, nilValue));
+      default:
+        throw new MachineError(TYPE, "including expecting a collection: ", collection);
     }
   }
 
@@ -7099,21 +7099,21 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Translates the value to a sequence...
 
     switch (tag(value)) {
-    case BUFFER:
-      return bufferAsSeq(value);
-    case SET:
-      return setElements(value);
-    case CONS:
-    case NIL:
-      return value;
-    case STRING:
-      return stringAsSeq(value);
-    case SYMBOL:
-      return stringAsSeq(symbolName(value));
-    case ARRAY:
-      return arrayAsSeq(value);
-    default:
-      throw new MachineError(TYPE, "asSeq ", value, theTypeSeqOfElement);
+      case BUFFER:
+        return bufferAsSeq(value);
+      case SET:
+        return setElements(value);
+      case CONS:
+      case NIL:
+        return value;
+      case STRING:
+        return stringAsSeq(value);
+      case SYMBOL:
+        return stringAsSeq(symbolName(value));
+      case ARRAY:
+        return arrayAsSeq(value);
+      default:
+        throw new MachineError(TYPE, "asSeq ", value, theTypeSeqOfElement);
     }
   }
 
@@ -7122,13 +7122,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Pushes a sequence on the stack...
 
     switch (tag(value)) {
-    case FOREIGNOBJ:
-      openFrame();
-      valueStack.push(value);
-      send(0, mkSymbol("asSeq"));
-      break;
-    default:
-      valueStack.push(asSeq(value));
+      case FOREIGNOBJ:
+        openFrame();
+        valueStack.push(value);
+        send(0, mkSymbol("asSeq"));
+        break;
+      default:
+        valueStack.push(asSeq(value));
     }
   }
 
@@ -7139,48 +7139,48 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int collection = valueStack.pop();
     int index = valueStack.pop();
     switch (tag(collection)) {
-    case BUFFER:
-    case NIL:
-    case CONS:
-    case STRING:
-    case SYMBOL:
-    case ARRAY:
-      valueStack.push(at(collection, value(index)));
-      break;
-    default:
-      openFrame();
-      valueStack.push(index);
-      valueStack.push(collection);
-      send(1, mkSymbol("at"));
+      case BUFFER:
+      case NIL:
+      case CONS:
+      case STRING:
+      case SYMBOL:
+      case ARRAY:
+        valueStack.push(at(collection, value(index)));
+        break;
+      default:
+        openFrame();
+        valueStack.push(index);
+        valueStack.push(collection);
+        send(1, mkSymbol("at"));
     }
   }
 
   public int at(int seq, int index) {
     switch (tag(seq)) {
-    case BUFFER:
-      return bufferRef(seq, index);
-    case NIL:
-      throw new MachineError(ERROR, "Machine.at: empty sequence.");
-    case CONS:
-      while (index > 0) {
-        seq = consTail(seq);
-        index--;
-        if (isNil(seq)) throw new MachineError(ERROR, "Seq(Element)::at: encountered Seq{} - index too big?");
-        if (!isCons(seq)) throw new MachineError(TYPE, "at.", seq, theTypeSeqOfElement);
-      }
-      return consHead(seq);
-    case STRING:
-      if (index < stringLength(seq))
-        return mkInt(stringRef(seq, index));
-      else throw new MachineError(ERROR, "String::at index " + index + " out of bounds in " + valueToString(seq));
-    case SYMBOL:
-      return at(symbolName(seq), index);
-    case ARRAY:
-      if (index < arrayLength(seq))
-        return arrayRef(seq, index);
-      else throw new MachineError(ERROR, "Machine.at: array index out of range: " + valueToString(seq) + " index = " + index);
-    default:
-      throw new MachineError(ERROR, "Machine.at: expecting a sequence " + valueToString(seq));
+      case BUFFER:
+        return bufferRef(seq, index);
+      case NIL:
+        throw new MachineError(ERROR, "Machine.at: empty sequence.");
+      case CONS:
+        while (index > 0) {
+          seq = consTail(seq);
+          index--;
+          if (isNil(seq)) throw new MachineError(ERROR, "Seq(Element)::at: encountered Seq{} - index too big?");
+          if (!isCons(seq)) throw new MachineError(TYPE, "at.", seq, theTypeSeqOfElement);
+        }
+        return consHead(seq);
+      case STRING:
+        if (index < stringLength(seq))
+          return mkInt(stringRef(seq, index));
+        else throw new MachineError(ERROR, "String::at index " + index + " out of bounds in " + valueToString(seq));
+      case SYMBOL:
+        return at(symbolName(seq), index);
+      case ARRAY:
+        if (index < arrayLength(seq))
+          return arrayRef(seq, index);
+        else throw new MachineError(ERROR, "Machine.at: array index out of range: " + valueToString(seq) + " index = " + index);
+      default:
+        throw new MachineError(ERROR, "Machine.at: expecting a sequence " + valueToString(seq));
     }
   }
 
@@ -7189,49 +7189,49 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements the OF instruction...
 
     switch (value >> 24) {
-    case ARRAY:
-      return theClassVector;
-    case BOOL:
-      return theTypeBoolean;
-    case BUFFER:
-      return theClassBuffer;
-    case CODEBOX:
-      return theClassCodeBox;
-    case FUN:
-      return theClassCompiledOperation;
-    case FOREIGNFUN:
-      return theClassForeignOperation;
-    case FORWARDREF:
-      return theClassForwardRef;
-    case FOREIGNOBJ:
-      return foreignObjects.elementAt(this.foreignObjIndex(value)).getType();
-    case INT:
-    case NEGINT:
-    case BIGINT:
-      return theTypeInteger;
-    case OBJ:
-      return objType(value);
-    case STRING:
-      return theTypeString;
-    case CONS:
-    case NIL:
-      return theTypeSeqOfElement;
-    case SET:
-      return theTypeSetOfElement;
-    case HASHTABLE:
-      return theClassTable;
-    case SYMBOL:
-      return theClassSymbol;
-    case UNDEFINED:
-      return theTypeNull;
-    case FLOAT:
-      return theTypeFloat;
-    case THREAD:
-      return theClassThread;
-    case DAEMON:
-      return theClassDaemon;
-    default:
-      return theClassElement;
+      case ARRAY:
+        return theClassVector;
+      case BOOL:
+        return theTypeBoolean;
+      case BUFFER:
+        return theClassBuffer;
+      case CODEBOX:
+        return theClassCodeBox;
+      case FUN:
+        return theClassCompiledOperation;
+      case FOREIGNFUN:
+        return theClassForeignOperation;
+      case FORWARDREF:
+        return theClassForwardRef;
+      case FOREIGNOBJ:
+        return foreignObjects.elementAt(this.foreignObjIndex(value)).getType();
+      case INT:
+      case NEGINT:
+      case BIGINT:
+        return theTypeInteger;
+      case OBJ:
+        return objType(value);
+      case STRING:
+        return theTypeString;
+      case CONS:
+      case NIL:
+        return theTypeSeqOfElement;
+      case SET:
+        return theTypeSetOfElement;
+      case HASHTABLE:
+        return theClassTable;
+      case SYMBOL:
+        return theClassSymbol;
+      case UNDEFINED:
+        return theTypeNull;
+      case FLOAT:
+        return theTypeFloat;
+      case THREAD:
+        return theClassThread;
+      case DAEMON:
+        return theClassDaemon;
+      default:
+        return theClassElement;
     }
   }
 
@@ -7408,14 +7408,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // or -1 if the value has no name.
 
     switch (tag(value)) {
-    case OBJ:
-      return objGetName(value);
-    case FOREIGNFUN:
-      return foreignFunName(value);
-    case FUN:
-      return funName(value);
-    default:
-      return -1;
+      case OBJ:
+        return objGetName(value);
+      case FOREIGNFUN:
+        return foreignFunName(value);
+      case FUN:
+        return funName(value);
+      default:
+        return -1;
     }
   }
 
@@ -7654,10 +7654,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int self = frameSelf();
     int value = objAttValue(self, slot);
-    if (value == NO_SLOT_FOUND)
-        throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
+    if (value == NO_SLOT_FOUND) throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
     if (value == SLOT_ACCESS_DENIED)
-        throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
+      throw new MachineError(MISSINGSLOT, "Machine.incSelfSlot no slot named " + valueToString(slot));
     else objSetAttValue(self, slot, mkInt(intValue(value) + 1));
     pushStack(self);
   }
@@ -7668,10 +7667,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int self = frameSelf();
     int value = objAttValue(self, slot);
-    if (value == NO_SLOT_FOUND)
-        throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
+    if (value == NO_SLOT_FOUND) throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
     if (value == SLOT_ACCESS_DENIED)
-        throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
+      throw new MachineError(MISSINGSLOT, "No slot.", self, slot);
     else objSetAttValue(self, slot, mkInt(intValue(value) - 1));
     pushStack(self);
   }
@@ -7721,17 +7719,17 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       int cell = consHead(dynamics);
       dynamics = consTail(dynamics);
       switch (dynamicCellType(cell)) {
-      case DYNAMIC_VALUE:
-        int binding = dynamicCellValue(cell);
-        if (dynamicBindingName(binding) == name) return dynamicBindingValue(binding);
-        break;
-      case DYNAMIC_TABLE:
-        int table = dynamicCellValue(cell);
-        int value = hashTableGet(table, name);
-        if (value != -1) return value;
-        break;
-      default:
-        throw new MachineError(ERROR, "Machine.dynamicValue: Unknown type of dynamic cell: " + valueToString(cell));
+        case DYNAMIC_VALUE:
+          int binding = dynamicCellValue(cell);
+          if (dynamicBindingName(binding) == name) return dynamicBindingValue(binding);
+          break;
+        case DYNAMIC_TABLE:
+          int table = dynamicCellValue(cell);
+          int value = hashTableGet(table, name);
+          if (value != -1) return value;
+          break;
+        default:
+          throw new MachineError(ERROR, "Machine.dynamicValue: Unknown type of dynamic cell: " + valueToString(cell));
       }
     }
     return -1;
@@ -7781,31 +7779,31 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int value = valueStack.pop();
     switch (tag(value)) {
-    case INT:
-      valueStack.push(intToXMFString(value));
-      break;
-    case BOOL:
-      valueStack.push(mkString(value == trueValue ? "true" : "false"));
-      break;
-    case STRING:
-      valueStack.push(value);
-      break;
-    case SYMBOL:
-      valueStack.push(symbolName(value));
-      break;
-    case BUFFER:
-      if (bufferAsString(value) == trueValue)
-        valueStack.push(stringBufferToXMFString(value));
-      else {
+      case INT:
+        valueStack.push(intToXMFString(value));
+        break;
+      case BOOL:
+        valueStack.push(mkString(value == trueValue ? "true" : "false"));
+        break;
+      case STRING:
+        valueStack.push(value);
+        break;
+      case SYMBOL:
+        valueStack.push(symbolName(value));
+        break;
+      case BUFFER:
+        if (bufferAsString(value) == trueValue)
+          valueStack.push(stringBufferToXMFString(value));
+        else {
+          openFrame();
+          valueStack.push(value);
+          send(0, mkSymbol("toString"));
+        }
+        break;
+      default:
         openFrame();
         valueStack.push(value);
         send(0, mkSymbol("toString"));
-      }
-      break;
-    default:
-      openFrame();
-      valueStack.push(value);
-      send(0, mkSymbol("toString"));
     }
   }
 
@@ -7828,13 +7826,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
     int op = valueStack.pop();
     switch (tag(op)) {
-    case FUN:
-      valueStack.push(mkInt(funArity(op)));
-      break;
-    default:
-      openFrame();
-      valueStack.push(op);
-      send(0, mkSymbol("arity"));
+      case FUN:
+        valueStack.push(mkInt(funArity(op)));
+        break;
+      default:
+        openFrame();
+        valueStack.push(op);
+        send(0, mkSymbol("arity"));
     }
   }
 
@@ -7845,25 +7843,25 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int v2 = popStack();
     int v1 = popStack();
     switch (tag(v1)) {
-    case BUFFER:
-      if (bufferStringEqual(v1, v2))
-        valueStack.push(trueValue);
-      else valueStack.push(falseValue);
-      break;
-    case STRING:
-      if (isBuffer(v2))
+      case BUFFER:
         if (bufferStringEqual(v1, v2))
           valueStack.push(trueValue);
         else valueStack.push(falseValue);
-      else if (this.equalValues(v1, v2))
-        valueStack.push(trueValue);
-      else valueStack.push(falseValue);
-      break;
-    default:
-      openFrame();
-      pushStack(v2);
-      pushStack(v1);
-      send(1, mkSymbol("stringEqual"));
+        break;
+      case STRING:
+        if (isBuffer(v2))
+          if (bufferStringEqual(v1, v2))
+            valueStack.push(trueValue);
+          else valueStack.push(falseValue);
+        else if (this.equalValues(v1, v2))
+          valueStack.push(trueValue);
+        else valueStack.push(falseValue);
+        break;
+      default:
+        openFrame();
+        pushStack(v2);
+        pushStack(v1);
+        send(1, mkSymbol("stringEqual"));
     }
 
   }
@@ -7875,19 +7873,19 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int table = valueStack.pop();
     int key = valueStack.pop();
     switch (tag(table)) {
-    case HASHTABLE:
-      tableGet(table, key);
-      break;
-    case OBJ:
-      if (isString(key))
-        dot(mkSymbol(key), table);
-      else dot(key, table);
-      break;
-    default:
-      openFrame();
-      valueStack.push(key);
-      valueStack.push(table);
-      send(1, mkSymbol("get"));
+      case HASHTABLE:
+        tableGet(table, key);
+        break;
+      case OBJ:
+        if (isString(key))
+          dot(mkSymbol(key), table);
+        else dot(key, table);
+        break;
+      default:
+        openFrame();
+        valueStack.push(key);
+        valueStack.push(table);
+        send(1, mkSymbol("get"));
     }
   }
 
@@ -7899,19 +7897,19 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int value = valueStack.pop();
     int key = valueStack.pop();
     switch (tag(table)) {
-    case HASHTABLE:
-      tablePut(table, key, value);
-      break;
-    case ARRAY:
-    case BUFFER:
-      arraySetValue(table, key, value);
-      break;
-    default:
-      openFrame();
-      valueStack.push(key);
-      valueStack.push(value);
-      valueStack.push(table);
-      send(2, mkSymbol("put"));
+      case HASHTABLE:
+        tablePut(table, key, value);
+        break;
+      case ARRAY:
+      case BUFFER:
+        arraySetValue(table, key, value);
+        break;
+      default:
+        openFrame();
+        valueStack.push(key);
+        valueStack.push(value);
+        valueStack.push(table);
+        send(2, mkSymbol("put"));
     }
 
   }
@@ -7923,16 +7921,16 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int table = valueStack.pop();
     int key = valueStack.pop();
     switch (tag(table)) {
-    case HASHTABLE:
-      if (hashTableHasKey(table, key))
-        valueStack.push(trueValue);
-      else valueStack.push(falseValue);
-      break;
-    default:
-      openFrame();
-      valueStack.push(table);
-      valueStack.push(key);
-      send(1, mkSymbol("hasKey"));
+      case HASHTABLE:
+        if (hashTableHasKey(table, key))
+          valueStack.push(trueValue);
+        else valueStack.push(falseValue);
+        break;
+      default:
+        openFrame();
+        valueStack.push(table);
+        valueStack.push(key);
+        send(1, mkSymbol("hasKey"));
     }
   }
 
@@ -8333,56 +8331,56 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // with respect to the new heap...
 
     switch (tag(word)) {
-    case ARRAY:
-      return gc.gcArray(word);
-    case BUFFER:
-      return gc.gcBuffer(word);
-    case BOOL:
-      return word;
-    case CODEBOX:
-      return gc.gcCodeBox(word);
-    case CODE:
-      return gc.gcCode(word);
-    case CONT:
-      return gc.gcCont(word);
-    case INT:
-    case NEGINT:
-      return word;
-    case FOREIGNFUN:
-      return word;
-    case FOREIGNOBJ:
-      return word;
-    case FUN:
-      return gc.gcFun(word);
-    case OBJ:
-      return gc.gcObj(word);
-    case STRING:
-      return gc.gcString(word);
-    case UNDEFINED:
-      return word;
-    case CONS:
-      return gc.gcCons(word);
-    case SET:
-      return gc.gcSet(word);
-    case NIL:
-      return word;
-    case SYMBOL:
-      return gc.gcSymbol(word);
-    case INPUT_CHANNEL:
-    case OUTPUT_CHANNEL:
-    case CLIENT:
-    case THREAD:
-      return word;
-    case HASHTABLE:
-      return gc.gcHashTable(word);
-    case FLOAT:
-      return gc.gcFloat(word);
-    case DAEMON:
-      return gc.gcDaemon(word);
-    case FORWARDREF:
-      return gc.gcForwardRef(word);
-    default:
-      throw new MachineError(GCERROR, "Machine.gcCopy: unknown type tag " + tag(word));
+      case ARRAY:
+        return gc.gcArray(word);
+      case BUFFER:
+        return gc.gcBuffer(word);
+      case BOOL:
+        return word;
+      case CODEBOX:
+        return gc.gcCodeBox(word);
+      case CODE:
+        return gc.gcCode(word);
+      case CONT:
+        return gc.gcCont(word);
+      case INT:
+      case NEGINT:
+        return word;
+      case FOREIGNFUN:
+        return word;
+      case FOREIGNOBJ:
+        return word;
+      case FUN:
+        return gc.gcFun(word);
+      case OBJ:
+        return gc.gcObj(word);
+      case STRING:
+        return gc.gcString(word);
+      case UNDEFINED:
+        return word;
+      case CONS:
+        return gc.gcCons(word);
+      case SET:
+        return gc.gcSet(word);
+      case NIL:
+        return word;
+      case SYMBOL:
+        return gc.gcSymbol(word);
+      case INPUT_CHANNEL:
+      case OUTPUT_CHANNEL:
+      case CLIENT:
+      case THREAD:
+        return word;
+      case HASHTABLE:
+        return gc.gcHashTable(word);
+      case FLOAT:
+        return gc.gcFloat(word);
+      case DAEMON:
+        return gc.gcDaemon(word);
+      case FORWARDREF:
+        return gc.gcForwardRef(word);
+      default:
+        throw new MachineError(GCERROR, "Machine.gcCopy: unknown type tag " + tag(word));
     }
   }
 
@@ -8724,18 +8722,18 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       int type = dynamicCellType(cell);
       dynamics = consTail(dynamics);
       switch (type) {
-      case DYNAMIC_VALUE:
-        int binding = dynamicCellValue(cell);
-        int name = dynamicBindingName(binding);
-        int value = dynamicBindingValue(binding);
-        System.out.println(valueToString(name) + " = " + valueToString(value));
-        break;
-      case DYNAMIC_TABLE:
-        int table = dynamicCellValue(cell);
-        printDynamicTable(table);
-        break;
-      default:
-        throw new MachineError(TYPE, "Machine.printDynamics: Unknown type of dynamic value " + valueToString(cell));
+        case DYNAMIC_VALUE:
+          int binding = dynamicCellValue(cell);
+          int name = dynamicBindingName(binding);
+          int value = dynamicBindingValue(binding);
+          System.out.println(valueToString(name) + " = " + valueToString(value));
+          break;
+        case DYNAMIC_TABLE:
+          int table = dynamicCellValue(cell);
+          printDynamicTable(table);
+          break;
+        default:
+          throw new MachineError(TYPE, "Machine.printDynamics: Unknown type of dynamic value " + valueToString(cell));
       }
     }
   }
@@ -8898,15 +8896,15 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public void writeByte(int channel, int value) {
     switch (tag(value)) {
-    case INT:
-      XOS.write(value(channel), value(value));
-      break;
-    case STRING:
-      for (int i = 0; i < stringLength(value); i++)
-        XOS.write(value(channel), value(stringRef(value, i)));
-      break;
-    default:
-      throw new MachineError(TYPE, "Unknown type to write to an output channel: " + valueToString(value));
+      case INT:
+        XOS.write(value(channel), value(value));
+        break;
+      case STRING:
+        for (int i = 0; i < stringLength(value); i++)
+          XOS.write(value(channel), value(stringRef(value, i)));
+        break;
+      default:
+        throw new MachineError(TYPE, "Unknown type to write to an output channel: " + valueToString(value));
     }
   }
 
@@ -8939,44 +8937,44 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public xos.Value messageValue(int value) {
     switch (tag(value)) {
-    case INT:
-    case NEGINT:
-      return XOS.allocValue(intValue(value));
-    case BOOL:
-      return XOS.allocValue(value == trueValue);
-    case STRING:
-      xos.Value v1 = XOS.allocValue();
-      v1.type = XData.STRING;
-      for (int i = 0; i < stringLength(value); i++)
-        v1.appendChar((char) stringRef(value, i));
-      return v1;
-    case SYMBOL:
-      xos.Value v2 = XOS.allocValue();
-      v2.type = XData.STRING;
-      for (int i = 0; i < stringLength(symbolName(value)); i++)
-        v2.appendChar((char) stringRef(symbolName(value), i));
-      return v2;
-    case FLOAT:
-      return XOS.allocValue(asFloat(value));
-    case CONS:
-      if (properList(value)) {
-        xos.Value[] values = new xos.Value[consLength(value)];
-        int index = 0;
-        while (value != nilValue) {
-          values[index++] = messageValue(consHead(value));
-          value = consTail(value);
-        }
-        return new xos.Value(values);
-      } else return XOS.allocValue(valueToString(value));
-    case ARRAY:
-      xos.Value[] values = new xos.Value[arrayLength(value)];
-      for (int j = 0; j < arrayLength(value); j++)
-        values[j] = messageValue(arrayRef(value, j));
-      return XOS.allocValue(values);
-    case NIL:
-      return new xos.Value(new xos.Value[0]);
-    default:
-      return XOS.allocValue(valueToString(value));
+      case INT:
+      case NEGINT:
+        return XOS.allocValue(intValue(value));
+      case BOOL:
+        return XOS.allocValue(value == trueValue);
+      case STRING:
+        xos.Value v1 = XOS.allocValue();
+        v1.type = XData.STRING;
+        for (int i = 0; i < stringLength(value); i++)
+          v1.appendChar((char) stringRef(value, i));
+        return v1;
+      case SYMBOL:
+        xos.Value v2 = XOS.allocValue();
+        v2.type = XData.STRING;
+        for (int i = 0; i < stringLength(symbolName(value)); i++)
+          v2.appendChar((char) stringRef(symbolName(value), i));
+        return v2;
+      case FLOAT:
+        return XOS.allocValue(asFloat(value));
+      case CONS:
+        if (properList(value)) {
+          xos.Value[] values = new xos.Value[consLength(value)];
+          int index = 0;
+          while (value != nilValue) {
+            values[index++] = messageValue(consHead(value));
+            value = consTail(value);
+          }
+          return new xos.Value(values);
+        } else return XOS.allocValue(valueToString(value));
+      case ARRAY:
+        xos.Value[] values = new xos.Value[arrayLength(value)];
+        for (int j = 0; j < arrayLength(value); j++)
+          values[j] = messageValue(arrayRef(value, j));
+        return XOS.allocValue(values);
+      case NIL:
+        return new xos.Value(new xos.Value[0]);
+      default:
+        return XOS.allocValue(valueToString(value));
     }
   }
 
@@ -8986,19 +8984,19 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public void writeData(int channel, int value) {
     switch (tag(value)) {
-    case INT:
-      XOS.writeInt(value(channel), value(value));
-      break;
-    case BOOL:
-      XOS.writeBool(value(channel), value == trueValue);
-      break;
-    case STRING:
-      XOS.startString(value(channel), stringLength(value));
-      for (int i = 0; i < stringLength(value); i++)
-        XOS.write(value(channel), stringRef(value, i));
-      break;
-    default:
-      XOS.writeString(value(channel), valueToString(value));
+      case INT:
+        XOS.writeInt(value(channel), value(value));
+        break;
+      case BOOL:
+        XOS.writeBool(value(channel), value == trueValue);
+        break;
+      case STRING:
+        XOS.startString(value(channel), stringLength(value));
+        for (int i = 0; i < stringLength(value); i++)
+          XOS.write(value(channel), stringRef(value, i));
+        break;
+      default:
+        XOS.writeString(value(channel), valueToString(value));
     }
   }
 
@@ -9469,22 +9467,22 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       int cell = consHead(dynamics);
       dynamics = consTail(dynamics);
       switch (dynamicCellType(cell)) {
-      case DYNAMIC_VALUE:
-        int binding = dynamicCellValue(cell);
-        if (dynamicBindingName(binding) == name) {
-          dynamicBindingSetValue(binding, value);
-          return value;
-        }
-        break;
-      case DYNAMIC_TABLE:
-        int table = dynamicCellValue(cell);
-        if (hashTableHasKey(table, name)) {
-          hashTablePut(table, name, value);
-          return value;
-        }
-        break;
-      default:
-        throw new MachineError(TYPE, "Machine.detDynamicValue: Unknown type of dynamic cell: " + valueToString(cell));
+        case DYNAMIC_VALUE:
+          int binding = dynamicCellValue(cell);
+          if (dynamicBindingName(binding) == name) {
+            dynamicBindingSetValue(binding, value);
+            return value;
+          }
+          break;
+        case DYNAMIC_TABLE:
+          int table = dynamicCellValue(cell);
+          if (hashTableHasKey(table, name)) {
+            hashTablePut(table, name, value);
+            return value;
+          }
+          break;
+        default:
+          throw new MachineError(TYPE, "Machine.detDynamicValue: Unknown type of dynamic cell: " + valueToString(cell));
       }
     }
     return -1;
@@ -9596,23 +9594,23 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     int type = XOS.read(value(in));
     DChannel din = XOS.dataInputStream(value(in));
     switch (type) {
-    case DataInputStream.BOOL:
-      valueStack.push(din.boolValue ? trueValue : falseValue);
-      break;
-    case DataInputStream.INT:
-      valueStack.push(mkInt(din.intValue));
-      break;
-    case DataInputStream.STRING:
-      StringBuffer s = din.stringValue;
-      int length = s.length();
-      int string = mkString(length);
-      for (int i = 0; i < length; i++)
-        stringSet(string, i, s.charAt(i));
-      valueStack.push(string);
-      break;
-    default:
-      System.out.println("Unknown type of data from input channel: " + type);
-      exitAbnormal();
+      case DataInputStream.BOOL:
+        valueStack.push(din.boolValue ? trueValue : falseValue);
+        break;
+      case DataInputStream.INT:
+        valueStack.push(mkInt(din.intValue));
+        break;
+      case DataInputStream.STRING:
+        StringBuffer s = din.stringValue;
+        int length = s.length();
+        int string = mkString(length);
+        for (int i = 0; i < length; i++)
+          stringSet(string, i, s.charAt(i));
+        valueStack.push(string);
+        break;
+      default:
+        System.out.println("Unknown type of data from input channel: " + type);
+        exitAbnormal();
     }
   }
 
@@ -9638,12 +9636,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       int lineCount = mkInt(XOS.lineCount(index));
       int charCount = mkInt(XOS.charCount(index));
       switch (XOS.tokenType(index)) {
-      case TChannel.EOF:
-        return undefinedValue;
-      case TChannel.INT:
-        return token(type, mkInt(XOS.tokenValue(index)), posValue, lineCount, charCount, rawChars);
-      default:
-        return token(type, mkString(XOS.token(index)), posValue, lineCount, charCount, rawChars);
+        case TChannel.EOF:
+          return undefinedValue;
+        case TChannel.INT:
+          return token(type, mkInt(XOS.tokenValue(index)), posValue, lineCount, charCount, rawChars);
+        default:
+          return token(type, mkString(XOS.token(index)), posValue, lineCount, charCount, rawChars);
       }
     }
   }
@@ -9671,12 +9669,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int readVector(int in, int array) {
     switch (tag(array)) {
-    case ARRAY:
-      return readArray(in, array);
-    case BUFFER:
-      return readBuffer(in, array);
-    default:
-      throw new MachineError(TYPE, "readVector: unknown target ", array, theClassVector);
+      case ARRAY:
+        return readArray(in, array);
+      case BUFFER:
+        return readBuffer(in, array);
+      default:
+        throw new MachineError(TYPE, "readVector: unknown target ", array, theClassVector);
     }
   }
 
@@ -9694,63 +9692,63 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     if (depth >= maxPrintDepth)
       return "...";
     else switch (tag(word)) {
-    case UNDEFINED:
-      return "null";
-    case ARRAY:
-      return arrayToString(word, depth);
-    case BUFFER:
-      return bufferToString(word, depth);
-    case CODE:
-      return codeToString(word);
-    case INT:
-    case NEGINT:
-      return intToString(word);
-    case BIGINT:
-      return asBigInteger(word).toString();
-    case STRING:
-      return stringToString(word);
-    case CODEBOX:
-      return codeBoxToString(word, depth);
-    case BOOL:
-      return boolToString(word);
-    case OBJ:
-      return objToString(word, depth);
-    case FUN:
-      return funToString(word);
-    case FOREIGNFUN:
-      return foreignFunToString(word);
-    case FOREIGNOBJ:
-      return foreignObjToString(word);
-    case CONT:
-      return contToString(word);
-    case CONS:
-      return consToString(word, depth);
-    case NIL:
-      return nilToString();
-    case SYMBOL:
-      return symbolToString(word);
-    case STRINGLENGTH:
-      return "StringLength(" + value(word) + ")";
-    case CODELENGTH:
-      return "CodeLength(" + value(word) + ")";
-    case SET:
-      return setToString(word, depth);
-    case INPUT_CHANNEL:
-      return inputChannelToString(word);
-    case OUTPUT_CHANNEL:
-      return outputChannelToString(word);
-    case HASHTABLE:
-      return hashTableToString(word);
-    case FLOAT:
-      return floatToString(word);
-    case CLIENT:
-      return clientToString(word);
-    case THREAD:
-      return threadToString(word);
-    case DAEMON:
-      return daemonToString(word);
-    default:
-      return "valueToString: unknown tag " + tag(word);
+      case UNDEFINED:
+        return "null";
+      case ARRAY:
+        return arrayToString(word, depth);
+      case BUFFER:
+        return bufferToString(word, depth);
+      case CODE:
+        return codeToString(word);
+      case INT:
+      case NEGINT:
+        return intToString(word);
+      case BIGINT:
+        return asBigInteger(word).toString();
+      case STRING:
+        return stringToString(word);
+      case CODEBOX:
+        return codeBoxToString(word, depth);
+      case BOOL:
+        return boolToString(word);
+      case OBJ:
+        return objToString(word, depth);
+      case FUN:
+        return funToString(word);
+      case FOREIGNFUN:
+        return foreignFunToString(word);
+      case FOREIGNOBJ:
+        return foreignObjToString(word);
+      case CONT:
+        return contToString(word);
+      case CONS:
+        return consToString(word, depth);
+      case NIL:
+        return nilToString();
+      case SYMBOL:
+        return symbolToString(word);
+      case STRINGLENGTH:
+        return "StringLength(" + value(word) + ")";
+      case CODELENGTH:
+        return "CodeLength(" + value(word) + ")";
+      case SET:
+        return setToString(word, depth);
+      case INPUT_CHANNEL:
+        return inputChannelToString(word);
+      case OUTPUT_CHANNEL:
+        return outputChannelToString(word);
+      case HASHTABLE:
+        return hashTableToString(word);
+      case FLOAT:
+        return floatToString(word);
+      case CLIENT:
+        return clientToString(word);
+      case THREAD:
+        return threadToString(word);
+      case DAEMON:
+        return daemonToString(word);
+      default:
+        return "valueToString: unknown tag " + tag(word);
     }
   }
 
@@ -9759,210 +9757,210 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Translate an instruction to a string.
 
     switch (tag(instr)) {
-    case MKSEQ:
-      return "MKSEQ " + value(instr);
-    case MKSET:
-      return "MKSET " + value(instr);
-    case MKCONS:
-      return "MKCONS";
-    case PUSHINT:
-      return "PUSHINT " + value(instr);
-    case PUSHTRUE:
-      return "PUSHTRUE";
-    case PUSHFALSE:
-      return "PUSHFALSE";
-    case PUSHSTR:
-      return "PUSHSTR " + valueToString(arrayRef(constants, value(instr)));
-    case RETURN:
-      return "RETURN";
-    case ADD:
-      return "ADD";
-    case SUB:
-      return "SUB";
-    case MUL:
-      return "MUL";
-    case DIV:
-      return "DIV";
-    case GRE:
-      return "GRE";
-    case LESS:
-      return "LESS";
-    case EQL:
-      return "EQL";
-    case AND:
-      return "AND";
-    case OR:
-      return "OR";
-    case NOT:
-      return "NOT";
-    case DOT:
-      return "DOT " + valueToString(arrayRef(constants, value(instr)));
-    case DOTSELF:
-      return "DOTSELF " + valueToString(arrayRef(constants, value(instr)));
-    case DOTLOCAL:
-      return "DOTLOCAL " + valueToString(arrayRef(constants, (byte3(instr) << 8) | byte2(instr))) + " " + byte1(instr);
-    case SELF:
-      return "SELF " + value(instr);
-    case SKPF:
-      return "SKPF " + value(instr);
-    case SKP:
-      return "SKP " + value(instr);
-    case DYNAMIC:
-      return "DYNAMIC(" + value(instr) + ") " + valueToString(arrayRef(constants, value(instr)));
-    case SETDYN:
-      return "SETDYN " + valueToString(arrayRef(constants, value(instr)));
-    case BINDDYN:
-      return "BINDDYN " + valueToString(arrayRef(constants, value(instr)));
-    case UNBINDDYN:
-      return "UNBINDDYN " + valueToString(arrayRef(constants, value(instr)));
-    case MKFUN:
-      return "MKFUN " + byte3(instr) + " " + byte2(instr) + " " + byte1(instr);
-    case MKFUNE:
-      return "MKFUNE " + byte3(instr) + " " + byte2(instr);
-    case LOCAL:
-      return "LOCAL " + value(instr);
-    case STARTCALL:
-      return "STARTCALL";
-    case ENTER:
-      return "ENTER " + value(instr);
-    case TAILENTER:
-      return "TAILENTER " + value(instr);
-    case SEND:
-      return "SEND " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
-    case SENDSELF:
-      return "SENDSELF " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
-    case SENDLOCAL:
-      return "SENDLOCAL " + byte3(instr) + " " + valueToString(arrayRef(constants, byte2(instr))) + byte1(instr);
-    case TAILSEND:
-      return "TAILSEND " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
-    case SEND0:
-      return "SEND0 " + valueToString(arrayRef(constants, value(instr)));
-    case TAILSEND0:
-      return "TAILSEND0 " + valueToString(arrayRef(constants, value(instr)));
-    case SUPER:
-      return "SUPER " + value(instr);
-    case TAILSUPER:
-      return "TAILSUPER " + value(instr);
-    case SETLOC:
-      return "SETLOC " + value(instr);
-    case POP:
-      return "POP";
-    case GLOBAL:
-      return "GLOBAL " + byte3(instr) + " " + byte2(instr);
-    case SETSLOT:
-      return "SETSLOT " + valueToString(arrayRef(constants, value(instr)));
-    case SETSELFSLOT:
-      return "SETSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
-    case SETLOCALSLOT:
-      return "SETLOCALSLOT " + valueToString(arrayRef(constants, (byte2(instr) << 8) | byte1(instr))) + " " + byte3(instr);
-    case SETGLOB:
-      return "SETGLOB " + byte3(instr) + " " + byte2(instr);
-    case MKARRAY:
-      return "MKARRAY " + value(instr);
-    case NAMESPACEREF:
-      return "NAMESPACEREF " + byte3(instr) + " " + valueToString(arrayRef(constants, (byte2(instr))));
-    case HEAD:
-      return "HEAD";
-    case TAIL:
-      return "TAIL";
-    case SIZE:
-      return "SIZE";
-    case DROP:
-      return "DROP";
-    case ISEMPTY:
-      return "ISEMPTY";
-    case INCLUDES:
-      return "INCLUDES";
-    case EXCLUDING:
-      return "EXCLUDING";
-    case INCLUDING:
-      return "INCLUDING";
-    case SEL:
-      return "SEL";
-    case UNION:
-      return "UNION";
-    case ASSEQ:
-      return "ASSEQ";
-    case AT:
-      return "AT";
-    case SKPBACK:
-      return "SKPBACK " + value(instr);
-    case NULL:
-      return "NULL";
-    case OF:
-      return "OF";
-    case THROW:
-      return "THROW";
-    case TRY:
-      return "TRY" + byte2(instr) + " " + byte1(instr);
-    case ISKINDOF:
-      return "ISKINDOF";
-    case SOURCEPOS:
-      return "SOURCEPOS line:" + ((byte3(instr) << 8) | byte2(instr)) + " char:" + byte1(instr);
-    case GETELEMENT:
-      return "GETELEMENT " + valueToString(arrayRef(constants, byte1(instr)));
-    case SETHEAD:
-      return "SETHEAD";
-    case SETTAIL:
-      return "SETTAIL";
-    case READ:
-      return "READ";
-    case ACCEPT:
-      return "ACCEPT";
-    case ARRAYREF:
-      return "ARRAYREF";
-    case ARRAYSET:
-      return "ARRAYSET";
-    case TABLEGET:
-      return "TABLEGET";
-    case TABLEPUT:
-      return "TABLEPUT";
-    case NOOP:
-      return "NOOP";
-    case SLEEP:
-      return "SLEEP";
-    case CONST:
-      return "CONST " + valueToString(arrayRef(constants, value(instr)));
-    case SETLOCPOP:
-      return "SETLOCPOP " + value(instr);
-    case DISPATCH:
-      return "DISPATCH " + valueToString(arrayRef(constants, value(instr)));
-    case INCSELFSLOT:
-      return "INCSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
-    case DECSELFSLOT:
-      return "DECSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
-    case INCLOCAL:
-      return "INCLOCAL " + value(instr);
-    case DECLOCAL:
-      return "DECLOCAL " + value(instr);
-    case ADDLOCAL:
-      return "ADDLOCAL " + value(instr);
-    case SUBLOCAL:
-      return "SUBLOCAL " + value(instr);
-    case PREPEND:
-      return "PREPEND";
-    case ENTERDYN:
-      return "ENTERDYN " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
-    case TAILENTERDYN:
-      return "TAILENTERDYN " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
-    case LOCALHEAD:
-      return "LOCALHEAD " + value(instr);
-    case LOCALTAIL:
-      return "LOCALTAIL " + value(instr);
-    case LOCALASSEQ:
-      return "LOCALASSEQ " + value(instr);
-    case LOCALISEMPTY:
-      return "LOCALISEMPTY " + value(instr);
-    case LOCALREFPOS:
-      return "LOCALREFPOS " + byte3(instr) + " " + ((byte2(instr) << 8) + byte1(instr));
-    case DYNREFPOS:
-      return "DYNREFPOS " + valueToString(arrayRef(constants, byte3(instr))) + " " + ((byte2(instr) << 8) + byte1(instr));
-    case ASSOC:
-      return "ASSOC";
-    case RETDOTSELF:
-      return "RETDOTSELF " + valueToString(arrayRef(constants, value(instr)));
-    default:
-      return "<Unknown instruction " + tag(instr) + ">";
+      case MKSEQ:
+        return "MKSEQ " + value(instr);
+      case MKSET:
+        return "MKSET " + value(instr);
+      case MKCONS:
+        return "MKCONS";
+      case PUSHINT:
+        return "PUSHINT " + value(instr);
+      case PUSHTRUE:
+        return "PUSHTRUE";
+      case PUSHFALSE:
+        return "PUSHFALSE";
+      case PUSHSTR:
+        return "PUSHSTR " + valueToString(arrayRef(constants, value(instr)));
+      case RETURN:
+        return "RETURN";
+      case ADD:
+        return "ADD";
+      case SUB:
+        return "SUB";
+      case MUL:
+        return "MUL";
+      case DIV:
+        return "DIV";
+      case GRE:
+        return "GRE";
+      case LESS:
+        return "LESS";
+      case EQL:
+        return "EQL";
+      case AND:
+        return "AND";
+      case OR:
+        return "OR";
+      case NOT:
+        return "NOT";
+      case DOT:
+        return "DOT " + valueToString(arrayRef(constants, value(instr)));
+      case DOTSELF:
+        return "DOTSELF " + valueToString(arrayRef(constants, value(instr)));
+      case DOTLOCAL:
+        return "DOTLOCAL " + valueToString(arrayRef(constants, (byte3(instr) << 8) | byte2(instr))) + " " + byte1(instr);
+      case SELF:
+        return "SELF " + value(instr);
+      case SKPF:
+        return "SKPF " + value(instr);
+      case SKP:
+        return "SKP " + value(instr);
+      case DYNAMIC:
+        return "DYNAMIC(" + value(instr) + ") " + valueToString(arrayRef(constants, value(instr)));
+      case SETDYN:
+        return "SETDYN " + valueToString(arrayRef(constants, value(instr)));
+      case BINDDYN:
+        return "BINDDYN " + valueToString(arrayRef(constants, value(instr)));
+      case UNBINDDYN:
+        return "UNBINDDYN " + valueToString(arrayRef(constants, value(instr)));
+      case MKFUN:
+        return "MKFUN " + byte3(instr) + " " + byte2(instr) + " " + byte1(instr);
+      case MKFUNE:
+        return "MKFUNE " + byte3(instr) + " " + byte2(instr);
+      case LOCAL:
+        return "LOCAL " + value(instr);
+      case STARTCALL:
+        return "STARTCALL";
+      case ENTER:
+        return "ENTER " + value(instr);
+      case TAILENTER:
+        return "TAILENTER " + value(instr);
+      case SEND:
+        return "SEND " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
+      case SENDSELF:
+        return "SENDSELF " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
+      case SENDLOCAL:
+        return "SENDLOCAL " + byte3(instr) + " " + valueToString(arrayRef(constants, byte2(instr))) + byte1(instr);
+      case TAILSEND:
+        return "TAILSEND " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
+      case SEND0:
+        return "SEND0 " + valueToString(arrayRef(constants, value(instr)));
+      case TAILSEND0:
+        return "TAILSEND0 " + valueToString(arrayRef(constants, value(instr)));
+      case SUPER:
+        return "SUPER " + value(instr);
+      case TAILSUPER:
+        return "TAILSUPER " + value(instr);
+      case SETLOC:
+        return "SETLOC " + value(instr);
+      case POP:
+        return "POP";
+      case GLOBAL:
+        return "GLOBAL " + byte3(instr) + " " + byte2(instr);
+      case SETSLOT:
+        return "SETSLOT " + valueToString(arrayRef(constants, value(instr)));
+      case SETSELFSLOT:
+        return "SETSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
+      case SETLOCALSLOT:
+        return "SETLOCALSLOT " + valueToString(arrayRef(constants, (byte2(instr) << 8) | byte1(instr))) + " " + byte3(instr);
+      case SETGLOB:
+        return "SETGLOB " + byte3(instr) + " " + byte2(instr);
+      case MKARRAY:
+        return "MKARRAY " + value(instr);
+      case NAMESPACEREF:
+        return "NAMESPACEREF " + byte3(instr) + " " + valueToString(arrayRef(constants, (byte2(instr))));
+      case HEAD:
+        return "HEAD";
+      case TAIL:
+        return "TAIL";
+      case SIZE:
+        return "SIZE";
+      case DROP:
+        return "DROP";
+      case ISEMPTY:
+        return "ISEMPTY";
+      case INCLUDES:
+        return "INCLUDES";
+      case EXCLUDING:
+        return "EXCLUDING";
+      case INCLUDING:
+        return "INCLUDING";
+      case SEL:
+        return "SEL";
+      case UNION:
+        return "UNION";
+      case ASSEQ:
+        return "ASSEQ";
+      case AT:
+        return "AT";
+      case SKPBACK:
+        return "SKPBACK " + value(instr);
+      case NULL:
+        return "NULL";
+      case OF:
+        return "OF";
+      case THROW:
+        return "THROW";
+      case TRY:
+        return "TRY" + byte2(instr) + " " + byte1(instr);
+      case ISKINDOF:
+        return "ISKINDOF";
+      case SOURCEPOS:
+        return "SOURCEPOS line:" + ((byte3(instr) << 8) | byte2(instr)) + " char:" + byte1(instr);
+      case GETELEMENT:
+        return "GETELEMENT " + valueToString(arrayRef(constants, byte1(instr)));
+      case SETHEAD:
+        return "SETHEAD";
+      case SETTAIL:
+        return "SETTAIL";
+      case READ:
+        return "READ";
+      case ACCEPT:
+        return "ACCEPT";
+      case ARRAYREF:
+        return "ARRAYREF";
+      case ARRAYSET:
+        return "ARRAYSET";
+      case TABLEGET:
+        return "TABLEGET";
+      case TABLEPUT:
+        return "TABLEPUT";
+      case NOOP:
+        return "NOOP";
+      case SLEEP:
+        return "SLEEP";
+      case CONST:
+        return "CONST " + valueToString(arrayRef(constants, value(instr)));
+      case SETLOCPOP:
+        return "SETLOCPOP " + value(instr);
+      case DISPATCH:
+        return "DISPATCH " + valueToString(arrayRef(constants, value(instr)));
+      case INCSELFSLOT:
+        return "INCSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
+      case DECSELFSLOT:
+        return "DECSELFSLOT " + valueToString(arrayRef(constants, value(instr)));
+      case INCLOCAL:
+        return "INCLOCAL " + value(instr);
+      case DECLOCAL:
+        return "DECLOCAL " + value(instr);
+      case ADDLOCAL:
+        return "ADDLOCAL " + value(instr);
+      case SUBLOCAL:
+        return "SUBLOCAL " + value(instr);
+      case PREPEND:
+        return "PREPEND";
+      case ENTERDYN:
+        return "ENTERDYN " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
+      case TAILENTERDYN:
+        return "TAILENTERDYN " + byte2(instr) + " " + valueToString(arrayRef(constants, byte1(instr)));
+      case LOCALHEAD:
+        return "LOCALHEAD " + value(instr);
+      case LOCALTAIL:
+        return "LOCALTAIL " + value(instr);
+      case LOCALASSEQ:
+        return "LOCALASSEQ " + value(instr);
+      case LOCALISEMPTY:
+        return "LOCALISEMPTY " + value(instr);
+      case LOCALREFPOS:
+        return "LOCALREFPOS " + byte3(instr) + " " + ((byte2(instr) << 8) + byte1(instr));
+      case DYNREFPOS:
+        return "DYNREFPOS " + valueToString(arrayRef(constants, byte3(instr))) + " " + ((byte2(instr) << 8) + byte1(instr));
+      case ASSOC:
+        return "ASSOC";
+      case RETDOTSELF:
+        return "RETDOTSELF " + valueToString(arrayRef(constants, value(instr)));
+      default:
+        return "<Unknown instruction " + tag(instr) + ">";
     }
   }
 
@@ -10030,18 +10028,18 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements Kernel_asString...
 
     switch (tag(value)) {
-    case STRING:
-      return value;
-    case CONS:
-      return consAsString(value);
-    case ARRAY:
-      return arrayAsString(value);
-    case BUFFER:
-      if (bufferAsString(value) == trueValue)
-        return bufAsString(value);
-      else return mkString(valueToString(value));
-    default:
-      return mkString(valueToString(value));
+      case STRING:
+        return value;
+      case CONS:
+        return consAsString(value);
+      case ARRAY:
+        return arrayAsString(value);
+      case BUFFER:
+        if (bufferAsString(value) == trueValue)
+          return bufAsString(value);
+        else return mkString(valueToString(value));
+      default:
+        return mkString(valueToString(value));
     }
   }
 
@@ -10197,13 +10195,13 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements kernel_close...
 
     switch (tag(channel)) {
-    case INPUT_CHANNEL:
-      XOS.closeInputChannel(value(channel));
-      break;
-    case OUTPUT_CHANNEL:
-      XOS.flush(value(channel));
-      XOS.closeOutputChannel(value(channel));
-      break;
+      case INPUT_CHANNEL:
+        XOS.closeInputChannel(value(channel));
+        break;
+      case OUTPUT_CHANNEL:
+        XOS.flush(value(channel));
+        XOS.closeOutputChannel(value(channel));
+        break;
     }
   }
 
@@ -10289,11 +10287,11 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public void flush(int channel) {
     switch (tag(channel)) {
-    case OUTPUT_CHANNEL:
-      XOS.flush(value(channel));
-      break;
-    default:
-      System.out.println("Machine.flush: Unknown channel type " + tag(channel));
+      case OUTPUT_CHANNEL:
+        XOS.flush(value(channel));
+        break;
+      default:
+        System.out.println("Machine.flush: Unknown channel type " + tag(channel));
     }
   }
 
@@ -10355,12 +10353,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements Kernel_hashCode...
 
     switch (tag(value)) {
-    case STRING:
-      return stringHashCode(value);
-    case SET:
-      return setHashCode(value);
-    default:
-      return ptr(value);
+      case STRING:
+        return stringHashCode(value);
+      case SET:
+        return setHashCode(value);
+      default:
+        return ptr(value);
     }
   }
 
@@ -10624,21 +10622,21 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int messageValue(xos.Value value) {
     switch (value.type) {
-    case XData.INT:
-      return mkInt(value.intValue);
-    case XData.BOOL:
-      return value.boolValue ? trueValue : falseValue;
-    case XData.STRING:
-      return mkString(value.strValue());
-    case XData.FLOAT:
-      return mkFloat(value.floatValue);
-    case XData.VECTOR:
-      int array = mkArray(value.values.length);
-      for (int i = 0; i < value.values.length; i++)
-        arraySet(array, i, messageValue(value.values[i]));
-      return array;
-    default:
-      throw new MachineError(TYPE, "Unknown message arg type: " + value.type);
+      case XData.INT:
+        return mkInt(value.intValue);
+      case XData.BOOL:
+        return value.boolValue ? trueValue : falseValue;
+      case XData.STRING:
+        return mkString(value.strValue());
+      case XData.FLOAT:
+        return mkFloat(value.floatValue);
+      case XData.VECTOR:
+        int array = mkArray(value.values.length);
+        for (int i = 0; i < value.values.length; i++)
+          arraySet(array, i, messageValue(value.values[i]));
+        return array;
+      default:
+        throw new MachineError(TYPE, "Unknown message arg type: " + value.type);
     }
   }
 
@@ -10889,6 +10887,10 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
 
   public int popStack() {
     return valueStack.pop();
+  }
+
+  public int tos(int index) {
+    return valueStack.fromTop(index);
   }
 
   public void pushOperators(int classifier) {
@@ -11148,12 +11150,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements Kernel_charCount (deprecated?)...
 
     switch (tag(string)) {
-    case STRING:
-      return stringCharCount(string, charPos);
-    case BUFFER:
-      return bufferCharCount(string, charPos);
-    default:
-      throw new Error("Illegal type of element for charCount: " + valueToString(string));
+      case STRING:
+        return stringCharCount(string, charPos);
+      case BUFFER:
+        return bufferCharCount(string, charPos);
+      default:
+        throw new Error("Illegal type of element for charCount: " + valueToString(string));
     }
   }
 
@@ -11162,12 +11164,12 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     // Implements kernel_lineCount (deprecated?)...
 
     switch (tag(string)) {
-    case STRING:
-      return stringLineCount(string, charPos);
-    case BUFFER:
-      return bufferLineCount(string, charPos);
-    default:
-      throw new Error("Illegal type of element for lineCount: " + valueToString(string));
+      case STRING:
+        return stringLineCount(string, charPos);
+      case BUFFER:
+        return bufferLineCount(string, charPos);
+      default:
+        throw new Error("Illegal type of element for lineCount: " + valueToString(string));
     }
   }
 
@@ -11326,7 +11328,5 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   public void setOpenFrame(int frame) {
     openFrame = frame;
   }
-
-
 
 }

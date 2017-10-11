@@ -1,0 +1,44 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass InstanceSelectBox metaclass Root::Visualization::Widget extends SelectBox	
+
+		@Slot Widget::triggers = {WidgetLibrary::EventDoubleClick} end
+
+   @Operation new()
+    	  let //id = self.commandInterpreter().allocateId(self);
+    		  es = [] 
+    	  in 
+          @For e in elements do
+          	es := es + [e.name]
+          end;
+			//self.owner.forwardCommand("createNavigationInstances",[id, es]);  
+       self.commandInterpreter().newElement(self,self.owner.id,"createNavigationInstances",[es])
+  		//id
+	      end
+      end
+      
+        	@Operation command(command,values)
+  			@Find (event, self.of().triggers)
+				 when event.command = command
+				 do if command = "doubleClick" then
+					@Find (e, self.elements)
+					 when e.name.toString() = values.ref(0)
+					 do 
+						self.eventManager().raiseEvent(event(self,e))
+  				 end
+					else			
+					 self.eventManager().raiseEvent(event(self))
+					end
+				 else super(command,values)
+				 end
+   	end
+	end
+
+

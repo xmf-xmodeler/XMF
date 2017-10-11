@@ -1,0 +1,186 @@
+parserImport XOCL;
+
+import Projects;
+import Clients::ExtensionPoints;
+
+// Visualization
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Visualization.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Visualization.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/VisualizationElement.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/VisualizationElement.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/EventType.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/EventType.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/VisualizationFeature.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/VisualizationFeature.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Widget.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Widget.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ScreenType.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ScreenType.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ScreenM1Inherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ScreenM1Inherit.o").loadBin(true);
+ 
+// Controller
+
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGeneration.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGeneration.o").loadBin(true);
+
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Configuration.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Configuration.o").loadBin(true);
+
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ViewRelation.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ViewRelation.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventHandling.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventHandling.o").loadBin(true);
+
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/WidgetRelation.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/WidgetRelation.o").loadBin(true);
+ 
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/FeatureRelation.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/FeatureRelation.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ControllerType.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ControllerType.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerType.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerType.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerM1Inherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerM1Inherit.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/FollowingScreenRelation.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/FollowingScreenRelation.o").loadBin(true);
+
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventHandler.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventHandler.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ElementXWidget.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ElementXWidget.o").loadBin(true);
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ElementXWidgetInherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ElementXWidgetInherit.o").loadBin(true);
+   
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/AttributeXWidget.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/AttributeXWidget.o").loadBin(true);
+ 
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/AttributeXWidgetM1Inherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/AttributeXWidgetM1Inherit.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/OperationXWidget.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/OperationXWidget.o").loadBin(true);
+ 
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/OperationXWidgetM1Inherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/OperationXWidgetM1Inherit.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ClassXWidget.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ClassXWidget.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ClassXWidgetM1Inherit.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ClassXWidgetM1Inherit.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Injections.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Injections.o").loadBin(true);
+
+//Client
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/MbcRegistryEntry.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/MbcRegistryEntry.o").loadBin(true);
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerRegistryEntry.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenControllerRegistryEntry.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationCommandInterpreter.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationCommandInterpreter.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationEventHandler.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationEventHandler.o").loadBin(true);
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventManagerRegistryEntry.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventManagerRegistryEntry.o").loadBin(true);
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventManager.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/EventManager.o").loadBin(true);
+
+	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationClient.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ScreenGenerationClient.o").loadBin(true);
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ExtMetaClass.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/ExtMetaClass.o").loadBin(true); 
+
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Menu.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/Controller/Menu.o").loadBin(true); 
+ 
+//WidgetLibrary 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/WidgetLibrary.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/WidgetLibrary.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/EventDoubleClick.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/EventDoubleClick.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SingleField.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SingleField.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/MultipleField.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/MultipleField.o").loadBin(true);
+ 
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/FormContainer.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/FormContainer.o").loadBin(true);
+  	
+ 	Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ContentElement.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ContentElement.o").loadBin(true);
+  
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/CheckBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/CheckBox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SelectBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SelectBox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SiblingSelectBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/SiblingSelectBox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/InstanceSelectBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/InstanceSelectBox.o").loadBin(true); 
+ 
+  Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ComplexElementBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ComplexElementBox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/TextBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/TextBox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ClassTextBox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/ClassTextBox.o").loadBin(true);
+  
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Contentbox.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/Contentbox.o").loadBin(true);
+ 
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/MultilevelFormContainer.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/MultilevelFormContainer.o").loadBin(true);
+  
+ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/WindowTab.xmf",true,true);
+ (xmf.homeDir()+"/../xmf-addons/ScreenGeneration/View/WindowTab.o").loadBin(true);
+ 
+ Root::c := ScreenGeneration::ScreenGenerationClient("screenGeneration");
+  xmf.clientManager().add(c);
+
+ @Fork(ScreenGenerationClient)
+ 		try 
+		     c.start()
+		catch(exception)
+          format(stdout,"~S~%",Seq{exception})
+     end
+ end;
+
+  
+  Root::t := WidgetLibrary::WindowTab("test");
+  t.setOwner(c);
+  
+//  Root::u := WidgetLibrary::MultilevelFormContainer("test2");
+  
+//ScreenGeneration.browse();

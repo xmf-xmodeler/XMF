@@ -69,6 +69,12 @@ context XCore
        end
      end
      
+     @Operation importNameSpaces(nameSpaces:Seq(NameSpace))
+       @For n in nameSpaces do
+         self.importNameSpace(n)
+       end
+     end
+     
      @Operation invoke(target,args)
        if args->size = parameters->size and not isVarArgs
        then body.eval(target,self.bindParams(parameters,args,target,self.dynamicEnv(),imports),imports)

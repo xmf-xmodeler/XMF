@@ -1,0 +1,132 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass MultilevelFormContainer metaclass Root::Visualization::Widget extends Clients::ContainedClientElement
+
+		@Attribute presentedContents: *ContentElement (?,!) end	
+		@Attribute navigationClass: ClassTextBox (?,!) end	
+		@Attribute navigationInstances: InstanceSelectBox (?,!) end	
+		@Attribute navigationSiblings: SiblingSelectBox (?,!) end	
+		@Attribute contentboxes: *Contentbox (?,!,+,-) end	
+
+		@Slot Widget::triggers = EventDoubleClick end
+
+		@Constructor(name) end
+		@Constructor(id, name) ! end
+
+		@Operation add(element:Widget)
+			if element.isKindOf(Contentbox)
+      	then
+	    	    self.addContentboxes(element)
+		    elseif element.isKindOf(ClassTextBox)
+      	then
+       		self.addClassTextBox(element)
+          elseif element.isKindOf(InstanceSelectBox)
+      	then
+         		self.addInstanceSelectBox(element)
+          elseif element.isKindOf(SiblingSelectBox)
+      	then
+         		self.addSiblingSelectBox(element)
+          elseif element.isKindOf(ContentElement)
+      	then
+         		self.addPresentedContents(element)
+      	else
+      	  "error".println()
+		      end
+		end
+
+		@Operation addPresentedContents(slot: ContentElement)
+			self.presentedContents:= self.presentedContents + {slot};
+			slot.setOwner(self);
+			//singleField.new();
+			self
+		end
+
+		@Operation addClassTextBox(navigation: ClassTextBox)
+			self.navigationClass := navigation;
+			navigation.setOwner(self);
+			self
+		end
+
+		@Operation addInstanceSelectBox(navigation: InstanceSelectBox)
+			self.navigationInstances := navigation;
+			navigation.setOwner(self);
+			self
+		end
+
+		@Operation addSiblingSelectBox(navigation: SiblingSelectBox)
+			self.navigationSiblings := navigation;
+			navigation.setOwner(self);
+			self
+		end
+
+		@Operation addContentboxes(content: Contentbox)
+//			multipleFields.addToMultipleFields(multipleField);
+			self.contentboxes := self.contentboxes + {content};
+     		content.setOwner(self);
+			//multipleField.new();
+			self
+		end 
+
+		@Operation close()
+			true
+		end
+
+		@Operation forwardCommand(message,args)
+			 self.owner.forwardCommand("messageForward",[self.id,message,args])
+		end
+
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+
+    	@Operation dispose()
+    	//TODO
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+    // 	let windowId = self.commandInterpreter().allocateId(self) in	
+	//	    self.owner.forwardCommand("newMultiView",[windowId]);
+			self.commandInterpreter().newElement(self,self.owner.id,"newMultiView",[]);
+			@For slot in presentedContents do
+				slot.new()
+			end;
+			if navigationClass<> null then
+				navigationClass.new()
+			end;
+			if navigationInstances<> null then
+				navigationInstances.new()
+			end;
+			if navigationSiblings <> null then
+				navigationSiblings.new()
+			end;
+			@For contentbox in contentboxes do
+				contentbox.new()
+			end//; 
+        // 	windowId
+      //end
+      end 
+      
+      @Operation newSingleField(label,text)
+        self.add(SingleField(label,text))        
+      end
+      
+ 		@Operation newMultipleField(name,values)
+        self.add(MultipleField(name,values))        
+      end 
+      
+      @Operation setText(text)
+      	self.owner.setText(text)
+      end
+	end
+
+

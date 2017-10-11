@@ -546,11 +546,16 @@ context Classifier
 
 context Classifier
   @Operation sendInstance(element,message,args)
+    self.sendInstance(element,message,args,true)
+  end
+
+context Classifier
+  @Operation sendInstance(element,message,args,setDefault)
     @Doc
       Part of the MOP. Redefine this in sub-classes to handle special
       message passing protocols.
     end
-    Kernel_setDefaultSendMOP(element.of(),true);
+    if setDefault then Kernel_setDefaultSendMOP(element.of(),true) end;
     let name = if message.isKindOf(Symbol) then message else Symbol(message) end;
         operations = element.of().allOperations()->asSeq
     in let index = 0;

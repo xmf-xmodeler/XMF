@@ -1,0 +1,20 @@
+parserImport XOCL;
+
+import Clients;
+import Diagrams;
+
+
+context FMML::MetaClass
+  @Operation createMultiScreen()
+  	xmf.clientManager().findClientByName("screenGeneration").createMultiScreen(self)
+  end
+
+/*context FMML::MetaClass
+  @Operation allInstances()
+		self.instances
+  end  
+  
+  context FMML::MetaClass
+  @Operation allSiblings()
+		self.of().instances.excluding(self)
+  end    */

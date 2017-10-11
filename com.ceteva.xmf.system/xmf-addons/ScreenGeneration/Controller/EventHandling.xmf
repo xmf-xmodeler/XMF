@@ -1,0 +1,14 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@Class EventHandling 
+		@Attribute eventType: EventType end
+		@Attribute handlerType: Element end
+
+		@Constructor(eventType,handlerType) ! end
+	end

@@ -1,0 +1,11 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration::ScreenControllerType
+		@Attribute rootElementType: ElementXWidget (+,-) end
+
+context Root::ScreenGeneration::ScreenControllerType
+		@IntrinsicAttribute rootElement: ElementXWidget (+,-) instLevel 0 end

@@ -1,0 +1,35 @@
+parserImport XOCL;
+ 
+import Clients;
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass ScreenControllerM1Inherit at 1 extends ContainedClientElement
+		
+		@Operation create(element:Element)//name:String)
+			//Views
+			let t = self.of().screenType
+			in
+				self.screen := t(element.name+"Screen","");
+				self.screen.setOwner(self)//;
+			end;
+			//Other controllers
+			let t = self.of().rootElementType
+			in
+				self.rootElement := t(element.name+"Controller");
+				self.rootElement.setOwner(self);
+				self.rootElement.create(self.screen,element)
+			end
+		end
+		
+		@Operation show()
+			screen.new()
+		end
+
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+	end

@@ -1,0 +1,53 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass Contentbox metaclass Root::Visualization::Widget extends Clients::ContainedClientElement	
+		@Attribute contentElements : *ContentElement (?,!,+,-) end
+
+		@Constructor(name) end
+		@Constructor(id, name) ! end
+
+		@Operation addContentElement(contentElement: Contentbox)
+//			multipleFields.addToMultipleFields(multipleField);
+			self.contentElements := self.contentElements + {contentElement};
+     		contentElement.setOwner(self);
+			//multipleField.new();
+			self
+		end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+		@Operation forwardCommand(message,args)
+			 self.owner.forwardCommand("messageForward",[self.id,message,args])
+		end
+
+     @Operation new()
+/*     	let id = self.commandInterpreter().allocateId(self) in	
+		    self.owner.forwardCommand("addContent",[id, name]);
+         	id
+      end */
+             self.commandInterpreter().newElement(self,self.owner.id,"addContent",[name])
+      end
+      
+   /*  @Operation textChanged(newText:String)
+			if newText <> self.text
+		    then
+				self.text := newText
+			end
+     end */
+     
+  
+		
+	end
+
+

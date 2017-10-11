@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass ElementXWidget at 3 extends ControllerType
+
+		@IntrinsicAttribute hasViews: VisualizationElement instLevel 0 end
+		@IntrinsicAttribute hasViewTypes : Seq(ViewRelation) = Seq{} (+,-) instLevel 1 end 
+		@IntrinsicAttribute hasEventHandler : EventHandler instLevel 1 end
+	
+		@Operation init(args:Element)
+			super(args);
+			self.addParent(Root::ScreenGeneration::ElementXWidgetInherit)
+		end
+	end

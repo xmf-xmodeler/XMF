@@ -1,0 +1,12 @@
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass FollowingScreenRelation at 1
+		@Attribute guard: String end
+		@Attribute target: ScreenControllerType end
+	end

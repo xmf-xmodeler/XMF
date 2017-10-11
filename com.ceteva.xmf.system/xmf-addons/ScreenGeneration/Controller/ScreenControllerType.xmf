@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+import Clients;
+import Root::FMML;
+import Root::ScreenGeneration;
+import Root::Visualization;
+
+context Root::ScreenGeneration
+
+	@MetaClass ScreenControllerType at 2 extends ControllerType
+		@Attribute screenType: ScreenType (+,-) end
+		@IntrinsicAttribute screen: ScreenType instLevel 0 end
+		
+		@Operation init()
+			super();
+			self.addParent(Root::ScreenGeneration::ScreenControllerM1Inherit)
+		end
+		
+	end

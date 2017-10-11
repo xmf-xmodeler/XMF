@@ -1,0 +1,32 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+import Root::WidgetLibrary;
+
+context Root::WidgetLibrary
+
+	@MetaClass MultipleField metaclass Root::Visualization::Widget extends Clients::ContainedClientElement
+		@Attribute name : String (?,!) end
+		@Attribute values : Seq(String) (?,!) end
+
+		@Constructor(name, values) end
+		
+		@Constructor(id, name, values) ! end
+
+    	@Operation dispose()
+      self.owner := null;
+      //self.disposeCollection(contents);
+      super()
+    	end
+
+     @Operation new()
+     	let multipleFieldId = self.commandInterpreter().allocateId(self) in	
+		    self.owner.forwardCommand("addMultipleElement",[multipleFieldId, name, values]);
+         	multipleFieldId
+      end
+      end
+	end
+
+

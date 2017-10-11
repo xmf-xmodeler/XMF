@@ -9,7 +9,7 @@ context Root::FMML
     @Attribute metaClass : *MetaClass end
 
     @Attribute model : 1..1 Model end
- 
+  
     @Constructor(name, level)
     	if self.of() <> FMML::MetaClass then
 			self.error("This constructor is only allowed for instantiating FMML::MetaClass")

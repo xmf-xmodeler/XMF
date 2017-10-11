@@ -1,0 +1,44 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::ScreenGeneration;
+
+context Root::ScreenGeneration
+
+	@MetaClass ClassXWidgetM1Inherit at 1 
+		@Operation create(parent:Element,element:Element)
+			self.instance := element;
+			//View
+			let t = self.of().hasViewTypes.head().widget
+			in	
+				self.hasViews := t();
+				self.hasViews.setOwner(self);
+				parent.add(self.hasViews);
+				self.hasViews.setText(element.name)
+			end;
+			//Controllers
+			@For t in self.of().displaysAttributeTypes do
+				let i = t()
+				in
+					self.displaysAttributes := self.displaysAttributes + [i];
+					i.setOwner(self);
+					i.create(self.hasViews,element)
+				end
+			end;
+			@For t in self.of().displaysOperationTypes do
+				let i = t()
+				in
+					self.displaysOperations := self.displaysOperations + [i];
+					i.setOwner(self);
+					i.create(self.hasViews,element)
+				end
+			end
+		end
+
+		@Operation eventManager()
+			self.owner.eventManager()
+		end
+	end
+
+

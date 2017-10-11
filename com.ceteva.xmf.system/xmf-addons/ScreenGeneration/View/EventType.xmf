@@ -1,0 +1,14 @@
+//Version 1.0 XMF2
+parserImport XOCL;
+
+import Root::FMML;
+import Root::Visualization;
+
+context Root::Visualization
+
+	@MetaClass EventType at 2
+		@IntrinsicAttribute sender : Element instLevel 0 end
+		@Attribute command: String end
+	end
+
+

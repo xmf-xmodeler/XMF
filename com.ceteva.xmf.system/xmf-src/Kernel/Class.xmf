@@ -75,6 +75,17 @@ context Class
     self.attributes := attributes->including(a);
     self
   end
+
+context Class
+  @Operation addDelayed(o:Operation)
+  
+    // Used to allow definitions to refer to 'self' in a
+    // @Class .. end form. Invoking the operation allows
+    // the class to supply itself. The operation o should 
+    // return something that can be added to the class...
+    
+    self.add(o.invoke(self,[]))
+  end
   
 context Class
   @Operation addConstructor(c:Constructor):Element
