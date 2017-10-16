@@ -56,12 +56,12 @@ context XCore::Operation
       
       // The return type of an operation is optional...
       
-      type = ReturnType
+      type = <<ReturnType>>
       
       // The body of an operation is a sequence of 
       // expressions...
       
-      body = Exp+ 
+      body = <<Exp>> + 
       
       'end'
       
@@ -105,12 +105,12 @@ context XCore::Operation
       // a '.'. At run-time the rest of the supplied arguments
       // are supplied as a sequence...
     
-      '.' multi = Pattern { Seq{multi} } 
+      '.' multi = <<Pattern>> { Seq{multi} } 
     | { Seq{} }.
     
     ReturnType ::= 
     
-      ':' TypeExp 
+      ':' <<TypeExp>> 
     | { NamedType() }.
     
     Properties ::= 
@@ -118,6 +118,6 @@ context XCore::Operation
       '[' p = Property ps = (',' Property)* ']' { Seq{p|ps} } 
     | { Seq{} }.
     
-    Property ::= n = Name '=' e = Exp { [n,e] } | n = Name { [ n,[| true |] ] }.
+    Property ::= n = Name '=' e = <<Exp>> { [n,e] } | n = Name { [ n,[| true |] ] }.
     
   end

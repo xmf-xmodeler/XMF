@@ -47,7 +47,7 @@ context XOCL
          // must be true in order to process
          // the names...
          
-         guard = ('when' Exp | { null })
+         guard = ('when' <<Exp>> | { null })
          
          // We are either performing commands or
          // producing a sequence of values...
@@ -57,13 +57,13 @@ context XOCL
          // The body - either a command or an 
          // expression..
          
-         body = Exp 
+         body = <<Exp>> 
          
          'end' 
          
          { For(names,dir,colls,guard,body,isExp) }. 
        
-       ForColls ::= exp = Exp exps = (',' Exp)* { Seq{exp | exps} }.
+       ForColls ::= exp = <<Exp>> exps = (',' <<Exp>>)* { Seq{exp | exps} }.
     
        ForDirective ::= 
     

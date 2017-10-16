@@ -29,7 +29,15 @@ context TextEditor
     end
 
     @Operation globalVar(name:String):Boolean
-      XCore.hasElement(name) orelse Root.hasElement(name) orelse name="super"
+
+      // Global variables will not be in the environment managed by the walker.
+      // Return true when the name is available everywhere...
+
+      XCore.hasElement(name) orelse 
+      Root.hasElement(name)  orelse 
+      name="super"           orelse 
+      name="declare"         orelse 
+      name="hidden"
     end
 
     @Operation handleImports(imports:Seq(Import),env)
@@ -40,7 +48,7 @@ context TextEditor
                nameSpace:NameSpace = self.getNameSpace(path,nameSpaces)
            in if nameSpace <> null
               then
-                nameSpaces = [nameSpace]+nameSpaces;
+                nameSpaces := [nameSpace]+nameSpaces;
                 @For name in nameSpace.names() do
                   if nameSpace.hasElement(name)
                   then env := env.bind(name.toString(),ImportDescriptor(nameSpace.getElement(name).of(),i))
@@ -110,6 +118,14 @@ context TextEditor
       null
     end
 
+    @Operation walkConstructor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,env)
+       charStart := charStart + "@Constructor("->size;
+       @For name in names do
+         self.walkVar(line,charStart,charStart+name->size,name,env);
+         charStart := charStart + name->size + 1
+       end
+    end
+
     @Operation walkContextDef(element:OCL,isForward:Boolean,path:Seq(Element),env)
       self.walk(element,env)
     end
@@ -118,14 +134,39 @@ context TextEditor
       self.walk(target,env)
     end
 
+    @Operation walkFind(line:Integer,charStart:Integer,charEnd:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,env)
+       let locStart = charStart + "@For ("->size then
+           locEnd = locStart+name->size then
+           loc = let loc = Located() in (loc.charStart := locStart).charEnd := locEnd end then
+           env0 = env.bind(name,VarDescriptor(null,loc))
+       in self.walk(collection,env);
+          self.walk(action,env0);
+          self.walk(alternative,env0);
+          self.walk(test,env0)
+       end
+    end
+
     @Operation walkFloatExp(line:Integer,postPoint:String,prePoint:String,env)
       null
     end
 
-    @Operation walkFor(line:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),env)
+    @Operation walkFor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),env)
        @For c in colls do self.walk(c,env) end;
-       let env0 = names->iterate(n e=env | e.bind(n,VarDescriptor(null,null)))
-       in self.walk(body,env0)
+       @Letrec
+         mkLocated(charStart:Integer,charEnd:Integer):Located =
+           let l = Located() 
+           in l.charStart := charStart; l.charEnd := charEnd; l
+           end;
+         bind(names:Seq(String),i:Integer,env) =
+           if names=[]
+           then env
+           else 
+             let name = names->head then
+                 length = name->size
+             in bind(names->tail,i+length+1,env.bind(name,VarDescriptor(null,mkLocated(i,i+length))))
+             end
+           end
+       in self.walk(body,bind(names,charStart + "@For "->size,env))
        end
     end
 
@@ -175,19 +216,32 @@ context TextEditor
        end
     end 
 
+    @Operation walkNamedType(charStart:Integer,charEnd:Integer,path:Seq(String),env)
+       self.walkVar(0,charStart,charEnd,path->head.toString(),env)
+    end
+
     @Operation walkNegate(exp:OCL,env)
       self.walk(exp,env)
     end
 
     @Operation walkOperation(doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env)
       let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v)))
-      in self.walk(body,env0)
+      in @For arg in args do self.walk(arg,env) end;
+         self.walk(body,env0);
+         self.walk(type,env)
       end
     end
 
     @Operation walkOrder(first:OCL,second:OCL,env)
       self.walk(first,env);
       self.walk(second,env)
+    end
+
+    @Operation walkParametricType(charStart:Integer,charEnd:Integer,args:Seq(TypeExp),constructor:Seq(String),env)
+      self.walkVar(0,charStart,charEnd,constructor->head,env);
+      @For arg in args do
+        self.walk(arg,env)
+      end
     end
 
     @Operation walkPath(names:Seq(Element),root:OCL,env)
@@ -248,6 +302,10 @@ context TextEditor
       elseif not(self.globalVar(name))
       then editor.unboundVar(name,charStart,charEnd)
       end
+    end
+
+    @Operation walkVarp(charStart:Integer,charEnd:Integer,name:String,pattern:Pattern,type:TypeExp,env)
+      self.walk(type,env)
     end
   
   end

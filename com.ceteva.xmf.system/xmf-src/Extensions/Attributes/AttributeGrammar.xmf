@@ -32,11 +32,11 @@ context Attribute
       // May be an instance of a class other
       // than XCore::Attribute...
       
-      meta = MetaClass 
+      meta = MetaClass
       
       // Has a type...
       
-      ':' mult = AttMult type = AttType 
+      ':' mult = AttMult type = <<AttType>>
       
       // Optionally has an initial value...
       
@@ -51,7 +51,7 @@ context Attribute
       // Optionally has a number of expressions
       // in the body...
       
-      body = Exp* 
+      body = <<Exp>> * 
       
       'end' 
       
@@ -65,7 +65,7 @@ context Attribute
       // otherwise the value is created once and shared between
       // the instances...
     
-      '=' Exp 
+      '=' <<Exp>>
       
     | '=' 'static' e = Exp { [| static(<e>) |] } 
     
@@ -174,7 +174,7 @@ context Attribute
       // Optionally specify a class that designates the
       // class to instantiate for the attribute...
     
-      'metaclass' Exp 
+      'metaclass' <<Exp>>
       
     | { null }.
     

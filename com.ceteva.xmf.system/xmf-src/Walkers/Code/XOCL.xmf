@@ -142,7 +142,7 @@ context Root
       ]
     end
 
-    @Operation walkConstructor(line:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,arg)
+    @Operation walkConstructor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,arg)
       Constructor[
         line=line,
         body=self.walk(body,arg),
@@ -182,7 +182,7 @@ context Root
       ExtendClass[      ]
     end
 
-    @Operation walkFind(line:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,arg)
+    @Operation walkFind(line:Integer,charStart:Integer,charEnd:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,arg)
       Find[
         line=line,
         action=self.walk(action,arg),
@@ -193,7 +193,7 @@ context Root
       ]
     end
 
-    @Operation walkFor(line:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),arg)
+    @Operation walkFor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),arg)
       For[
         line=line,
         body=self.walk(body,arg),
@@ -471,8 +471,8 @@ context Root
         Constraint[line,body,name,reason] do
           self.walkConstraint(line,body,name,reason,arg)
         end
-        Constructor[line,body,doc,names,toString] do
-          self.walkConstructor(line,body,doc,names,toString,arg)
+        Constructor[line,charStart,charEnd,body,doc,names,toString] do
+          self.walkConstructor(line,charStart,charEnd,body,doc,names,toString,arg)
         end
         Count[line,body,lower,upper,var] do
           self.walkCount(line,body,lower,upper,var,arg)
@@ -486,11 +486,11 @@ context Root
         ExtendClass[] do
           self.walkExtendClass(arg)
         end
-        Find[line,action,alternative,collection,name,test] do
-          self.walkFind(line,action,alternative,collection,name,test,arg)
+        Find[line,charStart,charEnd,action,alternative,collection,name,test] do
+          self.walkFind(line,charStart,charEnd,action,alternative,collection,name,test,arg)
         end
-        For[line,body,colls,directive,guard,isExp,names] do
-          self.walkFor(line,body,colls,directive,guard,isExp,names,arg)
+        For[line,charStart,charEnd,body,colls,directive,guard,isExp,names] do
+          self.walkFor(line,charStart,charEnd,body,colls,directive,guard,isExp,names,arg)
         end
         Fork[line,body,name] do
           self.walkFork(line,body,name,arg)

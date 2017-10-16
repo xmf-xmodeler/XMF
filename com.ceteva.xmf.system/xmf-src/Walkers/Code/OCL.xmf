@@ -230,7 +230,7 @@ context Code
       ]
     end
 
-    @Operation walkNamedType(path:Seq(String),arg)
+    @Operation walkNamedType(charStart:Integer,charEnd:Integer,path:Seq(String),arg)
       NamedType[
         path=path->collect(x | self.walk(x,arg))
       ]
@@ -277,7 +277,7 @@ context Code
       ]
     end
 
-    @Operation walkParametricType(args:Seq(TypeExp),constructor:Seq(String),arg)
+    @Operation walkParametricType(charStart:Integer,charEnd:Integer,args:Seq(TypeExp),constructor:Seq(String),arg)
       ParametricType[
         args=args->collect(x | self.walk(x,arg)),
         constructor=constructor->collect(x | self.walk(x,arg))
@@ -399,7 +399,7 @@ context Code
       ]
     end
 
-    @Operation walkVarp(name:String,pattern:Pattern,type:TypeExp,arg)
+    @Operation walkVarp(charStart:Integer,charEnd:Integer,name:String,pattern:Pattern,type:TypeExp,arg)
       Varp[
         name=self.walk(name,arg),
         pattern=self.walk(pattern,arg),
@@ -508,8 +508,8 @@ context Code
         Lift[line,exp] do
           self.walkLift(line,exp,arg)
         end
-        NamedType[path] do
-          self.walkNamedType(path,arg)
+        NamedType[charStart,charEnd,path] do
+          self.walkNamedType(charStart,charEnd,path,arg)
         end
         Negate[exp] do
           self.walkNegate(exp,arg)
@@ -526,8 +526,8 @@ context Code
         Order[first,second] do
           self.walkOrder(first,second,arg)
         end
-        ParametricType[args,constructor] do
-          self.walkParametricType(args,constructor,arg)
+        ParametricType[charStart,charEnd,args,constructor] do
+          self.walkParametricType(charStart,charEnd,args,constructor,arg)
         end
         Parentheses[exp] do
           self.walkParentheses(exp,arg)
@@ -577,8 +577,8 @@ context Code
         VarUpdate[name,value] do
           self.walkVarUpdate(name,value,arg)
         end
-        Varp[name,pattern,type] do
-          self.walkVarp(name,pattern,type,arg)
+        Varp[charStart,charEnd,name,pattern,type] do
+          self.walkVarp(charStart,charEnd,name,pattern,type,arg)
         end
         else o
       end

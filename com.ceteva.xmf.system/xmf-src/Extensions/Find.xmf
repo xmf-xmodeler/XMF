@@ -20,11 +20,11 @@ context XOCL
   
     @Grammar extends OCL::OCL.grammar
     
-      Find ::= '(' name = Name ',' coll = Exp ')' test = Test action = Action alt = Alt 'end'
+      Find ::= '(' name = Name ',' coll = <<Exp>> ')' test = Test action = Action alt = Alt 'end'
         { Find(coll,name,test,action,alt) }.
-      Alt ::= 'else' Exp | { [| false |] }.
-      Action ::= 'do' action = Exp | { [| findElement |] }.
-      Test ::= 'when' Exp | { [| true |] }.
+      Alt ::= 'else' <<Exp>> | { [| false |] }.
+      Action ::= 'do' action = <<Exp>> | { [| findElement |] }.
+      Test ::= 'when' <<Exp>> | { [| true |] }.
       
     end 
     

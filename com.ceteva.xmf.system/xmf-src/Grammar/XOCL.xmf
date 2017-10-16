@@ -643,13 +643,13 @@ context OCL::OCL
       // Operations can be specified to have a type that defines
       // their argument types and their return type...
     
-      domains = TypeArgs '->' range = TypeExp { OpType(domains,range) }.
+      domains = TypeArgs '->' range = <<TypeExp>> { OpType(domains,range) }.
 
     OptType ::= 
     
       // A binding may onclude an optional type after ':'...
     
-      ':' TypeExp 
+      ':' <<TypeExp>>
       
       // The syntax construct NamedType defaults the path
       // to XCore::Element...
@@ -910,9 +910,9 @@ context OCL::OCL
     
     TypeArgs ::= 
     
-      '(' arg = TypeExp 
+      '(' arg = <<TypeExp>> 
       
-      args = (',' TypeExp)* ')' 
+      args = (',' <<TypeExp>>)* ')' 
       
       { Seq{arg | args} }.
     
@@ -954,7 +954,7 @@ context OCL::OCL
       
       pattern = 
       
-      (  '=' Pattern 
+      (  '=' <<Pattern>>
       
       | { null } 
       
@@ -962,7 +962,7 @@ context OCL::OCL
       
       type = 
       
-      ( ':' TypeExp 
+      ( ':' <<TypeExp>> 
       
       | { NamedType() }
       
