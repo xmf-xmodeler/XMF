@@ -41,6 +41,10 @@ context TextEditor
       self.find(textId).commitText(text)
     end
 
+    @Operation textChanged(textId:Integer,text:String)
+      self.find(textId).textChanged(text)
+    end
+
     @Operation urlRequest(browserId,url)
       self.find(browserId).requestURL(url)
     end
@@ -60,16 +64,17 @@ context TextEditor
          
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
-        "rightClickMenuSelected" do self.readRightClickMenuSelected(parameters) end
-        "urlRequest" 			 do self.readUrlRequest(parameters) end
-        "editorText"             do self.readEditorText(parameters) end
-        "textClosed"             do self.readTextClosed(parameters) end
-        "textDirty"              do self.readTextDirty(parameters)  end
+        "rightClickMenuSelected"  do self.readRightClickMenuSelected(parameters) end
+        "urlRequest" 			 do self.readUrlRequest(parameters)  end
+        "editorText"              do self.readEditorText(parameters)  end
+        "textClosed"              do self.readTextClosed(parameters)  end
+        "textDirty"               do self.readTextDirty(parameters)   end
         "undoStacked"			 do self.readUndoStacked(parameters) end
         "focusGained"			 do self.readFocusGained(parameters) end
-        "focusLost"			 	 do self.readFocusLost(parameters) end
-        "saveText"			 	 do self.readSaveText(parameters) end
-        "oleClosed"              do self.oleClosed(parameters) end
+        "focusLost"			 	 do self.readFocusLost(parameters)   end
+        "saveText"			 	 do self.readSaveText(parameters)    end
+        "oleClosed"               do self.oleClosed(parameters)       end
+        "textChanged"             do self.readTextChanged(parameters)     end
       end
     end
     
@@ -120,6 +125,13 @@ context TextEditor
     @Operation readTextClosed(parameters)
       let editorId = parameters.at(0) in
         self.editorClosed(editorId)
+      end
+    end
+
+    @Operation readTextChanged(parameters)
+      let editorId = parameters.at(0);
+          text = parameters.at(1) in
+        self.textChanged(editorId,text)
       end
     end
     

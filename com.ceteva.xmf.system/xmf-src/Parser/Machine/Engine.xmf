@@ -1119,12 +1119,12 @@ context Machine
       // If the value is an instance of Located then set the
       // start and end character position if it is available...
       
-      if value.isKindOf(Located)
+      if value <> null andthen value.isKindOf(Located)
       then
         if not(charPosStack->isEmpty)
         then
           value.charStart := charPosStack->head;
-          value.charEnd := tokenizer.charPos()
+          value.charEnd := tokenizer.lastCharPos
         end
       end
     

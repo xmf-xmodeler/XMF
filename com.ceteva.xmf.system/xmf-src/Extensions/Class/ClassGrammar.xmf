@@ -52,23 +52,23 @@ context Class
         else Class(name,metaClass,isAbstract,parents,defs) 
         end }.
       
-    ClassName ::= AName | '(' e=Exp ')' { e }.
+    ClassName ::= AName | '(' e= <<Exp>> ')' { e }.
       
     Defs ::= 
     
       // Definitions are sequences of expressions...
     
-      Exp* 
+      <<Exp>> * 
       
       // Dropped sequence of  expressions...
       
-    | '<*' e = Exp '*>' 
+    | '<*' e = <<Exp>> '*>' 
     
       { Drop(e) } 
       
       // If the class definition is used as a pattern...
       
-    | '<*|' p = Pattern '|*>' 
+    | '<*|' p = <<Pattern>> '|*>' 
     
       { DropPattern(p) }.
       
@@ -77,7 +77,7 @@ context Class
       // Specify the meta-class as any expression
       // or let it default...
     
-      'metaclass' Exp 
+      'metaclass' <<Exp>> 
        
     | { [| XCore::Class |] }.
       
@@ -107,9 +107,9 @@ context Class
     
       'extends' 
       
-      parent = Exp 
+      parent = <<Exp>> 
       
-      parents = (',' Exp)* 
+      parents = (',' <<Exp>>)* 
       
       { Seq{ parent | parents } } 
       

@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+import OCL;
+import Clients;
+import TextEditor;
+
+context TextEditor
+
+  @Class VarDescriptor
+
+    // A descriptor used by an EditorWalker to record variable information
+    // during the walk. These are bound in an environment during a walk of 
+    // the source code. Any feature of a var descriptor might be null if 
+    // the information is not available.
+
+    @Attribute type:Classifier          end
+    @Attribute definingLocation:Located end
+
+    @Constructor(type,definingLocation) ! end
+
+  end

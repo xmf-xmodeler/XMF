@@ -149,7 +149,7 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
   // The interrupt flag is set when the user causes an interrupt (usually
   // ^C). The VM handles the flag approprately...
 
-  public static boolean /* static for testing because of infinity loop */  interrupt                 = false;
+  public static boolean /* static for testing because of infinity loop */ interrupt                 = false;
 
   // Lots of occurrences of the empty array - so preallocate and reuse...
 
@@ -8917,9 +8917,9 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
     for (int i = 0; i < stringLength(client); i++)
       clientName.append((char) stringRef(client, i));
     int result = client;
-    xos.MessageClient messageClient = XOS.messageClient(clientName);
+    final xos.MessageClient messageClient = XOS.messageClient(clientName);
     if (messageClient != null) {
-      Message message = XOS.allocMessage();
+      final Message message = XOS.allocMessage();
       message.setArity(value(arity));
       for (int i = 0; i < stringLength(mname); i++)
         message.appendNameChar((char) stringRef(mname, i));
@@ -8929,7 +8929,14 @@ public final class Machine implements Words, Constants, ObjectProperties, Daemon
       }
       if (isCall)
         result = messageValue(messageClient.call(message));
-      else messageClient.sendMessage(message);
+      else {
+        // Ensure that this is asynchronous...
+        new java.lang.Thread(new Runnable() {
+          public void run() {
+            messageClient.sendMessage(message);
+          }
+        }).run();
+      }
       XOS.freeMessage(message);
     } else error(ERROR, "Unknown client: " + clientName);
     return result;

@@ -1,0 +1,253 @@
+parserImport XOCL;
+
+import OCL;
+import Walkers;
+import Code;
+import Clients;
+import TextEditor;
+import FileTextEditor;
+
+context TextEditor
+
+  @Class EditorWalker extends CompilerWalker 
+
+    @Attribute editor : FileTextEditor end
+
+    @Constructor(editor) ! end
+
+    @Operation getNameSpace(path:Seq(String),nameSpaces:Seq(NameSpace)):NameSpace
+      if path = []
+      then nameSpaces->head
+      else 
+        let n:NameSpace = @Find(n,nameSpaces) when n.hasElement(path->head) do n.getElement(path->head) else null end
+        in if n = null
+           then null
+           else self.getNameSpace(path->tail,[n]+nameSpaces)
+           end
+        end
+      end
+    end
+
+    @Operation globalVar(name:String):Boolean
+      XCore.hasElement(name) orelse Root.hasElement(name) orelse name="super"
+    end
+
+    @Operation handleImports(imports:Seq(Import),env)
+      // Add all the bindings from the imported name-space to the env...
+      let nameSpaces = [Root]
+      in @For i in imports do
+           let path:Seq(String) = i.nameSpace then
+               nameSpace:NameSpace = self.getNameSpace(path,nameSpaces)
+           in if nameSpace <> null
+              then
+                nameSpaces = [nameSpace]+nameSpaces;
+                @For name in nameSpace.names() do
+                  if nameSpace.hasElement(name)
+                  then env := env.bind(name.toString(),ImportDescriptor(nameSpace.getElement(name).of(),i))
+                  else env := env.bind(name.toString(),ImportDescriptor(null,i))
+                  end
+                end
+              end
+           end
+         end;
+         env
+       end
+    end
+
+    @Operation walkApply(args:Seq(OCL),operator:OCL,env)
+      self.walk(operator,env);
+      @For arg in args do
+        self.walk(arg,env)
+      end
+    end
+
+    @Operation walkAttribute(line:Integer,doc:Performable,init:Performable,meta:Performable,modifiers:AttributeModifiers,mult:String,name:String,properties:Seq(Element),type:Performable,env)
+      self.walk(init,env);
+      self.walk(type,env)
+    end
+
+    @Operation walkBinExp(binOp:String,left:OCL,right:OCL,env)
+      self.walk(left,env);
+      self.walk(right,env)
+    end
+
+    @Operation walkBinding(name:String,env)
+      null
+    end
+
+    @Operation walkBoolExp(line:Integer,value:Boolean,env)
+      null
+    end
+
+    @Operation walkCollExp(args:Seq(OCL),collOp:String,collection:OCL,env)
+      self.walk(collection,env);
+      @For arg in args do
+        self.walk(arg,env)
+      end
+    end
+
+    @Operation walkClass(line:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
+      let atts = defs->select(d | d.isKindOf(XOCL::Attribute)) then
+          env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type,a)))
+      in self.walk(metaClass,env);
+         @For parent in parents do self.walk(parent,env) end;
+         @For def in defs do self.walk(def,env0) end
+      end
+    end
+
+    @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,env)
+      @For exp in exps do
+        self.walk(exp,self.handleImports(imports,env))
+      end
+    end
+
+    @Operation walkConsExp(head:OCL,tail:OCL,env)
+      self.walk(head,env);
+      self.walk(tail,env)
+    end
+
+    @Operation walkConst(value:Element,env)
+      null
+    end
+
+    @Operation walkContextDef(element:OCL,isForward:Boolean,path:Seq(Element),env)
+      self.walk(element,env)
+    end
+
+    @Operation walkDot(name:String,target:OCL,env)
+      self.walk(target,env)
+    end
+
+    @Operation walkFloatExp(line:Integer,postPoint:String,prePoint:String,env)
+      null
+    end
+
+    @Operation walkFor(line:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),env)
+       @For c in colls do self.walk(c,env) end;
+       let env0 = names->iterate(n e=env | e.bind(n,VarDescriptor(null,null)))
+       in self.walk(body,env0)
+       end
+    end
+
+    @Operation walkFunBinding(name:String,args:Seq(Pattern),type:OCL,body:OCL,env)
+      let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v))) 
+      in self.walk(body,env0)
+      end
+    end
+
+    @Operation walkHeadUpdate(seq:Performable,value:Performable,env)
+      self.walk(seq,env);
+      self.walk(value,env)
+    end
+    
+    @Operation walkIf(line:Integer,test:Performable,e1:Performable,e2:Performable,env)
+      self.walk(test,env);
+      self.walk(e1,env);
+      self.walk(e2,env)
+    end
+
+    @Operation walkInstantiate(args:Seq(KeyArg),class:Performable,env)
+      self.walk(class,env);
+      @For arg in args do
+        self.walk(arg,env)
+      end
+    end
+
+    @Operation walkIntExp(line:Integer,value:Integer,env)
+      null
+    end
+
+    @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,env)
+       self.walk(collection,env);
+       self.walk(body,env.bind(name,VarDescriptor(null,null)))
+    end
+
+    @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,env)
+      self.walk(collection,env);
+      self.walk(value,env);
+      self.walk(body,env.bind(accumulator,null).bind(name,VarDescriptor(null,null)))
+    end
+
+    @Operation walkLet(line:Integer,bindings:Seq(ValueBinding),body:OCL,env)
+       @For b in bindings do self.walk(b,env) end;
+       let env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(b.type,b)))
+       in self.walk(body,env0)
+       end
+    end 
+
+    @Operation walkNegate(exp:OCL,env)
+      self.walk(exp,env)
+    end
+
+    @Operation walkOperation(doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env)
+      let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v)))
+      in self.walk(body,env0)
+      end
+    end
+
+    @Operation walkOrder(first:OCL,second:OCL,env)
+      self.walk(first,env);
+      self.walk(second,env)
+    end
+
+    @Operation walkPath(names:Seq(Element),root:OCL,env)
+      null
+    end
+
+    @Operation walkPathUpdate(path:Path,value:Performable,env)
+      self.walk(value,env)
+    end
+
+    @Operation walkSelf(line:Integer,env)
+      null
+    end
+
+    @Operation walkSend(args:Seq(OCL),message:String,target:OCL,env)
+      self.walk(target,env);
+      @For arg in args do 
+        self.walk(arg,env)
+      end
+    end
+
+    @Operation walkSetExp(line:Integer,collType:String,elements:Seq(OCL),env)
+      @For e in elements do
+        self.walk(e,env)
+      end
+    end
+
+    @Operation walkSlotUpdate(name:String,target:OCL,value:OCL,env)
+      self.walk(target,env);
+      self.walk(value,env)
+    end
+
+    @Operation walkStrExp(line:Integer,value:String,env)
+      null
+    end
+
+    @Operation walkVar(line:Integer,charStart:Integer,charEnd:Integer,name:String,env)
+
+      // Inform the editor of any unbound variables. The supplied
+      // environment binds the names of the variables to information
+      // bundles. Some name-spaces are implicitly imported everywhere
+      // and those should be checked here...
+
+      if env.binds(name)
+      then 
+        let d:VarDescriptor = env.lookup(name)
+        in if d <> null 
+           then
+             if d.type <> null then editor.varType(d.type,charStart,charEnd) end;
+             if d.definingLocation <> null 
+             then 
+               let l:Located = d.definingLocation
+               in editor.varDeclared(charStart,charEnd,l.charStart,l.charEnd)
+               end
+             end
+           end
+        end
+      elseif not(self.globalVar(name))
+      then editor.unboundVar(name,charStart,charEnd)
+      end
+    end
+  
+  end

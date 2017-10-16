@@ -383,9 +383,11 @@ context Code
       ]
     end
 
-    @Operation walkVar(line:Integer,name:String,arg)
+    @Operation walkVar(line:Integer,charStart:Integer,charEnd:Integer,name:String,arg)
       Var[
         line=line,
+        charStart=charStart,
+        charEnd=charEnd,
         name=self.walk(name,arg)
       ]
     end
@@ -407,7 +409,7 @@ context Code
     
     @Operation walkObject(o,arg)
       let walked = self.walkDispatchObject(o,arg)
-      in if o.isKindOf(Located) and walked.isKindOf(Located)
+      in if o.isKindOf(Located) and walked.isKindOf(Located) and walked <> null
          then (walked.charStart := o.charStart).charEnd := o.charEnd
          else walked
          end
@@ -569,8 +571,8 @@ context Code
         ValueBinding[name,type,value] do
           self.walkValueBinding(name,type,value,arg)
         end
-        Var[line,name] do
-          self.walkVar(line,name,arg)
+        Var[line,charStart,charEnd,name] do
+          self.walkVar(line,charStart,charEnd,name,arg)
         end
         VarUpdate[name,value] do
           self.walkVarUpdate(name,value,arg)

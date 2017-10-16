@@ -36,6 +36,12 @@ context TextEditor
       end
     end
 
+    @Operation clearErrors(editor)
+      @SendCommand(self)
+        clearErrors(editor.id())
+      end
+    end
+
     @Operation clearHighlights(editor)
       @SendCommand(self)
         clearHighlights(editor.id())
@@ -108,6 +114,12 @@ context TextEditor
     @Operation redo(editor)
       @SendCommand(self)
         redo(editor.id())
+      end
+    end
+    
+    @Operation rendering(editor,state:Boolean)
+      @SendCommand(self)
+        rendering(editor.id(),state)
       end
     end
     
@@ -184,10 +196,33 @@ context TextEditor
       end
     end
 
+    @Operation syntaxError(editor,position,message)
+      @SendCommand(self)
+       syntaxError(editor.id(),position,message)
+      end
+    end
+    
+    @Operation unboundVar(editor,name,charStart,charEnd)
+      @SendCommand(self)
+        unboundVar(editor.id(),name,charStart,charEnd)
+       end
+    end
     
     @Operation undo(editor)
       @SendCommand(self)
         undo(editor.id())
+       end
+    end
+    
+    @Operation varDeclared(editor,charStart,charEnd,decStart,decEnd)
+      @SendCommand(self)
+        varDec(editor.id(),charStart,charEnd,decStart,decEnd)
+       end
+    end
+    
+    @Operation varType(editor,type,charStart,charEnd)
+      @SendCommand(self)
+        varType(editor.id(),type.toString(),charStart,charEnd)
        end
     end
    

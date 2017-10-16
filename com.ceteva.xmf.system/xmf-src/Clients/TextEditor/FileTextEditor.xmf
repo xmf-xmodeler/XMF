@@ -68,10 +68,44 @@ context TextEditor
       super();
       self.lastModified := self.getFileModifiedDate()
     end
+
+    @Operation textChanged(text:String)
+      try
+        let unit = OCL::OCL.grammar.parseString(text,"CompilationUnit",[]);
+            walker = EditorWalker(self)
+        in self.commandInterpreter().clearErrors(self);
+           self.commandInterpreter().rendering(self,false);
+           walker.walk(unit,[]);
+           self.commandInterpreter().rendering(self,true)
+        end
+      catch(exception)
+        @TypeCase(exception)
+           Parser::ParseError do
+             self.commandInterpreter().syntaxError(self,exception.errorPos,exception.message);
+           self.commandInterpreter().rendering(self,true)
+           end
+        else 
+          xmf.message(exception.toString());
+          self.commandInterpreter().rendering(self,true)
+        end
+      end
+    end 
+
+    @Operation unboundVar(name:String,charStart:Integer,charEnd:Integer)
+      self.commandInterpreter().unboundVar(self,name,charStart,charEnd)   
+    end  
     
     @Operation updateFileQuestion()
       xmf.question("The file " + file.name() + " has been changed outside of the system,"
         + " do you want to update the editor?")
+    end
+
+    @Operation varType(type:Classifier,charStart:Integer,charEnd:Integer)
+       self.commandInterpreter().varType(self,type,charStart,charEnd)
+    end
+
+    @Operation varDeclared(charStart:Integer,charEnd:Integer,decStart:Integer,decEnd:Integer)
+       self.commandInterpreter().varDeclared(self,charStart,charEnd,decStart,decEnd)
     end
   
   end

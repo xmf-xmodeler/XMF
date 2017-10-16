@@ -118,13 +118,13 @@ context OCL::OCL
       // An atomic pattern is one that is delimited and is
       // not followed by a pattern infix operator...
     
-      Varp 
-    | Constp 
-    | Objectp 
-    | Consp 
-    | Keywordp 
-    | Syntaxp 
-    | '(' Pattern ')'.
+      <<Varp>> 
+    | <<Constp>> 
+    | <<Objectp>> 
+    | <<Consp>> 
+    | <<Keywordp>> 
+    | <<Syntaxp>> 
+    | '(' <<Pattern>> ')'.
     
     Binding ::=
     
@@ -167,7 +167,7 @@ context OCL::OCL
       // bindings are sneakily processed in the parser by flattening
       // let-expressions)... 
     
-      binding = Binding bindings = (';' Binding)* { Seq{ binding | bindings } }.
+      binding = <<Binding>> bindings = (';' <<Binding>>)* { Seq{ binding | bindings } }.
 
     Bindings ::= 
     
@@ -491,7 +491,7 @@ context OCL::OCL
 
     Import ::= 
     
-      'import' path = ImportPath ';' { Import(path) }.
+      << 'import' path = ImportPath ';' { Import(path) } >> .
     
     ImportPath ::= 
     
@@ -561,7 +561,7 @@ context OCL::OCL
     
       'in' body = <<Expr>> { body } 
       
-    | 'then' bindings = Bindings body = LetBody { Let(bindings,body) }.
+    | << 'then' bindings = <<Bindings>> body = LetBody { Let(bindings,body) } >> .
 
     LetExp ::= 
     
@@ -571,7 +571,7 @@ context OCL::OCL
     
       l = LinePos 
       
-      'let' bindings = Bindings 
+      'let' bindings = <<Bindings>>
       
       body = LetBody 'end' 
       

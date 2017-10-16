@@ -414,8 +414,17 @@ context Root
         body=self.walk(body,arg)
       ]
     end
-
+    
     @Operation walkObject(o,arg)
+      let walked = self.walkDispatchObject(o,arg)
+      in if o.isKindOf(Located) and walked.isKindOf(Located) and walked <> null
+         then (walked.charStart := o.charStart).charEnd := o.charEnd
+         else walked
+         end
+      end
+    end
+
+    @Operation walkDispatchObject(o,arg)
       @CaseObj o of
         AbstractOp[line,args,doc,name,type] do
           self.walkAbstractOp(line,args,doc,name,type,arg)
