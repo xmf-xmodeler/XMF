@@ -1,5 +1,4 @@
 #!/bin/sh
-set -x
 XMFHOME=$1
 LIB="$XMFHOME:$XMFHOME/../../com.ceteva.xmf.machine/bin"
 EVALUATOR=$XMFHOME/../xmf-img/compiler.img
