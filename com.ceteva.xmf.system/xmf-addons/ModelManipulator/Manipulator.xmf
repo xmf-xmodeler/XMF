@@ -5,8 +5,12 @@ context Root
 @Class Manipulator
 
   @Attribute model:Package end
-  @Attribute project:Projects::Project end
+  @Attribute project:Projects::Project end 
   
+  @Doc
+  Needed to start the Manipulator
+  end
+    
   @Constructor()
     self.model := Package("MyPackage");
     self.model.addParent(FMML);
@@ -14,6 +18,12 @@ context Root
     xmf.projectManager("MyProjects").add(self.project);
     Root.add(self.model)
   end
+  
+  @Doc
+  Package <--> Entity
+  end
+      
+  // add (for top level meta class)
       
   @Operation addMetaClass(name:String, level:Integer)
     self.checkNewClassPreconditions(name, level); // precondition
@@ -38,10 +48,20 @@ context Root
     andthen
     (self.model.classes-classesPre).size()=1
   end
+  
+
+  // add (for instances)
+
    
   @Operation addInstance(name:String, class:FMML::MetaClass)
-    self.model.add(class(name))
+    self.model.add(self.cleanInstanceAttributes(class(name)))
   end
+
+  @Operation cleanInstanceAttributes(obj:FMML::MetaClass) 
+    obj//obj.attributes := {}
+  end
+ 
+  // remove
   
   @Operation removeElement(element:Element)
     if element.level > 0 
@@ -53,36 +73,128 @@ context Root
     self.model.remove(element)
   end
   
+  @Doc
+  attributes: Entity <--> Attribute
+  end
+  
+  // add
+  
   @Operation addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)
-    if class.level < 1 then error("Cannot add attribute to object (level 0)") end;
-    if instLevel < 0 then error("instLevel must not be negative") end;
-    if class.level <= instLevel then error("instLevel must be less than class level") end;
-    if class.hasAttribute(name) then error("Cannot use duplicate name") end;
+    if class.level < 1 then xmf.error("Cannot add attribute to object (level 0)") end;
+    if instLevel < 0 then xmf.error("instLevel must not be negative") end;
+    if class.level <= instLevel then xmf.error("instLevel must be less than class level") end;
+    if class.hasAttribute(name) then xmf.error("Cannot use duplicate name") end;
     
     let 
-      a = Attribute(name)
+      a = Attribute(name);
+      allInst = self.allMetaInstances(class, instLevel);
+      allInstLevel = self.allMetaInstancesOneLevel(class, instLevel)
     in 
       a.isIntrinsic := true;
       a.type := type;
       a.instLevel := instLevel;
       
-      class.addAttribute(a)
+      class.addAttribute(a);
+      @For entity in allInst - allInstLevel do
+        entity.addAttribute(a)
+      end;
+      @For entity in allInstLevel do
+        ("DEBUG: checking if instance " + entity.name + " meta-*-of " + class.name + " needs Attribute " + name).println();
+        if a.init <> null
+        then
+          Kernel_addAtt(entity,a.name,a.init.invoke(entity,Seq{}))
+        else
+          Kernel_addAtt(entity,a.name,a.type.default())
+        end
+      end
     end
   end
+  
+  // remove
+  
+  // changeEntity
+  
+  @Doc
+  value: Slot <--> Entity
+  end
+  
+  // changeValue
+  
+  @Doc
+  type: Attribute <--> Entity 
+  end
+  
+  // changeType
+  
+  @Doc
+  parent: Entity <--> Entity 
+  end
+  
+  // add
+  
+  // remove
+  
+  @Doc
+  change of 
+   * Entity::name
+   * Attribute::name
+  end
+  
+  @Operation allMetaInstances(class:FMML::MetaClass, instLevel)
+    if instLevel >= class.level then [] else 
+//    let level = class.level - 1 // Start with first step already done.
+      let instances = class.allInstances() in
+        if class.level-1 > instLevel then
+          let newInstances = [] 
+          in  
+          //level := level - 1
+          // do recursive search for intrinsic instances
+            @For instance in instances do 
+              newInstances := newInstances.append(self.allMetaInstances(instance, instLevel))
+            end; // for
+            instances := instances.append(newInstances)
+          end // let
+        end; // if
+        instances
+      end
+    end
+  end
+  
+  @Operation allMetaInstancesOneLevel(class:FMML::MetaClass, instLevel)
+    let  
+      instances = self.allMetaInstances(class, instLevel)
+    then 
+      result = []
+    in
+      @For instance in instances do
+        if instance.level = instLevel 
+        then result := result.append([instance])
+        end
+      end;
+      result
+    end
+  end
+  
   
   @Operation help()
     "The following operations are available:".println();
     "addMetaClass(name:String, level:Integer)".println();
     "addInstance(name:String, class:FMML::MetaClass)".println();
     "addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)".println();
-    "removeElement(element:Element)".println()
+    "removeElement(element:Element)".println();
+    "".println()
   end
   
   @Operation test1()
     self.addMetaClass("Vier",4);
+    self.addAttribute(MyPackage::Vier, "att3_1", Integer, 3);
+    self.addAttribute(MyPackage::Vier, "att1_1", Integer, 1);
     self.addInstance("Drei",MyPackage::Vier);
+    self.addAttribute(MyPackage::Vier, "att3_2", Integer, 3);
     self.addInstance("Zwei",MyPackage::Drei);
-    self.addInstance("Eins",MyPackage::Zwei)
+    self.addInstance("Eins",MyPackage::Zwei);
+    self.addAttribute(MyPackage::Vier, "att1_2", Integer, 1);
+    self.addInstance("Null",MyPackage::Eins)
   end
   
 end
