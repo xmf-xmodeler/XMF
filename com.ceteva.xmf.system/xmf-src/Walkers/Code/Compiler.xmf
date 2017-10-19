@@ -17,12 +17,13 @@ context Code
       ]
     end
 
-    @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,arg)
+    @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),arg)
       CompilationUnit[
         resource=self.walk(resource,arg),
         exps=exps->collect(x | self.walk(x,arg)),
         imports=imports->collect(x | self.walk(x,arg)),
-        source=self.walk(source,arg)
+        source=self.walk(source,arg),
+        parserImports=parserImports->collect(p | self.walk(p,arg))
       ]
     end
 
@@ -37,8 +38,8 @@ context Code
         CompilationModule[elements,resource] do
           self.walkCompilationModule(resource,elements,arg)
         end
-        CompilationUnit[resource,exps,imports,source] do
-          self.walkCompilationUnit(resource,exps,imports,source,arg)
+        CompilationUnit[resource,exps,imports,source,parserImports] do
+          self.walkCompilationUnit(resource,exps,imports,source,parserImports,arg)
         end
         Import[nameSpace] do
           self.walkImport(nameSpace,arg)

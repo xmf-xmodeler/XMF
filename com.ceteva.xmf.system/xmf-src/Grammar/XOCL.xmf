@@ -258,14 +258,14 @@ context OCL::OCL
       
       // Parser imports affect the current parse...
     
-      ParserImport* 
+      parserImports = ParserImport* 
       
       // Name-space imports affect the dynamic variables
       // referenced in the rest of the compilation unit...
       
       imports = Import* 
       
-      // A sequence of definitions ot expressions...
+      // A sequence of definitions of expressions...
       
       exps = CompilationBody* 
       
@@ -275,7 +275,7 @@ context OCL::OCL
       
       s = pState 
       
-      { CompilationUnit("",imports,exps,s.getSource()) }.
+      { CompilationUnit("",imports,exps,s.getSource(),parserImports) }.
     
     CompilationBody ::= 
     
@@ -689,7 +689,9 @@ context OCL::OCL
       // Add the name-space designated by the path to the
       // current parse engine...
       
-      ImportAt.
+      ImportAt
+
+      { ParserImport([name]+names,null) }.
 
     Parentheses ::= 
     

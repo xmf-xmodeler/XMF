@@ -65,9 +65,10 @@ context XmfTextEditor
     end
 
     @Operation setSyntaxHighlightRules()
-      self.addMultilineRule("/*","*/",Editor::gray);
+      self.addMultilineRule("/*","*/","102,0,204");
       self.addMultilineRule("@Doc","end",Editor::red);
       self.addMultilineRule("\"","\"",Editor::green);
+      self.addMultilineRule("//","\n","0,102,0");
       self.addWordRule("self",Editor::torquoise);
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         rules->iterate(rule S="" | self.addWordRule(rule,Clients::TextEditor::Editor::blue))

@@ -13,9 +13,28 @@ context TextEditor
     // the source code. Any feature of a var descriptor might be null if 
     // the information is not available.
 
-    @Attribute type:Classifier          end
-    @Attribute definingLocation:Located end
+    @Attribute type:Classifier                  end
+    @Attribute definingLocation:Located         end
+    @Attribute tooltip:String = ""              end
 
-    @Constructor(type,definingLocation) ! end
+    @Constructor()                              end
+    @Constructor(type) !                        end
+    @Constructor(type,definingLocation)         end
+    @Constructor(type,definingLocation,tooltip) end
+
+    @Operation sendEditor(editor,charStart,charEnd)
+
+      // Inform the editor of any information that should be displayed
+      // about this variable...
+
+      if tooltip <> "" then editor.setTooltip(tooltip,charStart,charEnd) end;
+      if type <> null then editor.varType(type,charStart,charEnd) end;
+      if definingLocation <> null 
+      then 
+        let l:Located = definingLocation
+        in editor.varDeclared(charStart,charEnd,l.charStart,l.charEnd)
+        end
+      end
+    end
 
   end

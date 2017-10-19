@@ -175,6 +175,12 @@ context TextEditor
         setTooltip(editor.id(),tooltip)
       end
     end
+    
+    @Operation setTooltip(editor,tooltip,charStart,charEnd)
+      @SendCommand(self)
+        setTooltip(editor.id(),tooltip,charStart,charEnd)
+      end
+    end
         
     @Operation setUrl(browser,url)
       let browserId = browser.id() in

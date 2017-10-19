@@ -15,9 +15,10 @@ context OCL
     // are referenced by the program code. The expressions are evaluated 
     // in the environment created by the imports.
       
-    @Attribute imports  : Seq(Import)      (?,!,+,-) end
-    @Attribute exps     : Seq(Performable) (?,!,+,!) end
-    @Attribute source   : String           (?,!)     end
+    @Attribute parserImports : Seq(ParserImport) (?,!,+,-) end
+    @Attribute imports       : Seq(Import)       (?,!,+,-) end
+    @Attribute exps          : Seq(Performable)  (?,!,+,!) end
+    @Attribute source        : String            (?,!)     end
     
     @Constructor(resource) ! end
     
@@ -26,6 +27,8 @@ context OCL
     @Constructor(resource,imports,exps) end
     
     @Constructor(resource,imports,exps,source) end
+    
+    @Constructor(resource,imports,exps,source,parserImports) end
       
     @Operation foldExps(resourceName:String):Performable
       // Create a single expression to compile. The expression is the

@@ -6,12 +6,13 @@ import Code;
 import Clients;
 import TextEditor;
 import FileTextEditor;
+import Stacks;
 
 context TextEditor
 
   @Class EditorWalker extends CompilerWalker 
 
-    @Attribute editor : FileTextEditor end
+    @Attribute editor : FileTextEditor  end
 
     @Constructor(editor) ! end
 
@@ -51,7 +52,11 @@ context TextEditor
                 nameSpaces := [nameSpace]+nameSpaces;
                 @For name in nameSpace.names() do
                   if nameSpace.hasElement(name)
-                  then env := env.bind(name.toString(),ImportDescriptor(nameSpace.getElement(name).of(),i))
+                  then 
+                    let e = nameSpace.getElement(name) then
+                        tooltip = if e.isKindOf(Class) then "Defined in " + e.resourceName else "" end
+                    in env := env.bind(name.toString(),ImportDescriptor(e.of(),i,tooltip))
+                    end
                   else env := env.bind(name.toString(),ImportDescriptor(null,i))
                   end
                 end
@@ -103,7 +108,7 @@ context TextEditor
       end
     end
 
-    @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,env)
+    @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
       @For exp in exps do
         self.walk(exp,self.handleImports(imports,env))
       end
@@ -200,13 +205,13 @@ context TextEditor
 
     @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,env)
        self.walk(collection,env);
-       self.walk(body,env.bind(name,VarDescriptor(null,null)))
+       self.walk(body,env.bind(name,VarDescriptor()))
     end
 
     @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,env)
       self.walk(collection,env);
       self.walk(value,env);
-      self.walk(body,env.bind(accumulator,null).bind(name,VarDescriptor(null,null)))
+      self.walk(body,env.bind(accumulator,null).bind(name,VarDescriptor()))
     end
 
     @Operation walkLet(line:Integer,bindings:Seq(ValueBinding),body:OCL,env)
@@ -289,14 +294,7 @@ context TextEditor
       then 
         let d:VarDescriptor = env.lookup(name)
         in if d <> null 
-           then
-             if d.type <> null then editor.varType(d.type,charStart,charEnd) end;
-             if d.definingLocation <> null 
-             then 
-               let l:Located = d.definingLocation
-               in editor.varDeclared(charStart,charEnd,l.charStart,l.charEnd)
-               end
-             end
+           then d.sendEditor(editor,charStart,charEnd)
            end
         end
       elseif not(self.globalVar(name))

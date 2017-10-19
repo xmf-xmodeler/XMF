@@ -159,6 +159,10 @@ context TextEditor
       self.commandInterpreter().setTooltip(self,tooltip)
     end
     
+    @Operation setTooltip(tooltip:String,charStart:Integer,charEnd:Integer)
+      self.commandInterpreter().setTooltip(self,tooltip,charStart,charEnd)
+    end
+    
     @Operation show()
     
       // Used to show the editor.
