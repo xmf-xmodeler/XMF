@@ -902,9 +902,11 @@ context OCL::OCL
       // named (via paths), parametric (a classifier applied to
       // some arguments) or an operation type...
     
-      path = TypePath (args = TypeArgs { ParametricType(path,args) } 
-      
-    | { NamedType(path) }) 
+      path = TypePath (args = TypeArgs { ParametricType(path,args) } | { NamedType(path) }) 
+
+    | '[' t = <<TypeExp>> ']' { ParametricType(["Seq"],[t]) }
+
+    | '{' t = <<TypeExp>> '}' { ParametricType(["Set"],[t]) }
     
     | Drop 
     

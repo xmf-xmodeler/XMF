@@ -109,10 +109,57 @@ context TextEditor
     end
 
     @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
-      @For exp in exps do
-        self.walk(exp,self.handleImports(imports,env))
+      let env0 = self.addCompilationUnitDefs(imports,exps,env)
+      in @For exp in exps do
+           self.walk(exp,self.handleImports(imports,env0))
+         end
       end
     end
+
+    @Operation addCompilationUnitDefs(imports:Seq(Import),exps:Seq(Performable),env)
+
+      // A compilation unit typically contains definitions of the form context P D where P is
+      // a path to a name space and D is a definition with a name. In addition there may be
+      // path updates of the form P::N := M where P is a path to a name space and N is a named 
+      // element to be added or updated. Assuming P is imported in the compilation unit, then 
+      // the name of D is available as a free variable anywhere. This operation extends the 
+      // supplied environment with variable descriptors for these definitions...
+
+      @Letrec
+        importedNames = imports->iterate(i paths = [["Root"],["XCore"]] | paths + [i.nameSpace]);
+        equalPaths(p1:Seq(String),p2:Seq(String)):Boolean = 
+          if p1 = [] and p2 = []
+          then true
+          elseif p1 = [] or p2 = []
+          then false
+          else p1->head = p2->head and equalPaths(p1->tail,p2->tail)
+          end;
+        isDef(e:Performable):Boolean = e.isKindOf(XOCL::Def) or e.isKindOf(OCL::Operation);
+        toPath(p:Path):Seq(String) =
+          if p.root.isKindOf(Var)
+          then [p.root.name.toString()]+p.names->butLast
+          else []
+          end
+      in @For exp in exps do
+           if exp.isKindOf(ContextDef)
+           then
+             if isDef(exp.element)
+             then 
+               if importedNames->exists(p | equalPaths(exp.path,p))
+               then env := env.bind(exp.element.name.toString(),VarDescriptor(null,exp.element))
+               end
+             end
+           elseif exp.isKindOf(PathUpdate)
+           then 
+             if importedNames->exists(p | equalPaths(toPath(exp.path),p))
+             then env := env.bind(exp.path.names->last.toString(),VarDescriptor(null,exp))
+             end
+           end
+         end; 
+         env
+      end
+    end
+    
 
     @Operation walkConsExp(head:OCL,tail:OCL,env)
       self.walk(head,env);

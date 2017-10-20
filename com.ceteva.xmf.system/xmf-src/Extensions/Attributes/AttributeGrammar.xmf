@@ -125,6 +125,10 @@ context Attribute
       n = AttTypeName 
       
       AttTypeTail^(n)
+
+    | '[' t = <<AttType>> ']' { Apply(Var("Seq"),[t]) }
+
+    | '{' t = <<AttType>> '}' { Apply(Var("Set"),[t]) }
       
     | Drop.
       
