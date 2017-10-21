@@ -76,6 +76,7 @@ context TextEditor
         in self.commandInterpreter().clearErrors(self);
            self.commandInterpreter().rendering(self,false);
            walker.walk(unit,[]);
+           walker.reset();
            self.commandInterpreter().rendering(self,true)
         end
       catch(exception)

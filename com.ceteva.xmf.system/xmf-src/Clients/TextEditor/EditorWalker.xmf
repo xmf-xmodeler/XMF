@@ -60,7 +60,7 @@ context TextEditor
                   then 
                     let e = nameSpace.getElement(name)
                     in if e.isKindOf(XCore::Class)
-                       then env := env.bind(name.toString(),TypeDescriptor(e.of().toType(),e.toType(),i,"Defined in " + e.resourceName))
+                       then env := env.bind(name.toString(),TypeDescriptor(e.of(),e,i,"Defined in " + e.resourceName))
                        else env := env.bind(name.toString(),ImportDescriptor(null,i))
                        end
                     end
@@ -107,7 +107,7 @@ context TextEditor
 
     @Operation walkClass(line:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
       let atts = defs->select(d | d.isKindOf(XOCL::Attribute)) then
-          env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type.toType(),a))) then
+          env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type,a))) then
           env0 = parents->iterate(parent env = env0 | self.bindInheritedAtts(parent,env))
       in self.walk(metaClass,env);
          @For parent in parents do self.walk(parent,env) end;
