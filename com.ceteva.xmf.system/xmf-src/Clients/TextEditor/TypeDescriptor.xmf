@@ -1,0 +1,19 @@
+parserImport XOCL;
+
+import Signatures;
+import OCL;
+import Clients;
+import TextEditor;
+
+context TextEditor
+
+  @Class TypeDescriptor extends VarDescriptor
+
+    // A descriptor used by an EditorWalker to record variable whose value is
+    // a type.
+
+    @Attribute meta:Signature end
+
+    @Constructor(type,meta,definingLocation,tooltip) end
+
+  end

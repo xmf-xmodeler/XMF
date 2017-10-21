@@ -1,5 +1,8 @@
 parserImport XOCL;
 
+import Signatures;
+import NamedElement;
+import XOCL;
 import OCL;
 import Walkers;
 import Code;
@@ -46,18 +49,21 @@ context TextEditor
       let nameSpaces = [Root]
       in @For i in imports do
            let path:Seq(String) = i.nameSpace then
-               nameSpace:NameSpace = self.getNameSpace(path,nameSpaces)
+               nameSpace:NameSpace = self.getNameSpace(path,nameSpaces);
+               getName(e) = if e.hasStructuralFeature("name") then e.name else "$" end then
+               names(n:NameSpace):[Symbol] = n.contents()->collect(c | getName(c))
            in if nameSpace <> null
               then
                 nameSpaces := [nameSpace]+nameSpaces;
-                @For name in nameSpace.names() do
+                @For name in names(nameSpace) do
                   if nameSpace.hasElement(name)
                   then 
-                    let e = nameSpace.getElement(name) then
-                        tooltip = if e.isKindOf(Class) then "Defined in " + e.resourceName else "" end
-                    in env := env.bind(name.toString(),ImportDescriptor(e.of(),i,tooltip))
+                    let e = nameSpace.getElement(name)
+                    in if e.isKindOf(XCore::Class)
+                       then env := env.bind(name.toString(),TypeDescriptor(e.of().toType(),e.toType(),i,"Defined in " + e.resourceName))
+                       else env := env.bind(name.toString(),ImportDescriptor(null,i))
+                       end
                     end
-                  else env := env.bind(name.toString(),ImportDescriptor(null,i))
                   end
                 end
               end
@@ -101,12 +107,44 @@ context TextEditor
 
     @Operation walkClass(line:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
       let atts = defs->select(d | d.isKindOf(XOCL::Attribute)) then
-          env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type,a)))
+          env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type.toType(),a))) then
+          env0 = parents->iterate(parent env = env0 | self.bindInheritedAtts(parent,env))
       in self.walk(metaClass,env);
          @For parent in parents do self.walk(parent,env) end;
          @For def in defs do self.walk(def,env0) end
       end
     end
+
+    @Operation bindInheritedAtts(parent:Performable,env) 
+      if parent.isKindOf(Var)
+      then 
+        let name:String = parent.name.toString()
+        in if env.binds(name)
+           then 
+             let v:VarDescriptor = env.lookup(name)
+             in if v.isKindOf(TypeDescriptor)
+                then 
+                  let m:Signature = v.meta
+                  in if m <> null
+                     then 
+                       @For b in m.bindings do
+                         if b.element.isKindOf(Field)
+                         then env := env.bind(b.name,AttDescriptor(b.element.att1.force(),parent))
+                         end
+                       end
+                     end
+                  end;
+                  env
+                else env
+                end
+             end
+           else env
+           end
+         end
+       else env
+       end
+     end
+        
 
     @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
       let env0 = self.addCompilationUnitDefs(imports,exps,env)

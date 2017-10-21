@@ -251,10 +251,16 @@ context ModelBrowsers
     @Operation expand()
       if not self.expanded 
       then
-        self.removeDummyNode();
-        self.addContents();
-        self.newContents();
-        self.expanded := true
+        try
+          self.commandInterpreter().renderOff();
+          self.removeDummyNode();
+          self.addContents();
+          self.newContents();
+          self.expanded := true;
+          self.commandInterpreter().renderOn()
+        catch(e)
+          self.commandInterpreter().renderOn()
+        end
       end;
       
       // the following should be refactored into a project node class

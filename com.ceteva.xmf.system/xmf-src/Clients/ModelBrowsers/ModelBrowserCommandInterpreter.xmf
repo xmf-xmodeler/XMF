@@ -111,6 +111,18 @@ context ModelBrowsers
         nodeId
       end
     end
+
+    @Operation renderOff()
+      @SendCommand(self)
+         renderOff()
+      end
+    end
+
+    @Operation renderOn()
+      @SendCommand(self)
+         renderOn()
+      end
+    end
     
     @Operation selectModelBrowserNodeCommand(node:ModelBrowserNode,doExpand:Boolean)
       let nodeId = node.id() in

@@ -1,5 +1,6 @@
 parserImport XOCL;
 
+import Signatures;
 import OCL;
 import Clients;
 import TextEditor;
@@ -13,7 +14,7 @@ context TextEditor
     // the source code. Any feature of a var descriptor might be null if 
     // the information is not available.
 
-    @Attribute type:Classifier                  end
+    @Attribute type:Signature                   end
     @Attribute definingLocation:Located         end
     @Attribute tooltip:String = ""              end
 
