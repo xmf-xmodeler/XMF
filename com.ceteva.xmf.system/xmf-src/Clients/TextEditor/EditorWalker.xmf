@@ -124,13 +124,11 @@ context TextEditor
              let v:VarDescriptor = env.lookup(name)
              in if v.isKindOf(TypeDescriptor)
                 then 
-                  let m:Signature = v.meta
-                  in if m <> null
+                  let c:Classifier = v.meta
+                  in if c <> null andthen c.isKindOf(XCore::Class)
                      then 
-                       @For b in m.bindings do
-                         if b.element.isKindOf(Field)
-                         then env := env.bind(b.name,AttDescriptor(b.element.att1.force(),parent))
-                         end
+                       @For a in c.allAttributes() do
+                         env := env.bind(a.name.toString(),AttDescriptor(a.type,parent))
                        end
                      end
                   end;
