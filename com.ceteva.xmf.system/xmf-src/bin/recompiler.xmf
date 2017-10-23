@@ -1,0 +1,13 @@
+parserImport XOCL;
+
+context Root
+  @Operation saveRecompiler()  
+    xmf.saveImage(xmf.homeDir()+"/../xmf-img/recompiler.img");
+    
+    (xmf.homeDir() + "/Manifest.o").loadBin(false).touch(xmf.homeDir(),true);
+    (xmf.homeDir() + "/Manifest.o").loadBin(false).touch(xmf.homeDir(),false);
+    
+	   (xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir());
+		
+    xmf.findClientByName("com.ceteva.mosaic").commandInterpreter.shutdown()
+  end
