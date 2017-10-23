@@ -116,32 +116,39 @@ context TextEditor
     end
 
     @Operation bindInheritedAtts(parent:Performable,env) 
-      if parent.isKindOf(Var)
-      then 
-        let name:String = parent.name.toString()
-        in if env.binds(name)
-           then 
+      let getAtts(name:String):[XCore::Attribute] =
+            if env.binds(name)
+            then 
              let v:VarDescriptor = env.lookup(name)
              in if v.isKindOf(TypeDescriptor)
                 then 
                   let c:Classifier = v.meta
                   in if c <> null andthen c.isKindOf(XCore::Class)
-                     then 
-                       @For a in c.allAttributes() do
-                         env := env.bind(a.name.toString(),AttDescriptor(a.type,parent))
-                       end
+                     then c.allAttributes()->asSeq
+                     else []
                      end
-                  end;
-                  env
-                else env
+                  end
+                else []
                 end
              end
-           else env
+            elseif XCore.hasElement(name) andthen XCore.getElement(name).isReallyKindOf(XCore::Class)
+            then XCore.getElement(name).allAttributes()->asSeq
+            elseif Root.hasElement(name) andthen Root.getElement(name).isReallyKindOf(XCore::Class)
+            then Root.getElement(name).allAttributes()->asSeq
+            else []
+            end
+      in if parent.isKindOf(Var)
+         then 
+           let name:String = parent.name.toString()
+           in @For a in getAtts(name) do 
+                 env := env.bind(a.name.toString(),AttDescriptor(a.type,parent))
+              end;
+              env
            end
+         else env
          end
-       else env
-       end
      end
+    end
         
 
     @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
@@ -287,8 +294,13 @@ context TextEditor
     end
 
     @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,env)
-       self.walk(collection,env);
-       self.walk(body,env.bind(name,VarDescriptor()))
+       let varStart = collection.charEnd + (iterOp + "->(")->size then
+           varEnd = varStart + name->size then
+           located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
+           env0 = env.bind(name,VarDescriptor(null,located))
+       in self.walk(collection,env);
+          self.walk(body,env0)
+       end
     end
 
     @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,env)
