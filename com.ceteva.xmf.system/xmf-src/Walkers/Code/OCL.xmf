@@ -11,21 +11,21 @@ context Code
     // The basic walker for code. Extend this walker with walkers
     // for specific features of code and for DSL walkers...
 
-    @Operation walkAddp(left:Pattern,right:Pattern,arg)
+    @Operation walkAddp(charStart:Integer,charEnd:Integer,left:Pattern,right:Pattern,arg)
       Addp[
         left=self.walk(left,arg),
         right=self.walk(right,arg)
       ]
     end
 
-    @Operation walkApply(args:Seq(OCL),operator:OCL,arg)
+    @Operation walkApply(charStart:Integer,charEnd:Integer,args:Seq(OCL),operator:OCL,arg)
       Apply[
         args=args->collect(x | self.walk(x,arg)),
         operator=self.walk(operator,arg)
       ]
     end
 
-    @Operation walkBinExp(binOp:String,left:OCL,right:OCL,arg)
+    @Operation walkBinExp(charStart:Integer,charEnd:Integer,binOp:String,left:OCL,right:OCL,arg)
       BinExp[
         binOp=self.walk(binOp,arg),
         left=self.walk(left,arg),
@@ -33,20 +33,20 @@ context Code
       ]
     end
 
-    @Operation walkBinding(name:String,arg)
+    @Operation walkBinding(charStart:Integer,charEnd:Integer,name:String,arg)
       Binding[
         name=self.walk(name,arg)
       ]
     end
 
-    @Operation walkBoolExp(line:Integer,value:Boolean,arg)
+    @Operation walkBoolExp(line:Integer,charStart:Integer,charEnd:Integer,value:Boolean,arg)
       BoolExp[
         line=line,
         value=self.walk(value,arg)
       ]
     end
 
-    @Operation walkCollExp(args:Seq(OCL),collOp:String,collection:OCL,arg)
+    @Operation walkCollExp(charStart:Integer,charEnd:Integer,args:Seq(OCL),collOp:String,collection:OCL,arg)
       CollExp[
         args=args->collect(x | self.walk(x,arg)),
         collOp=self.walk(collOp,arg),
@@ -61,7 +61,7 @@ context Code
       ]
     end
 
-    @Operation walkConsExp(head:OCL,tail:OCL,arg)
+    @Operation walkConsExp(charStart:Integer,charEnd:Integer,head:OCL,tail:OCL,arg)
       ConsExp[
         head=self.walk(head,arg),
         tail=self.walk(tail,arg)
@@ -75,7 +75,7 @@ context Code
       ]
     end
 
-    @Operation walkConst(value:Element,arg)
+    @Operation walkConst(charStart:Integer,charEnd:Integer,value:Element,arg)
       Const[
         value=self.walk(value,arg)
       ]
@@ -87,7 +87,7 @@ context Code
       ]
     end
 
-    @Operation walkContextDef(element:OCL,isForward:Boolean,path:Seq(Element),arg)
+    @Operation walkContextDef(charStart:Integer,charEnd:Integer,element:OCL,isForward:Boolean,path:Seq(Element),arg)
       ContextDef[
         element=self.walk(element,arg),
         isForward=self.walk(isForward,arg),
@@ -95,7 +95,7 @@ context Code
       ]
     end
 
-    @Operation walkDot(name:String,target:OCL,arg)
+    @Operation walkDot(charStart:Integer,charEnd:Integer,name:String,target:OCL,arg)
       Dot[
         name=self.walk(name,arg),
         target=self.walk(target,arg)
@@ -138,7 +138,7 @@ context Code
       ]
     end
     
-    @Operation walkIf(line:Integer,test:Performable,e1:Performable,e2:Performable,arg)
+    @Operation walkIf(line:Integer,charStart:Integer,charEnd:Integer,test:Performable,e1:Performable,e2:Performable,arg)
       If(line,self.walk(test,arg),self.walk(e1,arg),self.walk(e2,arg))
     end
 
@@ -163,14 +163,14 @@ context Code
       ]
     end
 
-    @Operation walkIntExp(line:Integer,value:Integer,arg)
+    @Operation walkIntExp(line:Integer,charStart:Integer,charEnd:Integer,value:Integer,arg)
       IntExp[
         line=line,
         value=self.walk(value,arg)
       ]
     end
 
-    @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,arg)
+    @Operation walkIterExp(charStart:Integer,charEnd:Integer,body:OCL,collection:OCL,iterOp:String,name:String,arg)
       IterExp[
         body=self.walk(body,arg),
         collection=self.walk(collection,arg),
@@ -179,7 +179,7 @@ context Code
       ]
     end
 
-    @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,arg)
+    @Operation walkIterate(charStart:Integer,charEnd:Integer,accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,arg)
       Iterate[
         accumulator=self.walk(accumulator,arg),
         body=self.walk(body,arg),
@@ -211,7 +211,7 @@ context Code
       ]
     end
 
-    @Operation walkLet(line:Integer,bindings:Seq(ValueBinding),body:OCL,arg)
+    @Operation walkLet(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:OCL,arg)
       Let[
         line=line,
         bindings=
@@ -257,7 +257,7 @@ context Code
       ]
     end
 
-    @Operation walkOperation(documentation:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,parameters:Seq(Pattern),performable:Performable,type:TypeExp,properties,arg)
+    @Operation walkOperation(charStart:Integer,charEnd:Integer,documentation:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,parameters:Seq(Pattern),performable:Performable,type:TypeExp,properties,arg)
       Operation[
         documentation=self.walk(documentation,arg),
         imports=imports->collect(x | self.walk(x,arg)),
@@ -297,25 +297,25 @@ context Code
       ]
     end
 
-    @Operation walkPath(names:Seq(Element),root:OCL,arg)
+    @Operation walkPath(charStart:Integer,charEnd:Integer,names:Seq(Element),root:OCL,arg)
       Path[
         names=names->collect(x | self.walk(x,arg)),
         root=self.walk(root,arg)
       ]
     end
 
-    @Operation walkPathUpdate(path:Path,value:Performable,arg)
+    @Operation walkPathUpdate(charStart:Integer,charEnd:Integer,path:Path,value:Performable,arg)
       PathUpdate[
         path=self.walk(path,arg),
         value=self.walk(value,arg)
       ]
     end
 
-    @Operation walkSelf(line:Integer,arg)
+    @Operation walkSelf(line:Integer,charStart:Integer,charEnd:Integer,arg)
       Self[line=line]
     end
 
-    @Operation walkSend(args:Seq(OCL),message:String,target:OCL,arg)
+    @Operation walkSend(charStart:Integer,charEnd:Integer,args:Seq(OCL),message:String,target:OCL,arg)
       Send[
         args=args->collect(x | self.walk(x,arg)),
         message=self.walk(message,arg),
@@ -418,44 +418,44 @@ context Code
 
     @Operation walkDispatchObject(o,arg)
       @CaseObj o of
-        Addp[left,right] do
-          self.walkAddp(left,right,arg)
+        Addp[charStart,charEnd,left,right] do
+          self.walkAddp(charStart,charEnd,left,right,arg)
         end
-        Apply[args,operator] do
-          self.walkApply(args,operator,arg)
+        Apply[charStart,charEnd,args,operator] do
+          self.walkApply(charStart,charEnd,args,operator,arg)
         end
-        BinExp[binOp,left,right] do
-          self.walkBinExp(binOp,left,right,arg)
+        BinExp[charStart,charEnd,binOp,left,right] do
+          self.walkBinExp(charStart,charEnd,binOp,left,right,arg)
         end
-        Binding[name] do
-          self.walkBinding(name,arg)
+        Binding[charStart,charEnd,name] do
+          self.walkBinding(charStart,charEnd,name,arg)
         end
-        BoolExp[line,value] do
-          self.walkBoolExp(line,value,arg)
+        BoolExp[line,charStart,charEnd,value] do
+          self.walkBoolExp(line,charStart,charEnd,value,arg)
         end
-        CollExp[args,collOp,collection] do
-          self.walkCollExp(args,collOp,collection,arg)
+        CollExp[charStart,charEnd,args,collOp,collection] do
+          self.walkCollExp(charStart,charEnd,args,collOp,collection,arg)
         end
         Condp[condition,pattern] do
           self.walkCondp(condition,pattern,arg)
         end
-        ConsExp[head,tail] do
-          self.walkConsExp(head,tail,arg)
+        ConsExp[charStart,charEnd,head,tail] do
+          self.walkConsExp(charStart,charEnd,head,tail,arg)
         end
         Consp[head,tail] do
           self.walkConsp(head,tail,arg)
         end
-        Const[value] do
-          self.walkConst(value,arg)
+        Const[charStart,charEnd,value] do
+          self.walkConst(charStart,charEnd,value,arg)
         end
         Constp[const] do
           self.walkConstp(const,arg)
         end
-        ContextDef[element,isForward,path] do
-          self.walkContextDef(element,isForward,path,arg)
+        ContextDef[charStart,charEnd,element,isForward,path] do
+          self.walkContextDef(charStart,charEnd,element,isForward,path,arg)
         end
-        Dot[name,target] do
-          self.walkDot(name,target,arg)
+        Dot[charStart,charEnd,name,target] do
+          self.walkDot(charStart,charEnd,name,target,arg)
         end
         Drop[exp] do
           self.walkDrop(exp,arg)
@@ -472,8 +472,8 @@ context Code
         HeadUpdate[seq,value] do
           self.walkHeadUpdate(seq,value,arg)
         end
-        If[line] do
-          self.walkIf(line,o.test,o.get("then"),o.get("else"),arg)
+        If[line,charStart,charEnd] do
+          self.walkIf(line,charStart,charEnd,o.test,o.get("then"),o.get("else"),arg)
         end
         ImportIn[body,nameSpace] do
           self.walkImportIn(body,nameSpace,arg)
@@ -484,14 +484,14 @@ context Code
         Instantiate[args,class] do
           self.walkInstantiate(args,class,arg)
         end
-        IntExp[line,value] do
-          self.walkIntExp(line,value,arg)
+        IntExp[line,charStart,charEnd,value] do
+          self.walkIntExp(line,charStart,charEnd,value,arg)
         end
-        IterExp[body,collection,iterOp,name] do
-          self.walkIterExp(body,collection,iterOp,name,arg)
+        IterExp[charStart,charEnd,body,collection,iterOp,name] do
+          self.walkIterExp(charStart,charEnd,body,collection,iterOp,name,arg)
         end
-        Iterate[accumulator,body,collection,name,value] do
-          self.walkIterate(accumulator,body,collection,name,value,arg)
+        Iterate[charStart,charEnd,accumulator,body,collection,name,value] do
+          self.walkIterate(charStart,charEnd,accumulator,body,collection,name,value,arg)
         end
         KeyArg[name,value] do
           self.walkKeyArg(name,value,arg)
@@ -502,8 +502,8 @@ context Code
         Keywordp[class,keys,names] do
           self.walkKeywordp(class,keys,names,arg)
         end
-        Let[line,bindings,body] do
-          self.walkLet(line,bindings,body,arg)
+        Let[line,charStart,charEnd,bindings,body] do
+          self.walkLet(line,charStart,charEnd,bindings,body,arg)
         end
         Lift[line,exp] do
           self.walkLift(line,exp,arg)
@@ -520,8 +520,8 @@ context Code
         OpType[domains,range] do
           self.walkOpType(domains,range,arg)
         end
-        Operation[documentation,imports,isMultiArgs,name,parameters,performable,type,properties] do
-          self.walkOperation(documentation,imports,isMultiArgs,name,parameters,performable,type,properties,arg)
+        Operation[charStart,charEnd,documentation,imports,isMultiArgs,name,parameters,performable,type,properties] do
+          self.walkOperation(charStart,charEnd,documentation,imports,isMultiArgs,name,parameters,performable,type,properties,arg)
         end
         Order[first,second] do
           self.walkOrder(first,second,arg)
@@ -535,17 +535,17 @@ context Code
         ParserImport[exp,names] do
           self.walkParserImport(exp,names,arg)
         end
-        Path[names,root] do
-          self.walkPath(names,root,arg)
+        Path[charStart,charEnd,names,root] do
+          self.walkPath(charStart,charEnd,names,root,arg)
         end
-        PathUpdate[path,value] do
-          self.walkPathUpdate(path,value,arg)
+        PathUpdate[charStart,charEnd,path,value] do
+          self.walkPathUpdate(charStart,charEnd,path,value,arg)
         end
-        Self[line] do
-          self.walkSelf(line,arg)
+        Self[line,charStart,charEnd] do
+          self.walkSelf(line,charStart,charEnd,arg)
         end
-        Send[args,message,target] do
-          self.walkSend(args,message,target,arg)
+        Send[charStart,charEnd,args,message,target] do
+          self.walkSend(charStart,charEnd,args,message,target,arg)
         end
         SetExp[line,collType,elements] do
           self.walkSetExp(line,collType,elements,arg)

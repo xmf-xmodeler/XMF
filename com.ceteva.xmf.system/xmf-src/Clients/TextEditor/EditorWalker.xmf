@@ -73,45 +73,50 @@ context TextEditor
        end
     end
 
-    @Operation walkApply(args:Seq(OCL),operator:OCL,env)
+    @Operation walkApply(charStart:Integer,charEnd:Integer,args:Seq(OCL),operator:OCL,env)
       self.walk(operator,env);
       @For arg in args do
         self.walk(arg,env)
-      end
+      end;
+      editor.ast("application",charStart,charEnd)
     end
 
-    @Operation walkAttribute(line:Integer,doc:Performable,init:Performable,meta:Performable,modifiers:AttributeModifiers,mult:String,name:String,properties:Seq(Element),type:Performable,env)
+    @Operation walkAttribute(line:Integer,charStart:Integer,charEnd:Integer,doc:Performable,init:Performable,meta:Performable,modifiers:AttributeModifiers,mult:String,name:String,properties:Seq(Element),type:Performable,env)
       self.walk(init,env);
-      self.walk(type,env)
+      self.walk(type,env);
+      editor.ast("attribute definition",charStart,charEnd)
     end
 
-    @Operation walkBinExp(binOp:String,left:OCL,right:OCL,env)
+    @Operation walkBinExp(charStart:Integer,charEnd:Integer,binOp:String,left:OCL,right:OCL,env)
       self.walk(left,env);
-      self.walk(right,env)
+      self.walk(right,env);
+      editor.ast("binexp",charStart,charEnd)
     end
 
-    @Operation walkBinding(name:String,env)
-      null
+    @Operation walkBinding(charStart:Integer,charEnd:Integer,name:String,env)
+      editor.ast("binding",charStart,charEnd)
     end
 
-    @Operation walkBoolExp(line:Integer,value:Boolean,env)
-      null
+    @Operation walkBoolExp(line:Integer,charStart:Integer,charEnd:Integer,value:Boolean,env)
+      editor.ast("bool",charStart,charEnd)
     end
 
-    @Operation walkCollExp(args:Seq(OCL),collOp:String,collection:OCL,env)
+    @Operation walkCollExp(charStart:Integer,charEnd:Integer,args:Seq(OCL),collOp:String,collection:OCL,env)
       self.walk(collection,env);
       @For arg in args do
         self.walk(arg,env)
-      end
+      end;
+      editor.ast("collection",charStart,charEnd)
     end
 
-    @Operation walkClass(line:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
+    @Operation walkClass(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
       let atts = defs->select(d | d.isKindOf(XOCL::Attribute)) then
           env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type,a))) then
           env0 = parents->iterate(parent env = env0 | self.bindInheritedAtts(parent,env))
       in self.walk(metaClass,env);
          @For parent in parents do self.walk(parent,env) end;
-         @For def in defs do self.walk(def,env0) end
+         @For def in defs do self.walk(def,env0) end;
+         editor.ast("class definition",charStart,charEnd)
       end
     end
 
@@ -204,13 +209,14 @@ context TextEditor
     end
     
 
-    @Operation walkConsExp(head:OCL,tail:OCL,env)
+    @Operation walkConsExp(charStart:Integer,charEnd:Integer,head:OCL,tail:OCL,env)
       self.walk(head,env);
-      self.walk(tail,env)
+      self.walk(tail,env);
+      editor.ast("cons",charStart,charEnd)
     end
 
-    @Operation walkConst(value:Element,env)
-      null
+    @Operation walkConst(charStart:Integer,charEnd:Integer,value:Element,env)
+      editor.ast("const",charStart,charEnd)
     end
 
     @Operation walkConstructor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,env)
@@ -218,15 +224,18 @@ context TextEditor
        @For name in names do
          self.walkVar(line,charStart,charStart+name->size,name,env);
          charStart := charStart + name->size + 1
-       end
+       end;
+       editor.ast("constructor definition",charStart,charEnd)
     end
 
-    @Operation walkContextDef(element:OCL,isForward:Boolean,path:Seq(Element),env)
-      self.walk(element,env)
+    @Operation walkContextDef(charStart:Integer,charEnd:Integer,element:OCL,isForward:Boolean,path:Seq(Element),env)
+      self.walk(element,env);
+      editor.ast("context definition",charStart,charEnd)
     end
 
-    @Operation walkDot(name:String,target:OCL,env)
-      self.walk(target,env)
+    @Operation walkDot(charStart:Integer,charEnd:Integer,name:String,target:OCL,env)
+      self.walk(target,env);
+      editor.ast("slot reference",charStart,charEnd)
     end
 
     @Operation walkFind(line:Integer,charStart:Integer,charEnd:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,env)
@@ -237,7 +246,8 @@ context TextEditor
        in self.walk(collection,env);
           self.walk(action,env0);
           self.walk(alternative,env0);
-          self.walk(test,env0)
+          self.walk(test,env0);
+          editor.ast("find definition",charStart,charEnd)
        end
     end
 
@@ -261,7 +271,8 @@ context TextEditor
              in bind(names->tail,i+length+1,env.bind(name,VarDescriptor(null,mkLocated(i,i+length))))
              end
            end
-       in self.walk(body,bind(names,charStart + "@For "->size,env))
+       in self.walk(body,bind(names,charStart + "@For "->size,env));
+          editor.ast("for definition",charStart,charEnd)
        end
     end
 
@@ -276,10 +287,11 @@ context TextEditor
       self.walk(value,env)
     end
     
-    @Operation walkIf(line:Integer,test:Performable,e1:Performable,e2:Performable,env)
+    @Operation walkIf(line:Integer,charStart:Integer,charEnd:Integer,test:Performable,e1:Performable,e2:Performable,env)
       self.walk(test,env);
       self.walk(e1,env);
-      self.walk(e2,env)
+      self.walk(e2,env);
+      editor.ast("if",charStart,charEnd)
     end
 
     @Operation walkInstantiate(args:Seq(KeyArg),class:Performable,env)
@@ -289,30 +301,33 @@ context TextEditor
       end
     end
 
-    @Operation walkIntExp(line:Integer,value:Integer,env)
-      null
+    @Operation walkIntExp(line:Integer,charStart:Integer,charEnd:Integer,value:Integer,env)
+      editor.ast("int",charStart,charEnd)
     end
 
-    @Operation walkIterExp(body:OCL,collection:OCL,iterOp:String,name:String,env)
+    @Operation walkIterExp(charStart:Integer,charEnd:Integer,body:OCL,collection:OCL,iterOp:String,name:String,env)
        let varStart = collection.charEnd + (iterOp + "->(")->size then
            varEnd = varStart + name->size then
            located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
            env0 = env.bind(name,VarDescriptor(null,located))
        in self.walk(collection,env);
-          self.walk(body,env0)
+          self.walk(body,env0);
+          editor.ast(iterOp,charStart,charEnd)
        end
     end
 
-    @Operation walkIterate(accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,env)
+    @Operation walkIterate(charStart:Integer,charEnd:Integer,accumulator:String,body:OCL,collection:OCL,name:String,value:OCL,env)
       self.walk(collection,env);
       self.walk(value,env);
-      self.walk(body,env.bind(accumulator,null).bind(name,VarDescriptor()))
+      self.walk(body,env.bind(accumulator,null).bind(name,VarDescriptor()));
+      editor.ast("iterate",charStart,charEnd)
     end
 
-    @Operation walkLet(line:Integer,bindings:Seq(ValueBinding),body:OCL,env)
+    @Operation walkLet(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:OCL,env)
        @For b in bindings do self.walk(b,env) end;
        let env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(b.type,b)))
-       in self.walk(body,env0)
+       in self.walk(body,env0);
+          editor.ast("let",charStart,charEnd)
        end
     end 
 
@@ -324,11 +339,12 @@ context TextEditor
       self.walk(exp,env)
     end
 
-    @Operation walkOperation(doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env)
+    @Operation walkOperation(charStart:Integer,charEnd:Integer,doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env)
       let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v)))
       in @For arg in args do self.walk(arg,env) end;
          self.walk(body,env0);
-         self.walk(type,env)
+         self.walk(type,env);
+         editor.ast("operation definition",charStart,charEnd)
       end
     end
 
@@ -344,23 +360,24 @@ context TextEditor
       end
     end
 
-    @Operation walkPath(names:Seq(Element),root:OCL,env)
-      null
+    @Operation walkPath(charStart:Integer,charEnd:Integer,names:Seq(Element),root:OCL,env)
+      editor.ast("path",charStart,charEnd)
     end
 
-    @Operation walkPathUpdate(path:Path,value:Performable,env)
-      self.walk(value,env)
+    @Operation walkPathUpdate(charStart:Integer,charEnd:Integer,path:Path,value:Performable,env)
+      editor.ast("path update",charStart,charEnd)
     end
 
-    @Operation walkSelf(line:Integer,env)
-      null
+    @Operation walkSelf(line:Integer,charStart:Integer,charEnd:Integer,env)
+      editor.ast("self",charStart,charEnd)
     end
 
-    @Operation walkSend(args:Seq(OCL),message:String,target:OCL,env)
+    @Operation walkSend(charStart:Integer,charEnd:Integer,args:Seq(OCL),message:String,target:OCL,env)
       self.walk(target,env);
       @For arg in args do 
         self.walk(arg,env)
-      end
+      end;
+      editor.ast("send",charStart,charEnd)
     end
 
     @Operation walkSetExp(line:Integer,collType:String,elements:Seq(OCL),env)
@@ -394,7 +411,8 @@ context TextEditor
         end
       elseif not(self.globalVar(name))
       then editor.unboundVar(name,charStart,charEnd)
-      end
+      end;
+      editor.ast("var",charStart,charEnd)
     end
 
     @Operation walkVarp(charStart:Integer,charEnd:Integer,name:String,pattern:Pattern,type:TypeExp,env)

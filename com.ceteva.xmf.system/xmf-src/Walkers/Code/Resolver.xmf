@@ -11,21 +11,21 @@ context Code
     // Second part of the binary operator transformation post-parsing.
     // Deals mostly with getting ., ; and :: in the right places...
   
-    @Operation walkApply(args,operator,arg)
+    @Operation walkApply(charStart:Integer,charEnd:Integer,args,operator,arg)
       @CaseObj operator of
         BinExp[left,binOp,right] do
           if binOp = "." and right.isKindOf(Var)
           then Send(self.walk(left,arg),right.name,args->collect(a | self.walk(a,arg)))
           elseif binOp = "." and right.isKindOf(Drop)
           then Send(self.walk(left,arg),Drop(self.walk(right.exp,arg)),args->collect(a | self.walk(a,arg)))
-          else super(args,operator,arg)
+          else super(charStart,charEnd,args,operator,arg)
           end
         end
-        else super(args,operator,arg)
+        else super(charStart,charEnd,args,operator,arg)
       end
     end
 
-    @Operation walkBinExp(op,left,right,arg)
+    @Operation walkBinExp(charStart:Integer,charEnd:Integer,op,left,right,arg)
       @Case op of
         "." do
           @CaseObj right of
@@ -38,7 +38,7 @@ context Code
             DropPattern[pattern] do
               Dot(self.walk(left,arg),DropPattern(self.walk(pattern,arg)))
             end
-            else super(op,left,right,arg)
+            else super(charStart,charEnd,op,left,right,arg)
           end
         end
         "::" do
@@ -63,13 +63,13 @@ context Code
                    "." do
                      self.walk(BinExp(BinExp(left1,"::",left),".",right),arg)
                    end
-                   else super(op,left,right)
+                   else super(charStart,charEnd,op,left,right)
                  end
                end
                Send[target,message,args] do
                  self.walk(Send(BinExp(left,"::",target),message,args),arg)
                end
-               else super(op,left,right,arg)
+               else super(charStart,charEnd,op,left,right,arg)
              end
            end
         end
@@ -114,7 +114,7 @@ context Code
               end
           end
         end
-        else super(op,left,right,arg)
+        else super(charStart,charEnd,op,left,right,arg)
       end
         
     end

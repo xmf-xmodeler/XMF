@@ -16,7 +16,7 @@ context Code
     // order to impose precedence rules. This walker imposes operator precedence
     // and returns source code with the correct precedences and associativites.
   
-    @Operation walkApply(args,operator,arg)
+    @Operation walkApply(charStart:Integer,charEnd:Integer,args,operator,arg)
       Apply(self.walk(operator,arg),args->collect(a | self.walk(a,arg)))
     end
 
@@ -24,7 +24,7 @@ context Code
       Instantiate(self.walk(class,arg),args->collect(a | self.walk(a,arg)))
     end
 
-    @Operation walkBinExp(op1,left1,right1,arg)
+    @Operation walkBinExp(charStart:Integer,charEnd:Integer,op1,left1,right1,arg)
       @Case op1 of
         "." do
           @CaseObj right1 of
@@ -115,15 +115,15 @@ context Code
       end
     end
      
-    @Operation walkCollExp(args,collOp,collection,arg)
+    @Operation walkCollExp(charStart:Integer,charEnd:Integer,args,collOp,collection,arg)
       CollExp(self.walk(collection,arg),collOp,args->collect(e | self.walk(e,arg)))
     end 
     
-    @Operation walkIterExp(body,collection,iterOp,name,arg)
+    @Operation walkIterExp(charStart:Integer,charEnd:Integer,body,collection,iterOp,name,arg)
       IterExp(self.walk(collection,arg),iterOp,name,self.walk(body,arg))
     end
     
-    @Operation walkIterate(accumulator,body,collection,name,value,arg)
+    @Operation walkIterate(charStart:Integer,charEnd:Integer,accumulator,body,collection,name,value,arg)
       Iterate(self.walk(collection,arg),name,accumulator,self.walk(value,arg),self.walk(body,arg))
     end
     

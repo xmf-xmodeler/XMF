@@ -30,6 +30,12 @@ context TextEditor
       end
     end
     
+    @Operation ast(editor,tooltip,charStart,charEnd)
+      @SendCommand(self)
+        ast(editor.id(),tooltip,charStart,charEnd)
+       end
+    end
+    
     @Operation delete(element)
       @SendCommand(self)
         delete(element.id())

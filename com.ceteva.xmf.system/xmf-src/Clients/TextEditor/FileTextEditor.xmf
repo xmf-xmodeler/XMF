@@ -14,6 +14,10 @@ context TextEditor
       self.init(Seq{file});
       self.lastModified := self.getFileModifiedDate()
     end
+
+    @Operation ast(tooltip:String,charStart:Integer,charEnd:Integer)
+      self.commandInterpreter().ast(self,tooltip,charStart,charEnd)   
+    end  
     
     @Operation close()
       super();
@@ -87,7 +91,7 @@ context TextEditor
            end
         else 
           xmf.message(exception.toString());
-          //exception.printBacktrace(false);
+          exception.printBacktrace(false);
           self.commandInterpreter().rendering(self,true)
         end
       end
