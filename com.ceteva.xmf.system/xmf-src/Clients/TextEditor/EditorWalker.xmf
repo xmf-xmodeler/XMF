@@ -52,7 +52,7 @@ context TextEditor
                nameSpace:NameSpace = self.getNameSpace(path,nameSpaces);
                getName(e) = if e.hasStructuralFeature("name") then e.name else "$" end then
                names(n:NameSpace):[Symbol] = n.contents()->collect(c | getName(c))
-           in if nameSpace <> null
+           in if nameSpace.isReallyKindOf(XCore::NameSpace)
               then
                 nameSpaces := [nameSpace]+nameSpaces;
                 @For name in names(nameSpace) do
@@ -361,10 +361,13 @@ context TextEditor
     end
 
     @Operation walkPath(charStart:Integer,charEnd:Integer,names:Seq(Element),root:OCL,env)
+      self.walk(root,env);
       editor.ast("path",charStart,charEnd)
     end
 
     @Operation walkPathUpdate(charStart:Integer,charEnd:Integer,path:Path,value:Performable,env)
+      self.walk(path,env);
+      self.walk(value,env);
       editor.ast("path update",charStart,charEnd)
     end
 
