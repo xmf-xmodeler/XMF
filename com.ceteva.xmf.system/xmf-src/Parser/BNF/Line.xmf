@@ -30,6 +30,10 @@ context BNF
     @Operation first(grammar)
       Set{"Builtin(Line)"}
     end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
 
     @Operation nullable(grammar):Boolean
        false

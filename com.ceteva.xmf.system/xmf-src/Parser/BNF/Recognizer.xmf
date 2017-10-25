@@ -64,6 +64,12 @@ context Parser::BNF
         self.error("FV: I don't know how to calculate the FV.")
       end
       
+      @AbstractOp last(g:Grammar,called:[String]):{String}
+      
+        // Return the last terminal in the recognizer.
+        
+      end
+      
       @Operation nullable(grammar):Boolean
       
         // Can this recognizer be satisfied without consuming

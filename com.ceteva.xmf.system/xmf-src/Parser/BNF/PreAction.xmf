@@ -51,6 +51,10 @@ context Parser::BNF
       Set{}
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
+    
     @Operation toExp(FV:Set(String)):Performable
     
       // Perform the pre-action to action transformation.

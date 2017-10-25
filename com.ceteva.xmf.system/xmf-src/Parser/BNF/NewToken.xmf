@@ -23,7 +23,7 @@ context Parser::BNF
     
     @Constructor(name,tokenNumber) ! end
 	
-	@Operation code(outputChannel)
+	    @Operation code(outputChannel)
       format(outputChannel," NewToken(~S,~S) ",Seq{name,tokenNumber})
     end
 
@@ -40,6 +40,10 @@ context Parser::BNF
     
     @Operation FV():Set(String)
       Set{}
+    end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
     end
     
     @Operation nullable(grammar):Boolean

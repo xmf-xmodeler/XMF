@@ -18,9 +18,13 @@ import BNF;
 context BNF
 
   @Class Chars extends Char
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
 	
-	@Operation toExp(FV:Set(String))
-	  [| Root::Parser::BNF::Chars() |]
-	end
+	    @Operation toExp(FV:Set(String))
+	      [| Root::Parser::BNF::Chars() |]
+	    end
 	
   end

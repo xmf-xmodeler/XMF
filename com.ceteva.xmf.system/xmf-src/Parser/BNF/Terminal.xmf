@@ -34,6 +34,10 @@ context Parser::BNF
       Set{}
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {terminal}
+    end
+    
     @Operation nullable(grammar):Boolean
        false
     end

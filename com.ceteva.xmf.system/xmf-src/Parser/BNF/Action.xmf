@@ -47,6 +47,10 @@ context Parser::BNF
       Set{}
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
+    
     @Operation setOwner(owner)
       action.owner := owner
     end

@@ -78,6 +78,15 @@ context XmfTextEditor
             self.addWordRule(class.name.toString(),Clients::TextEditor::Editor::blue)
          end
       end;
+      @For grammar in Parser::BNF::Grammar.allInstances() do
+        let start = grammar.startingSymbol;
+            last = grammar.last()
+        in @For terminal in last do self.addTerminates(terminal,"@"+start) end
+        end
+      end;     
+      self.addTerminates("end","if");
+      self.addTerminates("end","let");
+      self.addTerminates("end","try");
       self.addWordRule("@",Editor::blue);
       // A cheat since OCL does not define 'do' as a terminal...
       self.addWordRule("do",Editor::blue)

@@ -25,6 +25,10 @@ context Parser::BNF
       Set{}
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
+    
     @Operation toExp(FV:Set(String))
       [| Root::Parser::BNF::LinePos() |]
     end

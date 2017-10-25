@@ -176,6 +176,13 @@ context Parser::BNF
         blocks->iterate(b E = Set{} | E + b.expected())
       end
       
+      @Operation last(g:Grammar,called:[String]):{String}
+      
+        // Calculate a set of terminals that terminate this clause...
+        
+        body.last(g,called)
+      end
+      
       @Operation lift():Performable
       
         // The lifting process is performed by the XMF compiler in order

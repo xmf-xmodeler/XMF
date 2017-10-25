@@ -32,6 +32,10 @@ context Parser::BNF
       Set{name}
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
+    
     @Operation toExp(FV:Set(String))
       [| Root::Parser::BNF::Bind(<StrExp(name)>) |]
     end

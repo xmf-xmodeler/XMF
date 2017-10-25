@@ -39,6 +39,10 @@ context TextEditor
       self.commandInterpreter().addMultilineRule(self,startRule,endRule,colour)
     end
     
+    @Operation addTerminates(terminates:String,starts:String)
+      self.commandInterpreter().addTerminates(self,terminates,starts)
+    end
+    
     @Operation addLineHighlight(line)
       self.commandInterpreter().addLineHighlight(self,line)
     end

@@ -50,7 +50,8 @@ context TextEditor
       in @For i in imports do
            let path:Seq(String) = i.nameSpace then
                nameSpace:NameSpace = self.getNameSpace(path,nameSpaces);
-               getName(e) = if e.hasStructuralFeature("name") then e.name else "$" end then
+               hasName(o) = o.isReallyKindOf(XCore::Object) andthen o.hasStructuralFeature("name") then
+               getName(e) = if hasName(e) then e.name else "$" end then
                names(n:NameSpace):[Symbol] = n.contents()->collect(c | getName(c))
            in if nameSpace.isReallyKindOf(XCore::NameSpace)
               then

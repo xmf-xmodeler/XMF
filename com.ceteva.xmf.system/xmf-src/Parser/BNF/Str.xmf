@@ -17,7 +17,7 @@ context Parser::BNF
 
   @Class Str extends Recognizer
 	
-	@Operation code(outputChannel)
+	    @Operation code(outputChannel)
       format(outputChannel," Str ")
     end
     
@@ -27,6 +27,10 @@ context Parser::BNF
 
     @Operation first(grammar)
       Set{"Builtin(Str)"}
+    end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
     end
     
     @Operation nullable(grammar):Boolean

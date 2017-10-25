@@ -91,7 +91,7 @@ context TextEditor
            end
         else 
           xmf.message(exception.toString());
-          exception.printBacktrace(false);
+          //exception.printBacktrace(false);
           self.commandInterpreter().rendering(self,true)
         end
       end

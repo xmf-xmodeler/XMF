@@ -20,12 +20,16 @@ context Parser::BNF
     @Attribute headIndex : Integer (?,!) end
     @Attribute tailIndex : Integer (?,!) end
 	
-	@Operation code(outputChannel)
+	    @Operation code(outputChannel)
       format(outputChannel," Cons ")
     end
     
     @Operation FV()
       Set{"$head","$tail"}
+    end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
     end
     
     @Operation toExp(FV:Set(String))

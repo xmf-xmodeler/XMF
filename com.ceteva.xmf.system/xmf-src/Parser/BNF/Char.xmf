@@ -30,6 +30,10 @@ context Parser::BNF
     @Operation first(grammar)
       Set{"Builtin(Char)"}
     end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
 
     @Operation nullable(grammar):Boolean
        false

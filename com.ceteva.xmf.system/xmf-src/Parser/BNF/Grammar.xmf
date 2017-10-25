@@ -264,6 +264,26 @@ context Parser::BNF
         end
       end
       
+      @Operation last():{String}
+        
+        // Returns the set of all terminals based on the starting terminal...
+        
+        if startingSymbol <> null
+        then self.last(startingSymbol)
+        else {}
+        end
+      end
+      
+      @Operation last(name:String):{String}
+        
+        // Returns the set of all terminals based on the supplied terminal...
+        
+        if self.clauseNamed(name) = null
+        then {}
+        else self.clauseNamed(name).last(self,[])
+        end
+      end
+      
       @Operation lift()
       
         // Called to produce the grammar creation expression. Various

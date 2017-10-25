@@ -33,16 +33,20 @@ context Parser::BNF
     @Operation FV():Set(String)
       Set{}
     end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
 	
-	@Operation setOwner(owner)
+  	@Operation setOwner(owner)
       parser.setOwner(owner)
     end
 	
-	@Operation toExp(FV:Set(String))
+	    @Operation toExp(FV:Set(String))
       [| Root::Parser::BNF::StarCons(<parser.toExp(FV)>) |]
     end
 	
-	@Operation transform(FV:Set(String),grammar):Recognizer
+    @Operation transform(FV:Set(String),grammar):Recognizer
       self.parser := parser.transform(FV,grammar)
     end
 	

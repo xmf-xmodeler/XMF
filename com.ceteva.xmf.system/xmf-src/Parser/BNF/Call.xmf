@@ -65,6 +65,19 @@ context Parser::BNF
          end
       end
     end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      if called->includes(name)
+      then {}
+      else 
+        let clause = g.clauseNamed(name)
+        in if clause <> null 
+           then clause.last(g,[name]+called)
+           else {}
+           end
+        end
+      end
+    end
 
     @Operation nullable(grammar):Set(String)
     

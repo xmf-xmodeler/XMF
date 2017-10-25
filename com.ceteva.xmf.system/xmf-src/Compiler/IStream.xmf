@@ -19,7 +19,7 @@ context Compiler
         instr.label := label;
         self.label := ""
       end;
-      self.instructions := seq{instr | instructions}
+      self.instructions := Seq{instr | instructions}
     end
     
     @Operation label(label:String)

@@ -45,6 +45,15 @@ context Parser::BNF
       left.FV()->union(right.FV())
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      let last:{String} = right.last(g,called)
+      in if last->isEmpty
+         then left.last(g,called)
+         else last
+         end
+      end
+    end
+    
     @Operation setOwner(owner)
       left.setOwner(owner);
       right.setOwner(owner)

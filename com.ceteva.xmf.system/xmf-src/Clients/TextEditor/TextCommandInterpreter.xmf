@@ -30,6 +30,15 @@ context TextEditor
       end
     end
     
+    @Operation addTerminates(editor,terminates,starts)
+      let id = editor.id() in
+        @SendCommand(self)
+          addTerminates(id,terminates,starts)
+        end;
+        id
+      end
+    end
+    
     @Operation ast(editor,tooltip,charStart,charEnd)
       @SendCommand(self)
         ast(editor.id(),tooltip,charStart,charEnd)

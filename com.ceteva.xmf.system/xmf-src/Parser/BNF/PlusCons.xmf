@@ -36,6 +36,10 @@ context Parser::BNF
       parser.FV()
     end
     
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
+    
     @Operation terminals():Set(String)
       parser.terminals()
     end

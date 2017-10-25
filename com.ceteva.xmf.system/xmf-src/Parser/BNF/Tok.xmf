@@ -18,19 +18,23 @@ context Parser::BNF
 
   @Class Tok extends Recognizer 
 	
-	@Operation code(outputChannel)
+    @Operation code(outputChannel)
       format(outputChannel," Token ")
     end
     
     @Operation FV():Set(String)
       Set{}
     end
+    
+    @Operation last(g:Grammar,called:[String]):{String}
+      {}
+    end
 	
-	@Operation toExp(FV:Set(String))
-	  [| Root::Parser::BNF::Tok() |]
-	end
+    @Operation toExp(FV:Set(String))
+	     [| Root::Parser::BNF::Tok() |]
+	    end
 	
-	@Operation transform(FV:Set(String),grammar):Recognizer
+	   @Operation transform(FV:Set(String),grammar):Recognizer
       self
     end
   end
