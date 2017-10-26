@@ -3,7 +3,7 @@
 set XMFHOME=%1%
 set XMFLIB=%XMFHOME%;%XMFHOME%/../../com.ceteva.xmf.machine/bin
 set PORT=10101
-set HEAPSIZE=8000
+set HEAPSIZE=10000
 set STACKSIZE=50
 set FREEHEAP=20
 set FILENAME=%2%
