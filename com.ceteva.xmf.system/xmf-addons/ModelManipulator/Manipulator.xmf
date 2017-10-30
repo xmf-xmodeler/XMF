@@ -62,12 +62,48 @@ context Root
   end
  
   // remove
-  
+
   @Operation removeElement(element:Element)
+    let
+      allEntitities = self.allEntitities();
+      ok = true;
+      reason = ""
+    in
+    @For entity in allEntitities do
+		 // check for instances
+      if entity.of() = element 
+      then
+        ok := false; 
+        reason := reason + "Instance " + entity + " prevents removal of class " + element + "\n"
+      end;
+      // check for subclasses
+      if entity.parents.contains(element)
+      then
+        ok := false; 
+        reason := reason + "Subclass " + entity + " prevents removal of class " + element + "\n"
+      end;
+      // check for use as type
+      @For attribute in entity.attributes do
+        if attribute.type = element
+        then
+          ok := false; 
+          reason := reason + "Attribute " + attribute + " in " + entity + " prevents removal of class " + element + "\n"
+        end
+      end
+      // check for use as slot value
+		 // TO-DO
+    end;
+    reason.println();
+    ok
+    //self.model.remove(element)
+    end
+  end
+  
+  @Operation removeElementAndDependants(element:Element)
     if element.level > 0 
     then 
       @For instance in element.allInstances() do
-        self.removeElement(instance) 
+        self.removeElementAndDependants(instance) 
       end
     end;
     self.model.remove(element)
@@ -183,6 +219,10 @@ context Root
     "addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)".println();
     "removeElement(element:Element)".println();
     "".println()
+  end
+
+  @Operation allEntitities() 
+    self.model.classes
   end
   
   @Operation test1()
