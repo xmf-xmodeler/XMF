@@ -46,6 +46,37 @@ context AuxiliaryClasses
 		      self.hour.value.round().toString() + ":" + self.minute.value.round().toString() + ":" + self.second.value.round().toString() + ":" + self.millisecond.value.round().toString() + ", " + self.day.value.round().toString() + "." + self.month.value.round().toString() + "." + self.year.value.round().toString()
 	    end
 
+		@Operation age() 
+			let today = Kernel_dateStructured();
+				difDate = AuxiliaryClasses::Date()
+			in
+				difDate.setYear(today.at(0)-self.year.value);
+				difDate.setMonth(today.at(1)-self.month.value);
+				difDate.setDay(today.at(2)-self.day.value);
+
+				if difDate.year.value > 0 or difDate.year.value = 0 and difDate.month.value > 0 or difDate.year.value = 0 and difDate.month.value = 0 and difDate.day.value > 0 then
+					if difDate.day.value < 0 then
+						difDate.setDay(difDate.day.value+30);
+						difDate.setMonth(difDate.month.value-1)
+					end;
+					if difDate.month.value < 0 then
+						difDate.setMonth(difDate.month.value+12);
+						difDate.setYear(difDate.year.value-1)
+					end
+				else
+					if difDate.day.value > 0 then
+						difDate.setDay(difDate.day.value-30);
+						difDate.setMonth(difDate.month.value+1)
+					end;
+					if difDate.month.value > 0 then
+						difDate.setMonth(difDate.month.value-12);
+						difDate.setYear(difDate.year.value+1)
+					end
+				end;
+				difDate
+			end
+		end	
+
 		@Operation validate()
 			if self.month.value > 12 or self.month.value < 1 then
 				xmf.error(self.month.value+" is an invalid month")
@@ -215,6 +246,37 @@ context AuxiliaryClasses
 			self.day := AuxiliaryClasses::Day(); 
 			self.timeZone := AuxiliaryClasses::TimeZone() 
 		end
+
+		@Operation age() 
+			let today = Kernel_dateStructured();
+				difDate = AuxiliaryClasses::Date()
+			in
+				difDate.setYear(today.at(0)-self.year.value);
+				difDate.setMonth(today.at(1)-self.month.value);
+				difDate.setDay(today.at(2)-self.day.value);
+
+				if difDate.year.value > 0 or difDate.year.value = 0 and difDate.month.value > 0 or difDate.year.value = 0 and difDate.month.value = 0 and difDate.day.value > 0 then
+					if difDate.day.value < 0 then
+						difDate.setDay(difDate.day.value+30);
+						difDate.setMonth(difDate.month.value-1)
+					end;
+					if difDate.month.value < 0 then
+						difDate.setMonth(difDate.month.value+12);
+						difDate.setYear(difDate.year.value-1)
+					end
+				else
+					if difDate.day.value > 0 then
+						difDate.setDay(difDate.day.value-30);
+						difDate.setMonth(difDate.month.value+1)
+					end;
+					if difDate.month.value > 0 then
+						difDate.setMonth(difDate.month.value-12);
+						difDate.setYear(difDate.year.value+1)
+					end
+				end;
+				difDate
+			end
+		end		
 
 		@Operation toString():String
 		     self.day.value.round().toString() + "." + self.month.value.round().toString() + "." + self.year.value.round().toString()

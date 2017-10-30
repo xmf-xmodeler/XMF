@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -132,6 +133,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_daemonsOff", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_daemonsOn", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_date", 1));
+    addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dateStructured", 0));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbAutoCommit", 2));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbClose", 1));
     addToTable(machine, table, new ForeignFun("foreignfuns.ForeignFuns", "Kernel_dbCommit", 1));
@@ -996,6 +998,16 @@ public class ForeignFuns implements Value, Instr, Errors {
     machine.popFrame();
   }
 
+  public static final void Kernel_dateStructured(Machine machine){
+	  int machineTime = Machine.nilValue; 
+	  Calendar cal = Calendar.getInstance ();
+	  machineTime = machine.mkCons(Machine.mkInt(cal.get(Calendar.DAY_OF_MONTH)), machineTime);
+	  machineTime = machine.mkCons(Machine.mkInt(cal.get(Calendar.MONTH)+1), machineTime);
+	  machineTime = machine.mkCons(Machine.mkInt(cal.get(Calendar.YEAR)), machineTime);
+	  machine.pushStack(machineTime);
+	  machine.popFrame();
+}
+ 
   public static void Kernel_dbAutoCommit(Machine machine) {
     Database.autoCommit(machine);
   }
@@ -2708,6 +2720,7 @@ public class ForeignFuns implements Value, Instr, Errors {
     else machine.pushStack(Machine.mkInt(-1));
     machine.popFrame();
   }
+
 
   public static final void Kernel_time(Machine machine) {
     machine.pushStack(machineTime(machine, System.currentTimeMillis(), machine.time));

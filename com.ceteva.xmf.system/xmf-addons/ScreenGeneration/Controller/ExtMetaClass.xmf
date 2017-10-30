@@ -9,7 +9,7 @@ context FMML::MetaClass
   	xmf.clientManager().findClientByName("screenGeneration").createMultiScreen(self)
   end
 
-/*context FMML::MetaClass
+context FMML::MetaClass
   @Operation allInstances()
 		self.instances
   end  
@@ -17,4 +17,81 @@ context FMML::MetaClass
   context FMML::MetaClass
   @Operation allSiblings()
 		self.of().instances.excluding(self)
-  end    */
+  end
+
+  context FMML::MetaClass
+   @Operation calcBooleanPercentage(a : Attribute)
+		if a.type = Boolean then
+			let 
+				values = self.allInstances().asSeq().get(a.name);
+				result = 0
+			in
+				result := values->iterate(e sum = 0 | if e then sum + 1 else sum end ) / values.size();
+				result := ((result*100000).round())/100000
+			end
+		else 
+			null
+		end 
+  end
+  
+  context FMML::MetaClass
+   @Operation calcMean(a : Attribute)
+		if a.type = Integer or a.type = Float then
+			let 
+				values = self.allInstances().asSeq().get(a.name)
+			in
+				values->iterate(e sum = 0 | sum + e) / values.size()
+			end
+		else 
+			null
+		end 
+  end
+
+  context FMML::MetaClass
+  @Operation calcMedian(a : Attribute)
+		if a.type = Integer or a.type = Float then
+			let 
+				values = self.allInstances().asSeq().get(a.name)
+			in
+				values := values->sort(@Operation(x,y) x<y end);
+				if(values.size().mod(2)=1)
+				then
+					// an odd number of values => get the middle value
+					values.at((values.size()-1).div(2))
+				else
+					// an even number of values => calc the arithmetic mean of the two middle values
+					(values->at((values.size().div(2))-1) + values->at((values.size().div(2)))) / 2
+				end
+			end
+		else
+			null
+		end 
+  end
+      
+  context FMML::MetaClass
+		@Operation arithmeticCalculation()
+			let temp = null;
+				entry = null;
+				content = []
+			in 
+				@For a in self.attributes do
+					/*
+					entry := [a.name+": "+a.type,"*"] + [entry];
+
+					temp := Class("Mean");
+					temp.setProperty("Attribute",a.name);
+					entry := [[temp]];
+
+					temp := Class("Median");
+					temp.setProperty("Attribute",a.name);
+					entry := entry + [[temp]];*/
+
+					if a.type = Integer or a.type = Float then
+						content := content + [[a.name+": "+a.type.name,"*",[["Mean: "+self.calcMean(a)],["Median: "+self.calcMedian(a)]]]]
+					elseif a.type = Boolean then
+						content := content + [[a.name+": "+a.type.name,"*",[["Distribution: "+self.calcBooleanPercentage(a)*100+"% of values are true"]]]]
+					end
+				end;
+				xmf.treeSelection("Results of arithetic calculations",["Attributes","*",content],"A",null)
+			end
+		end
