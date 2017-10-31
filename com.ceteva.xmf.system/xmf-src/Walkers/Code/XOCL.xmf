@@ -270,7 +270,7 @@ context Root
       ]
     end
 
-    @Operation walkPackage(line:Integer,defs:Seq(Performable),meta:Performable,metaPackage:Performable,name:String,parents:Seq(Performable),defImports:Seq(Performable),arg)
+    @Operation walkPackage(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),meta:Performable,metaPackage:Performable,name:String,parents:Seq(Performable),defImports:Seq(Performable),arg)
       Package[
         line=line,
         defs=defs->collect(x | self.walk(x,arg)),
@@ -513,8 +513,8 @@ context Root
         NotNull[line,args,error,exp,isMessage,name] do
           self.walkNotNull(line,args,error,exp,isMessage,name,arg)
         end
-        Package[line,defs,meta,metaPackage,name,parents,defImports] do
-          self.walkPackage(line,defs,meta,metaPackage,name,parents,defImports,arg)
+        Package[line,charStart,charEnd,defs,meta,metaPackage,name,parents,defImports] do
+          self.walkPackage(line,charStart,charEnd,defs,meta,metaPackage,name,parents,defImports,arg)
         end
         Record[line,class,slots] do
           self.walkRecord(line,class,slots,arg)

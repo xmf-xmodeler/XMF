@@ -25,20 +25,20 @@ context Package
       
       { Package(name,meta,metaPackage,parents,imports,defs) }.
     
-    MetaPackage ::= 'metapackage' Exp | { null }.
+    MetaPackage ::= 'metapackage' <<Exp>> | { null }.
     
-    MetaClass ::= 'metaclass' Exp | { null }.
+    MetaClass ::= 'metaclass' <<Exp>> | { null }.
     
-    Parents ::= 'extends' p = Exp ps = (',' Exp)* { Seq{p|ps} } | { Seq{} }.
+    Parents ::= 'extends' p = <<Exp>> ps = (',' <<Exp>>)* { Seq{p|ps} } | { Seq{} }.
     
-    PImports ::= 'import' p = Exp ps = (',' Exp)* { Seq{p|ps} } | { Seq{} }.
+    PImports ::= 'import' p = <<Exp>> ps = (',' <<Exp>>)* { Seq{p|ps} } | { Seq{} }.
     
     Defs ::= 
     
-      Exp* | 
+      <<Exp>> * | 
       
-      '<*' e = Exp '*>' { Drop(e) } | 
+      '<*' e = <<Exp>> '*>' { Drop(e) } | 
       
-      '<*|' p = Pattern '|*>' { DropPattern(p) }.
+      '<*|' p = <<Pattern>> '|*>' { DropPattern(p) }.
    
   end
