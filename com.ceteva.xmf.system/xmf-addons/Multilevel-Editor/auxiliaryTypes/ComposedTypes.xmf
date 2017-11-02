@@ -77,6 +77,27 @@ context AuxiliaryClasses
 			end
 		end	
 
+		@Operation ageInDays() 
+			let age = self.age()
+			in
+				(age.day.value) + (age.month.value*30) + (age.year.value*360)
+			end
+		end	
+
+		@Operation ageInMonths() 
+			let age = self.age()
+			in
+				(age.day.value / 30) + (age.month.value) + (age.year.value*12)
+			end
+		end	
+
+		@Operation ageInYears()
+			let age = self.age()
+			in
+				(age.day.value / 360) + (age.month.value / 12) + (age.year.value)
+			end
+		end	
+
 		@Operation validate()
 			if self.month.value > 12 or self.month.value < 1 then
 				xmf.error(self.month.value+" is an invalid month")
@@ -277,6 +298,27 @@ context AuxiliaryClasses
 				difDate
 			end
 		end		
+
+		@Operation ageInDays() 
+			let age = self.age()
+			in
+				(age.day.value) + (age.month.value*30) + (age.year.value*360)
+			end
+		end	
+
+		@Operation ageInMonths() 
+			let age = self.age()
+			in
+				(age.day.value / 30) + (age.month.value) + (age.year.value*12)
+			end
+		end	
+
+		@Operation ageInYears()
+			let age = self.age()
+			in
+				(age.day.value / 360) + (age.month.value / 12) + (age.year.value)
+			end
+		end	
 
 		@Operation toString():String
 		     self.day.value.round().toString() + "." + self.month.value.round().toString() + "." + self.year.value.round().toString()
