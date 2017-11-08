@@ -9,5 +9,7 @@ context Root
     
 	   (xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir());
 		
+		xmf.delay(2000);
+
     xmf.findClientByName("com.ceteva.mosaic").commandInterpreter.shutdown()
   end
