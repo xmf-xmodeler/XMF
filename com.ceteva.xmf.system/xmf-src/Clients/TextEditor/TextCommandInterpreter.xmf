@@ -217,6 +217,12 @@ context TextEditor
       end
     end
 
+    @Operation setSignature(editor,sig)
+      @SendCommand(self)
+        setSignature(editor.id(),sig)
+      end
+    end
+
     @Operation syntaxError(editor,position,message)
       @SendCommand(self)
        syntaxError(editor.id(),position,message)

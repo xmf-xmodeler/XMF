@@ -52,6 +52,7 @@ context TextEditor
               client.newTextEditor(editor);
               editor.setText(filename.readFile());
               editor.addListener(self);
+              self.writeFiles();
               editor
             end
           else
@@ -135,6 +136,27 @@ context TextEditor
     @Operation showFileEditor(editor:FileEditor)
       editor.setFocus();
       editor
+    end
+    
+    @Operation writeFiles()
+      // Uses the init directory to save the files...
+      self.writeFiles(xmf.projDir() + "/init/")
+    end
+    
+    @Operation writeFiles(path:String)
+      // Writes the most recently opened files to the supplied path...
+      let files = xmf.fileEditorManager().fileEditorTable.keys()
+      in if path.fileExists()
+         then
+           @WithOpenFile(fout -> (path + "/recentlyOpenFiles.xml"))
+              format(fout,"<Files>~%",[]);
+              @For file in files do
+                format(fout,"<File path='~S'/>~%",[file])
+              end;
+              format(fout,"</Files>~%",[])
+           end
+         end
+      end
     end
   
   end

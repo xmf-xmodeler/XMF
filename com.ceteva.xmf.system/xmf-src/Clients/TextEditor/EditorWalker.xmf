@@ -176,10 +176,37 @@ context TextEditor
         
 
     @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
-      let env0 = self.addCompilationUnitDefs(imports,exps,env)
+      let env0 = self.addCompilationUnitDefs(imports,exps,env);
+          sig = exps->iterate(exp sig = [] | sig + self.toSigEntry(exp))
       in @For exp in exps do
            self.walk(exp,self.handleImports(imports,env0))
-         end
+         end;
+         editor.setSignature(sig)
+      end
+    end
+    
+    @Operation toSigEntry(exp:Performable):[[Element]]
+    
+      // Format of each signature entry is [charPos,shortLabel,longLabel,children]
+      // These are processed by the client to provide a file index...
+      
+      @CaseObj exp of
+        ContextDef[path,element] do
+          self.toSigEntry(element)
+        end
+        OCL::Operation[charStart,name,parameters,type] do
+          [[charStart,name+"()",name+"()",[]]]
+        end
+        XOCL::Attribute[charStart,name,type] do
+          [[charStart,name+":"+type.pprint(),name+":"+type.pprint(),[]]]
+        end
+        XOCL::Package[charStart,name,defs] do
+          [[charStart,name,name,defs->iterate(def sig=[] | sig + self.toSigEntry(def))]]
+        end
+        XOCL::Class[charStart,name,defs] do
+          [[charStart,name,name,defs->iterate(def sig=[] | sig + self.toSigEntry(def))]]
+        end
+        else []
       end
     end
 

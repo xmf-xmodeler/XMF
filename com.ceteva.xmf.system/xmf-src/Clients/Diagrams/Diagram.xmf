@@ -1091,13 +1091,17 @@ context Diagrams
     
     @Operation updateValues()
     
-             // This appears to assume that the owner is a mapping diagram.
-             // That is not the case in general since a diagram can exist
-             // in isolation. Moving the owner.classMaps code down into a
-             // mapping diagram.
-      @For node in owner.classMaps do
-        node.refresh()
-      end//;
+       // This appears to assume that the owner is a mapping diagram.
+       // That is not the case in general since a diagram can exist
+       // in isolation. Should move owner.classMaps code down into a
+       // mapping diagram.
+         
+      if owner.hasStructuralFeature("classMaps") 
+      then
+        @For node in owner.classMaps do
+          node.refresh()
+        end
+      end
       //@Command(self) updateValues(self) end
       //null
     end

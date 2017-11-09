@@ -72,6 +72,10 @@ context TextEditor
       super();
       self.lastModified := self.getFileModifiedDate()
     end
+    
+    @Operation setSignature(sig:[[Element]])
+      self.commandInterpreter().setSignature(self,sig)
+    end
 
     @Operation textChanged(text:String)
       try
