@@ -149,7 +149,7 @@ context Machine
                elementNames = names->tail
            in let nameSpaces = imports->select(nameSpace | nameSpace.hasElement(rootName))
               in if nameSpaces->isEmpty
-                 then self.error("Cannot find " + rootName + " perhaps you need to import it.")
+                 then throw AtError("Cannot find " + rootName + " perhaps you need to import it.",tokenizer.buffer().toString(),maxCharPos,names,imports)
                  else elementNames->iterate(name nameSpace = nameSpaces->head.getElement(rootName) |
                    let value = nameSpace.getElement(name)
                    in if value = null

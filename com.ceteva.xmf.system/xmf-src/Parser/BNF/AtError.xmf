@@ -1,0 +1,36 @@
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                                    @ Errors                                *
+ *                                  ------------                              *
+ *                                                                            *
+ *  After @ is encountered the path that follows must name a syntax class     *
+ *  that is currently in scope. If it does not, then an AtError is thrown.    *
+ *                                                                            *
+ ******************************************************************************/
+
+import Exceptions;
+import Parser;
+
+context Parser
+
+  @Class AtError extends ParseError
+     
+    @Attribute path    : [String]     (?,!) end // The named path.
+    @Attribute imports : [NameSpace]  (?,!) end // The imported namespaces.
+    
+    @Constructor() ! end
+    
+    @Constructor(message,input,errorPos,path,imports)
+      self.setBacktrace()
+    end
+    
+    @Operation printBacktrace(short:Boolean)
+      if short
+      then format(stdout,"~S~%",Seq{self.pprint()})
+      else super(short)
+      end
+    end
+    
+  end
