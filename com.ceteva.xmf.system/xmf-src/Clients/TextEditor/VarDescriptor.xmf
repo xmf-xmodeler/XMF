@@ -14,14 +14,16 @@ context TextEditor
     // the source code. Any feature of a var descriptor might be null if 
     // the information is not available.
 
-    @Attribute type:Classifier                  end
-    @Attribute definingLocation:Located         end
-    @Attribute tooltip:String = ""              end
+    @Attribute type:Classifier                          end
+    @Attribute definingLocation:Located                 end
+    @Attribute tooltip:String   = ""                    end
+    @Attribute actions:[Action] = []                    end
 
-    @Constructor()                              end
-    @Constructor(type) !                        end
-    @Constructor(type,definingLocation)         end
-    @Constructor(type,definingLocation,tooltip) end
+    @Constructor()                                      end
+    @Constructor(type) !                                end
+    @Constructor(type,definingLocation)                 end
+    @Constructor(type,definingLocation,tooltip)         end
+    @Constructor(type,definingLocation,tooltip,actions) end
 
     @Operation sendEditor(editor,charStart,charEnd)
 
@@ -29,6 +31,7 @@ context TextEditor
       // about this variable...
 
       if tooltip <> "" then editor.setTooltip(tooltip,charStart,charEnd) end;
+      @For action in actions do action.sendEditor(editor,charStart,charEnd) end;
       if type <> null then editor.varType(type,charStart,charEnd) end;
       if definingLocation <> null 
       then 

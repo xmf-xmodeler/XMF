@@ -77,9 +77,9 @@ context TextEditor
                 @For name in names(nameSpace) do
                   if nameSpace.hasElement(name)
                   then 
-                    let e = nameSpace.getElement(name)
+                    let e = nameSpace.getElement(name) 
                     in if e.isKindOf(XCore::Class)
-                       then env := env.bind(name.toString(),TypeDescriptor(e.of(),e,i,"Defined in " + e.resourceName))
+                       then env := env.bind(name.toString(),TypeDescriptor(e.of(),e,i,"Defined in " + e.resourceName,[Action("edit",[e.resourceName])]))
                        else env := env.bind(name.toString(),ImportDescriptor(null,i))
                        end
                     end

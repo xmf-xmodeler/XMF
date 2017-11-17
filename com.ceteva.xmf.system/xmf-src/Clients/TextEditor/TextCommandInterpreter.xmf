@@ -6,6 +6,12 @@ context TextEditor
 
   @Class TextCommandInterpreter extends CommandInterpreter
   
+    @Operation action(editor,name:String,args:[Element],charStart:Integer,charEnd:Integer)
+      @SendCommand(self)
+        action(editor.id(),name,args,charStart,charEnd)
+      end
+    end
+  
     @Operation addLineHighlight(editor,line)
       @SendCommand(self)
         addLineHighlight(editor.id(),line)

@@ -1,0 +1,24 @@
+parserImport XOCL;
+
+import Clients;
+import TextEditor;
+
+context TextEditor
+
+  @Class Action
+
+    // A named action supported by a text editor.
+
+    @Attribute name:String    end
+    @Attribute args:[Element] end
+
+    @Constructor(name,args) ! end
+
+    @Operation sendEditor(editor,charStart,charEnd)
+
+      // Inform the editor that the action can be performed at this point...
+
+      editor.action(name,args,charStart,charEnd)
+    end
+    
+  end
