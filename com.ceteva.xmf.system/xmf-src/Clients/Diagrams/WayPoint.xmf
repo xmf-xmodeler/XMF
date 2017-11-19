@@ -20,6 +20,7 @@ context Diagrams
     
     @Operation delete()
       @Command(self) deleteCommand(self) end;
+      self.raiseEvent(["deleteWayPoint",self]);
       self.removeFromOwner()
     end
     
@@ -29,6 +30,7 @@ context Diagrams
     
     @Operation move(x,y)
       @When self.x <> x or self.y <> y do
+        self.raiseEvent(["moveWayPoint",self,x,y]);
         self.x := x;
         self.y := y;
         @Command(self) moveCommand(self,x,y) end
@@ -38,6 +40,7 @@ context Diagrams
     @Operation new(parent,setMenu)
       self.setOwner(parent);
       @Command(self) newWayPointCommand(parent,self,false) end;
+      self.raiseEvent(["newWayPoint",self]);
       self
     end
     

@@ -1,6 +1,7 @@
 parserImport XOCL;
 
 import Clients;
+import Diagrams;
 
 context Diagrams
 
@@ -23,6 +24,14 @@ context Diagrams
     
     @Operation new(parent)
       self.new(parent,true)
+    end
+    
+    @Operation raiseEvent(event:[Element])
+      let d:Diagram = self.diagram()
+      in if d <> null
+         then d.raiseEvent(event)
+         end
+      end
     end
   
   end

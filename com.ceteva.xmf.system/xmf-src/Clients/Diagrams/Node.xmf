@@ -89,6 +89,7 @@ context Diagrams
     end
 
     @Operation delete()
+      self.raiseEvent(["deleteNode",self]);
       @For display in displays do
         display.delete()
       end;
@@ -386,6 +387,7 @@ context Diagrams
         if setMenu
         then self.setRightClickMenu()
         end;
+        self.raiseEvent(["newNode",self]);
         self
       
       end
@@ -523,14 +525,13 @@ context Diagrams
       // the contents of the node. Sub-classes of
       // node should handle their contents appropriately.
       
-      //("XMF:  1: Node " + self.id + " resize to " + width + "x" + height).println();
-      
       let oldWidth = self.width;
           oldHeight = self.height;
           width = width.max(self.maxWidth());
           height = height.max(self.maxHeight()) then
           doResize = true
-      in //("XMF:  2: Node " + self.id + " resize to " + width + "x" + height).println();
+      in 
+         self.raiseEvent(["resizeNode",self,width,height]);
          @For l in listeners do
            let event = PreNodeResizeEvent(self,width,height,true)
            in l(event);

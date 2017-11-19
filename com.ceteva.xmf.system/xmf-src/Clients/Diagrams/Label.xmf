@@ -36,6 +36,7 @@ context Diagrams
     @Constructor(id,text,attachedTo,relx,rely,editable,truncate) end
 
     @Operation delete()
+      self.raiseEvent(["deleteLabel",self]);
       @Command(self) deleteCommand(self) end;
       self.removeFromOwner()
     end
@@ -77,6 +78,7 @@ context Diagrams
       if setMenu
       then self.setRightClickMenu()
       end;
+      self.raiseEvent(["newLabel",self]);
       self
     end
     
@@ -142,7 +144,9 @@ context Diagrams
     @Operation textChanged(newText) 
       @Command(self) setTextCommand(self,newText) end;
       if self.text <> newText
-      then self.text := newText
+      then 
+        self.raiseEvent(["textChanged",self,newText]);
+        self.text := newText
       end // Avoid unnecessary daemon firing
     end
     

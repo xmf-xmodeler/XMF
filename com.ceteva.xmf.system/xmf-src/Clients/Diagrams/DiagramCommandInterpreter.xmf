@@ -363,6 +363,12 @@ context Diagrams
       end
     end
     
+    @Operation resetErrors(diagram)
+      @SendCommand(self)
+        resetErrors(diagram.id())
+      end
+    end
+    
     @Operation newLineCommand(parent,line)
       let lineId = self.allocateId(line)
       in @SendCommand(self)

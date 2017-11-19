@@ -115,6 +115,7 @@ context Diagrams
       if setMenu
       then self.setRightClickMenu()
       end;
+      self.raiseEvent(["newText",self]);
       self
     end
     
@@ -152,6 +153,7 @@ context Diagrams
     
     @Operation textChanged(newText) 
       @Command(self) setTextCommand(self,newText) end;
+      self.raiseEvent(["textChanged",self,newText]);
       if self.text <> newText
       then self.text := newText
       end; // Avoid unnecessary daemon firing
@@ -196,6 +198,7 @@ context Diagrams
     
     @Operation setText(newText)
       @Command(self) setTextCommand(self,newText) end;
+      self.raiseEvent(["textChanged",self,newText]);
       if self.text <> newText
       then self.text := newText
       end; // Avoid unnecessary daemon firing

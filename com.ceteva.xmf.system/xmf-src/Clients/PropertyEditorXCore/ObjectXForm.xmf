@@ -63,7 +63,7 @@ context PropertyEditorXCore
     end
 
     @Operation daemons_ofNameChanged(elementOf,slot,newName,oldName)
-      self.form.setTextOut("of",element.of())
+      form.setTextOut("of",elementOf)
     end
 
     @Operation daemons_ofParentsChanged(elementOf,slot,newValue,oldValue)

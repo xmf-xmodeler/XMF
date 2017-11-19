@@ -29,7 +29,9 @@ context ClassMapping
     @Attribute intrinsicAssociationConstraintMaps  : Seq(IntrinsicAssociationConstraintXIntrinsicAssociationConstraintEdge)(+,-) end
     
     @Constructor(package,diagram,owner)
-      self.init(Seq{package,diagram})
+      self.init(Seq{package,diagram});
+      // Replace with a package constraint checker...
+      PackageConstraintChecker(self).registerWithDiagram(diagram)
     end
     
     @Constructor(package,diagram) !

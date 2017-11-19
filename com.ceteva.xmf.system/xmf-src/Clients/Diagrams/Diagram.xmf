@@ -23,8 +23,8 @@ context Diagrams
     @Attribute isSubDiagram      : Boolean                    end           // Set when this diagram is a display element.
     @Attribute listeners         : Set(DiagramListener) (+,-) end           // Listeners for diagram events.
     @Attribute backgroundColor   : Color = null (?,!)         end           // Background color for diagram.
-    @Attribute zoom			     : Float = 1.0                end	        // Zoom ratio when shown as a top level diagram.
-    @Attribute nestedZoom	     : Float = 1.0                end		    // Zoom ratio when shown as a nested diagram.
+    @Attribute zoom			     : Float = 1.0                end	       // Zoom ratio when shown as a top level diagram.
+    @Attribute nestedZoom	     : Float = 1.0                end		   // Zoom ratio when shown as a nested diagram.
     @Attribute magneticWaypoints : Boolean = true             end           // Handled in the client, recorded here.
     
     @Constructor(name)

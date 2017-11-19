@@ -206,6 +206,7 @@ context Diagrams
     end
     
     @Operation delete()
+      self.raiseEvent(["deleteEdge",self]);
       @For wayPoint in wayPoints do
         wayPoint.delete()
       end;
@@ -308,6 +309,7 @@ context Diagrams
       if setMenu
       then self.setRightClickMenu()
       end;
+      self.raiseEvent(["newEdge",self]);
       self
     end
     
@@ -438,7 +440,8 @@ context Diagrams
     
     @Operation sourceReconnected(port)
       self.source := port;
-      @Command(self) setEdgeSourceCommand(self,self.source) end
+      @Command(self) setEdgeSourceCommand(self,self.source) end;
+      self.raiseEvent(["sourceReconnected",self,port])
     end
     
     @Doc
@@ -535,7 +538,8 @@ context Diagrams
     
     @Operation targetReconnected(port)
       self.target := port;
-      @Command(self) setEdgeTargetCommand(self,self.target) end
+      @Command(self) setEdgeTargetCommand(self,self.target) end;
+      self.raiseEvent(["targetReconnected",self,port])
     end
     
   end

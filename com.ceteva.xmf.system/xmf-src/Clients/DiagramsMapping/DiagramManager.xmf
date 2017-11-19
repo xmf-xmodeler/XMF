@@ -7,7 +7,7 @@ import DiagramsMapping;
 
 context DiagramsMapping
 
-  @Class DiagramManager extends DiagramListener
+  @Class DiagramManager extends Diagrams::DiagramListener
 
     @Attribute clients : Seq(DiagramMappingClient) = Seq{} (+,-) end
     @Attribute contributionTable : Table = Table(10) end

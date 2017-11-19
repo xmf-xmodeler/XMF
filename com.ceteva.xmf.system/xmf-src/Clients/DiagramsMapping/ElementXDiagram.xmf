@@ -8,7 +8,7 @@ import Menus;
 
 context DiagramsMapping
 
-  @Class ElementXDiagram extends ContainedClientElement, RightClickableProxy, DiagramListener
+  @Class ElementXDiagram extends ContainedClientElement, RightClickableProxy, Diagrams::DiagramListener
   			
     @Attribute theme	: String = ""  (?) end    // the theme currently applied to this mapping
     @Attribute eventFilterTable : Table = Table(10) end

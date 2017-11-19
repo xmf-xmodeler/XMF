@@ -6,30 +6,127 @@ import Diagrams;
 context Diagrams
 
   @Class DiagramListener isabstract
+  
+    // A diagram listener can be added to a diagram to receive events
+    // that occur on the diagram. The supplied event is in the form
+    // [name,arg1,arg2,...]. 
 
     @Operation deregisterFromDiagram(diagram)
       diagram.deleteFromListeners(self)
     end
-
-    @AbstractOp handleDiagramCloseEvent(diagram)
+    
+    @Operation handleDeleteBoxEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleDeleteEdgeEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleDeleteLabelEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleDeleteNodeEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleDeleteTextEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleDeleteWayPointEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleBoxResizedEvent(diagram:Diagram,event:[Element])
+      null
     end
 
-    @AbstractOp handleDiagramDeleteEvent(diagram)
+    @Operation handleDiagramCloseEvent(diagram)
+      null
+    end
+
+    @Operation handleDiagramDeleteEvent(diagram)
+      null
     end
 
     @Operation handleDiagramEvent(diagram,event)
       let eventType = event->at(0)
       in
         @Case eventType of 
-          "close"  do self.handleDiagramCloseEvent(diagram) end
-          "delete" do self.handleDiagramDeleteEvent(diagram) end
-          "renew"  do self.handleDiagramRenewEvent(diagram) end
+          "close"              do self.handleDiagramCloseEvent(diagram)            end
+          "delete"             do self.handleDiagramDeleteEvent(diagram)           end
+          "deleteBox"          do self.handleDeleteBoxEvent(diagram,event)         end
+          "deleteEdge"         do self.handleDeleteEdgeEvent(diagram,event)        end
+          "deleteLabel"        do self.handleDeleteLabelEvent(diagram,event)       end
+          "deleteNode"         do self.handleDeleteNodeEvent(diagram,event)        end
+          "deleteText"         do self.handleDeleteTextEvent(diagram,event)        end
+          "deleteWayPoint"     do self.handleDeleteWayPointEvent(diagram,event)    end
+          "moveWayPoint"       do self.handleMoveWayPointEvent(diagram,event)      end
+          "newBox"             do self.handleNewBoxEvent(diagram,event)            end
+          "newEdge"            do self.handleNewEdgeEvent(diagram,event)           end
+          "newLabel"           do self.handleNewLabelEvent(diagram,event)          end
+          "newNode"            do self.handleNewNodeEvent(diagram,event)           end
+          "newText"            do self.handleNewTextEvent(diagram,event)           end
+          "newWayPoint"        do self.handleNewWayPointEvent(diagram,event)       end
+          "renew"              do self.handleDiagramRenewEvent(diagram)            end
+          "resizeBox"          do self.handleBoxResizedEvent(diagram,event)        end
+          "resizeNode"         do self.handleNodeResizedEvent(diagram,event)       end
+          "sourceReconnected"  do self.handleSourceReconnectedEvent(diagram,event) end
+          "targetReconnected"  do self.handleTargetReconnectedEvent(diagram,event) end
+          "textChanged"        do self.handleTextChangedEvent(diagram,event)       end
         else self
         end
       end
     end
 
-    @AbstractOp handleDiagramRenewEvent(diagram)
+    @Operation handleDiagramRenewEvent(diagram)
+       null
+    end
+    
+    @Operation handleMoveWayPointEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewBoxEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewEdgeEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewLabelEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewNodeEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewTextEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNewWayPointEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleNodeResizedEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleSourceReconnectedEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleTargetReconnectedEvent(diagram:Diagram,event:[Element])
+      null
+    end
+    
+    @Operation handleTextChangedEvent(diagram:Diagram,event:[Element])
+      null
     end
 
     @Operation registerWithDiagram(diagram)

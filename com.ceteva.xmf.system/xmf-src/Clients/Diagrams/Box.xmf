@@ -35,6 +35,7 @@ context Diagrams
       @For display in displays do 
         display.delete()
       end;
+      self.raiseEvent(["deleteBox",self]);
       super()
     end
     
@@ -167,6 +168,7 @@ context Diagrams
       if setMenu
       then self.setRightClickMenu()
       end;
+      self.raiseEvent(["newBox",self]);
       self
     end
     
@@ -241,6 +243,7 @@ context Diagrams
       
       if width <> self.width or height <> self.height
       then 
+        self.raiseEvent(["resizeBox",self,width,height]);
         @Command(self) resizeCommand(self,width,height) end;
         self.width := width;
         self.height := height
