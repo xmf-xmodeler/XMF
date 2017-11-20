@@ -214,6 +214,10 @@ context ClassMapping
       end;
       self.metaslotMaps := Set{}
     end
+    
+    @Operation elementChanged()
+      owner.elementChanged()
+    end
 
     @Operation generateAttributes()
       @For attribute in class.attributes do
@@ -408,7 +412,8 @@ context ClassMapping
     @Operation nameChangedDaemon(text,slot,newName,oldName)
       if class.name.toString() <> newName
       then 
-        class.setName(newName)
+        class.setName(newName);
+        self.elementChanged()
       end
     end
      
@@ -429,6 +434,7 @@ context ClassMapping
           constraint = conASfun()
       in constraint.setName(name);
          class.add(constraint);
+         self.elementChanged();
          constraint.init()
       end
     end
@@ -436,7 +442,8 @@ context ClassMapping
     @Operation newConstructor()
       let constructor = @Constructor() end
       in
-        class.add(constructor)
+        class.add(constructor);
+        self.elementChanged()
       end
     end
     
@@ -447,8 +454,7 @@ context ClassMapping
         opAS = OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}) then
         opASfun = Compiler::compileToFun("",opAS,Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true) then
         operation = opASfun()
-      in
-        operation
+      in operation
       end
     end
 
@@ -489,7 +495,7 @@ context ClassMapping
         @Find(map,operationMaps)
           when map.operation = operation
           do self.remove(map);
-           map.text.delete()
+             map.text.delete()
         end
       end
     end
@@ -509,6 +515,7 @@ context ClassMapping
           let map = OperationXText(operation,text) in
             self.add(map);
             class.add(operation);
+            self.elementChanged();
             text.setName(operation.name.toString())
           end
         end
@@ -519,7 +526,8 @@ context ClassMapping
       @Find(map,operationMaps)
         when map.text = text
         do self.remove(map);
-           class.remove(map.operation)
+           class.remove(map.operation);
+           self.elementChanged()
       end
     end
     

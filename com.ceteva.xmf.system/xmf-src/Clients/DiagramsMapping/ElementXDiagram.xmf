@@ -141,6 +141,10 @@ context DiagramsMapping
     @AbstractOp element()
     end
     
+    @Operation elementChanged()
+      null
+    end
+    
     @Operation elementXNodeChangedState(mapping:ElementXNode,event:DiagramEvent)
     
       // Called when the element in the mapping is an object whose state has just changed.
