@@ -21,7 +21,7 @@ context ClassMapping
            self.processConstraints(report)
         end
       catch(x)
-        x.println()
+        ("PackageConstraintChecker::checkConstraints() " + x).println()
       end
     end
     
