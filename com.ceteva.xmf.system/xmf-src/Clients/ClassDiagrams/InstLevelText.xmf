@@ -5,18 +5,20 @@ import Clients;
 import ClassDiagrams;
 
 // textbox for inst level next to operation (and attribute later)
+
 context Clients::ClassDiagrams
+
    @Class InstLevelText extends Clients::Diagrams::Box
+   
 		@Attribute instLevel : Clients::Diagrams::Text end
 		@Attribute active : Boolean end
-
 		@Attribute referringTo : CompiledOperation (!,?) end
 		
 		@Constructor(x,y)
 			self.fillColor := Clients::Diagrams::Color();
 			self.hideAllEdges();
 			self.active := false;
-            self.instLevel := Clients::Diagrams::Text("X",1,0,true,false,false,Clients::Diagrams::Color(255,255,255))	
+            self.instLevel := Clients::Diagrams::Text("X",1,0,true,false,false,Clients::Diagrams::Color(255,255,255))
 		end
 		
 		@Operation setActive(active : Boolean)

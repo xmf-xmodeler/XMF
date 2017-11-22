@@ -21,8 +21,7 @@ context ClassDiagrams
       end;
       if not "noBox"= (instLevel+"")
       then 
-        //1 / "NULL" + NuLL;
-        self.instLevel := InstLevelText(x,y);
+        self.instLevel := InstLevelText(x+1,y);
         self.instLevel.setLevel(instLevel+"");
         // A group should not have any Display attributes set.
         if not " "= (instLevel+"")
@@ -49,6 +48,7 @@ context ClassDiagrams
 
     @Operation moveDown()
       @Count i from 1 to 16 do
+        instLevel.move(name.x,name.y-1);
         name.move(name.x,name.y-1);
         metaclass_.move(metaclass_.x,metaclass_.y-1)
       end

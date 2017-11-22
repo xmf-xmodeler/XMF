@@ -9,7 +9,7 @@ context ClassDiagrams
   @Class Multiplicity extends Label
   
     @Constructor() ! 
-      self.init(Seq{"1","end",5,5,false})
+      self.init(Seq{"0..1","end",5,5,false})
     end
     
     @Constructor(text) ! 
@@ -21,7 +21,7 @@ context ClassDiagrams
     end
     
     @Constructor(attachedTo,relx,rely)
-      self.init(Seq{"1",attachedTo,relx,rely,false})
+      self.init(Seq{"0..1",attachedTo,relx,rely,false})
     end
     
     @Operation multiplicity()

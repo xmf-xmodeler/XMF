@@ -191,27 +191,27 @@ context ClassDiagrams
        metaslotsBox.packHeight();
        operationValuesBox.packHeight();
        
-       attBox.move(				0,name.height() - 1);
-       opsBox.move(				0,name.height() + attBox.maxHeight() - 2);
-       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
-       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
+       attBox.move(				0,name.height() - 0);
+       opsBox.move(				0,name.height() + attBox.maxHeight() - 0 );
+       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 0);
+       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 0);
        
        super()
      end
      
      @Operation expandHeight()
-     
+          
        name.expandHeight();
        attBox.expandHeight();
        opsBox.expandHeight();
        metaslotsBox.expandHeight();
        operationValuesBox.expandHeight();
        
-       attBox.move(				0,name.height() - 1);
-       opsBox.move(				0,name.height() + attBox.maxHeight() - 2);
-       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 2);
-       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 2);
-       
+       attBox.move(				0,name.height() - 0);
+       opsBox.move(				0,name.height() + attBox.maxHeight() - 0);
+       metaslotsBox.move(		0,name.height() + attBox.maxHeight() + opsBox.maxHeight() - 0);
+       operationValuesBox.move(	0,name.height() + attBox.maxHeight() + opsBox.maxHeight() + metaslotsBox.maxHeight() - 0);
+              
        super()
      end
      

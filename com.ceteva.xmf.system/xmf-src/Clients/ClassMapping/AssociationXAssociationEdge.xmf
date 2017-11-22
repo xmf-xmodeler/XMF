@@ -214,8 +214,8 @@ context ClassMapping
       @TypeCase(mult)
         Multiplicities::SingleMult do
           if mult.isMandatory
-          then "1 <<mandatory>>"
-          else "1"
+          then "1..1"
+          else "0..1"
           end
         end
         Multiplicities::CollectionMult do

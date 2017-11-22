@@ -84,13 +84,13 @@ context ClassDiagrams
     end
     
     @Operation nextAttribute(name,metaclass_,type)
-      AttributeText(name,metaclass_,type.name.toString(),0,self.displays->size * 16)
+      AttributeText(name,metaclass_,type.name.toString(),2,self.displays->size * 16)
     end
     
     @Operation nextAttributeExtension(name,metaclass_,metaclassName,type)
       let extensionPoint = xmf.registry().getExtensionPoint("com.ceteva.diagrams.attribute.text") then
           class = (extensionPoint.find(metaclass_).values->head)()
-      in class(name,metaclassName,type.name.toString(),0,self.displays->size * 16)
+      in class(name,metaclassName,type.name.toString(),2,self.displays->size * 16)
       end
     end
     

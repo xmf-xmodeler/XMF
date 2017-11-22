@@ -22,8 +22,6 @@ context ClassMapping
       // should not be coupled to the model in
       // this way
    
-//      ("text.of():" + text.of()).println();
-//      ("operation.of():" + operation.of()).println();
       self.setHotLoad(true);
       text.setOperation(operation);  
       self.checkDaemons();
@@ -75,7 +73,6 @@ context ClassMapping
     end
     
     @Operation instLevelChanged_OperationXText(attribute,slot,newInstLevel,oldInstLevel)
-//      "instLevelChanged".println();
       if operation.isIntrinsic and text.instLevel.instLevel.text <> newInstLevel.toString() 
       then 
         text.instLevel.instLevel.setText(newInstLevel.toString())
@@ -83,17 +80,11 @@ context ClassMapping
     end   
      
     @Operation isIntrinsicChanged_OperationXText(attribute,slot,newIntrinsic,oldIntrinsic)
-//      "isIntrinsicChanged".println();
-//      ("operation.isIntrinsic: " + operation.isIntrinsic).println();
-//      ("text.instLevel.instLevel.text: " + text.instLevel.instLevel.text).println();
-//      ("operation.instLevel.toString: " + operation.instLevel.toString()).println();
       if operation.isIntrinsic and text.instLevel.instLevel.text <> operation.instLevel.toString() 
       then 
-//        "then".println();
         text.instLevel.instLevel.setText(operation.instLevel.toString()) 
       else
         if not operation.isIntrinsic and text.instLevel.instLevel.text <> " " 
-//        then "else-then".println(); 
           then text.instLevel.instLevel.setText(" ")
         end
       end

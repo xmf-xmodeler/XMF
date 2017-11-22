@@ -12,15 +12,13 @@ import SnapshotDiagrams;
 
 context Clients::ClassDiagrams::AttributeBox	
    @Operation packWidth()
-                        	 
+                        	    
 	  let maxNameWidth = 0;
 	  	  maxIntrinsicLevelName = 0
 	  in
-
 		@For attText in displays do
            maxIntrinsicLevelName := maxIntrinsicLevelName.max(attText.instLevel.x + attText.instLevel.minWidth())
         end;
- 
 		@For attText in displays do
            attText.name.move(maxIntrinsicLevelName + attText.separatorIntrinsic(),attText.name.y())
         end;
@@ -48,7 +46,6 @@ context Clients::ClassDiagrams::AttributeBox
         @For attText in displays do
           maxNameWidth := maxNameWidth.max(attText.name.x + attText.name.width())
         end;
-        
         @For attText in displays do
           attText.type.move(maxNameWidth + attText.separator(),attText.type.y())
         end

@@ -688,8 +688,8 @@ context ClassDiagrams
 		        	instLevel2 = InstLevelLabel(" ", "end",   10, (-2*yDiff)+(1*endy), Color(0,0,0), true);
     			    varName1 = Label("e1","start",startx,starty,true);
 	          		varName2 = Label("e2","end",endx,endy,true);
-        	  		displayName1 = Label(assoName,"",0,-16,true, Color(0,0,0),0+1);
-    	      		displayName2 = Label(assoName,"",0, 16,true, Color(0,0,0),0-1) 
+        	  		displayName1 = Label(assoName,"center",0,-16,true, Color(0,0,0),0+1);
+    	      		displayName2 = Label(assoName,"center",0, 16,true, Color(0,0,0),0-1) 
 	        		then
         	  		end1 = AssociationEnd(varName1,displayName1,
     	          		Multiplicity("start",10, (yDiff)+(1*starty)), instLevel1);
@@ -711,7 +711,7 @@ context ClassDiagrams
     
     @Operation newAssociationInstanceEdgeCommand(sourcePort,targetPort,typePath,x1,y1,x2,y2)
     	let metaclass = typePath->ref([Root,self.owner.package]) then
-    		name_label = Label("instance of " + metaclass.name,"",0,-16,true, Color(120,120,120),0+1) then
+    		name_label = Label("instance of " + metaclass.name,"center",0,-16,true, Color(120,120,120),0+1) then
 			edge = AssociationInstanceEdge(name_label, sourcePort,targetPort,typePath,x1,y1,x2,y2)
         in 
            edge.new(self,false);
@@ -768,7 +768,7 @@ context ClassDiagrams
     
     @Operation newIntrinsicAssociationConstraintEdgeCommand(sourcePort,targetPort,typePath,x1,y1,x2,y2)
     	let metaclass = typePath->ref([Root,self.owner.package]) then
-    		name_label = Label(metaclass.name,"",0,-16,true, Color(120,120,120),0-1) then
+    		name_label = Label(metaclass.name,"center",0,-16,true, Color(120,120,120),0-1) then
 			edge = IntrinsicAssociationConstraintEdge(name_label, sourcePort,targetPort,typePath,x1,y1,x2,y2)
         in 
            edge.new(self,false);

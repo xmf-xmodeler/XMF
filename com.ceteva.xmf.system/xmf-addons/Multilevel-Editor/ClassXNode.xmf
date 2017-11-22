@@ -16,7 +16,6 @@ context ClassXNode
     then
     if level >= 5
     then node.name.name.setColor(white); 
-    //(0.825-((level*2.0)/(1.0+(5.0.sqrt())))).println();
     node.name.setFillColor(Color::makeHSV(0.44-((level*2.0)/(1.0+(5.0.sqrt()))), (4.0/level), 1.0-(2.5/level)))
     elseif level = 4
     then node.name.name.setColor(white); node.name.setFillColor(red); if node.name.stereotypeText <> null  then node.name.stereotypeText.setColor(grey) end
@@ -93,7 +92,6 @@ context ClassXNode
   
 context ClassXNode
   @Operation daemon_changeButtonInToolbar(newName,oldName)
-    //("daemon_changeButtonInToolbar " + oldName + " --> " + newName).println();
     if class.isMetaClass() 
       andthen class.level > 0 
         then 

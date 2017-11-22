@@ -475,8 +475,14 @@ context ClassMapping
             then
               map = OperationXText(operation,text)
           in self.add(map);
-              text.new(node.opsBox);
-              node.add(text)
+            text.new(node.opsBox);
+            node.add(text);
+            if node.opsBox.shown then
+              // make sure everything is shown, as constructor may say false. 
+              // But if the box is visible everything must be visible.
+              node.opsBox.setShown(node.opsBox.shown); 
+              node.packWidth()
+            end
           end
         end
       end
