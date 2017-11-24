@@ -66,7 +66,8 @@ context BinExp
         rightCode = right.compile(env,frame,false,saveSource)
     in if binOp = "*" then leftCode + rightCode + Seq{Mul()}
        elseif binOp = "/" then leftCode + rightCode + Seq{Div()}
-       elseif binOp = "implies" then leftCode + rightCode + Seq{Implies()}
+       //elseif binOp = "implies" then leftCode + rightCode + Seq{Implies()}
+       elseif binOp = "implies" then [| not(<left>) orelse <right> |].compile(env,frame,isLast,saveSource)
        elseif binOp = "<" then leftCode + rightCode + Seq{Less()}
        elseif binOp = ">" then leftCode + rightCode + Seq{Greater()}
        elseif binOp = "=" then leftCode + rightCode + Seq{Eql()}

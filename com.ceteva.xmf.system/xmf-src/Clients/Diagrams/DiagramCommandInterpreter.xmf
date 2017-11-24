@@ -119,6 +119,15 @@ context Diagrams
       end
     end
     
+    @Operation error(element,reason:String)
+      let id = element.id() 
+      in
+        @SendCommand(self)
+          error(id,reason)
+        end
+      end
+    end
+    
     @Operation globalRenderOff()
       @SendCommand(self)
         globalRenderOff()

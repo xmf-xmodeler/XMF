@@ -1472,7 +1472,7 @@ context ClassMapping
     
     @Operation elementChanged()
       super();
-      "PackageXClassDiagrams::elementChanged".println()
+      PackageConstraintChecker(self).checkConstraints()
     end
     
     @Operation ensureDisplayPackage()

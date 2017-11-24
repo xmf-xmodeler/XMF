@@ -5,10 +5,7 @@ import Diagrams;
 
 context ClassMapping
 
-  @Class PackageConstraintChecker extends DiagramListener
-  
-    // This class monitors changes to a diagram and performs constraint
-    // checks on the package when appropriate changes occur.
+  @Class PackageConstraintChecker 
     
     @Attribute mapping:ClassMapping::PackageXClassDiagram end
     
@@ -28,13 +25,17 @@ context ClassMapping
     @Operation processConstraints(report:ConstraintReport) 
       if not(report.satisfied)
       then 
-        let diagramElement = self.find(report.candidate)
-        in if diagramElement <> null
-           then @Command(diagramElement) error(diagramElement,report.reason) end
-           end;
-           @For child in report.children do
-             self.processConstraints(child)
-           end
+        if report.candidate = mapping.package
+        then @Command(mapping.diagram) error(mapping.diagram,report.reason) end
+        else 
+          let diagramElement = self.find(report.candidate)
+          in if diagramElement <> null
+             then @Command(diagramElement) error(diagramElement,report.reason) end
+             end
+          end
+        end;
+        @For child in report.children do
+          self.processConstraints(child)
         end
       end
     end
@@ -55,71 +56,7 @@ context ClassMapping
     end
     
     @Operation findEdge(o:Object)
-      @Find(map,mapping.attributeEdges) when map.attribute = o do map.edge else null end
-    end
-        
-    @Operation handleDeleteBoxEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints() 
-    end
-    
-    @Operation handleDeleteEdgeEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleDeleteLabelEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleDeleteNodeEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleDeleteTextEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleDeleteWayPointEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewBoxEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewEdgeEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewLabelEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewNodeEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewTextEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNewWayPointEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleNodeResizedEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleSourceReconnectedEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleTargetReconnectedEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
-    end
-    
-    @Operation handleTextChangedEvent(diagram:Diagram,event:[Element])
-      self.checkConstraints()
+      @Find(map,mapping.attributeMaps) when map.attribute = o do map.edge else null end
     end
   
   end
