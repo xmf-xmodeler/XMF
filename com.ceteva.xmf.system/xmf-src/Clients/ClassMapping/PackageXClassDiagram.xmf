@@ -182,8 +182,8 @@ context ClassMapping
     end
     
     @Operation addAttribute(attribute)
-     let acMaps = self.abstractClassMaps()
-      in
+     if xmf.attributeEdge then 
+      let acMaps = self.abstractClassMaps() in
         @Find(sourceMap,acMaps)
           when sourceMap.element() = attribute.owner
           do @Find(targetMap,acMaps)
@@ -203,6 +203,7 @@ context ClassMapping
                     end
                   end
              end
+          end
         end
       end
     end
