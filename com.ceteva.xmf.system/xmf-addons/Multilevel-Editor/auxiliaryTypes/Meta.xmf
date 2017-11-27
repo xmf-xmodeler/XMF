@@ -20,11 +20,10 @@ context Root
 		@Attribute rate : Float end
 	end 
 
-/*	@Class VolatileConversionRate metaclass Root::FMML::MetaClass extends ConversionRate
-		//@Attribute from : Unit end
-		@Attribute from : Date end
-		@Attribute to : Date end
-	end */
+	@Class VolatileConversionRate metaclass Root::FMML::MetaClass extends ConversionRate
+		/*@Attribute from : Date end
+		@Attribute to : Date end */
+	end
 	
 	@Class Unit metaclass Root::FMML::MetaClass extends Root::FMML::MetaClass
 		@Attribute name : String end
