@@ -125,7 +125,8 @@ context ClassMapping
     @Operation nameChangedDaemon(obj,slot,newName,oldName)
       if attribute.name.toString() <> newName
       then 
-        attribute.setName(newName)
+        attribute.setName(newName);
+        self.elementChanged()
       end
     end
     

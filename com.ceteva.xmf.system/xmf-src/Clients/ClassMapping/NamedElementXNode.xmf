@@ -29,7 +29,9 @@ context ClassMapping
     
     @Operation nodeLabelChanged_namedElementNode(attribute,slot,newText,oldText)
       if element.name().toString() <> newText
-        then element.setName(newText)
+      then 
+        element.setName(newText);
+        self.elementChanged()
       end
     end
 

@@ -26,6 +26,7 @@ context DiagramsMapping
     // changes that the following operation is called
     
     @Operation elementChanged()
+      owner.elementChanged();
       let theme = owner.theme()
       in
         self.theme := theme;

@@ -583,7 +583,8 @@ context ClassMapping
         do self.remove(associationMap);
            let association = associationMap.association
            in  association.remove();
-               association.owner.remove(association)
+               association.owner.remove(association);
+               self.elementChanged()
            end
       end
     end
@@ -625,7 +626,8 @@ context ClassMapping
         do self.remove(associationInstanceMap);
            let associationInstance = associationInstanceMap.associationInstance
            in  associationInstance.remove();
-               associationInstance.owner.remove(associationInstance)
+               associationInstance.owner.remove(associationInstance);
+               self.elementChanged()
            end
       end
     end
@@ -799,7 +801,8 @@ context ClassMapping
         do
           self.remove(attributeMap);
           let attribute = attributeMap.attribute
-          in  attribute.owner.remove(attribute)
+          in  attribute.owner.remove(attribute);
+              self.elementChanged()
           end
       end
     end
