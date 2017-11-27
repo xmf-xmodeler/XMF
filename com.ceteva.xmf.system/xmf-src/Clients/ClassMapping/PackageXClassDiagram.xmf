@@ -182,30 +182,29 @@ context ClassMapping
     end
     
     @Operation addAttribute(attribute)
-//     let acMaps = self.abstractClassMaps()
-//      in
-//        @Find(sourceMap,acMaps)
-//          when sourceMap.element() = attribute.owner
-//          do @Find(targetMap,acMaps)
-//               when targetMap.element() = attribute.underlyingType()
-//               do let 
-//                    edge = diagram.makeAttribute(sourceMap.node,targetMap.node,attribute.of().pathSeq());
-//                    //type = attribute.type then
-//                    //mult = if type.isKindOf(Set) then "*" elseif type.isKindOf(Seq) then "* <<ordered>>" else "" end
-//                    mult = AttributeXAttributeEdge::calcMultLabelString(attribute.mult())
-//                  in  
-//                    edge.setName(attribute.name.toString());
-//                    edge.setMult(mult);
-//                    let attributeEdgeMap = AttributeXAttributeEdge(attribute,edge)
-//                    in  
-//                      self.add(attributeEdgeMap);
-//                      self.diagram.add(edge)
-//                    end
-//                  end
-//             end
-//        end
-//      end
-      null
+     let acMaps = self.abstractClassMaps()
+      in
+        @Find(sourceMap,acMaps)
+          when sourceMap.element() = attribute.owner
+          do @Find(targetMap,acMaps)
+               when targetMap.element() = attribute.underlyingType()
+               do let 
+                    edge = diagram.makeAttribute(sourceMap.node,targetMap.node,attribute.of().pathSeq());
+                    //type = attribute.type then
+                    //mult = if type.isKindOf(Set) then "*" elseif type.isKindOf(Seq) then "* <<ordered>>" else "" end
+                    mult = AttributeXAttributeEdge::calcMultLabelString(attribute.mult())
+                  in  
+                    edge.setName(attribute.name.toString());
+                    edge.setMult(mult);
+                    let attributeEdgeMap = AttributeXAttributeEdge(attribute,edge)
+                    in  
+                      self.add(attributeEdgeMap);
+                      self.diagram.add(edge)
+                    end
+                  end
+             end
+        end
+      end
     end
     
     @Operation addClass(class)

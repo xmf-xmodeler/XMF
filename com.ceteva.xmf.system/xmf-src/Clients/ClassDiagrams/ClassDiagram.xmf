@@ -798,7 +798,11 @@ context ClassDiagrams
           targetNode = targetPort.owner
       in if sourceNode.isKindOf(ClassifierNode) and targetNode.isKindOf(ClassifierNode)
          then 
-           let edge = AttributeEdge("att",sourcePort,targetPort,typePath)
+           let edge = AttributeEdge("att",sourcePort,targetPort,typePath,
+             sourceNode.x+(sourceNode.width()/2).floor(),
+             sourceNode.y+(sourceNode.height()/2).floor(),
+             targetNode.x+(targetNode.width()/2).floor(),
+             targetNode.y+(targetNode.height()/2).floor())
            in edge.new(self);
               edge
            end

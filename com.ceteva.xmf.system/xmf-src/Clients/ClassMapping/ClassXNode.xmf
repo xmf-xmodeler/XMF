@@ -221,8 +221,8 @@ context ClassMapping
 
     @Operation generateAttributes()
       @For attribute in class.attributes do
-        //if attribute.underlyingType().isKindOf(DataType)
-		       if not attribute.isKindOf(Associations::End)
+        if attribute.underlyingType().isKindOf(DataType)
+		//       if not attribute.isKindOf(Associations::End)
         then self.attributeAdded(attribute)
         end
       end
