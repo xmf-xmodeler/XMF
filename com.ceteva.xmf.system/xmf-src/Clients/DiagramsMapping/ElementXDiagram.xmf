@@ -167,7 +167,8 @@ context DiagramsMapping
     @Operation generateDiagram()
       @WithoutDaemons(self.diagram())
         self.generateNodes();
-        self.generateEdges()
+        self.generateEdges();
+        self.elementChanged()
       end
     end
     
