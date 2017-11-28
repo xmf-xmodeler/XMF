@@ -119,7 +119,7 @@ context ClassMapping
         @SlotValueChanged multi once ClassXNode::attributeTypeChangedDaemon(attribute,"type") end
       elseif attribute.underlyingType().isKindOf(DataType)
       then self.attributeAdded(attribute)
-      else if not attribute.isKindOf(Associations::End) then self.attributeAdded(attribute) end 
+      else if not attribute.isKindOf(Associations::End) then owner.attributeAdded(attribute) end 
       // TEST owner.attributeAdded(attribute)
       end
     end
