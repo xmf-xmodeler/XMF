@@ -200,9 +200,9 @@ context Diagrams
         "delete"                 do self.readDelete(parameters)                 end
         "deleteIfOfContained"    do self.readDeleteIfOfContained(parameters)    end
         "deleteWaypoint"         do self.readDelete(parameters)                 end
-        "diagramOpen"			 do self.readDiagramOpen(parameters)            end
+        "diagramOpen"			do self.readDiagramOpen(parameters)            end
         "acceptDrop"             do self.readAcceptDrop(parameters)             end
-        "dragAndDrop"			 do self.readDragAndDrop(parameters)            end
+        "dragAndDrop"			do self.readDragAndDrop(parameters)            end
         "edgeDeselected"         do self.readEdgeDeselected(parameters)         end
         "edgeSelected"           do self.readEdgeSelected(parameters)           end
         "edgeSourceReconnected"  do self.readEdgeSourceReconnected(parameters)  end
@@ -214,18 +214,18 @@ context Diagrams
         "newWaypoint"            do self.readNewWayPoint(parameters)            end
         "nodeDeselected"         do self.readNodeDeselected(parameters)         end
         "nodeSelected"           do self.readNodeSelected(parameters)           end
-        "preferenceChange"		 do self.readPreferenceChange(parameters)       end
+        "preferenceChange"	    do self.readPreferenceChange(parameters)       end
         "resizeNode"             do self.readResizeNode(parameters)             end
         "rightClickMenuSelected" do self.readRightClickMenuSelected(parameters) end
         "setReferencePoint"      do self.readSetReferencePoint(parameters)      end
         "textChanged"            do self.readTextChanged(parameters)            end
-        "diagramClosed"		     do self.readDiagramClosed(parameters)          end
-        "focusGained"			 do self.readFocusGained(parameters)            end
-        "focusLost"			     do self.readFocusLost(parameters)              end
+        "diagramClosed"		    do self.readDiagramClosed(parameters)          end
+        "focusGained"			do self.readFocusGained(parameters)            end
+        "focusLost"			    do self.readFocusLost(parameters)              end
         "textDimension"          do self.readTextDimension(parameters)          end
         "toggle"                 do self.readToggle(parameters)                 end
-        "selected"				 do self.readSelected(parameters)               end
-        "zoomChanged"			 do self.readZoomChanged(parameters)            end
+        "selected"				do self.readSelected(parameters)               end
+        "zoomChanged"			do self.readZoomChanged(parameters)            end
       end
     end
     

@@ -125,13 +125,16 @@ context ClassMapping
     @Operation nameChangedDaemon(obj,slot,newName,oldName)
       if attribute.name.toString() <> newName
       then 
-        attribute.setName(newName)
+        attribute.setName(newName);
+        owner.elementChanged()
       end
     end
     
     @Operation nameChanged_classDiagramDaemon(attribute,slot,newName,oldName)
       if edge.name() <> newName.toString()
-      then edge.setName(newName.toString())
+      then 
+        edge.setName(newName.toString());
+        owner.elementChanged()
       end
     end
     

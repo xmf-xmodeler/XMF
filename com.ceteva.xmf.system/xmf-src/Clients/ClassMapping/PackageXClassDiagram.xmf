@@ -583,7 +583,8 @@ context ClassMapping
         do self.remove(associationMap);
            let association = associationMap.association
            in  association.remove();
-               association.owner.remove(association)
+               association.owner.remove(association);
+               self.elementChanged()
            end
       end
     end
@@ -625,7 +626,8 @@ context ClassMapping
         do self.remove(associationInstanceMap);
            let associationInstance = associationInstanceMap.associationInstance
            in  associationInstance.remove();
-               associationInstance.owner.remove(associationInstance)
+               associationInstance.owner.remove(associationInstance);
+               self.elementChanged()
            end
       end
     end
@@ -799,7 +801,8 @@ context ClassMapping
         do
           self.remove(attributeMap);
           let attribute = attributeMap.attribute
-          in  attribute.owner.remove(attribute)
+          in  attribute.owner.remove(attribute);
+              self.elementChanged()
           end
       end
     end
@@ -824,7 +827,8 @@ context ClassMapping
         when attributeMap.attribute = attribute
         do 
           self.remove(attributeMap);
-          attributeMap.edge.delete()
+          attributeMap.edge.delete();
+          self.elementChanged()
       end
     end
     
@@ -1077,7 +1081,9 @@ context ClassMapping
         do
           map.node.delete();
           self.remove(map)
-      end
+      end;
+      
+      self.elementChanged()
     end
     
     /*@Operation classNodeRemoved(classNode)
@@ -1865,7 +1871,8 @@ context ClassMapping
     @Operation operationRemoved(operation)
       if operation.getProperty("diagramAction",false)
       then self.actionRemoved(operation)
-      end
+      end;
+      self.elementChanged()
     end 
     
     @Operation operationAdded_classDiagramDaemon(obj,slot,operation)
@@ -1928,7 +1935,8 @@ context ClassMapping
         when map.package = package
         do 
           self.remove(map);
-          map.node.delete()
+          map.node.delete();
+          self.elementChanged()
       end
     end
     
