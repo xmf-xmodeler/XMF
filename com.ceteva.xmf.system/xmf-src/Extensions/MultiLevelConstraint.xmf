@@ -1,0 +1,76 @@
+parserImport Parser::BNF;
+parserImport XOCL;
+
+/******************************************************************************
+ *                                                                            *
+ *                  Multi Level Constraint Definitions                        *
+ *                  ----------------------------------                        *
+ *                                                                            *
+ *   A constraint definition is used to construct a syntax expression that    *
+ *   instantiates XCore::Constraint. Constraints created using @Constraint    *
+ *   are limited to one type level (check the value of level in the body of   *
+ *   the constraint. However, @MultiLevelConstraint's are applied to objects  *
+ *   any type level below the class that owns them. Therefore you need to be  *
+ *   careful to add pre-conditions to check whether the candidate object has  *
+ *   the correct interface before performing slot access or invoking self     *
+ *   operations. The distance between the class that owns the constraint and  *
+ *   the candidate object is supplied as the value of 'level' in the body of  *
+ *   the constraint. If o is the candidate then the value of level in o.of()  *
+ *   is 1, of the constraint is defined by o.of().of() then the value is 2    *
+ *   and so on. Constraints defined by Class will be checked last where the   *
+ *   value of level depends on the number of type levels traversed.           *
+ *                                                                            *
+ ******************************************************************************/ 
+
+import XOCL;
+import OCL;
+import Parser::BNF;
+
+context XOCL
+
+  @Class MultiLevelConstraint extends Constraint
+    
+    @Grammar extends Constraint.grammar
+    
+      MultiLevelConstraint ::= 
+      
+        // A consraint has a name...
+      
+        name = Name 
+        
+        // A boolean valued body...
+        
+        body = Exp 
+        
+        // A string valued explanation for failure...
+        
+        reason = Reason 
+        
+        'end' 
+        
+        { MultiLevelConstraint(name,body,reason) }.
+      
+    end
+    
+    @Operation desugar():Performable
+    
+      // Produce an expression that instantiates the class
+      // XCore::Constraint...
+      
+      [| let name = <StrExp(name)>;
+             body = @Operation <"body">(classifier,level) <body> end;
+             reason = @Operation <"reason">(classifier,level) <reason> end
+         in XCore::Constraint(XCore::Symbol(name),body,reason)
+         end
+      |]
+    end
+    
+    @Operation pprint(out,indent)
+      format(out,"@MultiLevelConstraint ~S~%~V",Seq{name,indent + 2});
+      body.pprint(out,indent+2);
+      format(out,"~%~V fail ",Seq{indent});
+      reason.pprint(out,indent+2);
+      format(out,"~%~Vend",Seq{indent})
+    end
+    
+  end

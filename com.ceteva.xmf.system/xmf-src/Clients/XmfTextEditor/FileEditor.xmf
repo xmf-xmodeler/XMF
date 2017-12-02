@@ -70,7 +70,7 @@ context XmfTextEditor
       self.addMultilineRule("\"","\"",Editor::green);
       self.addMultilineRule("//","\n","0,102,0");
       self.addWordRule("self",Editor::torquoise);
-      let rules = OCL::OCL.grammar.terminals()->asSeq in
+      let rules = OCL::OCL.grammar.terminals()->asSeq->excluding("@") in
         rules->iterate(rule S="" | self.addWordRule(rule,Clients::TextEditor::Editor::blue))
       end;
       let classes = Root.syntaxClasses()

@@ -251,6 +251,15 @@ context Root
       ]
     end
 
+    @Operation walkMultiLevelConstraint(line:Integer,body:Performable,name:String,reason:Performable,arg)
+      MultiLevelConstraint[
+        line=line,
+        body=self.walk(body,arg),
+        name=self.walk(name,arg),
+        reason=self.walk(reason,arg)
+      ]
+    end
+
     @Operation walkNameSpace(line:Integer,bindings:Seq(ValueBinding),name:String,arg)
       NameSpace[
         line=line,
@@ -506,6 +515,9 @@ context Root
         end
         Map[line,clauses,defs,domains,isAbstract,metaClass,name,parents,range] do
           self.walkMap(line,clauses,defs,domains,isAbstract,metaClass,name,parents,range,arg)
+        end
+        MultiLevelConstraint[line,body,name,reason] do
+          self.walkMultiLevelConstraint(line,body,name,reason,arg)
         end
         NameSpace[line,bindings,name] do
           self.walkNameSpace(line,bindings,name,arg)

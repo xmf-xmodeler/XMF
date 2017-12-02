@@ -11,7 +11,7 @@ parserImport XOCL;
  *                                                                            *
  ******************************************************************************/
 
-context Object
+context Object 
   @Constraint AllSlotsTypeCorrect
     self.of().allAttributes()->forAll(a |
       self.get(a.name).isKindOf(a.type))

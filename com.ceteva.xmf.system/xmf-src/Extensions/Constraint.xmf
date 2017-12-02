@@ -55,7 +55,7 @@ context XOCL
         'end' 
         
         { Constraint(name,body,reason) }.
-        
+         
       Reason ::= 
       
         // The reason for failure is specified
@@ -73,8 +73,8 @@ context XOCL
       // XCore::Constraint...
       
       [| let name = <StrExp(name)>;
-             body = @Operation <"body">(classifier) <body> end;
-             reason = @Operation <"reason">(classifier) <reason> end
+             body = @Operation <"body">(classifier,level) if level = 1 then <body> else true end end;
+             reason = @Operation <"reason">(classifier,level) <reason> end
          in XCore::Constraint(XCore::Symbol(name),body,reason)
          end
       |]

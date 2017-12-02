@@ -37,7 +37,7 @@ context Constraint
   end
 
 context Constraint
-  @Operation invoke(target,Seq{candidate,classifier})
+  @Operation invoke(target,Seq{candidate,classifier,level})
   
     // Constraints are invoked with respect to a target (not important) and
     // supplied with arguments - the candidate to classifier and the classifier
@@ -46,9 +46,9 @@ context Constraint
     // invocation returns a constraint report. If it fails then the report
     // contails a reason that is constructed by calling the reason operation...
     
-    if body.invoke(candidate,Seq{classifier})
+    if body.invoke(candidate,Seq{classifier,level})
     then ConstraintReport(candidate,self,true)
-    else ConstraintReport(candidate,self,false,reason.invoke(candidate,Seq{classifier}))
+    else ConstraintReport(candidate,self,false,reason.invoke(candidate,Seq{classifier,level}))
     end
   end
   

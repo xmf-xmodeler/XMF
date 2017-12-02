@@ -222,25 +222,37 @@ context Classifier
       candidate supply it to 'classify/1' to produce the set of
       reports.
     end
-     
-    let C = self.allConstraints();
-        reports = Set{}
-    in @While not C->isEmpty do
-         let c = C->sel
-         in let report = 
-              try c(e,self)
-              catch(exception)
-                ConstraintReport(e,c,false,"Error while performing classification: " + exception.message)
-              end
-            in reports := reports->including(report);
-               C := C->excluding(c)
-            end
-         end
-       end; 
-       ConstraintReport(e,null,
-         reports->forAll(r | r.satisfied()),
-         "",
-         reports->asSeq)
+    
+    @Letrec
+      classify(classifier:Classifier,prev:Classifier,done:{Constraint},level:Integer):{ConstraintReport} = 
+        let C:{Constraint} = classifier.allConstraints() then
+            reports:{ConstraintReport} = runConstraints(C->reject(c | done->contains(c)),level)
+        in prev := classifier;
+           classifier := classifier.of();
+           if prev = classifier
+           then reports
+           else reports + classify(classifier,prev,done+C,level+1)
+           end
+        end;
+      runConstraints(C:{Constraint},level:Integer):{ConstraintReport} =
+        let reports:{ConstraintReport} = {}
+        in @While not C->isEmpty do
+             let c = C->sel
+             in let report = 
+                  try c(e,c.owner,level)
+                  catch(exception)
+                    ConstraintReport(e,c,false,"Error while performing classification: " + exception.message)
+                  end
+                in reports := reports->including(report);
+                   C := C->excluding(c)
+                end
+             end
+          end; 
+          reports
+        end
+    in let reports:{ConstraintReport} = classify(self,self,{},1)
+       in ConstraintReport(e,null,reports->forAll(r | r.satisfied()),"",reports->asSeq)
+       end
     end
   end
 
@@ -593,4 +605,15 @@ context Classifier
       invoked.
     end
     self
+  end
+  
+context Classifier
+  @Operation typeDistance():Boolean
+    @Doc
+      The distance between the received and Class.
+    end
+    if self = Class 
+    then 0
+    else self.of().typeDistance() + 1
+    end
   end

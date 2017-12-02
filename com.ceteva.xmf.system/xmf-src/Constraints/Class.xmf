@@ -17,7 +17,7 @@ context Class
       child.delegatesTo = self orelse
       ((not child.delegatesTo = null) andthen hasParent(child.delegatesTo))
     in 
-      not hasParent(self)
+      not hasParent(self) 
     end
     fail self.toString() + " has circular inheritance"
   end
