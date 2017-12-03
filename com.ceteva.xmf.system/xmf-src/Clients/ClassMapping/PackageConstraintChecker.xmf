@@ -19,7 +19,10 @@ context ClassMapping
       try
         let report:ConstraintReport = mapping.package.checkConstraints()
         in @Command(mapping.diagram) resetErrors(mapping.diagram) end;
-           self.processConstraints(report)
+           self.processConstraints(report);
+           @For elementMap in mapping.elementMaps do
+             self.processConstraints(elementMap.element.checkConstraints())
+           end
         end
       catch(x)
         ("PackageConstraintChecker::checkConstraints() " + x).println()
@@ -56,7 +59,14 @@ context ClassMapping
     end
     
     @Operation findNode(o:Object)
-      @Find(map,mapping.classMaps) when map.class = o do map.node else null end
+      @Find(map,mapping.classMaps) when map.class = o do 
+        map.node 
+      else 
+        @Find(map,mapping.elementMaps) when map.element = o do
+          map.node 
+        else null
+        end
+      end
     end
     
     @Operation findEdge(o:Object)

@@ -53,12 +53,13 @@ context ClassMapping
             object.get(slotName).set("value",type.parseValue(newText))
           elseif type.of()=AuxiliaryClasses::ComposedType then
             let value = object.get(slotName).parseValue(newText)
-            in
-	            @WithoutDaemons(object.get(slotName))
+            in @WithoutDaemons(object.get(slotName))
 		            object.get(slotName).setValue(value)
+        	       end
         	    end
-        	end
-          end
+          end;
+          
+          if owner <> null then owner.elementChanged() end
           
         catch(exception)
           xmf.warning("Metaslot \"" + slotName + "\" expects a value of type " + type.name().toString() + ".\n"

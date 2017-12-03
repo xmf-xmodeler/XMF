@@ -1689,7 +1689,7 @@ context ClassMapping
     @Operation instantiateClassHandler(c,p,m)
     
       // Create a handler for a new button where the element being instantiated is
-      // not a meta-class. A few checks are used to see ifwe can meaningfully add
+      // not a meta-class. A few checks are used to see if we can meaningfully add
       // the new object to the package...
       
       @Operation(x,y) 
@@ -1709,7 +1709,7 @@ context ClassMapping
              if addToPackage
              then p.add(instance)
              end;
-             self.elementChanged()
+             m.elementChanged()
            end
         end
       end

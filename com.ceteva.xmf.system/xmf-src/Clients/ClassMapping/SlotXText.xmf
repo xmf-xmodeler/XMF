@@ -81,7 +81,10 @@ context ClassMapping
             object.set(slot,newValue.asFloat())
           else
             object.set(slot,newValue)
-          end
+          end;
+          
+          if owner <> null then owner.elementChanged() end
+          
         catch(exception)
           format(stdout,"Slot value change error~%");
           xmf.warning( "Slot \"" + slot + "\" expects a value of type "

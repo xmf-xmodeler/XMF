@@ -125,6 +125,7 @@ context ClassMapping
     
     @Operation elementChanged() 
       super();
+      owner.elementChanged();
       node.pack()
     end
     
