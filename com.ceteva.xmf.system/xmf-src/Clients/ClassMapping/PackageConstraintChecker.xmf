@@ -6,6 +6,10 @@ import Diagrams;
 context ClassMapping
 
   @Class PackageConstraintChecker 
+  
+    // This class performs a check on the package against its constraints
+    // and then informs the diagram of any errors. The diagram can then
+    // display the errors attached to the appropriate element.
     
     @Attribute mapping:ClassMapping::PackageXClassDiagram end
     

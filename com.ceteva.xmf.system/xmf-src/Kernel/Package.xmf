@@ -112,6 +112,77 @@ context Package
   @Operation availableContents(type:Classifier):Set(Classifier)
     self.availableContents()->select(c | c <> null andthen c.of() = type)
   end
+  
+context Package
+  @Operation checkConstraints():ConstraintReport
+    @Doc
+      A package is an object and is checked against its classifier in
+      the normal way. In addition, a package has a meta-package that
+      classifies its elements. Both of these classifications are
+      performed and then merged.
+    end
+    let selfClassification:ConstraintReport = super();
+        metaClassification:ConstraintReport = self.checkMetaConstraints() then
+        satisfied = selfClassification.satisfied() and metaClassification.satisfied();
+        children = selfClassification.children + metaClassification.children
+    in ConstraintReport(self,null,satisfied,"",children)
+    end
+  end
+  
+context Package
+  @Operation checkMetaConstraints():ConstraintReport
+  
+    @Doc
+      Classify the elements of the package with respect to the meta-package. The
+      constraints of meta-packages are inherited through both the parents and the
+      meta-meta-package etc.
+    end
+    
+    @Letrec
+      classify(metaPackage:Package,prev:Package,done:{Constraint},level:Integer):{ConstraintReport} = 
+        let C:{Constraint} = metaPackage.allConstraints() then
+            reports:{ConstraintReport} = runConstraints(C->reject(c | done->contains(c)),level)
+        in prev := metaPackage;
+           metaPackage := metaPackage.metaPackage;
+           if prev = metaPackage
+           then reports
+           else reports + classify(metaPackage,prev,done+C,level+1)
+           end
+        end;
+      applyConstraint(c:Constraint,o:Object,level:Integer):{ConstraintReport} =
+        @TypeCase(o)
+          Package do
+            {doConstraint(c,o,level)} + o.classes->collect(class | applyConstraint(c,class,level)).flatten()
+          end
+          Class do
+            {doConstraint(c,o,level)} + o.attributes->collect(att | applyConstraint(c,att,level)).flatten()
+          end
+          Attribute do
+            {doConstraint(c,o,level)}
+          end
+          else {}
+        end;
+      doConstraint(c:Constraint,o:Object,level:Integer):ConstraintReport =
+        try c(o,c.owner,level)
+        catch(exception)
+          ConstraintReport(self,c,false,"Error while performing classification: " + exception.message)
+        end;
+      runConstraints(C:{Constraint},level:Integer):{ConstraintReport} =
+        let reports:{ConstraintReport} = {}
+        in @While not C->isEmpty do
+             let c = C->sel then
+                 R:{ConstraintReport} = applyConstraint(c,self,level)
+             in reports := reports + R;
+                C := C->excluding(c)
+             end
+          end; 
+          reports
+        end
+    in let reports:{ConstraintReport} = classify(metaPackage,metaPackage,{},1)
+       in ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports->asSeq)
+       end
+    end
+  end
 
 context Package
   @Operation defaultParents():Set(Classifier)

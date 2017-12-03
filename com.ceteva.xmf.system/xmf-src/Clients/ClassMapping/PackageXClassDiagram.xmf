@@ -150,12 +150,18 @@ context ClassMapping
     @Operation addDropped(element)
       @TypeCase(element)
         XCore::Package do
-          self.packageDropped(element);
-          self.generateEdges()
+          if not(packageMaps->exists(map | map.package = element))
+          then 
+            self.packageDropped(element);
+            self.generateEdges()
+          end
         end
         XCore::Class do
-          self.classDropped(element);
-          self.generateEdges()
+          if not(classMaps->exists(map | map.class = element))
+          then 
+            self.classDropped(element);
+            self.generateEdges()
+          end
         end
         else format(stdout,"PackageXClassDiagram::addDropped: unknown element " + element.toString())
       end
@@ -471,11 +477,11 @@ context ClassMapping
                 do let name = association.name.toString();
                   mult1 = Multiplicity(association.end1.mult.labelString(),"start"); 
                   mult2 = Multiplicity(association.end2.mult.labelString(),"end") then 
-//                  instLevel1 = Label("Ø", "start", 40, 40, true, true, Color(0,0,0));
-//                  instLevel1 = Label("Ø", "start", 40, 40, true, Color(0,0,0));
+//                  instLevel1 = Label("ï¿½", "start", 40, 40, true, true, Color(0,0,0));
+//                  instLevel1 = Label("ï¿½", "start", 40, 40, true, Color(0,0,0));
 					instLevel1 = InstLevelLabel(if association.end1.isIntrinsic then association.end1.instLevel.toString() else " " end, "start", 40, 40, Color(0,0,0),true);
-//                  instLevel2 = Label("Ø", "start", -40, -40, true, true, Color(0,0,0));
-//                  instLevel2 = Label("Ø", "start", -40, -40, true, Color(0,0,0));
+//                  instLevel2 = Label("ï¿½", "start", -40, -40, true, true, Color(0,0,0));
+//                  instLevel2 = Label("ï¿½", "start", -40, -40, true, Color(0,0,0));
                   instLevel2 = InstLevelLabel(if association.end1.isIntrinsic then association.end1.instLevel.toString() else " " end, "end", -40, -40, Color(0,0,0),true);
                   varName1 = Label(association.end1.name.toString(),"start",10,10,true);
                   varName2 = Label(association.end2.name.toString(),"end",-10,-10,true);
@@ -1589,6 +1595,17 @@ context ClassMapping
           @For parent in package.parents do
             if parent.isReallyKindOf(XCore::Package)
             then self.add(parent)
+            end
+          end
+        end;
+        // Tony: Should be able to see the imported classes and packages.
+        @For nameSpace in package.imports do
+          if nameSpace <> XCore and nameSpace <> Root
+          then 
+            @For element in nameSpace.contents() do
+              if element.isKindOf(Class) or element.isKindOf(Package)
+              then self.addDropped(element)
+              end
             end
           end
         end
