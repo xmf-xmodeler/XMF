@@ -195,6 +195,17 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
+        Seq{"&File","Projects","Load Image"},
+        	@Operation call()
+ 	        xmf.findClientByName("com.ceteva.mosaic").commandInterpreter().loadImage()
+ 		end
+      }
+    )
+  );
+  
+  registry.addContribution(id,
+    TypeLessContribution(
+      Seq{
         Seq{"&File","Import","&Import","Main","CSV Data ..."},
         Arrays::importAndEditCSV
       }

@@ -73,4 +73,9 @@ context Mosaic
       end
     end
     
+    @Operation loadImage()
+      @SendCommand(self)
+        loadImage()
+      end
+    end
   end
