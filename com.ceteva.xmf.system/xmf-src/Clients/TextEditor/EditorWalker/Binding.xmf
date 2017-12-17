@@ -1,0 +1,36 @@
+/******************************************************************************
+ *                                                                            *
+ *                               The Editor Walker                            *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  An editor walker is assigned to each text editor showing an XMF file and  *
+ *  is used to process the abstract syntax structure (a compilation unit)     *
+ *  contained in the file. The walker generates commands to the text editor   *
+ *  client in order to inform it of markup for the text. For example the      *
+ *  walker detects unbound variables in the source code and uses the position *
+ *  information contained in the abstract syntax structure to inform the      *
+ *  editor where to place visual indicators of the error. The walker will be  *
+ *  called as required by the text editor client: at most it may be called    *
+ *  every time the text changes, but it is likely that there could be a delay *
+ *  in order to make the processing more efficient.                           *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+import XOCL;
+import OCL;
+import Walkers;
+import Code;
+import Clients;
+import TextEditor;
+import FileTextEditor;
+import Stacks;
+
+context EditorWalker
+
+  @Operation walkBinding(charStart:Integer,charEnd:Integer,name:String,env)
+    editor.ast("binding",charStart,charEnd)
+  end

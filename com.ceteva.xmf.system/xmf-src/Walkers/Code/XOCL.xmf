@@ -229,8 +229,10 @@ context Root
       ]
     end
 
-    @Operation walkLetrec(line:Integer,bindings:Seq(ValueBinding),body:Performable,arg)
+    @Operation walkLetrec(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:Performable,arg)
       Letrec[
+        charStart=charStart,
+        charEnd=charEnd,
         line=line,
         bindings=bindings->collect(x | self.walk(x,arg)),
         body=self.walk(body,arg)
@@ -510,8 +512,8 @@ context Root
         Index[line,collection,slot] do
           self.walkIndex(line,collection,slot,arg)
         end
-        Letrec[line,bindings,body] do
-          self.walkLetrec(line,bindings,body,arg)
+        Letrec[line,charStart,charEnd,bindings,body] do
+          self.walkLetrec(line,charStart,charEnd,bindings,body,arg)
         end
         Map[line,clauses,defs,domains,isAbstract,metaClass,name,parents,range] do
           self.walkMap(line,clauses,defs,domains,isAbstract,metaClass,name,parents,range,arg)

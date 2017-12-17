@@ -377,6 +377,14 @@ context TextEditor
        end
     end 
 
+    @Operation walkLetrec(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:Performable,env)
+       let env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(b.type,b)))
+       in @For b in bindings do self.walk(b,env0) end;
+          self.walk(body,env0);
+          editor.ast("letrec",charStart,charEnd)
+       end
+    end
+
     @Operation walkNamedType(charStart:Integer,charEnd:Integer,path:Seq(String),env)
        self.walkVar(0,charStart,charEnd,path->head.toString(),env)
     end
@@ -462,6 +470,19 @@ context TextEditor
 
     @Operation walkStrExp(line:Integer,value:String,env)
       null
+    end
+
+    @Operation walkTry(line:Integer,body:Performable,handler:Performable,name:String,env)
+      
+      // Bind the catch variable...
+      
+      let varStart = body.charEnd + "catch("->size then
+          varEnd = varStart + name->size then
+          located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
+          env0 = env.bind(name,VarDescriptor(null,located))
+      in self.walk(body,env);
+         self.walk(handler,env0)
+      end
     end
 
     @Operation walkVar(line:Integer,charStart:Integer,charEnd:Integer,name:String,env)

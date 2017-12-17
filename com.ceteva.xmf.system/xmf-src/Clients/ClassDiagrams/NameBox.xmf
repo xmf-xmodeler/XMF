@@ -14,10 +14,10 @@ context ClassDiagrams
     // have information about where the class has been imported
     // from.
   
-    @Attribute name          : Text end
-    @Attribute isAbstract	 : Boolean end
-    @Attribute sourcePackage : String end
-    @Attribute stereotype    : String end 
+    @Attribute name          : Text    end
+    @Attribute isAbstract	: Boolean end
+    @Attribute sourcePackage : String  end
+    @Attribute stereotype    : String  end 
   
     @Constructor(name,sourcePackage,isAbstract,stereotype,x,y,width) !
       self.cornerCurve := 0;

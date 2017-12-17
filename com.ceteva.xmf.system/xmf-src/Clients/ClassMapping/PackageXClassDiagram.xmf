@@ -218,7 +218,7 @@ context ClassMapping
       let package = 
             if package.classes->includes(class) 
             then "" 
-            else "(from " + class.owner.path() + ")"
+            else "(from " + class.owner.path().subst("","Root::",false) + ")"
             end;
           x = diagram.selectedX() + 100;
           y = diagram.selectedY() + 100 then
@@ -906,6 +906,7 @@ context ClassMapping
     @Operation buildGlobalMenuExtras(globalMenu)
       super(globalMenu);
       globalMenu.add(MenuAction("Add Missing Package Contents to Diagram",RightClickableProxy::proxyTarget,Seq{},PackageXClassDiagram::addMissingContents));
+      globalMenu.add(MenuAction("Import",RightClickableProxy::proxyTarget,Seq{},PackageXClassDiagram::importMenu));
       //globalMenu.add(MenuAction("Inherit",RightClickableProxy::proxyTarget,Seq{},PackageXClassDiagram::inheritMenu));
       self
     end

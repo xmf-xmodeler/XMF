@@ -267,7 +267,7 @@ context OCL::OCL
       
       // A sequence of definitions of expressions...
       
-      exps = CompilationBody* 
+      exps = CompilationBodyExps 
       
       // The end of the input...
       
@@ -283,6 +283,13 @@ context OCL::OCL
       
       Def 
     | TopLevelExp.
+    
+    CompilationBodyExps ::=
+    
+      // A sequence of compilation bodies
+      
+      b=CompilationBody! bs=CompilationBodyExps { Seq{b|bs} }
+    | {[]}.
     
     Consp ::= 
     

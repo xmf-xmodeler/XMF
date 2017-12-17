@@ -17,7 +17,7 @@ import OCL;
 
 context Parser::BNF
 
-  @Class Term extends Str
+  @Class Term extends (Root::Parser::BNF.getElement("Str"))
     
     @Operation first(grammar)
       Set{"Builtin(Term)"}
@@ -32,7 +32,7 @@ context Parser::BNF
     end
     
     @Operation toExp(FV:Set(String))
-      [| Root::Parser::BNF::Term() |]
+      [| (Root::Parser::BNF.getElement("Term"))() |]
     end
     
   end 

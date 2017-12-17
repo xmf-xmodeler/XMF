@@ -29,6 +29,9 @@ context XCore::Class
            a.deployXOCL(fout);
            format(fout,"~%~%")
          end;
+         @For o in operations do
+           o.deployXOCL(dir)
+         end;
          format(fout,"  end~%");
          fout.close()
       end

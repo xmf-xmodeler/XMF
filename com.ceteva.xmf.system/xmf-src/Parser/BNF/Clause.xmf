@@ -398,6 +398,7 @@ context Parser::BNF
           
           else next(locals,body)
         end
+      
       end
       
       @Operation liftOrsOuter(grammar,body)
@@ -566,10 +567,21 @@ context Parser::BNF
              
              [NAME] do 
                let token = token.toString()
-               in blocks->select(b | 
+               in 
+                 if grammar.terminals()->includes(token) 
+                 then 
+                   if cache.hasKey(token)
+                   then cache.get(token)
+                   else 
+                     let B = blocks->select(b | b.predicts()->includes(token)) 
+                     in cache.put(token,B); B
+                     end
+                   end
+                 else
+                   blocks->select(b | 
                     b.namePredicts() orelse 
                     b.charPredicts() orelse 
-                    b.predicts()->includes(token)) 
+                    b.predicts()->includes(token)) end  
                end
              end
              

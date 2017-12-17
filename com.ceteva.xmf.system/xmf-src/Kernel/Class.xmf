@@ -166,7 +166,7 @@ context Class
     Kernel_allInstances(Kernel_allSubClasses(self))
   end
 
-context Class // not needed anymore?
+context Class 
   @Operation allSubclasses():Seq(Object)
     @Doc
       Return a list of all classes c for which c.inheritsFrom(self)
@@ -174,7 +174,7 @@ context Class // not needed anymore?
     self.allClasses()->select(c|c.inheritsFrom(self)).asSeq()
   end
     
-context Class // not needed anymore?
+context Class 
   @Operation allClasses():Set(Object)
     @Doc
       Return a list of all classes

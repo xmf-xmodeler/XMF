@@ -1,0 +1,42 @@
+parserImport XOCL;
+
+import IO;
+      
+  
+context XCore::CompiledOperation
+  @Operation deployXOCL(dir:String)
+  
+    // Writes out the text that can be used to reconstruct
+    // the element. Relies on source code being available...
+    
+    try
+      @WithOpenFile(fout -> dir + "/" + self.pathSeq().separateWith("_") + ".xmf")
+         format(fout,"parserImport XOCL;~%~%");
+         format(fout,"import ~{::~;~S~};~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"context ! ~{::~;~S~}~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"  ~S~% ",[self.source()]);
+         fout.close()
+      end
+    catch(exception)
+      format(stdout,"Error writing operation source: ~S~%",Seq{exception})
+    end
+  end
+  
+context XCore::InterpretedOperation
+  @Operation deployXOCL(dir:String)
+  
+    // Writes out the text that can be used to reconstruct
+    // the element. Relies on source code being available...
+    
+    try
+      @WithOpenFile(fout -> dir + "/" + self.pathSeq().separateWith("_") + ".xmf")
+         format(fout,"parserImport XOCL;~%~%");
+         format(fout,"import ~{::~;~S~};~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"context ! ~{::~;~S~}~%~%",Seq{self.owner().pathSeq()});
+         format(fout,"  ~S~% ",[self.compile().source()]);
+         fout.close()
+      end
+    catch(exception)
+      format(stdout,"Error writing operation source: ~S~%",Seq{exception})
+    end
+  end

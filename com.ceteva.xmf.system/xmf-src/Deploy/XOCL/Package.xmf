@@ -11,6 +11,18 @@ context Package
       else self.allContentsOf(Package)->forAll(p | p.performDeployXOCLCheck())
     end
   end
+  
+context XCore::Package
+  @Operation deployXOCL()
+  
+    // Select a directory and then deploy XOCL code into it...
+    
+    let dir:String = xmf.selectDirectory(xmf.projDir())
+    in if dir <> null and dir <> ""
+       then self.deployXOCL(dir)
+       end
+    end
+  end
    
 context XCore::Package
   @Operation deployXOCL(dir:String)
@@ -30,12 +42,20 @@ context XCore::Package
         in @WithOpenFile(fout -> dir + "/" + self.name() + ".xmf")
              format(fout,"parserImport XOCL;~%~%");
              format(fout,"context ! ~{::~;~S~}~%~%",Seq{owner.pathSeq()});
-             format(fout,"@Package ~S end",Seq{self.name()});
+             format(fout,"@Package ~S metaclass ~S metapackage ~S extends ~{,~;~S~} import ~{,~;~S~} end",[
+               self.name(),
+               self.of().path(),
+               metaPackage.path(),
+               parents->map("name")->asSeq,
+               imports->map("name")->asSeq]);
              @For p in self.packages do
                p.deployXOCL(dir + "/" + p.name())
              end;
              @For c in self.classes do
                c.deployXOCL(dir)
+             end;
+             @For o in self.operations do
+               o.deployXOCL(dir)
              end;
              fout.close()
            end
@@ -59,7 +79,13 @@ context XCore::Package
        format(fout,"@Manifest ~S~%",Seq{self.name()});
        format(fout,"  p = @File ~S end~%",Seq{self.name()});
        @For c in self.classes do
-         format(fout,"  @File ~S end~%",Seq{c.name()})
+         format(fout,"  @File ~S end~%",Seq{c.name()});
+         @For o in c.operations do
+           format(fout,"  @File ~S end~%",[o.pathSeq().separateWith("_")])
+         end
+       end;
+       @For o in self.operations do
+         format(fout,"  @File ~S end~%",[o.pathSeq().separateWith("_")])
        end;
        @For p in self.packages do
          format(fout,"  @Ref ~S end~%",Seq{p.name()})

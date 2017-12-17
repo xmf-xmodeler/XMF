@@ -1,0 +1,199 @@
+/******************************************************************************
+ *                                                                            *
+ *                               The Editor Walker                            *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  An editor walker is assigned to each text editor showing an XMF file and  *
+ *  is used to process the abstract syntax structure (a compilation unit)     *
+ *  contained in the file. The walker generates commands to the text editor   *
+ *  client in order to inform it of markup for the text. For example the      *
+ *  walker detects unbound variables in the source code and uses the position *
+ *  information contained in the abstract syntax structure to inform the      *
+ *  editor where to place visual indicators of the error. The walker will be  *
+ *  called as required by the text editor client: at most it may be called    *
+ *  every time the text changes, but it is likely that there could be a delay *
+ *  in order to make the processing more efficient.                           *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import Signatures;
+import NamedElement;
+import XOCL;
+import OCL;
+import Walkers;
+import Code;
+import Clients;
+import TextEditor;
+import FileTextEditor;
+import Stacks;
+
+context TextEditor
+
+  @Class EditorWalker extends CompilerWalker 
+
+    @Attribute editor : FileTextEditor  end
+
+    @Constructor(editor) ! end
+
+    @Operation getNameSpace(path:Seq(String),nameSpaces:Seq(NameSpace)):NameSpace
+      if path = []
+      then nameSpaces->head
+      else 
+        let n:NameSpace = @Find(n,nameSpaces) when n.hasElement(path->head) do n.getElement(path->head) else null end
+        in if n = null
+           then null
+           else self.getNameSpace(path->tail,[n]+nameSpaces)
+           end
+        end
+      end
+    end
+
+    @Operation globalVar(name:String):Boolean
+
+      // Global variables will not be in the environment managed by the walker.
+      // Return true when the name is available everywhere...
+
+      XCore.hasElement(name) orelse 
+      Root.hasElement(name)  orelse 
+      name="super"           orelse 
+      name="declare"         orelse 
+      name="hidden"
+    end
+
+    @Operation handleImports(imports:Seq(Import),env)
+      // Add all the bindings from the imported name-space to the env...
+      let nameSpaces = [Root]
+      in @For i in imports do
+           let path:Seq(String) = i.nameSpace then
+               nameSpace:NameSpace = self.getNameSpace(path,nameSpaces);
+               hasName(o) = o.isReallyKindOf(XCore::Object) andthen o.hasStructuralFeature("name") then
+               getName(e) = if hasName(e) then e.name else "$" end then
+               names(n:NameSpace):[Symbol] = n.contents()->collect(c | getName(c))->asSet + n.names()->asSet
+           in if nameSpace.isReallyKindOf(XCore::NameSpace)
+              then
+                nameSpaces := [nameSpace]+nameSpaces;
+                @For name in names(nameSpace) do
+                  if nameSpace.hasElement(name)
+                  then 
+                    let e = nameSpace.getElement(name) 
+                    in if e.isKindOf(XCore::Class)
+                       then env := env.bind(name.toString(),TypeDescriptor(e.of(),e,i,"Defined in " + e.resourceName,[Action("edit",[e.resourceName])]))
+                       else env := env.bind(name.toString(),ImportDescriptor(null,i))
+                       end
+                    end
+                  end
+                end
+              end
+           end
+         end;
+         env
+       end
+    end
+
+    @Operation bindInheritedAtts(parent:Performable,env) 
+      let getAtts(name:String):[XCore::Attribute] =
+            if env.binds(name)
+            then 
+             let v:VarDescriptor = env.lookup(name)
+             in if v.isKindOf(TypeDescriptor)
+                then 
+                  let c:Classifier = v.meta
+                  in if c <> null andthen c.isKindOf(XCore::Class)
+                     then c.allAttributes()->asSeq
+                     else []
+                     end
+                  end
+                else []
+                end
+             end
+            elseif XCore.hasElement(name) andthen XCore.getElement(name).isReallyKindOf(XCore::Class)
+            then XCore.getElement(name).allAttributes()->asSeq
+            elseif Root.hasElement(name) andthen Root.getElement(name).isReallyKindOf(XCore::Class)
+            then Root.getElement(name).allAttributes()->asSeq
+            else []
+            end
+      in if parent.isKindOf(Var)
+         then 
+           let name:String = parent.name.toString()
+           in @For a in getAtts(name) do 
+                 env := env.bind(a.name.toString(),AttDescriptor(a.type,parent))
+              end;
+              env
+           end
+         else env
+         end
+     end
+    end
+    
+    @Operation toSigEntry(exp:Performable):[[Element]]
+    
+      // Format of each signature entry is [charPos,shortLabel,longLabel,children]
+      // These are processed by the client to provide a file index...
+      
+      @CaseObj exp of
+        ContextDef[path,element] do
+          self.toSigEntry(element)
+        end
+        OCL::Operation[charStart,name,parameters,type] do
+          [[charStart,name+"()",name+"()",[]]]
+        end
+        XOCL::Attribute[charStart,name,type] do
+          [[charStart,name+":"+type.pprint(),name+":"+type.pprint(),[]]]
+        end
+        XOCL::Package[charStart,name,defs] do
+          [[charStart,name,name,defs->iterate(def sig=[] | sig + self.toSigEntry(def))]]
+        end
+        XOCL::Class[charStart,name,defs] do
+          [[charStart,name,name,defs->iterate(def sig=[] | sig + self.toSigEntry(def))]]
+        end
+        else []
+      end
+    end
+
+    @Operation addCompilationUnitDefs(imports:Seq(Import),exps:Seq(Performable),env)
+
+      // A compilation unit typically contains definitions of the form context P D where P is
+      // a path to a name space and D is a definition with a name. In addition there may be
+      // path updates of the form P::N := M where P is a path to a name space and N is a named 
+      // element to be added or updated. Assuming P is imported in the compilation unit, then 
+      // the name of D is available as a free variable anywhere. This operation extends the 
+      // supplied environment with variable descriptors for these definitions...
+
+      @Letrec
+        importedNames = imports->iterate(i paths = [["Root"],["XCore"]] | paths + [i.nameSpace]);
+        equalPaths(p1:Seq(String),p2:Seq(String)):Boolean = 
+          if p1 = [] and p2 = []
+          then true
+          elseif p1 = [] or p2 = []
+          then false
+          else p1->head = p2->head and equalPaths(p1->tail,p2->tail)
+          end;
+        isDef(e:Performable):Boolean = e.isKindOf(XOCL::Def) or e.isKindOf(OCL::Operation);
+        toPath(p:Path):Seq(String) =
+          if p.root.isKindOf(Var)
+          then [p.root.name.toString()]+p.names->butLast
+          else []
+          end
+      in @For exp in exps do
+           if exp.isKindOf(ContextDef)
+           then
+             if isDef(exp.element)
+             then 
+               if importedNames->exists(p | equalPaths(exp.path,p))
+               then env := env.bind(exp.element.name.toString(),VarDescriptor(null,exp.element))
+               end
+             end
+           elseif exp.isKindOf(PathUpdate)
+           then 
+             if importedNames->exists(p | equalPaths(toPath(exp.path),p))
+             then env := env.bind(exp.path.names->last.toString(),VarDescriptor(null,exp))
+             end
+           end
+         end; 
+         env
+      end
+    end
+  
+  end
