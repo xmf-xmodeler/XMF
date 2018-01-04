@@ -62,6 +62,17 @@ context TextEditor
       name="hidden"
     end
 
+    @Operation globalType(name:String):Type
+
+      // Global variables will not be in the environment managed by the walker.
+      // Return true when the name is available everywhere...
+
+      if XCore.hasElement(name) then XCore.getElement(name).of().toType()
+      elseif Root.hasElement(name)  then Root.getElement(name).of().toType() 
+      else Element.toType()
+      end
+    end
+
     @Operation handleImports(imports:Seq(Import),env)
       // Add all the bindings from the imported name-space to the env...
       let nameSpaces = [Root]
@@ -127,6 +138,63 @@ context TextEditor
      end
     end
     
+    @Operation getNameSpaces(imports:[Import]):[NameSpace]
+       let nameSpaces = [XCore,Root]
+      in @For i in imports do
+           let path:Seq(String) = i.nameSpace then
+               nameSpace:NameSpace = self.getNameSpace(path,nameSpaces)
+           in if nameSpace.isReallyKindOf(XCore::NameSpace)
+              then nameSpaces := [nameSpace]+nameSpaces
+              end
+           end
+         end;
+         nameSpaces
+       end
+    end
+    
+    @Operation getNameSpaceInEnv(name:String,env):XCore::NameSpace
+    
+      // Returns the named name-space or null...
+      
+      if env.binds(name)
+      then 
+        let v:VarDescriptor = env.lookup(name)
+        in if v.isKindOf(TypeDescriptor)
+           then v.meta
+           else null
+           end
+        end
+      elseif Root.hasElement(name) andthen Root.getElement(name).isKindOf(XCore::NameSpace)
+      then Root.getElement(name)
+      elseif XCore.hasElement(name) andthen XCore.getElement(name).isKindOf(XCore::NameSpace)
+      then XCore.getElement(name)
+      else null
+      end
+    end
+
+    @Operation bindContextDefs(path:[String],c:ContextDef,env) 
+    
+      // Called when a context-def wants to add the rest of the definitions in the
+      // context to the environment for the scope of the context-definition...
+      
+      let n:NameSpace = self.getNameSpaceInEnv(path->head,env)
+      in if n <> null
+         then
+           let m:NameSpace = path->tail->iterate(name ns=n | if ns.hasElement(name) then ns.getElement(name) else ns end)
+           in if m.isKindOf(XCore::Class)
+              then 
+                @For a in n.allAttributes() do 
+                  env := env.bind(a.name.toString(),AttDescriptor(a.type.toType(),c))
+                end;
+                env
+              else env
+              end
+            end
+          else env
+          end
+      end
+    end
+    
     @Operation toSigEntry(exp:Performable):[[Element]]
     
       // Format of each signature entry is [charPos,shortLabel,longLabel,children]
@@ -182,13 +250,13 @@ context TextEditor
              if isDef(exp.element)
              then 
                if importedNames->exists(p | equalPaths(exp.path,p))
-               then env := env.bind(exp.element.name.toString(),VarDescriptor(null,exp.element))
+               then env := env.bind(exp.element.name.toString(),VarDescriptor(Element.toType(),exp.element))
                end
              end
            elseif exp.isKindOf(PathUpdate)
            then 
              if importedNames->exists(p | equalPaths(toPath(exp.path),p))
-             then env := env.bind(exp.path.names->last.toString(),VarDescriptor(null,exp))
+             then env := env.bind(exp.path.names->last.toString(),VarDescriptor(Element.toType(),exp))
              end
            end
          end; 

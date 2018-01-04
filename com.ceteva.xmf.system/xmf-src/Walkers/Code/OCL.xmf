@@ -284,7 +284,7 @@ context Code
       ]
     end
 
-    @Operation walkParentheses(exp:Performable,arg)
+    @Operation walkParentheses(charStart:Integer,charEnd:Integer,exp:Performable,arg)
       Parentheses[
         exp=self.walk(exp,arg)
       ]
@@ -323,7 +323,7 @@ context Code
       ]
     end
 
-    @Operation walkSetExp(line:Integer,collType:String,elements:Seq(OCL),arg)
+    @Operation walkSetExp(charStart:Integer,charEnd:Integer,line:Integer,collType:String,elements:Seq(OCL),arg)
       SetExp[
         line=line,
         collType=self.walk(collType,arg),
@@ -392,9 +392,11 @@ context Code
       ]
     end
 
-    @Operation walkVarUpdate(name:String,value:Performable,arg)
+    @Operation walkVarUpdate(charStart:Integer,charEnd:Integer,name:String,value:Performable,arg)
       VarUpdate[
         name=self.walk(name,arg),
+        charStart=charStart,
+        charEnd=charEnd,
         value=self.walk(value,arg)
       ]
     end
@@ -529,8 +531,8 @@ context Code
         ParametricType[charStart,charEnd,args,constructor] do
           self.walkParametricType(charStart,charEnd,args,constructor,arg)
         end
-        Parentheses[exp] do
-          self.walkParentheses(exp,arg)
+        Parentheses[charStart,charEnd,exp] do
+          self.walkParentheses(charStart,charEnd,exp,arg)
         end
         ParserImport[exp,names] do
           self.walkParserImport(exp,names,arg)
@@ -547,8 +549,8 @@ context Code
         Send[charStart,charEnd,args,message,target] do
           self.walkSend(charStart,charEnd,args,message,target,arg)
         end
-        SetExp[line,collType,elements] do
-          self.walkSetExp(line,collType,elements,arg)
+        SetExp[charStart,charEnd,line,collType,elements] do
+          self.walkSetExp(charStart,charEnd,line,collType,elements,arg)
         end
         SlotUpdate[name,target,value] do
           self.walkSlotUpdate(name,target,value,arg)
@@ -574,8 +576,8 @@ context Code
         Var[line,charStart,charEnd,name] do
           self.walkVar(line,charStart,charEnd,name,arg)
         end
-        VarUpdate[name,value] do
-          self.walkVarUpdate(name,value,arg)
+        VarUpdate[charStart,charEnd,name,value] do
+          self.walkVarUpdate(charStart,charEnd,name,value,arg)
         end
         Varp[charStart,charEnd,name,pattern,type] do
           self.walkVarp(charStart,charEnd,name,pattern,type,arg)

@@ -23,7 +23,8 @@ context OCL
     @Attribute message : String        end
     @Attribute args    : Seq(OCL::OCL) end
     
-    @Constructor(target,message,args) ! end
+    @Constructor(target,message,args)                 ! end
+    @Constructor(charStart,charEnd,target,message,args) end
     
     @Operation pprint(out,indent)
       format(out,"~S.~S(~{,~;~S~})",Seq{

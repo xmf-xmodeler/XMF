@@ -17,4 +17,12 @@ context Root
 
   @Package CodeGen
   
+    @Doc
+      Defines a construct that allows code (or more generally) text templates 
+      to be defined where literal text can be interleaved with program code   
+      to generate output. The literal text and programs can be nested to any 
+      depth using a feature that is similar to [| with |] (lifting) and <     
+      with > (dropping) in abstract syntax.
+    end
+  
   end

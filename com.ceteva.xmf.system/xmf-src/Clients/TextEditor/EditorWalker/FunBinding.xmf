@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,8 +31,9 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkFunBinding(name:String,args:Seq(Pattern),type:OCL,body:OCL,env)
+  @Operation walkFunBinding(name:String,args:Seq(Pattern),type:OCL,body:OCL,env):Type
     let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v))) 
-    in self.walk(body,env0)
+    in self.walk(body,env0);
+       Element.toType()
     end
   end

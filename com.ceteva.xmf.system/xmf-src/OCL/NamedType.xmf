@@ -21,6 +21,10 @@ context OCL
     
     @Constructor(path) ! end
     
+    @Operation isElement():Boolean
+      path.equals([Symbol("XCore"),Symbol("Element")])
+    end
+    
     @Operation pprint(out,indent)
       format(out,"~{::~;~S~}",Seq{path})
     end

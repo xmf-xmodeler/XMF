@@ -36,6 +36,14 @@ context Signatures
       end
     end
     
+    @Operation getField(name:String):Type
+      self.getElement(name).type()
+    end
+    
+    @Operation getOp(name:String,arity:Integer):Type
+      self.getElement(name).type()
+    end
+    
     @Operation hasBinding(name:String):Boolean
       self.getBinding(name) <> null
     end
@@ -43,6 +51,11 @@ context Signatures
     @Operation hasField(name:String):Boolean
       self.hasBinding(name) andthen
       self.getBinding(name).element().isKindOf(NamedElement::Field)
+    end
+    
+    @Operation hasOp(name:String,arity:Integer):Boolean
+      self.hasBinding(name) andthen
+      self.getBinding(name).element().isKindOf(NamedElement::Fun)
     end
     
     @Operation lookup(path:Seq(String))

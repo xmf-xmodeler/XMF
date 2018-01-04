@@ -1,4 +1,10 @@
 parserImport XOCL;
 
 context Root
-  @Package Comprehensions end
+  @Package Comprehensions 
+    @Doc
+      This package defines syntax translation classes that implement list and set comprehensions.
+      A typical list comprehension is [ x + 1 | x:Integer <- 0.to(100), ?x.isPrime() ]. A set
+      comprehension uses { ... }.
+    end
+  end

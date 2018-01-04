@@ -212,6 +212,42 @@ context Root
         name=self.walk(name,arg)
       ]
     end
+    
+    @Operation walkGrammar(charStart,charEnd,bindings,imports,line,parents,contents,clauseCache,clauses,documentation,dynamics,name,startingSymbol,terminals,owner,debug,arg)
+      Parser::BNF::Grammar[
+        charStart=charStart,
+        charEnd=charEnd,
+        bindings=self.walk(bindings,arg),
+        imports=self.walk(imports,arg),
+        line=line,
+        parents=self.walk(parents,arg),
+        contents=self.walk(contents,arg),
+        clauseCache=clauseCache,
+        clauses=self.walk(clauses,arg),
+        documentation=documentation,
+        dynamics=dynamics,
+        name=name,
+        startingSymbol=startingSymbol,
+        terminals=terminals,
+        owner=self.walk(owner,arg),
+        debug=debug
+      ]
+    end
+    
+    @Operation walkGrammarClause(charStart,charEnd,name,args,body,blocks,nullable,first,follow,cache,arg)
+      Parser::BNF::Clause[
+        charStart=charStart,
+        charEnd=charEnd,
+        name=name,
+        args=args,
+        body=self.walk(body,arg),
+        blocks=blocks,
+        nullable=nullable,
+        first=first,
+        follow=follow,
+        cache=cache
+      ]
+    end
 
     @Operation walkImports(line:Integer,body:Performable,name:String,arg)
       Imports[
@@ -292,6 +328,10 @@ context Root
         defImports=defImports->collect(x | self.walk(x,arg))
       ]
     end
+    
+    @Operation walkRecognizer(recognizer:Parser::BNF::Recognizer,arg)
+      recognizer
+    end
 
     @Operation walkRecord(line:Integer,class:Performable,slots:Seq(Element),arg)
       Record[
@@ -318,7 +358,7 @@ context Root
       ]
     end
 
-    @Operation walkSnapshot(linearg)
+    @Operation walkSnapshot(line,arg)
       Snapshot[line=line]
     end
 
@@ -479,6 +519,9 @@ context Root
         Clause[bindings,body,name,patterns] do
           self.walkClause(bindings,body,name,patterns,arg)
         end
+        Parser::BNF::Clause[charStart,charEnd,name,args,body,blocks,nullable,first,follow,cache] do
+          self.walkGrammarClause(charStart,charEnd,name,args,body,blocks,nullable,first,follow,cache,arg)
+        end
         Constraint[line,body,name,reason] do
           self.walkConstraint(line,body,name,reason,arg)
         end
@@ -506,6 +549,9 @@ context Root
         Fork[line,body,name] do
           self.walkFork(line,body,name,arg)
         end
+        Parser::BNF::Grammar[charStart,charEnd,bindings,imports,line,parents,contents,clauseCache,clauses,documentation,dynamics,name,startingSymbol,terminals,owner,debug] do
+          self.walkGrammar(charStart,charEnd,bindings,imports,line,parents,contents,clauseCache,clauses,documentation,dynamics,name,startingSymbol,terminals,owner,debug,arg)
+        end
         Imports[line,body,name] do
           self.walkImports(line,body,name,arg)
         end
@@ -529,6 +575,9 @@ context Root
         end
         Package[line,charStart,charEnd,defs,meta,metaPackage,name,parents,defImports] do
           self.walkPackage(line,charStart,charEnd,defs,meta,metaPackage,name,parents,defImports,arg)
+        end
+        Parser::BNF::Recognizer > [ ] do
+          self.walkRecognizer(o,arg)
         end
         Record[line,class,slots] do
           self.walkRecord(line,class,slots,arg)

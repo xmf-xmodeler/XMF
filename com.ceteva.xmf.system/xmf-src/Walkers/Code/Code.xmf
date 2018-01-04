@@ -2,4 +2,14 @@ parserImport XOCL;
 
 context Walkers
 
-  @Package Code end
+  @Package Code 
+  
+    @Operation cStart(p:Performable):Integer
+      if p = null then 0 else p.charStart end
+    end
+    
+    @Operation cEnd(p:Performable):Integer
+      if p = null then 0 else p.charEnd end
+    end
+  
+  end

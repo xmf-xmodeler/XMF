@@ -7,7 +7,18 @@ context TextEditor
 
   @Class FileTextEditor extends Editor, FileEditor
   
-    @Attribute lastModified : Seq(Integer) end
+    @Attribute lastModified  : Seq(Integer)              end
+    @Attribute 
+    
+      // This is set by the editor and can be: ON, OFF, IGNORE_ELEMENT.
+      // When the value is IGNORE_ELEMENT then the type checker will 
+      // ignore errors that arise because an expression has the type
+      // XCore::Element. This allows legacy code to be incrementally
+      // extended with types: if you specify a type then the type checker
+      // will enforce it.
+      
+      typeCheckMode : String = "IGNORE_ELEMENT" 
+    end
   
     @Constructor(file,name,tooltip,editable)
       self.init(Seq{name,tooltip,editable});
@@ -20,7 +31,9 @@ context TextEditor
     end
 
     @Operation ast(tooltip:String,charStart:Integer,charEnd:Integer)
-      self.commandInterpreter().ast(self,tooltip,charStart,charEnd)   
+      if charStart <> charEnd
+      then self.commandInterpreter().ast(self,tooltip,charStart,charEnd) 
+      end
     end  
     
     @Operation close()
@@ -28,8 +41,16 @@ context TextEditor
       self.closeEvent()
     end
     
+    @Operation dotError(charStart:Integer,charEnd:Integer,name:String)
+      self.commandInterpreter().dotError(self,charStart,charEnd,name)
+    end
+    
     @Operation getFileModifiedDate()
       file.fullPath().getLastModified()
+    end
+    
+    @Operation isTypeChecking(t:Type):Boolean
+      (typeCheckMode = "ON") orelse ((typeCheckMode = "IGNORE_ELEMENT") andthen not(t.isElement()))
     end
     
     @Operation isModified(time,since)
@@ -99,11 +120,19 @@ context TextEditor
            end
         else 
           xmf.message(exception.toString());
-          //exception.printBacktrace(false);
+          Root::editorException := exception;
           self.commandInterpreter().rendering(self,true)
         end
       end
     end 
+    
+    @Operation typeCheckMode(mode:String)
+      self.typeCheckMode := mode
+    end
+    
+    @Operation typeError(charStart:Integer,charEnd:Integer,expected:Classifier,found:Classifier)
+      self.commandInterpreter().typeError(self,charStart,charEnd,expected.name.toString(),found.name.toString())
+    end
 
     @Operation unboundVar(name:String,charStart:Integer,charEnd:Integer)
       self.commandInterpreter().unboundVar(self,name,charStart,charEnd)   

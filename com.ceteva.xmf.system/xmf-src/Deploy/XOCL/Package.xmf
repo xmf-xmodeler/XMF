@@ -37,28 +37,36 @@ context XCore::Package
          else dir.mkDir()
          end
       then
-        self.deployManifest(dir);
-        let owner = if self.owner() = null then Root else self.owner() end
-        in @WithOpenFile(fout -> dir + "/" + self.name() + ".xmf")
-             format(fout,"parserImport XOCL;~%~%");
-             format(fout,"context ! ~{::~;~S~}~%~%",Seq{owner.pathSeq()});
-             format(fout,"@Package ~S metaclass ~S metapackage ~S extends ~{,~;~S~} import ~{,~;~S~} end",[
-               self.name(),
-               self.of().path(),
-               metaPackage.path(),
-               parents->map("name")->asSeq,
-               imports->map("name")->asSeq]);
-             @For p in self.packages do
-               p.deployXOCL(dir + "/" + p.name())
-             end;
-             @For c in self.classes do
-               c.deployXOCL(dir)
-             end;
-             @For o in self.operations do
-               o.deployXOCL(dir)
-             end;
-             fout.close()
+        if if (dir + "/Manifest.xmf").fileExists()
+           then xmf.question("Overwrite " + dir + "/Manifest.xmf")
+           else true
            end
+        then
+          self.deployManifest(dir);
+          let owner = if self.owner() = null then Root else self.owner() end
+          in @WithOpenFile(fout -> dir + "/" + self.name() + ".xmf")
+               format(fout,"parserImport XOCL;~%~%");
+               format(fout,"context ! ~{::~;~S~}~%~%",Seq{owner.pathSeq()});
+               format(fout,"@Package ~S metaclass ~S metapackage ~S extends ~{,~;~S~} import ~{,~;~S~} end",[
+                 self.name(),
+                 self.of().path(),
+                 metaPackage.path(),
+                 parents->map("name")->asSeq,
+                 imports->map("name")->asSeq]);
+               @For p in self.packages do
+                 p.deployXOCL(dir + "/" + p.name())
+               end;
+               @For c in self.classes do
+                 c.deployXOCL(dir)
+               end;
+               @For o in self.operations do
+                 o.deployXOCL(dir)
+               end;
+               fout.close()
+             end
+          end;
+          xmf.message(name + "deployed.")
+        else xmf.message(name + " not deployed.")
         end
       else self.error("Cannot find deployment directory " + dir)
       end
@@ -90,7 +98,16 @@ context XCore::Package
        @For p in self.packages do
          format(fout,"  @Ref ~S end~%",Seq{p.name()})
        end;
-       format(fout,"do p~%");
+       format(fout,"do p.init();~%");
+       @For diagram in xmf.diagramManager().diagramsFor(self) do
+         let file:String = dir + "/" + diagram.name + ".xml"
+         in diagram.saveLayoutInFile(file);
+            format(fout,"   let d:Clients::Diagrams::Diagram = p.createClassDiagram(\"~S\",true)~%",[diagram.name]);
+            format(fout,"   in d.loadLayout(\"~S\")~%",[file]);
+            format(fout,"   end;~%")
+         end
+       end;
+       format(fout,"   p~%");
        format(fout,"end;~%");
        fout.close()
     end

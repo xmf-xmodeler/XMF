@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,13 +31,18 @@ import Stacks;
 
 context EditorWalker
 
- @Operation walkClass(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env)
+ @Operation walkClass(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),isAbstract:Boolean,metaClass:Performable,name:String,parents:Seq(Performable),env):Type
     let atts = defs->select(d | d.isKindOf(XOCL::Attribute)) then
-        env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(a.type,a))) then
+        getType(p:Performble):Type =
+          try p.eval(null,[],env.lookup("__NameSpaces__")).toType()
+          catch(x) Element.toType()
+          end then
+        env0 = atts->iterate(a e=env | e.bind(a.name,AttDescriptor(getType(a.type),a))) then
         env0 = parents->iterate(parent env = env0 | self.bindInheritedAtts(parent,env))
     in self.walk(metaClass,env);
        @For parent in parents do self.walk(parent,env) end;
        @For def in defs do self.walk(def,env0) end;
-       editor.ast("class definition",charStart,charEnd)
+       editor.ast("class definition",charStart,charEnd);
+       Element.toType()
     end
   end

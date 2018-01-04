@@ -58,7 +58,7 @@ context Operation
         globalRefs = env.refs(freeVars); 
         docCode = self.doc().compile(env,frame,false,true);
         bodyCode = matchBody.compile(funEnv,frame + 1,true,saveSource);
-        source = if saveSource and Compiler::saveSource then self.pprint(4) else "" end;
+        source = if saveSource and Compiler::saveSource then self.pprint(0) else "" end;
         properties = self.parserImportProperty()
     in Seq{Const(self.toSig() + properties)} +
        docCode + 

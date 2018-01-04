@@ -1,0 +1,99 @@
+parserImport XOCL;
+
+import Signatures;
+import Exceptions;
+import IO;
+
+context Signatures
+
+  @Class ClassifierAsType extends Type
+  
+    @Attribute classifier:Classifier end
+    
+    @Constructor(classifier) ! end
+  
+    @Operation force():Type
+      self
+    end
+    
+    @Operation getField(name:String):Type
+      throw Error("no field named " + name)
+    end
+    
+    @Operation getOp(name:String,arity:Integer):Type
+      @Find(o,classifier.allOperations())
+        when o.name.toString() = name and o.arity() = arity
+        do self.getOperationType(o)
+        else throw Error("no operation " + name + "/" + arity)
+      end
+    end
+    
+    @Operation getType(e:Element):Type
+      @TypeCase(e)
+        XCore::Classifier do
+          e.toType()
+        end
+        XCore::Operation do
+          self.getOperationType(e)
+        end
+        else XCore::Element.toType()
+      end
+    end
+    
+    @Operation getOperationType(o:Operation):Type
+      let sig = o.sig();
+          imports = o.imports() then
+          domain = sig->butLast->collect(arg | Classifier::mapType(arg->at(1),imports));
+          range = Classifier::mapType(sig->last,imports)
+      in Fun(domain,range)
+      end
+    end
+    
+    @Operation hasField(name:String):Boolean
+      false
+    end
+    
+    @Operation hasOp(name:String,arity:Integer):Boolean
+      classifier.allOperations()->exists(o | o.name.toString() = name and o.arity() = arity)
+    end
+    
+    @Operation isBool():Boolean
+      classifier = Boolean
+    end
+    
+    @Operation isElement():Boolean
+      classifier = Element
+    end
+    
+    @Operation isFloat():Boolean
+      classifier = Float
+    end
+    
+    @Operation isInt():Boolean
+      classifier = Integer
+    end
+    
+    @Operation isStr():Boolean
+      classifier = String
+    end
+    
+    @Operation lookup(path:Seq(String))
+      if path->isEmpty
+      then self
+      else 
+        if classifier.hasElement(path->head)
+        then self.getType(classifier.getElement(path->head)).lookup(path->tail)
+        else throw Error("cannot find element named " + path->head + " in " + classifier)
+        end
+      end
+    end
+    
+    @Operation path():String
+      classifier.path()
+    end
+    
+    @Operation pprint(out:OutputChannel) 
+      format(out,"Derived(~S)",[classifier])
+    end
+  
+  end

@@ -1,0 +1,120 @@
+/******************************************************************************
+ *                                                                            *
+ *                               The Editor Walker                            *
+ *                           -------------------------                        *
+ *                                                                            *
+ *  An editor walker is assigned to each text editor showing an XMF file and  *
+ *  is used to process the abstract syntax structure (a compilation unit)     *
+ *  contained in the file. The walker generates commands to the text editor   *
+ *  client in order to inform it of markup for the text. For example the      *
+ *  walker detects unbound variables in the source code and uses the position *
+ *  information contained in the abstract syntax structure to inform the      *
+ *  editor where to place visual indicators of the error. The walker will be  *
+ *  called as required by the text editor client: at most it may be called    *
+ *  every time the text changes, but it is likely that there could be a delay *
+ *  in order to make the processing more efficient.                           *
+ *                                                                            *
+ ******************************************************************************/
+ 
+parserImport XOCL;
+
+import NamedElement;
+import XOCL;
+import OCL;
+import Signatures;
+import Walkers;
+import Code;
+import Clients;
+import TextEditor;
+import FileTextEditor;
+import Stacks;
+import Parser::BNF;
+
+context EditorWalker
+
+  @Operation walkRecognizer(recognizer:Recognizer,env):Type
+    let cStart(l:Recognizer):Integer = 
+          if l.isKindOf(Terminal)
+          then l.charStart-2
+          else l.charStart
+          end;
+        cEnd(l:Located):Integer = l.charEnd
+    in @CaseObj recognizer of
+         And[left,right] do
+           @Letrec
+             bind(r:Recognizer,env) =
+               @CaseObj r of
+                 And[left,right] do
+                   bind(left,bind(right,env))
+                 end
+                 Bind[name] do
+                   env.bind(name,VarDescriptor(Element.toType(),r))
+                 end
+                 else env
+               end
+           in editor.ast("and",cStart(left),cEnd(right));
+              self.walkRecognizer(left,env);
+              self.walkRecognizer(right,bind(left,env));
+              And.toType()
+           end
+         end
+         Call[name,args] do
+           editor.ast("call",cStart(recognizer),cEnd(recognizer));
+           if env.binds(name.toString())
+           then
+             let v:VarDescriptor = env.lookup(name.toString()) then
+                 t:Type = v.type;
+                 d:Clause = v.definingLocation
+             in if not(t.inheritsFrom(Clause)) // Should this be a type?
+                then editor.typeError(cStart(recognizer),cStart(recognizer)+name->size,Clause,t.classifier)
+                elseif d.args->size <> args->size
+                then xmf.message("call error: arity " + name)
+                end;
+                v.sendEditor(editor,cStart(recognizer),cStart(recognizer)+name->size)
+             end
+           else editor.unboundVar(name,cStart(recognizer),cStart(recognizer)+name->size)
+           end;
+           Call.toType()
+         end
+         Not[parser] do
+           editor.ast("not",cStart(recognizer),cEnd(recognizer));
+           self.walkRecognizer(parser,env);
+           Not.toType()
+         end
+         Opt[parser] do
+           editor.ast("opt",cStart(recognizer),cEnd(recognizer));
+           self.walkRecognizer(parser,env);
+           Opt.toType()
+         end
+         Or[left,right] do
+           editor.ast("or",cStart(left),cEnd(right));
+           self.walkRecognizer(left,env);
+           self.walkRecognizer(right,env);
+           Or.toType()
+         end
+         PlusCons[parser] do
+           editor.ast("+",cStart(recognizer),cEnd(recognizer));
+           self.walkRecognizer(parser,env);
+           PlusCons.toType()
+         end
+         PreAction[action] do
+           editor.ast("action",cStart(recognizer),cEnd(recognizer));
+           self.walk(action,env);
+           PreAction.toType()
+         end
+         PrePredicate[boolExp] do
+           editor.ast("predicate",cStart(recognizer),cEnd(recognizer));
+           self.walk(boolExp,env);
+           PrePredicate.toType()
+         end
+         StarCons[parser] do
+           editor.ast("*",cStart(recognizer),cEnd(recognizer));
+           self.walkRecognizer(parser,env);
+           StarCons.toType()
+         end
+         else 
+           editor.ast("recognizer",cStart(recognizer),cEnd(recognizer));
+           Recognizer.toType()
+       end
+    end
+  end

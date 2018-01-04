@@ -62,14 +62,16 @@ context XOCL
              in <arms->iterate(arm e = default |
                   let  type = arm->at(0);
                        slots = arm->at(1);
-                       body = arm->at(2)
+                       body = arm->at(2);
+                       modifier = arm->at(3) then
+                       test = if modifier = ">" then [| caseObjType.inheritsFrom(<type>) |] else [| caseObjType = <type> |] end
                   in 
                      // For each arm produce an if-expression
                      // that checks the direct type of the
                      // object and compares it against the type
                      // in the arm...
                      
-                     [| if caseObjType = <type>
+                     [| if <test>
                         then 
                         
                           // If the type matches then bind the slots
@@ -93,6 +95,8 @@ context XOCL
       
         type = PathExp 
         
+        modifier = CaseObjModifier
+        
         // The slot names...
         
         '[' slots = CaseObjSlots ']' 
@@ -105,7 +109,9 @@ context XOCL
         
         'end' 
         
-        { Seq{type,slots,body} }.
+        { [type,slots,body,modifier] }.
+        
+      CaseObjModifier ::= '>' { ">" } | { "=" }.
       
       CaseObjSlots ::= 
       

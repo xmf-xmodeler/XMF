@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,6 +31,13 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkConst(charStart:Integer,charEnd:Integer,value:Element,env)
-    editor.ast("const",charStart,charEnd)
+  @Operation walkConst(charStart:Integer,charEnd:Integer,value:Element,env):Type
+    editor.ast("const",charStart,charEnd);
+    @TypeCase(value)
+      Integer do Integer.toType() end
+      String  do Integer.toType() end
+      Boolean do Boolean.toType() end
+      Float   do Float.toType()   end
+      else Element.toType()
+    end
   end

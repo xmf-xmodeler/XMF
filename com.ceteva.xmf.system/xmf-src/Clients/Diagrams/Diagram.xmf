@@ -23,8 +23,8 @@ context Diagrams
     @Attribute isSubDiagram      : Boolean                    end           // Set when this diagram is a display element.
     @Attribute listeners         : Set(DiagramListener) (+,-) end           // Listeners for diagram events.
     @Attribute backgroundColor   : Color = null (?,!)         end           // Background color for diagram.
-    @Attribute zoom			     : Float = 1.0                end	       // Zoom ratio when shown as a top level diagram.
-    @Attribute nestedZoom	     : Float = 1.0                end		   // Zoom ratio when shown as a nested diagram.
+    @Attribute zoom			  : Float = 1.0                end	       // Zoom ratio when shown as a top level diagram.
+    @Attribute nestedZoom	      : Float = 1.0                end		   // Zoom ratio when shown as a nested diagram.
     @Attribute magneticWaypoints : Boolean = true             end           // Handled in the client, recorded here.
     
     @Constructor(name)
@@ -894,24 +894,35 @@ context Diagrams
       self
     end
     
-    @Operation saveLayout(verbose:Boolean)
+    @Operation saveLayout(verbose:Boolean):String
     
       // Saves the layout data to a file so that it can be read
       // in and applied to an un-formatted diagram at a later date.
+      // Return the path to the file containing the format info
+      // or "" if no data was saved...
       
-      let data = self.layoutData();
-          file = xmf.saveFile(xmf.projDir(),"*.xml")
+      let file = xmf.saveFile(xmf.projDir(),"*.xml")
       in if file <> ""
          then
-           @Busy("Saving Diagram Layout")
-             @WithOpenFile(fout -> file)
-               data.writeXML(fout)
-             end
-           end;
            if verbose
-           then xmf.message("Layout saved in " + file)
+           then
+             @Busy("Saving Diagram Layout")
+               self.saveLayoutInFile(file)
+             end;
+             xmf.message("Layout saved in " + file)
+           else self.saveLayoutInFile(file)
            end
-         end
+         end;
+         file
+      end
+    end
+    
+    @Operation saveLayoutInFile(file:String):String
+      let data = self.layoutData()
+      in @WithOpenFile(fout -> file)
+           data.writeXML(fout)
+         end;
+         file
       end
     end
     

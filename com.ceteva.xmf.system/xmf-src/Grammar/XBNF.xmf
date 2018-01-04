@@ -22,21 +22,21 @@ context Grammar
       // which synthesizes a value or is a predicate that
       // must be true for the parse to proceed...
       
-      '{' exp = Exp '}' 
+      '{' exp = <<Exp>> '}' 
       { PreAction(exp) } 
-    | '?' boolExp = Exp
+    | '?' boolExp = <<Exp>>
       { PrePredicate(boolExp) }.
     
     XBNF_Atom ::= 
     
       // An atom is the basic unit of a clause...
       
-      XBNF_Action    
-    | XBNF_Literal   
-    | XBNF_Call      
-    | XBNF_Not       
-    | '(' XBNF_Disjunction ')'
-    | '<<' d=XBNF_Disjunction '>>' { And(PushChar(),And(d,PopChar())) }.
+      <<XBNF_Action>>    
+    | <<XBNF_Literal>>  
+    | <<XBNF_Call>>    
+    | <<XBNF_Not>>      
+    | '(' <<XBNF_Disjunction>> ')'
+    | '<<' d= <<XBNF_Disjunction>> '>>' { And(PushChar(),And(d,PopChar())) }.
   
     XBNF_Binding ::= 
     
@@ -44,8 +44,8 @@ context Grammar
       // associates the value produced with a named 
       // local...
       
-      name = Name '=' atom = XBNF_Sequence { 
-        And(atom,Bind(name)) 
+      name = Name '=' atom = <<XBNF_Sequence>> b = { Bind(name) } { 
+        And(atom,b) 
       }.
     
     XBNF_Call ::= 
@@ -65,7 +65,7 @@ context Grammar
   
     XBNF_Clause ::= 
     
-      name = Name args = XBNF_ClauseArgs '::=' body = XBNF_Disjunction '.' 
+      name = Name args = XBNF_ClauseArgs '::=' body = <<XBNF_Disjunction>> '.' 
       { Clause(name,args,body) }. 
   
     XBNF_ClauseArgs ::= 
@@ -78,7 +78,7 @@ context Grammar
       // Conjunction is just a sequence of 1 or more
       // clause elements...
     
-      elements = XBNF_Element+ { 
+      elements = (<<XBNF_Element>>)+ { 
        elements->tail->iterate(e conj = elements->head | 
          And(conj,e)) 
     }. 
@@ -88,20 +88,20 @@ context Grammar
       // A disjunction is a sequence of elements
       // separated by | ...
     
-      element = XBNF_Conjunction (
-        '|' rest = XBNF_Disjunction { Or(element,rest) } | { element }).
+      element = <<XBNF_Conjunction>> (
+        '|' rest = <<XBNF_Disjunction>> { Or(element,rest) } | { element }).
    
     XBNF_Element ::= 
     
-      XBNF_Optional    
-    | XBNF_Binding   
-    | XBNF_Sequence.
+      <<XBNF_Optional>>    
+    | <<XBNF_Binding>>  
+    | <<XBNF_Sequence>>.
   
     Grammar ::= 
     
       parents = XBNF_GrammarParents
       imports = XBNF_GrammarImports
-      clauses = XBNF_Clause* 
+      clauses = (<<XBNF_Clause>>)* 
       'end'
       { Grammar(parents,clauses->asSet,"",imports) }.
   
@@ -110,7 +110,7 @@ context Grammar
       // The imports of a grammar affect the grammars that are
       // available via @... 
     
-      'import' class = Exp classes = (',' Exp)* { Seq{class | classes} } 
+      'import' class = <<Exp>> classes = (',' <<Exp>>)* { Seq{class | classes} } 
     | { Seq{} }.
   
     XBNF_GrammarParents ::= 
@@ -118,7 +118,7 @@ context Grammar
       // A grammar may inherit from 0 or more parent grammars.
       // The parent clauses are added to the child...
     
-      'extends' parent = Exp parents = (',' Exp)* { parents->asSet->including(parent) } 
+      'extends' parent = <<Exp>> parents = (',' <<Exp>>)* { parents->asSet->including(parent) } 
     | { Set{} }.
 
     XBNF_Literal ::=  
@@ -192,7 +192,7 @@ context Grammar
     
       // Define a new terminal in the form NewToken(NAME,ID)...
       
-    | XBNF_NewToken                                
+    | <<XBNF_NewToken>>                                
     
       // Get a terminal name...
                       
@@ -218,7 +218,7 @@ context Grammar
     
       // An optional clause element is tried and ignored if it fails...
       
-      '[' opt = XBNF_Disjunction ']'
+      '[' opt = <<XBNF_Disjunction>> ']'
       { Opt(opt) }.
   
     XBNF_Path ::= name = Name names = ('::' Name)* { Seq{name | names} }.
@@ -227,7 +227,7 @@ context Grammar
     
       // An element that checks the type of the synthesized value...
     
-      element = XBNF_Atom (':' type = XBNF_Path { And(element,TypeCheck(type)) } 
+      element = <<XBNF_Atom>> (':' type = XBNF_Path { And(element,TypeCheck(type)) } 
     | { element }).
   
     XBNF_Sequence ::=

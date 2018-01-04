@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,8 +31,9 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkPathUpdate(charStart:Integer,charEnd:Integer,path:Path,value:Performable,env)
+  @Operation walkPathUpdate(charStart:Integer,charEnd:Integer,path:Path,value:Performable,env):Type
     self.walk(path,env);
     self.walk(value,env);
-    editor.ast("path update",charStart,charEnd)
+    editor.ast("path update",charStart,charEnd);
+    Element.toType()
   end

@@ -372,7 +372,8 @@ context Tokens
            
            // Handle / specially because of // and /*...
            "/"->at(0) do
-             let char = self.readChar()
+             let char = self.readChar();
+                 last:Integer = lastCharPos
              in @CaseInt[256] char of
              
                   "/"->at(0) do
@@ -380,7 +381,8 @@ context Tokens
                     // The sequence // means we have a single line comment...
                     
                     self.readCommentLine();
-                    self.nextToken()
+                    self.nextToken();
+                    self.lastCharPos := last
                   end
                   
                   "*"->at(0) do
@@ -388,7 +390,8 @@ context Tokens
                     // The sequence /* means we have a multi-line comment...
                     
                     self.readMultilineComment();
-                    self.nextToken()
+                    self.nextToken();
+                    self.lastCharPos := last
                   end
                   
                   else 

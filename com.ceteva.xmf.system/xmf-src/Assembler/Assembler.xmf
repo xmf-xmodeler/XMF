@@ -17,6 +17,12 @@ import IO;
 context Root
 
   @Package Assembler
+  
+    @Doc
+      Executable code in XModeler is contained in code-boxes. A code-box is a byte-coded
+      sequence of machine instructions that can run on the XModeler VM. The assembler is
+      used to translate a sequence of objects of type Instr into a code-box.
+    end
     
     @Operation assemble(instrs,locals,source):Assembler::CodeBox
       @Doc

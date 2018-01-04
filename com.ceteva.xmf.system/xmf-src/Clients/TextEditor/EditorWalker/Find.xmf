@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkFind(line:Integer,charStart:Integer,charEnd:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,env)
+  @Operation walkFind(line:Integer,charStart:Integer,charEnd:Integer,action:Performable,alternative:Performable,collection:Performable,name:String,test:Performable,env):Type
      let locStart = charStart + "@For ("->size then
          locEnd = locStart+name->size then
          loc = let loc = Located() in (loc.charStart := locStart).charEnd := locEnd end then
@@ -40,6 +40,7 @@ context EditorWalker
         self.walk(action,env0);
         self.walk(alternative,env0);
         self.walk(test,env0);
-        editor.ast("find definition",charStart,charEnd)
+        editor.ast("find definition",charStart,charEnd);
+        Element.toType()
      end
   end

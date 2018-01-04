@@ -30,15 +30,16 @@ import FileTextEditor;
 import Stacks;
 
 context EditorWalker
-
-  @Operation walkIterExp(charStart:Integer,charEnd:Integer,body:OCL,collection:OCL,iterOp:String,name:String,env):Type
-     let varStart = collection.charEnd + (iterOp + "->(")->size then
-         varEnd = varStart + name->size then
-         located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
-         env0 = env.bind(name,VarDescriptor(null,located))
-     in self.walk(collection,env);
-        self.walk(body,env0);
-        editor.ast(iterOp,charStart,charEnd);
-        Element.toType()
-     end
-   end
+    
+    @Operation walkGrammar(charStart,charEnd,bindings,imports,line,parents,contents,clauseCache,clauses,documentation,dynamics,name,startingSymbol,terminals,owner,debug,env)
+      editor.ast("grammar",charStart,charEnd);
+      env := clauses->iterate(clause env=env |
+        // Add in the definition of each clause-name. The clause is used as
+        // the definiting location and can be used to verify the arity and
+        // type-signature for subsequent calls...
+        env.bind(clause.name.toString(),VarDescriptor(Parser::BNF::Clause,clause)));
+      @For clause in clauses do
+        self.walk(clause,env)
+      end;
+      Parser::BNF::Grammar.toType()
+    end

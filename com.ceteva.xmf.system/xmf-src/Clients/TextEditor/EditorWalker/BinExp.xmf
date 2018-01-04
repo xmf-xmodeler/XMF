@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,8 +31,38 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkBinExp(charStart:Integer,charEnd:Integer,binOp:String,left:OCL,right:OCL,env)
-    self.walk(left,env);
-    self.walk(right,env);
-    editor.ast("binexp",charStart,charEnd)
+  @Operation walkBinExp(charStart:Integer,charEnd:Integer,binOp:String,left:OCL,right:OCL,env):Type
+    let expectElement    (t:Type):Boolean         = true;
+        expectInt        (t:Type):Boolean         = t.isInt();
+        expectBool       (t:Type):Boolean         = t.isBool();
+        expectStr        (t:Type):Boolean         = t.isStr();
+        expectNum        (t:Type):Boolean         = t.isInt() or t.isFloat() then
+        expectNumOrString(t:Type):Boolean         = expectNum(t) or expectStr(t);
+        expect(leftp:(Type) -> Boolean,rightp:(Type)->Boolean,c:Classifier) =
+          let lt:Type = self.walk(left,env);
+              rt:Type = self.walk(right,env)
+          in if not(editor.isTypeChecking(lt)) orelse not(editor.isTypeChecking(rt)) orelse (leftp(lt) andthen rightp(rt))
+             then c.toType()
+             else 
+               if not(leftp(lt))
+               then editor.typeError(left.charStart,left.charEnd,c,lt.classifier)
+               else editor.typeError(right.charStart,right.charEnd,c,rt.classifier)
+               end;
+               Boolean.toType()
+             end
+          end
+    in editor.ast("binexp",charStart,charEnd);
+       @Case binOp of
+         "and"       do expect(expectBool,expectBool,Boolean)               end
+         "andthen"   do expect(expectBool,expectBool,Boolean)               end
+         "or"        do expect(expectBool,expectBool,Boolean)               end
+         "orelse"    do expect(expectBool,expectBool,Boolean)               end
+         "implies"   do expect(expectBool,expectBool,Boolean)               end
+         "="         do expect(expectElement,expectElement,Boolean)         end
+         ">"         do expect(expectNum,expectNum,Boolean)                 end
+         "<"         do expect(expectNum,expectNum,Boolean)                 end
+         "+"         do expect(expectNumOrString,expectNumOrString,Number)  end
+         else Element.toType()
+       end
+     end
   end

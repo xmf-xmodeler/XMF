@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,22 +31,28 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkVar(line:Integer,charStart:Integer,charEnd:Integer,name:String,env)
+  @Operation walkVar(line:Integer,charStart:Integer,charEnd:Integer,name:String,env):Type
 
       // Inform the editor of any unbound variables. The supplied
       // environment binds the names of the variables to information
       // bundles. Some name-spaces are implicitly imported everywhere
       // and those should be checked here...
 
+      editor.ast("var",charStart,charEnd);
       if env.binds(name)
       then 
         let d:VarDescriptor = env.lookup(name)
         in if d <> null 
-           then d.sendEditor(editor,charStart,charEnd)
+           then 
+             d.sendEditor(editor,charStart,charEnd);
+             if d.type <> null then d.type else Element.toType() end
+           else Element.toType()
            end
         end
       elseif not(self.globalVar(name))
-      then editor.unboundVar(name,charStart,charEnd)
-      end;
-      editor.ast("var",charStart,charEnd)
+      then 
+        editor.unboundVar(name,charStart,charEnd);
+        Element.toType()
+      else self.globalType(name)
+      end
     end

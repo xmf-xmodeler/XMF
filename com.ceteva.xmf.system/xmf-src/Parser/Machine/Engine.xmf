@@ -129,7 +129,7 @@ context Machine
     
     @Attribute consumeToken : Boolean                        end  
     
-    // The current characte position is recorded by PushChar and is
+    // The current character position is recorded by PushChar and is
     // Forotten by PopChar. When an instance of OCL::Located is synthesized
     // the top of the charPosStack is recorded as the location.
     
@@ -163,7 +163,7 @@ context Machine
          else self.error("At: expecting a sequence of names, got " + names.toString())
          end
        end
-     end
+    end
       
     @Operation atNameSpace():NameSpace
     
@@ -708,7 +708,9 @@ context Machine
                 if callStack.ref(frame + GRAMMAR).debug
                 then self.debug1("Consume ",token)
                 end;
-                if consumeToken then self.nextToken() end
+                if consumeToken 
+                then self.nextToken()
+                end
               end
             end
             

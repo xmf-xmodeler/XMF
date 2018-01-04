@@ -44,7 +44,34 @@ context OCL
     end
     
     @Operation pprint(out,indent)
-      format(out,"if ~S~%~Vthen~%~V~S~%~Velse~%~V~S~%~Vend",Seq{
+      format(out,"if ");
+      test.pprint(out,indent);
+      format(out,"~%~Vthen ",[indent]);
+      if self.get("then").isKindOf(Order)
+      then 
+        format(out,"~%~V",[indent+2]);
+        self.get("then").pprint(out,indent + 2);
+        format(out,"~%~Velse",[indent])
+      else 
+        self.get("then").pprint(out,indent+5);
+        format(out,"~%~Velse",[indent])
+      end;
+      if self.get("else").isKindOf(Order)
+      then 
+        format(out,"~%~V",[indent+2]);
+        self.get("else").pprint(out,indent + 2);
+        format(out,"~%~Vend ",[indent])
+      elseif self.get("else").isKindOf(If)
+      then self.get("else").pprint(out,indent)
+      else
+        format(out," "); 
+        self.get("else").pprint(out,indent+5);
+        format(out,"~%~Vend ",[indent])
+      end
+    end
+    
+    @Operation pprintOld(out,indent)
+      format(out,"ifOld ~S~%~Vthen~%~V~S~%~Velse~%~V~S~%~Vend",[
         test.pprint(indent),
         indent,
         indent + 2,
@@ -52,7 +79,7 @@ context OCL
         indent,
         indent + 2,
         self.get("else").pprint(indent + 2),
-        indent})
+        indent])
     end
     
     @Operation toString()

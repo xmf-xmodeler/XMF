@@ -32,7 +32,10 @@ context OCL
     end
     
     @Operation pprint(out,indent)
-      format(out,"~S : ~S = ~S",Seq{name,type.pprint(),value.pprint(indent + name.toString()->size + 3)})
+      if type.isElement()
+      then  format(out,"~S = ~S",[name,value.pprint(indent + name.toString()->size + 3)])
+      else format(out,"~S : ~S = ~S",Seq{name,type.pprint(),value.pprint(indent + name.toString()->size + 3)})
+      end
     end
     
   end 

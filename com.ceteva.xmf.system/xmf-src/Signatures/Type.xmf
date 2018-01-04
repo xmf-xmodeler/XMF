@@ -11,12 +11,46 @@ context Signatures
       self
     end
     
+    @AbstractOp getField(name:String):Type
+    end
+    
+    @AbstractOp getOp(name:String,arity:Integer):Type
+    end
+    
+    @AbstractOp hasField(name:String):Boolean
+    end
+    
+    @AbstractOp hasOp(name:String,arity:Integer):Boolean
+    end
+    
+    @Operation isBool():Boolean
+      false
+    end
+    
+    @Operation isElement():Boolean
+      false
+    end
+    
+    @Operation isFloat():Boolean
+      false
+    end
+    
+    @Operation isInt():Boolean
+      false
+    end
+    
+    @Operation isStr():Boolean
+      false
+    end
+    
     @Operation lookup(path:Seq(String))
       if path->isEmpty
       then self
       else self.error("No binding for " + path->head)
       end
     end
+    
+    @AbstractOp path():String end
     
     @AbstractOp pprint(out:OutputChannel) end
     

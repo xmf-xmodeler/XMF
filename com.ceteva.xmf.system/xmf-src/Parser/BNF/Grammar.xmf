@@ -253,13 +253,17 @@ context Parser::BNF
       
       @Operation init(args):Element
         super(args);
-        self.parents := args->at(0);
-        @For clause in args->at(1) do
-          self.add(clause)
-        end;
-        self.startingSymbol := args->at(2);
-        if args->size = 4
-        then self.imports := args->at(3)
+        if args->size > 2
+        then
+          self.parents := args->at(0);
+          @For clause in args->at(1) do
+            self.add(clause)
+          end;
+          self.startingSymbol := args->at(2);
+          if args->size = 4
+          then self.imports := args->at(3)
+          else self
+          end
         else self
         end
       end

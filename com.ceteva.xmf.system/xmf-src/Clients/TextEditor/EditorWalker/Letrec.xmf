@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,10 +31,11 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkLetrec(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:Performable,env)
+  @Operation walkLetrec(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:Performable,env):Type
      let env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(b.type,b)))
      in @For b in bindings do self.walk(b,env0) end;
         self.walk(body,env0);
-        editor.ast("letrec",charStart,charEnd)
+        editor.ast("letrec",charStart,charEnd);
+        Element.toType()
      end
   end

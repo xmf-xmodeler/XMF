@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,11 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkContextDef(charStart:Integer,charEnd:Integer,element:OCL,isForward:Boolean,path:Seq(Element),env)
-    self.walk(element,env);
-    editor.ast("context definition",charStart,charEnd)
+  @Operation walkContextDef(charStart:Integer,charEnd:Integer,element:OCL,isForward:Boolean,path:Seq(String),env):Type
+    let l:Located = (Located().charStart := (charStart + 8)).charEnd := charEnd then
+        env = self.bindContextDefs(path,l,env)
+    in self.walk(element,env);
+       editor.ast("context definition",charStart,charEnd);
+       Element.toType()
+    end
   end

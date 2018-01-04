@@ -45,6 +45,10 @@ context TextEditor
       self.find(textId).textChanged(text)
     end
 
+    @Operation typeCheckMode(textId:Integer,mode:String)
+      self.find(textId).typeCheckMode(mode)
+    end
+
     @Operation urlRequest(browserId,url)
       self.find(browserId).requestURL(url)
     end
@@ -65,17 +69,18 @@ context TextEditor
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
         "rightClickMenuSelected"  do self.readRightClickMenuSelected(parameters) end
-        "urlRequest" 			 do self.readUrlRequest(parameters)   end
-        "editorText"              do self.readEditorText(parameters)   end
-        "textClosed"              do self.readTextClosed(parameters)   end
-        "textDirty"               do self.readTextDirty(parameters)    end
-        "undoStacked"			 do self.readUndoStacked(parameters)  end
-        "focusGained"			 do self.readFocusGained(parameters)  end
-        "focusLost"			 	 do self.readFocusLost(parameters)    end
-        "saveText"			 	 do self.readSaveText(parameters)     end
-        "oleClosed"               do self.oleClosed(parameters)        end
-        "textChanged"             do self.readTextChanged(parameters)  end
-        "openHomeFile"            do self.readOpenHomeFile(parameters) end
+        "urlRequest" 			 do self.readUrlRequest(parameters)             end
+        "editorText"              do self.readEditorText(parameters)             end
+        "textClosed"              do self.readTextClosed(parameters)             end
+        "textDirty"               do self.readTextDirty(parameters)              end
+        "undoStacked"			 do self.readUndoStacked(parameters)            end
+        "focusGained"			 do self.readFocusGained(parameters)            end
+        "focusLost"			 	 do self.readFocusLost(parameters)              end
+        "saveText"			 	 do self.readSaveText(parameters)               end
+        "oleClosed"               do self.oleClosed(parameters)                  end
+        "textChanged"             do self.readTextChanged(parameters)            end
+        "openHomeFile"            do self.readOpenHomeFile(parameters)           end
+        "typeCheckMode"           do self.readTypeCheckMode(parameters)          end
       end
     end
     
@@ -146,6 +151,13 @@ context TextEditor
       let editorId = parameters.at(0) then
           dirty = parameters.at(1) in
         self.editorDirty(editorId,dirty)
+      end
+    end
+    
+    @Operation readTypeCheckMode(parameters)
+      let editorId = parameters.at(0) then
+          mode = parameters.at(1) in
+        self.typeCheckMode(editorId,mode)
       end
     end
     

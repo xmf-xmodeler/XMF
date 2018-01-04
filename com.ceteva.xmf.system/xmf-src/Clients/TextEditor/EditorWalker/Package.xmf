@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkPackage(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),meta:Performable,metaPackage:Performable,name:String,parents:Seq(Performable),defImports:Seq(Performable),env)
+  @Operation walkPackage(line:Integer,charStart:Integer,charEnd:Integer,defs:Seq(Performable),meta:Performable,metaPackage:Performable,name:String,parents:Seq(Performable),defImports:Seq(Performable),env):Type
       let env0 = defs->iterate(def env=env | 
                    if def.isKindOf(XOCL::Class) 
                    then env.bind(def.name.toString(),VarDescriptor(XCore::Class,def)) 
@@ -47,6 +47,7 @@ context EditorWalker
          end;
          @For def in defs do
            self.walk(def,env0)
-         end
+         end;
+         Element.toType()
       end
     end

@@ -20,7 +20,7 @@ import Parser::BNF;
 
 context Parser::BNF
     
-    @Class Recognizer isabstract
+    @Class Recognizer isabstract extends Located
       
       @Operation cnf(grammar)
       

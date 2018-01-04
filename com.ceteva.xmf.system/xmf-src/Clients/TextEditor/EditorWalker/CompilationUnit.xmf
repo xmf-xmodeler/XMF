@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,12 +31,15 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:Seq(Import),source:String,parserImports:Seq(ParserImport),env)
-    let env0 = self.addCompilationUnitDefs(imports,exps,env);
-        sig = exps->iterate(exp sig = [] | sig + self.toSigEntry(exp))
+  @Operation walkCompilationUnit(resource:String,exps:Seq(Performable),imports:[Import],source:String,parserImports:[ParserImport],env):Type
+    let env0 = self.handleImports(imports,self.addCompilationUnitDefs(imports,exps,env));
+        sig = exps->iterate(exp sig = [] | sig + self.toSigEntry(exp)) then
+        ns:[NameSpace] = self.getNameSpaces(imports) then
+        env0 = env0.bind("__NameSpaces__",ns)
     in @For exp in exps do
-         self.walk(exp,self.handleImports(imports,env0))
+         self.walk(exp,env0)
        end;
-       editor.setSignature(sig)
+       editor.setSignature(sig);
+       Element.toType()
     end
   end

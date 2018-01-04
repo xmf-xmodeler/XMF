@@ -35,6 +35,11 @@ context OCL
     @Bind NAMED      = 2 end
     @Bind OPTYPE     = 3 end
     
+    @Operation isElement():Boolean
+      // Returns true when the receiver represents XCore::Element
+      false
+    end
+    
     @AbstractOp toSig()
     
       // Transforms the receiver into a signature componentof

@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,11 +31,12 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkConstructor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,env)
+  @Operation walkConstructor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,doc:Performable,names:Seq(String),toString:Boolean,env):Type
      charStart := charStart + "@Constructor("->size;
      @For name in names do
        self.walkVar(line,charStart,charStart+name->size,name,env);
        charStart := charStart + name->size + 1
      end;
-     editor.ast("constructor definition",charStart,charEnd)
+     editor.ast("constructor definition",charStart,charEnd);
+     Element.toType()
   end

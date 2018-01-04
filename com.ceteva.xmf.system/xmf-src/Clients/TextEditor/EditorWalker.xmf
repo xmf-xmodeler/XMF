@@ -457,7 +457,7 @@ context TextEditor
       editor.ast("send",charStart,charEnd)
     end
 
-    @Operation walkSetExp(line:Integer,collType:String,elements:Seq(OCL),env)
+    @Operation walkSetExp(charStart:Integer,charEnd:Integer,line:Integer,collType:String,elements:Seq(OCL),env)
       @For e in elements do
         self.walk(e,env)
       end

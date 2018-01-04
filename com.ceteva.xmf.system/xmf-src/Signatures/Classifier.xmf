@@ -4,11 +4,13 @@ import Signatures;
 import NamedElement;
 
 context XCore::Classifier
+ 
    @Derived toType():Signature
-     let sig = Signature(self.path())
-     in @For operation in self.allOperations() do
-          sig.bind(operation.name().toString(),operation.toNamedElement())
-        end;
-        sig
+     if classifiers.hasKey(self)
+     then classifiers.get(self)
+     else
+       let t:Type = ClassifierAsType(self)
+       in classifiers.put(self,t); t
+       end
      end
    end

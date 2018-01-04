@@ -15,9 +15,9 @@ context Code
       @CaseObj operator of
         BinExp[left,binOp,right] do
           if binOp = "." and right.isKindOf(Var)
-          then Send(self.walk(left,arg),right.name,args->collect(a | self.walk(a,arg)))
+          then Send(charStart,charEnd,self.walk(left,arg),right.name,args->collect(a | self.walk(a,arg)))
           elseif binOp = "." and right.isKindOf(Drop)
-          then Send(self.walk(left,arg),Drop(self.walk(right.exp,arg)),args->collect(a | self.walk(a,arg)))
+          then Send(charStart,charEnd,self.walk(left,arg),Drop(self.walk(right.exp,arg)),args->collect(a | self.walk(a,arg)))
           else super(charStart,charEnd,args,operator,arg)
           end
         end
@@ -55,19 +55,19 @@ context Code
                CollExp[args,collOp,collection] do
                  if collection.isKindOf(Var)
                  then self.walk(CollExp(resolvePath(left,Seq{collection.name}),collOp,args),arg)
-                 else self.walk(CollExp(BinExp(left,"::",collection),collOp,args),arg)
+                 else self.walk(CollExp(BinExp(cStart(left),cEnd(collection),left,"::",collection),collOp,args),arg)
                  end
                end
                BinExp[left,binOp,right] do
                  @Case binOp of
                    "." do
-                     self.walk(BinExp(BinExp(left1,"::",left),".",right),arg)
+                     self.walk(BinExp(cStart(left1),cEnd(right),BinExp(cStart(left1),cEnd(left),left1,"::",left),".",right),arg)
                    end
                    else super(charStart,charEnd,op,left,right)
                  end
                end
-               Send[target,message,args] do
-                 self.walk(Send(BinExp(left,"::",target),message,args),arg)
+               Send[charStart,charEnd,target,message,args] do
+                 self.walk(Send(charStart,charEnd,BinExp(cStart(left),cEnd(target),left,"::",target),message,args),arg)
                end
                else super(charStart,charEnd,op,left,right,arg)
              end
@@ -124,19 +124,19 @@ context Code
         BinExp[left,binOp,right] do
           @Case binOp of
             ";" do
-              self.walk(BinExp(Negate(left),";",right),arg)
+              self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),";",right),arg)
             end
             "and" do
-              self.walk(BinExp(Negate(left),"and",right),arg)
+              self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),"and",right),arg)
             end
             "andthen" do
-              self.walk(BinExp(Negate(left),"andthen",right),arg)
+              self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),"andthen",right),arg)
             end
             "or" do
-              self.walk(BinExp(Negate(left),"or",right),arg)
+              self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),"or",right),arg)
             end
             "orelse" do
-              self.walk(BinExp(Negate(left),"orelse",right),arg)
+              self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),"orelse",right),arg)
             end
           else super(exp,arg)
           end

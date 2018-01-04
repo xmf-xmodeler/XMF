@@ -1,0 +1,30 @@
+parserImport XOCL;
+
+import Signatures;
+import Exceptions;
+
+context Signatures
+  @Class ClassAsType extends ClassifierAsType
+  
+    @Operation hasField(name:String):Boolean
+      classifier.allAttributes()->exists(a | a.name.toString() = name)
+    end
+    
+    @Operation getField(name:String):Type
+      @Find(a,classifier.allAttributes())
+        when a.name.toString() = name
+        do a.type.toType()
+        else throw Error("no field named " + name)
+      end
+    end
+    
+    @Operation getType(e:Element):Type
+      @TypeCase(e)
+        XCore::Attribute do
+          e.type.toType()
+        end
+        else super(e)
+      end
+    end
+  
+  end

@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,6 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkSelf(line:Integer,charStart:Integer,charEnd:Integer,env)
-    editor.ast("self",charStart,charEnd)
+  @Operation walkSelf(line:Integer,charStart:Integer,charEnd:Integer,env):Type
+    editor.ast("self",charStart,charEnd);
+    Element.toType()
   end

@@ -56,6 +56,12 @@ context TextEditor
         delete(element.id())
       end
     end
+    
+    @Operation dotError(editor,charStart:Integer,charEnd:Integer,name:String)
+      @SendCommand(self)
+        dotError(editor.id(),charStart,charEnd,name)
+      end
+    end
 
     @Operation clearErrors(editor)
       @SendCommand(self)
@@ -231,13 +237,19 @@ context TextEditor
 
     @Operation syntaxError(editor,position,message)
       @SendCommand(self)
-       syntaxError(editor.id(),position,message)
+        syntaxError(editor.id(),position,message)
       end
     end
     
     @Operation unboundVar(editor,name,charStart,charEnd)
       @SendCommand(self)
         unboundVar(editor.id(),name,charStart,charEnd)
+       end
+    end
+    
+    @Operation typeError(editor,charStart,charEnd,expected:String,found:String)
+      @SendCommand(self)
+        typeError(editor.id(),charStart,charEnd,expected,found)
        end
     end
     

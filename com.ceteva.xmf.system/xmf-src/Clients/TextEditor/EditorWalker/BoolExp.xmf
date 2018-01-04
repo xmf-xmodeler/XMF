@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,6 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkBoolExp(line:Integer,charStart:Integer,charEnd:Integer,value:Boolean,env)
-    editor.ast("bool",charStart,charEnd)
+  @Operation walkBoolExp(line:Integer,charStart:Integer,charEnd:Integer,value:Boolean,env):Type
+    editor.ast("bool",charStart,charEnd);
+    Boolean.toType()
   end

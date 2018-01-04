@@ -5,14 +5,33 @@ import NamedElement;
 
 context XCore::Class
  
-   @Derived toType():Signature
-     let sig = Signature(self.path())
-     in @For operation in self.allOperations() do
-          sig.bind(operation.name().toString(),operation.toNamedElement())
-        end;
-        @For attribute in self.allAttributes() do
-          sig.bind(attribute.name().toString(),Field(Delayed(@Operation() attribute.toType() end)))
-        end;
-        sig
+   @Derived toType():Type
+     if classifiers.hasKey(self)
+     then classifiers.get(self)
+     else
+       let t:Type = ClassAsType(self)
+       in classifiers.put(self,t); t
+       end
      end
+   end
+   
+ context XOCL::Class
+   @Operation toType(path:[String],imports:[NameSpace]):Signature
+     let s:Signature = Signature(path)
+     in @For def in defs do
+          @CaseObj def of
+            XOCL::Attribute[name,type] do
+              s.bind(name.toString(),Field(try type.eval(null,[],imports).toType() catch(x) Element.toType() end))
+            end
+            OCL::Operation[name] do
+              let d:[Type] = def.toSig()->butLast->collect(arg | Classifier::mapType(arg->at(1),imports).toType());
+                  r:Type = Classifier::mapType(def.toSig()->last,imports).toType()
+              in s.bind(name.toString(),Operation(d,r))
+              end
+            end
+            else null
+          end
+        end;
+        s
+      end
    end

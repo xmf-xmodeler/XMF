@@ -75,11 +75,12 @@ import IO;
       @For p in self.allParents() do
          if not p.attributes->isEmpty
          then
-           format(fout,"From <A HREF=\"~S\">~S</A>: ",Seq{p.href(self.pathSeq()),p.name.toString()});
-           @For a in p.attributes do
+           format(fout,"<B>From</B> <A HREF=\"~S\">~S</A>: ",Seq{p.href(self.pathSeq()),p.name.toString()});
+           @For a in p.attributes->asSeq->sortNamedElements do
              format(fout,"~S",Seq{a.name});
              if not isLast then format(fout,", ") else format(fout,". ") end
-           end
+           end;
+           format(fout,"<BR>")
          end
       end;
       format(fout,"</FONT>~%</TD>~%</TR>~%");
@@ -90,61 +91,68 @@ import IO;
          
       // Write the operations ...
       
-      format(fout,"<TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"3\" CELLSPACING=\"0\" SUMMARY=\"\">~%");
+      format(fout,"<TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"2\" CELLSPACING=\"0\" SUMMARY=\"\">~%");
       format(fout,"<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">~%");
       format(fout,"<TD COLSPAN=2><FONT SIZE=\"+2\">~%");
       format(fout,"<B>Operations</B></FONT></TD>~%</TR>~%");
       
-      if showOpBody then
-        @For o in operations->asSeq->sortNamedElements do
-          format(fout,"<TR><TD>");
-          if o.isKindOf(Operation)
-          then
-            format(fout,"<FONT FACE=\"Courier\" SIZE=\"1\">~S</FONT>~%",Seq{o.source().asHTML()})
-          end;
-          format(fout,"</TD><TD>~S</TD></TR>~%",Seq{o.doc().doc})
-        end
-      else
-        @For o in operations->asSeq->sortNamedElements do
-          format(fout,"<TR><TD><B>~S(",Seq{o.name()});
-          @For p,t in o.paramNames(),o.paramTypes() do
-            @TypeCase(t)
-              Set do
-                format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.elementType.href(self.pathSeq()),t.name()})
-              end
-              Seq do
-                format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.elementType.href(self.pathSeq()),t.name()})
-              end
-              else 
-                format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.href(self.pathSeq()),t.name()})
-              end;
-              if not isLast then format(fout,",") end
-          end;
-          format(fout,"):");
-          @TypeCase(o.type())
+      
+      @For o in operations->asSeq->sortNamedElements do
+        if showOpBody
+        then format(fout,"<TR><TD><B><a href=\"#~S\">~S</a>(",Seq{o.name(),o.name()})
+        else format(fout,"<TR><TD><B>~S(",Seq{o.name()})
+        end;
+        @For p,t in o.paramNames(),o.paramTypes() do
+          @TypeCase(t)
             Set do
-              format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().elementType.href(self.pathSeq()),o.type().name()})
+              format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.elementType.href(self.pathSeq()),t.name()})
             end
             Seq do
-              format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().elementType.href(self.pathSeq()),o.type().name()})
+              format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.elementType.href(self.pathSeq()),t.name()})
             end
             else 
-             format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().href(self.pathSeq()),o.type().name()})
-          end;
-          format(fout,"</B></TD><TD>~S</TD></TR>~%",Seq{o.doc().doc})
+              format(fout,"~S:<A HREF=\"~S\">~S<\A>",Seq{p,t.href(self.pathSeq()),t.name()})
+            end;
+            if not isLast then format(fout,",") end
         end;
-        format(fout,"<TR>~%<TD COLSPAN=2>~%<FONT SIZE=\"-1\">~%");
-        @For p in self.allParents() do
-          if not p.operations->isEmpty
-          then
-            format(fout,"From <A HREF=\"~S\">~S</A>: ",Seq{p.href(self.pathSeq()),p.name.toString()});
-            @For o in p.operations do
-              format(fout,"~S",Seq{o.name});
-              if not isLast then format(fout,", ") else format(fout,". ") end
-            end
+        format(fout,"):");
+        @TypeCase(o.type())
+          Set do
+            format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().elementType.href(self.pathSeq()),o.type().name()})
           end
+          Seq do
+            format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().elementType.href(self.pathSeq()),o.type().name()})
+          end
+          else 
+           format(fout,"<A HREF=\"~S\">~S<\A>",Seq{o.type().href(self.pathSeq()),o.type().name()})
+        end;
+        format(fout,"</B></TD><TD>~S</TD></TR>~%",Seq{o.doc().doc})
+      end;
+      format(fout,"<TR>~%<TD COLSPAN=2>~%<FONT SIZE=\"-1\">~%");
+      @For p in self.allParents() do
+        if not p.operations->isEmpty
+        then
+          format(fout,"<B>From</B> <A HREF=\"~S\">~S</A>: ",Seq{p.href(self.pathSeq()),p.name.toString()});
+          @For o in p.operations->asSeq->sortNamedElements do
+            format(fout,"~S",Seq{o.name});
+            if not isLast then format(fout,", ") else format(fout,". ") end
+          end;
+          format(fout,"<BR>")
         end
       end;
+      
+      if showOpBody then
+        @For o in operations->asSeq->sortNamedElements do
+          format(fout,"<TR><TD COLSPAN=2>");
+          if o.isKindOf(Operation)
+          then 
+            format(fout,"<a name=\"~S\"/>",[o.name()]);
+            format(fout,"<FONT FACE=\"Courier\" SIZE=\"1\">~S</FONT>~%",Seq{o.source().asHTML()})
+          end;
+          format(fout,"</TD></TR>~%")
+        end
+      end;
+      
       format(fout,"</FONT>~%</TD>~%</TR>~%");
       format(fout,"</TABLE>~%"); 
          

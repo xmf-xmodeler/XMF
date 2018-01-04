@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkFor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),env)
+  @Operation walkFor(line:Integer,charStart:Integer,charEnd:Integer,body:Performable,colls:Seq(Performable),directive:String,guard:Performable,isExp:Boolean,names:Seq(String),env):Type
      @For c in colls do self.walk(c,env) end;
      @Letrec
        mkLocated(charStart:Integer,charEnd:Integer):Located =
@@ -48,6 +48,7 @@ context EditorWalker
            end
          end
      in self.walk(body,bind(names,charStart + "@For "->size,env));
-        editor.ast("for definition",charStart,charEnd)
+        editor.ast("for definition",charStart,charEnd);
+        Element.toType()
      end
   end

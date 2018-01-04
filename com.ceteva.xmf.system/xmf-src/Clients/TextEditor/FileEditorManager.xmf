@@ -1,8 +1,10 @@
+parserImport XML::Parser;
 parserImport XOCL;
 
 import IO;
 import Clients;
 import TextEditor;
+import XML::Parser;
 
 context TextEditor
 
@@ -97,6 +99,28 @@ context TextEditor
       end
     end
     
+    @Operation getRecentFiles():[String]
+      let grammar = 
+            @Grammar Files
+              Files ::= <Files> fs=File* </Files> { fs }.
+              File ::= <File p=path/> { p }.
+            end then
+          getFiles():[String] =
+            let path = xmf.projDir() + "/init/recentlyOpenFiles.xml"
+            in if path.fileExists()
+               then
+                 @WithOpenFile(fin <- path)
+                   let xin = ParserChannel(fin,grammar)
+                   in xin.parse("Files")
+                   end
+                 end
+               else []
+               end
+            end
+      in getFiles()
+      end
+    end
+    
     @Operation handleEditorCloseEvent(editor)
       self.removeFileEditor(editor);
       editor.removeListener(self)
@@ -145,7 +169,9 @@ context TextEditor
     
     @Operation writeFiles(path:String)
       // Writes the most recently opened files to the supplied path...
-      let files = xmf.fileEditorManager().fileEditorTable.keys()
+      let files:String = xmf.fileEditorManager().fileEditorTable.keys() then
+          files:String = files + self.getRecentFiles() then
+          files:String = files->asSet->asSeq
       in if path.fileExists()
          then
            @WithOpenFile(fout -> (path + "/recentlyOpenFiles.xml"))

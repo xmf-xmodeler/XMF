@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,11 +31,12 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkOperation(charStart:Integer,charEnd:Integer,doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env)
+  @Operation walkOperation(charStart:Integer,charEnd:Integer,doc:Performable,imports:Seq(Seq(String)),isMultiArgs:Boolean,name:String,args:Seq(Pattern),body:Performable,type:TypeExp,properties,env):Type
     let env0 = args->select(p | p.isKindOf(Varp))->iterate(v e = env | e.bind(v.name,VarDescriptor(null,v)))
     in @For arg in args do self.walk(arg,env) end;
        self.walk(body,env0);
        self.walk(type,env);
-       editor.ast("operation definition",charStart,charEnd)
+       editor.ast("operation definition",charStart,charEnd);
+       Element.toType()
     end
   end

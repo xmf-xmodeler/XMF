@@ -17,7 +17,7 @@ context Code
     // and returns source code with the correct precedences and associativites.
   
     @Operation walkApply(charStart:Integer,charEnd:Integer,args,operator,arg)
-      Apply(self.walk(operator,arg),args->collect(a | self.walk(a,arg)))
+      Apply(charStart,charEnd,self.walk(operator,arg),args->collect(a | self.walk(a,arg)))
     end
 
     @Operation walkInstantiate(args,class,arg)
@@ -29,39 +29,39 @@ context Code
         "." do
           @CaseObj right1 of
             Apply[operator,args] do
-              self.walk(Apply(BinExp(left1,".",operator),args),arg)
+              self.walk(Apply(charStart,charEnd,BinExp(cStart(right1),cEnd(operator),left1,".",operator),args),arg)
             end
             Instantiate[class,args] do
-              self.walk(Instantiate(BinExp(left1,".",class),args),arg)
+              self.walk(Instantiate(BinExp(charStart,charEnd,left1,".",class),args),arg)
             end
             BinExp[left,binOp,right] do
-              self.walk(BinExp(BinExp(left1,".",left),binOp,right),arg)
+              self.walk(BinExp(charStart,charEnd,BinExp(cStart(left1),cEnd(left),left1,".",left),binOp,right),arg)
             end
             CollExp[collection,collOp,args] do
-              self.walk(CollExp(BinExp(left1,".",collection),collOp,args),arg)
+              self.walk(CollExp(BinExp(charStart,charEnd,left1,".",collection),collOp,args),arg)
             end
             IterExp[collection,name,iterOp,body] do
-              self.walk(IterExp(BinExp(left1,".",collection),iterOp,name,body),arg)
+              self.walk(IterExp(BinExp(charStart,charEnd,left1,".",collection),iterOp,name,body),arg)
             end
             Iterate[collection,name,accumulator,value,body] do
-              self.walk(Iterate(BinExp(left1,".",collection),name,accumulator,value,body),arg)
+              self.walk(Iterate(BinExp(charStart,charEnd,left1,".",collection),name,accumulator,value,body),arg)
             end
             else self.walkBinExpDefault(left1,op1,right1,arg)
           end
         end
         "::" do
           @CaseObj right1 of
-            Apply[operator,args] do
-              self.walk(Apply(BinExp(left1,"::",operator),args),arg) 
+            Apply[charStart,charEnd,operator,args] do
+              self.walk(Apply(charStart,charEnd,BinExp(charStart,charEnd,left1,"::",operator),args),arg) 
             end
             Instantiate[class,args] do
-              self.walk(Instantiate(BinExp(left1,"::",class),args),arg)
+              self.walk(Instantiate(BinExp(charStart,charEnd,left1,"::",class),args),arg)
             end
             BinExp[left,binOp,right] do
-              self.walk(BinExp(BinExp(left1,"::",left),binOp,right),arg)
+              self.walk(BinExp(charStart,charEnd,BinExp(charStart,charEnd,left1,"::",left),binOp,right),arg)
             end
             CollExp[collection,collOp,args] do
-              self.walk(CollExp(BinExp(left1,"::",collection),collOp,args),arg)
+              self.walk(CollExp(BinExp(charStart,charEnd,left1,"::",collection),collOp,args),arg)
             end
             else self.walkBinExpDefault(left1,op1,right1,arg)
           end
@@ -79,7 +79,7 @@ context Code
                  o11 = binOp;
                  e12 = right
              in if prec(o1) < prec(o11)
-                then self.walk(BinExp(e11,o11,BinExp(e12,o1,e2)),arg)
+                then self.walk(BinExp(cStart(e11),cEnd(e2),e11,o11,BinExp(cStart(e12),cEnd(e2),e12,o1,e2)),arg)
                 else
                   @CaseObj e2 of
                     BinExp[left,binOp,right] do
@@ -87,12 +87,12 @@ context Code
                           o22 = binOp;
                           e22 = right
                       in if prec(o1) < prec(o22)
-                         then self.walk(BinExp(BinExp(e1,o1,e21),o22,e22),arg)
-                         else BinExp(e1,o1,e2)
+                         then self.walk(BinExp(cStart(e1),cEnd(e22),BinExp(cStart(e1),cEnd(e21),e1,o1,e21),o22,e22),arg)
+                         else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
                          end
                       end
                     end
-                    else BinExp(e1,o1,e2)
+                    else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
                   end
                 end
              end
@@ -104,12 +104,12 @@ context Code
                      o2 = binOp;
                      e22 = right
                  in if prec(o1) < prec(o2)
-                    then self.walk(BinExp(BinExp(e1,o1,e21),o2,e22),arg)
-                    else BinExp(e1,o1,e2)
+                    then self.walk(BinExp(cStart(e1),cEnd(e22),BinExp(cStart(e1),cEnd(e21),e1,o1,e21),o2,e22),arg)
+                    else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
                     end 
                  end
                end
-               else BinExp(e1,o1,e2)
+               else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
              end 
          end
       end
@@ -131,7 +131,7 @@ context Code
       @CaseObj exp of
         BinExp[left,binOp,right] do
           if binOp = ";"
-          then self.walk(BinExp(Negate(left),";",right),arg)
+          then self.walk(BinExp(cStart(left)-3,cEnd(right),Negate(left),";",right),arg)
           else Negate(self.walk(exp,arg))
           end
         end

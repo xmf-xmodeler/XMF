@@ -28,7 +28,8 @@ context OCL
     @Attribute binOp : String end
     @Attribute right : OCL::OCL end
     
-    @Constructor(left,binOp,right) ! end
+    @Constructor(left,binOp,right)                 ! end
+    @Constructor(charStart,charEnd,left,binOp,right) end
     
     @Operation pprint(out,indent)
       left.pprint(out,indent);

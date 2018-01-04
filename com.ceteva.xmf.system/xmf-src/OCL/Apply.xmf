@@ -24,7 +24,8 @@ context OCL
     @Attribute operator : OCL::OCL      end
     @Attribute args     : Seq(OCL::OCL) end
     
-    @Constructor(operator,args) ! end
+    @Constructor(operator,args)                 ! end
+    @Constructor(charStart,charEnd,operator,args) end
     
     @Operation pprint(out,indent)
       operator.pprint(out,indent);

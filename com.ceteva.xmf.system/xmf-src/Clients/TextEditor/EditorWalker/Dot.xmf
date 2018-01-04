@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,18 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkContextDef(charStart:Integer,charEnd:Integer,element:OCL,isForward:Boolean,path:Seq(Element),env)
-    self.walk(element,env);
-    editor.ast("context definition",charStart,charEnd)
+  @Operation walkDot(charStart:Integer,charEnd:Integer,name:String,target:OCL,env):Type
+    let t:Type = self.walk(target,env)
+    in editor.ast("slot reference",charStart,charEnd); 
+       if editor.isTypeChecking(t)
+       then
+         if t.hasField(name)
+         then t.getField(name)
+         else 
+           editor.dotError(target.charStart,target.charEnd,name);
+           Element.toType()
+         end
+       else Element.toType()
+       end
+    end
   end

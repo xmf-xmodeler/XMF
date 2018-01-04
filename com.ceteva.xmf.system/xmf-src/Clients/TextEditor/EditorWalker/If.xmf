@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,9 +31,23 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkIf(line:Integer,charStart:Integer,charEnd:Integer,test:Performable,e1:Performable,e2:Performable,env)
-    self.walk(test,env);
-    self.walk(e1,env);
-    self.walk(e2,env);
-    editor.ast("if",charStart,charEnd)
+  @Operation walkIf(line:Integer,charStart:Integer,charEnd:Integer,test:Performable,e1:Performable,e2:Performable,env):Type
+    editor.ast("if",charStart,charEnd);
+    let type:Type = self.walk(test,env);
+        e1Type:Type = self.walk(e1,env);
+        e2Type:Type = self.walk(e2,env)
+    in if editor.isTypeChecking(type)
+       then
+         if not(e1Type.equals(e2Type))
+         then editor.typeError(e1.charStart,e1.charEnd,e2Type.classifier,e1Type.classifier)
+         end;
+         if type.isBool()
+         then e1Type
+         else 
+           editor.typeError(test.charStart,test.charEnd,Boolean,type.classifier);
+           Element.toType()
+         end
+       else Element.toType()
+       end
+    end
   end

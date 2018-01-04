@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,7 +31,7 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkTry(line:Integer,body:Performable,handler:Performable,name:String,env)
+  @Operation walkTry(line:Integer,body:Performable,handler:Performable,name:String,env):Type
       
     // Bind the catch variable...
       
@@ -40,6 +40,7 @@ context EditorWalker
         located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
         env0 = env.bind(name,VarDescriptor(null,located))
     in self.walk(body,env);
-       self.walk(handler,env0)
+       self.walk(handler,env0);
+       Element.toType()
     end
   end

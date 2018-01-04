@@ -30,15 +30,6 @@ import FileTextEditor;
 import Stacks;
 
 context EditorWalker
-
-  @Operation walkIterExp(charStart:Integer,charEnd:Integer,body:OCL,collection:OCL,iterOp:String,name:String,env):Type
-     let varStart = collection.charEnd + (iterOp + "->(")->size then
-         varEnd = varStart + name->size then
-         located = let l = Located() in (l.charStart := varStart).charEnd := varEnd end then
-         env0 = env.bind(name,VarDescriptor(null,located))
-     in self.walk(collection,env);
-        self.walk(body,env0);
-        editor.ast(iterOp,charStart,charEnd);
-        Element.toType()
-     end
-   end
+  @Operation walkParentheses(charStart:Integer,charEnd:Integer,exp:Performable,env) 
+    self.walk(exp,env)
+  end

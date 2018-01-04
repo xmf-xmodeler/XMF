@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,10 +31,12 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkSend(charStart:Integer,charEnd:Integer,args:Seq(OCL),message:String,target:OCL,env)
+  @Operation walkSend(charStart:Integer,charEnd:Integer,args:Seq(OCL),message:String,target:OCL,env):Type
     self.walk(target,env);
     @For arg in args do 
+      //format(stdout,"[~S,~S] ~S ~S ~S ~%",[charStart,charEnd,arg,arg.charStart,arg.charEnd]);
       self.walk(arg,env)
     end;
-    editor.ast("send",charStart,charEnd)
+    editor.ast("send",charStart,charEnd);
+    Element.toType()
   end

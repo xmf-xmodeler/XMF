@@ -7,7 +7,10 @@ context Root
     @Doc
        This package contains definitions relating to XMF clients.
        An XMF client is a (possibly external) program that communicates
-       with the XMF engine.
+       with the XMF engine. Clients have command interpreters used to transmit
+       messages to the Java client and receives events sent by the Java
+       client. An XMF client uses a thread to read the 
+       communication channel from the Java client.
      end
      
    end

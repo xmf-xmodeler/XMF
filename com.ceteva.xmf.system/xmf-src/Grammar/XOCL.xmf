@@ -111,7 +111,7 @@ context OCL::OCL
       // however this is not necessary - you could use any
       // terminal to introduce an at-expression...
     
-      l = LinePos '@' e = @ { e.setLine(l) }. 
+      l = LinePos '@' e = << @ >> { e.setLine(l) }. 
 
     AtomicPattern ::= 
     
@@ -281,7 +281,7 @@ context OCL::OCL
     
       // An element in a compilation unit...
       
-      Def 
+      << Def >> 
     | TopLevelExp.
     
     CompilationBodyExps ::=

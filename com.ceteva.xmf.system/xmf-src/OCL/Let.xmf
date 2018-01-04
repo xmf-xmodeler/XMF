@@ -69,22 +69,31 @@ context OCL
 
     @Operation pprint(out,indent)
       format(out,"let ");
+      self.pprintLetBody(out,indent)
+    end
+    
+    @Operation pprintLetBody(out,indent)
       if bindings.isKindOf(Seq(Element))
       then
         @For b in bindings do
           b.pprint(out,indent + 4);
           if not isLast 
           then format(out,";~%~V",Seq{indent + 4})
-          else format(out,"~%~V",Seq{indent})
           end
         end
       else 
         // Assume that this is a dropped element....
         bindings.pprint(out)
       end;
-      format(out,"in ");
-      body.pprint(out,indent + 3);
-      format(out,"~%~Vend",Seq{indent})
+      if body.isKindOf(Let)
+      then 
+        format(out," then~%~V",[indent+4]);
+        body.pprintLetBody(out,indent)
+      else
+        format(out,"~%~Vin ",[indent]);
+        body.pprint(out,indent + 3);
+        format(out,"~%~Vend",Seq{indent})
+      end
     end
     
   end

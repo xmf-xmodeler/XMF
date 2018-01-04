@@ -9,6 +9,7 @@ context Mosaic
 
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
+        "fileDropped"     do self.fileDropped(parameters)     end
         "shutdownRequest" do self.shutdown()                  end
         "shutDownAndSave" do self.shutDownAndSave(parameters) end
         "consoleDot"      do self.consoleDot(parameters)      end
@@ -16,6 +17,20 @@ context Mosaic
         "send"            do self.sendEvent(parameters)       end
       end
     end
+    
+    @Operation fileDropped(parameters)
+      self.debug("fileDropped",parameters);
+      let file = parameters.at(0)
+      in if file.hasSuffix(".o")
+         then file.loadBin(true)
+         elseif file.hasSuffix(".xmf")
+         then 
+           Compiler::compileFile(file,true,true);
+           (file.truncate(file->size - 4) + ".o").loadBin(true)
+         end
+      end
+    end
+      
     
     @Operation sendEvent(parameters)
       self.debug("send",parameters);

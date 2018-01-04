@@ -18,10 +18,10 @@
  
 parserImport XOCL;
 
-import Signatures;
 import NamedElement;
 import XOCL;
 import OCL;
+import Signatures;
 import Walkers;
 import Code;
 import Clients;
@@ -31,10 +31,21 @@ import Stacks;
 
 context EditorWalker
 
-  @Operation walkLet(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:OCL,env)
+  @Operation walkLet(line:Integer,charStart:Integer,charEnd:Integer,bindings:Seq(ValueBinding),body:OCL,env):Type
      @For b in bindings do self.walk(b,env) end;
-     let env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(b.type,b)))
+     let getType(t:TypeExp):Type = 
+           if env.binds("__NameSpaces__")
+           then 
+             try t.toExp().eval(null,[],env.lookup("__NameSpaces__")).toType()
+             catch(x)
+               xmf.message(x.toString());
+               Element.toType()
+             end
+           else Element.toType()
+           end then
+         env0 = bindings->iterate(b e=env | e.bind(b.name,VarDescriptor(getType(b.type),b)))
      in self.walk(body,env0);
-        editor.ast("let",charStart,charEnd)
+        editor.ast("let",charStart,charEnd);
+        Element.toType()
      end
   end 
