@@ -48,12 +48,12 @@ context AttributeXText
   end
 
 context AttributeXText 
-	@Operation instLevelChangedDaemon(obj,slot,newInstLevel,oldInstLevel )
+	@Operation instLevelChangedDaemon(obj,slot,newInstLevel,oldInstLevel)
       if attribute.instLevel <> newInstLevel
       then
         try
         	newInstLevel.asInt();
-        	if newInstLevel <> " "
+        	if newInstLevel <> " " and newInstLevel <> ""
         	then
                 if 0 <= newInstLevel.asInt() andthen newInstLevel.asInt() < attribute.owner.level
                 then attribute.instLevel := newInstLevel.asInt(); attribute.isIntrinsic := true

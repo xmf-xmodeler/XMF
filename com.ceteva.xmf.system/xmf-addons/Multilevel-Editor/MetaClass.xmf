@@ -277,7 +277,7 @@ context Root::FMML
 	@Operation hasInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
       if not Kernel_hasSlot(object,name)
       then
-        throw Exception(name + " is intrinsic and cannot be accessed on this level.")
+        false//throw Exception(name + " is intrinsic and cannot be accessed on this level.")
       else
         true
       end
