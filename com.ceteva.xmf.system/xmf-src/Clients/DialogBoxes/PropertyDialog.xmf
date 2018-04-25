@@ -1,0 +1,17 @@
+parserImport XOCL;
+
+import Clients;
+import DialogBoxes;
+
+context DialogBoxes
+
+  @Class PropertyDialog extends ContainedClientElement
+  
+    @Constructor()
+    end
+    
+    @Operation new()
+      self.commandInterpreter().newPropertyDialog(self)
+    end
+  
+  end

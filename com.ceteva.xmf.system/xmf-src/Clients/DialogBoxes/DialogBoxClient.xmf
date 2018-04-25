@@ -190,4 +190,11 @@ context DialogBoxes
     @Operation postSave()
       self
     end
+    
+    @Operation newPropertyDialog()
+      let dialog = PropertyDialog() in
+        dialog.setOwner(self);
+        dialog.new()
+      end
+    end
   end

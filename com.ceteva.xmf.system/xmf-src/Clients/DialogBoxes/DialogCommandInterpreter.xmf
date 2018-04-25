@@ -17,6 +17,7 @@ context DialogBoxes
            [newQuestionDialog(dialogId,message)]
            [newQuestionDialogYesNoCancel(dialogId,message)]
            [newQuestionDialogYesOnly(dialogId,message)]
+           [newPropertyDialog()]
            [newConfirmDialog(dialogId,message)]
            //[newMultioptionDialog(dialogId,message,type)]
            [newFileDialog(dialogId,type,dir,ext)]
@@ -175,6 +176,10 @@ context DialogBoxes
     
     @Operation newTreeDialog(dialog)
       self.call("newTreeDialog",Seq{dialog.title(),dialog.tree()})
+    end
+    
+    @Operation newPropertyDialog(dialog)
+      self.call("newPropertyDialog",Seq{})
     end
        
     @Operation newProgressDialog(dialog)

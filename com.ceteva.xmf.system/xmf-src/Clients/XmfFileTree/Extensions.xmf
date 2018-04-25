@@ -114,6 +114,11 @@ context Root
       end
     end
   end
+  
+context Root
+  @Operation openPropertyManager()
+  	xmf.findClient(Clients::DialogBoxes::DialogBoxClient).newPropertyDialog()
+  end
 
 context Root
   @Operation openSingleFile()

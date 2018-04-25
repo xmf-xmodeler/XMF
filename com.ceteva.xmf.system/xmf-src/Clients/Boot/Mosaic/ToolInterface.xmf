@@ -112,11 +112,13 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
-        Seq{"&File","System","&Browse","File","Open &File Browser ..."},
-        Root::createFileBrowser
+        Seq{"&File","System","&Browse","File","Open &PropertyManager ..."},
+        Root::openPropertyManager
       }
     )
   );
+
+
 
   registry.addContribution(id,
     TypeLessContribution(
