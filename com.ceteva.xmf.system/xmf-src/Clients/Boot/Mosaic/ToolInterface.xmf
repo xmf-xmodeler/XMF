@@ -112,7 +112,7 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
-        Seq{"&File","System","&Browse","File","Open &PropertyManager ..."},
+        Seq{"&File","System","&Preferences ..."},
         Root::openPropertyManager
       }
     )
@@ -154,15 +154,6 @@ in
       Seq{
         Seq{"&Browse","XTools","&XTools Manager"},
         Tools::Basic::showXToolsBrowser
-      }
-    )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&Browse","File","Open &File Browser ..."},
-        Root::createFileBrowser
       }
     )
   );
