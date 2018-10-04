@@ -6,14 +6,34 @@ import Clients::ExtensionPoints;
 Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.xmf",true,true);
 (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
 						
-Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
-(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
+//Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
+//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
 			
 //Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.xmf",true,true);
 //(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.o").loadBin(true);
 
-Root::manipulator := Manipulator();
-Root::mp := Root::manipulator;
+//Root::manipulator := Manipulator();
+//Root::mp := Root::manipulator;
 
-Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.xmf",true,true);
-(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.o").loadBin(true);		
+//Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.xmf",true,true);
+//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.o").loadBin(true);	
+
+Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.xmf",true,true);
+(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.o").loadBin(true);	
+ 
+ 
+let 
+  model = Package("BikePackage")
+in 
+  model.addParent(FMML);
+  Root.add(model);
+  let 
+    project = Projects::Project(model, "BikeProject", null)
+  in
+    xmf.projectManager("MyProjects").add(project)
+  end
+  
+end;
+Root::bikeSetup := BikeSetup();	
+Root::bikeSetup.setup(BikePackage);
+"type BikePackage.browse(); to start".println();

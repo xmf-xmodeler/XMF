@@ -49,6 +49,9 @@ context ClassMapping::PackageXClassDiagram
           	node.showMetaslots(true);
           	node.showAttributes(false)
           end;
+          // test start Quickfix MODEL2018
+	      self.addMetaClass(class,"M"+(class.level - 1));
+          // test end
           node
         end
       end

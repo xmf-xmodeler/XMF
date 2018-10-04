@@ -1,0 +1,182 @@
+parserImport XOCL;
+
+context Root
+
+@Class BikeSetup
+
+  @Operation setup(p:Package) // Level 5 only
+
+    // Level 5
+
+    self.addClass(p, "Component", 5);
+    self.addClass(p, "Configuration", 5);
+    self.addClass(p, "Part", 5);
+    self.addClass(p, "CompPart", 5);
+    p::Part.addParent(p::Component);
+    p::CompPart.addParent(p::Component);
+    self.addAttribute(p::Component, "Name", String, 4);
+    self.addAttribute(p::Component, "weight", Float, 1);
+    self.addAttribute(p::Configuration, "Name", String, 4);
+    p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"))
+//    self.createAssociation(p,
+//  	p::Configuration, p::Part,
+//  	"role1","role2",
+//  	0, 1,
+//  	0, 1,
+//  	2)
+
+  end
+
+  @Operation setup4(p:Package)
+    
+    // Level 4
+    self.addInstance(p, p::Configuration, "Bicycle");
+    self.addAttribute(p::Bicycle, "allTerrain", Boolean, 3);
+    self.addAttribute(p::Bicycle, "race", Boolean, 3);
+    self.addAttribute(p::Bicycle, "city", Boolean, 3);
+    self.addAttribute(p::Bicycle, "salesPrice", Float, 1);
+    self.addAttribute(p::Bicycle, "weight", Float, 1);
+    self.addAttribute(p::Bicycle, "partSalesPrice", Float, 0);
+    self.addAttribute(p::Bicycle, "serialNo", String, 0);
+    BikeSetup.getOperation("highestPrice").instLevel:=2;
+    BikeSetup.getOperation("highestPrice").isIntrinsic:=true;
+    p::Bicycle.addOperation(BikeSetup.getOperation("highestPrice"));
+    BikeSetup.getOperation("averagePrice").instLevel:=2;
+    BikeSetup.getOperation("averagePrice").isIntrinsic:=true;
+    p::Bicycle.addOperation(BikeSetup.getOperation("averagePrice"));
+    
+    self.addInstance(p, p::Part, "Fork");
+    self.addAttribute(p::Fork, "color", String, 1);
+    self.addAttribute(p::Fork, "suspension", String, 2);
+    self.addAttribute(p::Fork, "material", String, 1);
+    self.addAttribute(p::Fork, "serialNo", String, 0);
+    self.addAttribute(p::Fork, "mudMount", Boolean, 0);
+    
+    self.addInstance(p, p::Part, "Frame");
+    self.addAttribute(p::Frame, "allTerrain", Boolean, 3);
+    self.addAttribute(p::Frame, "race", Boolean, 3);
+    self.addAttribute(p::Frame, "color", String, 1);
+    self.addAttribute(p::Frame, "width", Float, 1);
+    self.addAttribute(p::Frame, "height", Float, 1);
+    self.addAttribute(p::Frame, "serialNo", String, 0);
+    self.addAttribute(p::Frame, "material", String, 2);
+    self.addInstance(p, p::Part, "Wheel");
+    
+    self.addAttribute(p::Wheel, "safetyRefl", Boolean, 3);
+    self.addAttribute(p::Wheel, "material", String, 1);
+    self.addAttribute(p::Wheel, "size", Float, 1);
+    self.addAttribute(p::Wheel, "width", Float, 1);
+    self.addAttribute(p::Wheel, "tubeless", Boolean, 2);
+    self.addAttribute(p::Wheel, "serialNo", String, 0)
+    
+  end
+  
+  @Operation setup3(p:Package)
+
+    // Level 3
+    self.addInstance(p, p::Bicycle, "RacingBike");
+    self.addInstance(p, p::Fork, "RacingFork");
+    self.addInstance(p, p::Frame, "RacingFrame");
+    self.addInstance(p, p::Wheel, "RacingWheel")
+    
+  end
+  
+  @Operation setup2(p:Package)
+  
+    // Level 2
+    self.addInstance(p, p::RacingBike, "ProRacer");
+    self.addInstance(p, p::RacingFork, "LightFork");
+    self.addInstance(p, p::RacingFrame, "ProRaceFrame");
+    self.addInstance(p, p::RacingWheel, "ProRaceWheel")
+    
+  end
+  
+  @Operation setup1(p:Package)
+  
+    // Level 1
+    self.addInstance(p, p::ProRacer, "ChallengerA2XL");
+    self.addInstance(p, p::LightFork, "myLightFork")/*;
+    self.addInstance(p, p::ProRaceFrame, "RocketA1XL");
+    self.addInstance(p, p::ProRaceWheel, "XForceDJ")*/
+
+  end
+  
+  @Operation setup0(p:Package)
+  
+    // Level 0
+    self.addInstance(p, p::ChallengerA2XL, "myBike1");
+    self.addInstance(p, p::myLightFork, "myFork1")/*;
+    self.addInstance(p, p::ProRaceFrame, "RocketA1XL");
+    self.addInstance(p, p::ProRaceWheel, "XForceDJ")*/
+
+  end
+  
+  @Operation addNewClasses(p:Package)
+    self.addInstance(p, p::LightFork, "mySuperLightFork")
+  end
+  
+  @Operation addClass(p:Package, name:String, level:Integer)
+	let c = FMML::MetaClass(name, level) in p.add(c); c end
+  end 
+  
+  @Operation addInstance(p:Package, class:FMML::MetaClass, name:String)
+	let c = class(name) in p.add(c); c end
+  end 
+  
+  @Operation addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)
+    let 
+      a = Attribute(name)
+//      allInst = self.allMetaInstances(class, instLevel);
+//      allInstLevel = self.allMetaInstancesOneLevel(class, instLevel)
+    in 
+      a.isIntrinsic := true;
+      a.type := type;
+      a.instLevel := instLevel;
+      
+      class.addAttribute(a);
+      a
+    end
+  end
+  
+  	@Operation createAssociation(
+  	p: Package,
+  	class1 : MetaClass,
+  	class2 : MetaClass,
+  	role1 : String,
+  	role2 : String,
+  	lower1 : Integer,
+  	upper1 : Integer,
+  	lower2 : Integer,
+  	upper2 : Integer,
+  	inst_lev : XCore::Element):XCore::Element
+      let c1 = Multiplicities::CollectionMult(false,true,lower1,upper1);
+          c2 = Multiplicities::CollectionMult(false,true,lower2,upper2)
+      in let e1 = Associations::End(role1,class1,c1);
+             e2 = Associations::End(role2,class2,c2)
+         in 
+            e1.instLevel := 1;
+            e2.instLevel := 2;
+            let a = Associations::Association("regular",e1,e2)
+            in a.println();p.println();p.addAssociation(a);a
+            end
+         end
+      end
+    end
+   
+  @Operation pi()
+	3.141592654
+  end
+  
+  @Operation totalRevenues[monitor=true]()
+	self.allInstances().size() * 3.141592654
+  end
+  
+  @Operation highestPrice[monitor=true]()
+	self.allInstances().size() * 3.141592654
+  end
+
+ @Operation averagePrice[monitor=true]()
+	self.allInstances().size() * 3.141592654
+  end
+
+end
