@@ -37,6 +37,11 @@ context Constructor
   @Operation getBodySource()
     self.body.source()
   end
+  
+context Constructor
+  @Operation setBodySource(content)
+    self.body.source := content
+  end
 
 context Constructor
   @Operation init(args) 
