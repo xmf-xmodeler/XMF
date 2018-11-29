@@ -5,5 +5,31 @@ import FmmlxDiagrams;
 
 context FmmlxDiagrams
 
-@Class FmmlxDiagramClient
+@Class FmmlxDiagramClient extends Client//, DiagramListener
+
+   @Constructor(name)
+//      self.setCommandInterpreter(DiagramCommandInterpreter());
+//      self.setEventHandler(DiagramEventHandler())
+        null
+    end
+    
+    @Operation createDiagram(package,name)
+        "createDiagram start".println();
+        let x = FmmlxDiagram()
+        in 
+          ("x: "+x).println();
+          x.newDiagram();
+          ("name: "+name).println();
+          ("self.newDiagram("+self.name+")").println();
+          x
+        end
+    end
+    
+/*    @Operation newDiagram(diagram)
+      // Installs the diagram, sends it the 'new' command and then
+      // switches focus to the new diagram.
+      self.add(diagram);
+      diagram.new();
+      self.showDiagram(diagram)
+    end*/    
 end
