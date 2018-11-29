@@ -10,11 +10,15 @@ context Forms
   
     @Attribute value : Boolean (?,!) end
     
-    @Constructor(x,y,value) end
+    @Attribute text : String (?,!) end
     
-    @Constructor(id,x,y,value) end
+    @Constructor(x,y,value,text) end
+    
+    @Constructor(id,x,y,value,text) end
     
     @Operation new(parent)
+    ("NEW FORMCHECKBOX").println();
+    self.println();
       self.commandInterpreter().newCheckBoxCommand(parent,self)
     end
     

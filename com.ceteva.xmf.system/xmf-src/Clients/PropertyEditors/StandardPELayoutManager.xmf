@@ -144,6 +144,7 @@ context PropertyEditors
     end
 
     @Operation layoutBooleans(displays:Seq(BooleanDisplay),startX:Integer,startY:Integer)
+    "****layoutBooleans****".println();
       if not displays->isEmpty then
         let displayCount = displays->size()
         then rows = displayCount.div(singletonColumns) + displayCount.mod(singletonColumns)

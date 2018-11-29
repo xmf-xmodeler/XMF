@@ -219,9 +219,11 @@ context Forms
     end
 
     @Operation newCheckBoxCommand(parent,checkBox:FormCheckBox)
+      "*****newCheckBoxCommand****".println();
+      checkBox.text.println();
       let checkBoxId = self.allocateId(checkBox) in
         @SendCommand(self)
-          newCheckBox(parent.id(),checkBoxId,checkBox.x(),checkBox.y(),checkBox.value())
+          newCheckBox(parent.id(),checkBoxId,checkBox.x(),checkBox.y(),checkBox.value(),checkBox.text())
         end;
         checkBoxId
       end
@@ -282,6 +284,7 @@ context Forms
     end
   
     @Operation newTextCommand(parent,text:FormLabel)
+    // creates labels
       let textId = self.allocateId(text) in
         @SendCommand(self)
           newText(parent.id(),textId,text.text(),text.x(),text.y())
@@ -497,6 +500,7 @@ context Forms
     end
 
     @Operation setText(textcomponent,text:String)
+    // sets text in Textfields
       let textcomponentId=textcomponent.id() in
         @SendCommand(self)
           setText(textcomponentId,text)

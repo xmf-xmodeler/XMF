@@ -147,6 +147,7 @@ context Forms
         hasFocus = Seq{"hasFocus",hasFocus} then
         attributes = Seq{id,type,name,isOpen,hasFocus}
       in
+      name.println();
         @Command(self) startElement("form",attributes) end;
         @For content in contents
         do

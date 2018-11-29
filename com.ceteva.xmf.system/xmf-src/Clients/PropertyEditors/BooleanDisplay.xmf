@@ -12,10 +12,15 @@ context PropertyEditors
     @Attribute checkBox : FormCheckBox end
   
     @Constructor(label,checkBox)
+    "NEW BD".println();
+    checkBox.println();
+    label.text.println()
     end
 
     @Operation addToForm(form:Form,x,y,labelWidth)
-      self.addLabel(form,x,y);
+    "BooleanDisplay addToForm".println();
+    ("TEXT: " + self.checkBox.text + " " + self.checkBox.value).println();
+      //self.addLabel(form,x,y);
       self.addCheckBox(form,x+labelWidth,y)
     end
 
