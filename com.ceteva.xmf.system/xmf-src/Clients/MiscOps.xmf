@@ -451,7 +451,6 @@ context XCore::Package
   
 context XCore::Package
   @Operation createFmmlxDiagram_raw(name)
-      ("createFmmlxDiagram_raw(" + name + ")").println();
       let fmmlxClient = xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient)
       in
           if fmmlxClient <> null
@@ -460,15 +459,6 @@ context XCore::Package
           else format(stdout,"Class diagram client not available.~%")
           end
       end
-//    let mappingClient = xmf.findClient(Clients::MappingMapping::MappingClient)
-//    in
-//      if mappingClient <> null
-//      then 
-//      	mappingClient.createDiagram(self,name,total)       
-//      else format(stdout,"Class diagram client not available.~%")
-//      end
-//    end 
-//    null
   end 
 
 context XCore::Package

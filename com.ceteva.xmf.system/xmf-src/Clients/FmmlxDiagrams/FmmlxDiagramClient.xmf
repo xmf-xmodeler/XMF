@@ -7,14 +7,27 @@ context FmmlxDiagrams
 
 @Class FmmlxDiagramClient extends Client//, DiagramListener
 
-   @Constructor(name)
+	@Attribute package : Package end
+	@Attribute communicator : Element end
+
+    @Constructor(name)
 //      self.setCommandInterpreter(DiagramCommandInterpreter());
 //      self.setEventHandler(DiagramEventHandler())
         null
     end
     
     @Operation createDiagram(package,name)
-        "createDiagram start".println();
+        self.package := package;
+        let 
+          FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
+          handle = xmf.getHandle(self)
+        in 
+          self.communicator := FmmlxDiagramCommunicator();
+          self.communicator.setHandle(handle);
+          self.communicator.test().println()
+          //;self.communicator.sendPackageToJava(1)
+        end;       
+        
         let x = FmmlxDiagram()
         in 
           ("x: "+x).println();
@@ -25,11 +38,15 @@ context FmmlxDiagrams
         end
     end
     
-/*    @Operation newDiagram(diagram)
-      // Installs the diagram, sends it the 'new' command and then
-      // switches focus to the new diagram.
-      self.add(diagram);
-      diagram.new();
-      self.showDiagram(diagram)
-    end*/    
+    @Operation fibo_i(n) 
+       if n <= 2
+          then 1
+          else self.fibo_i(n-1) + self.fibo_i(n-2)
+      end
+    end
+    
+    @Operation fibo(n) 
+       self.communicator.sendPackageToJava(["fibo", self.fibo_i(n)])
+    end
+    
 end

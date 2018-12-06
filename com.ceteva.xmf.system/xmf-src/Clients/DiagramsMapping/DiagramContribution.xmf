@@ -34,11 +34,18 @@ context DiagramsMapping
               else DiagramStub(name,element,handler).createToolStub()
               end
           in
-            diagramManager.addDiagram(element,diagram);
-            diagram.setName(name); // this forces a refresh on the diagram tab
-            if self.dropEnabled
-            then diagram.enableDrop()
+            if diagram.of() <> Clients::FmmlxDiagrams::FmmlxDiagram
+              then
+                ("addDiagram for "+diagram.of()).println(); 
+                diagramManager.addDiagram(element,diagram);
+	            diagram.setName(name); // this forces a refresh on the diagram tab
+	            if self.dropEnabled
+	            then diagram.enableDrop()
+	            end
+	        else
+                "addDiagram for FMMLxDiagram ignored".println()
             end;
+
             //diagram.isOpen := showDiagram;
             diagram
           end
