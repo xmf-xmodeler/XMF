@@ -22,7 +22,13 @@ context Contained
     end
 
 Contained.removeOperation(Contained.getOperation("delete_client_check"));    
-    
+
+/*
+ * Ask user whether an element to be deleted should really be deleted.
+ * This is a central place where this is implemented for several different kinds of element.
+ *  
+ * Overwrites original implementation in /xmf-src/Clients/MenusXCore/Contained.xmf
+ */
  context Contained
   @Operation delete_client_check()
     let name = if self.isKindOf(NamedElement) then self.name() else self.toString() end
@@ -35,9 +41,9 @@ Contained.removeOperation(Contained.getOperation("delete_client_check"));
     		else
     			xmf.question("Are you sure you want to delete " + name + "?")
     		end
-    	elseif self.isKindOf(Constraint) or self.isKindOf(Operation) or self.isKindOf(Associations::Association) then
+    	elseif self.isKindOf(Constraint) or self.isKindOf(Operation) or self.isKindOf(Associations::Association) or self.isKindOf(Projects::Project) then
     		xmf.question("Are you sure you want to delete " + name + "?")
-    	else
+    	else // todo can we test something like isKindOf(Class) here to make sure self has an allInstances() operation? (and use the previous branch as general else case)
 			let ret = self.allInstances()
 			in
 				if ret <> Set{} and ret <> Seq{} 
