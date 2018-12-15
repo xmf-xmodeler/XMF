@@ -7,18 +7,18 @@ import IO;
 context Forms
 
   @Class FormComboBox extends FormElement
-  
+
     @Attribute contents : Seq(String) end
     @Attribute selected : String end // refactor this to be position rather than the text
-    
+
     @Constructor(x,y,width,height)
       self.selected := null
     end
-    
+
     @Constructor(id,x,y,width,height) !
       self.selected := null
     end
-    
+
     @Operation addContents()
 
       // By default this does nothing. Redefine it
@@ -28,7 +28,7 @@ context Forms
 
       self
     end
-    
+
     @Operation addItem(item:String)
       self.contents := self.contents + Seq{item};
       if self.hasCommandInterpreter()
@@ -36,7 +36,7 @@ context Forms
       end;
       self
     end
-    
+
     @Operation clear()
       self.contents := Seq{};
       self.commandInterpreter().clear(self)
@@ -51,14 +51,14 @@ context Forms
       self.newContents();
       self.setSelected();
       self
-    end  
-        
+    end
+
     @Operation newContents()
       @For content in contents do
         self.commandInterpreter().addComboBoxItem(self,content)
       end
     end
-    
+
     @Operation renew(parent)
       self.commandInterpreter().newComboBoxCommand(parent,self);
       self.newContents();
@@ -73,7 +73,7 @@ context Forms
 
     @Operation setSelected()
       if selected <> ""
-      then self.commandInterpreter().setComboBoxSelection(self,self.getCurrentPosition())     
+      then self.commandInterpreter().setComboBoxSelection(self,self.getCurrentPosition())
       end
     end
 
@@ -81,7 +81,7 @@ context Forms
       self.selected := text;
       self.setSelected()
     end
-    
+
     @Operation synchronise()
       let
         id = Seq{"identity",id};
@@ -95,7 +95,7 @@ context Forms
         @Command(self) startElement("combobox",attributes) end;
         @For content in contents
         do
-          let 
+          let
             value = Seq{"value",content} then
             attributes = Seq{value}
           in

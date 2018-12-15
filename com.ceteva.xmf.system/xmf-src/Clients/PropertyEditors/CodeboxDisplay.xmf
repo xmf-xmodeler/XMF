@@ -13,7 +13,7 @@ context PropertyEditors
     @Attribute label : FormLabel end
     @Attribute maxButton : FormButton end
     @Attribute textbox : FormTextBox end
-  
+
     @Constructor(label,textbox)
       let action = @Operation() self.maximise() end
       in
@@ -22,7 +22,7 @@ context PropertyEditors
     end
 
     @Operation addToForm(form:Form,x,y,labelHeight,yGap,textboxWidth,textboxHeight)
-      self.addLabel(form,x,y+yGap);
+      // self.addLabel(form,x,y+yGap);
       self.addButton(form,x+textboxWidth-CodeboxDisplay::buttonWidth,y,CodeboxDisplay::buttonWidth,20);
       self.addTextBox(form,x,y+labelHeight+yGap,textboxWidth,textboxHeight)
     end
@@ -40,7 +40,7 @@ context PropertyEditors
       self.label.setY(y);
       form.addElement(self.label)
     end
-    
+
     @Operation addTextBox(form,x,y,width,height)
       self.textbox.setX(x);
       self.textbox.setY(y);
@@ -48,7 +48,7 @@ context PropertyEditors
       self.textbox.setHeight(height);
       form.addElement(self.textbox)
     end
-    
+
     @Operation maximise()
       let formsClient = xmf.findClient(Clients::Forms::FormClient)
       in

@@ -9,6 +9,10 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CodeboxDisplayTextBox isabstract extends FormTextBox, ContextFormElement, RightClickable
+  
+    @Constructor(x,y,width,height,text,isEditable,labelText) end
+    
+    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
 
     @Operation buildGlobalMenu()
       let 

@@ -13,10 +13,11 @@ context Forms
     @Bind green = "green" end
     
     @Attribute wordRules : SeqOfElement (+) end
+    @Attribute labelText : String end
   
-    @Constructor(x,y,width,height,text,isEditable) end
+    @Constructor(x,y,width,height,text,isEditable,labelText) end
     
-    @Constructor(id,x,y,width,height,text,isEditable) end
+    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
     
     @Operation new(parent)
       self.commandInterpreter().newTextBoxCommand(parent,self);

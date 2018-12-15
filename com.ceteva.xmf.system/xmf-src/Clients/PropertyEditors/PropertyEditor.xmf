@@ -8,7 +8,7 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class PropertyEditor isabstract extends LockableFormWithHistory,RightClickableWithElement
-  
+
     @Attribute layoutManager : PropertyEditorLayoutManager end
 
     @Constructor(element)
@@ -39,7 +39,7 @@ context PropertyEditors
       self.layoutManager := StandardPELayoutManager(self);
       self.contents := Seq{}
     end
-    
+
     @Operation dispose()
       self.clearRightClickMenu();
       super()
@@ -75,14 +75,14 @@ context PropertyEditors
       // in sub-classes to add contents. It is
       // called when the property editor is created and if the
       // displays are ever refreshed.
-      
+
       self
     end
-    
+
     @Operation newSingletonDisplay(e:Element,labelText:String)
       self.newSingletonDisplay(SingletonTextField,e,labelText)
     end
-    
+
     @Operation newSingletonDisplay(fieldType:Class,e:Element,labelText:String)
       let
         editable = e.isReallyKindOf(String) orelse
@@ -92,10 +92,10 @@ context PropertyEditors
         fieldText = e.labelString()
       then
         label = FormLabel(0,0,labelText);
-        field = fieldType(0,0,0,0,fieldText,editable,e)
+        field = fieldType(0,0,0,0,fieldText,editable,e,labelText)
       in
         SingletonDisplay(label,field)
-      end  
+      end
     end
 
     @Operation newBooleanDisplay(b:Boolean,labelText:String)
@@ -108,20 +108,20 @@ context PropertyEditors
         checkBox = checkBoxType(0,0,b,labelText)
       in
         BooleanDisplay(label,checkBox)
-      end  
+      end
     end
 
     @Operation newEnumerationDisplay(e:Element,labelText:String)
       self.newEnumerationDisplay(EnumChoiceComboBox,e,labelText)
     end
-    
+
     @Operation newEnumerationDisplay(comboBoxType:Class,e:Element,labelText:String)
       let
-        label = FormLabel(0,0,labelText);
+        //label = FormLabel(0,0,labelText);
         comboBox = comboBoxType(0,0,0,0,e)
       in
-        EnumerationDisplay(label,comboBox)
-      end  
+        EnumerationDisplay(comboBox)
+      end
     end
 
     @Operation newCollectionDisplay(values,labelText:String)
@@ -137,23 +137,23 @@ context PropertyEditors
           end;
           @For e inSeq values do
             let
-              editable = e.isKindOf(NamedElement);          
-              itemText = e.labelString() then            
+              editable = e.isKindOf(NamedElement);
+              itemText = e.labelString() then
               item = CollectionListElement(itemText,e)
             in
               list.addItem(item)
-            end           
+            end
           end
         end;
         CollectionDisplay(label,list)
-      end  
+      end
     end
 
     @Operation newCodeboxDisplay(textbox,labelText:String)
       let label = FormLabel(0,0,labelText)
       in
         CodeboxDisplay(label,textbox)
-      end  
+      end
     end
 
   end

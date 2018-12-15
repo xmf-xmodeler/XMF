@@ -7,19 +7,18 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CollectionComboBoxDisplay
-  
+
     @Bind buttonWidth = 128 end
     @Bind buttonGap = 5 end
-    
+
     @Attribute comboBox : FormActiveComboBox end
     @Attribute list : FormList end
-    @Attribute label : FormLabel end
     @Attribute openButton : FormButton end
     @Attribute modifyButton : FormButton end
     @Attribute element : Element end
     @Attribute slotName : String end // used for daemon monitoring
-  
-    @Constructor(label,comboBox,list,element)
+
+    @Constructor(comboBox,list,element)
       let comboItems = comboBox.contents in
         if not comboItems->isEmpty then
           let comboSelection = comboItems.at(0) in
@@ -41,7 +40,6 @@ context PropertyEditors
     end
 
     @Operation addToForm(form:Form,x,y,labelHeight,listWidth,listHeight,comboHeight,yGap)
-      self.addLabel(form,x+98,y); //+3+CollectionComboBoxDisplay::buttonGap
       self.addButton(form,openButton,x+listWidth-CollectionComboBoxDisplay::buttonWidth,y+18,CollectionComboBoxDisplay::buttonWidth,20);
       self.addButton(form,modifyButton,x,y+18,CollectionComboBoxDisplay::buttonWidth,20);
       self.addComboBox(form,x,y+14+labelHeight+yGap+CollectionComboBoxDisplay::buttonGap,listWidth,comboHeight);
@@ -54,12 +52,6 @@ context PropertyEditors
       button.setWidth(width);
       button.setHeight(height);
       form.addElement(button)
-    end
-
-    @Operation addLabel(form,x,y)
-      label.setX(x);
-      label.setY(y);
-      form.addElement(label)
     end
 
     @Operation addComboBox(form,x,y,width,height)
@@ -121,7 +113,7 @@ context PropertyEditors
                 elseif coll.type.inheritsFrom(SetOfElement) then
                   if not slotvalue.isKindOf(SetOfElement) andthen not slotvalue.isKindOf(SeqOfElement) then
                     let
-                      dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then                 
+                      dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then
                       ok = dialog.newConfirmDialog("Cannot display the value of '" + newSlotName + "' because it is not a set. Do you want to put the current slot value into a set?")
                     in
                       if ok then
@@ -139,7 +131,7 @@ context PropertyEditors
                 else
                   if not slotvalue.isKindOf(SetOfElement) andthen not slotvalue.isKindOf(SeqOfElement) then
                     let
-                      dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then                 
+                      dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then
                       ok = dialog.newConfirmDialog("Cannot display the value of '" + newSlotName + "' because it is not a sequence. Do you want to put the current slot value into a sequence?")
                     in
                       if ok then
@@ -159,13 +151,13 @@ context PropertyEditors
               if not values->isEmpty then
                 @For e inSeq values do
                   let
-                    editable = e.isKindOf(NamedElement);          
+                    editable = e.isKindOf(NamedElement);
                     itemText = e.labelString()
-                  then            
+                  then
                     item = CollectionListElement(itemText,e)
                   in
                     list.addItem(item)
-                  end           
+                  end
                 end
               end
             end;
@@ -180,7 +172,7 @@ context PropertyEditors
     @Operation modifyCollection()
       let
         collection = element.get(slotName) then
-        options = 
+        options =
           if collection.isKindOf(SetOfElement)
           then Seq{"Add Element",
                    "Add Element (Instance of Set Element Type)",
@@ -205,7 +197,7 @@ context PropertyEditors
           in
             if collection.isKindOf(Table)
             then
-              @Case choice of 
+              @Case choice of
                 "Add Element"          do self.addTableElement(collection) end
                 "Remove Element"       do self.removeTableElement(collection) end
                 "Remove All Elements"  do self.clearTable(collection) end
@@ -264,7 +256,7 @@ context PropertyEditors
                   else null
                   end
                 else
-                  let stringOp = 
+                  let stringOp =
                         @Operation(class)
                           class.name().toString() + " from " + class.owner.toString()
                         end then
@@ -323,9 +315,9 @@ context PropertyEditors
              if collection.isKindOf(SeqOfElement)
              then self.moveAddedSeqElement(value,collection)
              end
-        else        
+        else
           ops := Seq{directSlotOp} + ops;
-          let stringOp = 
+          let stringOp =
                 @Operation(op)
                   if op = directSlotOp
                   then "Modify '" + slotName + "' slot directly"
@@ -349,7 +341,7 @@ context PropertyEditors
               end
             end
           end
-        end  
+        end
       end
     end
 
@@ -396,7 +388,7 @@ context PropertyEditors
                                             "Choose an element to remove from the collection")
       in
         if value <> null
-        then        
+        then
           let ops = self.getRemoveFromSlotOps();
               directSlotOp = CollectionComboBoxDisplay::removeFromSlotDirect
           in
@@ -405,9 +397,9 @@ context PropertyEditors
               if xmf.question("Are you sure you want to remove this element?")
               then self.removeFromSlotDirect(collection,value)
               end
-            else        
+            else
               ops := Seq{directSlotOp} + ops;
-              let stringOp = 
+              let stringOp =
                     @Operation(op)
                       if op = directSlotOp
                       then "Modify '" + slotName + "' slot directly"
@@ -428,7 +420,7 @@ context PropertyEditors
                   end
                 end
               end
-            end  
+            end
           end
         end
       end
@@ -443,9 +435,9 @@ context PropertyEditors
           if xmf.question("Are you sure you want to remove all elements?")
           then self.clearSlotDirect(collection)
           end
-        else        
+        else
           ops := Seq{directSlotOp} + ops;
-          let stringOp = 
+          let stringOp =
                 @Operation(op)
                   if op = directSlotOp
                   then "Clear '" + slotName + "' slot directly"
@@ -470,7 +462,7 @@ context PropertyEditors
               end
             end
           end
-        end  
+        end
       end
     end
 
@@ -496,7 +488,7 @@ context PropertyEditors
 
     @Operation moveSeqElement(value,collection)
       let options = collection->excluding(value) + Seq{"end"};
-          stringOp = 
+          stringOp =
             @Operation(e)
               if e = "end"
               then "- End of Sequence -"
@@ -573,7 +565,7 @@ context PropertyEditors
     end
 
     @Operation addTableElement(collection) xmf.message("Not yet supported") end
-    
+
     @Operation removeTableElement(collection) xmf.message("Not yet supported") end
 
     @Operation clearTable(collection) xmf.message("Not yet supported") end

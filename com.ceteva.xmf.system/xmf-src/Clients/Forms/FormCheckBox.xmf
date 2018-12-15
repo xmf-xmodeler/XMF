@@ -9,7 +9,6 @@ context Forms
   @Class FormCheckBox extends FormElement
   
     @Attribute value : Boolean (?,!) end
-    
     @Attribute text : String (?,!) end
     
     @Constructor(x,y,value,text) end
@@ -17,8 +16,6 @@ context Forms
     @Constructor(id,x,y,value,text) end
     
     @Operation new(parent)
-    ("NEW FORMCHECKBOX").println();
-    self.println();
       self.commandInterpreter().newCheckBoxCommand(parent,self)
     end
     

@@ -7,15 +7,17 @@ import IO;
 context Forms
 
   @Class FormTextField extends FormElement, TextComponent
-    
-    @Constructor(x,y,width,height,text,isEditable) end
-    
-    @Constructor(id,x,y,width,height,text,isEditable) end
-    
+
+    @Attribute labelText : String end
+
+    @Constructor(x,y,width,height,text,isEditable,labelText) end
+
+    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
+
     @Operation doubleSelected()
       self
     end
-     
+
     @Operation new(parent)
       self.commandInterpreter().newTextFieldCommand(parent,self);
       self.commandInterpreter().setText(self,self.text);
@@ -27,7 +29,7 @@ context Forms
       self.commandInterpreter().setText(self,self.text);
       self
     end
-    
+
     @Operation synchronise()
       let
         id = Seq{"identity",id};

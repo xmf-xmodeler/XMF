@@ -7,10 +7,10 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CollectionDisplay
-  
+
     @Attribute label : FormLabel end
     @Attribute list : FormList end
-  
+
     @Constructor(label,list)
     end
 
@@ -24,7 +24,7 @@ context PropertyEditors
       self.label.setY(y);
       form.addElement(self.label)
     end
-    
+
     @Operation addList(form,x,y,width,height)
       self.list.setX(x);
       self.list.setY(y);
@@ -32,7 +32,7 @@ context PropertyEditors
       self.list.setHeight(height);
       form.addElement(self.list)
     end
-    
+
     @Operation getListElementFor(e)
       @Find(item,self.list.contents)
         when item.element = e

@@ -8,6 +8,10 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class ContextCheckBox extends FormCheckBox, ContextFormElement
+  
+    @Constructor(x,y,value,text) end
+    
+    @Constructor(id,x,y,value,text) end
 
     @Operation setBooleanIn(newValue:Boolean)
       try

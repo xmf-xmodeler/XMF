@@ -15,7 +15,7 @@ context PropertyEditorXCore
     @Attribute collectionAttributes : SeqOfElement = Seq{} end
     @Attribute setOrSeqAttributes : SeqOfElement = Seq{} end
     @Attribute tableAttributes : SeqOfElement = Seq{} end
-    
+
     @Attribute selfDisplay : SingletonDisplay end
     @Attribute ofDisplay : SingletonDisplay end
     @Attribute documentationDisplay : CodeboxDisplay end
@@ -110,8 +110,8 @@ context PropertyEditorXCore
       let
         doc = self.element.documentation
       then
-        text = 
-          if doc.isReallyKindOf(XCore::Doc) 
+        text =
+          if doc.isReallyKindOf(XCore::Doc)
           then doc.docString()
           else ""
           end
@@ -183,12 +183,12 @@ context PropertyEditorXCore
         let
           labelText = coll.name
         then
-          collValue = 
+          collValue =
             if coll.type.inheritsFrom(Table) then
               self.element.get(labelText).values()->asSeq
             else
               self.element.get(labelText)->asSeq
-            end         
+            end
         in
           self.collectionDisplays := collectionDisplays + Seq{self.newCollectionDisplay(collValue,labelText)}
         end
@@ -206,7 +206,7 @@ context PropertyEditorXCore
             buttonAction =
               @Operation buttonAction()
                 collectionButtonDisplay.resetList(coll)
-              end      
+              end
           then
             button = FormButton(0,0,0,0,collName,buttonAction)
           in
@@ -214,15 +214,14 @@ context PropertyEditorXCore
           end
         end;
         self.collectionButtonDisplay := CollectionButtonDisplay(buttons,list,self.element)
-      end        
+      end
     end
 
     @Operation setCollectionComboBoxDisplay()
       if not collectionAttributes->isEmpty then
         let
           comboBox = FormActiveComboBox(0,0,0,0);
-          list = FormList(0,0,0,0);
-          label = FormLabel(0,0,"Collection Slots")
+          list = FormList(0,0,0,0,"Collection Slots")
         in
           @For coll inSeq collectionAttributes do
             let
@@ -230,12 +229,12 @@ context PropertyEditorXCore
               action =
                 @Operation action()
                   collectionComboBoxDisplay.resetList(coll,true)
-                end 
+                end
             in
               comboBox.addItem(collName,action,self)
             end
           end;
-          self.collectionComboBoxDisplay := CollectionComboBoxDisplay(label,comboBox,list,self.element)
+          self.collectionComboBoxDisplay := CollectionComboBoxDisplay(comboBox,list,self.element)
         end
       end
     end

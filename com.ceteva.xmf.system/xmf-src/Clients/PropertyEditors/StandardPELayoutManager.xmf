@@ -46,7 +46,7 @@ context PropertyEditors
           Seq(BooleanDisplay) do
             self.setY(self.layoutBooleans(displays,x,y))
           end
-          
+
           Seq(EnumerationDisplay) do
             self.setY(self.layoutEnumerations(displays,x,y))
           end
@@ -57,7 +57,7 @@ context PropertyEditors
             self.y := maxY;
             //if not yReset then self.resetY() end;
             self.setY(self.layoutCodeboxes(displays,x,y))
-          end          
+          end
 
           Seq(CollectionDisplay) do
             self.x := (2*xGap) + (self.singletonColumns*(labelWidth + singletonWidth + (2*xGap)));
@@ -76,7 +76,7 @@ context PropertyEditors
             if not yReset then self.resetY() end;
             self.setY(self.layoutCollectionComboBoxDisplays(displays,x,y))
           end
-          
+
           Seq(CodeComboBoxDisplay) do
             self.x := xGap;
             self.y := maxY;
@@ -144,7 +144,6 @@ context PropertyEditors
     end
 
     @Operation layoutBooleans(displays:Seq(BooleanDisplay),startX:Integer,startY:Integer)
-    "****layoutBooleans****".println();
       if not displays->isEmpty then
         let displayCount = displays->size()
         then rows = displayCount.div(singletonColumns) + displayCount.mod(singletonColumns)
@@ -194,6 +193,7 @@ context PropertyEditors
     end
 
   @Operation layoutCollections(displays:Seq(CollectionDisplay),startX:Integer,startY:Integer)
+	displays.println();
       if not displays->isEmpty then
         let displayCount = displays->size() then
             rows = displayCount.div(collectionColumns) + displayCount.mod(collectionColumns) then
@@ -222,7 +222,7 @@ context PropertyEditors
         let display = displays.last()
         then buttonCount = display.buttons->size()
         in
-          if buttonCount>0 then 
+          if buttonCount>0 then
 
             let
               labelOffset = singletonHeight + 2;
@@ -230,7 +230,6 @@ context PropertyEditors
             then
               finalY = startY + labelOffset + actualCollectionHeight
             in
-              display.addLabelToForm(owner,startX,startY);
               display.addListToForm(owner,(startX+buttonWidth+xGap),(startY+labelOffset),collectionWidth,actualCollectionHeight);
               @For loop in 0.to(buttonCount-1) do
                 let
@@ -238,9 +237,9 @@ context PropertyEditors
                   x = startX;
                   y = startY + labelOffset + (loop*(buttonHeight + buttonGap))
                 in
-                  button.setX(x); 
+                  button.setX(x);
                   button.setY(y);
-                  button.setWidth(buttonWidth); 
+                  button.setWidth(buttonWidth);
                   button.setHeight(buttonHeight);
                   owner.addElement(button)
                 end
