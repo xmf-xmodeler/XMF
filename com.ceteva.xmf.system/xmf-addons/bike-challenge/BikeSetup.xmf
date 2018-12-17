@@ -14,9 +14,9 @@ context Root
     self.addClass(p, "CompPart", 5);
     p::Part.addParent(p::Component);
     p::CompPart.addParent(p::Component);
-    self.addAttribute(p::Component, "Name", String, 4);
+//    self.addAttribute(p::Component, "Name", String, 4);
     self.addAttribute(p::Component, "weight", Float, 1);
-    self.addAttribute(p::Configuration, "Name", String, 4);
+//    self.addAttribute(p::Configuration, "Name", String, 4);
     p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"))
 //    self.createAssociation(p,
 //  	p::Configuration, p::Part,
@@ -44,6 +44,9 @@ context Root
     BikeSetup.getOperation("averagePrice").instLevel:=2;
     BikeSetup.getOperation("averagePrice").isIntrinsic:=true;
     p::Bicycle.addOperation(BikeSetup.getOperation("averagePrice"));
+    BikeSetup.getOperation("isBikeComplete").instLevel:=0;
+    BikeSetup.getOperation("isBikeComplete").isIntrinsic:=true;
+    p::Bicycle.addOperation(BikeSetup.getOperation("isBikeComplete"));
     
     self.addInstance(p, p::Part, "Fork");
     self.addAttribute(p::Fork, "color", String, 1);
@@ -95,19 +98,19 @@ context Root
   
     // Level 1
     self.addInstance(p, p::ProRacer, "ChallengerA2XL");
-    self.addInstance(p, p::LightFork, "myLightFork")/*;
+    self.addInstance(p, p::LightFork, "Superfork800");
     self.addInstance(p, p::ProRaceFrame, "RocketA1XL");
-    self.addInstance(p, p::ProRaceWheel, "XForceDJ")*/
+    self.addInstance(p, p::ProRaceWheel, "XForceDJ")
 
   end
   
-  @Operation setup0(p:Package)
+  @Operation setup0(p:Package, index:String)
   
     // Level 0
-    self.addInstance(p, p::ChallengerA2XL, "myBike1");
-    self.addInstance(p, p::myLightFork, "myFork1")/*;
-    self.addInstance(p, p::ProRaceFrame, "RocketA1XL");
-    self.addInstance(p, p::ProRaceWheel, "XForceDJ")*/
+    self.addInstance(p, p::ChallengerA2XL, "myBike_"+index);
+    self.addInstance(p, p::Superfork800, "myFork_"+index);
+    self.addInstance(p, p::RocketA1XL, "myFrame_"+index);
+    self.addInstance(p, p::XForceDJ, "myWheel_"+index)
 
   end
   
@@ -172,11 +175,40 @@ context Root
   end
   
   @Operation highestPrice[monitor=true]()
-	self.allInstances().size() * 3.141592654
+    if self.allInstances().size() = 0
+    then "N/A"
+    else
+      let max = 0
+      in
+        @For x in self.allInstances() do
+          if x.salesPrice>max then max := x.salesPrice end
+        end;
+        max
+      end
+    end
   end
 
- @Operation averagePrice[monitor=true]()
-	self.allInstances().size() * 3.141592654
+  @Operation averagePrice[monitor=true]()
+    if self.allInstances().size() = 0
+    then "div/zero"
+    else
+      let sum = 0; count = 0
+      in
+        @For x in self.allInstances() do
+          sum := sum + x.salesPrice;
+          count := count + 1
+        end;
+        sum/count
+      end
+    end
+  end
+  
+  @Operation isBikeComplete[monitor=true]()
+    if self.frame = null then "a Frame is missing"
+    elseif self.fork = null then "a Fork is missing"
+    elseif self.wheel = null then "a Wheel is missing"
+    else "complete"
+    end
   end
 
 end

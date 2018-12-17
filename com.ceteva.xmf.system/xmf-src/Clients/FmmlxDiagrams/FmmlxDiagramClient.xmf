@@ -21,21 +21,20 @@ context FmmlxDiagrams
         let 
           FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self)
-        in 
+        in
           self.communicator := FmmlxDiagramCommunicator();
           self.communicator.setHandle(handle);
-          self.communicator.test().println()
-          //;self.communicator.sendPackageToJava(1)
-        end;       
-        
-        let x = FmmlxDiagram()
-        in 
-          ("x: "+x).println();
-          x.newDiagram();
-          ("name: "+name).println();
-          ("self.newDiagram("+self.name+")").println();
-          x
-        end
+          self.communicator.newDiagram()
+        end;
+//        let x = FmmlxDiagram()
+//        in 
+//          ("x: "+x).println();
+//          x.newDiagram();
+//          ("name: "+name).println();
+//          ("self.newDiagram("+self.name+")").println();
+//          x
+//        end
+        FmmlxDiagram() // vestigial return value for diagram manager
     end
     
     @Operation fibo_i(n) 
@@ -45,8 +44,25 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation fibo(n) 
-       self.communicator.sendPackageToJava(["fibo", self.fibo_i(n)])
+    @Operation fibo(idRequest, n) 
+       self.communicator.sendMessageToJava([idRequest, self.fibo_i(n)])
+    end
+    
+    @Operation getAllObjects(idRequest)
+        "getAllObjects".println();
+        let 
+          result = [] 
+        in 
+    	  @For c in package.getChildren() do
+    	    if c.isKindOf(FMML::MetaClass) 
+    	    then
+    	      ("c:" + c.name).println();
+    	      result := result.append([c.name.toString()])
+    	    end
+    	  end;
+    	  ("result:" + result).println();
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
     end
     
 end
