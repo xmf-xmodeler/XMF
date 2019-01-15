@@ -49,25 +49,34 @@ context FmmlxDiagrams
     end
     
     @Operation getAllObjects(idRequest)
-        "getAllObjects".println();
         let 
           result = [] 
         in 
     	  @For c in package.getChildren() do
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
-    	      ("c:" + c.name).println();
     	      result := result.append([c.name.toString()])
     	    end
     	  end;
-    	  ("result:" + result).println();
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end
     
-    @Operation getAttributes(idRequest, className) 
-    	//self.communicator.sendMessageToJava([idRequest, result])
-    	null
+    @Operation getOwnAttributes(idRequest, className) 
+        "getOwnAttributes".println();
+        let 
+          result = [] 
+        in 
+          @For c in package.getChildren() do 
+            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+            then 
+              @For a in c.attributes do 
+                result := result.append([a.name.toString()])
+              end
+            end
+          end;
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
     end
     
 end
