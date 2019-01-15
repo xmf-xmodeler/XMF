@@ -233,7 +233,7 @@ context ClassMapping::PackageXClassDiagram
 	  false,
 	  theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
 	  @Operation(x,y)
-		let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
+		let name = xmf.getString("Name","Type the name of the instance:",thePackage.newName(metaclass.name.toString()))
       in
           if not name = null
         then
