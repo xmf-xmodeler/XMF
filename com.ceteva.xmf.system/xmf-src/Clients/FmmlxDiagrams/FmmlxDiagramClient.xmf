@@ -71,7 +71,7 @@ context FmmlxDiagrams
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
-                result := result.append([a.name.toString()])
+                result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel]])
               end
             end
           end;
@@ -79,4 +79,37 @@ context FmmlxDiagrams
         end
     end
     
+    @Operation getSlots(idRequest, objectName) 
+        "getSlots".println();
+        let 
+          result = [] 
+        in 
+          @For o in package.getChildren() do 
+            if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
+            then 
+              @For s in o.slots() do 
+                result := result.append([[s.name.toString(), s.value.toString()]])
+              end
+            end
+          end;
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+      
+    @Operation getOwnOperations(idRequest, className) 
+        "getOwnOperations".println();
+        let 
+          result = [] 
+        in 
+          @For c in package.getChildren() do 
+            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+            then 
+              @For o in c.operations do 
+                result := result.append([[o.name.toString(), o.type.name.toString(), o.instLevel]])
+              end
+            end
+          end;
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end  
 end
