@@ -206,7 +206,7 @@ context PropertyEditorXCore
                 collectionButtonDisplay.resetList(coll)
               end
           then
-            button = FormButton(0,0,0,0,collName,buttonAction)
+            button = FormButton(collName,buttonAction)
           in
             buttons := buttons + Seq{button}
           end

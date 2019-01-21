@@ -212,7 +212,7 @@ context Forms
     @Operation newButtonCommand(parent,button:FormButton)
       let buttonId = self.allocateId(button) in
         @SendCommand(self)
-          newButton(parent.id(),buttonId,button.label(),button.x(),button.y(),button.width(),button.height())
+          newButton(parent.id(),buttonId,button.label())
         end;
         buttonId
       end
@@ -221,7 +221,7 @@ context Forms
     @Operation newCheckBoxCommand(parent,checkBox:FormCheckBox)
       let checkBoxId = self.allocateId(checkBox) in
         @SendCommand(self)
-          newCheckBox(parent.id(),checkBoxId,checkBox.x(),checkBox.y(),checkBox.value(),checkBox.text())
+          newCheckBox(parent.id(),checkBoxId,checkBox.value(),checkBox.labelText)
         end;
         checkBoxId
       end

@@ -17,21 +17,17 @@ context PropertyEditors
     @Constructor(labelText,textbox)
       let action = @Operation() self.maximise() end
       in
-        self.maxButton := FormButton(0,0,0,0,"Maximise",action)
+        self.maxButton := FormButton("Maximise",action)
       end
     end
 
     @Operation addToForm(form:Form,x,y,labelHeight,yGap,textboxWidth,textboxHeight)
       // self.addLabel(form,x,y+yGap);
-      self.addButton(form,x+textboxWidth-CodeboxDisplay::buttonWidth,y,CodeboxDisplay::buttonWidth,20);
+      self.addButton(form);
       self.addTextBox(form,x,y+labelHeight+yGap,textboxWidth,textboxHeight)
     end
 
-    @Operation addButton(form,x,y,width,height)
-      self.maxButton.setX(x);
-      self.maxButton.setY(y);
-      self.maxButton.setWidth(width);
-      self.maxButton.setHeight(height);
+    @Operation addButton(form)
       form.addElement(self.maxButton)
     end
 

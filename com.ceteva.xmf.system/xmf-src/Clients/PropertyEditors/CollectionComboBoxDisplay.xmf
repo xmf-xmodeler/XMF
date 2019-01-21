@@ -34,23 +34,19 @@ context PropertyEditors
         modifyAction = @Operation() self.modifyCollection() end;
         openAction =   @Operation() element.get(slotName).edit() end
       in
-        self.modifyButton := FormButton(0,0,0,0,"Modify Collection",modifyAction);
-        self.openButton := FormButton(0,0,0,0,"Open Collection Viewer",openAction)
+        self.modifyButton := FormButton("Modify Collection",modifyAction);
+        self.openButton := FormButton("Open Collection Viewer",openAction)
       end
     end
 
     @Operation addToForm(form:Form,x,y,labelHeight,listWidth,listHeight,comboHeight,yGap)
-      self.addButton(form,openButton,x+listWidth-CollectionComboBoxDisplay::buttonWidth,y+18,CollectionComboBoxDisplay::buttonWidth,20);
-      self.addButton(form,modifyButton,x,y+18,CollectionComboBoxDisplay::buttonWidth,20);
+      self.addButton(form,openButton);
+      self.addButton(form,modifyButton);
       self.addComboBox(form,x,y+14+labelHeight+yGap+CollectionComboBoxDisplay::buttonGap,listWidth,comboHeight);
       self.addList(form,x,y+14+(2*(labelHeight+yGap))+CollectionComboBoxDisplay::buttonGap,listWidth,listHeight)
     end
 
-    @Operation addButton(form,button,x,y,width,height)
-      button.setX(x);
-      button.setY(y);
-      button.setWidth(width);
-      button.setHeight(height);
+    @Operation addButton(form,button)
       form.addElement(button)
     end
 

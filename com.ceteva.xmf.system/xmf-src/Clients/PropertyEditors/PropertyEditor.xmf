@@ -105,7 +105,7 @@ context PropertyEditors
     @Operation newBooleanDisplay(checkBoxType:Class,b:Boolean,labelText:String)
       let
         label = FormLabel(0,0,labelText);
-        checkBox = checkBoxType(0,0,b,labelText)
+        checkBox = checkBoxType(b,labelText)
       in
         BooleanDisplay(label,checkBox)
       end
