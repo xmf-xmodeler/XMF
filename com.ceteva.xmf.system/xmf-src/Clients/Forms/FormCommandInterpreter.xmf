@@ -294,7 +294,7 @@ context Forms
     @Operation newTextFieldCommand(parent,textfield:FormTextField)
       let textfieldId = self.allocateId(textfield) in
         @SendCommand(self)
-          newTextField(parent.id(),textfieldId,textfield.x(),textfield.y(),textfield.width(),textfield.height(),textfield.isEditable(),textfield.labelText)
+          newTextField(parent.id(),textfieldId,textfield.isEditable(),textfield.labelText)
         end;
         textfieldId
       end

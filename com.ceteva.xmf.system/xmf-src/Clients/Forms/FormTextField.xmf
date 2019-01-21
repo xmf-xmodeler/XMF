@@ -10,9 +10,9 @@ context Forms
 
     @Attribute labelText : String end
 
-    @Constructor(x,y,width,height,text,isEditable,labelText) end
+    @Constructor(isEditable,labelText) end
 
-    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
+    @Constructor(id,isEditable,labelText) end
 
     @Operation doubleSelected()
       self
@@ -28,22 +28,6 @@ context Forms
       self.commandInterpreter().newTextFieldCommand(parent,self);
       self.commandInterpreter().setText(self,self.text);
       self
-    end
-
-    @Operation synchronise()
-      let
-        id = Seq{"identity",id};
-        x = Seq{"x",x};
-        y = Seq{"y",y};
-        width = Seq{"width",width};
-        height = Seq{"height",height};
-        text = Seq{"text",text};
-        editable = Seq{"editable",isEditable} then
-        attributes = Seq{id,x,y,width,height,text,editable}
-      in
-        @Command(self) startElement("textfield",attributes) end;
-        @Command(self) endElement("textfield") end
-      end
     end
 
   end

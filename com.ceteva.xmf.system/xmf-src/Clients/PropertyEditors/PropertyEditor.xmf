@@ -92,7 +92,7 @@ context PropertyEditors
         fieldText = e.labelString()
       then
         label = FormLabel(0,0,labelText);
-        field = fieldType(0,0,0,0,fieldText,editable,e,labelText)
+        field = fieldType(fieldText,editable,e,labelText)
       in
         SingletonDisplay(label,field)
       end

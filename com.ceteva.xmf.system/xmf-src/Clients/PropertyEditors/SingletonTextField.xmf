@@ -9,14 +9,14 @@ context PropertyEditors
 
   @Class SingletonTextField extends FormTextField, ContextFormElement,
          RightClickableWithElement
-  
+
     @Attribute type : Classifier = NamedElement (?,!) end
     @Attribute labelText: String end
-  
-    @Constructor(x,y,width,height,text,isEditable,element,labelText) end
-  
-    @Constructor(id,x,y,width,height,text,isEditable,element,labelText) end
-    
+
+    @Constructor(text,isEditable,element,labelText) end
+
+    @Constructor(id,text,isEditable,element,labelText) end
+
     @Operation changeLabel(text)
       try
         let
@@ -46,7 +46,7 @@ context PropertyEditors
     end
 
     @Operation coerceValue(text:String)
-    
+
       // Used to translate a text field change into a value
       // for a slot based on the type of the attribute...
 
