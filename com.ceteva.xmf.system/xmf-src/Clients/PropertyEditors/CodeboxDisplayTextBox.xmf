@@ -9,13 +9,14 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CodeboxDisplayTextBox isabstract extends FormTextBox, ContextFormElement, RightClickable
-  
-    @Constructor(x,y,width,height,text,isEditable,labelText) end
-    
+
+    @Constructor(x,y,width,height,text,isEditable,labelText)
+		end
+
     @Constructor(id,x,y,width,height,text,isEditable,labelText) end
 
     @Operation buildGlobalMenu()
-      let 
+      let
         globalMenu = super();
         target = RightClickable::selfTarget
       in
@@ -24,12 +25,12 @@ context PropertyEditors
         globalMenu
       end
     end
-    
+
     @Operation cancelChanges()
       self.changesMade(false);
       self.resetText()
     end
-    
+
     @Operation commitChanges()
       self.changesMade(false);
       self.setTextIn(self.getText())
@@ -38,13 +39,13 @@ context PropertyEditors
     @Operation codeboxEditorType()
       CodeboxEditor
     end
-    
+
     @Operation new(parent)
       super(parent);
       self.setMenuKey(Set{self});
       self.setRightClickMenu()
     end
-    
+
     @Operation newCodeboxEditor()
       let formsClient = xmf.findClient(Clients::Forms::FormClient)
       in

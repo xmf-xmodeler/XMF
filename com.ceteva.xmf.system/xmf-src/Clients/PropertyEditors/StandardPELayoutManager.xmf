@@ -176,7 +176,7 @@ context PropertyEditors
           @For loop in 0.to(displayCount-1) do
             let
               disp = displays.at(loop) then
-              actualCodeboxHeight = if disp.label.text.toString() = "documentation" then documentationHeight else codeboxHeight end then
+              actualCodeboxHeight = if disp.labelText.toString() = "documentation" then documentationHeight else codeboxHeight end then
               x = startX;
               y = finalY
               //y = startY + (loop*(actualCodeboxHeight + singletonHeight + yGap))

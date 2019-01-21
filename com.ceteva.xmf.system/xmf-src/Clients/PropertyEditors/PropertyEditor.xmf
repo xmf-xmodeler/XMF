@@ -150,10 +150,7 @@ context PropertyEditors
     end
 
     @Operation newCodeboxDisplay(textbox,labelText:String)
-      let label = FormLabel(0,0,labelText)
-      in
-        CodeboxDisplay(label,textbox)
-      end
+	    CodeboxDisplay(labelText,textbox)
     end
 
   end

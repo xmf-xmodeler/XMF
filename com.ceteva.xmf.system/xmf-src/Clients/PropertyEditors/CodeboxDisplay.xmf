@@ -10,11 +10,11 @@ context PropertyEditors
 
     @Bind buttonWidth = 60 end
 
-    @Attribute label : FormLabel end
+    @Attribute labelText : String end
     @Attribute maxButton : FormButton end
     @Attribute textbox : FormTextBox end
 
-    @Constructor(label,textbox)
+    @Constructor(labelText,textbox)
       let action = @Operation() self.maximise() end
       in
         self.maxButton := FormButton(0,0,0,0,"Maximise",action)
@@ -33,12 +33,6 @@ context PropertyEditors
       self.maxButton.setWidth(width);
       self.maxButton.setHeight(height);
       form.addElement(self.maxButton)
-    end
-
-    @Operation addLabel(form,x,y)
-      self.label.setX(x);
-      self.label.setY(y);
-      form.addElement(self.label)
     end
 
     @Operation addTextBox(form,x,y,width,height)

@@ -273,10 +273,9 @@ context Forms
     end
 
     @Operation newTextBoxCommand(parent,textbox:FormTextBox)
-		("newTextBox: " + textbox.isEditable());
       let textboxId = self.allocateId(textbox) in
         @SendCommand(self)
-          newTextBox(parent.id(),textboxId,textbox.x(),textbox.y(),textbox.width(),textbox.height(),textbox.isEditable(),"documentation")
+          newTextBox(parent.id(),textboxId,textbox.x(),textbox.y(),textbox.width(),textbox.height(),textbox.isEditable(),textbox.labelText)
         end;
         textboxId
       end

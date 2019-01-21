@@ -63,7 +63,7 @@ context PropertyEditorXCore
         documentationDisplay
       end
     end
-    
+
     @Operation refresh()
       super();
       self.addTextBoxRules()
@@ -79,9 +79,7 @@ context PropertyEditorXCore
           else source
           end
       then
-        textbox = CompiledOperationSourceTextBox(0,0,0,0,code,true)
-          .setContex(element)
-          .setSlotName("source")
+        textbox = CompiledOperationSourceTextBox(0,0,0,0,code,true,"source")
       in
         self.sourceDisplay := self.newCodeboxDisplay(textbox,"source");
         sourceDisplay

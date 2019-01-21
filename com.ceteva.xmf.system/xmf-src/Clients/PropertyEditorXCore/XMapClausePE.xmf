@@ -28,7 +28,7 @@ context PropertyEditorXCore
       else self.error("Layout manager must be set for " + self.toString())
       end
     end
-    
+
     @Operation refresh()
       super();
       self.addTextBoxRules()
@@ -62,9 +62,7 @@ context PropertyEditorXCore
           else source
           end
       then
-        textbox = XMapClauseTextBox(0,0,0,0,code,true)
-          .setContex(element)
-          .setSlotName("source")
+        textbox = XMapClauseTextBox(0,0,0,0,code,true,"source")
       in
         self.sourceDisplay := self.newCodeboxDisplay(textbox,"source");
         sourceDisplay

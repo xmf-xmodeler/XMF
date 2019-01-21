@@ -7,38 +7,38 @@ import IO;
 context Forms
 
   @Class FormTextBox extends FormElement, TextComponent
-  
+
     @Bind red   = "red"   end
     @Bind blue  = "blue"  end
     @Bind green = "green" end
-    
+
     @Attribute wordRules : SeqOfElement (+) end
     @Attribute labelText : String end
-  
+
     @Constructor(x,y,width,height,text,isEditable,labelText) end
-    
+
     @Constructor(id,x,y,width,height,text,isEditable,labelText) end
-    
+
     @Operation new(parent)
       self.commandInterpreter().newTextBoxCommand(parent,self);
       self.commandInterpreter().setText(self,self.text);
       self.newWordRules();
       self
     end
-    
+
     @Operation addWordRule(word,colour)
       self.addToWordRules(Seq{word | colour});
       self.commandInterpreter().addTextBoxRule(self,word,colour)
     end
-    
+
     @Operation changesMade(value:Boolean)
       self.commandInterpreter().changesMade(self,value)
     end
-    
+
     @Operation doubleSelected()
       self
     end
-    
+
     @Operation getText()
       self.commandInterpreter().getText(self)
     end
@@ -55,8 +55,8 @@ context Forms
 
     @Operation renew()
       self.renew(null)
-    end 
-    
+    end
+
     @Operation renew(parent)
       self.commandInterpreter().setText(self,self.text);
       self.newWordRules();
