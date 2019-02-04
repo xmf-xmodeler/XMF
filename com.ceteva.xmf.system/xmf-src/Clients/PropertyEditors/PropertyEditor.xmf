@@ -127,7 +127,7 @@ context PropertyEditors
     @Operation newCollectionDisplay(values,labelText:String)
       let
         label = FormLabel(0,0,labelText);
-        list = FormList(0,0,0,0)
+        list = FormList()
       in
         if not values->isEmpty then
           values := values->asSeq;

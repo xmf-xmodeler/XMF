@@ -30,13 +30,13 @@ context Forms
     end
 
     @Operation addItem(item:String)
-      self.contents := self.contents + Seq{item};
-      if self.hasCommandInterpreter()
-      then self.commandInterpreter().addComboBoxItem(self,item)
-      end;
-      self
-    end
-
+		self.contents := self.contents + Seq{item};
+		      if self.hasCommandInterpreter()
+		      then self.commandInterpreter().addComboBoxItem(self,item)
+		      end;
+		      self
+		end
+		
     @Operation clear()
       self.contents := Seq{};
       self.commandInterpreter().clear(self)

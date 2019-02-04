@@ -55,7 +55,7 @@ context PropertyEditorXCore
           doc.docString()
         end
       then
-        textbox = DocumentationTextBox(0,0,0,0,text,true,"documentation")
+        textbox = DocumentationTextBox(text,true,"documentation")
           .setContex(element)
           .setSlotName("documentation")
       in
@@ -79,7 +79,9 @@ context PropertyEditorXCore
           else source
           end
       then
-        textbox = CompiledOperationSourceTextBox(0,0,0,0,code,true,"source")
+        textbox = CompiledOperationSourceTextBox(code,true,"source")
+          .setContex(element)
+          .setSlotName("source")
       in
         self.sourceDisplay := self.newCodeboxDisplay(textbox,"source");
         sourceDisplay
@@ -120,7 +122,7 @@ context PropertyEditorXCore
     @Operation addTextBoxRules()
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         @For rule inSeq rules do
-          sourceDisplay.textbox.addWordRule(rule,FormTextBox::blue)
+          sourceDisplay.textbox.addWordRule(rule,FormTex	tBox::blue)
         end
       end;
       self

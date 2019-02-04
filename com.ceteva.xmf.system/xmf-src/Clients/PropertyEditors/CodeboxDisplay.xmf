@@ -15,27 +15,22 @@ context PropertyEditors
     @Attribute textbox : FormTextBox end
 
     @Constructor(labelText,textbox)
-      let action = @Operation() self.maximise() end
+      let action = @Operation() self.maximise() end	
       in
         self.maxButton := FormButton("Maximise",action)
       end
     end
 
-    @Operation addToForm(form:Form,x,y,labelHeight,yGap,textboxWidth,textboxHeight)
-      // self.addLabel(form,x,y+yGap);
+    @Operation addToForm(form:Form)
       self.addButton(form);
-      self.addTextBox(form,x,y+labelHeight+yGap,textboxWidth,textboxHeight)
+      self.addTextBox(form)
     end
 
     @Operation addButton(form)
       form.addElement(self.maxButton)
     end
 
-    @Operation addTextBox(form,x,y,width,height)
-      self.textbox.setX(x);
-      self.textbox.setY(y);
-      self.textbox.setWidth(width);
-      self.textbox.setHeight(height);
+    @Operation addTextBox(form)
       form.addElement(self.textbox)
     end
 

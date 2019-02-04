@@ -10,10 +10,10 @@ context PropertyEditors
 
   @Class CodeboxDisplayTextBox isabstract extends FormTextBox, ContextFormElement, RightClickable
 
-    @Constructor(x,y,width,height,text,isEditable,labelText)
+    @Constructor(text,isEditable,labelText)
 		end
 
-    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
+    @Constructor(id,text,isEditable,labelText) end
 
     @Operation buildGlobalMenu()
       let
@@ -52,7 +52,7 @@ context PropertyEditors
         if formsClient <> null
         then
           let type = self.of() then
-              clone = type(0,0,0,0,text,isEditable)
+              clone = type(text,isEditable,slotName)
                         .setContex(contex)
                         .setSlotName(slotName);
               editorType = self.codeboxEditorType()

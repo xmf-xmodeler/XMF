@@ -15,9 +15,9 @@ context Forms
     @Attribute wordRules : SeqOfElement (+) end
     @Attribute labelText : String end
 
-    @Constructor(x,y,width,height,text,isEditable,labelText) end
+    @Constructor(text,isEditable,labelText) end
 
-    @Constructor(id,x,y,width,height,text,isEditable,labelText) end
+    @Constructor(id,text,isEditable,labelText) end
 
     @Operation new(parent)
       self.commandInterpreter().newTextBoxCommand(parent,self);
@@ -63,19 +63,4 @@ context Forms
       self
     end
 
-    @Operation synchronise()
-      let
-        id = Seq{"identity",id};
-        x = Seq{"x",x};
-        y = Seq{"y",y};
-        width = Seq{"width",width};
-        height = Seq{"height",height};
-        text = Seq{"text",text};
-        editable = Seq{"editable",isEditable} then
-        attributes = Seq{id,x,y,width,height,text,editable}
-      in
-        @Command(self) startElement("textbox",attributes) end;
-        @Command(self) endElement("textbox") end
-      end
-    end
   end

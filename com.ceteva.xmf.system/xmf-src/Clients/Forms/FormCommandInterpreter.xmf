@@ -266,7 +266,7 @@ context Forms
     @Operation newListCommand(parent,list:FormList)
       let listId = self.allocateId(list) in
         @SendCommand(self)
-          newList(parent.id(),listId,list.x(),list.y(),list.width(),list.height(),list.labelText)
+          newList(parent.id(),listId,list.labelText)
         end;
         listId
       end
@@ -275,7 +275,7 @@ context Forms
     @Operation newTextBoxCommand(parent,textbox:FormTextBox)
       let textboxId = self.allocateId(textbox) in
         @SendCommand(self)
-          newTextBox(parent.id(),textboxId,textbox.x(),textbox.y(),textbox.width(),textbox.height(),textbox.isEditable(),textbox.labelText)
+          newTextBox(parent.id(),textboxId,textbox.isEditable(),textbox.labelText)
         end;
         textboxId
       end

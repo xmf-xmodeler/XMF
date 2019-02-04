@@ -53,21 +53,21 @@ context CollectionViewer
     @Operation newCollectionDisplay(values,labelText:String)
       let
         label = FormLabel(0,0,labelText);
-        list = FormList(0,0,0,0)
+        list = FormList(labelText)
       in
         if not values->isEmpty then
           @For e inSeq values do
             let
-              editable = e.isKindOf(NamedElement);          
-              itemText = e.labelString() then            
+              editable = e.isKindOf(NamedElement);
+              itemText = e.labelString() then
               item = CollectionListElement(itemText,e)
             in
               list.addItem(item)
-            end           
+            end
           end
         end;
         CollectionDisplay(label,list)
-      end  
+      end
     end
 
   end

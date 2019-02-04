@@ -10,9 +10,10 @@ import IO;
 context PropertyEditorXCore
 
   @Class DocumentationEditor extends CodeboxEditor
-  
+
     @Operation checkDaemons()
       super();
+			("checkDaemons: Textbox: " + self.textbox).println();
       let contex = textbox.contex
       in
         if contex.hasSlot("name") then

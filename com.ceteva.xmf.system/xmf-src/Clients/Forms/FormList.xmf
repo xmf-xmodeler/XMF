@@ -12,10 +12,10 @@ context Forms
     @Attribute contents : Seq(ListElement) end
 		@Attribute labelText : String end
 
-    @Constructor(x,y,width,height,labelText)
+    @Constructor(labelText)
     end
 
-    @Constructor(id,x,y,width,height,labelText) ! end
+    @Constructor(id,labelText) ! end
 
     @Operation addContents()
 
@@ -75,24 +75,6 @@ context Forms
     @Operation renewContents()
       self.commandInterpreter().clear(self);
       self.newContents()
-    end
-
-    @Operation synchronise()
-      let
-        id = Seq{"identity",id};
-        x = Seq{"x",x};
-        y = Seq{"y",y};
-        width = Seq{"width",width};
-        height = Seq{"height",height} then
-        attributes = Seq{id,x,y,width,height}
-      in
-        @Command(self) startElement("list",attributes) end;
-        @For content in contents
-        do
-          content.synchronise()
-        end;
-        @Command(self) endElement("list") end
-      end
     end
 
   end

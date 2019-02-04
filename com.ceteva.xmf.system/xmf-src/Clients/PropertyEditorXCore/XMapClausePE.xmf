@@ -62,7 +62,9 @@ context PropertyEditorXCore
           else source
           end
       then
-        textbox = XMapClauseTextBox(0,0,0,0,code,true,"source")
+        textbox = XMapClauseTextBox(code,true,"source")
+				.setContex(element)
+				.setSlotName("source")
       in
         self.sourceDisplay := self.newCodeboxDisplay(textbox,"source");
         sourceDisplay

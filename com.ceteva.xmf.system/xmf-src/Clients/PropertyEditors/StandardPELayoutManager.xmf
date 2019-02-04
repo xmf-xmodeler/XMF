@@ -181,7 +181,7 @@ context PropertyEditors
               y = finalY
               //y = startY + (loop*(actualCodeboxHeight + singletonHeight + yGap))
             in
-              disp.addToForm(owner,x,y,singletonHeight,yGap,codeboxWidth,actualCodeboxHeight);
+              disp.addToForm(owner);
               finalY := finalY + actualCodeboxHeight + singletonHeight + (4*yGap)
             end
           end;
@@ -207,7 +207,7 @@ context PropertyEditors
               x = startX + (col*(collectionWidth + xGap));
               y = startY + (row*(collectionHeight + singletonHeight + yGap))
             in
-              displays.at(loop).addToForm(owner,x,y,singletonHeight,collectionWidth,collectionHeight)
+              displays.at(loop).addToForm(owner)
             end
           end;
           finalY

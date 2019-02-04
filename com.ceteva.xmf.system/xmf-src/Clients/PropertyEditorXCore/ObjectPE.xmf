@@ -116,7 +116,9 @@ context PropertyEditorXCore
           else ""
           end
       then
-        textbox = DocumentationTextBox(0,0,0,0,text,true,"documentation")
+        textbox = DocumentationTextBox(text,true,"documentation")
+				.setContex(element)
+			  .setSlotName("documentation")
       in
         self.documentationDisplay := self.newCodeboxDisplay(textbox,"documentation");
         documentationDisplay
