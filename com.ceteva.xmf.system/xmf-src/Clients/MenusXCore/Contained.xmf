@@ -61,7 +61,12 @@ context Contained
     end
   end
 
-
+/*
+ * Ask user whether an element to be deleted should really be deleted.
+ *  
+ * Gets overwritten by in Protect/ProtectDelete.xmf and
+ * multilevel implementation in xmf-addons/Multilevel-Editor/Contained.xmf
+ */
 context Contained
   @Operation delete_client_check()
     let name = if self.isKindOf(NamedElement) then self.name() else self.toString() end

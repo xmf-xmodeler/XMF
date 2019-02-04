@@ -21,10 +21,10 @@ context TextEditor
     @Attribute dirty     : Boolean (?) end
     
     @Constructor(element,name,tooltip,editable)
-      "test".println();
-      name.println();
-      tooltip.println();
-      editable.println()
+      "test(Constructor Editor.xmf)".println();
+      ("name:"+name).println();
+      ("tooltip:"+tooltip).println();
+      ("editable:"+editable).println()
     end
     
     @Constructor(name,tooltip,editable)

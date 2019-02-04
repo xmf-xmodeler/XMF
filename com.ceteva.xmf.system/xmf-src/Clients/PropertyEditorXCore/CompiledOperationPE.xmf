@@ -122,7 +122,7 @@ context PropertyEditorXCore
     @Operation addTextBoxRules()
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         @For rule inSeq rules do
-          sourceDisplay.textbox.addWordRule(rule,FormTex	tBox::blue)
+          sourceDisplay.textbox.addWordRule(rule,FormTextBox::blue)
         end
       end;
       self
