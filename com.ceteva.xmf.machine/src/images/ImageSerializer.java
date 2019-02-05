@@ -121,6 +121,7 @@ public class ImageSerializer {
     try {
       FileInputStream fin = new FileInputStream(machine.getFile(path));
       int size = readInt(fin);
+      System.err.println(size+"");
       image = new byte[size];
       fin.read(image);
       inflate();
