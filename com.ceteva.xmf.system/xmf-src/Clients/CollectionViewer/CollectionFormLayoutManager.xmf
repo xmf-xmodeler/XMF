@@ -18,7 +18,7 @@ context CollectionViewer
         @TypeCase(displays)
           Seq(SingletonDisplay) do
             self.setY(self.layoutSingletons(displays,x,y))
-          end     
+          end
           Seq(CollectionDisplay) do
             self.setY(self.layoutCollections(displays,x,y))
           end
@@ -44,7 +44,7 @@ context CollectionViewer
             localColHeight = (listSize*collectionItemHeight).round() + 22 then
             finalY = startY + localColHeight + singletonHeight
         in
-          display.addToForm(owner,startX,startY,0,localColWidth,localColHeight);
+          display.addToForm(owner);
           owner.addElement(FormLabel(0,startY + localColHeight + singletonHeight," "));
           finalY
         end

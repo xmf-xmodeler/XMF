@@ -151,7 +151,8 @@ context Forms
       // necessary.
       
       if self.hasForm(form)
-      then self.commandInterpreter().setVisible(form)
+      then
+      self.commandInterpreter().setVisible(form)
       else self.newForm(form)
       end
     end

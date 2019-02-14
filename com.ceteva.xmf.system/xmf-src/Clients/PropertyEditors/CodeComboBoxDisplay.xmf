@@ -7,13 +7,13 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CodeComboBoxDisplay
-  
+
     @Attribute comboBox : CodeComboBox end
     @Attribute codeBox : FormTextBox end
     @Attribute label : FormLabel end
     @Attribute element : Element end
     @Attribute selectionName : String end // used for daemon monitoring
-  
+
     @Constructor(label,comboBox,codeBox,element)
       let comboItems = comboBox.contents in
         if not comboItems->isEmpty then
@@ -29,7 +29,7 @@ context PropertyEditors
     end
 
     @Operation addToForm(form:Form,x,y,labelHeight,codeBoxWidth,codeBoxHeight,comboHeight,yGap)
-      self.addLabel(form,x,y);
+      //self.addLabel(form,x,y);
       self.addComboBox(form,x,y+labelHeight,codeBoxWidth,comboHeight);
       self.addCodeBox(form,x,y+(2*labelHeight+yGap),codeBoxWidth,codeBoxHeight)
     end
@@ -41,6 +41,7 @@ context PropertyEditors
     end
 
     @Operation addComboBox(form,x,y,width,height)
+		("CodeComboBoxDisplay: add: " + self.comboBox).println();
       self.comboBox.setX(x);
       self.comboBox.setY(y);
       self.comboBox.setWidth(width);
@@ -75,7 +76,7 @@ context PropertyEditors
         end
       end
     end
-    
+
     @Operation addTextBoxRules()
       let rules = OCL::OCL.grammar.terminals()->asSeq in
         @For rule inSeq rules do
