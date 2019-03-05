@@ -56,13 +56,18 @@ context FmmlxDiagrams
     	  @For c in package.getChildren() do
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
-    	      ("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
+    	      let
+    	        mapping = mapping.addOrGetObjectMapping(c)
+    	      in
+    	        result := result.append([[mapping.id, c.name.toString(), mapping.lastKnownDiagramX, mapping.lastKnownDiagramY]])
+    	      end
+    	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
     	      /*
     	      if c is not in mapping
     	        add c to mapping
     	      return c with mapping info
     	      */
-    	      result := result.append([c.name.toString()])
+    	      //result := result.append([c.name.toString()])
     	    end
     	  end;
     	  // clean up mapping ? 
@@ -117,4 +122,9 @@ context FmmlxDiagrams
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end  
+    
+    @Operation sendNewPosition(idRequest, objectID, x, y)
+        mapping.setNewPosition(objectID, x, y);
+        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+    end
 end
