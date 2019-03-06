@@ -1,0 +1,18 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+context FmmlxDiagrams
+
+@Class FmmlxManipulator
+
+  @Operation addMetaClass(package, name, level, parents, abstract)
+    let 
+      newClass = FMML::MetaClass(name, level)
+    in
+      package.add(newClass)
+    end
+  end
+
+end // Class

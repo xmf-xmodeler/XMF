@@ -11,7 +11,6 @@ context FmmlxDiagrams
     @Attribute nextID : Integer = 0 end
     
     @Operation addOrGetObjectMapping(o : Object)
-//      ("addOrGetObjectMapping " + o).println();
       let 
         foundMapping = null 
       in 
@@ -22,7 +21,6 @@ context FmmlxDiagrams
         end; // for
         if foundMapping <> null
         then 
-//          ("foundMapping " + foundMapping.id).println();
           foundMapping
         else
           let 
@@ -34,7 +32,6 @@ context FmmlxDiagrams
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             self.mapping := self.mapping + {newMappingInfo};
-//            ("newMappingInfo " + newMappingInfo.id).println();
             newMappingInfo
           end // let
         end // if 

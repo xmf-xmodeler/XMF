@@ -38,17 +38,6 @@ context FmmlxDiagrams
         FmmlxDiagram() // vestigial return value for diagram manager
     end
     
-    @Operation fibo_i(n) 
-       if n <= 2
-          then 1
-          else self.fibo_i(n-1) + self.fibo_i(n-2)
-      end
-    end
-    
-    @Operation fibo(idRequest, n) 
-       self.communicator.sendMessageToJava([idRequest, self.fibo_i(n)])
-    end
-    
     @Operation getAllObjects(idRequest)
         let 
           result = [] 
@@ -127,4 +116,25 @@ context FmmlxDiagrams
         mapping.setNewPosition(objectID, x, y);
         self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
     end
+    
+    @Operation addNewMetaClass(idRequest, name, level, parents, abstract, x, y)
+        ("addNewMetaClass " + name 
+        + " on level " + level 
+        + " with parents " + parents 
+        + (if abstract then " and abstract " else " " end)
+        + "at position " + x + "/" + y).println(); 
+        
+        let 
+          m = FmmlxDiagrams::FmmlxManipulator() 
+        then 
+          newClass = m.addMetaClass(package, name, level, parents, abstract)
+        then
+          mappingInfo = mapping.addOrGetObjectMapping(newClass)
+        in 
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y
+        end;
+        "addNewMetaClass done".println();
+        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+    end 
 end
