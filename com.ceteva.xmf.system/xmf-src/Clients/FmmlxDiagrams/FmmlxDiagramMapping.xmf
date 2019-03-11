@@ -48,6 +48,18 @@ context FmmlxDiagrams
       end // for
     end
     
+    @Operation getMapping(objectID) 
+      let result = null in 
+        @For mappingInfo in mapping do
+          if mappingInfo.id = objectID
+          then 
+            result := mappingInfo
+          end // if
+        end; // for
+        result
+      end //let
+    end
+    
     @Operation cleanUpMapping() null end
 
 end // Class

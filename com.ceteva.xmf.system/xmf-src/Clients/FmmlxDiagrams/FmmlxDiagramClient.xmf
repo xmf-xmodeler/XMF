@@ -117,8 +117,8 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
     end
     
-    @Operation addNewMetaClass(idRequest, name, level, parents, abstract, x, y)
-        ("addNewMetaClass " + name 
+    @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
+        ("addMetaClass " + name 
         + " on level " + level 
         + " with parents " + parents 
         + (if abstract then " and abstract " else " " end)
@@ -135,6 +135,29 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramY := y
         end;
         "addNewMetaClass done".println();
+        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+    end 
+    
+    @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
+        ("addInstance " + name 
+        + " of id " + ofId 
+        + " with parents " + parents 
+        + (if abstract then " and abstract " else " " end)
+        + "at position " + x + "/" + y).println(); 
+        
+        let 
+          m = FmmlxDiagrams::FmmlxManipulator() 
+        then 
+          ofClass = mapping.getMapping(ofId).object
+        then 
+          newInstance = m.addInstance(package, ofClass, name, parents, abstract)
+        then
+          mappingInfo = mapping.addOrGetObjectMapping(newInstance)
+        in 
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y
+        end;
+        "addInstance done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
 end
