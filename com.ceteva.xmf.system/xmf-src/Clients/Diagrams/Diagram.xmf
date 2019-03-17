@@ -175,10 +175,10 @@ context Diagrams
     @Operation defineActions()
       // Actions are buttons that do something when pressed...
       self.defineToolGroup("Actions");
-      self.defineActionHandler("Actions","Update","update","Mapping/update.png",Diagram::updateValues);
-      self.defineActionHandler("Actions","Zoom +","zoom in","MDC/ZoomIn.png",Diagram::zoomIn);
-      self.defineActionHandler("Actions","Zoom 1","zoom one","MDC/ZoomOne.png",Diagram::zoomOne);
-      self.defineActionHandler("Actions","Zoom -","zoom out","MDC/ZoomOut.png",Diagram::zoomOut);
+      self.defineActionHandler("Actions","Update","update","resources/gif/Mapping/update.png",Diagram::updateValues);
+      self.defineActionHandler("Actions","Zoom +","zoom in","resources/gif/MDC/ZoomIn.png",Diagram::zoomIn);
+      self.defineActionHandler("Actions","Zoom 1","zoom one","resources/gif/MDC/ZoomOne.png",Diagram::zoomOne);
+      self.defineActionHandler("Actions","Zoom -","zoom out","resources/gif/MDC/ZoomOut.png",Diagram::zoomOut);
       self.defineActionHandler("Actions","Hide Selected","hide","resources/gif/Tools/Ghost.gif",Diagram::hideSelected);
       self.defineActionHandler("Actions","Copy to Clipboard","clip","resources/gif/Tools/Copy.gif",Diagram::copyDiagramToClipboard);
       self.defineActionHandler("Actions","Add New Button","add new button","resources/gif/User/Balls1.gif",Diagram::addNewButton)

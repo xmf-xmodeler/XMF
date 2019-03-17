@@ -454,7 +454,7 @@ context ClassDiagrams
       self.defineNewHandler("XCore","Attribute (self)",false,"resources/gif/XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
       self.defineNewHandler("XCore","Inheritance",true,"resources/gif/XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
       self.defineNewHandler("XCore","Dependency",true,"resources/gif/XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
-      self.defineNewHandler("XCore","Delegation",true,"XCore/Delegation.png",ClassDiagram::newDelegationEdge);
+      self.defineNewHandler("XCore","Delegation",true,"resources/gif/XCore/Delegation.png",ClassDiagram::newDelegationEdge);
       if xmf.preference("EnableMeta")
       then self.defineNewHandler("XCore","Slot Value",true,"resources/gif/XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
       end
@@ -470,11 +470,11 @@ context ClassDiagrams
     @Operation defineToggles() 
       self.defineToolGroup("Toggles");
       super();
-      self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "Tools/Ghost1.png","Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
-      self.defineToggleHandler("Toggles","Show Associations",        "foo3",showAssociationEdges,   "Tools/Ghost3.png","Tools/Ghost0.png",ClassDiagram::setShowAssociationEdges);
-      self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "Tools/Ghost5.png","Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
-      self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "Tools/Ghost2.png","Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
-      self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "Tools/Ghost4.png","Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
+      self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "resources/gif/Tools/Ghost1.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
+      self.defineToggleHandler("Toggles","Show Associations",        "foo3",showAssociationEdges,   "resources/gif/Tools/Ghost3.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowAssociationEdges);
+      self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "resources/gif/Tools/Ghost5.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
+      self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "resources/gif/Tools/Ghost2.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
+      self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "resources/gif/Tools/Ghost4.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
     end
     
     @Operation defineToolGroupTypes()

@@ -133,29 +133,29 @@ context ClassMapping::PackageXClassDiagram
 	@Operation getElementIcon(group)
 		/*@Case group of
 				[ "X" ] do
-					"XCore/Class.gif"
+					"resources/gif/XCore/Class.gif"
 				end
 				[ "0" ] do
-					//"XCore/Object.gif"
-					"XCore/Class.gif"
+					//"resources/gif/XCore/Object.gif"
+					"resources/gif/XCore/Class.gif"
            		end
 				[ "1" ] do
-					//"XCore/Object.gif"
-					"XCore/Class.gif"
+					//"resources/gif/XCore/Object.gif"
+					"resources/gif/XCore/Class.gif"
            		end
 				[ "2" ] do
-					"XCore/Class.gif"
+					"resources/gif/XCore/Class.gif"
            		end
 				[ "3" ] do
-					"XCore/Class.gif"
+					"resources/gif/XCore/Class.gif"
            		end
 				[ "4" ] do
-					"XCore/Class.gif"
+					"resources/gif/XCore/Class.gif"
            		end
 				[ "5" ] do
-					"XCore/Class.gif"
+					"resources/gif/XCore/Class.gif"
            		end
-				else */"XCore/Class.gif"/*
+				else */"resources/gif/XCore/Class.gif"/*
 			end*/
 	end
 
@@ -189,7 +189,7 @@ context ClassMapping::PackageXClassDiagram
 				theMapping.getMetaToolGroupName(group),	
 				metaclass.name.toString(),
 				false,
-				theMapping.getElementIcon(group),//"XCore/Class.gif",
+				theMapping.getElementIcon(group),//"resources/gif/XCore/Class.gif",
 				@Operation(x,y)
                     let name = xmf.getString("Name","Type the name of the meta type:",thePackage.newName(metaclass.name.toString()))
                     in
@@ -231,7 +231,7 @@ context ClassMapping::PackageXClassDiagram
 	  theMapping.getMetaToolGroupName(metaclass.level),
 	  metaclass.name.toString(),
 	  false,
-	  theMapping.getElementIcon((metaclass.level).toString()),//"XCore/Object.gif",		
+	  theMapping.getElementIcon((metaclass.level).toString()),//"resources/gif/XCore/Object.gif",
 	  @Operation(x,y)
 		let name = xmf.getString("Name","Type the name of the instance:",thePackage.newName(metaclass.name.toString()))
       in
@@ -283,7 +283,7 @@ end // @Operation instantiationHandlerObject(...
 								theMapping.getMetaToolGroupName(0),
 								domainType.name.toString(),
 								false,
-								"XCore/Object.gif",
+								"resources/gif/XCore/Object.gif",
 								innerhandler);
 							@Find(map,theMapping.classMaps)
 								when map.class = domainType	
@@ -314,7 +314,7 @@ end // @Operation instantiationHandlerObject(...
 					theMapping.getMetaToolGroupName(class.level - 1),	
 					class.name.toString(),
 					false,
-					"XCore/Class.gif",
+					"resources/gif/XCore/Class.gif",
 					if class.level > 2 
 						then 
 							theMapping.domainTypeHandler(class,thePackage,theDiagram,theMapping) 
@@ -446,7 +446,7 @@ context ClassMapping::PackageXClassDiagram
              "XCore",
              "Object",
              false,
-             "XCore/Other.gif",
+             "resources/gif/XCore/Other.gif",
              let 
                p = self.package;
                m = self
@@ -475,7 +475,7 @@ context ClassMapping::PackageXClassDiagram
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Package.gif",
+                "resources/gif/XCore/Package.gif",
                 handler)
            end
          end;
@@ -485,7 +485,7 @@ context ClassMapping::PackageXClassDiagram
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Class.gif",
+                "resources/gif/XCore/Class.gif",
                 handler)
            end
          end;
@@ -496,13 +496,13 @@ context ClassMapping::PackageXClassDiagram
                 languageName,
                 c.name.toString(),
                 true,
-                "XCore/Attribute.gif",
+                "resources/gif/XCore/Attribute.gif",
                 handler);
               diagram.defineNewHandler(
                 languageName,
                 c.name.toString() + " (self)",
                 false,
-                "XCore/Attribute.gif",
+                "resources/gif/XCore/Attribute.gif",
                 handler) 
            end
          end;
@@ -512,7 +512,7 @@ context ClassMapping::PackageXClassDiagram
                 languageName,
                 c.name.toString(),
                 true,
-                "XCore/Dependency.gif",
+                "resources/gif/XCore/Dependency.gif",
                 handler)
            end
          end;
@@ -524,7 +524,7 @@ context ClassMapping::PackageXClassDiagram
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Object.gif",
+                "resources/gif/XCore/Object.gif",
                 handler)
            end
          end
