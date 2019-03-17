@@ -2,7 +2,7 @@
 ### compileAll
 `./bin/compileAll .`
 
-Compiles all the files necessary for using any other script in /bin 
+Compiles all the files necessary for using any other script in /bin .
 
 ### compiler
 `./bin/compiler .`
@@ -28,6 +28,5 @@ Used to make the minimal XCore image. Images are held in ../xmf-img/.
 
 ### xmf.bat
 `./bin/xmf.bat .`
-
 
 Starts the minimal XCore image with a very small heap.
