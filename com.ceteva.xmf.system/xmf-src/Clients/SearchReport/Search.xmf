@@ -53,7 +53,7 @@ context Walkers
         if predicate(element)
         then 
           let label = element.toString();
-              icon = "Search/Search.gif";
+              icon = "resources/gif/Search/Search.gif";
               action = @Operation(r) map(r.element) end
           in Clients::SearchReport::SearchResult(label,element,icon,action)
           end
@@ -86,7 +86,7 @@ context Walkers
     @Operation walkSeq(s:SeqOfElement,limit:Element):Element 
       if s->isProperSequence
       then
-        let nodes = SearchNodes("","Search/Seq.gif");
+        let nodes = SearchNodes("","resources/gif/Search/Seq.gif");
             results = s->collect(e | self.walk(e,if limit = null then null else limit - 1 end))->reject(x | x = null)
         in if results->isEmpty
            then null
@@ -105,7 +105,7 @@ context Walkers
            elseif tail = null
            then head
            else 
-             let nodes = SearchNodes("","Search/Pair.gif")
+             let nodes = SearchNodes("","resources/gif/Search/Pair.gif")
              in nodes.add(head);
                 nodes.add(tail);
                 nodes
@@ -120,7 +120,7 @@ context Walkers
       in if results->isEmpty
          then null
          else 
-           let nodes = SearchNodes("","Search/Set.gif")
+           let nodes = SearchNodes("","resources/gif/Search/Set.gif")
            in @For result in results do
                 nodes.add(result)
               end;
@@ -146,7 +146,7 @@ context Walkers
        in if results->isEmpty
           then null
           else
-            let nodes = SearchNodes(o.toString(),"Search/Object.gif")
+            let nodes = SearchNodes(o.toString(),"resources/gif/Search/Object.gif")
             in @For result in results do
                  nodes.add(result)
                end;
@@ -173,7 +173,7 @@ context Walkers
       in if results->isEmpty
          then null
          else
-           let nodes = SearchNodes(t.toString(),"Search/Table.gif")
+           let nodes = SearchNodes(t.toString(),"resources/gif/Search/Table.gif")
            in @For result in results do
                 nodes.add(result)
               end;
@@ -188,7 +188,7 @@ context Walkers
       in if results->isEmpty
          then null
          else 
-           let nodes = SearchNodes("<Vector size = " + v.size() + ">","Search/Vector.gif")
+           let nodes = SearchNodes("<Vector size = " + v.size() + ">","resources/gif/Search/Vector.gif")
            in @For result in results do
                 nodes.add(result)
               end;

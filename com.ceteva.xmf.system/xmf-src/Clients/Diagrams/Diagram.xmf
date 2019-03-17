@@ -125,7 +125,7 @@ context Diagrams
         exportMenu.add(MenuAction("SVG",target,Seq{},Diagram::exportSVGMenuOperation));
         exportMenu.add(MenuAction("JPG",target,Seq{"jpg"},Diagram::exportImageMenuOperation));
         exportMenu.add(MenuAction("BMP",target,Seq{"bmp"},Diagram::exportImageMenuOperation));
-        // exportMenu.add(MenuAction("GIF",target,Seq{"gif"},Diagram::exportImageMenuOperation));
+        // exportMenu.add(MenuAction("GIF"resources/gif/,target,Seq{"gif"},Diagram::exportImageMenuOperation));
         exportMenu.add(MenuAction("ICO",target,Seq{"ico"},Diagram::exportImageMenuOperation));
         exportMenu.add(MenuAction("PNG",target,Seq{"png"},Diagram::exportImageMenuOperation));
         globalMenu.add(MenuAction("Show Hidden...",target,Seq{},Diagram::showMenuOperation));
@@ -179,9 +179,9 @@ context Diagrams
       self.defineActionHandler("Actions","Zoom +","zoom in","MDC/ZoomIn.png",Diagram::zoomIn);
       self.defineActionHandler("Actions","Zoom 1","zoom one","MDC/ZoomOne.png",Diagram::zoomOne);
       self.defineActionHandler("Actions","Zoom -","zoom out","MDC/ZoomOut.png",Diagram::zoomOut);
-      self.defineActionHandler("Actions","Hide Selected","hide","Tools/Ghost.gif",Diagram::hideSelected);
-      self.defineActionHandler("Actions","Copy to Clipboard","clip","Tools/Copy.gif",Diagram::copyDiagramToClipboard);
-      self.defineActionHandler("Actions","Add New Button","add new button","User/Balls1.gif",Diagram::addNewButton)
+      self.defineActionHandler("Actions","Hide Selected","hide","resources/gif/Tools/Ghost.gif",Diagram::hideSelected);
+      self.defineActionHandler("Actions","Copy to Clipboard","clip","resources/gif/Tools/Copy.gif",Diagram::copyDiagramToClipboard);
+      self.defineActionHandler("Actions","Add New Button","add new button","resources/gif/User/Balls1.gif",Diagram::addNewButton)
 //	  self.updateTEMPmax := 0;
 /*      let o = self; updateTEMPmax=0 in
         @XOCL::Fork
@@ -228,7 +228,7 @@ context Diagrams
     @Operation defineToggles()
       // Toggles switch properties on and off...
       self.defineToolGroup("Toggles");
-      self.defineToggleHandler("Toggles","Magnetic Waypoints","magnetic",magneticWaypoints,"XCore/Object.gif",Diagram::setMagneticWaypoints)
+      self.defineToggleHandler("Toggles","Magnetic Waypoints","magnetic",magneticWaypoints,"resources/gif/XCore/Object.gif",Diagram::setMagneticWaypoints)
     end
 
     @Operation defineToolGroupTypes()
