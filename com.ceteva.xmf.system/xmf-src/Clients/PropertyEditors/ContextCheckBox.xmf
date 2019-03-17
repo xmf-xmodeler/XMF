@@ -9,6 +9,10 @@ context PropertyEditors
 
   @Class ContextCheckBox extends FormCheckBox, ContextFormElement
 
+    @Constructor(value,labelText) end
+
+    @Constructor(id,value,labelText) end
+
     @Operation setBooleanIn(newValue:Boolean)
       try
         contex.set(slotName,newValue)

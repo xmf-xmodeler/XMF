@@ -72,7 +72,7 @@ context ClassXNode
     if node.name() <> newName.toString()
     then 
       node.setName(newName.toString());
-      self.daemon_changeButtonInToolbar();
+      self.daemon_changeButtonInToolbar(newName,oldName);
       self.daemon_changeOfFieldInstances(newName)
     end
   end   

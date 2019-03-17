@@ -60,15 +60,14 @@ context PropertyEditorXCore
     @Operation setClauseCodeComboBoxDisplay()
       let
         comboBox = GrammarClauseCodeComboBox(0,0,0,0);
-        codeBox = FormTextBox(0,0,0,0,"",false)
-          .setIsEditable(false); // editing grammar clauses needs to be supported in future
-        label = FormLabel(0,0,"clauses")
+        codeBox = FormTextBox("",false,"clauses")
+          .setIsEditable(false) // editing grammar clauses needs to be supported in future
       in
         self.clauseCodeComboBoxDisplay := CodeComboBoxDisplay(label,comboBox,codeBox,self.element);
         self.resetClauseCodeComboBoxDisplay()
       end
     end
-    
+
     @Operation resetClauseCodeComboBoxDisplay()
       @For clause in element.clauses do
         let
@@ -76,7 +75,7 @@ context PropertyEditorXCore
           action =
             @Operation action()
               clauseCodeComboBoxDisplay.resetCodeBox(clause,true)
-            end 
+            end
         in
           clauseCodeComboBoxDisplay.comboBox.addItem(clauseName,action,self)
         end

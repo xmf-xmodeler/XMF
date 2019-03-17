@@ -10,8 +10,11 @@ context PropertyEditors
 
     @Attribute enum : Enum (?,!) end
 
-    @Constructor(x,y,width,height,element) end
-    @Constructor(id,x,y,width,height,element) end
+    @Constructor(x,y,width,height,element,labelText)
+		end
+
+    @Constructor(id,x,y,width,height,element,labelText)
+		end
 
     @Operation addItems()
       @For content inTableValues enum.contents do
@@ -27,7 +30,7 @@ context PropertyEditors
                               self.setElement(choice)
                          end
                        end
-          in 
+          in
             self.addItem(choiceString,action,self)
           end
         end
