@@ -48,7 +48,14 @@ context FmmlxDiagrams
     	      let
     	        mapping = mapping.addOrGetObjectMapping(c)
     	      in
-    	        result := result.append([[mapping.id, c.name.toString(), mapping.lastKnownDiagramX, mapping.lastKnownDiagramY]])
+    	        result := result.append([[
+    	        mapping.id, 
+    	        c.name.toString(), 
+    	        c.level, // level
+    	        -1,// of-ID
+    	        [],// parents-ID
+    	        mapping.lastKnownDiagramX, 
+    	        mapping.lastKnownDiagramY]])
     	      end
     	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
     	      /*
