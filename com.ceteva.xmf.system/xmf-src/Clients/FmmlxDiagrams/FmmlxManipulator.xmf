@@ -36,10 +36,10 @@ context FmmlxDiagrams
           // We prepare a set of all Attributes from the class and a set of all Operations
         A = ofClass.allAttributes();
         O = ofClass.allOperations();
-          // We also prepare a set to put (which?) Attributes/Operatins into to (do what?)
+          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
         intrinsicA = Set{};
         intrinsicO = Set{};
-        myLevel = ofClass.level - 1;
+        myLevel = ofClass.level - 1
       in 
         Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
       
@@ -116,9 +116,10 @@ context FmmlxDiagrams
          ofClass.instances := ofClass.instances.including(obj);
          
          // todo: name, parents, abstract ...
+        obj.level := myLevel;
         package.add(obj);         
         obj.setName(Symbol(name)); // todo: test name
-        obj.level := myLevel;
+        obj.addParent(FMML::MetaClass);
         obj
       end
     end
