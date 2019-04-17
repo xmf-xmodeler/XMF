@@ -34,18 +34,19 @@ context FmmlxDiagrams
           // create new Object
         obj = Kernel_mkObj(); 
           // We prepare a set of all Attributes from the class and a set of all Operations
-        A = self.allAttributes();
-        O = self.allOperations();
+        A = ofClass.allAttributes();
+        O = ofClass.allOperations();
           // We also prepare a set to put (which?) Attributes/Operatins into to (do what?)
         intrinsicA = Set{};
-        intrinsicO = Set{}
+        intrinsicO = Set{};
+        myLevel = ofClass.level - 1;
       in 
         Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
       
          // Then we loop through the Attributes
          @While not A->isEmpty do
            let a = A->sel // pick any one Attribute
-           in if a.isIntrinsic andthen a.instLevel < obj.of().level - 1 
+           in if a.isIntrinsic andthen a.instLevel < myLevel
               then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
                 intrinsicA := intrinsicA.including(a)
               else // otherwise it becomes a slot and is initialised
@@ -64,7 +65,7 @@ context FmmlxDiagrams
          // Then we loop through the Operations
          @While not O->isEmpty do
            let op = O->sel // pick any one Operation
-           in if op.isIntrinsic andthen op.instLevel < obj.of().level - 1 
+           in if op.isIntrinsic andthen op.instLevel < myLevel 
               then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
                 intrinsicO := intrinsicO.including(op)
               //else // otherwise it becomes available and we do nothing
@@ -74,7 +75,7 @@ context FmmlxDiagrams
          end;
          
          
-         if self.inheritsFrom(Classifier)
+         if ofClass.inheritsFrom(Classifier)
          then
            obj.parents := obj.defaultParents()
          else
@@ -102,8 +103,8 @@ context FmmlxDiagrams
 //           end
 //		 end;
 //
-//		   if self.delegatesTo <> null	
-//		   then self.selectRoleFiller(obj, self) end;
+//		   if ofClass.delegatesTo <> null	
+//		   then ofClass.selectRoleFiller(obj, ofClass) end;
 //
 //         if Root.contents.keys().includes("TargetPackage".asSymbol())
 //         then
@@ -115,8 +116,10 @@ context FmmlxDiagrams
          ofClass.instances := ofClass.instances.including(obj);
          
          // todo: name, parents, abstract ...
-         
-         obj
+        package.add(obj);         
+        obj.setName(Symbol(name)); // todo: test name
+        obj.level := myLevel;
+        obj
       end
     end
 
