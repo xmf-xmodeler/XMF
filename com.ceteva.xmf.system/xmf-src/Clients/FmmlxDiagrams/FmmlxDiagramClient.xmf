@@ -79,10 +79,34 @@ context FmmlxDiagrams
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
-                result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel]])
+                result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
               end
             end
           end;
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+     
+    @Operation getAllAttributes(idRequest, className) 
+        let 
+          resultOwn   = [];
+          resultOther = [];
+          result = []
+        in 
+          @For c in package.getChildren() do 
+            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+            then 
+              @For a in c.attributes do 
+                resultOwn   :=   resultOwn.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
+              end;
+              @For a in (c.allAttributes() - c.attributes) do 
+                if a.isIntrinsic then
+                  resultOther := resultOther.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
+                end
+              end            
+            end
+          end;
+          result := [resultOwn, resultOther];
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end

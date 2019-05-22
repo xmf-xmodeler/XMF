@@ -150,6 +150,39 @@ context Root::FMML
          newAll
       end
     end
+    
+  @Operation ownAttributes():Set(Attribute)
+    attributes
+  end
+ 
+  @Operation allAttributes():Set(Attribute)
+     
+    let allA = attributes;
+        allP = parents; // parents and classes
+        result = {};
+        alreadyChecked = {}
+    in //("checking " + self.name + " for attributes").println();
+       allP := allP->union({self.of()});
+       @While not allP->isEmpty do
+         //("allP:= " + allP).println();
+         let p = allP->sel
+         in alreadyChecked := alreadyChecked->union({p});
+            //("  checking " + p.name + " for attributes").println();
+            allA := allA->union(p.attributes);
+            if p.parents.contains(FMML::MetaClass)
+              then allP := allP->union({p.of()}) end;
+            allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
+         end
+       end;
+       // remove all intrinsic, where level is too high
+       @For a in allA do
+         if (not a.isIntrinsic) or a.instLevel < self.level then
+           result := result->union({a})
+         end
+       end;
+       result
+    end
+  end
 	
 	@Operation allEnds():XCore::Element
       self.allAttributes()->select(a |

@@ -25,21 +25,35 @@ context FmmlxDiagrams
 //    end
 //  end
   
+  /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
+     all slots need to be created. If the multiplicity of the slot mandates, a value needs to be aquired, either default or otherwise.
+     For Associations, multiplicity must be checked as well.
+     
+     The following operation assumes the former to have been checked. 
+     Until proving the mandatory slots has been taken care of, all slots will be simply initiated with null.
+  
+  */
   @Operation addInstance(package, ofClass, name, parents, abstract):Object
 
+      // The following seems to be trivial, but better check once more
       if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
 
-	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of()=ofClass
+	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
       let 
           // create new Object
         obj = Kernel_mkObj(); 
+        myLevel = ofClass.level - 1;
+        
           // We prepare a set of all Attributes from the class and a set of all Operations
+          // !!! This needs to be changed to fit its purpose here.
+          // !!! We need a list of all Attributes which are to be instantiated here.
         A = ofClass.allAttributes();
         O = ofClass.allOperations();
+
           // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
+          // !!! This can probably be dropped
         intrinsicA = Set{};
-        intrinsicO = Set{};
-        myLevel = ofClass.level - 1
+        intrinsicO = Set{}
       in 
         Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
       
@@ -73,7 +87,6 @@ context FmmlxDiagrams
               O := O->excluding(op) // we remove that attribute from the list as it has been handled
            end
          end;
-         
          
          if ofClass.inheritsFrom(Classifier)
          then
