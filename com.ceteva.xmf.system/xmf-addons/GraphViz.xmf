@@ -1,0 +1,293 @@
+parserImport XOCL;
+
+context Root
+
+  @Package GraphViz
+
+    @Class Graph 
+
+      @Attribute nodes : Seq(Node) (+,-) end
+
+      @Attribute edges : Seq(Edge) (+,-) end
+
+      @Attribute ids : Table = Table(10) end
+
+      @Attribute counter : Integer end
+
+      @Constructor(nodes,edges,ids,counter) ! end
+
+      @Operation reset()
+
+        self.nodes := [];
+
+        self.edges := [];
+
+        ids.clear();
+
+        self.counter := 0;
+
+        self
+
+      end
+
+      @Operation getId(x):Integer
+
+        if ids.hasKey(x)
+
+        then ids.get(x)
+
+        else
+
+          let k = counter
+
+          in self.counter := counter +1;
+
+              ids.put(x,k);
+
+              k
+
+          end
+
+        end
+
+      end 
+
+      @Operation addNode(id:Integer,label:String,style:String)
+
+        self.addToNodes(Node(id,label,style))
+
+      end
+
+      @Operation addEdge(source:Integer,target:Integer,label:String)
+
+        self.addToEdges(Edge(source,target,label))
+
+      end
+
+      @Operation graphViz(out:OutputChannel) 
+
+        format(out, "digraph {~%  rankdir=\"LR\"~%",Seq{});
+
+        @For node in nodes do
+
+          node.graphViz(out)
+
+        end;
+
+        @For edge in edges do
+
+          edge.graphViz(out)
+
+        end;
+
+        format(out, "}~%",Seq{})
+
+      end 
+
+      @Operation write(path:String)
+
+        @WithOpenFile(fout -> path)
+
+          self.graphViz(fout)
+
+        end
+
+      end
+
+    end
+
+    
+
+    @Class Node
+
+      @Attribute id:Integer end
+
+      @Attribute label : String end
+
+      @Attribute style : String end
+
+      @Constructor(id) ! end
+
+      @Constructor(id,label,style) end
+
+      @Operation graphViz(out:OutputStream)
+
+        format(out, "~S",Seq{id});
+
+        if style <> "" or label <> ""
+
+        then 
+
+          format(out, "[",Seq{});
+
+          if label <> "" then format(out, "label=~S",Seq{label}) end;
+
+          if style <> ""
+
+          then
+
+            if label <> "" then format(out, " ,",Seq{}) end;
+
+            format(out, "~S",Seq{style})
+
+          end;
+
+          format(out, "]",Seq{})
+
+        end;
+
+        format(out, ";~%",Seq{})
+
+      end
+
+    end
+
+    
+
+    @Class Edge 
+
+      @Attribute source : Integer end
+
+      @Attribute target : Integer end
+
+      @Attribute style : String end
+
+      @Constructor(source,target) ! end
+
+      @Constructor(source,target,style) end
+
+      @Operation graphViz(out:OutputChannel)
+
+        format(out, "~S -> ~S",Seq{source,target});
+
+        if style <> ""
+
+        then 
+
+          format(out, "[~S]",Seq{style})
+
+        end;
+
+        format(out, ";~%",Seq{})
+
+      end
+
+    end
+
+  
+
+  end
+
+  
+
+  context Root
+
+     @Operation test1()
+
+       GraphViz::Node(10).graphViz(stdout);
+
+       GraphViz::Node(10,"xxx","yyy").graphViz(stdout);
+
+       let g = GraphViz::Graph()
+
+       in g.addNode(g.getId("1"),"1","");
+
+           g.graphViz(stdout);
+
+           g
+
+       end
+
+     end
+
+  
+
+  context Root
+
+     @Operation test2()
+
+       let File = xmf.javaClass("java.io.File");
+
+           GraphViz = xmf.javaClass("tool.external.graphviz.GraphViz",["../tmp/bin"]) then
+
+           gv = GraphViz("../tmp");
+
+           type = "svg";
+
+           representationType = "dot" then
+
+           out = File(xmf.projDir() + "/graphviz/out." + type)
+
+       in gv.addln(gv.start_graph());
+
+          gv.addln("A -> B;");
+
+          gv.addln("A -> C;");
+
+          gv.addln(gv.end_graph());
+
+          let s = gv.getString(xmf.projDir()+"/graphviz","out","svg","dot") then
+
+              i = s.indexOf("<svg",0) then
+
+              s = s.subString(i,s.size())
+
+          in xmf.browse("<html>"+s+"</html>")
+
+          end
+
+       end
+
+     end
+
+  
+
+  context Root
+
+     @Operation test3(p:Package)
+
+       let File = xmf.javaClass("java.io.File");
+
+           GraphViz = xmf.javaClass("tool.external.graphviz.GraphViz",["../tmp/bin"]) then
+
+           gv = GraphViz("../tmp");
+
+           type = "svg";
+
+           representationType = "dot" then
+
+           out = File(xmf.projDir() + "/graphviz/out." + type)
+
+       in gv.addln(gv.start_graph());
+
+          @For c in p.classes do
+
+            gv.addln(c.name+";");
+
+            @For super in c.parents do
+
+              gv.addln(c.name + " -> " + super.name + ";")
+
+            end
+
+          end;
+
+          gv.addln(gv.end_graph());
+
+          let s = gv.getString(xmf.projDir()+"/graphviz","out","svg","dot") then
+
+              i = s.indexOf("<svg",0) then
+
+              s = s.subString(i,s.size()) then
+              
+              h = "<html>"+s+"</html>"
+
+          in 
+          
+          xmf.browse(h)
+
+          end
+
+       end
+
+     end

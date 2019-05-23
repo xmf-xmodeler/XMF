@@ -1,0 +1,65 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+context FmmlxDiagrams
+
+@Class FmmlxDiagramMapping
+
+    @Attribute mapping : Set = {} end
+    @Attribute nextID : Integer = 0 end
+    
+    @Operation addOrGetObjectMapping(o : Object)
+      let 
+        foundMapping = null 
+      in 
+        @For mappingInfo in mapping do
+          if mappingInfo.object = o
+          then foundMapping := mappingInfo
+          end // if
+        end; // for
+        if foundMapping <> null
+        then 
+          foundMapping
+        else
+          let 
+            newMappingInfo = MappingInfo()
+          in 
+            self.nextID := self.nextID + 1;
+            newMappingInfo.object := o;
+            newMappingInfo.id := self.nextID;
+            newMappingInfo.lastKnownDiagramX := 0;
+            newMappingInfo.lastKnownDiagramY := 0;
+            self.mapping := self.mapping + {newMappingInfo};
+            newMappingInfo
+          end // let
+        end // if 
+      end // let 
+    end
+    
+    @Operation setNewPosition(objectID, x, y) 
+      @For mappingInfo in mapping do
+        if mappingInfo.id = objectID
+        then 
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y
+        end // if
+      end // for
+    end
+    
+    @Operation getMapping(objectID) 
+      let result = null in 
+        @For mappingInfo in mapping do
+          if mappingInfo.id = objectID
+          then 
+            result := mappingInfo
+          end // if
+        end; // for
+        result
+      end //let
+    end
+    
+    @Operation cleanUpMapping() null end
+
+end // Class

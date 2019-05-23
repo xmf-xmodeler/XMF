@@ -1,0 +1,123 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+context FmmlxDiagrams
+
+@Class FmmlxManipulator
+
+  @Operation addMetaClass(package, name, level, parents, abstract)
+    let 
+      newClass = FMML::MetaClass(name, level)
+    in
+      package.add(newClass);
+      newClass
+    end    
+  end
+  
+//  @Operation addInstance(package, ofClass, name, parents, abstract)
+//    let 
+//      newInstance = ofClass(name)
+//    in
+//      package.add(newInstance);
+//      newInstance
+//    end
+//  end
+  
+  @Operation addInstance(package, ofClass, name, parents, abstract):Object
+
+      if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
+
+	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of()=ofClass
+      let 
+          // create new Object
+        obj = Kernel_mkObj(); 
+          // We prepare a set of all Attributes from the class and a set of all Operations
+        A = self.allAttributes();
+        O = self.allOperations();
+          // We also prepare a set to put (which?) Attributes/Operatins into to (do what?)
+        intrinsicA = Set{};
+        intrinsicO = Set{}
+      in 
+        Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
+      
+         // Then we loop through the Attributes
+         @While not A->isEmpty do
+           let a = A->sel // pick any one Attribute
+           in if a.isIntrinsic andthen a.instLevel < obj.of().level - 1 
+              then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+                intrinsicA := intrinsicA.including(a)
+              else // otherwise it becomes a slot and is initialised
+                if a.init <> null
+                then
+                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
+                else
+                  Kernel_addAtt(obj,a.name,a.type.default())
+                end;
+                if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+              end;
+              A := A->excluding(a) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         // Then we loop through the Operations
+         @While not O->isEmpty do
+           let op = O->sel // pick any one Operation
+           in if op.isIntrinsic andthen op.instLevel < obj.of().level - 1 
+              then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
+                intrinsicO := intrinsicO.including(op)
+              //else // otherwise it becomes available and we do nothing
+              end;
+              O := O->excluding(op) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         
+         if self.inheritsFrom(Classifier)
+         then
+           obj.parents := obj.defaultParents()
+         else
+           false
+         end;
+         
+         obj.init();
+         
+//                DON'T             
+//         // Now       copy the intrinsic attributes to the object
+//         @While not intrinsicA.isEmpty() do
+//           let intA = intrinsicA.sel()
+//           in 
+//			obj.add(intA);
+//              intrinsicA := intrinsicA.excluding(intA)
+//           end
+//		 end;
+//         
+//         // Copy the operations as well
+//         @While not intrinsicO.isEmpty() do
+//           let intO = intrinsicO.sel()
+//           in 
+//			obj.add(intO);
+//              intrinsicO := intrinsicO.excluding(intO)
+//           end
+//		 end;
+//
+//		   if self.delegatesTo <> null	
+//		   then self.selectRoleFiller(obj, self) end;
+//
+//         if Root.contents.keys().includes("TargetPackage".asSymbol())
+//         then
+//           TargetPackage.add(obj)
+//         else
+//           false
+//         end;
+
+         ofClass.instances := ofClass.instances.including(obj);
+         
+         // todo: name, parents, abstract ...
+         
+         obj
+      end
+    end
+
+end // Class

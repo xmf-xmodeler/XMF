@@ -8,6 +8,7 @@ context FmmlxDiagrams
 @Class FmmlxDiagramClient extends Client//, DiagramListener
 
 	@Attribute package : Package end
+	@Attribute mapping : FmmlxDiagramMapping = FmmlxDiagramMapping() end
 	@Attribute communicator : Element end
 
     @Constructor(name)
@@ -37,17 +38,6 @@ context FmmlxDiagrams
         FmmlxDiagram() // vestigial return value for diagram manager
     end
     
-    @Operation fibo_i(n) 
-       if n <= 2
-          then 1
-          else self.fibo_i(n-1) + self.fibo_i(n-2)
-      end
-    end
-    
-    @Operation fibo(idRequest, n) 
-       self.communicator.sendMessageToJava([idRequest, self.fibo_i(n)])
-    end
-    
     @Operation getAllObjects(idRequest)
         let 
           result = [] 
@@ -55,15 +45,26 @@ context FmmlxDiagrams
     	  @For c in package.getChildren() do
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
-    	      result := result.append([c.name.toString()])
+    	      let
+    	        mapping = mapping.addOrGetObjectMapping(c)
+    	      in
+    	        result := result.append([[mapping.id, c.name.toString(), mapping.lastKnownDiagramX, mapping.lastKnownDiagramY]])
+    	      end
+    	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
+    	      /*
+    	      if c is not in mapping
+    	        add c to mapping
+    	      return c with mapping info
+    	      */
+    	      //result := result.append([c.name.toString()])
     	    end
     	  end;
+    	  // clean up mapping ? 
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end
     
     @Operation getOwnAttributes(idRequest, className) 
-        "getOwnAttributes".println();
         let 
           result = [] 
         in 
@@ -80,7 +81,6 @@ context FmmlxDiagrams
     end
     
     @Operation getSlots(idRequest, objectName) 
-        "getSlots".println();
         let 
           result = [] 
         in 
@@ -97,7 +97,6 @@ context FmmlxDiagrams
     end
       
     @Operation getOwnOperations(idRequest, className) 
-        "getOwnOperations".println();
         let 
           result = [] 
         in 
@@ -112,4 +111,53 @@ context FmmlxDiagrams
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end  
+    
+    @Operation sendNewPosition(idRequest, objectID, x, y)
+        mapping.setNewPosition(objectID, x, y);
+        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+    end
+    
+    @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
+        ("addMetaClass " + name 
+        + " on level " + level 
+        + " with parents " + parents 
+        + (if abstract then " and abstract " else " " end)
+        + "at position " + x + "/" + y).println(); 
+        
+        let 
+          m = FmmlxDiagrams::FmmlxManipulator() 
+        then 
+          newClass = m.addMetaClass(package, name, level, parents, abstract)
+        then
+          mappingInfo = mapping.addOrGetObjectMapping(newClass)
+        in 
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y
+        end;
+        "addNewMetaClass done".println();
+        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+    end 
+    
+    @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
+        ("addInstance " + name 
+        + " of id " + ofId 
+        + " with parents " + parents 
+        + (if abstract then " and abstract " else " " end)
+        + "at position " + x + "/" + y).println(); 
+        
+        let 
+          m = FmmlxDiagrams::FmmlxManipulator() 
+        then 
+          ofClass = mapping.getMapping(ofId).object
+        then 
+          newInstance = m.addInstance(package, ofClass, name, parents, abstract)
+        then
+          mappingInfo = mapping.addOrGetObjectMapping(newInstance)
+        in 
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y
+        end;
+        "addInstance done".println();
+        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+    end 
 end
