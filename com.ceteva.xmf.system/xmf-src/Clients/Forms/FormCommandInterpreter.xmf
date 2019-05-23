@@ -5,13 +5,13 @@ import Clients;
 context Forms
 
   @Class FormCommandInterpreter extends XMLCommandInterpreter
-  
+
     @Doc
        This class defines a command interpreter over forms. It can be used as the basis
        for defining event driven mappings. The mapping handles the following output
        commands by sen-ding them in the appropriate format to the client connected to the
        output channel:
-           [newFormCommandCommand(form)] 
+           [newFormCommandCommand(form)]
        end
 
     @Operation addComboBoxItem(combo:FormComboBox,text:String)
@@ -59,7 +59,7 @@ context Forms
         textboxId
       end
     end
-    
+
     @Operation changesMade(textbox:FormTextBox,value:Boolean)
       let textboxId = textbox.id() in
         @SendCommand(self)
@@ -95,7 +95,7 @@ context Forms
         formId
       end
     end
-    
+
     @Operation delete(element)
       let elementId = element.id()
       in
@@ -160,11 +160,11 @@ context Forms
         textComponentId
       end
     end
-    
+
     @Operation getText(textBox:FormTextBox)
       self.call("getText",Seq{textBox.id()})
     end
-    
+
     @Operation getTextDimension(text)
       let result = self.call("getTextDimension",Seq{text})
       in Seq{result->at(0),result->at(1)}
@@ -212,7 +212,7 @@ context Forms
     @Operation newButtonCommand(parent,button:FormButton)
       let buttonId = self.allocateId(button) in
         @SendCommand(self)
-          newButton(parent.id(),buttonId,button.label(),button.x(),button.y(),button.width(),button.height())
+          newButton(parent.id(),buttonId,button.label())
         end;
         buttonId
       end
@@ -221,12 +221,12 @@ context Forms
     @Operation newCheckBoxCommand(parent,checkBox:FormCheckBox)
       let checkBoxId = self.allocateId(checkBox) in
         @SendCommand(self)
-          newCheckBox(parent.id(),checkBoxId,checkBox.x(),checkBox.y(),checkBox.value())
+          newCheckBox(parent.id(),checkBoxId,checkBox.value(),checkBox.labelText)
         end;
         checkBoxId
       end
     end
-    
+
     @Operation newComboBoxCommand(parent,combobox:FormComboBox)
       let comboboxId = self.allocateId(combobox) in
         @SendCommand(self)
@@ -235,7 +235,7 @@ context Forms
         comboboxId
       end
     end
- 
+
     @Operation newFormCommand(form:Form)
       let formId = self.allocateId(form) in
         @SendCommand(self)
@@ -244,7 +244,7 @@ context Forms
         formId
       end
     end
-    
+
     @Operation newIconedTreeNodeCommand(parent,node:TreeNode)
       let nodeId = self.allocateId(node) in
         @SendCommand(self)
@@ -266,22 +266,23 @@ context Forms
     @Operation newListCommand(parent,list:FormList)
       let listId = self.allocateId(list) in
         @SendCommand(self)
-          newList(parent.id(),listId,list.x(),list.y(),list.width(),list.height())
+          newList(parent.id(),listId,list.labelText)
         end;
         listId
       end
-    end 
+    end
 
     @Operation newTextBoxCommand(parent,textbox:FormTextBox)
       let textboxId = self.allocateId(textbox) in
         @SendCommand(self)
-          newTextBox(parent.id(),textboxId,textbox.x(),textbox.y(),textbox.width(),textbox.height(),textbox.isEditable())
+          newTextBox(parent.id(),textboxId,textbox.isEditable(),textbox.labelText)
         end;
         textboxId
       end
     end
-  
+
     @Operation newTextCommand(parent,text:FormLabel)
+    // creates labels
       let textId = self.allocateId(text) in
         @SendCommand(self)
           newText(parent.id(),textId,text.text(),text.x(),text.y())
@@ -293,7 +294,7 @@ context Forms
     @Operation newTextFieldCommand(parent,textfield:FormTextField)
       let textfieldId = self.allocateId(textfield) in
         @SendCommand(self)
-          newTextField(parent.id(),textfieldId,textfield.x(),textfield.y(),textfield.width(),textfield.height(),textfield.isEditable())
+          newTextField(parent.id(),textfieldId,textfield.isEditable(),textfield.labelText)
         end;
         textfieldId
       end
@@ -316,7 +317,7 @@ context Forms
         treeId
       end
     end
-    
+
     @Operation newTreeNodeCommand(parent,node:TreeNode)
       let nodeId = self.allocateId(node) in
         @SendCommand(self)
@@ -348,7 +349,7 @@ context Forms
         end;
         tableId
       end
-    end 
+    end
 
     @Operation setTableItemCommand(table:FormTable,col:Integer,row:Integer,item:FormElement)
       let itemId = item.id() in
@@ -357,7 +358,7 @@ context Forms
         end;
         itemId
       end
-    end 
+    end
 
     @Operation setTableColumnWidthCommand(table:FormTable,col:Integer,width:Integer)
       let tableId = table.id() in
@@ -366,7 +367,7 @@ context Forms
         end;
         tableId
       end
-    end 
+    end
 
     @Operation setTableColumnTitleCommand(table:FormTable,col:Integer,title:String)
       let tableId = table.id() in
@@ -375,7 +376,7 @@ context Forms
         end;
         tableId
       end
-    end 
+    end
 
     @Operation removeItem(item:ListElement)
       let itemId = item.id() in
@@ -400,7 +401,7 @@ context Forms
         nodeId
       end
     end
-    
+
     @Operation setBackground(component,red,green,blue)
       let componentId = component.id() in
         @SendCommand(self)
@@ -460,7 +461,7 @@ context Forms
         textcomponentId
       end
     end
-    
+
     @Operation setFocus(form:Form)
       let formId=form.id() in
         if xmf.clientManager().idManager.hasId(formId)
@@ -497,6 +498,7 @@ context Forms
     end
 
     @Operation setText(textcomponent,text:String)
+    // sets text in Textfields
       let textcomponentId=textcomponent.id() in
         @SendCommand(self)
           setText(textcomponentId,text)

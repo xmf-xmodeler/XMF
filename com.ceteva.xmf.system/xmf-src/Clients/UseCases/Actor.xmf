@@ -11,7 +11,7 @@ context UseCaseDiagrams
   @Class Actor extends Node
   
     @Attribute name  : Text  = Text("Actor",0,0,true) end
-    @Attribute image : Image = Image("images/Actor.gif",0,0,30,50) end
+    @Attribute image : Image = Image("resources/gif/images/Actor.gif",0,0,30,50) end
     
     @Constructor(x,y) ! 
       self.setMenuKey(self) 

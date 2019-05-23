@@ -36,7 +36,7 @@ context Root
               minWidth = 400
               minHeight = 400
               @TreeNode NodeA(readonly) "A Node" 
-                icon = "Exceptions/Exception.gif"
+                icon = "resources/gif/Exceptions/Exception.gif"
                 @Nodes Children
                   @Ref NodeA end
                 end
@@ -47,7 +47,7 @@ context Root
               end
               @Nodes Bs
                 @TreeNode NodeB "A Node" 
-                  icon = "Exceptions/Self.gif"
+                  icon = "resources/gif/Exceptions/Self.gif"
                   @Menu
                     @MenuAction Delete self.delete() end
                   end

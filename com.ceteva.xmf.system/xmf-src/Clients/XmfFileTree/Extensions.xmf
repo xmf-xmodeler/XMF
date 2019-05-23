@@ -424,7 +424,7 @@ context XmfFileTree
   @Operation mapResourcePosition(p:ResourcePosition):SearchNode
     @Case p of
       DirectoryPosition(d) do
-        let node = SearchNodes(d.fullPath(),"Search/Directory.gif")
+        let node = SearchNodes(d.fullPath(),"resources/gif/Search/Directory.gif")
         in @For position in p.contents() do
              node.add(mapResourcePosition(position))
            end;
@@ -432,7 +432,7 @@ context XmfFileTree
         end
       end
       FilePosition(f) do
-        let node = SearchNodes(f.name,"Search/File.gif")
+        let node = SearchNodes(f.name,"resources/gif/Search/File.gif")
         in @For position in p.contents() do
              let label = "line " + position.line + " char " + position.char;
                  action = 
@@ -443,7 +443,7 @@ context XmfFileTree
                        editor.addLineHighlight(position.line) 
                     end
                   end
-             in node.add(SearchResult(label,p,"Search/Search.gif",action))
+             in node.add(SearchResult(label,p,"resources/gif/Search/Search.gif",action))
              end
            end;
            node

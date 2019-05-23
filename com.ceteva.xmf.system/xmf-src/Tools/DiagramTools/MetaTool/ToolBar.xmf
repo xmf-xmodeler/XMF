@@ -20,7 +20,7 @@ context MetaTool
       minWidth = 100
       minHeight = 30
       @Image toolBarImage(CENTRE)
-        "ToolBar.gif"
+        "resources/gif/ToolBar.gif"
         width = 15 
         height = 15
         @Menu
@@ -38,7 +38,7 @@ context MetaTool
           @PaddedBox groupAttribute(CENTRE,HORIZONTAL)
             pad = 3
             @Image groupImage(LEFT)
-              "Group.gif"
+              "resources/gif/Group.gif"
               width = 15
               height = 15
               @Menu
@@ -61,7 +61,7 @@ context MetaTool
               @PaddedBox button(CENTRE,HORIZONTAL)
                 pad = 3
                 @Image groupImage(LEFT)
-                  "Button.gif"
+                  "resources/gif/Button.gif"
                   width = 15
                   height = 15
                 end
@@ -76,13 +76,13 @@ context MetaTool
                 end
                 @Or EdgeOrNode
                   @Image edgeImage(RIGHT)
-                    "Edge.gif"
+                    "resources/gif/Edge.gif"
                     width = 15
                     height = 15
                     @Menu @MenuAction Node self.owner().changeTo("EdgeOrNode","nodeImage") end end
                   end
                   @Image nodeImage(RIGHT)
-                    "Node.gif"
+                    "resources/gif/Node.gif"
                     width = 15
                     height = 15
                     @Menu @MenuAction Edge self.owner().changeTo("EdgeOrNode","edgeImage") end end

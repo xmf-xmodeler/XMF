@@ -18,7 +18,7 @@ context Root
     // Nodes have ports (so they can be linked via edges)...
     @NodeType Node(hasport)
       // Place an image above the label...
-      @Image image "Activity.gif" width = 30 height = 30 end
+      @Image image "resources/gif/Activity.gif" width = 30 height = 30 end
         // Pad out the text...
       @Text label(CENTRE) "label" padLeft = 2 padRight = 2 padTop = 2 padBottom = 2 end
       // A node has a delete menu action. Note that 'self' refers to the
@@ -39,8 +39,8 @@ context Root
     // The tool bar allows nodes and edges to be created...
     @ToolBar 
       @ToolGroup Operations
-        @ToolButton Node          icon = "Tools/Node.gif" end
-        @ToolButton Edge   isEdge icon = "Tools/Edge.gif"     end
+        @ToolButton Node          icon = "resources/gif/Tools/Node.gif" end
+        @ToolButton Edge   isEdge icon = "resources/gif/Tools/Edge.gif"     end
       end
     end
 end

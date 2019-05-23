@@ -53,7 +53,7 @@ context ClassMapping
     @Operation actionAdded(handler)
       // Add the action to the appropriate group in the palette...
       let name = handler.getProperty("actionName",handler.name.toString());
-          icon = handler.getProperty("actionIcon","Tools/Activity.gif");
+          icon = handler.getProperty("actionIcon","resources/gif/Tools/Activity.gif");
           group = handler.getProperty("actionGroup","Actions")
       in diagram.defineToolGroup(group);
          diagram.defineActionHandler(group,name,name,icon,handler)
@@ -133,15 +133,15 @@ context ClassMapping
          then 
            if class.inheritsFrom(XCore::Attribute)
            then 
-             diagram.defineNewHandler(groupName,className,true,"XCore/Attribute.gif",attHandler);
+             diagram.defineNewHandler(groupName,className,true,"resources/gif/XCore/Attribute.gif",attHandler);
              // Perhaps this should be done via another menu item...
              self.defineAttributeRegistryContributions(class)
            elseif class.isMetaClass()
            then 
-             diagram.defineNewHandler(groupName,className,false,"XCore/Class.gif",metaHandler);
+             diagram.defineNewHandler(groupName,className,false,"resources/gif/XCore/Class.gif",metaHandler);
              // Perhaps this should be done via another menu item...
              self.defineMetaClassRegistryContributions(class)
-           else diagram.defineNewHandler(groupName,className,false,"XCore/Object.gif",classHandler)
+           else diagram.defineNewHandler(groupName,className,false,"resources/gif/XCore/Object.gif",classHandler)
            end
          end
       end
@@ -325,7 +325,7 @@ context ClassMapping
       in diagram.defineToolGroup(name);
          @For class in package.classes when not(class.isAbstract) do
            let handler(x,y) = map.add(class())
-           in diagram.defineNewHandler(name,class.name.toString(),false,"XCore/Object.gif",handler)
+           in diagram.defineNewHandler(name,class.name.toString(),false,"resources/gif/XCore/Object.gif",handler)
            end
          end
       end
@@ -353,7 +353,7 @@ context ClassMapping
                "Meta Elements",
                a.name.toString() + "(subclass)",
                false,
-               "XCore/Attribute.gif",
+               "resources/gif/XCore/Attribute.gif",
                @Operation(x,y) 
                  // Create a sub-class of a..
                  let class = Class(thePackage.newName(a.name.toString() + "Like"))
@@ -368,7 +368,7 @@ context ClassMapping
                "Meta Elements",
                a.name.toString() + "(subclass)",
                false,
-               "XCore/Association.gif",
+               "resources/gif/XCore/Association.gif",
                @Operation(x,y) 
                  // Create a sub-class of a..
                  let class = Class(thePackage.newName(a.name.toString() + "Like"))
@@ -383,7 +383,7 @@ context ClassMapping
                "Meta Elements",
                metaclass.name.toString() + "(subclass)",
                false,
-               "XCore/Class.gif",
+               "resources/gif/XCore/Class.gif",
                @Operation(x,y) 
                  // Create a new instance of the meta-class and make it inherit 
                  // from Class (actually this should be selectable). Should get
@@ -1211,9 +1211,9 @@ context ClassMapping
             end;
           manageParents() = map.package.setParents_client();
           manageImports() = map.package.setImports_client()
-      in diagram.defineActionHandler("Actions","Delete Selected","delete","Tools/Delete.gif",delete);
-         diagram.defineActionHandler("Actions","Manage Parents","parents","XCore/Generalization.gif",manageParents);
-         diagram.defineActionHandler("Actions","Manage Imports","imports","XCore/Dependency.gif",manageImports);
+      in diagram.defineActionHandler("Actions","Delete Selected","delete","resources/gif/Tools/Delete.gif",delete);
+         diagram.defineActionHandler("Actions","Manage Parents","parents","resources/gif/XCore/Generalization.gif",manageParents);
+         diagram.defineActionHandler("Actions","Manage Imports","imports","resources/gif/XCore/Dependency.gif",manageImports);
          // User defined operations with the named properties below are transformed into actions.
          // The operation properties define the group, label and icon. These default as shown...
          @For handler in package.allOperations() when handler.getProperty("diagramAction",false) do
@@ -2180,10 +2180,10 @@ context ClassMapping
     end
     
     @Operation XCoreToolGroups()
-      diagram.defineNewHandler("XCore","Attribute (String)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,String));
-      diagram.defineNewHandler("XCore","Attribute (Integer)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Integer));
-      diagram.defineNewHandler("XCore","Attribute (Boolean)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Boolean));
-      diagram.defineNewHandler("XCore","Attribute (Float)",false,"XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Float))
+      diagram.defineNewHandler("XCore","Attribute (String)",false,"resources/gif/XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,String));
+      diagram.defineNewHandler("XCore","Attribute (Integer)",false,"resources/gif/XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Integer));
+      diagram.defineNewHandler("XCore","Attribute (Boolean)",false,"resources/gif/XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Boolean));
+      diagram.defineNewHandler("XCore","Attribute (Float)",false,"resources/gif/XCore/DataType.gif",PackageXClassDiagram::defaultSimpleAttribute(self,Float))
     end
     
     @Operation defaultSimpleAttribute(map:PackageXClassDiagram,type:Classifier)
@@ -2285,7 +2285,7 @@ context ClassMapping
              "XCore",
              "Object",
              false,
-             "XCore/Other.gif",
+             "resources/gif/XCore/Other.gif",
              let 
                p = self.package;
                m = self 
@@ -2314,7 +2314,7 @@ context ClassMapping
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Package.gif",
+                "resources/gif/XCore/Package.gif",
                 handler)
            end
          end;
@@ -2324,7 +2324,7 @@ context ClassMapping
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Class.gif",
+                "resources/gif/XCore/Class.gif",
                 handler)
            end
          end;
@@ -2335,13 +2335,13 @@ context ClassMapping
                 languageName,
                 c.name.toString(),
                 true,
-                "XCore/Attribute.gif",
+                "resources/gif/XCore/Attribute.gif",
                 handler);
               diagram.defineNewHandler(
                 languageName,
                 c.name.toString() + " (self)",
                 false,
-                "XCore/Attribute.gif",
+                "resources/gif/XCore/Attribute.gif",
                 handler) 
            end
          end;
@@ -2351,7 +2351,7 @@ context ClassMapping
                 languageName,
                 c.name.toString(),
                 true,
-                "XCore/Dependency.gif",
+                "resources/gif/XCore/Dependency.gif",
                 handler)
            end
          end;
@@ -2363,7 +2363,7 @@ context ClassMapping
                 languageName,
                 c.name.toString(),
                 false,
-                "XCore/Object.gif",
+                "resources/gif/XCore/Object.gif",
                 handler)
            end
          end

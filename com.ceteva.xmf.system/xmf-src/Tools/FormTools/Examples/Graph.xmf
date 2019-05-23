@@ -51,7 +51,7 @@ context Root
            // A tree node is created within the tree and is used as the
            // anchor of a menu for node creation...
            
-           icon = "Exceptions/Exception.gif"
+           icon = "resources/gif/Exceptions/Exception.gif"
            @Nodes Children
            
              // This is a container for a collection of nodes in the
@@ -62,7 +62,7 @@ context Root
                 // A node type that represents a graph-node. The menu
                 // on the tree node is used to delete it...
                 
-                icon = "Exceptions/Self.gif"
+                icon = "resources/gif/Exceptions/Self.gif"
                 @Menu
                   @MenuAction Delete self.delete() end
                 end
@@ -81,10 +81,10 @@ context Root
          // A tree-node that is used to contain tree-nodes that represent
          // edges. This works the same as the graph nodes above...
          
-         icon = "Exceptions/Exception.gif"
+         icon = "resources/gif/Exceptions/Exception.gif"
          @Nodes Children
             @TreeNode Edge "An Edge"
-              icon = "Exceptions/Self.gif"
+              icon = "resources/gif/Exceptions/Self.gif"
               @Menu
                 @MenuAction Delete self.delete() end
               end

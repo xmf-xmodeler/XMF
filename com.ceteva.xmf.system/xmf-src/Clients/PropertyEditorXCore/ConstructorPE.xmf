@@ -14,7 +14,7 @@ context PropertyEditorXCore
     @Attribute ownerDisplay : SingletonDisplay end
     @Attribute namesDisplay : SingletonDisplay end
     @Attribute sourceDisplay : CodeboxDisplay end
-    
+
     @Operation new()
       super();
       self.addTextBoxRules()
@@ -47,7 +47,7 @@ context PropertyEditorXCore
         .setSlotName("owner");
       Seq{selfDisplay,ofDisplay,ownerDisplay}
     end
-    
+
     @Operation namesDisplay()
       self.namesDisplay := self.newSingletonDisplay(ConstructorNamesTextField,self.element.names,"names");
       namesDisplay.field
@@ -56,7 +56,7 @@ context PropertyEditorXCore
         .setSlotName("names");
       namesDisplay
     end
-    
+
     @Operation refresh()
       super();
       self.addTextBoxRules()
@@ -66,7 +66,7 @@ context PropertyEditorXCore
       let
         source = self.element.source
       then
-        textbox = ConstructorSourceTextBox(0,0,0,0,source,true)
+        textbox = ConstructorSourceTextBox(source,true)
           .setContex(element)
           .setSlotName("source")
       in
@@ -122,7 +122,7 @@ context PropertyEditorXCore
       "@Operation " + op.name().toString() + "(classifier : Element):Element "
         + newBody + " end"
     end
-    
+
 
 
   end

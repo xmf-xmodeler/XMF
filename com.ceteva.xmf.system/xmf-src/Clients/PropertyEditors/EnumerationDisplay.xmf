@@ -7,24 +7,22 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class EnumerationDisplay
-  
-    @Attribute label : FormLabel end
+
     @Attribute comboBox : EnumChoiceComboBox end
-  
-    @Constructor(label,comboBox)
+
+    @Constructor(comboBox)
     end
 
     @Operation addToForm(form:Form,x,y,labelWidth,fieldWidth,fieldHeight)
-      self.addLabel(form,x,y+3);
       self.addComboBox(form,x+labelWidth,y,fieldWidth,fieldHeight)
     end
 
     @Operation addLabel(form,x,y)
       self.label.setX(x);
-      self.label.setY(y);
-      form.addElement(self.label)
+      self.label.setY(y)
+      //form.addElement(self.label)
     end
-    
+
     @Operation addComboBox(form,x,y,width,height)
       self.comboBox.setX(x);
       self.comboBox.setY(y);

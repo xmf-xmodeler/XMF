@@ -47,7 +47,7 @@ Root::type :=
   @NodeType Owner(OVERLAY,hasport) extends Actor
     @Box box(ALIGN)
       @Image image(ALIGN)
-        "Actor.gif"
+        "resources/gif/Actor.gif"
         width = 50
         height = 50
       end
@@ -56,7 +56,7 @@ Root::type :=
   end
   @NodeType External(hasport) extends Actor
     @Image image(ALIGN)
-      "Actor.gif"
+      "resources/gif/Actor.gif"
       width = 50
       height = 50
     end
@@ -64,10 +64,10 @@ Root::type :=
   end
   @ToolBar 
     @ToolGroup Operations
-      @ToolButton Owner           icon = "Tools/Activity.gif" end
-      @ToolButton External        icon = "Tools/Actor.gif"    end
-      @ToolButton Event    isEdge icon = "Tools/Edge.gif"     end
-      @ToolButton Optional isEdge icon = "Tools/Edge.gif"     end
+      @ToolButton Owner           icon = "resources/gif/Tools/Activity.gif" end
+      @ToolButton External        icon = "resources/gif/Tools/Actor.gif"    end
+      @ToolButton Event    isEdge icon = "resources/gif/Tools/Edge.gif"     end
+      @ToolButton Optional isEdge icon = "resources/gif/Tools/Edge.gif"     end
     end
   end
   @Menu

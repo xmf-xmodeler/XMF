@@ -182,9 +182,9 @@ context ClassDiagrams
       	when asso.edge = edge_new
       	do
     		self.owner.updateToolGroup("Edges");
-      		self.defineNewHandler("Edges",asso.association.name.toString(),true,"XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort,asso) );
+      		self.defineNewHandler("Edges",asso.association.name.toString(),true,"resources/gif/XCore/Association.gif", self.generateAssociationInstanceEdgeCreationMethod(sourcePort,targetPort,asso) );
       		self.owner.updateToolGroup("IntrinsicConstraintEdges");
-			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"XCore/Association.gif", self.generateIntrinsicAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2,asso) )      
+			self.defineNewHandler("IntrinsicConstraintEdges",asso.association.name.toString()+ " Constraints",true,"resources/gif/XCore/Association.gif", self.generateIntrinsicAssociationConstraintEdgeCreationMethod(asso.association.end1,asso.association.end2,asso) )
 		end
       end
     end
@@ -448,33 +448,33 @@ context ClassDiagrams
     end
    
     @Operation defineEdgeToolGroups()
-      self.defineNewHandler("XCore","Association",true,"XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
-      self.defineNewHandler("XCore","Attribute",true,"XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
-      self.defineNewHandler("XCore","Association (self)",false,"XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
-      self.defineNewHandler("XCore","Attribute (self)",false,"XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
-      self.defineNewHandler("XCore","Inheritance",true,"XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
-      self.defineNewHandler("XCore","Dependency",true,"XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
-      self.defineNewHandler("XCore","Delegation",true,"XCore/Delegation.png",ClassDiagram::newDelegationEdge);
+      self.defineNewHandler("XCore","Association",true,"resources/gif/XCore/Association.gif",ClassDiagram::defaultAssociationEdgeCommand);
+      self.defineNewHandler("XCore","Attribute",true,"resources/gif/XCore/Attribute.gif",ClassDiagram::defaultAttributeEdge);
+      self.defineNewHandler("XCore","Association (self)",false,"resources/gif/XCore/Association.gif",ClassDiagram::defaultSelfAssociation);
+      self.defineNewHandler("XCore","Attribute (self)",false,"resources/gif/XCore/Attribute.gif",ClassDiagram::defaultSelfAttribute);
+      self.defineNewHandler("XCore","Inheritance",true,"resources/gif/XCore/Generalization.gif",ClassDiagram::newInheritanceEdge);
+      self.defineNewHandler("XCore","Dependency",true,"resources/gif/XCore/Dependency.gif",ClassDiagram::defaultDependencyEdgeCommand);
+      self.defineNewHandler("XCore","Delegation",true,"resources/gif/XCore/Delegation.png",ClassDiagram::newDelegationEdge);
       if xmf.preference("EnableMeta")
-      then self.defineNewHandler("XCore","Slot Value",true,"XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
+      then self.defineNewHandler("XCore","Slot Value",true,"resources/gif/XCore/Contains.gif",ClassDiagram::newContainsEdgeCommand)
       end
     end
     
     @Operation defineNodeToolGroups()
-      // self.defineNewHandler("XCore","Sub Diagram",false,"XCore/Package.gif",ClassDiagram::defaultSubDiagram);
-      self.defineNewHandler("XCore","Class",false,"XCore/Class.gif",ClassDiagram::defaultClassNode);
-      self.defineNewHandler("XCore","Package",false,"XCore/Package.gif",ClassDiagram::defaultPackageNode);
-      self.defineNewHandler("XCore","Note",false,"XCore/Note.gif",ClassDiagram::defaultNote)
+      // self.defineNewHandler("XCore","Sub Diagram",false,"resources/gif/XCore/Package.gif",ClassDiagram::defaultSubDiagram);
+      self.defineNewHandler("XCore","Class",false,"resources/gif/XCore/Class.gif",ClassDiagram::defaultClassNode);
+      self.defineNewHandler("XCore","Package",false,"resources/gif/XCore/Package.gif",ClassDiagram::defaultPackageNode);
+      self.defineNewHandler("XCore","Note",false,"resources/gif/XCore/Note.gif",ClassDiagram::defaultNote)
     end
     
     @Operation defineToggles() 
       self.defineToolGroup("Toggles");
       super();
-      self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "Tools/Ghost1.png","Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
-      self.defineToggleHandler("Toggles","Show Associations",        "foo3",showAssociationEdges,   "Tools/Ghost3.png","Tools/Ghost0.png",ClassDiagram::setShowAssociationEdges);
-      self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "Tools/Ghost5.png","Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
-      self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "Tools/Ghost2.png","Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
-      self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "Tools/Ghost4.png","Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
+      self.defineToggleHandler("Toggles","Show Attributes",          "foo1",showAttributeEdges,     "resources/gif/Tools/Ghost1.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowAttributeEdges);
+      self.defineToggleHandler("Toggles","Show Associations",        "foo3",showAssociationEdges,   "resources/gif/Tools/Ghost3.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowAssociationEdges);
+      self.defineToggleHandler("Toggles","Show Inheritance",         "foo5",showInheritanceEdges,   "resources/gif/Tools/Ghost5.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowInheritanceEdges);
+      self.defineToggleHandler("Toggles","Show Multiplicity",        "foo2",showMultiplicity,       "resources/gif/Tools/Ghost2.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowMultiplicity);
+      self.defineToggleHandler("Toggles","Show Instantiation Level", "foo4",showInstantiationLevel, "resources/gif/Tools/Ghost4.png","resources/gif/Tools/Ghost0.png",ClassDiagram::setShowInstantiationLevel)
     end
     
     @Operation defineToolGroupTypes()
