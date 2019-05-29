@@ -38,6 +38,24 @@ context FmmlxDiagrams
       end // let 
     end
     
+    @Operation getMappingId(o : Object)
+      let 
+        foundMapping = null 
+      in 
+        @For mappingInfo in mapping do
+          if mappingInfo.object = o
+          then foundMapping := mappingInfo
+          end // if
+        end; // for
+        if foundMapping <> null
+        then 
+          foundMapping.id
+        else
+          null
+        end // if 
+      end // let 
+    end
+    
     @Operation setNewPosition(objectID, x, y) 
       @For mappingInfo in mapping do
         if mappingInfo.id = objectID

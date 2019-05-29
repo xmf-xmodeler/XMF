@@ -46,16 +46,16 @@ context FmmlxDiagrams
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
     	      let
-    	        mapping = mapping.addOrGetObjectMapping(c)
+    	        mappingInfo = mapping.addOrGetObjectMapping(c)
     	      in
     	        result := result.append([[
-    	        mapping.id, 
+    	        mappingInfo.id, 
     	        c.name.toString(), 
     	        c.level, // level
-    	        -1,// of-ID
+    	        if c.of().isKindOf(FMML::MetaClass) then mapping.addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
     	        [],// parents-ID
-    	        mapping.lastKnownDiagramX, 
-    	        mapping.lastKnownDiagramY]])
+    	        mappingInfo.lastKnownDiagramX, 
+    	        mappingInfo.lastKnownDiagramY]])
     	      end
     	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
     	      /*
@@ -97,11 +97,23 @@ context FmmlxDiagrams
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
-                resultOwn   :=   resultOwn.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
+                resultOwn   :=   resultOwn.append([[
+                    a.name.toString(), 
+                    a.type.name.toString(), 
+                    a.instLevel, 
+                    a.mult(),
+                    mapping.getMappingId(c)
+                    ]])
               end;
               @For a in (c.allAttributes() - c.attributes) do 
                 if a.isIntrinsic then
-                  resultOther := resultOther.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
+                  resultOther := resultOther.append([[
+                    a.name.toString(), 
+                    a.type.name.toString(), 
+                    a.instLevel, 
+                    a.mult(),
+                    mapping.getMappingId(c)
+                    ]])
                 end
               end            
             end
