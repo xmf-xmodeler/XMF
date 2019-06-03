@@ -7,22 +7,21 @@ import PropertyEditors;
 context PropertyEditors
 
   @Class CollectionButtonDisplay
-  
+
     @Attribute buttons : Seq(FormButton) end
     @Attribute list : FormList end
-    @Attribute label : FormLabel end
     @Attribute element : Element end
     @Attribute slotName : String end // used for daemon monitoring
-  
+		@Attribute label : String end
+
     @Constructor(buttons,list,element)
-      self.label := FormLabel(0,0,"Collection slots");
       self.slotName := null
     end
 
     @Operation addLabelToForm(form,x,y)
       self.label.setX(x);
-      self.label.setY(y);
-      form.addElement(self.label)
+      self.label.setY(y)
+      //form.addElement(self.label)
     end
 
     @Operation addListToForm(form,x,y,width,height)
@@ -59,7 +58,7 @@ context PropertyEditors
               elseif coll.type.inheritsFrom(SetOfElement) then
                 if not slotvalue.isKindOf(SetOfElement) andthen not slotvalue.isKindOf(SeqOfElement) then
                   let
-                    dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then                 
+                    dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then
                     ok = dialog.newConfirmDialog("Cannot display the value of '" + newSlotName + "' because it is not a set. Do you want to put the current slot value into a set?")
                   in
                     if ok then
@@ -74,7 +73,7 @@ context PropertyEditors
               else
                 if not slotvalue.isKindOf(SetOfElement) andthen not slotvalue.isKindOf(SeqOfElement) then
                   let
-                    dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then                 
+                    dialog = xmf.findClient(Clients::DialogBoxes::DialogBoxClient) then
                     ok = dialog.newConfirmDialog("Cannot display the value of '" + newSlotName + "' because it is not a sequence. Do you want to put the current slot value into a sequence?")
                   in
                     if ok then
@@ -91,13 +90,13 @@ context PropertyEditors
             if not values->isEmpty then
               @For e inSeq values do
                 let
-                  editable = e.isKindOf(NamedElement);          
+                  editable = e.isKindOf(NamedElement);
                   itemText = e.labelString()
-                then            
+                then
                   item = CollectionListElement(itemText,e)
                 in
                   list.addItem(item)
-                end           
+                end
               end
             end
           end;

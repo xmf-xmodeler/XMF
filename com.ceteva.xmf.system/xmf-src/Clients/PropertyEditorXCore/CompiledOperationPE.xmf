@@ -55,7 +55,7 @@ context PropertyEditorXCore
           doc.docString()
         end
       then
-        textbox = DocumentationTextBox(0,0,0,0,text,true)
+        textbox = DocumentationTextBox(text,true,"documentation")
           .setContex(element)
           .setSlotName("documentation")
       in
@@ -63,7 +63,7 @@ context PropertyEditorXCore
         documentationDisplay
       end
     end
-    
+
     @Operation refresh()
       super();
       self.addTextBoxRules()
@@ -79,7 +79,7 @@ context PropertyEditorXCore
           else source
           end
       then
-        textbox = CompiledOperationSourceTextBox(0,0,0,0,code,true)
+        textbox = CompiledOperationSourceTextBox(code,true,"source")
           .setContex(element)
           .setSlotName("source")
       in

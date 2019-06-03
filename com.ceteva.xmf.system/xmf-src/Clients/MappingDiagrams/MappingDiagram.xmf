@@ -65,15 +65,15 @@ context MappingDiagrams
   
     @Operation defineEdgeToolGroups()
       super();
-      self.defineNewHandler("XMap","Domain",true,"Mapping/domain.gif",MappingDiagram::newDomainEdge);
-      self.defineNewHandler("XMap","Range",true,"Mapping/range.gif",MappingDiagram::newRangeEdge)
-      //self.defineNewHandler("XSync","Scope",true,"Mapping/scope.gif",MappingDiagram::newScopeEdge)
+      self.defineNewHandler("XMap","Domain",true,"resources/gif/Mapping/domain.gif",MappingDiagram::newDomainEdge);
+      self.defineNewHandler("XMap","Range",true,"resources/gif/Mapping/range.gif",MappingDiagram::newRangeEdge)
+      //self.defineNewHandler("XSync","Scope",true,"resources/gif/Mapping/scope.gif",MappingDiagram::newScopeEdge)
     end 
     
     @Operation defineNodeToolGroups()
       super();
-      self.defineNewHandler("XMap","Mapping",false,"Mapping/map.gif",MappingDiagram::newMapping)
-      //self.defineNewHandler("XSync","Sync",false,"Mapping/sync.gif",MappingDiagram::newSync)
+      self.defineNewHandler("XMap","Mapping",false,"resources/gif/Mapping/map.gif",MappingDiagram::newMapping)
+      //self.defineNewHandler("XSync","Sync",false,"resources/gif/Mapping/sync.gif",MappingDiagram::newSync)
     end
     
     @Operation defineToolGroupTypes()

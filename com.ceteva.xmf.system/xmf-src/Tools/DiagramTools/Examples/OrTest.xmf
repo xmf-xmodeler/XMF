@@ -17,21 +17,21 @@ Root::type :=
   @NodeType OrTest
     @Box b
     @Or alt
-      @Image image1 "Actor.gif" width = 100 height = 100
+      @Image image1 "resources/gif/Actor.gif" width = 100 height = 100
         @Menu
           @MenuAction Change
             self.owner().changeTo("alt","image2")
           end
         end
       end
-      @Image image2 "Class.gif"  width = 100 height = 100
+      @Image image2 "resources/gif/Class.gif"  width = 100 height = 100
         @Menu
           @MenuAction Change
             self.owner().changeTo("alt","image3")
           end
         end
       end
-      @Text image3 "Grammar.gif"  
+      @Text image3 "resources/gif/Grammar.gif"
         @Menu
           @MenuAction Change
             self.owner().changeTo("alt","image1")
@@ -43,7 +43,7 @@ Root::type :=
   end
   @ToolBar 
     @ToolGroup Operations
-      @ToolButton OrTest             icon = "Tools/State.gif" end
+      @ToolButton OrTest             icon = "resources/gif/Tools/State.gif" end
     end
   end
 end;

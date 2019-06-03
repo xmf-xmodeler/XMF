@@ -43,7 +43,7 @@ context StateMachines::Package::ClassDiagrams
     end
     @NodeType Clock(hasport)
       // A clock is a state machine that generates clicks...
-      @Image clock(ALIGN) "Clock.gif" width = 75 height =75 end
+      @Image clock(ALIGN) "resources/gif/Clock.gif" width = 75 height =75 end
     end
     // Inheritance arrows go from child to parent...
     @EdgeType Inheritance StateMachine -> StateMachine targetHead = whiteArrow
@@ -61,11 +61,11 @@ context StateMachines::Package::ClassDiagrams
     // A single group offers the creation buttons for the diagram components...
     @ToolBar 
       @ToolGroup Operations
-        @ToolButton StateMachine       icon = "StateMachines/StateMachine.gif" end 
-        @ToolButton Clock              icon = "StateMachines/Clock.gif"        end 
-        @ToolButton Inheritance isEdge icon = "XCore/Generalization.gif"       end
-        @ToolButton Attribute isEdge   icon = "XCore/Attribute.gif"            end
-        @ToolButton Consumer isEdge    icon = "XCore/Attribute.gif"            end
+        @ToolButton StateMachine       icon = "resources/gif/StateMachines/StateMachine.gif" end
+        @ToolButton Clock              icon = "resources/gif/StateMachines/Clock.gif"        end
+        @ToolButton Inheritance isEdge icon = "resources/gif/XCore/Generalization.gif"       end
+        @ToolButton Attribute isEdge   icon = "resources/gif/XCore/Attribute.gif"            end
+        @ToolButton Consumer isEdge    icon = "resources/gif/XCore/Attribute.gif"            end
       end
     end
     @Menu

@@ -66,17 +66,17 @@ context UseCaseDiagrams
    
     @Operation defineEdgeToolGroups()
       super();
-      self.defineNewHandler("UseCases","Use",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultUses);
-      self.defineNewHandler("UseCases","Extend",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultExtends);
-      self.defineNewHandler("UseCases","Specialize",true,"XCore/Generalization.gif",UseCaseDiagrams::UseCaseDiagram::defaultSpecialize);
-      self.defineNewHandler("UseCases","Include",true,"XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultIncludes)
+      self.defineNewHandler("UseCases","Use",true,"resources/gif/XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultUses);
+      self.defineNewHandler("UseCases","Extend",true,"resources/gif/XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultExtends);
+      self.defineNewHandler("UseCases","Specialize",true,"resources/gif/XCore/Generalization.gif",UseCaseDiagrams::UseCaseDiagram::defaultSpecialize);
+      self.defineNewHandler("UseCases","Include",true,"resources/gif/XCore/Dependency.gif",UseCaseDiagrams::UseCaseDiagram::defaultIncludes)
     end
     
     @Operation defineNodeToolGroups()
       super();
-      self.defineNewHandler("UseCases","Note",false,"XCore/Note.gif",ClassDiagrams::ClassDiagram::defaultNote);
-      self.defineNewHandler("UseCases","UseCase",false,"UseCases/UseCase.gif",UseCaseDiagram::defaultUseCase);
-      self.defineNewHandler("UseCases","Actor",false,"UseCases/Actor.gif",UseCaseDiagram::defaultActor)
+      self.defineNewHandler("UseCases","Note",false,"resources/gif/XCore/Note.gif",ClassDiagrams::ClassDiagram::defaultNote);
+      self.defineNewHandler("UseCases","UseCase",false,"resources/gif/UseCases/UseCase.gif",UseCaseDiagram::defaultUseCase);
+      self.defineNewHandler("UseCases","Actor",false,"resources/gif/UseCases/Actor.gif",UseCaseDiagram::defaultActor)
     end
     
     @Operation defineToolGroupTypes()

@@ -8,13 +8,14 @@ import IO;
 context Forms
 
   @Class FormList extends FormElement, DroppableClientElement
-  
+
     @Attribute contents : Seq(ListElement) end
-    
-    @Constructor(x,y,width,height)
+		@Attribute labelText : String end
+
+    @Constructor(labelText)
     end
-    
-    @Constructor(id,x,y,width,height) ! end
+
+    @Constructor(id,labelText) ! end
 
     @Operation addContents()
 
@@ -30,11 +31,11 @@ context Forms
       self.contents := self.contents + Seq{item};
       item.setOwner(self)
     end
-    
+
     @Operation clearContents()
       self.contents := Seq{}
-    end 
-    
+    end
+
     @Operation deselectAll()
       @For element in contents do
         element.setSelected(false)
@@ -51,19 +52,19 @@ context Forms
       self.addContents();
       self.newContents();
       self
-    end   
-    
+    end
+
     @Operation newContents()
       @For content in contents do
         content.new(self)
       end
-    end    
+    end
 
     @Operation removeItem(item:ListElement)
       self.contents := self.contents.excluding(item);
       item.setOwner(null)
     end
-    
+
     @Operation renew(parent)
       self.commandInterpreter().newListCommand(parent,self);
       @For content in contents do
@@ -74,24 +75,6 @@ context Forms
     @Operation renewContents()
       self.commandInterpreter().clear(self);
       self.newContents()
-    end
-    
-    @Operation synchronise()
-      let
-        id = Seq{"identity",id};
-        x = Seq{"x",x};
-        y = Seq{"y",y};
-        width = Seq{"width",width};
-        height = Seq{"height",height} then
-        attributes = Seq{id,x,y,width,height}
-      in
-        @Command(self) startElement("list",attributes) end;
-        @For content in contents
-        do
-          content.synchronise()
-        end;
-        @Command(self) endElement("list") end
-      end
     end
 
   end

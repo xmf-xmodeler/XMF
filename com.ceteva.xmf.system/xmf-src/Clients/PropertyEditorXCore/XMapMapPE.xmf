@@ -59,8 +59,9 @@ context PropertyEditorXCore
 
     @Operation setClauseCodeComboBoxDisplay()
       let
-        comboBox = XMapClauseCodeComboBox(0,0,0,0);
-        codeBox = XMapClauseTextBox(0,0,0,0,"",true)
+        comboBox = XMapClauseCodeComboBox();
+        codeBox = XMapClauseTextBox("",true,"source")
+					.setContex(element)
           .setSlotName("source");
         label = FormLabel(0,0,"clauses")
       in
@@ -68,7 +69,7 @@ context PropertyEditorXCore
         self.resetClauseCodeComboBoxDisplay()
       end
     end
-    
+
     @Operation resetClauseCodeComboBoxDisplay()
       @For clause in element.clauses do
         let
@@ -76,7 +77,7 @@ context PropertyEditorXCore
           action =
             @Operation action()
               clauseCodeComboBoxDisplay.resetCodeBox(clause,true)
-            end 
+            end
         in
           clauseCodeComboBoxDisplay.comboBox.addItem(clauseName,action,self)
         end

@@ -61,7 +61,7 @@ context Object
              manager = descriptor.manager()
          in if type <> null and manager <> null
             then
-              let tool = descriptor.tool(self,self.toString()) 
+              let tool = descriptor.tool(self,self.toString())
               in tool.showForm();
                  descriptor.add(tool);
                  self.observeBy(tool);

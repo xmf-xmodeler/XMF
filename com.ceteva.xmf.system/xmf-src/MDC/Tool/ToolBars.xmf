@@ -58,7 +58,7 @@ end;
            button = ToolButton(nodeType.name().toString(),"",false);
            groupName = event.parent().text()
        in event.value().setTextIn(nodeType.name().toString());
-          button.icon := "XCore/Object.gif";
+          button.icon := "resources/gif/XCore/Object.gif";
           @Find(group,rootElementType.displayType().toolBar().groups())
             when group.name() = groupName
             do group.add(button);
@@ -99,7 +99,7 @@ end;
            button = ToolButton(edgeType.name().toString(),"",true);
            groupName = event.parent().text()
        in event.value().setTextIn(edgeMap.toString());
-          button.icon := "XCore/Attribute.gif";
+          button.icon := "resources/gif/XCore/Attribute.gif";
           @Find(group,rootElementType.displayType().toolBar().groups())
             when group.name() = groupName
             do group.add(button);

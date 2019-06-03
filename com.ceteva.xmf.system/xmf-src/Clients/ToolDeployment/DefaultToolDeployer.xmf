@@ -25,15 +25,15 @@ context ToolDeployment
   
     @Operation copyBranding(target,iconImage16,iconImage32,aboutImage,splash)
       if iconImage16.fileExists() andthen iconImage16.hasSuffix(".gif")
-      then iconImage16.copyFile(target + "/icons/mosaic16.gif")
+      then iconImage16.copyFile(target + "resources/gif//icons/mosaic16.gif")
       else format(stdout,"Warning: tool icon must be a gif image~%")
       end;      
       if iconImage32.fileExists() andthen iconImage32.hasSuffix(".gif")
-      then iconImage32.copyFile(target + "/icons/mosaic32.gif")
+      then iconImage32.copyFile(target + "resources/gif//icons/mosaic32.gif")
       else format(stdout,"Warning: tool icon must be a gif image~%")
       end;
       if aboutImage.fileExists() andthen aboutImage.hasSuffix(".gif") 
-      then aboutImage.copyFile(target + "/icons/mosaicLogo.gif")
+      then aboutImage.copyFile(target + "resources/gif//icons/mosaicLogo.gif")
       else format(stdout,"Warning: about branding must be a gif image~%")
       end;
       if splash.fileExists() andthen splash.hasSuffix(".bmp")

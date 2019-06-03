@@ -27,7 +27,7 @@ context Tools
          type.add(attName,ExpType("null"))
        end
        "Image" do
-         type.add(attName,ImageType("unknown.gif",0,0,30,30))
+         type.add(attName,ImageType("resources/gif/unknown.gif",0,0,30,30))
        end
        else xmf.message("Unknown type for attribute: " + attType)
     end
@@ -46,7 +46,7 @@ context Tools
         att.setType(ExpType("null"))
       end
       "Image" do
-        att.setType(ImageType("unknown.gif",0,0,30,30))
+        att.setType(ImageType("resources/gif/unknown.gif",0,0,30,30))
       end
       else xmf.message("Unknown type for a attribute: " + newType)
     end
@@ -80,23 +80,23 @@ context Tools
       diagramGroup = ToolGroup("Types");
       toolBarGroup = ToolGroup("Tool Bar");
       
-      newBoxType = NodeCreationButton("Box","Tools/Box.gif");
-      newBarType = NodeCreationButton("Bar","Tools/Bar.gif");
-      newImageType = NodeCreationButton("Image","Tools/Image.gif");
-      newEllipseType = NodeCreationButton("Ellipse","Tools/Ellipse.gif");
-      newTextType = NodeCreationButton("Text","Tools/Text.gif");
-      newExpType = NodeCreationButton("Exp","Tools/Exp.gif");
-      newNodeType = NodeCreationButton("Node","Tools/Node.gif");
-      newToolBarButton = NodeCreationButton("Button","Tools/Button.gif");
-      newToolBarGroup = NodeCreationButton("Group","Tools/Group.gif");
-      newMenuType = NodeCreationButton("Menu","Tools/Menu.gif");
+      newBoxType = NodeCreationButton("Box","resources/gif/Tools/Box.gif");
+      newBarType = NodeCreationButton("Bar","resources/gif/Tools/Bar.gif");
+      newImageType = NodeCreationButton("Image","resources/gif/Tools/Image.gif");
+      newEllipseType = NodeCreationButton("Ellipse","resources/gif/Tools/Ellipse.gif");
+      newTextType = NodeCreationButton("Text","resources/gif/Tools/Text.gif");
+      newExpType = NodeCreationButton("Exp","resources/gif/Tools/Exp.gif");
+      newNodeType = NodeCreationButton("Node","resources/gif/Tools/Node.gif");
+      newToolBarButton = NodeCreationButton("Button","resources/gif/Tools/Button.gif");
+      newToolBarGroup = NodeCreationButton("Group","resources/gif/Tools/Group.gif");
+      newMenuType = NodeCreationButton("Menu","resources/gif/Tools/Menu.gif");
       
-      groupButton = EdgeCreationButton("GroupButton","Tools/Edge.gif");
-      inheritButton = EdgeCreationButton("Inherit","Tools/Inherit.gif");
-      attributeButton = EdgeCreationButton("Attribute","Tools/Edge.gif");
-      nodeCreationButton = EdgeCreationButton("Create","Tools/Edge.gif");
-      menuButton = EdgeCreationButton("AddMenu","Tools/Edge.gif");
-      edgeButton = EdgeCreationButton("Edge","Tools/Edge.gif");
+      groupButton = EdgeCreationButton("GroupButton","resources/gif/Tools/Edge.gif");
+      inheritButton = EdgeCreationButton("Inherit","resources/gif/Tools/Inherit.gif");
+      attributeButton = EdgeCreationButton("Attribute","resources/gif/Tools/Edge.gif");
+      nodeCreationButton = EdgeCreationButton("Create","resources/gif/Tools/Edge.gif");
+      menuButton = EdgeCreationButton("AddMenu","resources/gif/Tools/Edge.gif");
+      edgeButton = EdgeCreationButton("Edge","resources/gif/Tools/Edge.gif");
       
       attributeSourceNodeType = NodeType("AttributeSource");
       attributeTargetNodeType = NodeType("AttributeTarget") then
@@ -125,7 +125,7 @@ context Tools
       attributeNameLabel = LabelType("att","end",0,0,true);
       
       boxTypeLabel = TextType("    Box    ");
-      imageTypeLabel = TextType("Tools/Image.gif");
+      imageTypeLabel = TextType("resources/gif/Tools/Image.gif");
       textTypeLabel = TextType("    Text    ");
       buttonName = TextType("  Button  ");
       groupName = TextType("  Group  ");
@@ -202,7 +202,7 @@ context Tools
         end);
       handleNewImageType = Handler("New(Image)",
         @Operation(object,tool)
-          let imageType = ImageType("Tools/Image.gif",0,0,30,30)
+          let imageType = ImageType("resources/gif/Tools/Image.gif",0,0,30,30)
           in tool.associate(imageType,object)
           end
         end);
@@ -224,7 +224,7 @@ context Tools
         end);
       handleNewButton = Handler("New(Button)",
         @Operation(object,tool)
-          let button = ToolButton("Button","Tools/Button.gif",false,@Operation(tool,x,y) format(stdout,"No Action~%") end)
+          let button = ToolButton("Button","resources/gif/Tools/Button.gif",false,@Operation(tool,x,y) format(stdout,"No Action~%") end)
           in tool.associate(button,object)
           end
         end);
@@ -540,9 +540,9 @@ context Tools
          toolType.addToHandlers(handleNewEdge);
          toolType.addToHandlers(handleEdgeNameChanged);
          
-         barNodeType.addToAttributes(ToolComponentAttribute("bar",false,ImageType("Bar.gif",0,0,30,30)));
-         ellipseNodeType.addToAttributes(ToolComponentAttribute("ellipse",false,ImageType("Ellipse.gif",0,0,30,30)));
-         expNodeType.addToAttributes(ToolComponentAttribute("exp",false,ImageType("Exp.gif",0,0,30,30)));
+         barNodeType.addToAttributes(ToolComponentAttribute("bar",false,ImageType("resources/gif/Bar.gif",0,0,30,30)));
+         ellipseNodeType.addToAttributes(ToolComponentAttribute("ellipse",false,ImageType("resources/gif/Ellipse.gif",0,0,30,30)));
+         expNodeType.addToAttributes(ToolComponentAttribute("exp",false,ImageType("resources/gif/Exp.gif",0,0,30,30)));
          textNodeType.addToAttributes(ToolComponentAttribute("label",false,textTypeLabel));
          menuNode.addToAttributes(ToolComponentAttribute("actions",true,actionType));
          menuNode.addToAttributes(ToolComponentAttribute("label",false,TextType("Menu"),"CENTRE"));
@@ -612,7 +612,7 @@ context Tools
           in attributeType.layout := "HORIZONTAL";
              attributeType.attNamed("name").type.menuType.addToItems(delete);
              boxNodeType.layout := "VERTICAL";
-             boxNodeType.add("icon",ImageType("Box.gif",0,0,30,30));
+             boxNodeType.add("icon",ImageType("resources/gif/Box.gif",0,0,30,30));
              boxNodeType.add("atts",true,attributeType);
              boxNodeType.attNamed("icon").type.menuType.addToItems(add)
          end;
@@ -640,7 +640,7 @@ context Tools
           in attributeType.layout := "HORIZONTAL";
              attributeType.attNamed("name").type.menuType.addToItems(delete);
              groupNodeType.layout := "VERTICAL";
-             groupNodeType.add("icon",ImageType("Group.gif",0,0,30,30));
+             groupNodeType.add("icon",ImageType("resources/gif/Group.gif",0,0,30,30));
              groupNodeType.add("atts",true,attributeType);
              groupNodeType.attNamed("icon").type.menuType.addToItems(add)
          end;
@@ -679,8 +679,8 @@ context Tools
             edge.menuType.addToItems(create)
          end;
          
-         imageBox(buttonNode,"Button.gif","Button");
-         imageBox(imageNodeType,"Image.gif","Image.gif");
+         imageBox(buttonNode,"resources/gif/Button.gif","Button");
+         imageBox(imageNodeType,"resources/gif/Image.gif","resources/gif/Image.gif");
          attributeEdge.addToAttributes(ToolComponentAttribute("name",false,attributeNameLabel));
          menuEdge.addToAttributes(ToolComponentAttribute("label",false,menuLabel));
          actionType.addToAttributes(ToolComponentAttribute("name",false,TextType("Action"),"CENTRE"));
