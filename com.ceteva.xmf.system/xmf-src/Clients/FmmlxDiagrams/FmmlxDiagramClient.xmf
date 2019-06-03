@@ -112,7 +112,7 @@ context FmmlxDiagrams
                     a.type.name.toString(), 
                     a.instLevel, 
                     a.mult(),
-                    mapping.getMappingId(c)
+                    mapping.getMappingId(a.owner)
                     ]])
                 end
               end            
@@ -146,9 +146,15 @@ context FmmlxDiagrams
           @For c in package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
-              @For o in c.operations do 
-                result := result.append([[o.name.toString(), o.type.name.toString(), o.instLevel]])
-              end
+//              @For o in c.operations do 
+              @For o in c.allOperations() do if o.owner.isKindOf(FMML::MetaClass) then
+                result := result.append([[
+                o.name.toString(), 
+                o.instLevel, 
+                o.type.name.toString(),
+                if o.owner.isKindOf(FMML::MetaClass) then mapping.getMappingId(o.owner) else -1 end,
+                "to-do: multiplicity"]])
+              end end
             end
           end;
     	  self.communicator.sendMessageToJava([idRequest, result])
