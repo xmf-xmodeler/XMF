@@ -434,4 +434,48 @@ context Root::FMML
       
     //end
     
+    
+      /* This is not used internally for invoking operations which would cause an infinite loop */
+      @Operation allOperations2():Seq(Operation)
+      let 
+        myOps = [];
+        alreadyChecked = {};
+        toBeChecked = [self];
+        currentClass = null
+      in   
+       @While toBeChecked.size() > 0 do 
+         currentClass := toBeChecked.at(0);
+         toBeChecked := toBeChecked - [currentClass];
+         ("Checking " + currentClass.name).println();
+         @For o in currentClass.operations do
+           if (o.isIntrinsic andthen o.instLevel <= self.level - 1)         // intrinsic and right level
+                                                                            or
+              ((not o.isIntrinsic) andthen currentClass.level = self.level) // non-intrinsic and one above the instance
+           then
+             myOps := myOps + [o]
+           end
+         end;
+         alreadyChecked = alreadyChecked + {currentClass};
+         @For p in currentClass.parents do                                 // inheritance
+           if p.isKindOf(FMML::MetaClass) then
+             if not alreadyChecked.contains(p) then
+               toBeChecked := toBeChecked + [p]
+             end
+           end
+         end;
+         if (not currentClass.of() = null) andthen currentClass.of().isKindOf(FMML::MetaClass) then               // instantiation
+           if not alreadyChecked.contains(currentClass.of()) then
+             toBeChecked := toBeChecked + [currentClass.of()]
+           end
+         end;
+         if (not currentClass.delegatesTo = null) andthen  currentClass.delegatesTo.isKindOf(FMML::MetaClass) then        // delegation
+           if not alreadyChecked.contains(currentClass.delegatesTo) then
+             toBeChecked := toBeChecked + [currentClass.delegatesTo]
+           end
+         end
+       end; // while
+       myOps
+     end // let
+   end // operation
+       
   end

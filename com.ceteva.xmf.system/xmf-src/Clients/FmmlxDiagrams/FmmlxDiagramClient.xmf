@@ -147,7 +147,7 @@ context FmmlxDiagrams
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
 //              @For o in c.operations do 
-              @For o in c.allOperations() do if o.owner.isKindOf(FMML::MetaClass) then
+              @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
                 result := result.append([[
                 o.name.toString(), 
                 o.instLevel, 
