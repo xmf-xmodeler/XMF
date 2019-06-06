@@ -19,6 +19,8 @@ context ProjectManager
   
 context ProjectManager
   @Operation loadFixedProject(fix:Boolean)
+    "lfp".println();
+    fix.println();
     @Operation()
       try
         let project = self.loadMosaicProject(fix)

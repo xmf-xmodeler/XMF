@@ -53,7 +53,8 @@ end;
 // *** MENUS ***
 
 @Menu "Open Project ..." on Projects::ProjectManager notUndoable
-  Projects::ProjectManager::loadFixedProject(false)
+  "op".println();
+  Projects::ProjectManager::loadFixedProject(true)
 end;
 
 @Menu "Import XMI":"UML XMI 1.1 (Rational Rose)" on Projects::ProjectManager

@@ -150,12 +150,14 @@ context Projects
       let install = true
       in if path.fileExists()
          then
+           "lpFE".println();
+           fix.println();
            let ein = ElementInputChannel(GZipInputChannel(FileInputChannel(path))) then
                pair = ein.read()
            in let project = pair->head then 
                   package = project.package;
                   resourceName = path
-              in if fix then Walkers::Fix().walk(pair,null) end;
+              in if fix then Walkers::Fix().walk(pair,null) end; //TODO: either plug in here
                  if Root.hasElement(package.name.toString())
                  then install := xmf.confirm("Overwrite " + package.name.toString() + "?")
                  end;
@@ -169,7 +171,7 @@ context Projects
                      //  "Modifying project save directory to " + resourceName);
                      project.resourceName := resourceName
                    end;
-                   project.setDaemons();
+                   project.setDaemons(); //TODO: or plug in here
                    self.add(project); 
                    Root.add(package);
                    project.setDaemonsActive(true);
