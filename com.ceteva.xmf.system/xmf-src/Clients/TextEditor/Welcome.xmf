@@ -12,16 +12,18 @@ context TextEditor
     @Operation requestDoc()
       let doc = xmf.select("Documentation","Select Documentation",Seq{"Applied Metamodelling","Bluebook","Superlanguages"},"",@Operation(s) s end)
       in @Case doc of
-           "Applied Metamodelling" do 
-             xmf.browse(xmf.docDir()+"/xmf-books/AppliedMetamodelling/book.pdf")
+           "Applied Metamodelling" do //TODO: javaFX webview doesn't load .pdfs, maybe overwrite to open external browser?
+             xmf.browse("file://external/"+xmf.canonicalPath(xmf.docDir())+"/xmf-books/AppliedMetamodelling/book.pdf")
            end
            "Bluebook" do 
-             xmf.browse(xmf.docDir()+"/xmf-books/Bluebook.pdf")
+             xmf.browse("file://external/"+xmf.canonicalPath(xmf.docDir())+"/xmf-books/Bluebook.pdf")
            end
            "Superlanguages" do
-             xmf.browse(xmf.docDir()+"/xmf-books/Superlanguages/book.pdf") 
+             xmf.browse("file://external/"+xmf.canonicalPath(xmf.docDir())+"/xmf-books/Superlanguages/book.pdf")
            end
-           else xmf.message("No documentation selected.")
+           else
+             xmf.message("No documentation selected.")
+
          end
       end
     end
