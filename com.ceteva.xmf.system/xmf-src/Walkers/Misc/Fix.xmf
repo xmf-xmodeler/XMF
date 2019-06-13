@@ -31,7 +31,6 @@ context Walkers
     end
     
     @Operation walkObject(o:Object,arg:Element):Element
-        o.orintln();
        self.encounter(o);
        let class = o.of() then
            attributes = class.allAttributes();

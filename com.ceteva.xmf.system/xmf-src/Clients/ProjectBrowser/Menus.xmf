@@ -19,8 +19,6 @@ context ProjectManager
   
 context ProjectManager
   @Operation loadFixedProject(fix:Boolean)
-    "lfp".println();
-    fix.println();
     @Operation()
       try
         let project = self.loadMosaicProject(fix)
@@ -124,6 +122,7 @@ context ProjectStub
 
 context Project
   @Operation browse()
+    self.closeAllDiagrams(package);
     if self.loaded()
     then package.browse()
     else 
@@ -136,6 +135,18 @@ context Project
       end
     end
   end
+
+context Project
+    @Operation closeAllDiagrams(Project)
+        // This is here to make sure that once a Project was saved with the isOpen attribute true, it can be reopened
+
+        let diagrams = xmf.diagramManager().diagramsFor(Project)
+        in
+            @For diagram in diagrams do
+                diagram.isOpen := false
+            end
+        end
+    end
 
 context Project
   @Operation build_check()
