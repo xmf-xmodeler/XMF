@@ -68,7 +68,9 @@ context Root::Extensions
            end
          end;
          
-         
+         //obj.addParent(FMML::MetaClass);
+         //obj.parents := {Object, Class, FMML::MetaClass};
+
          if self.inheritsFrom(Classifier)
          then
            obj.parents := obj.defaultParents()

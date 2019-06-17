@@ -53,7 +53,8 @@ context FmmlxDiagrams
     	        c.name.toString(), 
     	        c.level, // level
     	        if c.of().isKindOf(FMML::MetaClass) then mapping.addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
-    	        [],// parents-ID
+    	        self.getParentIdList(c),//[],// parents-ID
+    	        c.isAbstract,
     	        mappingInfo.lastKnownDiagramX, 
     	        mappingInfo.lastKnownDiagramY]])
     	      end
@@ -70,6 +71,16 @@ context FmmlxDiagrams
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end
+    
+    @Operation getParentIdList(c : FMML::MetaClass) // for local use
+      let list = [] in
+        @For p in c.parents do
+          if p.isKindOf(FMML::MetaClass) then list.append([mapping.addOrGetObjectMapping(p).id]) end
+        end; // for
+        list
+      end// let      
+    end
+    
     
     @Operation getOwnAttributes(idRequest, className) 
         let 

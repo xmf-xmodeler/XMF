@@ -68,20 +68,147 @@ context Root::FMML
     /* This Operation should've been named send-TO-Instance. 
        It is invoked when an operation is invoked. 
        This operation tries to find out where the operation is defined. 
-       It checks superclassed and rolefillers. */
+    */
     @Operation sendInstance(element,message,args):XCore::Element 
+      let
+        found = false;
+        op = null;
+        // String to Symbol if necessary
+        name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
+        //operations = element.of().allOperations()->asSeq
+        operations = self.allOperations()->asSeq;
+        moreOperations = [];
+        index = 0
+      in 
+    /*  "self" is the class of "element" and therefore the most obvious place
+        to look for an operation. "self.allOperations()" will check the class 
+        and all its parents. I.e. where you would look in a two-level architecture.
+        If you find something there, check the level if intrinsic and the operation 
+        can be invoked  
+    */    
+        let  // let 1
+          size = operations->size;
+          arity = args->size
+        in 
+          index := 0;
+          @While index < size and not found do //loop until found through all operations 
+            op := operations->at(index);
+            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            then found := true
+            else index := index + 1
+            end
+          end; // while
+          if found
+          then
+            /* Now, we found the operation.
+               Before we can invoke it, we must check if the intrinsic 
+               level forbids us to do so.
+               We'll pretend we didn't find it if the intrinsic levels is too low */
+            if 
+              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
+            then
+              //("The level " + (self.level-1) + " object " + element 
+              //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
+              //element.noOperationFound(message,args)
+              found := false
+            end
+          end // if 
+        end; // let 1
+        
+        /* now we tried to find via the traditional way, two options are left: intrinsic operations and delegation.
+        We can use allOperations2() to find all multilevel operations
+        */
+        moreOperations := operations;
+        //(name + " found? " + found).println();
+        if not found then let  // if+let 2
+          size = operations->size;
+          arity = args->size
+        in 
+          //(name + " not yet found").println();
+          index := 0;
+          moreOperations := self.allOperations2(); // TODO: modify to avoid delegation here
+          @While index < size and not found do //loop until found through all operations 
+            op := moreOperations->at(index);
+            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            then found := true
+            else index := index + 1
+            end
+          end; // while
+          if found
+          then
+            /* Now, we found the operation.
+               Before we can invoke it, we must check if the intrinsic 
+               level forbids us to do so.
+               We'll pretend we didn't find it if the intrinsic levels is too low.
+               Also if it is not intrinsic at all it should have be found in the first run,
+               if relevant for this object */
+            //if op.isIntrinsic then 
+              //("op.instLevel: " + op.instLevel).println();
+              //("objLevel: " + (self.level-1)).println()
+            //end;
+            if 
+              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
+              or 
+              (not op.isIntrinsic) 
+            then
+              //("The level " + (self.level-1) + " object " + element 
+              //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
+              //element.noOperationFound(message,args)
+              found := false
+            end
+          end // if 
+        end end; // if+let 2
+        /*We have tried the traditional way and the multilevel way. */
+          if not found then
+            /* We have not found the operation yet.
+               But maybe we are lucky with delegation.
+               If we find a role filler forward to them. */
+            if 
+              element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
+            then
+              //("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
+              element.roleFiller.send(message,args)
+            else
+              //"Operation not found, throwing Exception".println();
+              element.noOperationFound(message,args)
+            end
+          else
+            //(element + ": Operation "+op.name+" found and to be invoked").println();
+            moreOperations := moreOperations->drop(index);
+            op.setSupers(moreOperations);
+            op.invoke(element,args)
+          end        
+        
+      end // let
+    end // operation
+
+    
+    /* This Operation should've been named send-TO-Instance. 
+       It is invoked when an operation is invoked. 
+       This operation tries to find out where the operation is defined. 
+       It checks superclasses and rolefillers. */
+    @Operation sendInstance0(element,message,args):XCore::Element 
 
       let 
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
         operations = element.of().allOperations()->asSeq
-      in // try to find an operation with the matching name
+      then 
+        moreOperations = operations;
+        element2 = element // for while through of's to top
+      in 
+//        @While (not element2.of() = null) andthen element2.of().isKindOf(FMML::MetaClass) do 
+//          element2 = element2.of();
+//          moreOperations = moreOperations + (element2.of().allOperations()->asSeq)
+//        end;
+        // try to find an operation with the matching name
         let index = 0;
            size = operations->size;
            found = false;
            op = null;
            arity = args->size
-       in @While index < size and not found do //loop until found through all operations 
+        in 
+          @While index < size and not found do //loop until found through all operations 
             op := operations->at(index);
             if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
             then found := true
@@ -97,7 +224,9 @@ context Root::FMML
                We'll pretend we didn't find it 
                if the intrinsic levels is too low */
             if 
-              op.isIntrinsic andthen op.instLevel < (self.level-1)
+              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
+//              or 
+//              ((not op.isIntrinsic) and (not operations.contains(op))) // not intrinsic, then must be in the smaller list
             then
               //("The level " + (self.level-1) + " object " + element 
               //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
@@ -446,7 +575,7 @@ context Root::FMML
        @While toBeChecked.size() > 0 do 
          currentClass := toBeChecked.at(0);
          toBeChecked := toBeChecked - [currentClass];
-         ("Checking " + currentClass.name).println();
+         //("Checking " + currentClass.name).println();
          @For o in currentClass.operations do
            if (o.isIntrinsic andthen o.instLevel <= self.level - 1)         // intrinsic and right level
                                                                             or
