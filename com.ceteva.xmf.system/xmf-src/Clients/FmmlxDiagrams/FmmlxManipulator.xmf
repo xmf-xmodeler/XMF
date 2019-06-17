@@ -12,19 +12,12 @@ context FmmlxDiagrams
       newClass = FMML::MetaClass(name, level)
     in
       package.add(newClass);
+      newClass.isAbstract := abstract;
+      if parents.size() > 0 then newClass.parents := parents.asSet() end;
       newClass
     end    
   end
-  
-//  @Operation addInstance(package, ofClass, name, parents, abstract)
-//    let 
-//      newInstance = ofClass(name)
-//    in
-//      package.add(newInstance);
-//      newInstance
-//    end
-//  end
-  
+    
   /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
      all slots need to be created. If the multiplicity of the slot mandates, a value needs to be aquired, either default or otherwise.
      For Associations, multiplicity must be checked as well.
@@ -95,6 +88,8 @@ context FmmlxDiagrams
            false
          end;
          
+         if parents.size() > 0 then newClass.parents := parents.asSet() end; // test: may work or not...
+         
          obj.init();
          
 //                DON'T             
@@ -132,6 +127,8 @@ context FmmlxDiagrams
         obj.level := myLevel;
         package.add(obj);         
         obj.setName(Symbol(name)); // todo: test name
+        
+        obj.isAbstract := abstract; // todo: check level 0
         obj.addParent(FMML::MetaClass);
         obj
       end

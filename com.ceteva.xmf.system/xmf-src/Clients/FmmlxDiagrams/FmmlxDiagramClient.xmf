@@ -72,16 +72,6 @@ context FmmlxDiagrams
         end
     end
     
-    @Operation getParentIdList(c : FMML::MetaClass) // for local use
-      let list = [] in
-        @For p in c.parents do
-          if p.isKindOf(FMML::MetaClass) then list.append([mapping.addOrGetObjectMapping(p).id]) end
-        end; // for
-        list
-      end// let      
-    end
-    
-    
     @Operation getOwnAttributes(idRequest, className) 
         let 
           result = [] 
@@ -164,7 +154,9 @@ context FmmlxDiagrams
                 o.instLevel, 
                 o.type.name.toString(),
                 if o.owner.isKindOf(FMML::MetaClass) then mapping.getMappingId(o.owner) else -1 end,
-                "to-do: multiplicity"]])
+                "to-do: multiplicity",
+                self.getOpProp(o, "monitor")
+                ]])
               end end
             end
           end;
@@ -187,7 +179,9 @@ context FmmlxDiagrams
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
-          newClass = m.addMetaClass(package, name, level, parents, abstract)
+          parentsList = self.getParentsList(parents)
+        then 
+          newClass = m.addMetaClass(package, name, level, parentsList, abstract)
         then
           mappingInfo = mapping.addOrGetObjectMapping(newClass)
         in 
@@ -220,4 +214,38 @@ context FmmlxDiagrams
         "addInstance done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
+    
+    
+    @Operation getParentsList(parentIds) // for local use
+      let list = [] in
+        @For id in parentIds do
+          if not id = -1 then list.append([mapping.getMapping(id).object]) end
+        end; // for
+        list
+      end// let      
+    end
+    
+        
+    @Operation getParentIdList(c : FMML::MetaClass) // for local use
+      let list = [] in
+        @For p in c.parents do
+          if p.isKindOf(FMML::MetaClass) then list.append([mapping.addOrGetObjectMapping(p).id]) end
+        end; // for
+        list
+      end// let      
+    end
+    
+    @Operation getOpProp(operation, name) // for local use
+      let
+        properties = operation.properties();
+        tagFound = null
+      in 
+        @For property in properties do  
+          if property->head() = name
+            then tagFound := property->tail()
+          end
+        end;
+        tagFound
+      end      
+    end
 end
