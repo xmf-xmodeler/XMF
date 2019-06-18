@@ -17,13 +17,16 @@ context Root
 //    self.addAttribute(p::Component, "Name", String, 4);
     self.addAttribute(p::Component, "weight", Float, 1);
 //    self.addAttribute(p::Configuration, "Name", String, 4);
-    p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"))
+    p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"));
 //    self.createAssociation(p,
 //  	p::Configuration, p::Part,
 //  	"role1","role2",
 //  	0, 1,
 //  	0, 1,
-//  	2)
+//  	2)    
+    BikeSetup.getOperation("time").instLevel:=4;
+    BikeSetup.getOperation("time").isIntrinsic:=true;
+    p::Configuration.addOperation(BikeSetup.getOperation("time"))
 
   end
 
@@ -166,6 +169,10 @@ context Root
       end
     end
    
+  @Operation time[monitor=true]()
+	xmf.date()
+  end
+  
   @Operation pi()
 	3.141592654
   end

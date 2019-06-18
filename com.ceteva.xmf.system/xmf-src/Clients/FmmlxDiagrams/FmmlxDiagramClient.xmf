@@ -124,22 +124,47 @@ context FmmlxDiagrams
         end
     end
     
-    @Operation getSlots(idRequest, objectName) 
-        let 
-          result = [] 
-        in 
-          @For o in package.getChildren() do 
-            if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
-            then 
-              @For s in o.slots() do 
-                result := result.append([[s.name.toString(), s.value.toString()]])
+    @Operation getSlots(idRequest, objectName, slotList) 
+      let 
+        result = [] 
+      in 
+        @For o in package.getChildren() do 
+          if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
+          then 
+            @For name in slotList do
+              if o.hasSlot(name)
+                then result := result.append([[name, o.get(name).toString()]])
               end
             end
-          end;
-    	  self.communicator.sendMessageToJava([idRequest, result])
-        end
+          end
+        end;
+    	self.communicator.sendMessageToJava([idRequest, result])
+      end
     end
       
+    @Operation getOperationValues(idRequest, objectName, opNames) 
+      let 
+        result = [] 
+      in 
+        @For obj in package.getChildren() do 
+          if obj.isKindOf(FMML::MetaClass) and obj.name.toString() = objectName and opNames.size() > 0
+          then 
+            @For o in obj.of().allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+              if o.instLevel = obj.level then
+                @For name in opNames do
+                  if name = o.name.toString() then                    
+                    result := result.append([[
+                      o.name.toString(), 
+                      o.invoke(obj,{})]]) 
+                end end // if contains // for
+              end // if level
+            end end // if // for
+          end
+        end;
+    	self.communicator.sendMessageToJava([idRequest, result])
+      end
+    end
+    
     @Operation getOwnOperations(idRequest, className) 
         let 
           result = [] 
@@ -147,7 +172,6 @@ context FmmlxDiagrams
           @For c in package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
-//              @For o in c.operations do 
               @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
                 result := result.append([[
                 o.name.toString(), 
@@ -229,7 +253,7 @@ context FmmlxDiagrams
     @Operation getParentIdList(c : FMML::MetaClass) // for local use
       let list = [] in
         @For p in c.parents do
-          if p.isKindOf(FMML::MetaClass) then list.append([mapping.addOrGetObjectMapping(p).id]) end
+          if p.isKindOf(FMML::MetaClass) then list := list.append([mapping.addOrGetObjectMapping(p).id]) end
         end; // for
         list
       end// let      
