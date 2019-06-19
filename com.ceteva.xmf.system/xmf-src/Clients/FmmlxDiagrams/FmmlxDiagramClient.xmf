@@ -72,6 +72,40 @@ context FmmlxDiagrams
         end
     end
     
+    @Operation getAllAssociations(idRequest)
+        let 
+          result = [] 
+        in 
+    	  @For a in package.associations do 
+    	    if a.isKindOf(Associations::Association) 
+    	    then
+    	      let
+    	        mappingInfo = mapping.addOrGetObjectMapping(a)
+    	      in
+    	        result := result.append([[
+    	          mappingInfo.id, // 0 ID
+    	          mapping.addOrGetObjectMapping(a.end1.type).id, // 1 start ID
+    	          mapping.addOrGetObjectMapping(a.end2.type).id, // 2 end ID
+    	          -1, // 3 parent ID
+    	          mappingInfo.points, // 4 points
+    	          "null", // 5 name 1
+    	          "null", // 6 name 2
+    	          a.end1.type, // 7 name start->end slot name
+    	          a.end2.type, // 8 name end->start slot name
+    	          0, // 9 level s->e
+    	          0, // 10 level e->s
+    	          null, // 11 mul s->e
+    	          null // 12 mul e->s
+    	        ]])
+    	      end // let
+    	    else ("a is of " + a.of()).println()
+    	    end // if
+    	  end;
+    	  // clean up mapping ? 
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+    
     @Operation getOwnAttributes(idRequest, className) 
         let 
           result = [] 
@@ -193,12 +227,17 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
     end
     
+    @Operation sendNewPositions(idRequest, objectID, listOfpoints)
+        mapping.setNewPositions(objectID, listOfpoints);
+        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+    end
+    
     @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
-        ("addMetaClass " + name 
-        + " on level " + level 
-        + " with parents " + parents 
-        + (if abstract then " and abstract " else " " end)
-        + "at position " + x + "/" + y).println(); 
+//        ("addMetaClass " + name 
+//        + " on level " + level 
+//        + " with parents " + parents 
+//        + (if abstract then " and abstract " else " " end)
+//        + "at position " + x + "/" + y).println(); 
         
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
@@ -212,16 +251,16 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
-        "addNewMetaClass done".println();
+//        "addNewMetaClass done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
     
     @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
-        ("addInstance " + name 
-        + " of id " + ofId 
-        + " with parents " + parents 
-        + (if abstract then " and abstract " else " " end)
-        + "at position " + x + "/" + y).println(); 
+        //("addInstance " + name 
+        //+ " of id " + ofId 
+        //+ " with parents " + parents 
+        //+ (if abstract then " and abstract " else " " end)
+        //+ "at position " + x + "/" + y).println(); 
         
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
@@ -235,7 +274,7 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
-        "addInstance done".println();
+        //"addInstance done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
     

@@ -66,6 +66,16 @@ context FmmlxDiagrams
       end // for
     end
     
+    @Operation setNewPositions(objectID, listOfPoints)
+      @For mappingInfo in mapping do
+        if mappingInfo.id = objectID
+        then
+          mappingInfo.points := listOfPoints.asSeq();
+          @For i in 0.to(mappingInfo.points.size()-1) do mappingInfo.points := mappingInfo.points.replaceAt(i, mappingInfo.points.at(i).asSeq()) end          
+        end // if
+      end // for
+    end
+    
     @Operation getMapping(objectID) 
       let result = null in 
         @For mappingInfo in mapping do
