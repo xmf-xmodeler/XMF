@@ -88,12 +88,12 @@ context FmmlxDiagrams
     	          mapping.addOrGetObjectMapping(a.end2.type).id, // 2 end ID
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
-    	          "null", // 5 name 1
-    	          "null", // 6 name 2
-    	          a.end1.type, // 7 name start->end slot name
-    	          a.end2.type, // 8 name end->start slot name
-    	          0, // 9 level s->e
-    	          0, // 10 level e->s
+    	          a.name.toString(), // 5 name 1
+    	          null, // 6 name 2
+    	          a.end2.name.toString(), // 7 name start->end slot name
+    	          a.end1.name.toString(), // 8 name end->start slot name
+    	          a.end2.instLevel, // 9 level s->e
+    	          a.end1.instLevel, // 10 level e->s
     	          null, // 11 mul s->e
     	          null // 12 mul e->s
     	        ]])
@@ -251,7 +251,6 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
-//        "addNewMetaClass done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
     
@@ -274,7 +273,6 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
-        //"addInstance done".println();
         self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
     end 
     
