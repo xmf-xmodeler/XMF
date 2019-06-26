@@ -156,7 +156,7 @@ context FmmlxDiagrams
     end    
     
     @Operation getTypeForName(typeName)
-      if typeName = "Integer" then 
+      /* if typeName = "Integer" then 
         Integer 
       elseif typeName = "Float" then 
         Float 
@@ -166,6 +166,21 @@ context FmmlxDiagrams
         Boolean 
       else
         Object 
+      end */
+      let
+        parseResult = self.evalString(typeName)
+      in
+        //("parseValue: "+ parseResult.at(0)).println();
+        //("parseError: "+ parseResult.at(1)).println();
+        if parseResult.at(1) = null then 
+          if parseResult.at(0).isKindOf(Classifier) then
+            parseResult.at(0)
+          else
+            xmf.message(text + " is not a Classifier"); Object
+          end
+        else
+          xmf.message(parseResult.at(1)); Object
+        end
       end
     end
     
@@ -176,6 +191,7 @@ context FmmlxDiagrams
         allInst = class.allMetaInstances();
         type = self.getTypeForName(typeName)
       in 
+        //("addAttribute type: " + type).println();
         a.isIntrinsic := true;
         a.type := type;
         a.instLevel := instLevel;
@@ -194,6 +210,25 @@ context FmmlxDiagrams
         end;
         
         a
+      end
+    end
+    
+    @Operation evalString(text)
+      if text.indexOf("(") >= 0 or text.indexOf(")") >= 0 then
+        [null, "This is dangerous. Don't use '(' or ')' here!"]
+      else
+        try
+          let 
+            exp = OCL::OCL.grammar.parseString(text,"Exp1",Seq{XOCL})
+          then 
+            value = exp.eval(self,Env::NullEnv(),Seq{XCore,Root})
+          in
+            [value, null]
+          end
+        catch(exception)
+        //xmf.message(exception.toString()); null
+          [null, exception.toString()]
+        end
       end
     end
 
