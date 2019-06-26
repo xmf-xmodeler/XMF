@@ -606,5 +606,21 @@ context Root::FMML
        myOps
      end // let
    end // operation
+   
+  @Operation allMetaInstances()
+    if level = 0 then [] else
+      let 
+        instances = {};
+        myInstances = self.allInstances()
+      in
+        @For instance in myInstances do
+          instances := instances + instance.allMetaInstances().asSet()
+        end;
+        instances := instances + myInstances.asSet();
+        instances.asSeq()
+      end
+    end
+  end
+ 
        
   end

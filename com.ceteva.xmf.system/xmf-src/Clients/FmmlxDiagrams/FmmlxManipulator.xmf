@@ -19,7 +19,7 @@ context FmmlxDiagrams
   end
     
   /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
-     all slots need to be created. If the multiplicity of the slot mandates, a value needs to be aquired, either default or otherwise.
+     all slots need to be created. If the multiplicity of the slot mandates, a value needs to be acquired, either default or otherwise.
      For Associations, multiplicity must be checked as well.
      
      The following operation assumes the former to have been checked. 
@@ -131,6 +131,69 @@ context FmmlxDiagrams
         obj.isAbstract := abstract; // todo: check level 0
         obj.addParent(FMML::MetaClass);
         obj
+      end
+    end
+    
+    @Operation checkAddAttribute(class, name, level, type, multiplicity) 
+      let 
+        problems = []
+      in 
+        if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
+        @For attribute in class.allAttributes() do 
+          if attribute.name.toString() = name 
+            then problems := problems + [("Identifier " + name + " already in use (see " +attribute.owner.name.toString()+ ").")] 
+          end
+        end;
+        @For child in class.allMetaInstances() do
+          @For attribute in class.allAttributes() do 
+            if attribute.name.toString() = name 
+              then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
+            end
+          end
+        end;
+        problems
+      end
+    end    
+    
+    @Operation getTypeForName(typeName)
+      if typeName = "Integer" then 
+        Integer 
+      elseif typeName = "Float" then 
+        Float 
+      elseif typeName = "String" then 
+        String 
+      elseif typeName = "Boolean" then 
+        Boolean 
+      else
+        Object 
+      end
+    end
+    
+    @Operation addAttribute(class, name, instLevel, typeName, multiplicity) 
+      // for now assume that checkAddAttribute did not return any trouble
+      let 
+        a = Attribute(name);
+        allInst = class.allMetaInstances();
+        type = self.getTypeForName(typeName)
+      in 
+        a.isIntrinsic := true;
+        a.type := type;
+        a.instLevel := instLevel;
+        
+        class.addAttribute(a);
+        
+        @For instance in allInst do
+          if instance.level = instLevel then 
+            //if a.init <> null
+            //then
+            //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
+            //else
+              Kernel_addAtt(instance,a.name,a.type.default())
+            //end;
+          end
+        end;
+        
+        a
       end
     end
 
