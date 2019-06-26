@@ -176,7 +176,7 @@ context FmmlxDiagrams
           if parseResult.at(0).isKindOf(Classifier) then
             parseResult.at(0)
           else
-            xmf.message(text + " is not a Classifier"); Object
+            xmf.message(typeName + " is not a Classifier"); Object
           end
         else
           xmf.message(parseResult.at(1)); Object
@@ -210,6 +210,25 @@ context FmmlxDiagrams
         end;
         
         a
+      end
+    end
+    
+    @Operation changeSlotValue(obj, slotName, valueToBeParsed) 
+      let
+        parseResult = self.evalString(valueToBeParsed)
+      in
+        //("parseValue: "+ parseResult.at(0)).println();
+        //("parseError: "+ parseResult.at(1)).println();
+        if parseResult.at(1) = null then 
+          obj.set(slotName, parseResult.at(0))
+          //if parseResult.at(0).isKindOf(Classifier) then
+          //  parseResult.at(0)
+          //else
+          //  xmf.message(typeName + " is not a Classifier"); Object
+          //end
+        else
+          xmf.message(parseResult.at(1)); Object
+        end
       end
     end
     

@@ -294,6 +294,16 @@ context FmmlxDiagrams
         end        
     end 
     
+    @Operation changeSlotValue(idRequest, objId, slotName, valueToBeParsed)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        obj = mapping.getMapping(objId).object
+      in
+        m.changeSlotValue(obj, slotName, valueToBeParsed)
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+    end
+    
     @Operation getParentsList(parentIds) // for local use
       let list = [] in
         @For id in parentIds do
