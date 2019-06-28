@@ -145,7 +145,7 @@ context FmmlxDiagrams
           end
         end;
         @For child in class.allMetaInstances() do
-          @For attribute in class.allAttributes() do 
+          @For attribute in child.of().allAttributes() do 
             if attribute.name.toString() = name 
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
             end
@@ -213,6 +213,38 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation removeAttribute(class, attName, strategy)
+        @For attribute in class.ownAttributes() do
+          if attribute.name.toString() = attName then 
+            // remove attribute
+            class.remove(attribute);
+            // remove slots
+            @For instance in class.allMetaInstances() do
+              // this instance may have a slot, check level first, otherwise ignore (no else)
+              if attribute.instLevel = instance.level then 
+                // now, the slot with the given name should be the one we are looking for
+                // UNLESS: by an unknown coincidence, there is another attribute from double inheritance,
+                // should not happen, but check anyway
+                if self.instanceHasAttribute(instance, attName, attribute.instLevel) then
+                  "Double Inheritance! Won't remove Slot".println()
+                else // now remove
+                  instance.removeStructuralFeature(attName)
+                end // if something wrong, print msg, otherwise do
+            end end // foor-loop+if, once for each instance, where the slot existed
+        end end // for-loop+if, only once if att existed, never if not
+    end
+
+    @Operation instanceHasAttribute(instance, attName, instLevel)
+          let found = false in
+            @For attribute in instance.of().allAttributes() do 
+              if attribute.name.toString() = attName 
+                then found:=true
+              end
+            end;
+          found   
+          end
+     end
+    
     @Operation changeSlotValue(obj, slotName, valueToBeParsed) 
       let
         parseResult = self.evalString(valueToBeParsed)
@@ -227,7 +259,7 @@ context FmmlxDiagrams
           //  xmf.message(typeName + " is not a Classifier"); Object
           //end
         else
-          xmf.message(parseResult.at(1)); Object
+          xmf.message(parseResult.at(1)); null
         end
       end
     end

@@ -14,7 +14,7 @@ context Root
     self.addClass(p, "CompPart", 5);
     p::Part.addParent(p::Component);
     p::CompPart.addParent(p::Component);
-//    self.addAttribute(p::Component, "Name", String, 4);
+    self.addAttribute(p::Component, "foo", String, 4);
     self.addAttribute(p::Component, "weight", Float, 1);
 //    self.addAttribute(p::Configuration, "Name", String, 4);
     p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"));
