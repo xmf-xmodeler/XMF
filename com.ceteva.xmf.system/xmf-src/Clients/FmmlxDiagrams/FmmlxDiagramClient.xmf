@@ -239,6 +239,13 @@ context FmmlxDiagrams
 //        + (if abstract then " and abstract " else " " end)
 //        + "at position " + x + "/" + y).println(); 
         
+        let parentsAsSet = {} in
+           @For p in parents do
+               parentsAsSet:=parentsAsSet+{mapping.getMapping(p).object}
+           end;
+           parents := parentsAsSet
+        end;
+        
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
@@ -260,6 +267,13 @@ context FmmlxDiagrams
         //+ " with parents " + parents 
         //+ (if abstract then " and abstract " else " " end)
         //+ "at position " + x + "/" + y).println(); 
+        
+        let parentsAsSet = {} in
+           @For p in parents do
+               parentsAsSet:=parentsAsSet+{mapping.getMapping(p).object}
+           end;
+           parents := parentsAsSet
+        end;
         
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
