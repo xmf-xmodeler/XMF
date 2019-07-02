@@ -239,13 +239,6 @@ context FmmlxDiagrams
 //        + (if abstract then " and abstract " else " " end)
 //        + "at position " + x + "/" + y).println(); 
         
-        let parentsAsSet = {} in
-           @For p in parents do
-               parentsAsSet:=parentsAsSet+{mapping.getMapping(p).object}
-           end;
-           parents := parentsAsSet
-        end;
-        
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
@@ -267,20 +260,15 @@ context FmmlxDiagrams
         //+ " with parents " + parents 
         //+ (if abstract then " and abstract " else " " end)
         //+ "at position " + x + "/" + y).println(); 
-        
-        let parentsAsSet = {} in
-           @For p in parents do
-               parentsAsSet:=parentsAsSet+{mapping.getMapping(p).object}
-           end;
-           parents := parentsAsSet
-        end;
-        
+       
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
           ofClass = mapping.getMapping(ofId).object
+        then
+          parentsList = self.getParentsList(parents)
         then 
-          newInstance = m.addInstance(package, ofClass, name, parents, abstract)
+          newInstance = m.addInstance(package, ofClass, name, parentsList, abstract)
         then
           mappingInfo = mapping.addOrGetObjectMapping(newInstance)
         in 
@@ -331,7 +319,7 @@ context FmmlxDiagrams
     @Operation getParentsList(parentIds) // for local use
       let list = [] in
         @For id in parentIds do
-          if not id = -1 then list.append([mapping.getMapping(id).object]) end
+          if not id = -1 then list := list.append([mapping.getMapping(id).object]) end
         end; // for
         list
       end// let      

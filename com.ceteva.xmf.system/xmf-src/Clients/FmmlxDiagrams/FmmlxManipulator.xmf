@@ -13,7 +13,7 @@ context FmmlxDiagrams
     in
       package.add(newClass);
       newClass.isAbstract := abstract;
-      if parents.size() > 0 then newClass.parents = parents end;
+      if parents.size() > 0 then newClass.parents := parents.asSet() end;
       newClass
     end    
   end
@@ -88,7 +88,7 @@ context FmmlxDiagrams
            false
          end;
 
-	    if parents.size() > 0 then obj.parents := parents end;
+	    if parents.size() > 0 then obj.parents := parents.asSet() end;
 
          //then newClass.parents := parents.asSet() end; // test: may work or not...
          
