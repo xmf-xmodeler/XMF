@@ -167,13 +167,13 @@ context FmmlxDiagrams
 		    attribute := att
 		  end
 		end;
-		if attribute = null then problems = ["Attribute " + oldName + " not found in " + class.name + "."] 
+		if attribute = null then problems := ["Attribute " + oldName + " not found in " + class.name + "."] 
 		else
-		  problems = checkAddAttribute(class, newName, attribute.instLevel, attribute.type, attribute.mult())
+		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type, attribute.mult())
 		end
 		// add further tests here...
-      end;
-      problems
+       ;problems
+     end
     end
     
     @Operation getTypeForName(typeName)
@@ -261,18 +261,16 @@ context FmmlxDiagrams
         attribute = null;
         allInst = class.allMetaInstances()
       in
-		@For att in class.attributes do
-		  if att.name.toString() = oldName then
-		    attribute := att
-		  end
-		end;
+        @For att in class.attributes do
+          if att.name.toString() = oldName then
+            attribute := att
+          end
+        end;
         
-        att.name := newName.asSymbol();
-        
-        class.addAttribute(a);
-        
+        attribute.name := newName.asSymbol();
+                
         @For instance in allInst do
-          if instance.level = att.instLevel then 
+          if instance.level = attribute.instLevel then 
             Kernel_addAtt(instance,newName,instance.get(oldName));
             instance.removeStructuralFeature(oldName)
           end
@@ -314,8 +312,42 @@ context FmmlxDiagrams
       null
     end
     
+    @Operation checkChangeOperationName(class, oldName, newName)
+      let
+        operation = null;
+        problems = []
+      in
+		@For o in class.operations do
+		  if o.name.toString() = oldName then
+		    operation := o
+		  end;
+		  if o.name.toString() = newName then
+		    problems := problems + ["Operation " + newName + " already exists in " + class.name + "."]
+		  end
+		end;
+		if operation = null then problems := problems + ["Operation " + oldName + " not found in " + class.name + "."] 
+		end
+		// add further tests here...
+		// todo: check parent and of classes...
+      ;problems
+      end
+    end
+        
     @Operation changeOperationName(class, oldName, newName)
-      xmf.error("Not yet implemented")
+      // for now assume that changeOperationName did not return any trouble
+      let
+        operation = null
+      in
+        @For o in class.operations do
+          if o.name.toString() = oldName then
+            operation := o
+          end
+        end;
+        
+        operation.name := newName.asSymbol();
+                
+        null
+      end
     end
     
     @Operation changeSlotValue(obj, slotName, valueToBeParsed) 

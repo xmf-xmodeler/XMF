@@ -292,7 +292,7 @@ context FmmlxDiagrams
           problems = m.checkAddAttribute(class, name, level, type, multiplicity)
         in           
           if problems.isEmpty() then m.addAttribute(class, name, level, type, multiplicity) end;
-          self.communicator.sendMessageToJava([idRequest, problems]) // temporary empty result 
+          self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
         end        
     end 
     
@@ -318,7 +318,6 @@ context FmmlxDiagrams
     end
     
     @Operation changeClassName(idRequest, classId, newName) 
-      ("changeClassName id:" + classId + " name:" + newName).println();
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = mapping.getMapping(classId).object
@@ -332,22 +331,24 @@ context FmmlxDiagrams
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = mapping.getMapping(classId).object
+      then 
+        problems = m.checkChangeOperationName(class, oldName, newName)
       in
-        m.changeOperationName(class, oldName, newName)
-      end;
-      //      ("changeOperationName id:" + classId + " " + oldName + "->" + newName).println();
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+        if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
     end
     
     @Operation changeAttributeName(idRequest, classId, oldName, newName) 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = mapping.getMapping(classId).object
+      then 
+        problems = m.checkChangeAttributeName(class, oldName, newName)
       in
-        m.changeAttributeName(class, oldName, newName)
-      end;
-      //      ("changeAttributeName id:" + classId + " " + oldName + "->" + newName).println();
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+        if problems.isEmpty() then m.changeAttributeName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
     end
     
     @Operation getParentsList(parentIds) // for local use
