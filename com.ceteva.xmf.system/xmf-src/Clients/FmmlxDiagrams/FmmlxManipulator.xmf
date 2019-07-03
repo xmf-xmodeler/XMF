@@ -157,6 +157,25 @@ context FmmlxDiagrams
       end
     end    
     
+    @Operation checkChangeAttributeName(class, oldName, newName)
+      let
+        attribute = null;
+        problems = []
+      in
+		@For att in class.attributes do
+		  if att.name.toString() = oldName then
+		    attribute := att
+		  end
+		end;
+		if attribute = null then problems = ["Attribute " + oldName + " not found in " + class.name + "."] 
+		else
+		  problems = checkAddAttribute(class, newName, attribute.instLevel, attribute.type, attribute.mult())
+		end
+		// add further tests here...
+      end;
+      problems
+    end
+    
     @Operation getTypeForName(typeName)
       /* if typeName = "Integer" then 
         Integer 
@@ -235,17 +254,69 @@ context FmmlxDiagrams
             end end // foor-loop+if, once for each instance, where the slot existed
         end end // for-loop+if, only once if att existed, never if not
     end
+    
+    @Operation changeAttributeName(class, oldName, newName)
+      // for now assume that changeAttributeName did not return any trouble
+      let
+        attribute = null;
+        allInst = class.allMetaInstances()
+      in
+		@For att in class.attributes do
+		  if att.name.toString() = oldName then
+		    attribute := att
+		  end
+		end;
+        
+        att.name := newName.asSymbol();
+        
+        class.addAttribute(a);
+        
+        @For instance in allInst do
+          if instance.level = att.instLevel then 
+            Kernel_addAtt(instance,newName,instance.get(oldName));
+            instance.removeStructuralFeature(oldName)
+          end
+        end;
+        
+        null
+      end
+    end
 
     @Operation instanceHasAttribute(instance, attName, instLevel)
-          let found = false in
-            @For attribute in instance.of().allAttributes() do 
-              if attribute.name.toString() = attName 
-                then found:=true
-              end
-            end;
-          found   
+      let found = false in
+        @For attribute in instance.of().allAttributes() do 
+          if attribute.name.toString() = attName 
+            then found:=true
           end
-     end
+        end;
+      found   
+      end
+    end
+    
+    @Operation changeClassName(class, newName)
+      let 
+        package = class.owner
+      in
+        if
+          package.hasElement(newName)
+        then
+          xmf.error(newName + " already in use in " + package)
+        else
+          if
+            newName.isValidName() 
+          then
+            class.name := newName.asSymbol()
+          else
+            xmf.error(newName + " is not a valid name")
+          end
+        end
+      end;
+      null
+    end
+    
+    @Operation changeOperationName(class, oldName, newName)
+      xmf.error("Not yet implemented")
+    end
     
     @Operation changeSlotValue(obj, slotName, valueToBeParsed) 
       let
