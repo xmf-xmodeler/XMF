@@ -170,13 +170,26 @@ context ModelBrowsers
             else
               tree.setFocus()
             end
-          end
-        else 
-          let mapping = self.add(element) 
+          end;
+          "let in end"
+        else
+          self.closeAllDiagrams(element);
+          let mapping = self.add(element)
           in
             mapping.tree.setFocus()
           end
       end
+    end
+
+    @Operation closeAllDiagrams(Project)
+      // This is here to make sure that once a Project was saved with the isOpen attribute true, it can be reopened
+
+      let diagrams = xmf.diagramManager().diagramsFor(Project)
+        in
+          @For diagram in diagrams do
+            diagram.isOpen := false
+          end
+        end
     end
 
   end

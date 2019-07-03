@@ -26,7 +26,8 @@ context ProjectManager
           if project = null
           then
             xmf.errorMessage("Project failed to load.")
-          //else
+          else
+            xmf.diagramManager().diagramsFor(project).println()
           //   xmf.message(
           //     "Project " + project.name().toString() + 
           //     " loaded.\nProject created by " + project.creator() + " on " + project.creationDate() + ".\n" +
@@ -122,10 +123,10 @@ context ProjectStub
 
 context Project
   @Operation browse()
-    self.closeAllDiagrams(package);
     if self.loaded()
-    then package.browse()
-    else 
+    then
+      package.browse()
+    else
       if xmf.question("Load " + self.name())
       then 
         self.load();
@@ -135,18 +136,6 @@ context Project
       end
     end
   end
-
-context Project
-    @Operation closeAllDiagrams(Project)
-        // This is here to make sure that once a Project was saved with the isOpen attribute true, it can be reopened
-
-        let diagrams = xmf.diagramManager().diagramsFor(Project)
-        in
-            @For diagram in diagrams do
-                diagram.isOpen := false
-            end
-        end
-    end
 
 context Project
   @Operation build_check()
