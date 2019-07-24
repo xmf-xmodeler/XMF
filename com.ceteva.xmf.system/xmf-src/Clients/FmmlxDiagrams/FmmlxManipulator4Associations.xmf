@@ -1,0 +1,56 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+   	@Operation createAssociation(
+  	      p: Package,
+  	      class1 : MetaClass,
+  	      class2 : MetaClass,
+  	      ref1 : String,
+  	      ref2 : String,
+  	      fwName : String,
+  	      reverseName : String,
+  	      mult1 : Multiplicity,
+  	      mult2 : Multiplicity,
+  	      instLevel1 : XCore::Element,
+  	      instLevel2 : XCore::Element):XCore::Element
+  	  //  1 check if fwName is valid and unique in p
+  	  //  2 check if reverseName is valid and unique in p (and obviously different from fwName)
+  	  //  3 check if ref1 is valid and unique in class2 ! (in 2!)
+  	  //  4 check if ref2 is valid and unique in class1 !
+  	  //  5 check if one or more of mult1 and mult2 have a minimum of zero.
+  	  //  5a check for circular mandatory multiplicity
+  	  //  5b if one multiplicity > 0, demand default value // or leave inconsistent and demand subsequent repair.
+  	  //  6 check instLevel plausibility  	  
+  	      
+  	      // can a class symmetrically self-associate?  	      
+  	      
+      let 
+        e1 = Associations::End(ref1,class1,mult1);
+        e2 = Associations::End(ref2,class2,mult2)
+      in 
+        e1.instLevel := instLevel1;
+        e2.instLevel := instLevel2;
+        let 
+          a = Associations::Association(fwName,e1,e2)
+        in 
+          a.println();p.println();
+          p.addAssociation(a);
+          a
+        end
+      end
+    end
+    
+    // change assoc direction
+    // change assoc name 4x
+    // change assoc multi 2x
+    // change assoc source/target 2x
+    // remove assoc direction
+    
+    // ??? assoc refinement
+    
+    // add assoc value (new val1, new val2)
+    // remove assoc value (old val1, old val2)
+    // replace assoc value (old val1, old val2, new val1, new val2) -> use remove + add?

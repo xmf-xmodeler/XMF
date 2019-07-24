@@ -38,6 +38,8 @@ context FmmlxDiagrams
         FmmlxDiagram() // vestigial return value for diagram manager
     end
     
+    //////////////////////// Queries ///////////////////////////////
+    
     @Operation getAllObjects(idRequest)
         let 
           result = [] 
@@ -46,19 +48,19 @@ context FmmlxDiagrams
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
     	      let
-    	        mappingInfo = mapping.addOrGetObjectMapping(c)
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(c)
     	      in
     	        result := result.append([[
     	        mappingInfo.id, 
     	        c.name.toString(), 
     	        c.level, // level
-    	        if c.of().isKindOf(FMML::MetaClass) then mapping.addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
+    	        if c.of().isKindOf(FMML::MetaClass) then self.mapping.addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
     	        self.getParentIdList(c),//[],// parents-ID
     	        c.isAbstract,
     	        mappingInfo.lastKnownDiagramX, 
     	        mappingInfo.lastKnownDiagramY]])
     	      end
-    	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
+    	      //("mapping of " + c + " is " + self.mapping.addOrGetObjectMapping(c)).println();
     	      /*
     	      if c is not in mapping
     	        add c to mapping
@@ -80,12 +82,12 @@ context FmmlxDiagrams
     	    if a.isKindOf(Associations::Association) 
     	    then
     	      let
-    	        mappingInfo = mapping.addOrGetObjectMapping(a)
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(a)
     	      in
     	        result := result.append([[
     	          mappingInfo.id, // 0 ID
-    	          mapping.addOrGetObjectMapping(a.end1.type).id, // 1 start ID
-    	          mapping.addOrGetObjectMapping(a.end2.type).id, // 2 end ID
+    	          self.mapping.addOrGetObjectMapping(a.end1.type).id, // 1 start ID
+    	          self.mapping.addOrGetObjectMapping(a.end2.type).id, // 2 end ID
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
@@ -137,7 +139,7 @@ context FmmlxDiagrams
                     a.type.name.toString(), 
                     a.instLevel, 
                     a.mult(),
-                    mapping.getMappingId(c)
+                    self.mapping.getMappingId(c)
                     ]])
               end;
               @For a in (c.allAttributes() - c.attributes) do 
@@ -147,7 +149,7 @@ context FmmlxDiagrams
                     a.type.name.toString(), 
                     a.instLevel, 
                     a.mult(),
-                    mapping.getMappingId(a.owner)
+                    self.mapping.getMappingId(a.owner)
                     ]])
                 end
               end            
@@ -211,9 +213,9 @@ context FmmlxDiagrams
                 o.name.toString(), 
                 o.instLevel, 
                 o.type.name.toString(),
-                if o.owner.isKindOf(FMML::MetaClass) then mapping.getMappingId(o.owner) else -1 end,
+                if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
                 "to-do: multiplicity",
-                self.getOpProp(o, "monitor")
+                if o.hasProperty("monitor") then self.getOpProp(o, "monitor") else false end
                 ]])
               end end
             end
@@ -222,15 +224,19 @@ context FmmlxDiagrams
         end
     end  
     
+    ///////////////////// Updates to the View ////////////////////
+    
     @Operation sendNewPosition(idRequest, objectID, x, y)
-        mapping.setNewPosition(objectID, x, y);
+        self.mapping.setNewPosition(objectID, x, y);
         self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
     end
     
     @Operation sendNewPositions(idRequest, objectID, listOfpoints)
-        mapping.setNewPositions(objectID, listOfpoints);
+        self.mapping.setNewPositions(objectID, listOfpoints);
         self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
     end
+    
+    ////////////////// Class Manipulations ///////////////////
     
     @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
 //        ("addMetaClass " + name 
@@ -246,7 +252,7 @@ context FmmlxDiagrams
         then 
           newClass = m.addMetaClass(package, name, level, parentsList, abstract)
         then
-          mappingInfo = mapping.addOrGetObjectMapping(newClass)
+          mappingInfo = self.mapping.addOrGetObjectMapping(newClass)
         in 
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
@@ -264,13 +270,13 @@ context FmmlxDiagrams
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
-          ofClass = mapping.getMapping(ofId).object
+          ofClass = self.mapping.getMapping(ofId).object
         then
           parentsList = self.getParentsList(parents)
         then 
           newInstance = m.addInstance(package, ofClass, name, parentsList, abstract)
         then
-          mappingInfo = mapping.addOrGetObjectMapping(newInstance)
+          mappingInfo = self.mapping.addOrGetObjectMapping(newInstance)
         in 
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
@@ -278,71 +284,64 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, []]) // temporary empty result 
     end 
     
-    @Operation addAttribute(idRequest, classId, name, level, type, multiplicity)
-//        ("addAttribute " + name 
-//        + " to id " + classId 
-//        + " level " + level 
-//        + " type " + type).println(); 
-        
-        let 
-          m = FmmlxDiagrams::FmmlxManipulator() 
-        then 
-          class = mapping.getMapping(classId).object
-        then 
-          problems = m.checkAddAttribute(class, name, level, type, multiplicity)
-        in           
-          if problems.isEmpty() then m.addAttribute(class, name, level, type, multiplicity) end;
-          self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
-        end        
-    end 
-    
-    @Operation changeSlotValue(idRequest, objId, slotName, valueToBeParsed)
-      let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        obj = mapping.getMapping(objId).object
-      in
-        m.changeSlotValue(obj, slotName, valueToBeParsed)
-      end;
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
-    end
-    
-    @Operation removeAttribute(idRequest, classId, attName, strategy) 
-     // for now: ignore strategy and simply delete 
-      let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = mapping.getMapping(classId).object
-      in
-        m.removeAttribute(class, attName, strategy)
-      end;
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
-    end
-    
     @Operation changeClassName(idRequest, classId, newName) 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = mapping.getMapping(classId).object
+        class = self.mapping.getMapping(classId).object
       in
         m.changeClassName(class, newName)
       end;
       self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
     end
     
-    @Operation changeOperationName(idRequest, classId, oldName, newName) 
+    //////////////////////// Attribute Manipulations /////////////////////
+    
+    @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicity)
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        class = self.mapping.getMapping(classId).object;
+        type = m.getTypeForName(typeName)
+      then 
+        problems = m.checkAddAttribute(class, name, level, typeName, multiplicity)
+      in           
+        if 
+          problems.isEmpty() 
+        then
+          //problems := [0];
+          problems := try 
+            //problems := [1];
+            m.addAttribute(class, name, level, type, multiplicity); null
+            //;problems := [2]
+            //;"addAttribute done".println()
+          catch(e)
+            //("caught " + e).println();
+            //problems := 
+            [("addAttribute failed during transaction: " + e.message)]
+            //;problems.println()
+          end // try
+          //;problems.println()
+        end; // if
+        //problems.println();
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end // in       
+    end 
+    
+    @Operation removeAttribute(idRequest, classId, attName, strategy) 
+     // for now: ignore strategy and simply delete 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = mapping.getMapping(classId).object
-      then 
-        problems = m.checkChangeOperationName(class, oldName, newName)
+        class = self.mapping.getMapping(classId).object
       in
-        if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
-        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
-      end
+        m.removeAttribute(class, attName, strategy)
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
     end
     
     @Operation changeAttributeName(idRequest, classId, oldName, newName) 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = mapping.getMapping(classId).object
+        class = self.mapping.getMapping(classId).object
       then 
         problems = m.checkChangeAttributeName(class, oldName, newName)
       in
@@ -350,6 +349,52 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end
     end
+    
+    @Operation changeAttributeLevel(idRequest, classId, attName, oldLevel, newLevel)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then         
+        problems = m.changeAttributeLevel(class, attName, oldLevel, newLevel)
+      in
+        if problems.isEmpty() then m.changeAttributeLevel(class, attName, oldLevel, newLevel) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+      
+      
+      
+      
+    //////////////////////// Slot Manipulations /////////////////////
+
+    @Operation changeSlotValue(idRequest, objId, slotName, valueToBeParsed)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        obj = self.mapping.getMapping(objId).object;
+        error = null
+      then
+        class = obj.of()
+      then
+        atts = class.allAttributesForLevel(obj.level);
+        foundAtt = null
+      in
+        @For att in atts do
+          if att.name.toString() = slotName.toString() then
+            foundAtt := att
+          end
+        end;
+        if 
+          foundAtt <> null 
+        then
+          m.changeSlotValue(obj, slotName, valueToBeParsed, foundAtt.type)
+        else
+          error := "no Slot Found"
+        end;
+        self.communicator.sendMessageToJava([idRequest, if error = null then null else [error] end]) // temporary empty result 
+      end
+    end
+    
+    //////////////// Local Operations ///////////////////
     
     @Operation getParentsList(parentIds) // for local use
       let list = [] in
@@ -359,8 +404,7 @@ context FmmlxDiagrams
         list
       end// let      
     end
-    
-        
+         
     @Operation getParentIdList(c : FMML::MetaClass) // for local use
       let list = [] in
         @For p in c.parents do
@@ -368,6 +412,31 @@ context FmmlxDiagrams
         end; // for
         list
       end// let      
+    end
+    
+    ////////////////// Operations for editing operations ///////////////////
+
+    @Operation changeOperationName(idRequest, classId, oldName, newName) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.checkChangeOperationName(class, oldName, newName)
+      in
+        if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation addOperation(opName)
+      let
+        opName = class.newName("op") then
+        opString = "@Operation " + opName + "() null end" then
+        opAS = OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}) then
+        opASfun = Compiler::compileToFun("",opAS,Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true) then
+        operation = opASfun()
+      in operation
+      end
     end
     
     @Operation getOpProp(operation, name) // for local use
@@ -383,4 +452,35 @@ context FmmlxDiagrams
         tagFound
       end      
     end
+    
+    @Operation checkOperationNameLegal(op, name):Boolean // todo: check for duplicates, consider arity
+      let nameSymbol = Symbol(name) in
+        if nameSymbol = op.name()
+        then
+          true
+        else
+          op.legalNameChangeCheck(nameSymbol,op.name())
+        end
+      end
+    end
+    
+    @Operation setOperationBody(idRequest, classId:Integer, opName:Operation, text:String)
+      let 
+        class = self.mapping.getMapping(classId).object
+      then
+        op = class.getOperation(opName)
+      then
+        newName = text.splitBy("()[]",0,0)->head.subst("","@Operation ",false)
+      in
+        if self.legalCheck(newName)
+        then
+          if Clients::checkParsable(contex,text)
+          then
+            Clients::setSource(contex,text)
+          end
+        end
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+    end
+    
 end

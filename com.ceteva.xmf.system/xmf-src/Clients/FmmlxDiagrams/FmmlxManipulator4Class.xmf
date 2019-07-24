@@ -1,0 +1,157 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+    @Operation addMetaClass(package, name, level, parents, abstract)
+    let 
+      newClass = FMML::MetaClass(name, level)
+    in
+      package.add(newClass);
+      newClass.isAbstract := abstract;
+      if parents.size() > 0 then newClass.parents := parents.asSet() end;
+      newClass
+    end    
+  end
+  
+    /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
+     all slots need to be created. If the multiplicity of the slot mandates, a value needs to be acquired, either default or otherwise.
+     For Associations, multiplicity must be checked as well.
+     
+     The following operation assumes the former to have been checked. 
+     Until proving the mandatory slots has been taken care of, all slots will be simply initiated with null.
+  
+  */
+  context FmmlxManipulator
+    @Operation addInstance(package, ofClass, name, parents, abstract):Object
+
+      // The following seems to be trivial, but better check once more
+      if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
+
+	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
+      let 
+          // create new Object
+        obj = Kernel_mkObj(); 
+        myLevel = ofClass.level - 1;
+        
+          // We prepare a set of all Attributes from the class and a set of all Operations
+          // !!! This needs to be changed to fit its purpose here.
+          // !!! We need a list of all Attributes which are to be instantiated here.
+        A = ofClass.allAttributes();
+        O = ofClass.allOperations();
+
+          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
+          // !!! This can probably be dropped
+        intrinsicA = Set{};
+        intrinsicO = Set{}
+      in 
+        Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
+      
+         // Then we loop through the Attributes
+         @While not A->isEmpty do
+           let a = A->sel // pick any one Attribute
+           in if a.isIntrinsic andthen a.instLevel < myLevel
+              then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+                intrinsicA := intrinsicA.including(a)
+              else // otherwise it becomes a slot and is initialised
+                if a.init <> null
+                then
+                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
+                else
+                  Kernel_addAtt(obj,a.name,a.type.default())
+                end;
+                if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+              end;
+              A := A->excluding(a) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         // Then we loop through the Operations
+         @While not O->isEmpty do
+           let op = O->sel // pick any one Operation
+           in if op.isIntrinsic andthen op.instLevel < myLevel 
+              then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
+                intrinsicO := intrinsicO.including(op)
+              //else // otherwise it becomes available and we do nothing
+              end;
+              O := O->excluding(op) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         if ofClass.inheritsFrom(Classifier)
+         then
+           obj.parents := obj.defaultParents()
+         else
+           false
+         end;
+
+	    if parents.size() > 0 then obj.parents := parents.asSet() end;
+
+         //then newClass.parents := parents.asSet() end; // test: may work or not...
+         
+         obj.init();
+         
+//                DON'T             
+//         // Now       copy the intrinsic attributes to the object
+//         @While not intrinsicA.isEmpty() do
+//           let intA = intrinsicA.sel()
+//           in 
+//			obj.add(intA);
+//              intrinsicA := intrinsicA.excluding(intA)
+//           end
+//		 end;
+//         
+//         // Copy the operations as well
+//         @While not intrinsicO.isEmpty() do
+//           let intO = intrinsicO.sel()
+//           in 
+//			obj.add(intO);
+//              intrinsicO := intrinsicO.excluding(intO)
+//           end
+//		 end;
+//
+//		   if ofClass.delegatesTo <> null	
+//		   then ofClass.selectRoleFiller(obj, ofClass) end;
+//
+//         if Root.contents.keys().includes("TargetPackage".asSymbol())
+//         then
+//           TargetPackage.add(obj)
+//         else
+//           false
+//         end;
+
+         ofClass.instances := ofClass.instances.including(obj);
+         
+         // todo: name, parents, abstract ...
+        obj.level := myLevel;
+        package.add(obj);         
+        obj.setName(Symbol(name)); // todo: test name
+        
+        obj.isAbstract := abstract; // todo: check level 0
+        obj.addParent(FMML::MetaClass);
+        obj
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeClassName(class, newName)
+      let 
+        package = class.owner
+      in
+        if
+          package.hasElement(newName)
+        then
+          xmf.error(newName + " already in use in " + package)
+        else
+          if
+            newName.isValidName() 
+          then
+            class.name := newName.asSymbol()
+          else
+            xmf.error(newName + " is not a valid name")
+          end
+        end
+      end;
+      null
+    end

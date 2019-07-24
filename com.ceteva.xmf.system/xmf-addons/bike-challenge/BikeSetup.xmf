@@ -1,7 +1,14 @@
 parserImport XOCL;
 
 context Root
+  @Class Complex
+    @Attribute real:Number end
+    @Attribute imaginary:Number end
+    
+    @Operation toString() real + "+" + imaginary + "i" end
+  end
 
+context Root
 @Class BikeSetup
 
   @Operation setup(p:Package) // Level 5 only
@@ -14,7 +21,7 @@ context Root
     self.addClass(p, "CompPart", 5);
     p::Part.addParent(p::Component);
     p::CompPart.addParent(p::Component);
-    self.addAttribute(p::Component, "foo", String, 4);
+    self.addAttribute(p::Component, "foo", Complex, 4);
     self.addAttribute(p::Component, "weight", Float, 1);
 //    self.addAttribute(p::Configuration, "Name", String, 4);
     p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"));
@@ -51,7 +58,14 @@ context Root
     BikeSetup.getOperation("isBikeComplete").isIntrinsic:=true;
     p::Bicycle.addOperation(BikeSetup.getOperation("isBikeComplete"));
     
+    
     self.addInstance(p, p::Part, "Fork");
+    let c = Complex() in
+      c.real := 1; 
+      c.imaginary := 0.5;
+      p::Fork.foo := c
+    end;
+
     self.addAttribute(p::Fork, "color", String, 1);
     self.addAttribute(p::Fork, "suspension", String, 2);
     self.addAttribute(p::Fork, "material", String, 1);
@@ -162,7 +176,7 @@ context Root
          in 
             e1.instLevel := 1;
             e2.instLevel := 2;
-            let a = Associations::Association("regular",e1,e2)
+            let a = Associations::Association("fwName",e1,e2)
             in a.println();p.println();p.addAssociation(a);a
             end
          end
@@ -217,5 +231,20 @@ context Root
     else "complete"
     end
   end
+  
+  @Operation testCatch(x) // try testCatch(null) to provoke error
+    let 
+      problem = false;
+      y = null
+    in
+      y := try
+        1 / x
+      catch(exception)
+        "War wohl nichts"
+      end;
+      y
+    end
+  end
 
 end
+

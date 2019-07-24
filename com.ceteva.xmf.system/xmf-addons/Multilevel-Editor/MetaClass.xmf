@@ -285,7 +285,6 @@ context Root::FMML
   end
  
   @Operation allAttributes():Set(Attribute)
-     
     let allA = attributes;
         allP = parents; // parents and classes
         result = {};
@@ -310,6 +309,22 @@ context Root::FMML
          end
        end;
        result
+    end
+  end
+  
+  @Operation allAttributesForLevel(attLevel):Set(Attribute)
+    let
+      result = {};
+      allAtt = self.allAttributes()
+    in
+      @For att in allAtt do
+        if att.isIntrinsic then 
+          if att.instLevel = attLevel then 
+            result := result.union({att})
+          end
+        end
+      end;
+      result
     end
   end
 	

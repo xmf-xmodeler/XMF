@@ -1,0 +1,44 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator        
+    @Operation changeOperationName(class, oldName, newName)
+      // for now assume that changeOperationName did not return any trouble
+      let
+        operation = null
+      in
+        @For o in class.operations do
+          if o.name.toString() = oldName then
+            operation := o
+          end
+        end;
+        
+        operation.name := newName.asSymbol();
+                
+        null
+      end
+    end
+    
+  context FmmlxManipulator        
+    @Operation checkChangeOperationName(class, oldName, newName)
+      let
+        operation = null;
+        problems = []
+      in
+		@For o in class.operations do
+		  if o.name.toString() = oldName then
+		    operation := o
+		  end;
+		  if o.name.toString() = newName then
+		    problems := problems + ["Operation " + newName + " already exists in " + class.name + "."]
+		  end
+		end;
+		if operation = null then problems := problems + ["Operation " + oldName + " not found in " + class.name + "."] 
+		end
+		// add further tests here...
+		// todo: check parent and of classes...
+      ;problems
+      end
+    end
