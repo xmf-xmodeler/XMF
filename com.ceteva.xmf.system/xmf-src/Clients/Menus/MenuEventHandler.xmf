@@ -9,8 +9,18 @@ context Menus
 
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
-        "menuSelected"           do self.readMenuSelected(parameters) end
-        "rightClickMenuSelected" do self.readRightClickMenuSelected(parameters) end
+        "menuSelected"                  do self.readMenuSelected(parameters) end
+        "rightClickMenuSelected"        do self.readRightClickMenuSelected(parameters) end
+
+        //set debugging values
+        "monitorClientCommunication"    do XMF::monitorClientCommunications() end
+        "silentClientCommunication"     do XMF::silentClientCommunications() end
+        "monitorDaemon"                 do Daemon::traceAll() end
+        "silentDaemon"                  do Daemon::untraceAll() end
+
+        //open debugging menus
+        "showPerformanceMonitor"        do Clients::PerfMon::showPerfMon() end
+        "monitorCalls"                  do Debug::monitor() end
       end
     end
     
