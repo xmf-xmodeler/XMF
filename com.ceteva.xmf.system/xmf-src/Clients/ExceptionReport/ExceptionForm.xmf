@@ -8,6 +8,7 @@ context ExceptionReport
 
   @Class ExceptionForm extends LockableFormWithHistory
 
+    @Attribute button    : FormButton end
     @Attribute exception : Exception end
     @Attribute tree      : ReportTree end
     
@@ -15,13 +16,13 @@ context ExceptionReport
       self.typeName := "Exception";
       let msg = exception.message
       in
-        self.itemName :=
-        if msg.size()>75
-        then
-          msg.truncate(75) + "..."
-        else
-          msg
-        end
+        self.itemName := msg
+        //if msg.size()>75
+        //then
+        //  msg.truncate(75) + "..." //TODO: why do we truncate this? imho the client should decide this
+        //else
+        //  msg
+        //end
       end;
       self.initialize()
 /*      if exception.message = ""
@@ -31,14 +32,17 @@ context ExceptionReport
     end
   
     @Operation addContents()
-      self.addElement(FormLabel(10,9,"Exception Trace : " + itemName));
-      let button = FormButton(560,6,100,18,"View As Text",self.toTextEditor())
-      in
-        self.addElement(button)
-      end;
+      // create elements
+
       self.tree := ReportTree(10,30,650,400,exception);
+
+      //let button = FormButton(560,6,100,18,"View As Text",self.toTextEditor()) //constructor was broken, src: @Constructor(label,action) end
+      self.button := FormButton("View As Text", self.toTextEditor());
+
+      self.addElement(FormLabel(0,450," ")); //TODO: is this supposed to be padding?
+      self.addElement(button);
       self.addElement(tree);
-      self.addElement(FormLabel(0,450," "))
+      self.addElement(FormLabel(10,9,"Exception Trace: " + itemName))
     end
 
     @Operation historyDialogMessage():String
