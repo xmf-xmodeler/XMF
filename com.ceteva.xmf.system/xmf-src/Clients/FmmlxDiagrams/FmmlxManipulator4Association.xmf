@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-   	@Operation createAssociation(
+   	@Operation addAssociation(
   	      p: Package,
   	      class1 : MetaClass,
   	      class2 : MetaClass,
@@ -12,8 +12,8 @@ import FmmlxDiagrams;
   	      ref2 : String,
   	      fwName : String,
   	      reverseName : String,
-  	      mult1 : Multiplicity,
-  	      mult2 : Multiplicity,
+  	      mult1 : XCore::Element,
+  	      mult2 : XCore::Element,
   	      instLevel1 : XCore::Element,
   	      instLevel2 : XCore::Element):XCore::Element
   	  //  1 check if fwName is valid and unique in p
@@ -25,7 +25,9 @@ import FmmlxDiagrams;
   	  //  5b if one multiplicity > 0, demand default value // or leave inconsistent and demand subsequent repair.
   	  //  6 check instLevel plausibility  	  
   	      
-  	      // can a class symmetrically self-associate?  	      
+  	      // can a class symmetrically self-associate?
+  	      
+  	  "manipulator.createAssociation started".println();      
   	      
       let 
         e1 = Associations::End(ref1,class1,mult1);

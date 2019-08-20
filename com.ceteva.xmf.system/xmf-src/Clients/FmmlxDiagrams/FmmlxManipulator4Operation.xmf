@@ -7,18 +7,77 @@ import FmmlxDiagrams;
     @Operation changeOperationName(class, oldName, newName)
       // for now assume that changeOperationName did not return any trouble
       let
+        operation = self.findOperation(class, oldName)
+      in        
+        operation.name := newName.asSymbol();
+        null
+      end
+    end
+    
+  context FmmlxManipulator 
+    @Operation findOperation(class, name) 
+      let
         operation = null
       in
         @For o in class.operations do
-          if o.name.toString() = oldName then
+          if o.name.toString() = name then
             operation := o
           end
         end;
-        
-        operation.name := newName.asSymbol();
-                
-        null
+        operation
       end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeOperationLevel(class, operation, newLevel, isMonitored)
+      let 
+//        operation = self.findOperation(class, name)
+//      then
+        problems = self.checkOperationAllowed(class, operation.name.toString(), operation.arity, operation.isIntrinsic, newLevel, isMonitored, [operation])
+      in 
+        if
+          problems.isEmpty() and operation.isIntrinsic 
+        then 
+          operation.instLevel := newLevel; []
+        else
+          problems
+        end
+      end
+    end
+       
+  context FmmlxManipulator
+    @Operation checkOperationAllowed(class, name, arity, isIntrinsic, instLevel, monitor, ignoreList)
+       
+      let
+        problems = [];
+        operations = class.allOperations().asSet() + class.allOperations2().asSet()
+      in
+        if not isIntrinsic 
+          then problems := problems + ["Operation must be intrinsic to change the level."] end;
+        if arity <> 0 and monitor = true 
+          then problems := problems + ["Monitored Operation must have an arity of zero."] end;
+        // First: Check whether the new operation would interfere with an existing one.
+        @For operation in operations do
+          if operation.name.toString() = name.toString() and not ignoreList.contains(operation) then
+            // and arity equal and level equal...
+            // But for now no duplicate names at all
+            problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
+          end
+        end; // done with conflicts from classes from above.
+        @For instance in class.allMetaInstances() do  // check all instances which could be affected
+          let theirOperations = instance.allOperations().asSet() + instance.allOperations2().asSet()
+          in
+            @For operation in theirOperations do
+              if operation.name.toString() = name.toString() and not ignoreList.contains(operation) then
+                // and arity equal and level equal...
+                // But for now no duplicate names at all
+                problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
+              end // if
+            end // for
+          end // let
+        end; // for
+        problems
+      end // let
     end
     
   context FmmlxManipulator        

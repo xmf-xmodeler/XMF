@@ -44,7 +44,7 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-    	  @For c in package.getChildren() do
+    	  @For c in self.package.getChildren() do
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
     	      let
@@ -215,7 +215,7 @@ context FmmlxDiagrams
                 o.type.name.toString(),
                 if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
                 "to-do: multiplicity",
-                if o.hasProperty("monitor") then self.getOpProp(o, "monitor") else false end
+                self.isOperationMonitored(o)
                 ]])
               end end
             end
@@ -414,6 +414,50 @@ context FmmlxDiagrams
       end// let      
     end
     
+    @Operation isOperationMonitored(o)
+      if o.hasProperty("monitor") then self.getOpProp(o, "monitor") else false end
+    end
+    
+    ////////////////// Operations for editing associations ///////////////////
+    
+  @Operation addAssociation(idRequest, 
+      class1Id : Integer,
+      class2Id : Integer,
+      ref1 : String,
+      ref2 : String,
+      fwName : String,
+      reverseName : String,
+      mult1S : String,
+      mult2S : String,
+      instLevel1 : Integer,
+      instLevel2 : Integer):XCore::Element
+  	  
+  	  let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    class1 = self.mapping.getMapping(class1Id).object;
+  	    class2 = self.mapping.getMapping(class2Id).object;
+  	    mult1 = null;
+  	    mult2 = null
+      then 
+        problems = [] /*m.checkAddAssociation(self.package,
+  	      class1, class2,
+  	      ref1, ref2,
+  	      fwName, reverseName,
+  	      mult1, mult2,
+  	      instLevel1, instLevel2) */
+      in
+        if problems.isEmpty() then 
+  	      problems := m.addAssociation(self.package,
+  	        class1, class2,
+  	        ref1, ref2,
+  	        fwName, reverseName,
+  	        mult1, mult2,
+  	        instLevel1, instLevel2)
+  	    end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end  	  
+  	end    
+    
     ////////////////// Operations for editing operations ///////////////////
 
     @Operation changeOperationName(idRequest, classId, oldName, newName) 
@@ -424,6 +468,19 @@ context FmmlxDiagrams
         problems = m.checkChangeOperationName(class, oldName, newName)
       in
         if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation changeOperationLevel(idRequest, classId, name, oldLevel, newLevel) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then
+        o = m.findOperation(class,name)
+      then 
+        problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
+      in
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end
     end

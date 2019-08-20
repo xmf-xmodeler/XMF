@@ -262,7 +262,7 @@ context Root::FMML
         e.association)
     end
 	
-	@Operation allAttributesWithoutIntrinsic():XCore::Element
+	/*@Operation allAttributesWithoutIntrinsic():XCore::Element
       let all = super();
           newAll = Set{}
       in @While not all.isEmpty() do
@@ -278,7 +278,7 @@ context Root::FMML
          end;
          newAll
       end
-    end
+    end*/
     
   @Operation ownAttributes():Set(Attribute)
     attributes
