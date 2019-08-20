@@ -131,11 +131,15 @@ context Root
     @Operation bootDir():String
       homeDir + "/Boot"
     end
+
+    @Operation docDir():String
+          homeDir.subst("doc", "src", true)
+     end
     
     @Operation browser(title:String,html:String)
     
       // Create a browser in Eclipse...
-      
+
       let DialogsClient = self.dialogsClient()
       in if DialogsClient = null
          then self.error("Cannot find dialogs client for browsing.")

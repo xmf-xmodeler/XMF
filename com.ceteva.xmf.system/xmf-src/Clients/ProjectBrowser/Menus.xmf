@@ -26,7 +26,8 @@ context ProjectManager
           if project = null
           then
             xmf.errorMessage("Project failed to load.")
-          //else
+          else
+            xmf.diagramManager().diagramsFor(project).println()
           //   xmf.message(
           //     "Project " + project.name().toString() + 
           //     " loaded.\nProject created by " + project.creator() + " on " + project.creationDate() + ".\n" +
@@ -123,8 +124,9 @@ context ProjectStub
 context Project
   @Operation browse()
     if self.loaded()
-    then package.browse()
-    else 
+    then
+      package.browse()
+    else
       if xmf.question("Load " + self.name())
       then 
         self.load();

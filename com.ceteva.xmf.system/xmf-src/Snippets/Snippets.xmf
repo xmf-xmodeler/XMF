@@ -1,15 +1,90 @@
-parserImport XOCL;parserImport Parser::BNF;import IO;import Clients;import TextEditor;context Root  @Package Snippets    @XOCL::Bind snippet = "" end    @Operation list(out,root,prefix,indent)      let path = root + "/" + prefix then          dir = Directory(path,Seq{".*xmf"})      in dir.build(1);         if prefix <> ""         then format(out,"~V<li><a class='list' href='.' onclick='return false'>~S</a>~%",Seq{indent,dir.name.splitBy("/",0,0)->last}) // fake <a> link to make mouse pointer indicating 'clickable' on hover          end;         if prefix = ""         then format(out,"~V<ul class='collapsibleList'>~%",Seq{indent+2})         else format(out,"~V<ul class='list'>~%",Seq{indent+2})         end;         @For x in dir.contents() do           let name = x.name.splitBy("/",0,0)->last           in if not Set{".svn","META-INF","Snippets.xmf","Manifest.xmf"}->includes(name)              then                if x.isKindOf(Directory)                then list(out,root,prefix + "/" + name ,indent+2)                else                   let ignore = OCL::OCL.grammar.parseFile(path + "/" + x.name,"CompilationUnit",Seq{})                  in format(out,"~V<li><a class='snippet' href='snippet:~S'>~S</a></li>~%",Seq{indent+2,prefix+"/"+name,snippet})                  end                end              end           end         end      end;      format(out,"~V</ul>~%",Seq{indent+2});      if prefix <> ""      then format(out,"~V</li>~%",Seq{indent})       end       end    @Class SnippetBrowser extends HTMLViewer      @Operation requestURL(url:String)        if url.hasPrefix("snippet:")        then File(xmf.homeDir()+"/Snippets"+url.drop(8)).editText()        else super(url)        end      end    end      @Operation getHTML():String      let sout = StringOutputChannel();
-          //scripts = Snippets::collapsibleLists();
-          web = xmf.pathRelativeToHome("web")      in //format(sout,"<html><script>"+scripts+"</script><head><style type=\"text/css\" media=\"all\">li{list-style: url(\"sym.png\") }li.item { list-style: url(\"sym2.png\") }</style></head><body onLoad='CollapsibleLists.apply();'/><center><h1>Snippets</h1></center>");         //format(sout,"<html><script>"+scripts+"</script><body onLoad='CollapsibleLists.apply();'/><center><h1>Snippets</h1></center>");         format(sout,"<html><head><script src='"+web+"/CollapsibleLists.js'></script><link rel='stylesheet' type='text/css' href='"+web+"/css/tree.css' /></head><body onLoad='CollapsibleLists.apply()'><center><h1><img src='"+web+"/img/Scroll.png' style='width:100px;height:100px;vertical-align:middle' />Code Snippets</h1></center>");
-         format(sout,"<i>Browse example code fragments:</i>");
-         Snippets::list(sout,xmf.homeDir()+"/Snippets","",0);         format(sout,"</body></html>");         sout.getString()      end    end
-    
-    @Operation collapsibleLists():String
-      @WithOpenFile(fin <- "web/CollapsibleLists.js")
-        let size = "web/CollapsibleLists.js".fileSize() then
-            chars = Vector(size)
-        in fin.read(chars);
-           chars.asString()
+parserImport XOCL;
+parserImport Parser::BNF;
+
+import IO;
+import Clients;
+import TextEditor;
+
+context Root
+
+  @Package Snippets
+
+    @XOCL::Bind snippet = "" end
+
+    @Operation list(out,root,prefix,indent)
+      let path = root + "/" + prefix then
+          dir = Directory(path,Seq{".*xmf"})
+      in dir.build(1);
+	//("indent: "+indent+", prefix: "+prefix).println();
+         if prefix <> "" //prefix = snippet-dir, => "" on first run
+         then
+		if indent = 2 //check if this is a list of snippets or dir sub-list => either h5 or li
+		then format(out,"~V<h5 style=\"text-align: unset;\">~S</h5>~%",Seq{indent,dir.name.splitBy("/",0,0)->last})
+		else format(out,"~V<li class=\"sub-list-head\">~S~%",Seq{indent,dir.name.splitBy("/",0,0)->last})
+		end
+         end;
+         if prefix = ""
+         then format(out,"~V~%",Seq{indent+2})
+         else
+		if indent = 4   //check if this is a list of snippets or dir sub-list => li class: either snippet-list or sub-list
+		then format(out,"~V<ul class='sub-list'>~%",Seq{indent+2})
+		else format(out,"~V<ul class='snippet-list'>~%",Seq{indent+2})
+		end
+         end;
+         @For x in dir.contents() do
+           let name = x.name.splitBy("/",0,0)->last
+           in if not Set{".svn","META-INF","Snippets.xmf","Manifest.xmf"}->includes(name)
+              then
+                if x.isKindOf(Directory)
+                then list(out,root,prefix + "/" + name ,indent+2)
+                else 
+                  let ignore = OCL::OCL.grammar.parseFile(path + "/" + x.name,"CompilationUnit",Seq{})
+                  in format(out,"~V<li><a class='snippet' href='http://snippet~S'>~S</a></li>~%",Seq{indent+2,prefix+"/"+name,snippet})
+                  end
+                end
+              end
+           end
+         end
+      end;
+      format(out,"~V</ul>~%",Seq{indent+2});
+      if prefix <> ""
+      then
+	if indent = 4 //check if this is a list of snippets or dir sub-list => close li on sublist, h5 already has a closing tag
+	then format(out,"</li>",Seq{indent})
+	else format(out,"",Seq{indent})
+	end 
+      end
+    end
+
+    @Class SnippetBrowser extends HTMLViewer
+      @Operation requestURL(url:String)
+        if url.hasPrefix("snippet:")
+        then File(xmf.homeDir()+"/Snippets"+url.drop(8)).editText()
+        else super(url)
         end
       end
-    end      @Operation displaySnippets()      xmf.browseUsing(self.getHTML(),SnippetBrowser)    end    @Class Snippet      @Grammar        Snippet ::= s=Str { Snippets::snippet := s; [| null |] }.      end    end end
+    end
+  
+    @Operation getHTML():String
+      let sout = StringOutputChannel();
+          web = "file://"+xmf.pathRelativeToHome("resources/webroot")
+      in format(sout,"<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <title>Snippets</title> <link rel=\"stylesheet\" href=\""+web+"/css/normalize.css\"> <link rel=\"stylesheet\" href=\""+web+"/css/skeleton.css\"> <link rel=\"stylesheet\" href=\""+web+"/css/custom.css\"> </head> <body>");
+         format(sout,"<!-- content --> <div class=\"container\"> <!-- title --> <h3 style=\"text-align: unset;\">Snippets</h3> <p>Click on a snippet to open its source code in a new tab.</p>");
+         Snippets::list(sout,xmf.homeDir()+"/Snippets","",0);
+         format(sout,"</div>");
+         format(sout,"<!-- footer --> <div class=\"section footer\"> <div class=\"container\"> <div class=\"row\"> <div class=\"one-half column\"> <a href=\"https://www.uni-due.de/\" target=\"_blank\"><img src=\""+web+"/img/ude-logo-w.png\"></a> </div> <div class=\"one-half column\"> <a href=\"https://www.aston.ac.uk/\" target=\"_blank\"><img src=\""+web+"/img/aston-logo-245x100.png\"></a> </div> </div> </div> </div>");
+         format(sout,"</body> </html>");
+         sout.getString()
+      end
+    end
+  
+    @Operation displaySnippets()
+      xmf.browseUsing(self.getHTML(),SnippetBrowser)
+    end
+
+    @Class Snippet
+      @Grammar
+        Snippet ::= s=Str { Snippets::snippet := s; [| null |] }.
+      end
+    end
+ end
