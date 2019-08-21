@@ -2,7 +2,71 @@ parserImport XOCL;
 
 import Clients;
 import FmmlxDiagrams;
+      
+  context FmmlxManipulator
+    @Operation checkAddOperation(class, opName, level, body)
+      []
+    end
+    
+  context FmmlxManipulator 
+    @Operation addOperation(class, opName, level, returnType, opString)
+      let
+        problems = [];
+        opAS = null;
+        opASfun = null;
+        operation = null
+      in 
+        // first parse
+        opAS := try [OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}),null] catch(exception) [null,[exception.message]] end;
 
+        // then compile
+        if 
+          opAS.at(0) <> null 
+        then 
+          opASfun := try [Compiler::compileToFun("",opAS.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,[exception.message]] end
+        else
+          opASfun := opAS
+        end;
+
+        // create an instance of the operation
+        if 
+          opASfun.at(0) <> null
+        then 
+          operation := try [(opASfun.at(0))(),null] catch(exception) [null,[exception.message]] end
+        else
+          operation := opASfun
+        end;
+        
+        // check if the operation is allowed to be added
+        if
+          operation.at(0) <> null
+        then 
+          operation.at(0).isIntrinsic := true;
+          operation.at(0).instLevel := level;
+          problems := self.checkOperationAllowed(
+                           class, 
+                           operation.at(0).name.toString(), 
+                           operation.at(0).arity, 
+                           operation.at(0).isIntrinsic, 
+                           level, 
+                           FmmlxDiagramClient::isOperationMonitored(operation.at(0)), 
+                           [])
+        else
+          problems := operation.at(1) 
+        end;
+
+        // if no problem, then add now
+        if 
+          problems.isEmpty() andthen operation.at(0) <> null
+        then 
+          class.addOperation(operation.at(0))
+        end;
+        
+        // return any problem that occurred
+        problems
+      end 
+    end
+    
   context FmmlxManipulator        
     @Operation changeOperationName(class, oldName, newName)
       // for now assume that changeOperationName did not return any trouble

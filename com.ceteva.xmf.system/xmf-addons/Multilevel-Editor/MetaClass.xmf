@@ -127,7 +127,7 @@ context Root::FMML
           //(name + " not yet found").println();
           index := 0;
           moreOperations := self.allOperations2(); // TODO: modify to avoid delegation here
-          @While index < size and not found do //loop until found through all operations 
+          @While index < moreOperations->size and not found do //loop until found through all operations 
             op := moreOperations->at(index);
             if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
             then found := true
@@ -155,8 +155,8 @@ context Root::FMML
               //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
               //element.noOperationFound(message,args)
               found := false
-            end
-          end // if 
+            end 
+          end // if found
         end end; // if+let 2
         /*We have tried the traditional way and the multilevel way. */
           if not found then

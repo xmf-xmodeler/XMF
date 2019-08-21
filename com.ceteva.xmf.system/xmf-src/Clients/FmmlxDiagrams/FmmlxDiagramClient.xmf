@@ -485,14 +485,21 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation addOperation(opName)
+    @Operation addOperation(
+      idRequest  : Integer, 
+      classId    : Integer,
+      opName     : String, 
+      level      : Integer, 
+      returnType : String, // ignore for now...
+      body       : String)
+      
       let
-        opName = class.newName("op") then
-        opString = "@Operation " + opName + "() null end" then
-        opAS = OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}) then
-        opASfun = Compiler::compileToFun("",opAS,Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true) then
-        operation = opASfun()
-      in operation
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.addOperation(class, opName, level, returnType, body)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end
     end
     
