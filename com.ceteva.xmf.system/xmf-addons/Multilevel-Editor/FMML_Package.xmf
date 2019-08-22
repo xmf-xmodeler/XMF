@@ -3,4 +3,17 @@ parserImport XOCL;
 context Root
 
 @Package FMML metapackage XCore extends XCore
+
+  @Attribute fmmlxAssociationInstances : Set end
+  
+  @Operation addAssociationInstance(source, target, association)
+    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
+    self.fmmlxAssociationInstances := self.fmmlxAssociationInstances + {[source,target,association]}
+   end
+  
+  @Operation removeAssociationInstance(source, target, association) 
+    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
+    self.fmmlxAssociationInstances := self.fmmlxAssociationInstances - {[source,target,association]}
+   end
+
 end
