@@ -53,5 +53,9 @@ context FmmlxDiagrams
         end
       end
     end
+    
+    @Operation isInstanceOf(objectS, typeS, instLevelS)
+      objectS.isKindOf(typeS) andthen objectS.level = instLevelS
+    end
 
 end // Class

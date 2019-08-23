@@ -457,6 +457,22 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end  	  
   	end    
+  	
+  	@Operation addAssociationInstance(idRequest, 
+      obj1Id  : Integer,
+      obj2Id  : Integer,
+      assocId : Integer) 
+  	  let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    obj1 = self.mapping.getMapping(obj1Id).object;
+  	    obj2 = self.mapping.getMapping(obj2Id).object;
+  	    association = self.mapping.getMapping(assocId).object
+  	  then 
+        problems = m.addAssociationInstance(self.package, obj1, obj2, association)
+  	  in
+  	    self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+  	  end
+    end
     
     ////////////////// Operations for editing operations ///////////////////
 

@@ -1,0 +1,73 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+   	@Operation countOccurences(
+   	  o : Object,
+   	  p : FMMLxPackage,
+   	  a : Association)
+   	  
+   	  let
+   	    count = 0
+   	  in
+            if p.fmmlxAssociationInstances = null then 0 else
+   	      @For link in p.fmmlxAssociationInstances do
+   	        if link.at(0) = o andthen link.at(2) = a then count := count + 1 end;
+   	        if link.at(1) = o andthen link.at(2) = a then count := count + 1 end
+   	      end;
+   	      count
+            end
+   	  end 
+    end
+
+  context FmmlxManipulator
+   	@Operation addAssociationInstance(
+  	      p       : Package,
+  	      objectS : Object,
+  	      objectT : Object,
+  	      a       : Association)
+  	  let 
+  	    typeS = a.end1.type;
+  	    typeT = a.end2.type;
+  	    instLevelS = a.end1.instLevel;
+  	    instLevelT = a.end2.instLevel;
+  	    typesOK = false;
+  	    objTemp = null
+  	  in 
+        // First check if they aren't there already
+        if not p.hasAssociationInstance(objectS, objectT, a)
+        then
+          if self.isInstanceOf(objectS, typeS, instLevelS) andthen self.isInstanceOf(objectT, typeT, instLevelT)
+   	      then typesOK := true 
+   	      else if self.isInstanceOf(objectT, typeS, instLevelS) andthen self.isInstanceOf(objectS, typeT, instLevelT)
+          then typesOK := true; objTemp:=objectT; objectT:=objectS; objectS:=objTemp end end;
+  	    
+  	      // Now it is checked if the objects fit the type (typesOK). If that is the case, objectS and objectT may have swapped to fit the type.
+
+  	      if typesOK then 
+            let 
+              sCount = self.countOccurences(objectS, p, a);
+              tCount = self.countOccurences(objectT, p, a);
+              sMult = a.end1.mult;
+              tMult = a.end2.mult
+            in
+              if 
+                ((not sMult.hasUpperBound) orelse (sMult.upperBound > sCount)) andthen 
+                ((not tMult.hasUpperBound) orelse (tMult.upperBound > tCount))  
+              then
+                p.addAssociationInstance(objectS, objectT, a);
+                []
+              else // multiplicity does not allow new link
+                [" The multiplicity does not allow a new link."]
+              end // if multiplicity ok
+            end
+  	      else // types not OK
+  	        ["The objects do not fit the type."]
+  	      end // if typesOK
+  	    else // p already has
+  	      ["The link already exists."]
+  	    end // if not already there
+  	  end
+    end
