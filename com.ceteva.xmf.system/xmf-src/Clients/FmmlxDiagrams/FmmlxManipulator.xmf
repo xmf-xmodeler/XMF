@@ -57,5 +57,28 @@ context FmmlxDiagrams
     @Operation isInstanceOf(objectS, typeS, instLevelS)
       objectS.isKindOf(typeS) andthen objectS.level = instLevelS
     end
+    
+    @Operation multiplicity2ValueList(multiplicity) 
+      if multiplicity.isKindOf(Multiplicities::SingleMult)
+        then [if multiplicity.isMandatory then 1 else 0 end, 1, true, true]
+      else if multiplicity.isKindOf(Multiplicities::CollectionMult) 
+        then [multiplicity.lowerBound, 
+              if multiplicity.hasUpperBound then multiplicity.upperBound else -1 end, 
+              multiplicity.hasUpperBound, 
+              multiplicity.isOrdered]
+      else error(multiplicity.of() + "not recognised")
+      end end
+    end
+    
+    @Operation valueList2Multiplicity(list)
+      let
+        min =           list.at(0);
+        max =           list.at(1);
+        hasUpperBound = list.at(2);
+        isOrdered =     list.at(3)
+      in
+        Multiplicities::CollectionMult(isOrdered, hasUpperBound, min, max)
+      end
+    end
 
 end // Class

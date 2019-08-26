@@ -96,8 +96,8 @@ context FmmlxDiagrams
     	          a.end1.name.toString(), // 8 name end->start slot name
     	          a.end2.instLevel, // 9 level s->e
     	          a.end1.instLevel, // 10 level e->s
-    	          null, // 11 mul s->e
-    	          null // 12 mul e->s
+    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->e
+    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult)  // 12 mul e->s
     	        ]])
     	      end // let
     	    else ("a is of " + a.of()).println()
@@ -241,7 +241,7 @@ context FmmlxDiagrams
                 o.instLevel, 
                 o.type.name.toString(),
                 if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
-                "to-do: multiplicity",
+                [0,1,false,true], // to-do: multiplicity
                 self.isOperationMonitored(o)
                 ]])
               end end
@@ -323,12 +323,13 @@ context FmmlxDiagrams
     
     //////////////////////// Attribute Manipulations /////////////////////
     
-    @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicity)
+    @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicityV)
       let 
         m = FmmlxDiagrams::FmmlxManipulator()
       then 
         class = self.mapping.getMapping(classId).object;
-        type = m.getTypeForName(typeName)
+        type = m.getTypeForName(typeName);
+        multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then 
         problems = m.checkAddAttribute(class, name, level, typeName, multiplicity)
       in           
@@ -423,6 +424,15 @@ context FmmlxDiagrams
     
     //////////////// Local Operations ///////////////////
     
+    @Operation vector2Seq(vec) // for local use
+      let list = [] in
+        @For id in vec do
+          list := list.append([id])
+        end; // for
+        list
+      end// let  
+    end
+      
     @Operation getParentsList(parentIds) // for local use
       let list = [] in
         @For id in parentIds do
@@ -462,9 +472,10 @@ context FmmlxDiagrams
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    class1 = self.mapping.getMapping(class1Id).object;
-  	    class2 = self.mapping.getMapping(class2Id).object;
-  	    mult1 = null;
-  	    mult2 = null
+  	    class2 = self.mapping.getMapping(class2Id).object
+  	  then
+        mult1 = m.valueList2Multiplicity(self.vector2Seq(mult1S));
+        mult2 = m.valueList2Multiplicity(self.vector2Seq(mult2S))
       then 
         problems = [] /*m.checkAddAssociation(self.package,
   	      class1, class2,
