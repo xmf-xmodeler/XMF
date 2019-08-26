@@ -108,6 +108,33 @@ context FmmlxDiagrams
         end
     end
     
+        
+    @Operation getAllAssociationInstances(idRequest)
+        let 
+          result = [] 
+        in 
+    	  @For i in (if package.fmmlxAssociationInstances = null then {} else package.fmmlxAssociationInstances end) do 
+    	    //if a.isKindOf(Associations::Association) 
+    	    //then
+    	      let
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(i)
+    	      in
+    	        result := result.append([[
+    	          mappingInfo.id, // 0 ID
+    	          self.mapping.addOrGetObjectMapping(i.at(0)).id, // 1 start ID
+    	          self.mapping.addOrGetObjectMapping(i.at(1)).id, // 2 end ID
+    	          self.mapping.addOrGetObjectMapping(i.at(2)).id, // 3 assoc ID
+    	          mappingInfo.points // 4 points
+    	        ]])
+    	      end // let
+    	    //else ("a is of " + a.of()).println()
+    	    //end // if
+    	  end;
+    	  // clean up mapping ? 
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+    
     @Operation getOwnAttributes(idRequest, className) 
         let 
           result = [] 
