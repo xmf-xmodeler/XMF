@@ -36,9 +36,9 @@ context FmmlxDiagrams
     end
     
     @Operation evalString(text)
-      if text.indexOf("(") >= 0 or text.indexOf(")") >= 0 then
-        [null, "This is dangerous. Don't use '(' or ')' here!"]
-      else
+//      if text.indexOf("(") >= 0 or text.indexOf(")") >= 0 then
+//        [null, "This is dangerous. Don't use '(' or ')' here!"] // TODO: Seq(, Set(: OK (: not OK
+//      else
         try
           let 
             exp = OCL::OCL.grammar.parseString(text,"Exp1",Seq{XOCL})
@@ -51,7 +51,7 @@ context FmmlxDiagrams
         //xmf.message(exception.toString()); null
           [null, exception.toString()]
         end
-      end
+//      end
     end
     
     @Operation isInstanceOf(objectS, typeS, instLevelS)

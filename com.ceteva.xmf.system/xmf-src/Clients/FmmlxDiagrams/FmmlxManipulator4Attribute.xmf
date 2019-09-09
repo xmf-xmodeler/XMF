@@ -10,13 +10,13 @@ import FmmlxDiagrams;
       in 
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
         @For attribute in class.allAttributes() do 
-          if attribute.name.toString() = name 
+          if attribute.name.toString() = name
             then problems := problems + [("Identifier " + name + " already in use (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
         @For child in class.allMetaInstances() do
           @For attribute in child.of().allAttributes() do 
-            if attribute.name.toString() = name 
+            if attribute.name.toString() = name
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
             end
           end
@@ -39,20 +39,63 @@ import FmmlxDiagrams;
 		if attribute = null then problems := ["Attribute " + oldName + " not found in " + class.name + "."] 
 		else
 		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type, attribute.mult())
+		  // add further tests here...
 		end
-		// add further tests here...
        ;problems
      end
     end
     
   context FmmlxManipulator   
+    @Operation checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
+      let
+        attribute = null;
+        problems = []
+      in
+		@For att in class.attributes do
+		  if att.name.toString() = attName then
+		    attribute := att
+		  end
+		end;
+		if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+		else
+		  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
+		  problems
+	      // add further tests here...
+		end
+       ;problems
+     end
+    end
+    
+    
+  context FmmlxManipulator   
+    @Operation checkChangeAttributeType(class, attName, oldType, newType)
+      let
+        attribute = null;
+        problems = []
+      in
+		@For att in class.attributes do
+		  if att.name.toString() = attName then
+		    attribute := att
+		  end
+		end;
+		if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+		else
+		  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
+		  problems := problems + try self.getTypeForName(newType); [] catch(e) [e.message] end
+		  // add further tests here...
+		end
+
+       ;problems
+     end
+    end
+    
+    context FmmlxManipulator   
     @Operation addAttribute(class, name, instLevel, type, multiplicity) 
       // for now assume that checkAddAttribute did not return any trouble
       let 
         a = Attribute(name);
         allInst = class.allMetaInstances()
       in 
-        //("addAttribute type: " + type).println();
         a.isIntrinsic := true;
         a.type := type;
         a.instLevel := instLevel;
@@ -199,11 +242,31 @@ import FmmlxDiagrams;
             end // instance.level = oldLevel
           end; // for
           self.removeAttribute(class, attName, "strategy:delete"); // remove the old one
-          self.checkChangeAttributeName(class, tempAttName, attName) // rename the new one to the original name
+          self.changeAttributeName(class, tempAttName, attName) // rename the new one to the original name
         end
       end
       
-     context FmmlxManipulator 
+    context FmmlxManipulator
+    @Operation changeAttributeType(class, attName, oldTypeName, newTypeName)
+      let 
+        attribute = null;
+        problems = [];
+        parseResult = null
+      in 
+        @For att in class.attributes do
+          if att.name.toString() = attName then
+	        attribute := att
+	      end
+	    end;
+	    parseResult := try [self.getTypeForName(newTypeName),null] catch(e) [null,e] end;
+	    if parseResult.at(0) <> null then 
+	      attribute.type := parseResult.at(0) 
+	    else throw parseResult.at(1)
+	    end
+	  end; null
+    end
+    
+    context FmmlxManipulator 
        @Operation getFreeAttName(class, newLevel)
          let name = "tempAtt"; counter = 0; result = null
          in

@@ -25,9 +25,7 @@ import FmmlxDiagrams;
   	  //  5b if one multiplicity > 0, demand default value // or leave inconsistent and demand subsequent repair.
   	  //  6 check instLevel plausibility  	  
   	      
-  	      // can a class symmetrically self-associate?
-  	      
-  	  "manipulator.createAssociation started".println();      
+  	      // can a class symmetrically self-associate?   
   	      
       let 
         e1 = Associations::End(ref1,class1,mult1);
@@ -39,9 +37,30 @@ import FmmlxDiagrams;
           a = Associations::Association(fwName,e1,e2)
         in 
           a.println();p.println();
-          p.addAssociation(a);
+//          p.addAssociation(a);
+			p.associations := p.associations->including(a);
+			a.owner := p;
           a
         end
+      end
+    end
+    
+
+  context FmmlxManipulator
+    @Operation removeAssociation(association)
+      let
+        package = association.owner
+      in
+        // if an association exists, 
+        // it can be removed as long as the 
+        // association instances are removed first
+        
+        // remove instances
+        self.removeAllAssociationInstances(association);
+        
+        // then remove itself
+        package.associations := package.associations->excluding(association);
+        association.owner := null
       end
     end
     

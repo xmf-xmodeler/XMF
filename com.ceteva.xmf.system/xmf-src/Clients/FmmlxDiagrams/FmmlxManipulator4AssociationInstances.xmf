@@ -12,13 +12,13 @@ import FmmlxDiagrams;
    	  let
    	    count = 0
    	  in
-            if p.fmmlxAssociationInstances = null then 0 else
+        if p.fmmlxAssociationInstances = null then 0 else
    	      @For link in p.fmmlxAssociationInstances do
    	        if link.at(0) = o andthen link.at(2) = a then count := count + 1 end;
    	        if link.at(1) = o andthen link.at(2) = a then count := count + 1 end
    	      end;
    	      count
-            end
+        end
    	  end 
     end
 
@@ -71,3 +71,22 @@ import FmmlxDiagrams;
   	    end // if not already there
   	  end
     end
+    
+  context FmmlxManipulator
+    @Operation removeAllAssociationInstances(a)
+      let
+        p = a.owner();
+        toBeRemoved = {}
+      in
+        ("links: " + p.fmmlxAssociationInstances).println();
+        @For link in p.fmmlxAssociationInstances do
+          if link.at(2) = a then
+            toBeRemoved := toBeRemoved + link
+          end
+        end;
+        @For link in toBeRemoved do
+          p.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
+        end
+      end
+    end 
+    

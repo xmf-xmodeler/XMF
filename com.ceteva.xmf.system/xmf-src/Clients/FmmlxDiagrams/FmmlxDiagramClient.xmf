@@ -240,6 +240,7 @@ context FmmlxDiagrams
                 o.name.toString(), 
                 o.instLevel, 
                 o.type.name.toString(),
+                o.source(),
                 if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
                 [0,1,false,true], // to-do: multiplicity
                 self.isOperationMonitored(o)
@@ -293,23 +294,36 @@ context FmmlxDiagrams
         //+ " with parents " + parents 
         //+ (if abstract then " and abstract " else " " end)
         //+ "at position " + x + "/" + y).println(); 
-       
-        let 
-          m = FmmlxDiagrams::FmmlxManipulator() 
-        then 
-          ofClass = self.mapping.getMapping(ofId).object
-        then
-          parentsList = self.getParentsList(parents)
-        then 
-          newInstance = m.addInstance(package, ofClass, name, parentsList, abstract)
-        then
-          mappingInfo = self.mapping.addOrGetObjectMapping(newInstance)
-        in 
-          mappingInfo.lastKnownDiagramX := x;
-          mappingInfo.lastKnownDiagramY := y
-        end;
-        self.communicator.sendMessageToJava([idRequest, []]) // temporary empty result 
+        try
+          let 
+            m = FmmlxDiagrams::FmmlxManipulator() 
+          then 
+            ofClass = self.mapping.getMapping(ofId).object
+          then
+            parentsList = self.getParentsList(parents)
+          then 
+            newInstance = m.addInstance(package, ofClass, name, parentsList, abstract)
+          then
+            mappingInfo = self.mapping.addOrGetObjectMapping(newInstance)
+          in 
+            mappingInfo.lastKnownDiagramX := x;
+            mappingInfo.lastKnownDiagramY := y
+          end;
+          self.communicator.sendMessageToJava([idRequest, []]) 
+        catch (exception)
+          self.communicator.sendMessageToJava([idRequest, [exception.message]])
+        end
     end 
+    
+    @Operation removeClass(idRequest, classId, strategy) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        m.removeClass(class, strategy)
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+    end
     
     @Operation changeClassName(idRequest, classId, newName) 
       let
@@ -383,14 +397,24 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
       then         
-        problems = m.changeAttributeLevel(class, attName, oldLevel, newLevel)
+        problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
       in
         if problems.isEmpty() then m.changeAttributeLevel(class, attName, oldLevel, newLevel) end;
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end
     end
       
-      
+    @Operation changeAttributeType(idRequest, classId, attName, oldTypeName, newTypeName)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then         
+        problems = m.checkChangeAttributeType(class, attName, oldTypeName, newTypeName)
+      in
+        if problems.isEmpty() then m.changeAttributeType(class, attName, oldTypeName, newTypeName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end   
       
       
     //////////////////////// Slot Manipulations /////////////////////

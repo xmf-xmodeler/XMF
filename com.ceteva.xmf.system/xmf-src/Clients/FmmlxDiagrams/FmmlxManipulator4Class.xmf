@@ -28,7 +28,8 @@ import FmmlxDiagrams;
 
       // The following seems to be trivial, but better check once more
       if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
-
+      if not Symbol(name).isValidName()  then self.error("name " + name + " not legal.") end;
+      
 	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
       let 
           // create new Object
@@ -93,23 +94,7 @@ import FmmlxDiagrams;
          obj.init();
          
 //                DON'T             
-//         // Now       copy the intrinsic attributes to the object
-//         @While not intrinsicA.isEmpty() do
-//           let intA = intrinsicA.sel()
-//           in 
-//			obj.add(intA);
-//              intrinsicA := intrinsicA.excluding(intA)
-//           end
-//		 end;
-//         
-//         // Copy the operations as well
-//         @While not intrinsicO.isEmpty() do
-//           let intO = intrinsicO.sel()
-//           in 
-//			obj.add(intO);
-//              intrinsicO := intrinsicO.excluding(intO)
-//           end
-//		 end;
+
 //
 //		   if ofClass.delegatesTo <> null	
 //		   then ofClass.selectRoleFiller(obj, ofClass) end;
@@ -125,7 +110,7 @@ import FmmlxDiagrams;
          
          // todo: name, parents, abstract ...
         obj.level := myLevel;
-        package.add(obj);         
+        package.add(obj);
         obj.setName(Symbol(name)); // todo: test name
         
         obj.isAbstract := abstract; // todo: check level 0
@@ -155,3 +140,62 @@ import FmmlxDiagrams;
       end;
       null
     end
+    
+  context FmmlxManipulator
+    @Operation removeClass(class, strategy)
+      let 
+        package = class.owner;
+        associations = [];
+        heirs = [];
+        instances = [] 
+      in
+        ("remove Class "+class.name+" start").println();
+
+      // remove the associations first
+        @For association in package.associations do
+          if association.end1.type = class or association.end2.type = class then
+            associations := associations + [association] end end;
+        ("found "+associations.size()+" associations").println();
+        @For association in associations do
+            self.removeAssociation(association) end;
+            
+        ("associations removed").println();
+
+      // remove all inheritance
+        @For heir in package.getChildren() do
+          if heir.parents.contains(class) then
+            heirs := heirs + [heir] end end;
+        ("found "+heirs.size()+" heirs").println();
+        @For heir in heirs do
+          self.removeParent(heir, class) end;
+        ("inheritance removed").println();
+          
+      // orphan the instances
+        @For instance in package.getChildren() do
+          if instance.of() = class then
+            instances := instances + [instance] end end;
+        ("found "+instances.size()+" instances").println();
+        @For instance in instances do
+          self.orphanInstance(instance) end;
+        ("instances orphaned").println();
+
+      // remove class
+        package.remove(class);
+        ("class removed").println()
+      end
+    end
+  
+  context FmmlxManipulator  
+    @Operation removeParent(heir, parent)
+      xmf.error("The operation \"removeParent\" has not been implemented yet.")
+    end
+    
+  context FmmlxManipulator  
+    @Operation orphanInstance(instance)
+      self.migrateInstance(instance, null)
+    end
+    
+  context FmmlxManipulator  
+    @Operation migrateInstance(instance, newClass)
+      xmf.error("The operation \"migrateInstance\" has not been implemented yet.")
+    end   
