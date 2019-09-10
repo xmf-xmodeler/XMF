@@ -476,7 +476,7 @@ context FmmlxDiagrams
     end
     
     @Operation isOperationMonitored(o)
-      if o.hasProperty("monitor") then self.getOpProp(o, "monitor") else false end
+      if o.hasProperty("monitor") then FmmlxDiagramClient::getOpProp(o, "monitor") else false end
     end
     
     ////////////////// Operations for editing associations ///////////////////
@@ -605,24 +605,27 @@ context FmmlxDiagrams
         end
       end
     end
-    
-    @Operation setOperationBody(idRequest, classId:Integer, opName:Operation, text:String)
+        
+    @Operation changeOperationBody(idRequest, classId:Integer, oldName:String, body:String)
       let 
-        class = self.mapping.getMapping(classId).object
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object;
+        problems = []
       then
-        op = class.getOperation(opName)
+        op = class.getOperation(oldName)
       then
-        newName = text.splitBy("()[]",0,0)->head.subst("","@Operation ",false)
+        newName = body.splitBy("()[]",0,0)->head.subst("","@Operation ",false)
       in
-        if self.legalCheck(newName)
-        then
-          if Clients::checkParsable(contex,text)
-          then
-            Clients::setSource(contex,text)
-          end
-        end
-      end;
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+        if oldName.toString() <> newName.toString() then 
+          problems := ["name change not allowed here"]
+        elseif
+          op = null then 
+          problems := ["operation not found"]
+        else // let the manipulator try
+          problems := m.changeOperationBody(class, op, newName, body)
+        end;
+        self.communicator.sendMessageToJava([idRequest, problems])
+      end
     end
     
 end

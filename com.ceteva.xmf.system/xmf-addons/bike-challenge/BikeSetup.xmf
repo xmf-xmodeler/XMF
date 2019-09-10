@@ -178,7 +178,7 @@ context Root
             e1.instLevel := inst_level1;
             e2.instLevel := inst_level2;
             let a = Associations::Association("fwName",e1,e2)
-            in a.println();p.println();p.addAssociation(a);a
+            in p.addAssociation(a);a
             end
          end
       end
@@ -232,20 +232,7 @@ context Root
     else "complete"
     end
   end
-  
-  @Operation testCatch(x) // try testCatch(null) to provoke error
-    let 
-      problem = false;
-      y = null
-    in
-      y := try
-        1 / x
-      catch(exception)
-        "War wohl nichts"
-      end;
-      y
-    end
-  end
+
 
 end
 

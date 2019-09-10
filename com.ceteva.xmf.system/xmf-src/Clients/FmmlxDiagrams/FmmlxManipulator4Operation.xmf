@@ -2,12 +2,7 @@ parserImport XOCL;
 
 import Clients;
 import FmmlxDiagrams;
-      
-  context FmmlxManipulator
-    @Operation checkAddOperation(class, opName, level, body)
-      []
-    end
-    
+
   context FmmlxManipulator 
     @Operation addOperation(class, opName, level, returnType, opString)
       let
@@ -59,12 +54,27 @@ import FmmlxDiagrams;
         if 
           problems.isEmpty() andthen operation.at(0) <> null
         then 
-          class.addOperation(operation.at(0))
+          class.operations := class.operations + {operation.at(0)};
+          operation.at(0).owner := class;
+          resetOperatorTable()
         end;
         
         // return any problem that occurred
         problems
       end 
+    end
+    
+  context FmmlxManipulator
+    @Operation removeOperation(class, name)
+      let 
+        o = self.findOperation(class, name) 
+      in
+        if o <> null then
+          class.operations :=  class.operations - {o};
+          o.owner := null;
+          resetOperatorTable()
+        end
+      end
     end
     
   context FmmlxManipulator        
@@ -74,7 +84,54 @@ import FmmlxDiagrams;
         operation = self.findOperation(class, oldName)
       in        
         operation.name := newName.asSymbol();
-        null
+        resetOperatorTable();
+        []
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeOperationLevel(class, operation, newLevel, isMonitored)
+      let 
+        problems = self.checkOperationAllowed(class, operation.name.toString(), operation.arity, operation.isIntrinsic, newLevel, isMonitored, [operation])
+      in 
+        if
+          problems.isEmpty() and operation.isIntrinsic 
+        then 
+          operation.instLevel := newLevel; []
+        else
+          problems
+        end
+      end
+    end
+
+  context FmmlxManipulator 
+    @Operation changeOperationBody(class, oldOp, opName, body)
+      let
+        problems = [];
+        level = oldOp.instLevel;
+        returnType = oldOp.type;
+        problems = []
+      then
+        tempName = self.getFreeOpName(class, level)
+      in
+        self.changeOperationName(class, opName, tempName); // temporarily rename the current operation
+        "Start adding new operation".println();
+        problems := try
+          self.addOperation(class, opName, level, returnType, body)
+        catch(e)
+          ["Something unforeseen went wrong while updating the operation: " + e.message]
+        end;
+        
+        ("changeOperationBody Problems: " + problems.size()).println();
+        
+        if 
+          problems.isEmpty()
+        then // remove old op
+          self.removeOperation(class, tempName)
+        else // restore old op
+          self.changeOperationName(class, tempName, opName)
+        end;
+        problems
       end
     end
     
@@ -89,23 +146,6 @@ import FmmlxDiagrams;
           end
         end;
         operation
-      end
-    end
-    
-  context FmmlxManipulator
-    @Operation changeOperationLevel(class, operation, newLevel, isMonitored)
-      let 
-//        operation = self.findOperation(class, name)
-//      then
-        problems = self.checkOperationAllowed(class, operation.name.toString(), operation.arity, operation.isIntrinsic, newLevel, isMonitored, [operation])
-      in 
-        if
-          problems.isEmpty() and operation.isIntrinsic 
-        then 
-          operation.instLevel := newLevel; []
-        else
-          problems
-        end
       end
     end
        
@@ -144,6 +184,11 @@ import FmmlxDiagrams;
       end // let
     end
     
+  context FmmlxManipulator
+    @Operation checkAddOperation(class, opName, level, body)
+      []
+    end
+    
   context FmmlxManipulator        
     @Operation checkChangeOperationName(class, oldName, newName)
       let
@@ -163,5 +208,35 @@ import FmmlxDiagrams;
 		// add further tests here...
 		// todo: check parent and of classes...
       ;problems
+      end
+    end
+    
+  context FmmlxManipulator 
+    @Operation isOpNameFree(class, testName, newLevel)
+      let
+        ok = true
+      in
+        @For o in class.allOperations() do
+          ok := ok andthen o.name.toString() <> testName.toString()
+        end;
+        @For o in class.allOperations2() do
+          ok := ok andthen (o.name.toString() <> testName.toString() or o.instLevel <> newLevel)
+        end;    
+        ok
+      end
+    end
+      
+  context FmmlxManipulator 
+    @Operation getFreeOpName(class, newLevel)
+      let name = "tempOp"; counter = 0; result = null
+      in
+        @While result = null do
+          let testName = name + counter in
+            if self.isOpNameFree(class, testName, newLevel) then// i.e. no problem
+              result := testName
+            end               
+          end
+        end;
+        result
       end
     end

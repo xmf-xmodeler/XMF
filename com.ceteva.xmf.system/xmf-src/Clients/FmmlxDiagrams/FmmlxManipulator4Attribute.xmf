@@ -8,6 +8,7 @@ import FmmlxDiagrams;
       let 
         problems = []
       in 
+        if type = null then problems := problems + [("null is not a valid type")] end;
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
         @For attribute in class.allAttributes() do 
           if attribute.name.toString() = name
@@ -171,17 +172,17 @@ import FmmlxDiagrams;
         attribute = null;
         problems = []
       in
-		@For att in class.attributes do
-		  if att.name.toString() = attName then
-		    attribute := att
-		  end
-		end;
-		if 
-		  attribute = null 
-		then 
-		  problems := ["Attribute " + attName + " not found in " + class.name + "."] 
-		end
-		// add further tests here...
+	@For att in class.attributes do
+	  if att.name.toString() = attName then
+	    attribute := att
+	  end
+	end;
+	if 
+	  attribute = null 
+	then 
+	  problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+	end
+	// add further tests here...
        ;problems
      end
     end

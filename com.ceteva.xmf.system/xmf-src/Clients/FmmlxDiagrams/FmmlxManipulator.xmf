@@ -12,7 +12,7 @@ context FmmlxDiagrams
       let
         parseResult = self.evalString(typeName)
       in
-        if parseResult.at(1) = null then 
+        if parseResult.at(0) <> null andthen parseResult.at(1) = null then 
           if parseResult.at(0).isKindOf(Classifier) then
             parseResult.at(0)
           else
