@@ -72,7 +72,10 @@ import FmmlxDiagrams;
         if o <> null then
           class.operations :=  class.operations - {o};
           o.owner := null;
-          resetOperatorTable()
+          resetOperatorTable();
+          []
+        else
+          ["Operation not found"]
         end
       end
     end
@@ -115,14 +118,11 @@ import FmmlxDiagrams;
         tempName = self.getFreeOpName(class, level)
       in
         self.changeOperationName(class, opName, tempName); // temporarily rename the current operation
-        "Start adding new operation".println();
         problems := try
           self.addOperation(class, opName, level, returnType, body)
         catch(e)
           ["Something unforeseen went wrong while updating the operation: " + e.message]
         end;
-        
-        ("changeOperationBody Problems: " + problems.size()).println();
         
         if 
           problems.isEmpty()

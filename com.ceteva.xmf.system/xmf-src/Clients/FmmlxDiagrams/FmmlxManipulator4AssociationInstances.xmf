@@ -78,7 +78,6 @@ import FmmlxDiagrams;
         p = a.owner();
         toBeRemoved = {}
       in
-        ("links: " + p.fmmlxAssociationInstances).println();
         @For link in p.fmmlxAssociationInstances do
           if link.at(2) = a then
             toBeRemoved := toBeRemoved + link
@@ -87,6 +86,17 @@ import FmmlxDiagrams;
         @For link in toBeRemoved do
           p.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
         end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation removeAssociationInstance(link)
+      let
+        a = link.at(2)
+      then
+        p = a.owner()
+      in
+        p.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
       end
     end 
     

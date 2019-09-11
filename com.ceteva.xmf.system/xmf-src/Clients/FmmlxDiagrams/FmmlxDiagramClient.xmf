@@ -536,6 +536,33 @@ context FmmlxDiagrams
   	  end
     end
     
+    @Operation removeAssociation(
+      idRequest  : Integer, 
+      assocId    : Integer)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.mapping.getMapping(assocId).object
+      then 
+        problems = m.removeAssociation(assoc)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    
+    @Operation removeAssociationInstance(
+      idRequest  : Integer, 
+      assocInstId    : Integer)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assocInstSeq = self.mapping.getMapping(assocInstId).object
+      then 
+        problems = m.removeAssociationInstance(assocInstSeq)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
     ////////////////// Operations for editing operations ///////////////////
 
     @Operation changeOperationName(idRequest, classId, oldName, newName) 
@@ -581,6 +608,20 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation removeOperation(
+      idRequest  : Integer, 
+      classId    : Integer,
+      opName     : String)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.removeOperation(class, opName)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
     @Operation getOpProp(operation, name) // for local use
       let
         properties = operation.properties();
@@ -594,6 +635,7 @@ context FmmlxDiagrams
         tagFound
       end      
     end
+    
     
     @Operation checkOperationNameLegal(op, name):Boolean // todo: check for duplicates, consider arity
       let nameSymbol = Symbol(name) in
