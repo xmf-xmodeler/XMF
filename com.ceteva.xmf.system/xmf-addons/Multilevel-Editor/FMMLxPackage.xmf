@@ -14,8 +14,25 @@ context Root::FMML
   
   @Operation removeAssociationInstance(source, target, association) 
     if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
-    self.fmmlxAssociationInstances := self.fmmlxAssociationInstances - {[source,target,association]}
-   end
+    let
+      toBeRemoved = {}
+    in
+      @For link in self.fmmlxAssociationInstances do
+        if 
+          source = link.at(0) andthen target = link.at(1) andthen association = link.at(2)
+        then
+          toBeRemoved := toBeRemoved + {link}
+        end
+      end;
+      if 
+        toBeRemoved.size() <> 1 
+      then 
+        throw Exception("associationInstance not found") 
+      else
+        self.fmmlxAssociationInstances := self.fmmlxAssociationInstances - toBeRemoved
+      end
+    end
+  end
    
   @Operation hasAssociationInstance(source, target, association)
     if fmmlxAssociationInstances = null then false 
