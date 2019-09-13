@@ -36,8 +36,6 @@ import FmmlxDiagrams;
         let 
           a = Associations::Association(fwName,e1,e2)
         in 
-          a.println();p.println();
-//          p.addAssociation(a);
 			p.associations := p.associations->including(a);
 			a.owner := p;
           a

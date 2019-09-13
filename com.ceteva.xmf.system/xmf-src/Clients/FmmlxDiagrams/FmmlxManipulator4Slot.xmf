@@ -8,10 +8,7 @@ import FmmlxDiagrams;
       let
         parseResult = self.evalString(valueToBeParsed)
       in
-        //("parse Value: "+ parseResult.at(0)).println();
-        //("parse Error: "+ parseResult.at(1)).println();
         if parseResult.at(1) = null then 
-          //obj.set(slotName, parseResult.at(0))
           if parseResult.at(0).isKindOf(requiredType) then
             obj.set(slotName, parseResult.at(0))
           else

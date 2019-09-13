@@ -80,7 +80,7 @@ import FmmlxDiagrams;
       in
         @For link in p.fmmlxAssociationInstances do
           if link.at(2) = a then
-            toBeRemoved := toBeRemoved + link
+            toBeRemoved := toBeRemoved + {link}
           end
         end;
         @For link in toBeRemoved do

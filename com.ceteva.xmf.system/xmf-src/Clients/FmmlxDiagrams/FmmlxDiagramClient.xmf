@@ -19,6 +19,16 @@ context FmmlxDiagrams
     
     @Operation createDiagram(package,name)
         self.package := package;
+        
+        ///////////FIND ALTERNATIVE TO THIS///////////////////
+        if 
+          package.of() <> FMML::FMMLxPackage
+        then 
+          package.setOf(FMML::FMMLxPackage);
+          Kernel_addAtt(package,"fmmlxAssociationInstances",{})
+        end;
+        //////////////////////////////////////////////////////
+        
         let 
           FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self)
@@ -27,14 +37,6 @@ context FmmlxDiagrams
           self.communicator.setHandle(handle);
           self.communicator.newDiagram()
         end;
-//        let x = FmmlxDiagram()
-//        in 
-//          ("x: "+x).println();
-//          x.newDiagram();
-//          ("name: "+name).println();
-//          ("self.newDiagram("+self.name+")").println();
-//          x
-//        end
         FmmlxDiagram() // vestigial return value for diagram manager
     end
     
@@ -60,13 +62,6 @@ context FmmlxDiagrams
     	        mappingInfo.lastKnownDiagramX, 
     	        mappingInfo.lastKnownDiagramY]])
     	      end
-    	      //("mapping of " + c + " is " + self.mapping.addOrGetObjectMapping(c)).println();
-    	      /*
-    	      if c is not in mapping
-    	        add c to mapping
-    	      return c with mapping info
-    	      */
-    	      //result := result.append([c.name.toString()])
     	    end
     	  end;
     	  // clean up mapping ? 
@@ -114,8 +109,7 @@ context FmmlxDiagrams
           result = [] 
         in 
     	  @For i in (if package.fmmlxAssociationInstances = null then {} else package.fmmlxAssociationInstances end) do 
-    	    //if a.isKindOf(Associations::Association) 
-    	    //then
+
     	      let
     	        mappingInfo = self.mapping.addOrGetObjectMapping(i)
     	      in
@@ -127,8 +121,6 @@ context FmmlxDiagrams
     	          mappingInfo.points // 4 points
     	        ]])
     	      end // let
-    	    //else ("a is of " + a.of()).println()
-    	    //end // if
     	  end;
     	  // clean up mapping ? 
     	  self.communicator.sendMessageToJava([idRequest, result])
@@ -267,12 +259,7 @@ context FmmlxDiagrams
     ////////////////// Class Manipulations ///////////////////
     
     @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
-//        ("addMetaClass " + name 
-//        + " on level " + level 
-//        + " with parents " + parents 
-//        + (if abstract then " and abstract " else " " end)
-//        + "at position " + x + "/" + y).println(); 
-        
+
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
@@ -289,11 +276,6 @@ context FmmlxDiagrams
     end 
     
     @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
-        //("addInstance " + name 
-        //+ " of id " + ofId 
-        //+ " with parents " + parents 
-        //+ (if abstract then " and abstract " else " " end)
-        //+ "at position " + x + "/" + y).println(); 
         try
           let 
             m = FmmlxDiagrams::FmmlxManipulator() 
@@ -350,21 +332,12 @@ context FmmlxDiagrams
         if 
           problems.isEmpty() 
         then
-          //problems := [0];
           problems := try 
-            //problems := [1];
             m.addAttribute(class, name, level, type, multiplicity); null
-            //;problems := [2]
-            //;"addAttribute done".println()
           catch(e)
-            //("caught " + e).println();
-            //problems := 
             [("addAttribute failed during transaction: " + e.message)]
-            //;problems.println()
           end // try
-          //;problems.println()
         end; // if
-        //problems.println();
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end // in       
     end 

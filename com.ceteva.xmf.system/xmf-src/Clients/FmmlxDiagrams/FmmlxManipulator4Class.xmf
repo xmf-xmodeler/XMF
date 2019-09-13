@@ -149,39 +149,39 @@ import FmmlxDiagrams;
         heirs = [];
         instances = [] 
       in
-        ("remove Class "+class.name+" start").println();
+//        ("remove Class "+class.name+" start").println();
 
       // remove the associations first
         @For association in package.associations do
           if association.end1.type = class or association.end2.type = class then
             associations := associations + [association] end end;
-        ("found "+associations.size()+" associations").println();
+//        ("found "+associations.size()+" associations").println();
         @For association in associations do
             self.removeAssociation(association) end;
             
-        ("associations removed").println();
+//        ("associations removed").println();
 
       // remove all inheritance
         @For heir in package.getChildren() do
           if heir.parents.contains(class) then
             heirs := heirs + [heir] end end;
-        ("found "+heirs.size()+" heirs").println();
+//        ("found "+heirs.size()+" heirs").println();
         @For heir in heirs do
           self.removeParent(heir, class) end;
-        ("inheritance removed").println();
+//        ("inheritance removed").println();
           
       // orphan the instances
         @For instance in package.getChildren() do
           if instance.of() = class then
             instances := instances + [instance] end end;
-        ("found "+instances.size()+" instances").println();
+//        ("found "+instances.size()+" instances").println();
         @For instance in instances do
           self.orphanInstance(instance) end;
-        ("instances orphaned").println();
+//        ("instances orphaned").println();
 
       // remove class
-        package.remove(class);
-        ("class removed").println()
+        package.remove(class)
+//        ("class removed").println()
       end
     end
   
