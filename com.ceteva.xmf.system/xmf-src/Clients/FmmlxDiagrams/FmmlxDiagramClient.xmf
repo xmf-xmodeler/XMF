@@ -231,7 +231,7 @@ context FmmlxDiagrams
                 result := result.append([[
                 o.name.toString(), 
                 o.instLevel, 
-                o.type.name.toString(),
+                o.type().name.toString(),
                 o.source(),
                 if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
                 [0,1,false,true], // to-do: multiplicity
@@ -492,6 +492,35 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end  	  
   	end    
+    
+    @Operation removeAssociation(
+      idRequest  : Integer, 
+      assocId    : Integer)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.mapping.getMapping(assocId).object
+      then 
+        problems = m.removeAssociation(assoc)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation changeAssociationForwardName(
+      idRequest  : Integer, 
+      assocId    : Integer, 
+      newName    : String) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.mapping.getMapping(assocId).object
+      then 
+        problems = m.changeAssociationForwardName(assoc, newName)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    //////////////////////////////////////////////////////////
   	
   	@Operation addAssociationInstance(idRequest, 
       obj1Id  : Integer,
@@ -507,19 +536,6 @@ context FmmlxDiagrams
   	  in
   	    self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
   	  end
-    end
-    
-    @Operation removeAssociation(
-      idRequest  : Integer, 
-      assocId    : Integer)
-      let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = self.mapping.getMapping(assocId).object
-      then 
-        problems = m.removeAssociation(assoc)
-      in
-        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
-      end
     end
     
     @Operation removeAssociationInstance(
@@ -567,14 +583,31 @@ context FmmlxDiagrams
       classId    : Integer,
       opName     : String, 
       level      : Integer, 
-      returnType : String, // ignore for now...
+      returnType : String,
       body       : String)
       
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
       then 
-        problems = m.addOperation(class, opName, level, returnType, body)
+        type = m.getTypeForName(returnType);
+        problems = m.addOperation(class, opName, level, type, body)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation addOperation2(
+      idRequest  : Integer, 
+      classId    : Integer,
+      level      : Integer, 
+      body       : String)
+      
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.addOperation2(class, level, body)
       in
         self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
       end

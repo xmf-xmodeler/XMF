@@ -62,6 +62,27 @@ import FmmlxDiagrams;
       end
     end
     
+  context FmmlxManipulator
+    @Operation changeAssociationForwardName(
+      association : Association, 
+      newName     : String) 
+      let
+        package = association.owner;
+        nameChangeOk = true
+      in
+        if newName = null orelse "".equals(newName) then ["name not valid"] else
+          @For a in package.associations do
+            if newName.equals(a.name) then nameChangeOk := false end
+          end;
+          if nameChangeOk then 
+            association.name := newName; []
+          else
+            ["the name already exists as an association name"]
+          end
+        end
+      end
+    end
+    
     // change assoc direction
     // change assoc name 4x
     // change assoc multi 2x
