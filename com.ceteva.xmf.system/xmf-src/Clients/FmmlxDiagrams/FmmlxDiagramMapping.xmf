@@ -8,6 +8,7 @@ context FmmlxDiagrams
 @Class FmmlxDiagramMapping
 
     @Attribute mapping : Set = {} end
+    @Attribute labelMapping : Set = {} end
     @Attribute nextID : Integer = 0 end
     
     @Operation addOrGetObjectMapping(o : Object)
@@ -89,5 +90,40 @@ context FmmlxDiagrams
     end
     
     @Operation cleanUpMapping() null end
-
+    
+    @Operation storeLabelInfo(edgeID, localID, x, y)
+      let 
+        foundMapping = null 
+      in 
+        @For mappingInfo in labelMapping do
+          if mappingInfo.at(0) = edgeID andthen mappingInfo.at(1) = localID
+          then foundMapping := mappingInfo
+          end // if
+        end; // for
+        
+        if foundMapping = null orelse foundMapping.at(2) <> x orelse foundMapping.at(3) <> y then // new or changed 
+          if foundMapping <> null then // if changed, remove old
+            self.labelMapping := self.labelMapping.excluding(foundMapping)
+          end;
+          
+          // create a new mapping
+          foundMapping := [edgeID, localID, x, y];
+          self.labelMapping := self.labelMapping.including(foundMapping)
+        end // done updating
+      end // let 
+    end
+    
+    @Operation getAllLabels(edgeID)
+      let 
+        result = []
+      in
+        @For mappingInfo in labelMapping do
+          if mappingInfo.at(0) = edgeID
+          then result := result + [mappingInfo]
+          end // if
+        end; // for
+        result
+      end 
+    end
+    
 end // Class

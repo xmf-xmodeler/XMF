@@ -92,7 +92,8 @@ context FmmlxDiagrams
     	          a.end2.instLevel, // 9 level s->e
     	          a.end1.instLevel, // 10 level e->s
     	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->e
-    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult)  // 12 mul e->s
+    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult),  // 12 mul e->s
+    	          self.mapping.getAllLabels(mappingInfo.id) // 13 labels
     	        ]])
     	      end // let
     	    else ("a is of " + a.of()).println()
@@ -118,7 +119,8 @@ context FmmlxDiagrams
     	          self.mapping.addOrGetObjectMapping(i.at(0)).id, // 1 start ID
     	          self.mapping.addOrGetObjectMapping(i.at(1)).id, // 2 end ID
     	          self.mapping.addOrGetObjectMapping(i.at(2)).id, // 3 assoc ID
-    	          mappingInfo.points // 4 points
+    	          mappingInfo.points, // 4 points
+    	          self.mapping.getAllLabels(mappingInfo.id) // 5 labels
     	        ]])
     	      end // let
     	  end;
@@ -248,12 +250,17 @@ context FmmlxDiagrams
     
     @Operation sendNewPosition(idRequest, objectID, x, y)
         self.mapping.setNewPosition(objectID, x, y);
-        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+        self.communicator.sendMessageToJava([idRequest, []]) 
     end
     
     @Operation sendNewPositions(idRequest, objectID, listOfpoints)
         self.mapping.setNewPositions(objectID, listOfpoints);
-        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+        self.communicator.sendMessageToJava([idRequest, []]) 
+    end
+  
+    @Operation storeLabelInfo(idRequest, edgeID, localID, x, y)
+        self.mapping.storeLabelInfo(edgeID, localID, x, y);
+        self.communicator.sendMessageToJava([idRequest, []]) 
     end
     
     ////////////////// Class Manipulations ///////////////////
