@@ -198,4 +198,19 @@ import FmmlxDiagrams;
   context FmmlxManipulator  
     @Operation migrateInstance(instance, newClass)
       xmf.error("The operation \"migrateInstance\" has not been implemented yet.")
-    end   
+    end
+    
+  context FmmlxManipulator  
+    @Operation changeClassAbstract(class, abstractNew)
+      if abstractNew 
+      then 
+        if class.level > 0 
+        then 
+          if class.allInstances().size() = 0 
+          then class.isAbstract := true; []
+          else ["Classes with instances cannot be made abstract"] end
+        else ["Objects on level 0 cannot be made abstract"] end
+      else
+        class.isAbstract := false; []
+      end
+    end

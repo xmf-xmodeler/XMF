@@ -321,8 +321,17 @@ context FmmlxDiagrams
       in
         m.changeClassName(class, newName)
       end;
-      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+      self.communicator.sendMessageToJava([idRequest, []])
     end
+      
+    @Operation setClassAbstract(idRequest, classId, isAbstract) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        self.communicator.sendMessageToJava([idRequest, m.changeClassAbstract(class, isAbstract)])
+      end      
+    end 
     
     //////////////////////// Attribute Manipulations /////////////////////
     
@@ -681,5 +690,82 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([idRequest, problems])
       end
     end
+    
+    // Not yet implemented
+    
+    @Operation respondNotYetImplemented(idRequest)
+      self.communicator.sendMessageToJava([idRequest, ["This feature is temporarily unavailable. Please try again later."]])
+    end
+      
+    @Operation changeAssociationEnd2StartMultiplicity(idRequest, mult) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationStart2EndMultiplicity(idRequest, mult) 
+      self.respondNotYetImplemented(idRequest)
+    end
+
+    @Operation changeAssociationStart2EndAccessName(idRequest, name) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationEnd2StartAccessName(idRequest, name) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationStart2EndLevel(idRequest, level) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationEnd2StartLevel(idRequest, level) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation updateAssociationInstance(idRequest, id1, id2) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation editAssociation(idRequest, idA, isS, idT, levT2S, levS2T, fwN, reN, accT2S, accS2T, mulT2S, mulS2T) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationTarget(inA, idT_o, idT_n) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationSource(inA, idS_o, idS_n) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation checkOperationBody(idRequest, operationBodyToBeChecked) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeOperationType(idRequest, idO, opName, newType) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeParent(idRequest, idO, oldList, newList) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeOperationOwner(idRequest, idO_old, name, idO_new) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAttributeOwner(idRequest, idO_old, name, idO_new) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeOf(idRequest, idO, idC_old, idC_new) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeClassLevel(idRequest, idO, newLevel) 
+      self.respondNotYetImplemented(idRequest)
+    end
+    
+
+    
     
 end

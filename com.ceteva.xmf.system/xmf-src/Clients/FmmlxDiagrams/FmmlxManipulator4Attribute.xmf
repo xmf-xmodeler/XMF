@@ -52,17 +52,17 @@ import FmmlxDiagrams;
         attribute = null;
         problems = []
       in
-		@For att in class.attributes do
-		  if att.name.toString() = attName then
-		    attribute := att
-		  end
-		end;
-		if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
-		else
-		  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
-		  problems
-	      // add further tests here...
-		end
+	@For att in class.attributes do
+	  if att.name.toString() = attName then
+	    attribute := att
+	  end
+	end;
+	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+	else
+	  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
+	  problems
+      // add further tests here...
+	end
        ;problems
      end
     end
@@ -74,18 +74,17 @@ import FmmlxDiagrams;
         attribute = null;
         problems = []
       in
-		@For att in class.attributes do
-		  if att.name.toString() = attName then
-		    attribute := att
-		  end
-		end;
-		if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
-		else
-		  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
-		  problems := problems + try self.getTypeForName(newType); [] catch(e) [e.message] end
-		  // add further tests here...
-		end
-
+	@For att in class.attributes do
+	  if att.name.toString() = attName then
+	    attribute := att
+	  end
+	end;
+	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+	else
+	  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
+	  problems := problems + try self.getTypeForName(newType); [] catch(e) [e.message] end
+	  // add further tests here...
+	end
        ;problems
      end
     end
@@ -120,24 +119,32 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator   
     @Operation removeAttribute(class, attName, strategy)
+      let 
+        oldAtt = null 
+      in
         @For attribute in class.ownAttributes() do
-          if attribute.name.toString() = attName then 
+          if attribute.name.toString() = attName.toString() then 
+            oldAtt := attribute
+          end
+        end;
+        if oldAtt <> null then
             // remove attribute
-            class.remove(attribute);
+            class.remove(oldAtt);
             // remove slots
             @For instance in class.allMetaInstances() do
               // this instance may have a slot, check level first, otherwise ignore (no else)
-              if attribute.instLevel = instance.level then 
+              if oldAtt.instLevel = instance.level then 
                 // now, the slot with the given name should be the one we are looking for
                 // UNLESS: by an unknown coincidence, there is another attribute from double inheritance,
                 // should not happen, but check anyway
-                if self.instanceHasAttribute(instance, attName, attribute.instLevel) then
+                if self.instanceHasAttribute(instance, attName, oldAtt.instLevel) then
                   "Double Inheritance! Won't remove Slot".println()
                 else // now remove
                   instance.removeStructuralFeature(attName)
                 end // if something wrong, print msg, otherwise do
             end end // foor-loop+if, once for each instance, where the slot existed
-        end end // for-loop+if, only once if att existed, never if not
+        end // if oldAtt Found
+      end // let
     end
     
   context FmmlxManipulator   
