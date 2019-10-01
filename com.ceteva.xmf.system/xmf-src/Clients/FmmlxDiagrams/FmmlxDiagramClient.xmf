@@ -109,7 +109,7 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-    	  @For i in (if package.fmmlxAssociationInstances = null then {} else package.fmmlxAssociationInstances end) do 
+    	  @For i in (if self.package.fmmlxAssociationInstances = null then {} else self.package.fmmlxAssociationInstances end) do 
 
     	      let
     	        mappingInfo = self.mapping.addOrGetObjectMapping(i)
@@ -133,7 +133,7 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-          @For c in package.getChildren() do 
+          @For c in self.package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
@@ -151,7 +151,7 @@ context FmmlxDiagrams
           resultOther = [];
           result = []
         in 
-          @For c in package.getChildren() do 
+          @For c in self.package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
@@ -185,7 +185,7 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-        @For o in package.getChildren() do 
+        @For o in self.package.getChildren() do 
           if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
           then 
             @For name in slotList do
@@ -203,16 +203,16 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-        @For obj in package.getChildren() do 
+        @For obj in self.package.getChildren() do 
           if obj.isKindOf(FMML::MetaClass) and obj.name.toString() = objectName and opNames.size() > 0
           then 
             @For o in obj.of().allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
               if o.instLevel = obj.level then
                 @For name in opNames do
-                  if name = o.name.toString() then                    
+                  if name = o.name.toString() then
                     result := result.append([[
                       o.name.toString(), 
-                      o.invoke(obj,{})]]) 
+                      o.invoke(obj,{})]])
                 end end // if contains // for
               end // if level
             end end // if // for
@@ -226,7 +226,7 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-          @For c in package.getChildren() do 
+          @For c in self.package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
@@ -272,7 +272,7 @@ context FmmlxDiagrams
         then 
           parentsList = self.getParentsList(parents)
         then 
-          newClass = m.addMetaClass(package, name, level, parentsList, abstract)
+          newClass = m.addMetaClass(self.package, name, level, parentsList, abstract)
         then
           mappingInfo = self.mapping.addOrGetObjectMapping(newClass)
         in 
@@ -291,7 +291,7 @@ context FmmlxDiagrams
           then
             parentsList = self.getParentsList(parents)
           then 
-            newInstance = m.addInstance(package, ofClass, name, parentsList, abstract)
+            newInstance = m.addInstance(self.package, ofClass, name, parentsList, abstract)
           then
             mappingInfo = self.mapping.addOrGetObjectMapping(newInstance)
           in 
@@ -333,6 +333,14 @@ context FmmlxDiagrams
       end      
     end 
     
+    @Operation levelRaiseAll(idRequest, amount)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      in
+        self.communicator.sendMessageToJava([idRequest, m.levelRaiseAll(self.package, amount)])
+      end  
+    end
+    
     //////////////////////// Attribute Manipulations /////////////////////
     
     @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicityV)
@@ -349,7 +357,7 @@ context FmmlxDiagrams
           problems.isEmpty() 
         then
           problems := try 
-            m.addAttribute(class, name, level, type, multiplicity); null
+            m.addAttribute(class, name, level, type); null
           catch(e)
             [("addAttribute failed during transaction: " + e.message)]
           end // try

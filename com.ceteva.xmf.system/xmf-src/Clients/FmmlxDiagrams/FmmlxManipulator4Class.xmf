@@ -11,6 +11,13 @@ import FmmlxDiagrams;
       package.add(newClass);
       newClass.isAbstract := abstract;
       if parents.size() > 0 then newClass.parents := parents.asSet() end;
+      
+      @For p in newClass.parents do
+	    if p.isKindOf(FMML::MetaClass) then
+	      p.children := p.children + {newClass}
+	    end
+	  end;
+      
       newClass
     end    
   end
@@ -87,7 +94,13 @@ import FmmlxDiagrams;
            false
          end;
 
-	    if parents.size() > 0 then obj.parents := parents.asSet() end;
+	     if parents.size() > 0 then obj.parents := parents.asSet() end;
+
+	     @For p in obj.parents do
+	       if p.isKindOf(FMML::MetaClass) then
+	         p.children := p.children + {obj}
+	       end
+	     end;
 
          //then newClass.parents := parents.asSet() end; // test: may work or not...
          
@@ -212,5 +225,61 @@ import FmmlxDiagrams;
         else ["Objects on level 0 cannot be made abstract"] end
       else
         class.isAbstract := false; []
+      end
+    end
+    
+  context  FmmlxManipulator  
+    @Operation levelRaiseAll(package, amount:Integer)
+      let
+        levelHighEnough = true;
+        oneRandomReason = null
+      in 
+        if amount < 0 then
+          @For obj in package.getChildren() do
+            if obj.level + amount < 0 then 
+              levelHighEnough := false; oneRandomReason:= "object " + obj.name
+            end;
+            @For att in obj.attributes do
+              if att.instLevel + amount < 0 then 
+                levelHighEnough := false; oneRandomReason:= "attribute " + att.name + " in " + obj.name
+              end
+            end;
+            @For o in obj.operations do
+              if o.instLevel + amount < 0 then 
+                levelHighEnough := false; oneRandomReason:= "operation " + o.name + " in " + obj.name
+              end
+            end
+          end;
+          @For assoc in package.associations do
+            if assoc.end1.instLevel + amount < 0 orelse assoc.end2.instLevel + amount < 0 then
+              levelHighEnough := false; 
+              oneRandomReason:= "association " + assoc.name 
+                + " between " + assoc.end1.type.name 
+                + " and "     + assoc.end2.type.name
+            end            
+          end
+        end;
+
+        // if one object or attribute is too low the objects cannot be lowered. Raising is always allowed.
+        if 
+          levelHighEnough 
+        then
+          @For obj in package.getChildren() do
+            obj.level := obj.level + amount;
+            @For att in obj.attributes do
+              att.instLevel := att.instLevel + amount
+            end;
+            @For o in obj.operations do
+              o.instLevel := o.instLevel + amount
+            end
+          end;
+          @For assoc in package.associations do
+            assoc.end1.instLevel := assoc.end1.instLevel + amount;
+            assoc.end2.instLevel := assoc.end2.instLevel + amount        
+          end;
+          []
+        else
+          ["Levels cannot be lowered. Some property (e.g. "+ oneRandomReason +") would be on a level below 0. "]
+        end
       end
     end
