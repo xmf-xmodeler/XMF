@@ -36,8 +36,8 @@ import FmmlxDiagrams;
         let 
           a = Associations::Association(fwName,e1,e2)
         in 
-			p.associations := p.associations->including(a);
-			a.owner := p;
+          p.associations := p.associations->including(a);
+          a.owner := p;
           a
         end
       end
@@ -80,6 +80,47 @@ import FmmlxDiagrams;
             ["the name already exists as an association name"]
           end
         end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeAssociationMultiplicity(association, newSourceMult, newTargetMult)
+      let 
+        package = association.owner;
+        oldSourceMult = association.end1.mult;
+        oldTargetMult = association.end2.mult;
+        problems = [];
+        oldSourceCount = null;
+        oldTargetCount = null
+      in
+        newSourceMult := if newSourceMult = null then oldSourceMult else newSourceMult end;
+        newTargetMult := if newTargetMult = null then oldTargetMult else newTargetMult end;
+        
+        oldSourceCount := self.countOccurencesForType(association.end1.type,association.end1.instLevel,package,association);
+        oldTargetCount := self.countOccurencesForType(association.end2.type,association.end2.instLevel,package,association); 
+        
+        if newSourceMult.lowerBound > oldSourceMult.lowerBound then 
+          if oldSourceCount.at(0) <> null andthen oldSourceCount.at(0) < newSourceMult.lowerBound then 
+            problems := problems + ["Minimum multiplicity increase for source not possible. "] end end;
+        
+        if newTargetMult.lowerBound > oldTargetMult.lowerBound then 
+          if oldTargetCount.at(0) <> null andthen oldTargetCount.at(0) < newTargetMult.lowerBound then 
+            problems := problems + ["Minimum multiplicity increase for target not possible. "] end end;
+
+        if newSourceMult.hasUpperBound andthen ((not oldSourceMult.hasUpperBound) orelse newSourceMult.upperBound < oldSourceMult.upperBound) then
+          if oldSourceCount.at(1) <> null andthen oldSourceCount.at(1) > newSourceMult.upperBound then 
+            problems := problems + ["Maximum multiplicity decrease for source not possible. "] end end;
+        
+        if newTargetMult.hasUpperBound andthen ((not oldTargetMult.hasUpperBound) orelse newTargetMult.upperBound < oldTargetMult.upperBound) then
+          if oldTargetCount.at(1) <> null andthen oldTargetCount.at(1) > newTargetMult.upperBound then 
+            problems := problems + ["Maximum multiplicity decrease for source not possible. "] end end;
+            
+        if problems.size() = 0 then 
+          association.end1.mult := newSourceMult;
+          association.end2.mult := newTargetMult
+        end;
+        
+        problems
       end
     end
     

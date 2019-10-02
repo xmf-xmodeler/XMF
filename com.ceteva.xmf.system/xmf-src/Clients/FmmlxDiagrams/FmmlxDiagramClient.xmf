@@ -348,10 +348,10 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator()
       then 
         class = self.mapping.getMapping(classId).object;
-        type = m.getTypeForName(typeName);
-        multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
+        type = m.getTypeForName(typeName)
+        // multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then 
-        problems = m.checkAddAttribute(class, name, level, typeName, multiplicity)
+        problems = m.checkAddAttribute(class, name, level, typeName, null)
       in           
         if 
           problems.isEmpty() 
@@ -705,27 +705,41 @@ context FmmlxDiagrams
       self.communicator.sendMessageToJava([idRequest, ["This feature is temporarily unavailable. Please try again later."]])
     end
       
-    @Operation changeAssociationEnd2StartMultiplicity(idRequest, mult) 
-      self.respondNotYetImplemented(idRequest)
+    @Operation changeAssociationEnd2StartMultiplicity(idRequest, associationID, multV)
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, newMult, null)])
+      end
     end
       
-    @Operation changeAssociationStart2EndMultiplicity(idRequest, mult) 
-      self.respondNotYetImplemented(idRequest)
+    @Operation changeAssociationStart2EndMultiplicity(idRequest, associationID, multV) 
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, null, newMult)])
+      end
     end
 
-    @Operation changeAssociationStart2EndAccessName(idRequest, name) 
+    @Operation changeAssociationStart2EndAccessName(idRequest, associationID, name) 
       self.respondNotYetImplemented(idRequest)
     end
       
-    @Operation changeAssociationEnd2StartAccessName(idRequest, name) 
+    @Operation changeAssociationEnd2StartAccessName(idRequest, associationID, name) 
       self.respondNotYetImplemented(idRequest)
     end
       
-    @Operation changeAssociationStart2EndLevel(idRequest, level) 
+    @Operation changeAssociationStart2EndLevel(idRequest, associationID, level) 
       self.respondNotYetImplemented(idRequest)
     end
       
-    @Operation changeAssociationEnd2StartLevel(idRequest, level) 
+    @Operation changeAssociationEnd2StartLevel(idRequest, associationID,level) 
       self.respondNotYetImplemented(idRequest)
     end
       
@@ -733,9 +747,9 @@ context FmmlxDiagrams
       self.respondNotYetImplemented(idRequest)
     end
       
-    @Operation editAssociation(idRequest, idA, isS, idT, levT2S, levS2T, fwN, reN, accT2S, accS2T, mulT2S, mulS2T) 
-      self.respondNotYetImplemented(idRequest)
-    end
+//    @Operation editAssociation(idRequest, idA, isS, idT, levT2S, levS2T, fwN, reN, accT2S, accS2T, mulT2S, mulS2T) 
+//      self.respondNotYetImplemented(idRequest)
+//    end
       
     @Operation changeAssociationTarget(inA, idT_o, idT_n) 
       self.respondNotYetImplemented(idRequest)
