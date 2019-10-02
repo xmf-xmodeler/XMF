@@ -301,3 +301,22 @@ import FmmlxDiagrams;
         result
       end
     end
+    
+  context FmmlxManipulator 
+    @Operation changeOperationOwner(oldOwner, operation, newOwner)
+      let 
+        level = operation.instLevel
+      in
+        if level >= newOwner.level then ["Level too high."]
+        else 
+          if self.isOpNameFree(newOwner, operation.name, level) then 
+            oldOwner.operations := oldOwner.operations - {operation};
+            operation.owner := newOwner;
+            newOwner.operations := newOwner.operations + {operation};
+            resetOperatorTable();
+            []
+          else ["Name already in use."]
+          end
+        end
+      end
+    end  

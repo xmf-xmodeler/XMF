@@ -544,6 +544,28 @@ context FmmlxDiagrams
       end
     end
     
+   @Operation changeAssociationEnd2StartMultiplicity(idRequest, associationID, multV)
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, newMult, null)])
+      end
+    end
+      
+    @Operation changeAssociationStart2EndMultiplicity(idRequest, associationID, multV) 
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, null, newMult)])
+      end
+    end
+
     //////////////////////////////////////////////////////////
   	
   	@Operation addAssociationInstance(idRequest, 
@@ -665,7 +687,18 @@ context FmmlxDiagrams
       end      
     end
     
-    
+    @Operation changeOperationOwner(idRequest, idO_old, name, idO_new) 
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        oldOwner = self.mapping.getMapping(idO_old).object;
+        newOwner = self.mapping.getMapping(idO_new).object
+      then
+        operation = oldOwner.getOperation(name)
+      in
+        self.communicator.sendMessageToJava([idRequest, m.changeOperationOwner(oldOwner, operation, newOwner)])
+      end      
+    end
+          
     @Operation checkOperationNameLegal(op, name):Boolean // todo: check for duplicates, consider arity
       let nameSymbol = Symbol(name) in
         if nameSymbol = op.name()
@@ -705,28 +738,6 @@ context FmmlxDiagrams
       self.communicator.sendMessageToJava([idRequest, ["This feature is temporarily unavailable. Please try again later."]])
     end
       
-    @Operation changeAssociationEnd2StartMultiplicity(idRequest, associationID, multV)
-      let 
-        m = FmmlxDiagrams::FmmlxManipulator();
-        a = self.mapping.getMapping(associationID).object
-      then 
-        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
-      in 
-        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, newMult, null)])
-      end
-    end
-      
-    @Operation changeAssociationStart2EndMultiplicity(idRequest, associationID, multV) 
-      let 
-        m = FmmlxDiagrams::FmmlxManipulator();
-        a = self.mapping.getMapping(associationID).object
-      then 
-        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
-      in 
-        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, null, newMult)])
-      end
-    end
-
     @Operation changeAssociationStart2EndAccessName(idRequest, associationID, name) 
       self.respondNotYetImplemented(idRequest)
     end
@@ -768,10 +779,6 @@ context FmmlxDiagrams
     end
       
     @Operation changeParent(idRequest, idO, oldList, newList) 
-      self.respondNotYetImplemented(idRequest)
-    end
-      
-    @Operation changeOperationOwner(idRequest, idO_old, name, idO_new) 
       self.respondNotYetImplemented(idRequest)
     end
       
