@@ -8,7 +8,30 @@ context Root
     @Attribute real:Number end
     @Attribute imaginary:Number end
     
-    @Operation toString() real + "+" + imaginary + "i" end
+    @Constructor(real,imaginary) end
+        
+    @Operation toString()  
+      let 
+        iText = 
+          if     imaginary = 1  then "i"
+          elseif imaginary = -1 then "-i"
+          else (imaginary + "i") end
+      in
+        if 
+          imaginary = 0 
+        then 
+          real
+        else
+          if 
+            real = 0
+          then
+            iText
+          else
+            real + if imaginary > 0 then "+" else "" end + iText
+          end
+        end
+      end
+    end
   end
 
 context Root

@@ -582,7 +582,7 @@ context Root::FMML
       /* This is not used internally for invoking operations which would cause an infinite loop */
       @Operation allOperations2():Seq(Operation)
       let 
-        myOps = [];
+        myOps = {};
         alreadyChecked = {};
         toBeChecked = [self];
         currentClass = null
@@ -596,7 +596,7 @@ context Root::FMML
                                                                             or
               ((not o.isIntrinsic) andthen currentClass.level = self.level) // non-intrinsic and one above the instance
            then
-             myOps := myOps + [o]
+             myOps := myOps + {o}
            end
          end;
          alreadyChecked = alreadyChecked + {currentClass};
@@ -618,7 +618,7 @@ context Root::FMML
            end
          end
        end; // while
-       myOps
+       myOps.asSeq()
      end // let
    end // operation
    

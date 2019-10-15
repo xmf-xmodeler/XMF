@@ -10,6 +10,7 @@ context FmmlxDiagrams
 	@Attribute package : Package end
 	@Attribute mapping : FmmlxDiagramMapping = FmmlxDiagramMapping() end
 	@Attribute communicator : Element end
+	@Attribute protocol : String = "" end
 
     @Constructor(name)
 //      self.setCommandInterpreter(DiagramCommandInterpreter());
@@ -73,7 +74,7 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-    	  @For a in package.associations do 
+    	  @For a in package.associations do
     	    if a.isKindOf(Associations::Association) 
     	    then
     	      let
@@ -266,7 +267,7 @@ context FmmlxDiagrams
     ////////////////// Class Manipulations ///////////////////
     
     @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
-
+        self.protocol := self.protocol + "\nE      addMetaClass: " + name + " | " + level + " | " + parents + " | " + abstract;
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
@@ -283,6 +284,7 @@ context FmmlxDiagrams
     end 
     
     @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
+      self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
         try
           let 
             m = FmmlxDiagrams::FmmlxManipulator() 
@@ -305,6 +307,7 @@ context FmmlxDiagrams
     end 
     
     @Operation removeClass(idRequest, classId, strategy) 
+      self.protocol := self.protocol + "\nE      removeClass: " + classId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -315,6 +318,7 @@ context FmmlxDiagrams
     end
     
     @Operation changeClassName(idRequest, classId, newName) 
+      self.protocol := self.protocol + "\nE      changeClassName: " + classId + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -325,6 +329,7 @@ context FmmlxDiagrams
     end
       
     @Operation setClassAbstract(idRequest, classId, isAbstract) 
+      self.protocol := self.protocol + "\nE      setClassAbstract: " + classId + " | " + isAbstract;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -334,6 +339,7 @@ context FmmlxDiagrams
     end 
     
     @Operation levelRaiseAll(idRequest, amount)
+      self.protocol := self.protocol + "\nE      levelRaiseAll: " + amount;
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       in
@@ -344,6 +350,7 @@ context FmmlxDiagrams
     //////////////////////// Attribute Manipulations /////////////////////
     
     @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicityV)
+      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + name + " | " + level + " | " + typeName;
       let 
         m = FmmlxDiagrams::FmmlxManipulator()
       then 
@@ -351,7 +358,7 @@ context FmmlxDiagrams
         type = m.getTypeForName(typeName)
         // multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then 
-        problems = m.checkAddAttribute(class, name, level, typeName, null)
+        problems = m.checkAddAttribute(class, name, level, typeName)
       in           
         if 
           problems.isEmpty() 
@@ -367,6 +374,7 @@ context FmmlxDiagrams
     end 
     
     @Operation removeAttribute(idRequest, classId, attName, strategy) 
+      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + attName;
      // for now: ignore strategy and simply delete 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
@@ -377,7 +385,8 @@ context FmmlxDiagrams
       self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
     end
     
-    @Operation changeAttributeName(idRequest, classId, oldName, newName) 
+    @Operation changeAttributeName(idRequest, classId, oldName, newName)
+      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -390,6 +399,7 @@ context FmmlxDiagrams
     end
     
     @Operation changeAttributeLevel(idRequest, classId, attName, oldLevel, newLevel)
+      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newLevel;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -402,6 +412,7 @@ context FmmlxDiagrams
     end
       
     @Operation changeAttributeType(idRequest, classId, attName, oldTypeName, newTypeName)
+      self.protocol := self.protocol + "\n A     changeAttributeType: " + classId + " | " + attName + " | " + newTypeName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -413,10 +424,10 @@ context FmmlxDiagrams
       end
     end   
       
-      
     //////////////////////// Slot Manipulations /////////////////////
 
     @Operation changeSlotValue(idRequest, objId, slotName, valueToBeParsed)
+      self.protocol := self.protocol + "\n  S    changeSlotValue: " + objId + " | " + slotName + " | " + valueToBeParsed;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         obj = self.mapping.getMapping(objId).object;
@@ -490,6 +501,8 @@ context FmmlxDiagrams
       instLevel1 : Integer,
       instLevel2 : Integer):XCore::Element
   	  
+      self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
+      
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    class1 = self.mapping.getMapping(class1Id).object;
@@ -520,6 +533,8 @@ context FmmlxDiagrams
     @Operation removeAssociation(
       idRequest  : Integer, 
       assocId    : Integer)
+      
+      self.protocol := self.protocol + "\n   Z   removeAssociation: " + assocId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = self.mapping.getMapping(assocId).object
@@ -533,7 +548,9 @@ context FmmlxDiagrams
     @Operation changeAssociationForwardName(
       idRequest  : Integer, 
       assocId    : Integer, 
-      newName    : String) 
+      newName    : String)
+      
+      self.protocol := self.protocol + "\n   Z   changeAssociationForwardName: " + assocId + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = self.mapping.getMapping(assocId).object
@@ -545,6 +562,8 @@ context FmmlxDiagrams
     end
     
    @Operation changeAssociationEnd2StartMultiplicity(idRequest, associationID, multV)
+
+      self.protocol := self.protocol + "\n   Z   changeAssociationEnd2StartMultiplicity: " + associationID + " | " + multV;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         a = self.mapping.getMapping(associationID).object
@@ -556,6 +575,7 @@ context FmmlxDiagrams
     end
       
     @Operation changeAssociationStart2EndMultiplicity(idRequest, associationID, multV) 
+      self.protocol := self.protocol + "\n   Z   changeAssociationStart2EndMultiplicity: " + associationID + " | " + multV;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         a = self.mapping.getMapping(associationID).object
@@ -571,7 +591,9 @@ context FmmlxDiagrams
   	@Operation addAssociationInstance(idRequest, 
       obj1Id  : Integer,
       obj2Id  : Integer,
-      assocId : Integer) 
+      assocId : Integer)
+      
+      self.protocol := self.protocol + "\n    L  addAssociationInstance: " + assocId + " | " + obj1Id + " | " + obj2Id;
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    obj1 = self.mapping.getMapping(obj1Id).object;
@@ -587,6 +609,8 @@ context FmmlxDiagrams
     @Operation removeAssociationInstance(
       idRequest  : Integer, 
       assocInstId    : Integer)
+      
+      self.protocol := self.protocol + "\n    L  removeAssociationInstance: " + assocInstId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assocInstSeq = self.mapping.getMapping(assocInstId).object
@@ -600,6 +624,8 @@ context FmmlxDiagrams
     ////////////////// Operations for editing operations ///////////////////
 
     @Operation changeOperationName(idRequest, classId, oldName, newName) 
+    
+      self.protocol := self.protocol + "\n     O changeOperationName: " + classId + " | " + oldName + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -612,6 +638,8 @@ context FmmlxDiagrams
     end
     
     @Operation changeOperationLevel(idRequest, classId, name, oldLevel, newLevel) 
+    
+      self.protocol := self.protocol + "\n     O changeOperationLevel: " + classId + " | " + name + " | " + newLevel;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -632,6 +660,8 @@ context FmmlxDiagrams
       returnType : String,
       body       : String)
       
+      self.protocol := self.protocol + "\n     O addOperation: " + classId + " | " + opName + " | " + level;
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -649,6 +679,8 @@ context FmmlxDiagrams
       level      : Integer, 
       body       : String)
       
+      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -663,6 +695,8 @@ context FmmlxDiagrams
       idRequest  : Integer, 
       classId    : Integer,
       opName     : String)
+      
+      self.protocol := self.protocol + "\n     O removeOperation: " + classId + " | " + opName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object
@@ -688,6 +722,8 @@ context FmmlxDiagrams
     end
     
     @Operation changeOperationOwner(idRequest, idO_old, name, idO_new) 
+      
+      self.protocol := self.protocol + "\n     O changeOperationOwner: " + classId + " | " + name + " | " + idO_new;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         oldOwner = self.mapping.getMapping(idO_old).object;
@@ -711,6 +747,8 @@ context FmmlxDiagrams
     end
         
     @Operation changeOperationBody(idRequest, classId:Integer, oldName:String, body:String)
+      
+      self.protocol := self.protocol + "\n     O changeOperationBody: " + classId + " | " + oldName;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.mapping.getMapping(classId).object;
@@ -794,7 +832,11 @@ context FmmlxDiagrams
       self.respondNotYetImplemented(idRequest)
     end
     
-
+    @Operation printProtocol(idRequest)
+      "printing the Protocol start".println();
+      self.protocol.println();
+      "printing the Protocol done".println()
+    end
     
     
 end

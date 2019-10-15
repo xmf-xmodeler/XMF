@@ -135,7 +135,8 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation changeClassName(class, newName)
       let 
-        package = class.owner
+        package = class.owner;
+        oldName = class.name
       in
         if
           package.hasElement(newName)
@@ -145,7 +146,8 @@ import FmmlxDiagrams;
           if
             newName.isValidName() 
           then
-            class.name := newName.asSymbol()
+            class.name := newName.asSymbol();
+            package.nameChanged(class,class.name,oldName)
           else
             xmf.error(newName + " is not a valid name")
           end

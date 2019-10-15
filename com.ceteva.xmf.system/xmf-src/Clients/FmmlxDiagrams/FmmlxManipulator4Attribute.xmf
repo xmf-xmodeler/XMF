@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation checkAddAttribute(class, name, level, type, multiplicity) 
+    @Operation checkAddAttribute(class, name, level, type) 
       let 
         problems = []
       in 
@@ -59,7 +59,6 @@ import FmmlxDiagrams;
 	end;
 	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
 	else
-	  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
 	  problems
       // add further tests here...
 	end
@@ -81,7 +80,6 @@ import FmmlxDiagrams;
 	end;
 	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
 	else
-	  //problems := self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute.mult())
 	  problems := problems + try self.getTypeForName(newType); [] catch(e) [e.message] end
 	  // add further tests here...
 	end
@@ -209,11 +207,10 @@ import FmmlxDiagrams;
         if newLevel > oldLevel then // just remove and recreate Attribute as we can't use the slots anyway
 		  if attribute <> null then 
 		    let 		   
-              type = attribute.type;
-              multiplicity = attribute.mult()
+              type = attribute.type
             in 
               self.removeAttribute(class, attName, "strategy:delete");
-              self.addAttribute(class, attName, newLevel, type, multiplicity) 
+              self.addAttribute(class, attName, newLevel, type) 
             end // inner let
           end // if attribute <> null
         end // if newLevel > oldLevel
@@ -229,10 +226,9 @@ import FmmlxDiagrams;
           tempAttName = self.getFreeAttName(class, newLevel)
         then 
           instLevel = attribute.instLevel; // = oldLevel
-          type = attribute.type;
-          multiplicity = attribute.mult()
+          type = attribute.type
         then  
-          newAtt = self.addAttribute(class, tempAttName, newLevel, type, multiplicity) 
+          newAtt = self.addAttribute(class, tempAttName, newLevel, type) 
         in
           @For instance in class.allMetaInstances() do
             if instance.level = oldLevel then
@@ -280,7 +276,7 @@ import FmmlxDiagrams;
          in
            @While result = null do
              let testName = name + counter in
-               if self.checkAddAttribute(class, testName, newLevel, Boolean, Multiplicities::SingleMult()).isEmpty() then// i.e. no problem
+               if self.checkAddAttribute(class, testName, newLevel, Boolean).isEmpty() then// i.e. no problem
                  result := testName
                end               
              end
