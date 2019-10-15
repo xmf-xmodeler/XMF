@@ -1,87 +1,192 @@
 parserImport XOCL;
 
-context Root
+import Clients;
+import FmmlxDiagrams;
 
+context Root
+  @Class Complex
+    @Attribute real:Number end
+    @Attribute imaginary:Number end
+    
+    @Constructor(real,imaginary) end
+        
+    @Operation toString()  
+      let 
+        iText = 
+          if     imaginary = 1  then "i"
+          elseif imaginary = -1 then "-i"
+          else (imaginary + "i") end
+      in
+        if 
+          imaginary = 0 
+        then 
+          real
+        else
+          if 
+            real = 0
+          then
+            iText
+          else
+            real + if imaginary > 0 then "+" else "" end + iText
+          end
+        end
+      end
+    end
+  end
+
+context Root
 @Class BikeSetup
 
   @Operation setup(p:Package) // Level 5 only
-
     // Level 5
 
-    self.addClass(p, "Component", 5);
-    self.addClass(p, "Configuration", 5);
-    self.addClass(p, "Part", 5);
-    self.addClass(p, "CompPart", 5);
-    p::Part.addParent(p::Component);
-    p::CompPart.addParent(p::Component);
-//    self.addAttribute(p::Component, "Name", String, 4);
-    self.addAttribute(p::Component, "weight", Float, 1);
-//    self.addAttribute(p::Configuration, "Name", String, 4);
-    p::Configuration.addOperation(BikeSetup.getOperation("totalRevenues"))
-//    self.createAssociation(p,
-//  	p::Configuration, p::Part,
-//  	"role1","role2",
-//  	0, 1,
-//  	0, 1,
-//  	2)
+    let
+      m = FmmlxDiagrams::FmmlxManipulator()
+    in
+      m.addMetaClass(p, "Component",     5, [], false);
+      m.addMetaClass(p, "Configuration", 5, [], false);
+      m.addMetaClass(p, "Part",          5, [p::Component], false);
+      m.addMetaClass(p, "CompPart",      5, [p::Component], false);
+      
+      m.addAttribute(p::Component, "foo", 4, Complex);
+      m.addAttribute(p::Component, "weight", 1, Float);
+      
+      m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", "belongsTo", 
+          m.valueList2Multiplicity([0,-1,false,false]),
+          m.valueList2Multiplicity([0, 2,true, false]),
+  	      4,4);
+  	      
+  	  m.addOperation(p::Configuration, null, 4, null, 
+      "  @Operation time[monitor=true]()
+"+    "    xmf.date()
+"+    "  end");
+  	  
+  	      
+  	  m.addOperation(p::Configuration, null, 3, null, 
+      "  @Operation totalRevenues[monitor=true]()
+"+    "    self.allInstances().size() * 3.141592654
+"+    "  end");
 
+      null
+    end
   end
 
   @Operation setup4(p:Package)
     
     // Level 4
-    self.addInstance(p, p::Configuration, "Bicycle");
-    self.addAttribute(p::Bicycle, "allTerrain", Boolean, 3);
-    self.addAttribute(p::Bicycle, "race", Boolean, 3);
-    self.addAttribute(p::Bicycle, "city", Boolean, 3);
-    self.addAttribute(p::Bicycle, "salesPrice", Float, 1);
-    self.addAttribute(p::Bicycle, "weight", Float, 1);
-    self.addAttribute(p::Bicycle, "partSalesPrice", Float, 0);
-    self.addAttribute(p::Bicycle, "serialNo", String, 0);
-    BikeSetup.getOperation("highestPrice").instLevel:=2;
-    BikeSetup.getOperation("highestPrice").isIntrinsic:=true;
-    p::Bicycle.addOperation(BikeSetup.getOperation("highestPrice"));
-    BikeSetup.getOperation("averagePrice").instLevel:=2;
-    BikeSetup.getOperation("averagePrice").isIntrinsic:=true;
-    p::Bicycle.addOperation(BikeSetup.getOperation("averagePrice"));
-    BikeSetup.getOperation("isBikeComplete").instLevel:=0;
-    BikeSetup.getOperation("isBikeComplete").isIntrinsic:=true;
-    p::Bicycle.addOperation(BikeSetup.getOperation("isBikeComplete"));
     
-    self.addInstance(p, p::Part, "Fork");
-    self.addAttribute(p::Fork, "color", String, 1);
-    self.addAttribute(p::Fork, "suspension", String, 2);
-    self.addAttribute(p::Fork, "material", String, 1);
-    self.addAttribute(p::Fork, "serialNo", String, 0);
-    self.addAttribute(p::Fork, "mudMount", Boolean, 0);
-    
-    self.addInstance(p, p::Part, "Frame");
-    self.addAttribute(p::Frame, "allTerrain", Boolean, 3);
-    self.addAttribute(p::Frame, "race", Boolean, 3);
-    self.addAttribute(p::Frame, "color", String, 1);
-    self.addAttribute(p::Frame, "width", Float, 1);
-    self.addAttribute(p::Frame, "height", Float, 1);
-    self.addAttribute(p::Frame, "serialNo", String, 0);
-    self.addAttribute(p::Frame, "material", String, 2);
-    self.addInstance(p, p::Part, "Wheel");
-    
-    self.addAttribute(p::Wheel, "safetyRefl", Boolean, 3);
-    self.addAttribute(p::Wheel, "material", String, 1);
-    self.addAttribute(p::Wheel, "size", Float, 1);
-    self.addAttribute(p::Wheel, "width", Float, 1);
-    self.addAttribute(p::Wheel, "tubeless", Boolean, 2);
-    self.addAttribute(p::Wheel, "serialNo", String, 0)
-    
+    let
+      m = FmmlxDiagrams::FmmlxManipulator()
+    in
+      m.addInstance(p, p::Configuration, "Bicycle", [], false);
+      m.addAttribute(p::Bicycle, "allTerrain",     3, Boolean);
+      m.addAttribute(p::Bicycle, "race",           3, Boolean);
+      m.addAttribute(p::Bicycle, "city",           3, Boolean);
+      m.addAttribute(p::Bicycle, "salesPrice",     1, Float);
+      m.addAttribute(p::Bicycle, "weight",         1, Float);
+      m.addAttribute(p::Bicycle, "partSalesPrice", 0, Float);
+      m.addAttribute(p::Bicycle, "serialNo",       0, String);
+      
+  	  m.addOperation(p::Configuration, null, 2, null, 
+      "  @Operation highestPrice[monitor=true]()
+"+    "    if self.allInstances().size() = 0
+"+    "    then \"N/A\"
+"+    "    else
+"+    "      let max = 0
+"+    "      in
+"+    "        @For x in self.allInstances() do
+"+    "          if x.salesPrice>max then max := x.salesPrice end
+"+    "        end;
+"+    "        max
+"+    "      end
+"+    "    end
+"+    "  end");
+
+  	  m.addOperation(p::Configuration, null, 2, null, 
+      "  @Operation averagePrice[monitor=true]()
+"+    "    if self.allInstances().size() = 0
+"+    "    then \"div/zero\"
+"+    "    else
+"+    "      let sum = 0; count = 0
+"+    "      in
+"+    "        @For x in self.allInstances() do
+"+    "          sum := sum + x.salesPrice;
+"+    "          count := count + 1
+"+    "        end;
+"+    "        sum/count
+"+    "      end
+"+    "    end
+"+    "  end");
+
+  	  m.addOperation(p::Configuration, null, 0, null, 
+      "  @Operation isBikeComplete[monitor=true]()
+"+    "    if self.frame = null then \"a Frame is missing\"
+"+    "    elseif self.fork = null then \"a Fork is missing\"
+"+    "    elseif self.wheel = null then \"a Wheel is missing\"
+"+    "    else \"complete\"
+"+    "    end
+"+    "  end");
+
+      m.addInstance(p, p::Part, "Fork", [], false);
+	  let c = Complex() in
+	    c.real := 1; 
+	    c.imaginary := 0.5;
+	    p::Fork.foo := c
+	    //m.changeSlotValue(p::Fork, "foo", "c", Complex)
+	  end;
+	  
+      m.addAttribute(p::Fork, "color",        1, String);
+      m.addAttribute(p::Fork, "suspension",   2, String);
+      m.addAttribute(p::Fork, "material",     1, String);
+      m.addAttribute(p::Fork, "serialNo",     0, String);
+      m.addAttribute(p::Fork, "mudMount",     0, Boolean);
+      
+      
+      m.addInstance(p, p::Part, "Frame", [], false);
+      m.addAttribute(p::Frame, "allTerrain",   3, Boolean);
+      m.addAttribute(p::Frame, "race",         3, Boolean);
+      m.addAttribute(p::Frame, "color",        1, String);
+      m.addAttribute(p::Frame, "height",       1, Float);
+      m.addAttribute(p::Frame, "width",        1, Float);
+      m.addAttribute(p::Frame, "material",     1, String);
+      m.addAttribute(p::Frame, "serialNo",     0, String);
+      
+      
+      m.addInstance(p, p::Part, "Wheel", [], false);
+      m.addAttribute(p::Wheel, "safetyRefl",   3, Boolean);
+      m.addAttribute(p::Wheel, "size",         1, Float);
+      m.addAttribute(p::Wheel, "material",     1, String);
+      m.addAttribute(p::Wheel, "width",        1, Float);
+      m.addAttribute(p::Wheel, "tubeless",     2, Boolean);
+      m.addAttribute(p::Wheel, "serialNo",     0, String);
+      
+      null
+    end    
   end
   
-  @Operation setup3(p:Package)
-
-    // Level 3
-    self.addInstance(p, p::Bicycle, "RacingBike");
-    self.addInstance(p, p::Fork, "RacingFork");
-    self.addInstance(p, p::Frame, "RacingFrame");
-    self.addInstance(p, p::Wheel, "RacingWheel")
+  @Operation setup3210(p:Package)
     
+    let
+      m = FmmlxDiagrams::FmmlxManipulator()
+    in
+    
+    // Level 3
+      m.addInstance(p, p::Bicycle, "RacingBike", [], false);
+      m.addInstance(p, p::Fork, "RacingFork", [], false);
+      m.addInstance(p, p::Frame, "RacingFrame", [], false);
+      m.addInstance(p, p::Wheel, "RacingWheel", [], false);
+    
+      m.addInstance(p, p::RacingBike, "ProRacer", [], false);
+      m.addInstance(p, p::RacingFork, "LightFork", [], false);
+      m.addInstance(p, p::RacingFrame, "ProRaceFrame", [], false);
+      m.addInstance(p, p::RacingWheel, "ProRaceWheel", [], false);
+      
+      m.addInstance(p, p::ProRacer, "ChallengerA2XL", [], false);
+      m.addInstance(p, p::LightFork, "Superfork800", [], false);
+      m.addInstance(p, p::ProRaceFrame, "RocketA1XL", [], false);
+      m.addInstance(p, p::ProRaceWheel, "XForceDJ", [], false);
+      null
+    end
   end
   
   @Operation setup2(p:Package)
@@ -151,64 +256,25 @@ context Root
   	upper1 : Integer,
   	lower2 : Integer,
   	upper2 : Integer,
-  	inst_lev : XCore::Element):XCore::Element
+  	inst_level1 : XCore::Element,
+  	inst_level2 : XCore::Element):XCore::Element
       let c1 = Multiplicities::CollectionMult(false,true,lower1,upper1);
           c2 = Multiplicities::CollectionMult(false,true,lower2,upper2)
       in let e1 = Associations::End(role1,class1,c1);
              e2 = Associations::End(role2,class2,c2)
          in 
-            e1.instLevel := 1;
-            e2.instLevel := 2;
-            let a = Associations::Association("regular",e1,e2)
-            in a.println();p.println();p.addAssociation(a);a
+            e1.instLevel := inst_level1;
+            e2.instLevel := inst_level2;
+            let a = Associations::Association("fwName",e1,e2)
+            in p.addAssociation(a);a
             end
          end
       end
     end
-   
+    
   @Operation pi()
 	3.141592654
   end
   
-  @Operation totalRevenues[monitor=true]()
-	self.allInstances().size() * 3.141592654
-  end
-  
-  @Operation highestPrice[monitor=true]()
-    if self.allInstances().size() = 0
-    then "N/A"
-    else
-      let max = 0
-      in
-        @For x in self.allInstances() do
-          if x.salesPrice>max then max := x.salesPrice end
-        end;
-        max
-      end
-    end
-  end
-
-  @Operation averagePrice[monitor=true]()
-    if self.allInstances().size() = 0
-    then "div/zero"
-    else
-      let sum = 0; count = 0
-      in
-        @For x in self.allInstances() do
-          sum := sum + x.salesPrice;
-          count := count + 1
-        end;
-        sum/count
-      end
-    end
-  end
-  
-  @Operation isBikeComplete[monitor=true]()
-    if self.frame = null then "a Frame is missing"
-    elseif self.fork = null then "a Fork is missing"
-    elseif self.wheel = null then "a Wheel is missing"
-    else "complete"
-    end
-  end
-
 end
+

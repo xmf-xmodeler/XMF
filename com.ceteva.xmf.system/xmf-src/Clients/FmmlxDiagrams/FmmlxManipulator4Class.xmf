@@ -1,0 +1,287 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+    @Operation addMetaClass(package, name, level, parents, abstract)
+    let 
+      newClass = FMML::MetaClass(name, level)
+    in
+      package.add(newClass);
+      newClass.isAbstract := abstract;
+      if parents.size() > 0 then newClass.parents := parents.asSet() end;
+      
+      @For p in newClass.parents do
+	    if p.isKindOf(FMML::MetaClass) then
+	      p.children := p.children + {newClass}
+	    end
+	  end;
+      
+      newClass
+    end    
+  end
+  
+    /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
+     all slots need to be created. If the multiplicity of the slot mandates, a value needs to be acquired, either default or otherwise.
+     For Associations, multiplicity must be checked as well.
+     
+     The following operation assumes the former to have been checked. 
+     Until proving the mandatory slots has been taken care of, all slots will be simply initiated with null.
+  
+  */
+  context FmmlxManipulator
+    @Operation addInstance(package, ofClass, name, parents, abstract):Object
+
+      // The following seems to be trivial, but better check once more
+      if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
+      if not Symbol(name).isValidName()  then self.error("name " + name + " not legal.") end;
+      
+	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
+      let 
+          // create new Object
+        obj = Kernel_mkObj(); 
+        myLevel = ofClass.level - 1;
+        
+          // We prepare a set of all Attributes from the class and a set of all Operations
+          // !!! This needs to be changed to fit its purpose here.
+          // !!! We need a list of all Attributes which are to be instantiated here.
+        A = ofClass.allAttributes();
+        O = ofClass.allOperations();
+
+          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
+          // !!! This can probably be dropped
+        intrinsicA = Set{};
+        intrinsicO = Set{}
+      in 
+        Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
+      
+         // Then we loop through the Attributes
+         @While not A->isEmpty do
+           let a = A->sel // pick any one Attribute
+           in if a.isIntrinsic andthen a.instLevel < myLevel
+              then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+                intrinsicA := intrinsicA.including(a)
+              else // otherwise it becomes a slot and is initialised
+                if a.init <> null
+                then
+                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
+                else
+                  Kernel_addAtt(obj,a.name,a.type.default())
+                end;
+                if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+              end;
+              A := A->excluding(a) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         // Then we loop through the Operations
+         @While not O->isEmpty do
+           let op = O->sel // pick any one Operation
+           in if op.isIntrinsic andthen op.instLevel < myLevel 
+              then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
+                intrinsicO := intrinsicO.including(op)
+              //else // otherwise it becomes available and we do nothing
+              end;
+              O := O->excluding(op) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         if ofClass.inheritsFrom(Classifier)
+         then
+           obj.parents := obj.defaultParents()
+         else
+           false
+         end;
+
+	     if parents.size() > 0 then obj.parents := parents.asSet() end;
+
+	     @For p in obj.parents do
+	       if p.isKindOf(FMML::MetaClass) then
+	         p.children := p.children + {obj}
+	       end
+	     end;
+
+         //then newClass.parents := parents.asSet() end; // test: may work or not...
+         
+         obj.init();
+         
+//                DON'T             
+
+//
+//		   if ofClass.delegatesTo <> null	
+//		   then ofClass.selectRoleFiller(obj, ofClass) end;
+//
+//         if Root.contents.keys().includes("TargetPackage".asSymbol())
+//         then
+//           TargetPackage.add(obj)
+//         else
+//           false
+//         end;
+
+         ofClass.instances := ofClass.instances.including(obj);
+         
+         // todo: name, parents, abstract ...
+        obj.level := myLevel;
+        package.add(obj);
+        obj.setName(Symbol(name)); // todo: test name
+        
+        obj.isAbstract := abstract; // todo: check level 0
+        obj.addParent(FMML::MetaClass);
+        obj
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeClassName(class, newName)
+      let 
+        package = class.owner;
+        oldName = class.name
+      in
+        if
+          package.hasElement(newName)
+        then
+          xmf.error(newName + " already in use in " + package)
+        else
+          if
+            newName.isValidName() 
+          then
+            class.name := newName.asSymbol();
+            package.nameChanged(class,class.name,oldName)
+          else
+            xmf.error(newName + " is not a valid name")
+          end
+        end
+      end;
+      null
+    end
+    
+  context FmmlxManipulator
+    @Operation removeClass(class, strategy)
+      let 
+        package = class.owner;
+        associations = [];
+        heirs = [];
+        instances = [] 
+      in
+//        ("remove Class "+class.name+" start").println();
+
+      // remove the associations first
+        @For association in package.associations do
+          if association.end1.type = class or association.end2.type = class then
+            associations := associations + [association] end end;
+//        ("found "+associations.size()+" associations").println();
+        @For association in associations do
+            self.removeAssociation(association) end;
+            
+//        ("associations removed").println();
+
+      // remove all inheritance
+        @For heir in package.getChildren() do
+          if heir.parents.contains(class) then
+            heirs := heirs + [heir] end end;
+//        ("found "+heirs.size()+" heirs").println();
+        @For heir in heirs do
+          self.removeParent(heir, class) end;
+//        ("inheritance removed").println();
+          
+      // orphan the instances
+        @For instance in package.getChildren() do
+          if instance.of() = class then
+            instances := instances + [instance] end end;
+//        ("found "+instances.size()+" instances").println();
+        @For instance in instances do
+          self.orphanInstance(instance) end;
+//        ("instances orphaned").println();
+
+      // remove class
+        package.remove(class)
+//        ("class removed").println()
+      end
+    end
+  
+  context FmmlxManipulator  
+    @Operation removeParent(heir, parent)
+      xmf.error("The operation \"removeParent\" has not been implemented yet.")
+    end
+    
+  context FmmlxManipulator  
+    @Operation orphanInstance(instance)
+      self.migrateInstance(instance, null)
+    end
+    
+  context FmmlxManipulator  
+    @Operation migrateInstance(instance, newClass)
+      xmf.error("The operation \"migrateInstance\" has not been implemented yet.")
+    end
+    
+  context FmmlxManipulator  
+    @Operation changeClassAbstract(class, abstractNew)
+      if abstractNew 
+      then 
+        if class.level > 0 
+        then 
+          if class.allInstances().size() = 0 
+          then class.isAbstract := true; []
+          else ["Classes with instances cannot be made abstract"] end
+        else ["Objects on level 0 cannot be made abstract"] end
+      else
+        class.isAbstract := false; []
+      end
+    end
+    
+  context  FmmlxManipulator  
+    @Operation levelRaiseAll(package, amount:Integer)
+      let
+        levelHighEnough = true;
+        oneRandomReason = null
+      in 
+        if amount < 0 then
+          @For obj in package.getChildren() do
+            if obj.level + amount < 0 then 
+              levelHighEnough := false; oneRandomReason:= "object " + obj.name
+            end;
+            @For att in obj.attributes do
+              if att.instLevel + amount < 0 then 
+                levelHighEnough := false; oneRandomReason:= "attribute " + att.name + " in " + obj.name
+              end
+            end;
+            @For o in obj.operations do
+              if o.instLevel + amount < 0 then 
+                levelHighEnough := false; oneRandomReason:= "operation " + o.name + " in " + obj.name
+              end
+            end
+          end;
+          @For assoc in package.associations do
+            if assoc.end1.instLevel + amount < 0 orelse assoc.end2.instLevel + amount < 0 then
+              levelHighEnough := false; 
+              oneRandomReason:= "association " + assoc.name 
+                + " between " + assoc.end1.type.name 
+                + " and "     + assoc.end2.type.name
+            end            
+          end
+        end;
+
+        // if one object or attribute is too low the objects cannot be lowered. Raising is always allowed.
+        if 
+          levelHighEnough 
+        then
+          @For obj in package.getChildren() do
+            obj.level := obj.level + amount;
+            @For att in obj.attributes do
+              att.instLevel := att.instLevel + amount
+            end;
+            @For o in obj.operations do
+              o.instLevel := o.instLevel + amount
+            end
+          end;
+          @For assoc in package.associations do
+            assoc.end1.instLevel := assoc.end1.instLevel + amount;
+            assoc.end2.instLevel := assoc.end2.instLevel + amount        
+          end;
+          []
+        else
+          ["Levels cannot be lowered. Some property (e.g. "+ oneRandomReason +") would be on a level below 0. "]
+        end
+      end
+    end

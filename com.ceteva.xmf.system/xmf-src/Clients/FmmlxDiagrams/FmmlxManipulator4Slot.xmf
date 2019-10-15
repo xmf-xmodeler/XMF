@@ -1,0 +1,21 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+    @Operation changeSlotValue(obj, slotName, valueToBeParsed, requiredType) 
+      let
+        parseResult = self.evalString(valueToBeParsed)
+      in
+        if parseResult.at(1) = null then 
+          if parseResult.at(0).isKindOf(requiredType) then
+            obj.set(slotName, parseResult.at(0))
+          else
+            xmf.message(parseResult.at(0) + " is not of " + requiredType.name); parseResult.at(0) + " is not of " + requiredType.name
+          end
+        else
+          xmf.message(parseResult.at(1)); parseResult.at(1) // error as message or as return value? maybe try exceptions...
+        end
+      end
+    end

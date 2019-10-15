@@ -805,6 +805,9 @@ in
   dm.addContribution(DiagramContribution("Class Diagram (Partial View)",
                                          XCore::Package,
                                          classDiagramPartialHandler).setDropEnabled(true));
+  dm.addContribution(DiagramContribution("FMMLx Diagram", // (new View)
+                                         XCore::Package,
+                                         fmmlxDiagramHandler).setDropEnabled(true));
   dm.addContribution(DiagramContribution("Snapshot Diagram", // (Default View)
                                          XCore::Snapshot,
                                          snapshotDiagramTotalHandler).setDropEnabled(true));

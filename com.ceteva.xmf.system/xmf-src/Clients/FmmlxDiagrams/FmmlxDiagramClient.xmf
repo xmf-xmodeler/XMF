@@ -10,6 +10,7 @@ context FmmlxDiagrams
 	@Attribute package : Package end
 	@Attribute mapping : FmmlxDiagramMapping = FmmlxDiagramMapping() end
 	@Attribute communicator : Element end
+	@Attribute protocol : String = "" end
 
     @Constructor(name)
 //      self.setCommandInterpreter(DiagramCommandInterpreter());
@@ -19,6 +20,16 @@ context FmmlxDiagrams
     
     @Operation createDiagram(package,name)
         self.package := package;
+        
+        ///////////FIND ALTERNATIVE TO THIS///////////////////
+        if 
+          package.of() <> FMML::FMMLxPackage
+        then 
+          package.setOf(FMML::FMMLxPackage);
+          Kernel_addAtt(package,"fmmlxAssociationInstances",{})
+        end;
+        //////////////////////////////////////////////////////
+        
         let 
           FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self)
@@ -27,37 +38,92 @@ context FmmlxDiagrams
           self.communicator.setHandle(handle);
           self.communicator.newDiagram()
         end;
-//        let x = FmmlxDiagram()
-//        in 
-//          ("x: "+x).println();
-//          x.newDiagram();
-//          ("name: "+name).println();
-//          ("self.newDiagram("+self.name+")").println();
-//          x
-//        end
         FmmlxDiagram() // vestigial return value for diagram manager
     end
+    
+    //////////////////////// Queries ///////////////////////////////
     
     @Operation getAllObjects(idRequest)
         let 
           result = [] 
         in 
-    	  @For c in package.getChildren() do
+    	  @For c in self.package.getChildren() do
     	    if c.isKindOf(FMML::MetaClass) 
     	    then
     	      let
-    	        mapping = mapping.addOrGetObjectMapping(c)
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(c)
     	      in
-    	        result := result.append([[mapping.id, c.name.toString(), mapping.lastKnownDiagramX, mapping.lastKnownDiagramY]])
+    	        result := result.append([[
+    	        mappingInfo.id, 
+    	        c.name.toString(), 
+    	        c.level, // level
+    	        if c.of().isKindOf(FMML::MetaClass) then self.mapping.addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
+    	        self.getParentIdList(c),//[],// parents-ID
+    	        c.isAbstract,
+    	        mappingInfo.lastKnownDiagramX, 
+    	        mappingInfo.lastKnownDiagramY]])
     	      end
-    	      //("mapping of " + c + " is " + mapping.addOrGetObjectMapping(c)).println();
-    	      /*
-    	      if c is not in mapping
-    	        add c to mapping
-    	      return c with mapping info
-    	      */
-    	      //result := result.append([c.name.toString()])
     	    end
+    	  end;
+    	  // clean up mapping ? 
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+    
+    @Operation getAllAssociations(idRequest)
+        let 
+          result = [] 
+        in 
+    	  @For a in package.associations do
+    	    if a.isKindOf(Associations::Association) 
+    	    then
+    	      let
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(a)
+    	      in
+    	        result := result.append([[
+    	          mappingInfo.id, // 0 ID
+    	          self.mapping.addOrGetObjectMapping(a.end1.type).id, // 1 start ID
+    	          self.mapping.addOrGetObjectMapping(a.end2.type).id, // 2 end ID
+    	          -1, // 3 parent ID
+    	          mappingInfo.points, // 4 points
+    	          a.name.toString(), // 5 name 1
+    	          null, // 6 name 2
+    	          a.end2.name.toString(), // 7 name start->end slot name
+    	          a.end1.name.toString(), // 8 name end->start slot name
+    	          a.end2.instLevel, // 9 level s->e
+    	          a.end1.instLevel, // 10 level e->s
+    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->e
+    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult),  // 12 mul e->s
+    	          self.mapping.getAllLabels(mappingInfo.id) // 13 labels
+    	        ]])
+    	      end // let
+    	    else ("a is of " + a.of()).println()
+    	    end // if
+    	  end;
+    	  // clean up mapping ? 
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+    
+        
+    @Operation getAllAssociationInstances(idRequest)
+        let 
+          result = [] 
+        in 
+    	  @For i in (if self.package.fmmlxAssociationInstances = null then {} else self.package.fmmlxAssociationInstances end) do 
+
+    	      let
+    	        mappingInfo = self.mapping.addOrGetObjectMapping(i)
+    	      in
+    	        result := result.append([[
+    	          mappingInfo.id, // 0 ID
+    	          self.mapping.addOrGetObjectMapping(i.at(0)).id, // 1 start ID
+    	          self.mapping.addOrGetObjectMapping(i.at(1)).id, // 2 end ID
+    	          self.mapping.addOrGetObjectMapping(i.at(2)).id, // 3 assoc ID
+    	          mappingInfo.points, // 4 points
+    	          self.mapping.getAllLabels(mappingInfo.id) // 5 labels
+    	        ]])
+    	      end // let
     	  end;
     	  // clean up mapping ? 
     	  self.communicator.sendMessageToJava([idRequest, result])
@@ -68,96 +134,709 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-          @For c in package.getChildren() do 
+          @For c in self.package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
-                result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel]])
+                result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
               end
             end
           end;
+    	  self.communicator.sendMessageToJava([idRequest, result])
+        end
+    end
+     
+    @Operation getAllAttributes(idRequest, className) 
+        let 
+          resultOwn   = [];
+          resultOther = [];
+          result = []
+        in 
+          @For c in self.package.getChildren() do 
+            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+            then 
+              @For a in c.attributes do 
+                resultOwn   :=   resultOwn.append([[
+                    a.name.toString(), 
+                    a.type.name.toString(), 
+                    a.instLevel, 
+                    a.mult(),
+                    self.mapping.getMappingId(c)
+                    ]])
+              end;
+              @For a in (c.allAttributes() - c.attributes) do 
+                if a.isIntrinsic then
+                  resultOther := resultOther.append([[
+                    a.name.toString(), 
+                    a.type.name.toString(), 
+                    a.instLevel, 
+                    a.mult(),
+                    self.mapping.getMappingId(a.owner)
+                    ]])
+                end
+              end            
+            end
+          end;
+          result := [resultOwn, resultOther];
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end
     
-    @Operation getSlots(idRequest, objectName) 
-        let 
-          result = [] 
-        in 
-          @For o in package.getChildren() do 
-            if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
-            then 
-              @For s in o.slots() do 
-                result := result.append([[s.name.toString(), s.value.toString()]])
+    @Operation getSlots(idRequest, objectName, slotList) 
+      let 
+        result = [] 
+      in 
+        @For o in self.package.getChildren() do 
+          if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
+          then 
+            @For name in slotList do
+              if o.hasSlot(name)
+                then result := result.append([[name, o.get(name).toString()]])
               end
             end
-          end;
-    	  self.communicator.sendMessageToJava([idRequest, result])
-        end
+          end
+        end;
+    	self.communicator.sendMessageToJava([idRequest, result])
+      end
     end
       
+    @Operation getOperationValues(idRequest, objectName, opNames) 
+      let 
+        result = [] 
+      in 
+        @For obj in self.package.getChildren() do 
+          if obj.isKindOf(FMML::MetaClass) and obj.name.toString() = objectName and opNames.size() > 0
+          then 
+            @For o in obj.of().allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+              if o.instLevel = obj.level then
+                @For name in opNames do
+                  if name = o.name.toString() then
+                    result := result.append([[
+                      o.name.toString(), 
+                      o.invoke(obj,{})]])
+                end end // if contains // for
+              end // if level
+            end end // if // for
+          end
+        end;
+    	self.communicator.sendMessageToJava([idRequest, result])
+      end
+    end
+    
     @Operation getOwnOperations(idRequest, className) 
         let 
           result = [] 
         in 
-          @For c in package.getChildren() do 
+          @For c in self.package.getChildren() do 
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
-              @For o in c.operations do 
-                result := result.append([[o.name.toString(), o.type.name.toString(), o.instLevel]])
-              end
+              @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+                result := result.append([[
+                o.name.toString(), 
+                o.instLevel, 
+                o.type().name.toString(),
+                o.source(),
+                if o.owner.isKindOf(FMML::MetaClass) then self.mapping.getMappingId(o.owner) else -1 end,
+                [0,1,false,true], // to-do: multiplicity
+                self.isOperationMonitored(o)
+                ]])
+              end end
             end
           end;
     	  self.communicator.sendMessageToJava([idRequest, result])
         end
     end  
     
+    ///////////////////// Updates to the View ////////////////////
+    
     @Operation sendNewPosition(idRequest, objectID, x, y)
-        mapping.setNewPosition(objectID, x, y);
-        self.communicator.sendMessageToJava([idRequest, []]) // empty result for compatibility
+        self.mapping.setNewPosition(objectID, x, y);
+        self.communicator.sendMessageToJava([idRequest, []]) 
     end
     
+    @Operation sendNewPositions(idRequest, objectID, listOfpoints)
+        self.mapping.setNewPositions(objectID, listOfpoints);
+        self.communicator.sendMessageToJava([idRequest, []]) 
+    end
+  
+    @Operation storeLabelInfo(idRequest, edgeID, localID, x, y)
+        self.mapping.storeLabelInfo(edgeID, localID, x, y);
+        self.communicator.sendMessageToJava([idRequest, []]) 
+    end
+    
+    ////////////////// Class Manipulations ///////////////////
+    
     @Operation addMetaClass(idRequest, name, level, parents, abstract, x, y)
-        ("addMetaClass " + name 
-        + " on level " + level 
-        + " with parents " + parents 
-        + (if abstract then " and abstract " else " " end)
-        + "at position " + x + "/" + y).println(); 
-        
+        self.protocol := self.protocol + "\nE      addMetaClass: " + name + " | " + level + " | " + parents + " | " + abstract;
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
-          newClass = m.addMetaClass(package, name, level, parents, abstract)
+          parentsList = self.getParentsList(parents)
+        then 
+          newClass = m.addMetaClass(self.package, name, level, parentsList, abstract)
         then
-          mappingInfo = mapping.addOrGetObjectMapping(newClass)
+          mappingInfo = self.mapping.addOrGetObjectMapping(newClass)
         in 
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
-        "addNewMetaClass done".println();
-        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+        self.communicator.sendMessageToJava([idRequest, []]) // temporary empty result 
     end 
     
     @Operation addInstance(idRequest, ofId, name, parents, abstract, x, y)
-        ("addInstance " + name 
-        + " of id " + ofId 
-        + " with parents " + parents 
-        + (if abstract then " and abstract " else " " end)
-        + "at position " + x + "/" + y).println(); 
-        
-        let 
-          m = FmmlxDiagrams::FmmlxManipulator() 
-        then 
-          ofClass = mapping.getMapping(ofId).object
-        then 
-          newInstance = m.addInstance(package, ofClass, name, parents, abstract)
-        then
-          mappingInfo = mapping.addOrGetObjectMapping(newInstance)
-        in 
-          mappingInfo.lastKnownDiagramX := x;
-          mappingInfo.lastKnownDiagramY := y
-        end;
-        "addInstance done".println();
-        self.communicator.sendMessageToJava([idRequest, [null]]) // temporary empty result 
+      self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
+        try
+          let 
+            m = FmmlxDiagrams::FmmlxManipulator() 
+          then 
+            ofClass = self.mapping.getMapping(ofId).object
+          then
+            parentsList = self.getParentsList(parents)
+          then 
+            newInstance = m.addInstance(self.package, ofClass, name, parentsList, abstract)
+          then
+            mappingInfo = self.mapping.addOrGetObjectMapping(newInstance)
+          in 
+            mappingInfo.lastKnownDiagramX := x;
+            mappingInfo.lastKnownDiagramY := y
+          end;
+          self.communicator.sendMessageToJava([idRequest, []]) 
+        catch (exception)
+          self.communicator.sendMessageToJava([idRequest, [exception.message]])
+        end
     end 
+    
+    @Operation removeClass(idRequest, classId, strategy) 
+      self.protocol := self.protocol + "\nE      removeClass: " + classId;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        m.removeClass(class, strategy)
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+    end
+    
+    @Operation changeClassName(idRequest, classId, newName) 
+      self.protocol := self.protocol + "\nE      changeClassName: " + classId + " | " + newName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        m.changeClassName(class, newName)
+      end;
+      self.communicator.sendMessageToJava([idRequest, []])
+    end
+      
+    @Operation setClassAbstract(idRequest, classId, isAbstract) 
+      self.protocol := self.protocol + "\nE      setClassAbstract: " + classId + " | " + isAbstract;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        self.communicator.sendMessageToJava([idRequest, m.changeClassAbstract(class, isAbstract)])
+      end      
+    end 
+    
+    @Operation levelRaiseAll(idRequest, amount)
+      self.protocol := self.protocol + "\nE      levelRaiseAll: " + amount;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      in
+        self.communicator.sendMessageToJava([idRequest, m.levelRaiseAll(self.package, amount)])
+      end  
+    end
+    
+    //////////////////////// Attribute Manipulations /////////////////////
+    
+    @Operation addAttribute(idRequest, classId, name, level, typeName, multiplicityV)
+      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + name + " | " + level + " | " + typeName;
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        class = self.mapping.getMapping(classId).object;
+        type = m.getTypeForName(typeName)
+        // multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
+      then 
+        problems = m.checkAddAttribute(class, name, level, typeName)
+      in           
+        if 
+          problems.isEmpty() 
+        then
+          problems := try 
+            m.addAttribute(class, name, level, type); null
+          catch(e)
+            [("addAttribute failed during transaction: " + e.message)]
+          end // try
+        end; // if
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end // in       
+    end 
+    
+    @Operation removeAttribute(idRequest, classId, attName, strategy) 
+      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + attName;
+     // for now: ignore strategy and simply delete 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      in
+        m.removeAttribute(class, attName, strategy)
+      end;
+      self.communicator.sendMessageToJava([idRequest, null]) // temporary empty result 
+    end
+    
+    @Operation changeAttributeName(idRequest, classId, oldName, newName)
+      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.checkChangeAttributeName(class, oldName, newName)
+      in
+        if problems.isEmpty() then m.changeAttributeName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation changeAttributeLevel(idRequest, classId, attName, oldLevel, newLevel)
+      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newLevel;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then         
+        problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
+      in
+        if problems.isEmpty() then m.changeAttributeLevel(class, attName, oldLevel, newLevel) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+      
+    @Operation changeAttributeType(idRequest, classId, attName, oldTypeName, newTypeName)
+      self.protocol := self.protocol + "\n A     changeAttributeType: " + classId + " | " + attName + " | " + newTypeName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then         
+        problems = m.checkChangeAttributeType(class, attName, oldTypeName, newTypeName)
+      in
+        if problems.isEmpty() then m.changeAttributeType(class, attName, oldTypeName, newTypeName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end   
+      
+    //////////////////////// Slot Manipulations /////////////////////
+
+    @Operation changeSlotValue(idRequest, objId, slotName, valueToBeParsed)
+      self.protocol := self.protocol + "\n  S    changeSlotValue: " + objId + " | " + slotName + " | " + valueToBeParsed;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        obj = self.mapping.getMapping(objId).object;
+        error = null
+      then
+        class = obj.of()
+      then
+        atts = class.allAttributesForLevel(obj.level);
+        foundAtt = null
+      in
+        @For att in atts do
+          if att.name.toString() = slotName.toString() then
+            foundAtt := att
+          end
+        end;
+        if 
+          foundAtt <> null 
+        then
+          m.changeSlotValue(obj, slotName, valueToBeParsed, foundAtt.type)
+        else
+          error := "no Slot Found"
+        end;
+        self.communicator.sendMessageToJava([idRequest, if error = null then null else [error] end]) // temporary empty result 
+      end
+    end
+    
+    //////////////// Local Operations ///////////////////
+    
+    @Operation vector2Seq(vec) // for local use
+      let list = [] in
+        @For id in vec do
+          list := list.append([id])
+        end; // for
+        list
+      end// let  
+    end
+      
+    @Operation getParentsList(parentIds) // for local use
+      let list = [] in
+        @For id in parentIds do
+          if not id = -1 then list := list.append([mapping.getMapping(id).object]) end
+        end; // for
+        list
+      end// let      
+    end
+         
+    @Operation getParentIdList(c : FMML::MetaClass) // for local use
+      let list = [] in
+        @For p in c.parents do
+          if p.isKindOf(FMML::MetaClass) then list := list.append([mapping.addOrGetObjectMapping(p).id]) end
+        end; // for
+        list
+      end// let      
+    end
+    
+    @Operation isOperationMonitored(o)
+      if o.hasProperty("monitor") then FmmlxDiagramClient::getOpProp(o, "monitor") else false end
+    end
+    
+    ////////////////// Operations for editing associations ///////////////////
+    
+  @Operation addAssociation(idRequest, 
+      class1Id : Integer,
+      class2Id : Integer,
+      ref1 : String,
+      ref2 : String,
+      fwName : String,
+      reverseName : String,
+      mult1S : String,
+      mult2S : String,
+      instLevel1 : Integer,
+      instLevel2 : Integer):XCore::Element
+  	  
+      self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
+      
+  	  let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    class1 = self.mapping.getMapping(class1Id).object;
+  	    class2 = self.mapping.getMapping(class2Id).object
+  	  then
+        mult1 = m.valueList2Multiplicity(self.vector2Seq(mult1S));
+        mult2 = m.valueList2Multiplicity(self.vector2Seq(mult2S))
+      then 
+        problems = [] /*m.checkAddAssociation(self.package,
+  	      class1, class2,
+  	      ref1, ref2,
+  	      fwName, reverseName,
+  	      mult1, mult2,
+  	      instLevel1, instLevel2) */
+      in
+        if problems.isEmpty() then 
+  	      problems := m.addAssociation(self.package,
+  	        class1, class2,
+  	        ref1, ref2,
+  	        fwName, reverseName,
+  	        mult1, mult2,
+  	        instLevel1, instLevel2)
+  	    end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end  	  
+  	end    
+    
+    @Operation removeAssociation(
+      idRequest  : Integer, 
+      assocId    : Integer)
+      
+      self.protocol := self.protocol + "\n   Z   removeAssociation: " + assocId;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.mapping.getMapping(assocId).object
+      then 
+        problems = m.removeAssociation(assoc)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation changeAssociationForwardName(
+      idRequest  : Integer, 
+      assocId    : Integer, 
+      newName    : String)
+      
+      self.protocol := self.protocol + "\n   Z   changeAssociationForwardName: " + assocId + " | " + newName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.mapping.getMapping(assocId).object
+      then 
+        problems = m.changeAssociationForwardName(assoc, newName)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+   @Operation changeAssociationEnd2StartMultiplicity(idRequest, associationID, multV)
+
+      self.protocol := self.protocol + "\n   Z   changeAssociationEnd2StartMultiplicity: " + associationID + " | " + multV;
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, newMult, null)])
+      end
+    end
+      
+    @Operation changeAssociationStart2EndMultiplicity(idRequest, associationID, multV) 
+      self.protocol := self.protocol + "\n   Z   changeAssociationStart2EndMultiplicity: " + associationID + " | " + multV;
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = self.mapping.getMapping(associationID).object
+      then 
+        newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
+      in 
+        self.communicator.sendMessageToJava([idRequest, m.changeAssociationMultiplicity(a, null, newMult)])
+      end
+    end
+
+    //////////////////////////////////////////////////////////
+  	
+  	@Operation addAssociationInstance(idRequest, 
+      obj1Id  : Integer,
+      obj2Id  : Integer,
+      assocId : Integer)
+      
+      self.protocol := self.protocol + "\n    L  addAssociationInstance: " + assocId + " | " + obj1Id + " | " + obj2Id;
+  	  let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    obj1 = self.mapping.getMapping(obj1Id).object;
+  	    obj2 = self.mapping.getMapping(obj2Id).object;
+  	    association = self.mapping.getMapping(assocId).object
+  	  then 
+        problems = m.addAssociationInstance(self.package, obj1, obj2, association)
+  	  in
+  	    self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+  	  end
+    end
+    
+    @Operation removeAssociationInstance(
+      idRequest  : Integer, 
+      assocInstId    : Integer)
+      
+      self.protocol := self.protocol + "\n    L  removeAssociationInstance: " + assocInstId;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assocInstSeq = self.mapping.getMapping(assocInstId).object
+      then 
+        problems = m.removeAssociationInstance(assocInstSeq)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    ////////////////// Operations for editing operations ///////////////////
+
+    @Operation changeOperationName(idRequest, classId, oldName, newName) 
+    
+      self.protocol := self.protocol + "\n     O changeOperationName: " + classId + " | " + oldName + " | " + newName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.checkChangeOperationName(class, oldName, newName)
+      in
+        if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation changeOperationLevel(idRequest, classId, name, oldLevel, newLevel) 
+    
+      self.protocol := self.protocol + "\n     O changeOperationLevel: " + classId + " | " + name + " | " + newLevel;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then
+        o = m.findOperation(class,name)
+      then 
+        problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation addOperation(
+      idRequest  : Integer, 
+      classId    : Integer,
+      opName     : String, 
+      level      : Integer, 
+      returnType : String,
+      body       : String)
+      
+      self.protocol := self.protocol + "\n     O addOperation: " + classId + " | " + opName + " | " + level;
+      
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        type = m.getTypeForName(returnType);
+        problems = m.addOperation(class, opName, level, type, body)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation addOperation2(
+      idRequest  : Integer, 
+      classId    : Integer,
+      level      : Integer, 
+      body       : String)
+      
+      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
+      
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.addOperation2(class, level, body)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation removeOperation(
+      idRequest  : Integer, 
+      classId    : Integer,
+      opName     : String)
+      
+      self.protocol := self.protocol + "\n     O removeOperation: " + classId + " | " + opName;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object
+      then 
+        problems = m.removeOperation(class, opName)
+      in
+        self.communicator.sendMessageToJava([idRequest, problems]) // return null or problems
+      end
+    end
+    
+    @Operation getOpProp(operation, name) // for local use
+      let
+        properties = operation.properties();
+        tagFound = null
+      in 
+        @For property in properties do  
+          if property->head() = name
+            then tagFound := property->tail()
+          end
+        end;
+        tagFound
+      end      
+    end
+    
+    @Operation changeOperationOwner(idRequest, idO_old, name, idO_new) 
+      
+      self.protocol := self.protocol + "\n     O changeOperationOwner: " + classId + " | " + name + " | " + idO_new;
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        oldOwner = self.mapping.getMapping(idO_old).object;
+        newOwner = self.mapping.getMapping(idO_new).object
+      then
+        operation = oldOwner.getOperation(name)
+      in
+        self.communicator.sendMessageToJava([idRequest, m.changeOperationOwner(oldOwner, operation, newOwner)])
+      end      
+    end
+          
+    @Operation checkOperationNameLegal(op, name):Boolean // todo: check for duplicates, consider arity
+      let nameSymbol = Symbol(name) in
+        if nameSymbol = op.name()
+        then
+          true
+        else
+          op.legalNameChangeCheck(nameSymbol,op.name())
+        end
+      end
+    end
+        
+    @Operation changeOperationBody(idRequest, classId:Integer, oldName:String, body:String)
+      
+      self.protocol := self.protocol + "\n     O changeOperationBody: " + classId + " | " + oldName;
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.mapping.getMapping(classId).object;
+        problems = []
+      then
+        op = class.getOperation(oldName)
+      then
+        newName = body.splitBy("()[]",0,0)->head.subst("","@Operation ",false)
+      in
+        if oldName.toString() <> newName.toString() then 
+          problems := ["name change not allowed here"]
+        elseif
+          op = null then 
+          problems := ["operation not found"]
+        else // let the manipulator try
+          problems := m.changeOperationBody(class, op, newName, body)
+        end;
+        self.communicator.sendMessageToJava([idRequest, problems])
+      end
+    end
+    
+    // Not yet implemented
+    
+    @Operation respondNotYetImplemented(idRequest)
+      self.communicator.sendMessageToJava([idRequest, ["This feature is temporarily unavailable. Please try again later."]])
+    end
+      
+    @Operation changeAssociationStart2EndAccessName(idRequest, associationID, name) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationEnd2StartAccessName(idRequest, associationID, name) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationStart2EndLevel(idRequest, associationID, level) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationEnd2StartLevel(idRequest, associationID,level) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation updateAssociationInstance(idRequest, id1, id2) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+//    @Operation editAssociation(idRequest, idA, isS, idT, levT2S, levS2T, fwN, reN, accT2S, accS2T, mulT2S, mulS2T) 
+//      self.respondNotYetImplemented(idRequest)
+//    end
+      
+    @Operation changeAssociationTarget(inA, idT_o, idT_n) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAssociationSource(inA, idS_o, idS_n) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation checkOperationBody(idRequest, operationBodyToBeChecked) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeOperationType(idRequest, idO, opName, newType) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeParent(idRequest, idO, oldList, newList) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeAttributeOwner(idRequest, idO_old, name, idO_new) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeOf(idRequest, idO, idC_old, idC_new) 
+      self.respondNotYetImplemented(idRequest)
+    end
+      
+    @Operation changeClassLevel(idRequest, idO, newLevel) 
+      self.respondNotYetImplemented(idRequest)
+    end
+    
+    @Operation printProtocol(idRequest)
+      "printing the Protocol start".println();
+      self.protocol.println();
+      "printing the Protocol done".println()
+    end
+    
+    
 end

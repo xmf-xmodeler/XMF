@@ -839,8 +839,8 @@ context String
        Returns true if the name is valid, i.e. it only contains valid 
        alpha and numeric characters (and underscore) and starts with a letter.
      end
-     self->size > 0 and
-     self->at(0).isAlphaChar() and
+     self->size > 0 andthen
+     self->at(0).isAlphaChar() andthen
      let i = 1;
          validName = true
      in @While i < self->size and validName do
