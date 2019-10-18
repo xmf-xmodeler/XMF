@@ -86,7 +86,7 @@ context Code
                       let e21 = left;
                           o22 = binOp;
                           e22 = right
-                      in if prec(o1) < prec(o22)
+                      in if prec(o1) <= prec(o22)
                          then self.walk(BinExp(cStart(e1),cEnd(e22),BinExp(cStart(e1),cEnd(e21),e1,o1,e21),o22,e22),arg)
                          else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
                          end
@@ -103,7 +103,7 @@ context Code
                  let e21 = left;
                      o2 = binOp;
                      e22 = right
-                 in if prec(o1) < prec(o2)
+                 in if prec(o1) <= prec(o2)
                     then self.walk(BinExp(cStart(e1),cEnd(e22),BinExp(cStart(e1),cEnd(e21),e1,o1,e21),o2,e22),arg)
                     else BinExp(cStart(e1),cEnd(e2),e1,o1,e2)
                     end 

@@ -55,59 +55,6 @@ in
     )
   );
 
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Main","Performance Monitor"},
-        Clients::PerfMon::showPerfMon
-      }
-    )
-  );
-  
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Main","Monitor Calls"},
-        Debug::monitor
-      }
-    )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Daemon","Monitor Daemon Firing"},
-        Daemon::traceAll
-      }
-    )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Daemon","Silent Daemon Firing"},
-        Daemon::untraceAll
-      }
-    )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Client","Monitor Client Communications"},
-        XMF::monitorClientCommunications
-      }
-    )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","System","&Debug","Client","Silent Client Communications"},
-        XMF::silentClientCommunications
-      }
-    )
-  );
 
   registry.addContribution(id,
     TypeLessContribution(
@@ -147,7 +94,7 @@ in
 			end
       }
     )
-  );
+  ); 
 
   registry.addContribution(id,
     TypeLessContribution(

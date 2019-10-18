@@ -155,7 +155,7 @@ context Projects
            in let project = pair->head then 
                   package = project.package;
                   resourceName = path
-              in if fix then Walkers::Fix().walk(pair,null) end;
+              in if fix then Walkers::Fix().walk(pair,null) end; //TODO: what does fix.xmf do?
                  if Root.hasElement(package.name.toString())
                  then install := xmf.confirm("Overwrite " + package.name.toString() + "?")
                  end;

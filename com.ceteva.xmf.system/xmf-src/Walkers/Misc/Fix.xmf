@@ -10,7 +10,8 @@ context Walkers
     // Run over the system and perform fixes.
   
     @Operation defaultWalk(e:Element,arg:Element):Element
-      null
+      "defWalk".println();
+      null //TODO: maybe we need to overwrite this to get action to be triggerd
     end
     
     @Operation reWalk(v:Element,arg:Element):Element

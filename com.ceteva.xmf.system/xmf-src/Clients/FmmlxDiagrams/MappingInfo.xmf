@@ -9,7 +9,8 @@ context FmmlxDiagrams
 
     @Attribute object : Object end
     @Attribute id : Integer end
-    @Attribute lastKnownDiagramX : Integer end
+    @Attribute lastKnownDiagramX : Integer end // use the points list later (TODO)
     @Attribute lastKnownDiagramY : Integer end
+    @Attribute points : Seq(Seq(Integer)) end // is indeed Vector(Vector(...)) for now
 
 end // Class

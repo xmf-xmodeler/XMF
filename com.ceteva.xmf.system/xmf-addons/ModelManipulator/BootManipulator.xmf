@@ -23,14 +23,15 @@ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.xmf
  
  
 let 
-  model = Package("BikePackage");
-  model2 = Package("SecondPackage")
+  model = FMML::FMMLxPackage("BikePackage")
+//  model2 = Package("SecondPackage")
 in 
   
   model.addParent(FMML);
+  model.fmmlxAssociationInstances:={};
   Root.add(model);
-  model2.addParent(FMML);
-  Root.add(model2);
+//  model2.addParent(FMML);
+//  Root.add(model2);
   let 
     project = Projects::Project(model, "BikeProject", null)
   in
@@ -41,4 +42,5 @@ end;
 Root::bikeSetup := BikeSetup();	
 Root::bikeSetup.setup(BikePackage);
 Root::bikeSetup.setup4(BikePackage);
+Root::bikeSetup.setup3210(BikePackage);
 //"type BikePackage.browse(); to start".println()
