@@ -13,10 +13,11 @@ context Root
     @Operation toString()  
       let 
         iText = 
-          if     imaginary = 1  then "i"
+          if     imaginary =  1 then  "i"
           elseif imaginary = -1 then "-i"
-          else (imaginary + "i") end
+          else  (imaginary + "i") end
       in
+        ""+
         if 
           imaginary = 0 
         then 
