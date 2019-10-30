@@ -232,7 +232,7 @@ context Root
                else 
                  @Case e2 of
                    BinExp(e21,o22,e22) do
-                     if prec(o1) <= prec(o22)
+                     if prec(o1) < prec(o22)
                      then order(BinExp(BinExp(e1,o1,e21),o22,e22))
                      else BinExp(e1,o1,e2)
                      end
@@ -244,7 +244,7 @@ context Root
              else 
                @Case e2 of
                  BinExp(e21,o2,e22) do
-                   if prec(o1) <= prec(o2)
+                   if prec(o1) < prec(o2)
                    then order(BinExp(BinExp(e1,o1,e21),o2,e22))
                    else BinExp(e1,o1,e2)
                    end
