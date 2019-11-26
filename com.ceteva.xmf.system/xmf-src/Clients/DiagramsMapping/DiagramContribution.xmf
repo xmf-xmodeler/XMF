@@ -22,6 +22,7 @@ context DiagramsMapping
     end
 
     @Operation newDiagram(element,name,showDiagram)
+      "addDiagram...".println();
       let diagramManager = xmf.diagramManager()
       in
         if self.singleDiagram andthen not diagramManager.diagramsFor(element)->isEmpty
@@ -36,7 +37,7 @@ context DiagramsMapping
           in
             if diagram.of() <> Clients::FmmlxDiagrams::FmmlxDiagram
               then
-                ("addDiagram for "+diagram.of()).println(); 
+                ("addDiagram for "+diagram.of()).println();
                 diagramManager.addDiagram(element,diagram);
 	            diagram.setName(name); // this forces a refresh on the diagram tab
 	            if self.dropEnabled

@@ -39,7 +39,7 @@ import FmmlxDiagrams;
 		end;
 		if attribute = null then problems := ["Attribute " + oldName + " not found in " + class.name + "."] 
 		else
-		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type, attribute.mult())
+		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type)
 		  // add further tests here...
 		end
        ;problems
@@ -68,7 +68,7 @@ import FmmlxDiagrams;
     
     
   context FmmlxManipulator   
-    @Operation checkChangeAttributeType(class, attName, oldType, newType)
+    @Operation checkChangeAttributeType(class, attName, oldType, newType, env:Package)
       let
         attribute = null;
         problems = []
@@ -80,7 +80,7 @@ import FmmlxDiagrams;
 	end;
 	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
 	else
-	  problems := problems + try self.getTypeForName(newType); [] catch(e) [e.message] end
+	  problems := problems + try self.getTypeForName(newType, env); [] catch(e) [e.message] end
 	  // add further tests here...
 	end
        ;problems
@@ -90,6 +90,7 @@ import FmmlxDiagrams;
     context FmmlxManipulator   
     @Operation addAttribute(class, name, instLevel, type) 
       // for now assume that checkAddAttribute did not return any trouble
+      "Trying to add Attribute...".println();
       let 
         a = Attribute(name);
         allInst = class.allMetaInstances()
@@ -98,7 +99,9 @@ import FmmlxDiagrams;
         a.type := type;
         a.instLevel := instLevel;
         
+        "Trying to actually add...".println();
         class.addAttribute(a);
+        "Class has Attribute now, instances/slots next...".println();
         
         @For instance in allInst do
           if instance.level = instLevel then 
@@ -106,6 +109,7 @@ import FmmlxDiagrams;
             //then
             //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
             //else
+              "Trying to add Slot...".println();
               Kernel_addAtt(instance,a.name,a.type.default())
             //end;
           end
@@ -251,7 +255,7 @@ import FmmlxDiagrams;
       end
       
     context FmmlxManipulator
-    @Operation changeAttributeType(class, attName, oldTypeName, newTypeName)
+    @Operation changeAttributeType(class, attName, oldTypeName, newTypeName, env:Package)
       let 
         attribute = null;
         problems = [];
@@ -262,7 +266,7 @@ import FmmlxDiagrams;
 	        attribute := att
 	      end
 	    end;
-	    parseResult := try [self.getTypeForName(newTypeName),null] catch(e) [null,e] end;
+	    parseResult := try [self.getTypeForName(newTypeName, env),null] catch(e) [null,e] end;
 	    if parseResult.at(0) <> null then 
 	      attribute.type := parseResult.at(0) 
 	    else throw parseResult.at(1)

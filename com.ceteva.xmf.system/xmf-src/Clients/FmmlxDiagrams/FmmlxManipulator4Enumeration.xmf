@@ -1,0 +1,34 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+    @Operation addEnumeration(p:Package, newEnumName:String)
+      ["Not yet implemented"]
+    end
+
+  context FmmlxManipulator
+    @Operation changeEnumerationName(p:Package, oldEnumName:String, newEnumName:String) 
+      ["Not yet implemented"]
+    end
+
+  context FmmlxManipulator
+    @Operation removeEnumeration(p:Package, enumName:String) 
+      ["Not yet implemented"]
+    end
+
+  context FmmlxManipulator
+    @Operation addEnumerationValue(p:Package, enumName:String, newEnumValueName:String) 
+      ["Not yet implemented"]
+    end
+
+  context FmmlxManipulator
+    @Operation changeEnumerationValueName(p:Package, enumName:String, oldEnumValueName:String, newEnumValueName:String) 
+      ["Not yet implemented"]
+    end
+
+  context FmmlxManipulator
+    @Operation removeEnumerationValue(p:Package, enumName:String, enumValueName:String) 
+      ["Not yet implemented"]
+    end

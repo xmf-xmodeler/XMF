@@ -8,9 +8,9 @@ context FmmlxDiagrams
 @Class FmmlxManipulator
 
     /* this operation tries to find out which Class/Classifier Corresponds to the String supplied */
-    @Operation getTypeForName(typeName)
+    @Operation getTypeForName(typeName, env:Package)
       let
-        parseResult = self.evalString(typeName)
+        parseResult = self.evalString(typeName, env)
       in
         if parseResult.at(0) <> null andthen parseResult.at(1) = null then 
           if parseResult.at(0).isKindOf(Classifier) then
@@ -35,7 +35,7 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation evalString(text)
+    @Operation evalString(text, env:Package)
 //      if text.indexOf("(") >= 0 or text.indexOf(")") >= 0 then
 //        [null, "This is dangerous. Don't use '(' or ')' here!"] // TODO: Seq(, Set(: OK (: not OK
 //      else
@@ -43,7 +43,7 @@ context FmmlxDiagrams
           let 
             exp = OCL::OCL.grammar.parseString(text,"Exp1",Seq{XOCL})
           then 
-            value = exp.eval(self,Env::NullEnv(),Seq{XCore,Root})
+            value = exp.eval(self,Env::NullEnv(),if env = null then Seq{XCore,Root} else Seq{XCore,Root,env} end)
           in
             [value, null]
           end

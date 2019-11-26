@@ -4,9 +4,9 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation changeSlotValue(obj, slotName, valueToBeParsed, requiredType) 
+    @Operation changeSlotValue(obj, slotName, valueToBeParsed, requiredType, env:Package) 
       let
-        parseResult = self.evalString(valueToBeParsed)
+        parseResult = self.evalString(valueToBeParsed, env)
       in
         if parseResult.at(1) = null then 
           if parseResult.at(0).isKindOf(requiredType) then

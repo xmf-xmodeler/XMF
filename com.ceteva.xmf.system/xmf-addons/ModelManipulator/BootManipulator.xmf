@@ -1,25 +1,90 @@
+parserImport XML::Parser;
 parserImport XOCL;
-
 import Projects;
 import Clients::ExtensionPoints;
-
+import IO;
+import XML::Parser;
+format(stdout,"[Load Init]~%");
+let grammar = 
+      @Grammar Files
+        Files ::= <Files> fs=File* </Files> { fs }.
+        File ::= <File p=path/> { p }.
+      end then
+    getFiles():[String] =
+      let path = xmf.projDir() + "/init/recentlyOpenFiles.xml"
+      in if path.fileExists()
+         then
+           @WithOpenFile(fin <- path)
+             let xin = ParserChannel(fin,grammar)
+             in xin.parse("Files")
+             end
+           end
+         else []
+         end
+      end
+in @For file in getFiles() do
+     xmf.addDropDownMenuItem(["&File","RecentFiles","Recent","RecentFile"] + [file],
+       @Operation() xmf.fileEditorManager().editFile(xmf.fileEditorManager().getHandler("xmf"),File(file),true) end
+     )
+   end
+end;
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Compile"},
+  @Operation() (xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir()) end);
+xmf.addDropDownMenuItem(Seq{"&File","XMFOperations","Multi-Level","LoadOptions","Load"},
+  @Operation() (xmf.homeDir() + "/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(false) end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Source","SourceOptions","Save"},
+  @Operation() Compiler::saveSource := true end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Source","SourceOptions","Omit"},
+  @Operation() Compiler::saveSource := false end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Locals","LocalsOptions","Save"},
+  @Operation() Compiler::localNames := true end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Locals","LocalsOptions","Omit"},
+  @Operation() Compiler::localNames := false end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Position","PositionOptions","Save"},
+  @Operation() Compiler::sourcePos := true end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Compiler","CompilerOptions","Position","PositionOptions","Omit"},
+  @Operation() Compiler::sourcePos := false end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Touch","TouchOptions","Sources"},
+  @Operation() (xmf.homeDir() + "/Manifest.o").loadBin(false).touch(xmf.homeDir(),true) end);
+xmf.addDropDownMenuItem(Seq{"&Build","XMFOperations","Touch","TouchOptions","Binaries"},
+  @Operation() (xmf.homeDir() + "/Manifest.o").loadBin(false).touch(xmf.homeDir(),false) end);
+xmf.addDropDownMenuItem(Seq{"&Doc","Docs","Applied Metamodelling"},
+  @Operation() xmf.browse(xmf.docDir()+"/xmf-books/AppliedMetamodelling/book.pdf") end);
+xmf.addDropDownMenuItem(Seq{"&Doc","Docs","Superlanguages"},
+  @Operation() xmf.browse(xmf.docDir()+"/xmf-books/Superlanguages/book.pdf") end);
+xmf.addDropDownMenuItem(Seq{"&Browse","XModeler","XMF Home"},
+  @Operation() IO::Directory(xmf.homeDir(),[".*.xmf"],0).browse() end);
+xmf.addDropDownMenuItem(Seq{"&Browse","XModeler","Projects"},
+  @Operation() IO::Directory(xmf.projDir(),[".*.xmf"],0).browse() end);
+xmf.addDropDownMenuItem(Seq{"&Browse","XModeler","Snippets"},
+  @Operation() IO::Directory(xmf.homeDir()+"/Snippets",[".*.xmf"],0).browse() end);
+  
+context Root
+  @Package AuxiliaryClasses 
+  
+    // There are references to the following types in the diagram meta-slot code.
+    // That code should be removed, or AuxiliaryClasses should be added to the main build.
+        @Class Unit end 
+        @Class ComposedType  end
+    
+  end
+  
+xmf.attributeEdge := true;
+xmf.setPreference("ShowLongDocumentation",true);
 Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.xmf",true,true);
 (xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
-						
+                        
 //Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
 //(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
-			
+            
 //Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.xmf",true,true);
 //(xmf.homeDir()+"/../xmf-addons/ModelManipulator/MinimalModel.o").loadBin(true);
-
 //Root::manipulator := Manipulator();
 //Root::mp := Root::manipulator;
-
 //Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.xmf",true,true);
-//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.o").loadBin(true);	
-
+//(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Test.o").loadBin(true); 
 Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.xmf",true,true);
-(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.o").loadBin(true);	
+(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.o").loadBin(true);    
  
  
 let 
@@ -39,7 +104,7 @@ in
   end
   
 end;
-Root::bikeSetup := BikeSetup();	
+Root::bikeSetup := BikeSetup(); 
 Root::bikeSetup.setup(BikePackage);
 Root::bikeSetup.setup4(BikePackage);
 Root::bikeSetup.setup3210(BikePackage);
