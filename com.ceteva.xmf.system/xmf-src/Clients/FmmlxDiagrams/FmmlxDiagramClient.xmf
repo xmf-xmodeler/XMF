@@ -213,7 +213,14 @@ context FmmlxDiagrams
           then 
             @For name in slotList do
               if o.hasSlot(name)
-                then result := result.append([[name, o.get(name).toString()]])
+              then 
+                let 
+                  value = o.get(name)
+                then
+                  text = if value.of().isKindOf(Enum) then value.name().toString() else value.toString() end 
+                in
+                  result := result.append([[name, text]])
+                end
               end
             end
           end

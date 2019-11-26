@@ -90,7 +90,6 @@ import FmmlxDiagrams;
     context FmmlxManipulator   
     @Operation addAttribute(class, name, instLevel, type) 
       // for now assume that checkAddAttribute did not return any trouble
-      "Trying to add Attribute...".println();
       let 
         a = Attribute(name);
         allInst = class.allMetaInstances()
@@ -99,9 +98,7 @@ import FmmlxDiagrams;
         a.type := type;
         a.instLevel := instLevel;
         
-        "Trying to actually add...".println();
         class.addAttribute(a);
-        "Class has Attribute now, instances/slots next...".println();
         
         @For instance in allInst do
           if instance.level = instLevel then 
@@ -109,7 +106,6 @@ import FmmlxDiagrams;
             //then
             //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
             //else
-              "Trying to add Slot...".println();
               Kernel_addAtt(instance,a.name,a.type.default())
             //end;
           end
