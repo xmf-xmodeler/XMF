@@ -4,13 +4,54 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation addEnumeration(p:Package, newEnumName:String)
-      ["Not yet implemented"]
+    @Operation addEnumeration(package:Package, newEnumName:String)
+      if 
+        newEnumName.isValidName()
+      then
+        if 
+          package.hasElement(newEnumName)
+        then
+          ["Name already in use"]
+        else
+          let
+            e = Enum(newEnumName,[])
+          in
+            package.add(e)
+            //;e.owner := package
+          end;
+          []
+        end
+      else
+        ["Name not valid"]
+      end
     end
 
   context FmmlxManipulator
-    @Operation changeEnumerationName(p:Package, oldEnumName:String, newEnumName:String) 
-      ["Not yet implemented"]
+    @Operation changeEnumerationName(package:Package, oldEnumName:String, newEnumName:String)
+      if
+        package.hasElement(oldEnumName) 
+      then
+        let 
+          e = package.getElement(oldEnumName);
+          oldNameSymbol = e.name
+        in
+          if 
+            newEnumName.isValidName()
+          then
+            if 
+              package.hasElement(newEnumName)
+            then
+              ["Name already in use"]
+            else
+              e.name := newEnumName.asSymbol();
+              package.nameChanged(e,e.name,oldEnumName);
+              []
+            end
+          else
+            ["Name not valid"]
+          end
+        end
+      else ["Enum does not exist"] end
     end
 
   context FmmlxManipulator
