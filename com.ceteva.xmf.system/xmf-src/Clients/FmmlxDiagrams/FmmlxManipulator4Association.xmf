@@ -8,8 +8,8 @@ import FmmlxDiagrams;
   	      p: Package,
   	      class1 : MetaClass,
   	      class2 : MetaClass,
-  	      ref1 : String,
-  	      ref2 : String,
+  	      accessSourceFromTargetName : String, // ref1
+  	      accessTargetFromSourceName : String, // ref2
   	      fwName : String,
   	      reverseName : String,
   	      mult1 : XCore::Element,
@@ -28,8 +28,8 @@ import FmmlxDiagrams;
   	      // can a class symmetrically self-associate?   
   	      
       let 
-        e1 = Associations::End(ref1,class1,mult1);
-        e2 = Associations::End(ref2,class2,mult2)
+        e1 = Associations::End(accessSourceFromTargetName,class1,mult1);
+        e2 = Associations::End(accessTargetFromSourceName,class2,mult2)
       in 
         e1.instLevel := instLevel1;
         e2.instLevel := instLevel2;

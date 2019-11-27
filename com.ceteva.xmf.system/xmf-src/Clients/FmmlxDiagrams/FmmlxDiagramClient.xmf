@@ -546,8 +546,8 @@ context FmmlxDiagrams
   @Operation addAssociation(requestID : Seq(Integer), 
       class1Id : Integer,
       class2Id : Integer,
-      ref1 : String,
-      ref2 : String,
+      accessSourceFromTargetName : String,
+      accessTargetFromSourceName : String,
       fwName : String,
       reverseName : String,
       mult1S : String,
@@ -567,7 +567,7 @@ context FmmlxDiagrams
       then 
         problems = [] /*m.checkAddAssociation(self.package,
   	      class1, class2,
-  	      ref1, ref2,
+  	      accessSourceFromTargetName, accessTargetFromSourceName,
   	      fwName, reverseName,
   	      mult1, mult2,
   	      instLevel1, instLevel2) */
@@ -575,7 +575,7 @@ context FmmlxDiagrams
         if problems.isEmpty() then 
   	      problems := m.addAssociation(self.package,
   	        class1, class2,
-  	        ref1, ref2,
+  	        accessSourceFromTargetName, accessTargetFromSourceName,
   	        fwName, reverseName,
   	        mult1, mult2,
   	        instLevel1, instLevel2)
