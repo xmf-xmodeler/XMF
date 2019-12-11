@@ -589,7 +589,11 @@ context FmmlxDiagrams
       mult1S : String,
       mult2S : String,
       instLevel1 : Integer,
-      instLevel2 : Integer):XCore::Element
+      instLevel2 : Integer,
+      sourceVisible : boolean, 
+      targetVisible : boolean,
+	  isSymmetric : boolean,
+	  isTransitive : boolean):XCore::Element
   	  
       self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
       
