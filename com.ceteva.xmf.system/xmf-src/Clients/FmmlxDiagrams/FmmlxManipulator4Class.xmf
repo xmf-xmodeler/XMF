@@ -162,7 +162,8 @@ import FmmlxDiagrams;
         package = class.owner;
         associations = [];
         heirs = [];
-        instances = [] 
+        instances = [];
+        ofClass = class.of()
       in
 //        ("remove Class "+class.name+" start").println();
 
@@ -195,7 +196,8 @@ import FmmlxDiagrams;
 //        ("instances orphaned").println();
 
       // remove class
-        package.remove(class)
+        package.remove(class);
+        ofClass.instances := ofClass.instances.excluding(class)
 //        ("class removed").println()
       end
     end

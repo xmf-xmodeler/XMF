@@ -4,18 +4,12 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation changeSlotValue(obj, slotName, valueToBeParsed, requiredType, env:Package) 
-      let
-        parseResult = self.evalString(valueToBeParsed, env)
-      in
-        if parseResult.at(1) = null then 
-          if parseResult.at(0).isKindOf(requiredType) then
-            obj.set(slotName, parseResult.at(0))
-          else
-            xmf.message(parseResult.at(0) + " is not of " + requiredType.name); parseResult.at(0) + " is not of " + requiredType.name
-          end
-        else
-          xmf.message(parseResult.at(1)); parseResult.at(1) // error as message or as return value? maybe try exceptions...
-        end
+    @Operation changeSlotValue(obj, slotName, valueToBeAdded, requiredType, env:Package) 
+      if valueToBeAdded.isKindOf(requiredType) then
+        obj.set(slotName, valueToBeAdded); null
+      else
+        valueToBeAdded + " is not of " + requiredType.name
       end
     end
+    
+    

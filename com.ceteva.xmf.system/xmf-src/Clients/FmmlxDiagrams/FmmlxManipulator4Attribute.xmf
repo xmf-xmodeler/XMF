@@ -6,7 +6,11 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation checkAddAttribute(class, name, level, type) 
       let 
-        problems = []
+        problems = [];
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+      then
+        getterName = "get"+camelCaseName;
+        setterName = "set"+camelCaseName
       in 
         if type = null then problems := problems + [("null is not a valid type")] end;
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
@@ -15,10 +19,26 @@ import FmmlxDiagrams;
             then problems := problems + [("Identifier " + name + " already in use (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
+        @For operation in class.allOperations() do
+          if operation.name.toString() = getterName
+            then problems := problems + [("Identifier " + getterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
+          end;
+          if operation.name.toString() = setterName
+            then problems := problems + [("Identifier " + setterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
+          end
+        end;
         @For child in class.allMetaInstances() do
           @For attribute in child.of().allAttributes() do 
             if attribute.name.toString() = name
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
+            end
+          end;
+          @For operation in child.of().allOperations() do
+            if operation.name.toString() = getterName
+              then problems := problems + [("Identifier " + getterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
+            end;
+            if operation.name.toString() = setterName
+              then problems := problems + [("Identifier " + setterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end
           end
         end;
@@ -90,9 +110,13 @@ import FmmlxDiagrams;
     context FmmlxManipulator   
     @Operation addAttribute(class, name, instLevel, type) 
       // for now assume that checkAddAttribute did not return any trouble
-      let 
+      let
         a = Attribute(name);
-        allInst = class.allMetaInstances()
+        allInst = class.allMetaInstances();
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+      then
+        getterName = "get"+camelCaseName;
+        setterName = "set"+camelCaseName
       in 
         a.isIntrinsic := true;
         a.type := type;
@@ -111,6 +135,22 @@ import FmmlxDiagrams;
           end
         end;
         
+        self.addOperation(class, null, instLevel, null, 
+        "  @Operation "+getterName+"[getterKey=\""+name+"\"]()
+"+      "    self."+name+"
+"+      "  end");
+        
+        self.addOperation(class, null, instLevel, null, 
+        "  @Operation "+setterName+"[getterKey=\""+name+"\"](value)
+"+      "    let 
+"+      "      m = FmmlxDiagrams::FmmlxManipulator()
+"+      "    then
+"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.package)
+"+      "    in
+"+      "      if error <> null then throw(Exception(error)) end
+"+      "    end
+"+      "  end");
+
         a
       end
     end
