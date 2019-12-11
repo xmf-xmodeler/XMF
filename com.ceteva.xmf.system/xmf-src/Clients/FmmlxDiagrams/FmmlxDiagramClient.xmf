@@ -93,11 +93,38 @@ context FmmlxDiagrams
         end
     end
     
+    @Operation getAllInheritanceEdges(requestID : Seq(Integer))
+      let
+        result = []
+      in
+        @For object in self.package.getChildren() do
+          @For parent in object.parents do
+            if parent.isKindOf(FMML::MetaClass) then
+              let 
+                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
+                parentID = self.getMapping(requestID).addOrGetObjectMapping(parent).id
+              then 
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping"+childID+"/"+parentID).asSymbol())
+              in 
+                result := result.append([[
+  	            mappingInfo.id, // 0 ID
+  	            childID, // 1 start ID
+  	            parentID, // 2 end ID
+  	            mappingInfo.points // 3 points
+  	          ]])
+              end
+            end
+          end
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation getAllAssociations(requestID : Seq(Integer))
         let 
           result = [] 
         in 
-    	  @For a in package.associations do
+    	  @For a in self.package.associations do
     	    if a.isKindOf(Associations::Association) 
     	    then
     	      let
@@ -308,8 +335,8 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) 
     end
     
-    @Operation sendNewPositions(requestID : Seq(Integer), objectID, listOfpoints)
-        self.getMapping(requestID).setNewPositions(objectID, listOfpoints);
+    @Operation sendNewPositions(requestID : Seq(Integer), edgeID, listOfpoints)
+        self.getMapping(requestID).setNewPositions(edgeID, listOfpoints);
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) 
     end
   
@@ -500,7 +527,16 @@ context FmmlxDiagrams
         if 
           foundAtt <> null 
         then
-          m.changeSlotValue(obj, slotName, valueToBeParsed, foundAtt.type, self.package)
+          let
+            parseResult = m.evalString(valueToBeParsed, self.package)
+          in
+            if parseResult.at(1) = null then 
+              error := m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.package)
+            else
+              error := parseResult.at(1) // error as message or as return value? maybe try exceptions...
+            end
+          end
+          
         else
           error := "no Slot Found"
         end;
