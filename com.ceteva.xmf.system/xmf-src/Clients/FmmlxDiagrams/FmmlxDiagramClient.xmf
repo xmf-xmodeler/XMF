@@ -201,8 +201,9 @@ context FmmlxDiagrams
           resultOther = [];
           result = []
         in 
-          @For c in self.package.getChildren() do 
-            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+          @For c in self.package.getChildren() do
+            //("att:"+c.name).println();
+            if c.isKindOf(FMML::MetaClass) and c.name.toString() = className
             then 
               @For a in c.attributes do 
                 resultOwn   :=   resultOwn.append([[
@@ -977,11 +978,13 @@ context FmmlxDiagrams
     end
     
     @Operation removeEnumerationValue(requestID : Seq(Integer), enumName:String, enumValueName:String) 
+      "removeEnumerationValueStart".println();
       let 
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.removeEnumerationValue(self.package, enumName, enumValueName)
       in
+        ("removeEnumerationValue problems: " + problems).println();
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end

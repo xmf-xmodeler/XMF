@@ -29,47 +29,137 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation changeEnumerationName(package:Package, oldEnumName:String, newEnumName:String)
       if
-        package.hasElement(oldEnumName) 
+        package.hasElement(oldEnumName)
       then
         let 
           e = package.getElement(oldEnumName);
           oldNameSymbol = e.name
         in
-          if 
-            newEnumName.isValidName()
+          if
+            e.isKindOf(Enum)
           then
             if 
-              package.hasElement(newEnumName)
+              newEnumName.isValidName()
             then
-              ["Name already in use"]
+              if 
+                package.hasElement(newEnumName)
+              then
+                ["Name already in use"]
+              else
+                e.name := newEnumName.asSymbol();
+                package.nameChanged(e,e.name,oldEnumName);
+                []
+              end
             else
-              e.name := newEnumName.asSymbol();
-              package.nameChanged(e,e.name,oldEnumName);
-              []
+              ["Name not valid"]
             end
           else
-            ["Name not valid"]
+            [oldEnumName + " is not an Enum"]
           end
         end
       else ["Enum does not exist"] end
     end
 
   context FmmlxManipulator
-    @Operation removeEnumeration(p:Package, enumName:String) 
+    @Operation removeEnumeration(package:Package, enumName:String) 
       ["Not yet implemented"]
     end
 
   context FmmlxManipulator
-    @Operation addEnumerationValue(p:Package, enumName:String, newEnumValueName:String) 
-      ["Not yet implemented"]
+    @Operation addEnumerationValue(package:Package, enumName:String, newEnumValueName:String) 
+      if
+        package.hasElement(enumName)
+      then
+        let 
+          e = package.getElement(enumName)
+        in
+          if
+            e.isKindOf(Enum)
+          then
+            if
+              e.hasElement(newEnumValueName)
+            then
+              [newEnumValueName + " is already an element of " + enumName]
+            else
+              if
+                newEnumValueName.isValidName()
+              then
+                e.addEnumElement(newEnumValueName);[]
+              else
+                [newEnumValueName + " is not a legal identifier"]
+              end
+            end
+          else
+            [enumName + " is not an Enum"]
+          end
+        end
+      else 
+        ["Enum does not exist"] 
+      end
     end
 
   context FmmlxManipulator
-    @Operation changeEnumerationValueName(p:Package, enumName:String, oldEnumValueName:String, newEnumValueName:String) 
-      ["Not yet implemented"]
+    @Operation changeEnumerationValueName(package:Package, enumName:String, oldEnumValueName:String, newEnumValueName:String) 
+      if
+        package.hasElement(enumName)
+      then
+        let 
+          e = package.getElement(enumName)
+        in
+          if
+            e.isKindOf(Enum)
+          then
+            if
+              e.hasElement(newEnumValueName)
+            then
+              [newEnumValueName + " is already an element of " + enumName]
+            else
+              if
+                e.hasElement(oldEnumValueName)
+              then
+                if
+                  newEnumValueName.isValidName()
+                then
+                  e.getElement(oldEnumValueName).name := newEnumValueName;[]
+                else
+                  [newEnumValueName + " is not a legal identifier"]
+                end
+              else
+                [oldEnumValueName + " is not an element of " + enumName]
+              end
+            end
+          else
+            [enumName + " is not an Enum"]
+          end
+        end
+      else 
+        ["Enum does not exist"] 
+      end
     end
 
   context FmmlxManipulator
-    @Operation removeEnumerationValue(p:Package, enumName:String, enumValueName:String) 
-      ["Not yet implemented"]
+    @Operation removeEnumerationValue(package:Package, enumName:String, enumValueName:String) 
+      if
+        package.hasElement(enumName)
+      then
+        let 
+          e = package.getElement(enumName)
+        in
+          if
+            e.isKindOf(Enum)
+          then
+            if
+              e.hasElement(enumValueName)
+            then
+              e.removeEnumElement(enumValueName);[]
+            else
+              [enumValueName + " is not an element of " + enumName]
+            end
+          else
+            [enumName + " is not an Enum"]
+          end
+        end
+      else 
+        ["Enum does not exist"] 
+      end
     end

@@ -239,18 +239,20 @@ import FmmlxDiagrams;
         oneRandomReason = null
       in 
         if amount < 0 then
-          @For obj in package.getChildren() do
-            if obj.level + amount < 0 then 
-              levelHighEnough := false; oneRandomReason:= "object " + obj.name
-            end;
-            @For att in obj.attributes do
-              if att.instLevel + amount < 0 then 
-                levelHighEnough := false; oneRandomReason:= "attribute " + att.name + " in " + obj.name
-              end
-            end;
-            @For o in obj.operations do
-              if o.instLevel + amount < 0 then 
-                levelHighEnough := false; oneRandomReason:= "operation " + o.name + " in " + obj.name
+          @For obj in package.getChildren() do 
+            if obj.isKindOf(FMML::MetaClass) then 
+              if obj.level + amount < 0 then 
+                levelHighEnough := false; oneRandomReason:= "object " + obj.name
+              end;
+              @For att in obj.attributes do
+                if att.instLevel + amount < 0 then 
+                  levelHighEnough := false; oneRandomReason:= "attribute " + att.name + " in " + obj.name
+                end
+              end;
+              @For o in obj.operations do
+                if o.instLevel + amount < 0 then 
+                  levelHighEnough := false; oneRandomReason:= "operation " + o.name + " in " + obj.name
+                end
               end
             end
           end;
@@ -269,12 +271,14 @@ import FmmlxDiagrams;
           levelHighEnough 
         then
           @For obj in package.getChildren() do
-            obj.level := obj.level + amount;
-            @For att in obj.attributes do
-              att.instLevel := att.instLevel + amount
-            end;
-            @For o in obj.operations do
-              o.instLevel := o.instLevel + amount
+            if obj.isKindOf(FMML::MetaClass) then 
+              obj.level := obj.level + amount;
+              @For att in obj.attributes do
+                att.instLevel := att.instLevel + amount
+              end;
+              @For o in obj.operations do
+                o.instLevel := o.instLevel + amount
+              end
             end
           end;
           @For assoc in package.associations do

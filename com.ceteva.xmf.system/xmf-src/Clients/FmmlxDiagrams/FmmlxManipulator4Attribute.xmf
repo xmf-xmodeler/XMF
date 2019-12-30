@@ -135,13 +135,15 @@ import FmmlxDiagrams;
           end
         end;
         
-        self.addOperation(class, null, instLevel, null, 
+        self.addGettersAndSetters(class, name, instLevel, type);
+        
+/*        self.addOperation(class, null, instLevel, null, 
         "  @Operation "+getterName+"[getterKey=\""+name+"\"]()
 "+      "    self."+name+"
 "+      "  end");
         
         self.addOperation(class, null, instLevel, null, 
-        "  @Operation "+setterName+"[getterKey=\""+name+"\"](value)
+        "  @Operation "+setterName+"[setterKey=\""+name+"\"](value)
 "+      "    let 
 "+      "      m = FmmlxDiagrams::FmmlxManipulator()
 "+      "    then
@@ -149,7 +151,7 @@ import FmmlxDiagrams;
 "+      "    in
 "+      "      if error <> null then throw(Exception(error)) end
 "+      "    end
-"+      "  end");
+"+      "  end"); */
 
         a
       end
@@ -206,6 +208,9 @@ import FmmlxDiagrams;
             instance.removeStructuralFeature(oldName)
           end
         end;
+        
+        self.removeGettersAndSetters(class, oldName, attribute.instLevel, attribute.type); 
+        self.addGettersAndSetters(class, newName, attribute.instLevel, attribute.type);    
         
         null
       end
@@ -310,19 +315,94 @@ import FmmlxDiagrams;
 	  end; null
     end
     
-    context FmmlxManipulator 
-       @Operation getFreeAttName(class, newLevel)
-         let name = "tempAtt"; counter = 0; result = null
-         in
-           @While result = null do
-             let testName = name + counter in
-               if self.checkAddAttribute(class, testName, newLevel, Boolean).isEmpty() then// i.e. no problem
-                 result := testName
-               end               
-             end
-           end;
-           result
-         end
-       end
+  context FmmlxManipulator 
+    @Operation getFreeAttName(class, newLevel)
+      let name = "tempAtt"; counter = 0; result = null
+      in
+        @While result = null do
+          let testName = name + counter in
+            if self.checkAddAttribute(class, testName, newLevel, Boolean).isEmpty() then// i.e. no problem
+              result := testName
+            end               
+          end
+        end;
+        result
+      end
+    end
        
+  context FmmlxManipulator
+    @Operation addGettersAndSetters(class, name, instLevel, type)
+      let
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+      then
+        getterName = "get"+camelCaseName;
+        setterName = "set"+camelCaseName
+      in
+        self.addOperation(class, null, instLevel, null, 
+        "  @Operation "+getterName+"[getterKey=\""+name+"\"]()
+"+      "    self."+name+"
+"+      "  end");
+        
+        self.addOperation(class, null, instLevel, null, 
+        "  @Operation "+setterName+"[setterKey=\""+name+"\"](value)
+"+      "    let 
+"+      "      m = FmmlxDiagrams::FmmlxManipulator()
+"+      "    then
+"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.package)
+"+      "    in
+"+      "      if error <> null then throw(Exception(error)) end
+"+      "    end
+"+      "  end")
+      end
+    end    
     
+  context FmmlxManipulator
+    @Operation removeGettersAndSetters(class, name, instLevel, type)
+      let
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+      then
+        getterName = "get"+camelCaseName;
+        setterName = "set"+camelCaseName
+      in
+        if 
+          class.hasOperation(getterName.asSymbol(),0) 
+        then
+          let 
+            op = class.getOperation(getterName.asSymbol(),0)
+          then
+            key = if op.hasProperty("getterKey") then Clients::FmmlxDiagrams::FmmlxDiagramClient::getOpProp(op,"getterKey") else null end
+          in 
+            if
+              key = name
+            then
+              // todo: check arity and instLevel as well
+              self.removeOperation(class, getterName)
+            else
+              "Presumed getter is not tagged as getter"
+            end
+          end
+        else
+          "Getter not found."
+        end;
+        if 
+          class.hasOperation(setterName.asSymbol(),1) 
+        then
+          let 
+            op = class.getOperation(setterName.asSymbol(),1)
+          then
+            key = if op.hasProperty("setterKey") then Clients::FmmlxDiagrams::FmmlxDiagramClient::getOpProp(op,"setterKey") else null end
+          in 
+            if
+              key = name
+            then
+              // todo: check arity and instLevel as well
+              self.removeOperation(class, setterName)
+            else
+              "Presumed setter is not tagged as setter"
+            end
+          end
+        else
+          "Setter not found."
+        end
+      end
+    end

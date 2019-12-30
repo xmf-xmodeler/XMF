@@ -74,8 +74,8 @@ context Clients
                 completed := true;
                 @While not queue->isEmpty do
                   let event = queue.head()
-                  in dispatchEvent(event.head,event.tail);
-                     queue := queue->tail
+                  in queue := queue->tail;
+                     dispatchEvent(event.head,event.tail)                     
                   end
                 end
               else queue->append(Seq{Seq{message}->append(parameters)})
@@ -115,7 +115,11 @@ context Clients
            self.processEvent(message,args)
         end
       catch(exception)
-        xmf.raise(exception)  
+        ("input: " + input).println()
+        ;("owner: " + owner).println()
+        ;("\n exception in EventHandler: " + exception).println()
+        //
+        ;if owner.hasSlot("name") then xmf.raise(exception) end
       end
     end
     
