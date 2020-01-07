@@ -53,7 +53,7 @@ context FmmlxDiagrams
           self.diagrams.put(newID, self.diagram);
           self.communicator := FmmlxDiagramCommunicator();
           self.communicator.setHandle(handle);          
-          self.communicator.newDiagram(newID, name.toString());
+          self.communicator.newDiagram(newID, name.toString(), self.package.path());
           
           diagram // vestigial return value for diagram manager
         end
@@ -288,15 +288,26 @@ context FmmlxDiagrams
             if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
-                result := result.append([[
-                o.name.toString(), 
-                o.instLevel, 
-                o.type().name.toString(),
-                o.source(),
-                if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                [0,1,false,true], // to-do: multiplicity
-                self.isOperationMonitored(o)
-                ]])
+                let
+                  paramNames = o.paramNames();
+                  paramTypesRaw = o.paramTypes();
+                  paramTypes = []
+                in
+                  @For type in paramTypesRaw do
+                    paramTypes := paramTypes.append([type.path()])
+                  end;       
+                  result := result.append([[
+                  o.name.toString(),
+                  paramNames,
+                  paramTypes,
+                  o.instLevel, 
+                  o.type().path(),
+                  o.source(),
+                  if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                   [0,1,false,true], // to-do: multiplicity
+                  self.isOperationMonitored(o)
+                  ]])
+                end
               end end
             end
           end;

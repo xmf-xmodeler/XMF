@@ -136,22 +136,6 @@ import FmmlxDiagrams;
         end;
         
         self.addGettersAndSetters(class, name, instLevel, type);
-        
-/*        self.addOperation(class, null, instLevel, null, 
-        "  @Operation "+getterName+"[getterKey=\""+name+"\"]()
-"+      "    self."+name+"
-"+      "  end");
-        
-        self.addOperation(class, null, instLevel, null, 
-        "  @Operation "+setterName+"[setterKey=\""+name+"\"](value)
-"+      "    let 
-"+      "      m = FmmlxDiagrams::FmmlxManipulator()
-"+      "    then
-"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.package)
-"+      "    in
-"+      "      if error <> null then throw(Exception(error)) end
-"+      "    end
-"+      "  end"); */
 
         a
       end
@@ -338,17 +322,17 @@ import FmmlxDiagrams;
         getterName = "get"+camelCaseName;
         setterName = "set"+camelCaseName
       in
-        self.addOperation(class, null, instLevel, null, 
-        "  @Operation "+getterName+"[getterKey=\""+name+"\"]()
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+getterName+"[getterKey=\""+name+"\"]():"+type.path()+"
 "+      "    self."+name+"
 "+      "  end");
         
-        self.addOperation(class, null, instLevel, null, 
-        "  @Operation "+setterName+"[setterKey=\""+name+"\"](value)
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+setterName+"[setterKey=\""+name+"\"](value:"+type.path()+")
 "+      "    let 
 "+      "      m = FmmlxDiagrams::FmmlxManipulator()
 "+      "    then
-"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.package)
+"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), "+type.path()+", self.package)
 "+      "    in
 "+      "      if error <> null then throw(Exception(error)) end
 "+      "    end
