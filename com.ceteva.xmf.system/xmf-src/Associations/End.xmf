@@ -50,11 +50,16 @@ context Associations
     @Attribute mult        : Multiplicity = One() (?) end
     @Attribute association : Element              (!) end
     @Attribute displayName : String                   end
+    @Attribute visible     : Boolean                  end // For use in FMMLx only for now
     
     @Constructor(name,type,mult) ! 
-       self.displayName := name.toString()
-       end 
-    @Constructor(name,type,mult, displayName) ! end 
+      self.displayName := name.toString();
+      self.visible := true
+    end 
+    
+    @Constructor(name,type,mult,displayName) ! 
+      self.visible := true
+    end 
     
     @Operation checkRoundTrip(object):Boolean
 

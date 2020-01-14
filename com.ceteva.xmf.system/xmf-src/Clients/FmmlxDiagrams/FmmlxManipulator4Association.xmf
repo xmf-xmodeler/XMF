@@ -15,7 +15,11 @@ import FmmlxDiagrams;
   	      mult1 : XCore::Element,
   	      mult2 : XCore::Element,
   	      instLevel1 : XCore::Element,
-  	      instLevel2 : XCore::Element):XCore::Element
+  	      instLevel2 : XCore::Element,
+          sourceVisibleFromTarget : Boolean, 
+          targetVisibleFromSource : Boolean,
+	      isSymmetric : Boolean,
+	      isTransitive : Boolean):XCore::Element
   	  //  1 check if fwName is valid and unique in p
   	  //  2 check if reverseName is valid and unique in p (and obviously different from fwName)
   	  //  3 check if ref1 is valid and unique in class2 ! (in 2!)
@@ -33,11 +37,15 @@ import FmmlxDiagrams;
       in 
         e1.instLevel := instLevel1;
         e2.instLevel := instLevel2;
+        e1.visible := sourceVisibleFromTarget;
+        e2.visible := targetVisibleFromSource;
         let 
           a = Associations::Association(fwName,e1,e2)
         in 
           p.associations := p.associations->including(a);
           a.owner := p;
+          a.symmetric := isSymmetric;
+          a.transitive := isTransitive;
           a
         end
       end
@@ -135,3 +143,11 @@ import FmmlxDiagrams;
     // add assoc value (new val1, new val2)
     // remove assoc value (old val1, old val2)
     // replace assoc value (old val1, old val2, new val1, new val2) -> use remove + add?
+    
+  context FmmlxManipulator
+    @Operation setAssociationEndVisibility(
+      assoc          : Association,
+      concernsTarget : Boolean, 
+      newVisibility  : Boolean)
+      (if concernsTarget then assoc.end2 else assoc.end1 end).visible := newVisibility;[]
+    end   

@@ -132,19 +132,23 @@ context FmmlxDiagrams
     	      in
     	        result := result.append([[
     	          mappingInfo.id, // 0 ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(a.end1.type).id, // 1 start ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(a.end2.type).id, // 2 end ID
+    	          self.getMapping(requestID).addOrGetObjectMapping(a.end1.type).id, // 1 source ID
+    	          self.getMapping(requestID).addOrGetObjectMapping(a.end2.type).id, // 2 target ID
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
     	          null, // 6 name 2
     	          a.end2.name.toString(), // 7 name start->end slot name
     	          a.end1.name.toString(), // 8 name end->start slot name
-    	          a.end2.instLevel, // 9 level s->e
-    	          a.end1.instLevel, // 10 level e->s
-    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->e
-    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult),  // 12 mul e->s
-    	          self.getMapping(requestID).getAllLabels(mappingInfo.id) // 13 labels
+    	          a.end2.instLevel, // 9 level s->t
+    	          a.end1.instLevel, // 10 level t->s
+    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->t
+    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult),  // 12 mul t->s
+    	          self.getMapping(requestID).getAllLabels(mappingInfo.id), // 13 labels
+    	          a.end1.visible, // 14 visibility t->s
+    	          a.end2.visible, // 15 visibility s->t
+    	          a.symmetric, // 16
+    	          a.transitive // 17
     	        ]])
     	      end // let
     	    else ("a is of " + a.of()).println()
@@ -602,11 +606,12 @@ context FmmlxDiagrams
       mult2S : String,
       instLevel1 : Integer,
       instLevel2 : Integer,
-      sourceVisible : boolean, 
-      targetVisible : boolean,
-	  isSymmetric : boolean,
-	  isTransitive : boolean):XCore::Element
+      sourceVisibleFromTarget : Boolean, 
+      targetVisibleFromSource : Boolean,
+	  isSymmetric : Boolean,
+	  isTransitive : Boolean):XCore::Element
   	  
+      (sourceVisibleFromTarget + "/" + targetVisibleFromSource +  "/" + isSymmetric +  "/" + isTransitive).println();
       self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
       
   	  let
@@ -630,7 +635,9 @@ context FmmlxDiagrams
   	        accessSourceFromTargetName, accessTargetFromSourceName,
   	        fwName, reverseName,
   	        mult1, mult2,
-  	        instLevel1, instLevel2)
+  	        instLevel1, instLevel2,
+  	        sourceVisibleFromTarget, targetVisibleFromSource,
+  	        isSymmetric, isTransitive)
   	    end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end  	  
@@ -650,6 +657,21 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+    
+    @Operation setAssociationEndVisibility(
+      requestID      : Seq(Integer), 
+      assocID        : Integer,
+      concernsTarget : Boolean, 
+      newVisibility  : Boolean)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        assoc = self.getMapping(requestID).getMapping(assocId).object
+      then 
+        problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
+      in
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end      
     
     @Operation changeAssociationForwardName(
       requestID  : Seq(Integer), 

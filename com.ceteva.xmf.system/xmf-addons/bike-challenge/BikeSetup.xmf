@@ -33,6 +33,17 @@ context Root
         end
       end
     end
+    
+    @Operation magnitude() ((self.real*self.real)+(self.imaginary*self.imaginary)).sqrt() end
+    @Operation argument() xmf.javaClass("java.lang.Math").atan2(self.imaginary+0.0,self.real+0.0) end
+    
+    @Operation add(other) Complex(self.real+other.real,self.imaginary+other.imaginary) end
+    @Operation sub(other) Complex(self.real-other.real,self.imaginary-other.imaginary) end
+    @Operation mul(other) Complex((self.real*other.real)-(self.imaginary*other.imaginary),(self.real*other.imaginary)+(other.real*self.imaginary)) end
+    @Operation div(other) Complex(
+        ((self.real*other.real)+(self.imaginary*other.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)),
+        ((self.real*other.imaginary)-(other.real*self.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)))
+    end
   end
 
 context Root
@@ -55,7 +66,7 @@ context Root
       m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", "belongsTo", 
           m.valueList2Multiplicity([0,-1,false,false]),
           m.valueList2Multiplicity([0, 2,true, false]),
-  	      4,4);
+  	      4,4, true, true, false, false);
   	      
   	  m.addOperation(p::Configuration, null, 4, null, 
       "  @Operation time[monitor=true]()

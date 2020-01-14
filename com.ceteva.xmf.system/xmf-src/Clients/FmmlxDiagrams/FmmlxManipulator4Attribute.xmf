@@ -7,7 +7,7 @@ import FmmlxDiagrams;
     @Operation checkAddAttribute(class, name, level, type) 
       let 
         problems = [];
-        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+        camelCaseName = name.toString().subString(0,1).toUpper() + name.toString().subString(1,name.toString().size())
       then
         getterName = "get"+camelCaseName;
         setterName = "set"+camelCaseName
