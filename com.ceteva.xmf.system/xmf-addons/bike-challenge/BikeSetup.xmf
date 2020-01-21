@@ -60,8 +60,8 @@ context Root
       m.addMetaClass(p, "Part",          5, [p::Component], false);
       m.addMetaClass(p, "CompPart",      5, [p::Component], false);
       
-      m.addAttribute(p::Component, "foo", 4, Complex);
-      m.addAttribute(p::Component, "weight", 1, Float);
+      m.addAttribute(p::Component, "foo", 4, Complex, m.valueList2Multiplicity([0,3,true,false]));
+      m.addAttribute(p::Component, "weight", 1, Float, m.valueList2Multiplicity([0,1,true,false]));
       
       m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", "belongsTo", 
           m.valueList2Multiplicity([0,-1,false,false]),
@@ -103,13 +103,13 @@ context Root
       m = FmmlxDiagrams::FmmlxManipulator()
     in
       m.addInstance(p, p::Configuration, "Bicycle", [], false);
-      m.addAttribute(p::Bicycle, "allTerrain",     3, Boolean);
-      m.addAttribute(p::Bicycle, "race",           3, Boolean);
-      m.addAttribute(p::Bicycle, "city",           3, Boolean);
-      m.addAttribute(p::Bicycle, "salesPrice",     1, Float);
-      m.addAttribute(p::Bicycle, "weight",         1, Float);
-      m.addAttribute(p::Bicycle, "partSalesPrice", 0, Float);
-      m.addAttribute(p::Bicycle, "serialNo",       0, String);
+      m.addAttribute(p::Bicycle, "allTerrain",     3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "race",           3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "city",           3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "salesPrice",     1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "weight",         1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "partSalesPrice", 0, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Bicycle, "serialNo",       0, String, m.valueList2Multiplicity([1,1,true,false]));
       
   	  m.addOperation(p::Configuration, null, 2, null, 
       "  @Operation highestPrice[monitor=true]()
@@ -159,30 +159,30 @@ context Root
 	    //m.changeSlotValue(p::Fork, "foo", "c", Complex)
 	  end;
 	  
-      m.addAttribute(p::Fork, "color",        1, String);
-      m.addAttribute(p::Fork, "suspension",   2, String);
-      m.addAttribute(p::Fork, "material",     1, String);
-      m.addAttribute(p::Fork, "serialNo",     0, String);
-      m.addAttribute(p::Fork, "mudMount",     0, Boolean);
+      m.addAttribute(p::Fork, "color",        1, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Fork, "suspension",   2, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Fork, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Fork, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Fork, "mudMount",     0, Boolean, m.valueList2Multiplicity([1,1,true,false]));
       
       
       m.addInstance(p, p::Part, "Frame", [], false);
-      m.addAttribute(p::Frame, "allTerrain",   3, Boolean);
-      m.addAttribute(p::Frame, "race",         3, Boolean);
-      m.addAttribute(p::Frame, "color",        1, String);
-      m.addAttribute(p::Frame, "height",       1, Float);
-      m.addAttribute(p::Frame, "width",        1, Float);
-      m.addAttribute(p::Frame, "material",     1, String);
-      m.addAttribute(p::Frame, "serialNo",     0, String);
+      m.addAttribute(p::Frame, "allTerrain",   3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "race",         3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "color",        1, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "height",       1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "width",        1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
       
       
       m.addInstance(p, p::Part, "Wheel", [], false);
-      m.addAttribute(p::Wheel, "safetyRefl",   3, Boolean);
-      m.addAttribute(p::Wheel, "size",         1, Float);
-      m.addAttribute(p::Wheel, "material",     1, String);
-      m.addAttribute(p::Wheel, "width",        1, Float);
-      m.addAttribute(p::Wheel, "tubeless",     2, Boolean);
-      m.addAttribute(p::Wheel, "serialNo",     0, String);
+      m.addAttribute(p::Wheel, "safetyRefl",   3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "size",         1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "width",        1, Float, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "tubeless",     2, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
       
       null
     end    

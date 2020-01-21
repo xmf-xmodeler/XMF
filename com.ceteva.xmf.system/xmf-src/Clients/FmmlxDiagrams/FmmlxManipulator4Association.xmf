@@ -95,8 +95,8 @@ import FmmlxDiagrams;
     @Operation changeAssociationMultiplicity(association, newSourceMult, newTargetMult)
       let 
         package = association.owner;
-        oldSourceMult = association.end1.mult;
-        oldTargetMult = association.end2.mult;
+        oldSourceMult = association.end1.mult();
+        oldTargetMult = association.end2.mult();
         problems = [];
         oldSourceCount = null;
         oldTargetCount = null

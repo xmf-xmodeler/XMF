@@ -142,8 +142,8 @@ context FmmlxDiagrams
     	          a.end1.name.toString(), // 8 name end->start slot name
     	          a.end2.instLevel, // 9 level s->t
     	          a.end1.instLevel, // 10 level t->s
-    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult), // 11 mul s->t
-    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult),  // 12 mul t->s
+    	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult()), // 11 mul s->t
+    	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult()),  // 12 mul t->s
     	          self.getMapping(requestID).getAllLabels(mappingInfo.id), // 13 labels
     	          a.end1.visible, // 14 visibility t->s
     	          a.end2.visible, // 15 visibility s->t
@@ -214,7 +214,7 @@ context FmmlxDiagrams
                     a.name.toString(), 
                     a.type.name.toString(), 
                     a.instLevel, 
-                    a.mult(),
+                    FmmlxManipulator::multiplicity2ValueList(a.mult()),
                     self.getMapping(requestID).getMappingId(c)
                     ]])
               end;
@@ -224,7 +224,7 @@ context FmmlxDiagrams
                     a.name.toString(), 
                     a.type.name.toString(), 
                     a.instLevel, 
-                    a.mult(),
+                    FmmlxManipulator::multiplicity2ValueList(a.mult()),
                     self.getMapping(requestID).getMappingId(a.owner)
                     ]])
                 end
@@ -452,8 +452,8 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator()
       then 
         class = self.getMapping(requestID).getMapping(classId).object;
-        type = m.getTypeForName(typeName, self.package)
-        // multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
+        type = m.getTypeForName(typeName, self.package);
+        multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then 
         problems = m.checkAddAttribute(class, name, level, typeName)
       in           
@@ -461,7 +461,7 @@ context FmmlxDiagrams
           problems.isEmpty() 
         then
           problems := try 
-            m.addAttribute(class, name, level, type); null
+            m.addAttribute(class, name, level, type, multiplicity); null
           catch(e)
             [("addAttribute failed during transaction: " + e.message)]
           end // try
@@ -665,7 +665,7 @@ context FmmlxDiagrams
       newVisibility  : Boolean)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = self.getMapping(requestID).getMapping(assocId).object
+        assoc = self.getMapping(requestID).getMapping(assocID).object
       then 
         problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
@@ -900,64 +900,64 @@ context FmmlxDiagrams
     
     // Not yet implemented
     
-    @Operation respondNotYetImplemented(requestID : Seq(Integer))
-      self.communicator.sendMessageToJava([self.vector2Seq(requestID), ["This feature is temporarily unavailable. Please try again later."]])
+    @Operation respondNotYetImplemented(name: String, requestID : Seq(Integer))
+      self.communicator.sendMessageToJava([self.vector2Seq(requestID), ["The feature \"" + name + "\" is temporarily unavailable. Please try again later."]])
     end
       
     @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), associationID, name) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationStart2EndAccessName", self.vector2Seq(requestID))
     end
       
     @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), associationID, name) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationEnd2StartAccessName", self.vector2Seq(requestID))
     end
       
     @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), associationID, level) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationStart2EndLevel", self.vector2Seq(requestID))
     end
       
     @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), associationID,level) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationEnd2StartLevel", self.vector2Seq(requestID))
     end
       
     @Operation updateAssociationInstance(requestID : Seq(Integer), id1, id2) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("updateAssociationInstance", self.vector2Seq(requestID))
     end
       
 //    @Operation editAssociation(requestID, idA, isS, idT, levT2S, levS2T, fwN, reN, accT2S, accS2T, mulT2S, mulS2T) 
-//      self.respondNotYetImplemented(self.vector2Seq(requestID))
+//      self.respondNotYetImplemented("editAssociation", self.vector2Seq(requestID))
 //    end
       
     @Operation changeAssociationTarget(inA : Seq(Integer), idT_o, idT_n) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationTarget", self.vector2Seq(requestID))
     end
       
     @Operation changeAssociationSource(inA : Seq(Integer), idS_o, idS_n) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAssociationSource", self.vector2Seq(requestID))
     end
       
     @Operation checkOperationBody(requestID : Seq(Integer), operationBodyToBeChecked) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("checkOperationBody", self.vector2Seq(requestID))
     end
       
     @Operation changeOperationType(requestID : Seq(Integer), idO, opName, newType) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
     end
       
     @Operation changeParent(requestID : Seq(Integer), idO, oldList, newList) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeParent", self.vector2Seq(requestID))
     end
       
     @Operation changeAttributeOwner(requestID : Seq(Integer), idO_old, name, idO_new) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeAttributeOwner", self.vector2Seq(requestID))
     end
       
     @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeOf", self.vector2Seq(requestID))
     end
       
     @Operation changeClassLevel(requestID : Seq(Integer), idO, newLevel) 
-      self.respondNotYetImplemented(self.vector2Seq(requestID))
+      self.respondNotYetImplemented("changeClassLevel", self.vector2Seq(requestID))
     end   
        
     @Operation addEnumeration(requestID : Seq(Integer), newEnumName:String)

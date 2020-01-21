@@ -105,7 +105,8 @@ context Clients
            self.processEvent(message.asSymbol(),parameters)
         end
         */
-        let m = Kernel_read(owner.name) then
+        let ownerName = owner.name then
+            m = Kernel_read(ownerName) then
             message = m->at(0).asSymbol();
             args = Seq{}
         in self.debug("Event ~S~%",Seq{m});

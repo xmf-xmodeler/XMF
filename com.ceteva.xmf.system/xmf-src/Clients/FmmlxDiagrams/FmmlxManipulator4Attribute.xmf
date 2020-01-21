@@ -108,7 +108,7 @@ import FmmlxDiagrams;
     end
     
     context FmmlxManipulator   
-    @Operation addAttribute(class, name, instLevel, type) 
+    @Operation addAttribute(class, name, instLevel, type, mult) 
       // for now assume that checkAddAttribute did not return any trouble
       let
         a = Attribute(name);
@@ -121,6 +121,8 @@ import FmmlxDiagrams;
         a.isIntrinsic := true;
         a.type := type;
         a.instLevel := instLevel;
+        //a.setMult(mult);
+        a.setProperty("mult",mult);
         
         class.addAttribute(a);
         
@@ -154,6 +156,7 @@ import FmmlxDiagrams;
         if oldAtt <> null then
             // remove attribute
             class.remove(oldAtt);
+            self.removeGettersAndSetters(class, oldAtt.name.toString(), oldAtt.instLevel, oldAtt.type); 
             // remove slots
             @For instance in class.allMetaInstances() do
               // this instance may have a slot, check level first, otherwise ignore (no else)
@@ -193,32 +196,11 @@ import FmmlxDiagrams;
           end
         end;
         
-        self.removeGettersAndSetters(class, oldName, attribute.instLevel, attribute.type); 
-        self.addGettersAndSetters(class, newName, attribute.instLevel, attribute.type);    
+        self.removeGettersAndSetters(class, oldName.toString(), attribute.instLevel, attribute.type); 
+        self.addGettersAndSetters(class, newName.toString(), attribute.instLevel, attribute.type);    
         
         null
       end
-    end
-
-  context FmmlxManipulator
-    @Operation checkAttributeLevel(class, attName, oldLevel, newLevel)
-      let
-        attribute = null;
-        problems = []
-      in
-	@For att in class.attributes do
-	  if att.name.toString() = attName then
-	    attribute := att
-	  end
-	end;
-	if 
-	  attribute = null 
-	then 
-	  problems := ["Attribute " + attName + " not found in " + class.name + "."] 
-	end
-	// add further tests here...
-       ;problems
-     end
     end
     
   context FmmlxManipulator
@@ -236,10 +218,11 @@ import FmmlxDiagrams;
         if newLevel > oldLevel then // just remove and recreate Attribute as we can't use the slots anyway
 		  if attribute <> null then 
 		    let 		   
-              type = attribute.type
+              type = attribute.type;
+              mult = attribute.mult()
             in 
               self.removeAttribute(class, attName, "strategy:delete");
-              self.addAttribute(class, attName, newLevel, type) 
+              self.addAttribute(class, attName, newLevel, type, mult) 
             end // inner let
           end // if attribute <> null
         end // if newLevel > oldLevel
@@ -255,9 +238,10 @@ import FmmlxDiagrams;
           tempAttName = self.getFreeAttName(class, newLevel)
         then 
           instLevel = attribute.instLevel; // = oldLevel
-          type = attribute.type
+          type = attribute.type;
+          mult = attribute.mult()
         then  
-          newAtt = self.addAttribute(class, tempAttName, newLevel, type) 
+          newAtt = self.addAttribute(class, tempAttName, newLevel, type, mult) 
         in
           @For instance in class.allMetaInstances() do
             if instance.level = oldLevel then
