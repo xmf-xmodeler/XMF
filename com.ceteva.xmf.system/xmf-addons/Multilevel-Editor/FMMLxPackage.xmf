@@ -35,17 +35,29 @@ context Root::FMML
   end
    
   @Operation hasAssociationInstance(source, target, association)
-    if fmmlxAssociationInstances = null then false 
+    if self.fmmlxAssociationInstances = null then false 
       else
       let 
         found = false
       in
-        @For link in fmmlxAssociationInstances do
+        @For link in self.fmmlxAssociationInstances do
           if link.at(0) = source andthen link.at(1) = target andthen link.at(2) = association then found := true end;
           if link.at(1) = source andthen link.at(0) = target andthen link.at(2) = association then found := true end
         end;
         found
       end
     end 
+  end
+  
+  @Operation getLinkEnds(obj:MetaClass, assocName:String)
+    let
+      result = {}
+    in
+      @For link in self.fmmlxAssociationInstances do
+        if link.at(0) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(1)} end;
+        if link.at(1) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(0)} end
+      end;
+      result
+    end
   end
 end

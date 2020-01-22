@@ -4,54 +4,81 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-   	@Operation addAssociation(
-  	      p: Package,
-  	      class1 : MetaClass,
-  	      class2 : MetaClass,
-  	      accessSourceFromTargetName : String, // ref1
-  	      accessTargetFromSourceName : String, // ref2
-  	      fwName : String,
-  	      reverseName : String,
-  	      mult1 : XCore::Element,
-  	      mult2 : XCore::Element,
-  	      instLevel1 : XCore::Element,
-  	      instLevel2 : XCore::Element,
-          sourceVisibleFromTarget : Boolean, 
-          targetVisibleFromSource : Boolean,
-	      isSymmetric : Boolean,
-	      isTransitive : Boolean):XCore::Element
-  	  //  1 check if fwName is valid and unique in p
-  	  //  2 check if reverseName is valid and unique in p (and obviously different from fwName)
-  	  //  3 check if ref1 is valid and unique in class2 ! (in 2!)
-  	  //  4 check if ref2 is valid and unique in class1 !
+   @Operation addAssociation(
+     p: Package,
+     source : MetaClass,
+     target : MetaClass,
+     accessSourceFromTargetName : String, // ref1
+     accessTargetFromSourceName : String, // ref2
+     fwName : String,
+     reverseName : String,
+     mult1 : XCore::Element,
+     mult2 : XCore::Element,
+     instLevel1 : XCore::Element,
+     instLevel2 : XCore::Element,
+     sourceVisibleFromTarget : Boolean, 
+     targetVisibleFromSource : Boolean,
+     isSymmetric : Boolean,
+     isTransitive : Boolean):XCore::Element
+	      
+  	  if // 1 check if fwName is valid and unique in p
+  	    not fwName.isValidName()
+  	  then
+  	    [fwName + " is not a valid identifier"]
+  	  elseif 
+  	    not self.assocNameIsUniqueInPackage(fwName, p)
+  	  then 
+  	    [fwName + " is not unique"]
+  	    
+  	  // IGNORE 2 check if reverseName is valid and unique in p (and obviously different from fwName)
+  	  
+  	  elseif // 3 check if accessSourceFromTargetName is valid and unique in Target ! (in Target!)
+  	    [] <> self.checkAddAttribute(target, accessSourceFromTargetName, instLevel1, source) 
+  	  then
+  	    [accessSourceFromTargetName + " is not unique in " + target.name]
+  	  
+  	  elseif //  4 check if accessTargetFromSourceName is valid and unique in Source !
+  	    [] <> self.checkAddAttribute(source, accessTargetFromSourceName, instLevel2, target) 
+  	  then
+  	    [accessTargetFromSourceName + " is not unique in " + source.name]
+  	    
   	  //  5 check if one or more of mult1 and mult2 have a minimum of zero.
   	  //  5a check for circular mandatory multiplicity
   	  //  5b if one multiplicity > 0, demand default value // or leave inconsistent and demand subsequent repair.
   	  //  6 check instLevel plausibility  	  
   	      
-  	      // can a class symmetrically self-associate?   
-  	      
-      let 
-        e1 = Associations::End(accessSourceFromTargetName,class1,mult1);
-        e2 = Associations::End(accessTargetFromSourceName,class2,mult2)
-      in 
-        e1.instLevel := instLevel1;
-        e2.instLevel := instLevel2;
-        e1.visible := sourceVisibleFromTarget;
-        e2.visible := targetVisibleFromSource;
+  	  // can a class symmetrically self-associate?   
+  	  
+  	  else // all checks passed
         let 
-          a = Associations::Association(fwName,e1,e2)
+          e1 = Associations::End(accessSourceFromTargetName,source,mult1);
+          e2 = Associations::End(accessTargetFromSourceName,target,mult2)
         in 
-          p.associations := p.associations->including(a);
-          a.owner := p;
-          a.symmetric := isSymmetric;
-          a.transitive := isTransitive;
-          a
+          e1.instLevel := instLevel1;
+          e2.instLevel := instLevel2;
+          e1.visible := sourceVisibleFromTarget;
+          e2.visible := targetVisibleFromSource;
+          let 
+            a = Associations::Association(fwName,e1,e2)
+          in 
+            p.associations := p.associations->including(a);
+            a.owner := p;
+            a.symmetric := isSymmetric;
+            a.transitive := isTransitive;
+            
+            if sourceVisibleFromTarget then 
+              self.addGettersAndSetters4Links(target, accessSourceFromTargetName, instLevel1, source, a)
+            end;
+            
+            if targetVisibleFromSource then 
+              self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevel2, target, a)
+            end;
+            
+            []
+          end
         end
       end
     end
-    
-
   context FmmlxManipulator
     @Operation removeAssociation(association)
       let
@@ -66,7 +93,7 @@ import FmmlxDiagrams;
         
         // then remove itself
         package.associations := package.associations->excluding(association);
-        association.owner := null
+        association.owner := null; []
       end
     end
     
@@ -149,5 +176,50 @@ import FmmlxDiagrams;
       assoc          : Association,
       concernsTarget : Boolean, 
       newVisibility  : Boolean)
-      (if concernsTarget then assoc.end2 else assoc.end1 end).visible := newVisibility;[]
-    end   
+      
+      let 
+        End       = if concernsTarget then assoc.end2 else assoc.end1 end;
+        class     = if concernsTarget then assoc.end1 else assoc.end2 end.type
+       then 
+        type          = End.type;
+        name          = End.name;
+        instLevel     = End.instLevel;
+        oldVisibility = End.visible
+      in
+        End.visible := newVisibility;
+        if newVisibility and not oldVisibility then 
+          self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc) end;
+        if oldVisibility and not newVisibility then 
+          self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;
+        []
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation assocNameIsUniqueInPackage(fwName, p)
+      let result = true in 
+        @For assoc in p.associations do
+          result := result and (not (assoc.name.toString() = fwName.toString()))
+        end;
+        result
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc) // actually, only one getter
+      let
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+      then
+        getterName = "get"+camelCaseName;
+        setterName = "set"+camelCaseName;
+        pName = assoc.owner.path()
+      in
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+getterName+"[getterKey=\""+name+"\"]():"+type.path()+"
+"+      "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\")
+//"+      "    throw(Exception(\"This operation has not been implemented yet.\"))
+"+      "  end")
+        
+
+      end
+    end    

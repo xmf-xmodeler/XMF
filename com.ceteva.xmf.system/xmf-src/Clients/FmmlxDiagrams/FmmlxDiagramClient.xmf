@@ -11,7 +11,7 @@ context FmmlxDiagrams
 	@Attribute communicator : Element end
 	@Attribute protocol : String = "" end
 	@Attribute name : String = "no name set yet" end
-        @Attribute diagrams : Table = Table(10) end
+    @Attribute diagrams : Table = Table(10) end
     /* TEMP */ @Attribute diagram : FmmlxDiagram end
     
     @Constructor(name)
@@ -611,7 +611,6 @@ context FmmlxDiagrams
 	  isSymmetric : Boolean,
 	  isTransitive : Boolean):XCore::Element
   	  
-      (sourceVisibleFromTarget + "/" + targetVisibleFromSource +  "/" + isSymmetric +  "/" + isTransitive).println();
       self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
       
   	  let
