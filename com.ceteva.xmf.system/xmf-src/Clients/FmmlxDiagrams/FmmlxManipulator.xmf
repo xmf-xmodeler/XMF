@@ -43,7 +43,7 @@ context FmmlxDiagrams
           let 
             exp = OCL::OCL.grammar.parseString(text,"Exp1",Seq{XOCL})
           then 
-            value = exp.eval(self,Env::NullEnv(),if env = null then Seq{XCore,Root} else Seq{XCore,Root,env} end)
+            value = exp.eval(self,Env::NullEnv(),if env = null then Seq{XCore,Root,Auxiliary} else Seq{XCore,Root,Auxiliary,env} end)
           in
             [value, null]
           end

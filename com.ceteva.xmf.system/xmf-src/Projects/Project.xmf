@@ -417,5 +417,9 @@ context Projects
       // Returns the path to the XAR file
       dir.subst("/","\\",true) + "/" + filename + ".xar"
     end
+    
+    @Operation createFmmlxDiagram()
+      package.createFmmlxDiagram_raw(package.name.toString())
+    end
    
   end

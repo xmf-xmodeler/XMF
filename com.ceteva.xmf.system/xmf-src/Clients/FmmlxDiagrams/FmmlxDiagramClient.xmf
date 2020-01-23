@@ -344,6 +344,23 @@ context FmmlxDiagrams
         end
     end
     
+    @Operation getAllAuxTypes(requestID : Seq(Integer))
+      let 
+        result = [] 
+      in 
+        if Root.hasElement("Auxiliary") then
+    	  @For ac in Root::Auxiliary.getChildren() do
+    	    if 
+    	      ac.isKindOf(Class) 
+    	    then
+    	      result := result.append([[ac.name.toString()]])
+    	    end
+    	  end
+    	end;
+    	self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     ///////////////////// Updates to the View ////////////////////
     
     @Operation sendNewPosition(requestID : Seq(Integer), objectID, x, y)
@@ -1010,7 +1027,6 @@ context FmmlxDiagrams
     end
     
     @Operation removeEnumerationValue(requestID : Seq(Integer), enumName:String, enumValueName:String) 
-      "removeEnumerationValueStart".println();
       let 
         m = FmmlxDiagrams::FmmlxManipulator()
       then

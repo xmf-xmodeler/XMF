@@ -100,6 +100,10 @@ end;
   Projects::Project::deploySelf
 end;
 
+@Menu "Show FMMLx Diagram" on Projects::Project
+  Projects::Project::createFmmlxDiagram
+end;
+
 @Menu "Save" on Projects::Project
   Projects::Project::save
 end;

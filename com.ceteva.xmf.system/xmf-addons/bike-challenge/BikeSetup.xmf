@@ -3,7 +3,7 @@ parserImport XOCL;
 import Clients;
 import FmmlxDiagrams;
 
-context Root
+/*context Root
   @Class Complex
     @Attribute real:Number end
     @Attribute imaginary:Number end
@@ -44,7 +44,7 @@ context Root
         ((self.real*other.real)+(self.imaginary*other.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)),
         ((self.real*other.imaginary)-(other.real*self.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)))
     end
-  end
+  end */
 
 context Root
 @Class BikeSetup
@@ -60,7 +60,7 @@ context Root
       m.addMetaClass(p, "Part",          5, [p::Component], false);
       m.addMetaClass(p, "CompPart",      5, [p::Component], false);
       
-      m.addAttribute(p::Component, "foo", 4, Complex, m.valueList2Multiplicity([0,3,true,false]));
+      m.addAttribute(p::Component, "foo", 4, Auxiliary::Complex, m.valueList2Multiplicity([0,3,true,false]));
       m.addAttribute(p::Component, "weight", 1, Float, m.valueList2Multiplicity([0,1,true,false]));
       
       m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", "belongsTo", 
@@ -152,11 +152,10 @@ context Root
 "+    "  end");
 
       m.addInstance(p, p::Part, "Fork", [], false);
-	  let c = Complex() in
+	  let c = Auxiliary::Complex() in
 	    c.real := 1; 
 	    c.imaginary := 0.5;
 	    p::Fork.foo := c
-	    //m.changeSlotValue(p::Fork, "foo", "c", Complex)
 	  end;
 	  
       m.addAttribute(p::Fork, "color",        1, String, m.valueList2Multiplicity([1,1,true,false]));
