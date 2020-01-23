@@ -1041,5 +1041,19 @@ context FmmlxDiagrams
       self.protocol.println()
     end
     
+    @Operation assignToGlobal(requestID : Seq(Integer), objID:Integer, varName:String)
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.getMapping(requestID).getMapping(objID).object
+      in
+        if 
+          class <> null
+        then
+          class.assignToGlobal(varName)
+        end;
+        []
+      end
+    end
+    
     
 end
