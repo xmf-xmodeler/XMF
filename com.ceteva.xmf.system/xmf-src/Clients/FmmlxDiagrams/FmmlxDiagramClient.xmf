@@ -361,6 +361,28 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation getAllIssues(requestID : Seq(Integer))
+      let 
+        result = [] 
+      in 
+		// Not yet implemented
+		@For obj in self.package.getChildren() do
+		  @For slot in obj.slots() do
+		    if self.package.getChildren().contains(slot.type.owner) then 
+		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
+		        result := result + [[
+		        "SLOT_NULL", 
+		        "The slot " + slot.name + " must not be empty.", 
+		        [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		        ["setSlotValue", self.getMapping(requestID).addOrGetObjectMapping(obj).id, slot.name.toString()]]]
+		      end // if null and mandatory
+		    end // if slot fmmlx
+		  end // for slots
+		end; // for obj
+    	self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     ///////////////////// Updates to the View ////////////////////
     
     @Operation sendNewPosition(requestID : Seq(Integer), objectID, x, y)
@@ -1043,13 +1065,25 @@ context FmmlxDiagrams
     
     @Operation assignToGlobal(requestID : Seq(Integer), objID:Integer, varName:String)
       let 
-        m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(objID).object
       in
         if 
           class <> null
         then
           class.assignToGlobal(varName)
+        end;
+        []
+      end
+    end
+        
+    @Operation showBody(requestID : Seq(Integer), objID:Integer, opName:String, arity:Integer)
+      let 
+        class = self.getMapping(requestID).getMapping(objID).object
+      in
+        if 
+          class <> null andthen class.getOperation(opName) <> null
+        then
+          class.getOperation(opName).edit()
         end;
         []
       end

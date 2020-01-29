@@ -3,49 +3,6 @@ parserImport XOCL;
 import Clients;
 import FmmlxDiagrams;
 
-/*context Root
-  @Class Complex
-    @Attribute real:Number end
-    @Attribute imaginary:Number end
-    
-    @Constructor(real,imaginary) end
-        
-    @Operation toString()  
-      let 
-        iText = 
-          if     imaginary =  1 then  "i"
-          elseif imaginary = -1 then "-i"
-          else  (imaginary + "i") end
-      in
-        ""+
-        if 
-          imaginary = 0 
-        then 
-          real
-        else
-          if 
-            real = 0
-          then
-            iText
-          else
-            real + if imaginary > 0 then "+" else "" end + iText
-          end
-        end
-      end
-    end
-    
-    @Operation magnitude() ((self.real*self.real)+(self.imaginary*self.imaginary)).sqrt() end
-    @Operation argument() xmf.javaClass("java.lang.Math").atan2(self.imaginary+0.0,self.real+0.0) end
-    
-    @Operation add(other) Complex(self.real+other.real,self.imaginary+other.imaginary) end
-    @Operation sub(other) Complex(self.real-other.real,self.imaginary-other.imaginary) end
-    @Operation mul(other) Complex((self.real*other.real)-(self.imaginary*other.imaginary),(self.real*other.imaginary)+(other.real*self.imaginary)) end
-    @Operation div(other) Complex(
-        ((self.real*other.real)+(self.imaginary*other.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)),
-        ((self.real*other.imaginary)-(other.real*self.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)))
-    end
-  end */
-
 context Root
 @Class BikeSetup
 

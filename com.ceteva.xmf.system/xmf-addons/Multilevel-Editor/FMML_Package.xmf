@@ -49,5 +49,27 @@ context Root::Auxiliary
         ((self.real*other.real)+(self.imaginary*other.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)),
         ((self.real*other.imaginary)-(other.real*self.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)))
     end
+    
+    @Operation createFromPolar(magnitude, argument) 
+      Complex(magnitude * xmf.javaClass("java.lang.Math").cos(argument), magnitude * xmf.javaClass("java.lang.Math").sin(argument))
+    end
+    
+    @Operation rotate(angle) 
+      Complex::createFromPolar(self.magnitude(), self.argument() + angle)
+    end
+    
+    @Operation exp(z:Complex)
+      let 
+        a = xmf.javaClass("java.lang.Math").exp(z.real) 
+      in
+      Complex(
+        a * xmf.javaClass("java.lang.Math").cos(z.imaginary),
+        a * xmf.javaClass("java.lang.Math").sin(z.imaginary)
+        )
+      end
+    end
+    
+    @Operation pi() Complex(-1,0).argument() end
+    
   end
   
