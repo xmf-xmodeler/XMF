@@ -163,6 +163,7 @@ import FmmlxDiagrams;
         associations = [];
         heirs = [];
         instances = [];
+        links = [];
         ofClass = class.of()
       in
 //        ("remove Class "+class.name+" start").println();
@@ -176,6 +177,16 @@ import FmmlxDiagrams;
             self.removeAssociation(association) end;
             
 //        ("associations removed").println();
+
+      // remove all links
+        @For link in package.associationInstances do
+          if link.at(0) = class then links := links + [link] end;
+          if link.at(1) = class then links := links + [link] end
+        end;
+        @For link in links do
+          ("remove link " + link).println();
+          package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
+        end;        
 
       // remove all inheritance
         @For heir in package.getChildren() do

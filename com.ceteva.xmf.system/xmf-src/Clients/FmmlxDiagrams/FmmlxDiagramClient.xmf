@@ -365,7 +365,6 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-		// Not yet implemented
 		@For obj in self.package.getChildren() do
 		  @For slot in obj.slots() do
 		    if self.package.getChildren().contains(slot.type.owner) then 
@@ -377,7 +376,59 @@ context FmmlxDiagrams
 		        ["setSlotValue", self.getMapping(requestID).addOrGetObjectMapping(obj).id, slot.name.toString()]]]
 		      end // if null and mandatory
 		    end // if slot fmmlx
-		  end // for slots
+		  end; // for slots
+		  @For assoc in self.package.associations do
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) 
+		    then
+		      let
+		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc) 
+		      in
+		        if 
+		          count < assoc.end2.mult().lowerBound() 
+		        then 
+		          result := result + [[
+		            "ASSOC_MULT_LOW", 
+		            "The association " + assoc.name + " requires more links.", 
+		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		        end;
+		        if 
+		          assoc.end2.mult().hasUpperBound() andthen count > assoc.end2.mult().upperBound() 
+		        then 
+		          result := result + [[
+		            "ASSOC_MULT_HIGH", 
+		            "The association " + assoc.name + " requires fewer links.", 
+		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		        end
+		      end // let
+		    end; // if instance of
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end2.instLevel) 
+		    then
+		      let
+		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc) 
+		      in
+		        if 
+		          count < assoc.end1.mult().lowerBound() 
+		        then 
+		          result := result + [[
+		            "ASSOC_MULT_LOW", 
+		            "The association " + assoc.name + " requires more links.", 
+		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		        end;
+		        if 
+		          assoc.end1.mult().hasUpperBound() andthen count > assoc.end1.mult().upperBound() 
+		        then 
+		          result := result + [[
+		            "ASSOC_MULT_HIGH", 
+		            "The association " + assoc.name + " requires fewer links.", 
+		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		        end
+		      end // let
+		    end // if instance of
+		  end // for assoc
 		end; // for obj
     	self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
       end
