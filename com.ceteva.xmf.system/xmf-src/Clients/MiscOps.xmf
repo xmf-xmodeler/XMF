@@ -187,23 +187,32 @@ context XCore::String
 
 context XCore::CompiledOperation
   @Operation edit()
-    @Doc
-    Launches an editor for a compiled operation. Basically the same as for String, but keeping link to the operation for committing changes
-    end
-    let textEditorClient = xmf.findClient(Clients::TextEditor::TextEditorClient) 
-    in if textEditorClient <> null
-       then
-         let
-           title = self.path();
-           text = self.source()
-         in
-           let editor = Clients::TextEditor::Editor(self,title,title,false) 
-           in 
-             textEditorClient.newTextEditor(editor);
-             editor.setText(text.toString())
-           end
-         end
-       end
+    /*@Doc
+    Launches an editor for a compiled operation. 
+    end*/
+    
+    //("editing " + self + "...").println();
+
+    let 
+      opBody = "parserImport XOCL;\n\ncontext " 
+      + self.owner.path() 
+      + "\n\n" 
+      + self.source()
+      + if self.isIntrinsic then 
+        "\n\n"
+        + self.owner.path() + "::" + self.name + ".isIntrinsic := true;"
+        + "\n"
+        + self.owner.path() + "::" + self.name + ".instLevel := "+self.instLevel+";"
+        else "" end;
+      fileName = "tempFileForOps" 
+        + xmf.javaClass("java.lang.System").currentTimeMillis()
+        +".xmf"
+    then 
+      foc = IO::FileOutputChannel(fileName)
+    in
+      foc.write(opBody);
+      foc.flush();
+      Clients::XmfFileTree::XmfFile(null,fileName).editText()
     end;
     self
   end

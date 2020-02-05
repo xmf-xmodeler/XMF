@@ -298,17 +298,17 @@ context FmmlxDiagrams
                   paramTypes = []
                 in
                   @For type in paramTypesRaw do
-                    paramTypes := paramTypes.append([type.path()])
+                    paramTypes := paramTypes.append([try type.path() catch(e) Element.path() end])
                   end;       
                   result := result.append([[
                   o.name.toString(),
                   paramNames,
                   paramTypes,
                   o.instLevel, 
-                  o.type().path(),
+                  try o.type().path() catch(e) Element.path() end,
                   o.source(),
                   if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                   [0,1,false,true], // to-do: multiplicity
+                  [0,1,false,true], // to-do: multiplicity
                   self.isOperationMonitored(o)
                   ]])
                 end

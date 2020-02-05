@@ -73,3 +73,77 @@ context Root::Auxiliary
     
   end
   
+context Root::Auxiliary
+  @Class AuxiliaryClass isabstract
+    @Attribute symbol:String end
+    @Attribute abbreviation:String end
+    @Attribute refValue:Float end
+    
+    @AbstractOp getAsString():String end
+    @AbstractOp setAsString(s:String) end
+  end
+  
+context Root::Auxiliary
+  @Class Currency
+    @Attribute symbol:String end
+    @Attribute abbreviation:String end
+    @Attribute refValue:Float end
+    
+    @Constructor(symbol, abbreviation, refValue) end
+    
+    @Operation update() self.refValue := if "EUR"=self.abbreviation then 1.0 else 1.0 / xmf.javaClass("tool.helper.CurrencyRates").getpriceOf1EUR(abbreviation) end end
+  end
+
+context Root::Auxiliary
+  @Class MonetaryValue
+    @Attribute amount:Float end
+    @Attribute currency:Root::Auxiliary::Currency end
+    
+    @Constructor(amount, currency) end
+    
+    @Operation value():Float self.amount end
+    @Operation getAsString():String self.amount + self.currency.symbol end
+    @Operation toString():String self.getAsString() end
+    @Operation valueIn(otherCurrency:Root::Auxiliary::Currency):Float self.amount * self.currency.refValue / otherCurrency.refValue end
+    @Operation getAmount():Float self.amount end
+    @Operation getCurrency():Float self.currency end
+  end
+  
+context Root::Auxiliary
+  @Class Date
+  	@Attribute date:ForeignObject end
+  	
+  	@Constructor() 
+  	  let 
+  	    dateClass = xmf.javaClass("java.util.Date")
+  	  in 
+  	    self.date := dateClass()
+  	  end
+  	end
+  	
+  	@Constructor(year, month, day, hour, minute, second)
+  	  let 
+  	    dateClass = xmf.javaClass("java.util.Date")
+  	  in 
+  	    self.date := dateClass(year, month, day, hour, minute, second)
+  	  end
+  	end
+  	 
+  	@Operation toString()
+  	  let
+  	    sdf = xmf.javaClass("java.text.SimpleDateFormat")
+  	  then
+  	    myf = sdf("hhmmss")
+  	  in
+  	    myf.format(self.date)
+  	  end
+  	end
+  end
+  
+  
+Root::Auxiliary::euro := Root::Auxiliary::Currency("€", "EUR", 1.0);
+
+Root::Auxiliary::dollar := Root::Auxiliary::Currency("$", "USD", 1.0);
+Root::Auxiliary::dollar.update();
+    
+    
