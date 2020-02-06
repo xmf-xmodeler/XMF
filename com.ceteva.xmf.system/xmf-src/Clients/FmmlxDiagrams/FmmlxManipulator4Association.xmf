@@ -67,11 +67,11 @@ import FmmlxDiagrams;
             a.transitive := isTransitive;
             
             if sourceVisibleFromTarget then 
-              self.addGettersAndSetters4Links(target, accessSourceFromTargetName, instLevel1, source, a)
+              self.addGettersAndSetters4Links(target, accessSourceFromTargetName, instLevel1, source, a, false)
             end;
             
             if targetVisibleFromSource then 
-              self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevel2, target, a)
+              self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevel2, target, a, true)
             end;
             
             []
@@ -131,8 +131,8 @@ import FmmlxDiagrams;
         newSourceMult := if newSourceMult = null then oldSourceMult else newSourceMult end;
         newTargetMult := if newTargetMult = null then oldTargetMult else newTargetMult end;
         
-        oldSourceCount := self.countOccurencesForType(association.end1.type,association.end1.instLevel,package,association);
-        oldTargetCount := self.countOccurencesForType(association.end2.type,association.end2.instLevel,package,association); 
+        oldSourceCount := self.countOccurencesForType(association.end1.type,association.end1.instLevel,package,association,true,false);
+        oldTargetCount := self.countOccurencesForType(association.end2.type,association.end2.instLevel,package,association,false,true); 
         
         if newSourceMult.lowerBound > oldSourceMult.lowerBound then 
           if oldSourceCount.at(0) <> null andthen oldSourceCount.at(0) < newSourceMult.lowerBound then 
@@ -188,7 +188,7 @@ import FmmlxDiagrams;
       in
         End.visible := newVisibility;
         if newVisibility and not oldVisibility then 
-          self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc) end;
+          self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc, concernsTarget) end;
         if oldVisibility and not newVisibility then 
           self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;
         []
@@ -206,7 +206,9 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
-    @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc) // actually, only one getter
+    @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc, selfIsSource) // actually, only one getter
+      // selfIsSource => true  where self is on the source side
+      // selfIsSource => false where self is on the target side
       let
         camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
       then
@@ -216,10 +218,7 @@ import FmmlxDiagrams;
       in
         self.addOperation2(class, instLevel, 
         "  @Operation "+getterName+"[getterKey=\""+name+"\"]():"+type.path()+"
-"+      "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\")
-//"+      "    throw(Exception(\"This operation has not been implemented yet.\"))
+"+      "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+")
 "+      "  end")
-        
-
       end
     end    

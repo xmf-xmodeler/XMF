@@ -7,15 +7,17 @@ context FmmlxManipulator
   @Operation countOccurences(
     o : Object,
     p : FMMLxPackage,
-    a : Association)
+    a : Association,
+    countSourceOccurences : Boolean,
+    countTargetOccurences : Boolean)
      
     let
       count = 0
     in
       if p.fmmlxAssociationInstances = null then 0 else
         @For link in p.fmmlxAssociationInstances do
-          if link.at(0) = o andthen link.at(2) = a then count := count + 1 end;
-          if link.at(1) = o andthen link.at(2) = a then count := count + 1 end
+          if countSourceOccurences andthen link.at(0) = o andthen link.at(2) = a then count := count + 1 end;
+          if countTargetOccurences andthen link.at(1) = o andthen link.at(2) = a then count := count + 1 end
         end;
         count
       end
@@ -27,7 +29,9 @@ context FmmlxManipulator
     type        : Class,
     level       : int,
     package     : FMMLxPackage,
-    association : Association)
+    association : Association,
+    countSourceOccurences : Boolean,
+    countTargetOccurences : Boolean)
    	  
     if not type.isKindOf(FMML::MetaClass) then null else
      
@@ -38,7 +42,7 @@ context FmmlxManipulator
       in
         @For instance in type.allMetaInstances() do
           if instance.level = level then
-            count := self.countOccurences(instance, package, association);
+            count := self.countOccurences(instance, package, association, countSourceOccurences, countTargetOccurences);
             minCount := if minCount = null then count else if count < minCount then count else minCount end end;
             maxCount := if maxCount = null then count else if count > maxCount then count else maxCount end end
           end
@@ -75,10 +79,10 @@ context FmmlxManipulator
 
         if typesOK then 
           let 
-            sCount = self.countOccurences(objectS, p, a);
-            tCount = self.countOccurences(objectT, p, a);
-            sMult = a.end1.mult;
-            tMult = a.end2.mult
+            sCount = self.countOccurences(objectS, p, a, true, false); // how many links to t go out of objectS
+            tCount = self.countOccurences(objectT, p, a, false, true); // how many links to s go out of objectT
+            sMult = a.end2.mult;  // how many links to t are allowed for objectS
+            tMult = a.end1.mult // how many links to s are allowed for objectT
           in
             if ((not sMult.hasUpperBound) orelse (sMult.upperBound > sCount)) andthen 
                ((not tMult.hasUpperBound) orelse (tMult.upperBound > tCount))  

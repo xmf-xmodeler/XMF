@@ -49,13 +49,16 @@ context Root::FMML
     end 
   end
   
-  @Operation getLinkEnds(obj:MetaClass, assocName:String)
+  @Operation getLinkEnds(obj:MetaClass, assocName:String) self.getLinkEnds(obj,assocName,true,true) end
+  
+  @Operation getLinkEnds(obj:MetaClass, assocName:String, findSourceEnds:Boolean, findTargetEnds:Boolean)
+    // findSourceEnds => find those where obj is target (at 1) and links to objects on the source (at 0) end
     let
       result = {}
     in
       @For link in self.fmmlxAssociationInstances do
-        if link.at(0) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(1)} end;
-        if link.at(1) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(0)} end
+        if findTargetEnds andthen link.at(0) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(1)} end;
+        if findSourceEnds andthen link.at(1) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(0)} end
       end;
       result
     end

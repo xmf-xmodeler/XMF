@@ -378,10 +378,10 @@ context FmmlxDiagrams
 		    end // if slot fmmlx
 		  end; // for slots
 		  @For assoc in self.package.associations do
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) 
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) // if obj fits sourceDef
 		    then
 		      let
-		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc) 
+		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc, true, false) // how many links go out of obj as source
 		      in
 		        if 
 		          count < assoc.end2.mult().lowerBound() 
@@ -403,10 +403,10 @@ context FmmlxDiagrams
 		        end
 		      end // let
 		    end; // if instance of
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end2.instLevel) 
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end2.instLevel) // if obj fits targetDef
 		    then
 		      let
-		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc) 
+		        count = FmmlxManipulator::countOccurences(obj, self.package, assoc, false, true) 
 		      in
 		        if 
 		          count < assoc.end1.mult().lowerBound() 
