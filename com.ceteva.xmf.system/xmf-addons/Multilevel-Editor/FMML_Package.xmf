@@ -111,34 +111,36 @@ context Root::Auxiliary
   
 context Root::Auxiliary
   @Class Date
-  	@Attribute date:ForeignObject end
+    @Attribute date:ForeignObject end
   	
-  	@Constructor() 
-  	  let 
-  	    dateClass = xmf.javaClass("java.util.Date")
-  	  in 
-  	    self.date := dateClass()
-  	  end
-  	end
+    @Constructor() 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.date := dateClass();
+        self.date.setNow()
+      end
+    end
   	
-  	@Constructor(year, month, day, hour, minute, second)
-  	  let 
-  	    dateClass = xmf.javaClass("java.util.Date")
-  	  in 
-  	    self.date := dateClass(year, month, day, hour, minute, second)
-  	  end
-  	end
-  	 
-  	@Operation toString()
-  	  let
-  	    sdf = xmf.javaClass("java.text.SimpleDateFormat")
-  	  then
-  	    myf = sdf("hhmmss")
-  	  in
-  	    myf.format(self.date)
-  	  end
-  	end
+    @Operation create(year, month, day, hour, minute, second)
+      let
+        d = Date()
+      in
+        d.date.setYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        d
+      end
+    end
+
+    @Operation diff(other)
+      self.date.getDifference(other.date)
+    end
+
+    @Operation toString()
+      self.date.printDate("dd MMM yyyy HH:mm:ss")
+    end
   end
+  
+  
   
   
 Root::Auxiliary::euro := Root::Auxiliary::Currency("€", "EUR", 1.0);
