@@ -314,9 +314,9 @@ import FmmlxDiagrams;
         self.addOperation2(class, instLevel, 
         "  @Operation "+setterName+"[setterKey=\""+name+"\"](value:"+type.path()+")
 "+      "    let 
-"+      "      m = FmmlxDiagrams::FmmlxManipulator()
+"+      "      m = Clients::FmmlxDiagrams::FmmlxManipulator()
 "+      "    then
-"+      "      error = m.changeSlotValue(obj, slotName, parseResult.at(0), "+type.path()+", self.package)
+"+      "      error = m.changeSlotValue(self, slotName, parseResult.at(0), "+type.path()+", self.package)
 "+      "    in
 "+      "      if error <> null then throw(Exception(error)) end
 "+      "    end

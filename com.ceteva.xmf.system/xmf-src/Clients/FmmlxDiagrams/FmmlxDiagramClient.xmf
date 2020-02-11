@@ -272,9 +272,24 @@ context FmmlxDiagrams
               if o.instLevel = obj.level then
                 @For name in opNames do
                   if name = o.name.toString() then
-                    result := result.append([[
-                      o.name.toString(), 
-                      o.invoke(obj,{})]])
+                    let
+                      value = o.invoke(obj,{});
+                      monMin = o.hasProperty("monitorMin");
+                      monMax = o.hasProperty("monitorMax")
+                    then
+                      minVal = if monMin then FmmlxDiagramClient::getOpProp(o, "monitorMin") else null end;
+                      maxVal = if monMax then FmmlxDiagramClient::getOpProp(o, "monitorMax") else null end
+                    then
+                      hasRange = monMin or monMax;
+                      isInRange = if monMin then minVal <= value else true end and
+                                  if monMax then maxVal >= value else true end
+                    in
+                      result := result.append([[
+                        o.name.toString(), 
+                        value,//o.invoke(obj,{}),
+                        hasRange,
+                        isInRange]])
+                    end
                 end end // if contains // for
               end // if level
             end end // if // for
@@ -1140,5 +1155,13 @@ context FmmlxDiagrams
       end
     end
     
-    
+    @Operation updateAll(obj:Element)
+      let 
+        clients = Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances()->select(a | a.package = obj.owner)
+      in
+        @For client in clients do 
+          client.communicator.triggerUpdate()
+        end
+      end
+    end
 end
