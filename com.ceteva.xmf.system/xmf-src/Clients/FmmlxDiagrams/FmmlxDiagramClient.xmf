@@ -273,20 +273,25 @@ context FmmlxDiagrams
                 @For name in opNames do
                   if name = o.name.toString() then
                     let
-                      value = o.invoke(obj,{});
+                      opResult = try [o.invoke(obj,{}),null] catch (e) [null, e] end
+                    then
+                      value = opResult.at(0);
+                      error = opResult.at(1);
                       monMin = o.hasProperty("monitorMin");
                       monMax = o.hasProperty("monitorMax")
                     then
                       minVal = if monMin then FmmlxDiagramClient::getOpProp(o, "monitorMin") else null end;
                       maxVal = if monMax then FmmlxDiagramClient::getOpProp(o, "monitorMax") else null end
                     then
-                      hasRange = monMin or monMax;
-                      isInRange = if monMin then minVal <= value else true end and
-                                  if monMax then maxVal >= value else true end
+                      hasRange = monMin or monMax or error <> null;
+                      isInRange = (error = null) andthen 
+                                  if monMin then minVal <= value else true end andthen
+                                  if monMax then maxVal >= value else true end                                  
                     in
                       result := result.append([[
                         o.name.toString(), 
-                        value,//o.invoke(obj,{}),
+                        if error = null then value else error.message.toString() end,
+                        //value,//o.invoke(obj,{}),
                         hasRange,
                         isInRange]])
                     end
@@ -624,7 +629,23 @@ context FmmlxDiagrams
         if problems.isEmpty() then m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.package) end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
-    end   
+    end
+    
+    @Operation changeAttributeMultiplicity(requestID : Seq(Integer), classId, attName, oldMul, newMul)
+      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newMul;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = self.getMapping(requestID).getMapping(classId).object
+      then       
+        newMult = m.valueList2Multiplicity(self.vector2Seq(newMul))
+      then    // TODO !!!    
+//        problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
+          problems = []
+      in
+        if problems.isEmpty() then m.changeAttributeMultiplicity(class, attName, null, newMult) end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end    
       
     //////////////////////// Slot Manipulations /////////////////////
 

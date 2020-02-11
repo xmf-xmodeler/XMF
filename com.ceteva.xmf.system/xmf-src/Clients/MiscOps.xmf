@@ -204,7 +204,7 @@ context XCore::CompiledOperation
         + "\n"
         + self.owner.path() + "::" + self.name + ".instLevel := "+self.instLevel+";"
         else "" end;
-      fileName = "tempFileForOps" 
+      fileName = "resources/tmp4ops/tempFileForOps" 
         + xmf.javaClass("java.lang.System").currentTimeMillis()
         +".xmf"
     then 

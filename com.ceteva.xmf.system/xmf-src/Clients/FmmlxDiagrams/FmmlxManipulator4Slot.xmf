@@ -5,7 +5,10 @@ import FmmlxDiagrams;
 
   context FmmlxManipulator
     @Operation changeSlotValue(obj, slotName, valueToBeAdded, requiredType, env:Package) 
-      if valueToBeAdded.isKindOf(requiredType) then
+      if valueToBeAdded.isKindOf(requiredType) 
+        orelse valueToBeAdded.isKindOf(Seq(requiredType))
+        orelse valueToBeAdded.isKindOf(Set(requiredType))
+      then
         obj.set(slotName, valueToBeAdded); null
       else
         valueToBeAdded + " is not of " + requiredType.name

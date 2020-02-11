@@ -283,7 +283,23 @@ import FmmlxDiagrams;
 	  end; null
     end
     
-  context FmmlxManipulator 
+    context FmmlxManipulator
+    @Operation changeAttributeMultiplicity(class, attName, oldMul, newMul)
+      let 
+        attribute = null;
+        problems = [];
+        parseResult = null
+      in 
+        @For att in class.attributes do
+          if att.name.toString() = attName then
+	        attribute := att
+	      end
+	    end;
+	    attribute.setMult(newMul)
+	  end; null
+    end
+    
+    context FmmlxManipulator 
     @Operation getFreeAttName(class, newLevel)
       let name = "tempAtt"; counter = 0; result = null
       in
