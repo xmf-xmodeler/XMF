@@ -101,47 +101,102 @@ context Root::Auxiliary
     
     @Constructor(amount, currency) end
     
-    @Operation value():Float self.amount end
-    @Operation getAsString():String self.amount + self.currency.symbol end
-    @Operation toString():String self.getAsString() end
-    @Operation valueIn(otherCurrency:Root::Auxiliary::Currency):Float self.amount * self.currency.refValue / otherCurrency.refValue end
+    @Operation toString():String self.amount + self.currency.symbol end
+    @Operation getAmountIn(otherCurrency:Root::Auxiliary::Currency):Float self.amount * self.currency.refValue / otherCurrency.refValue end
     @Operation getAmount():Float self.amount end
-    @Operation getCurrency():Float self.currency end
+    @Operation getCurrency():Root::Auxiliary::Currency self.currency end
+    
+    @Operation mul(factor:Float):Root::Auxiliary::Currency MonetaryValue(self.amount*factor, self.currency) end
+    @Operation add(other:MonetaryValue):MonetaryValue MonetaryValue(self.amount + other.getAmountIn(self.currency), self.currency) end
+    @Operation sub(other:MonetaryValue):MonetaryValue self.add(other.mul(-1)) end
+    
   end
   
 context Root::Auxiliary
   @Class Date
-    @Attribute date:ForeignObject end
+    @Attribute time : String end
+    @Attribute showTimeOfDay : Boolean end
   	
     @Constructor() 
       let 
         dateClass = xmf.javaClass("tool.helper.XDate")
       in 
-        self.date := dateClass();
-        self.date.setNow()
+        self.time := dateClass().getNow();
+        self.showTimeOfDay := true
+      end
+    end
+    
+    @Constructor(year, month, day) 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, 12, 0, 0);
+        self.showTimeOfDay := false
+      end
+    end    
+    
+    @Constructor(year, month, day, hour, minute, second) 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        self.showTimeOfDay := true
       end
     end
   	
-    @Operation create(year, month, day, hour, minute, second)
+    @Operation createDate(year, month, day):Date
       let
-        d = Date()
+        d = Date();
+        dateClass = xmf.javaClass("tool.helper.XDate")
       in
-        d.date.setYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        d.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, 12, 0, 0);
+        d.showTimeOfDay := false;
+        d
+      end
+    end
+  	
+    @Operation createDateAndTime(year, month, day, hour, minute, second):Date
+      let
+        d = Date();
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in
+        d.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        d.showTimeOfDay := true;
         d
       end
     end
 
-    @Operation diff(other)
-      self.date.getDifference(other.date)
+    @Operation diff(other):String
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        dateClass().getDifference(self.time, other.time)
+      end
     end
 
-    @Operation toString()
-      self.date.printDate("dd MMM yyyy HH:mm:ss")
+    @Operation toString():String
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in
+        if 
+          self.showTimeOfDay
+        then
+          dateClass().printDate(self.time, "dd MMM yyyy HH:mm:ss")
+        else
+          dateClass().printDate(self.time, "dd MMM yyyy")
+        end
+      end
+    end
+    
+    @Operation age():Integer
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        dateClass().age(self.time)
+      end
     end
   end
-  
-  
-  
+    
   
 Root::Auxiliary::euro := Root::Auxiliary::Currency("€", "EUR", 1.0);
 
