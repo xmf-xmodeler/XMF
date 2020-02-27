@@ -208,7 +208,6 @@ context FmmlxDiagrams
           result = []
         in 
           @For c in self.package.getChildren() do
-            //("att:"+c.name).println();
             if c.isKindOf(FMML::MetaClass) and c.name.toString() = className
             then 
               @For a in c.attributes do 
@@ -344,7 +343,6 @@ context FmmlxDiagrams
               end end
             end
           end;
-//          ("Result: " + result).println();
     	  self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
         end
     end  

@@ -196,11 +196,188 @@ context Root::Auxiliary
       end
     end
   end
-    
-  
-Root::Auxiliary::euro := Root::Auxiliary::Currency("€", "EUR", 1.0);
 
-Root::Auxiliary::dollar := Root::Auxiliary::Currency("$", "USD", 1.0);
-Root::Auxiliary::dollar.update();
+context Root
+  @Operation createExamplePackage()
+    let
+      p = FMML::FMMLxPackage("OrderManagementML");
+      m = Clients::FmmlxDiagrams::FmmlxManipulator()
+    then
+      project = Projects::Project(p, "OrderManagementML", null);
+      OPTIONAL = m.valueList2Multiplicity([1,1,true,false]);
+      MANDATORY = m.valueList2Multiplicity([1,1,true,false])
+    in
+      p.addParent(FMML);
+      p.fmmlxAssociationInstances:={};
+      Root.add(p);
+      
+      m.addMetaClass(p, "PhysicalProduct", 4, [], false);
+      m.addInstance(p, p::PhysicalProduct, "Automobile", [], false);
+      m.addInstance(p, p::Automobile, "Sedan", [], false);
+      m.addInstance(p, p::Sedan, "DMW_T450", [], false);
+      m.addInstance(p, p::DMW_T450, "s1", [], false);
+      
+      m.addInstance(p, p::PhysicalProduct, "Computer", [], false);
+      m.addInstance(p, p::PhysicalProduct, "PeripheralDevice", [], false);
+      
+      m.addMetaClass(p, "MetaItem", 3, [], false);
+      m.addInstance(p, p::MetaItem, "TransItem", [], false);
+      
+      m.addMetaClass(p, "BusinessDocument", 3, [], false);
+      
+      m.addInstance(p, p::PeripheralDevice, "Printer", [], false);
+      
+      m.addMetaClass(p, "TransactionDocument", 2, [], false);
+      m.addInstance(p, p::TransactionDocument, "Order", [], false);
+      
+      m.addMetaClass(p, "TransItem", 2, [], false);
+      m.addInstance(p, p::TransItem, "OrderItemInt", [], false);
+      
+      m.addMetaClass(p, "Customer", 2, [], false);
+      m.addInstance(p, p::Customer, "PrivateCustomer", [], false);
+      m.addInstance(p, p::PrivateCustomer, "cust44", [], false);
+      
+      m.addMetaClass(p, "MetaAddress", 2, [], false);
+      m.addInstance(p, p::MetaAddress, "UK_Address", [], false);
+      m.addInstance(p, p::UK_Address, "ukAddr1", [], false);
+      
+      
+      
+      m.addAttribute(p::PhysicalProduct, "strategicAsset", 3, Boolean, OPTIONAL);
+      m.addAttribute(p::PhysicalProduct, "unit", 3, String, MANDATORY);
+      m.addAttribute(p::PhysicalProduct, "salesPrice", 1, Float, MANDATORY);
+      m.addAttribute(p::PhysicalProduct, "weight", 1, Float, MANDATORY);
+      
+      m.addAttribute(p::TransactionDocument, "accountable", 1, Boolean, OPTIONAL);
+      m.addAttribute(p::TransactionDocument, "phase", 1, String, OPTIONAL);
+      m.addAttribute(p::TransactionDocument, "readOnly", 1, Boolean, OPTIONAL);
+      m.addAttribute(p::TransactionDocument, "transID", 0, String, MANDATORY); 
+      
+//      m.changeSlotValue(p::Order, "accountable", false, Element, null);
+//      m.changeSlotValue(p::Order, "readOnly", false, Element, null);
+      
+      m.addAttribute(p::BusinessDocument, "archive", 2, Boolean, OPTIONAL);
+      m.addAttribute(p::BusinessDocument, "confidential", 2, Boolean, MANDATORY);
+      m.addAttribute(p::BusinessDocument, "creationDate", 0, Auxiliary::Date, OPTIONAL);
+      
+      m.addAttribute(p::Customer, "legalStatus", 1, String, MANDATORY);
+      m.addAttribute(p::Customer, "liableToVAT", 1, Boolean, MANDATORY);
+      m.addAttribute(p::Customer, "custID", 0, String, OPTIONAL);
+      
+//      m.changeSlotValue(p::legalStatus, "postalCode", false, Element, null);
+//      m.changeSlotValue(p::liableToVAT, "streetDirection", false, Element, null);
+      
+      m.addAttribute(p::PrivateCustomer, "dateOfBirth", 0, Auxiliary::Date, MANDATORY);
+      m.addAttribute(p::PrivateCustomer, "firstName", 0, String, MANDATORY);
+      m.addAttribute(p::PrivateCustomer, "lastName", 0, String, MANDATORY);
+      
+      m.changeSlotValue(p::cust44, "dateOfBirth", Auxiliary::Date::createDate(1926,4,21), Element, null);
+      m.changeSlotValue(p::cust44, "firstName", "Sam", Element, null);
+      m.changeSlotValue(p::cust44, "lastName", "Smith", Element, null);
+      m.changeSlotValue(p::cust44, "custID", "08-SMTH-15", Element, null);
+      
+      m.addAttribute(p::MetaAddress, "codeNumerical", 1, Boolean, MANDATORY);
+      m.addAttribute(p::MetaAddress, "postalCode", 1, Boolean, MANDATORY);
+      m.addAttribute(p::MetaAddress, "streetDirection", 1, Boolean, MANDATORY);
+
+//      m.changeSlotValue(p::UK_Address, "codeNumerical", false, Element, null);
+//      m.changeSlotValue(p::UK_Address, "postalCode", false, Element, null);
+//      m.changeSlotValue(p::UK_Address, "streetDirection", false, Element, null);
+
+      m.addAttribute(p::UK_Address, "country", 0, String, MANDATORY);
+      m.addAttribute(p::UK_Address, "locality", 0, String, MANDATORY);
+      m.addAttribute(p::UK_Address, "postalCode", 0, String, MANDATORY);
+      m.addAttribute(p::UK_Address, "street", 0, String, MANDATORY);
+      
+      m.changeSlotValue(p::ukAddr1, "country", "UK", Element, null);
+      m.changeSlotValue(p::ukAddr1, "locality", "Birmingham", Element, null);
+      m.changeSlotValue(p::ukAddr1, "postalCode", "B29 4JA", Element, null);
+      m.changeSlotValue(p::ukAddr1, "street", "Cape Hill", Element, null);
+      
+      m.addAttribute(p::OrderItemInt, "amount", 0, Integer, MANDATORY);
+      
+      m.addAttribute(p::Automobile, "drivenWheels", 1, Integer, MANDATORY);
+      m.addAttribute(p::Automobile, "engineType", 1, String, MANDATORY);
+      m.addAttribute(p::Automobile, "power", 1, Integer, MANDATORY);
+      m.addAttribute(p::Automobile, "partSalesPrice", 0, Float, MANDATORY);
+      m.addAttribute(p::Automobile, "year", 0, Integer, MANDATORY);
+      
+      m.addAttribute(p::Sedan, "numOfPass", 1, Integer, MANDATORY);
+      
+      m.addAttribute(p::Computer, "mobile", 2, Boolean, MANDATORY);
+      m.addAttribute(p::Computer, "cpuSpeed", 1, Integer, MANDATORY);
+      m.addAttribute(p::Computer, "memory", 1, Integer, MANDATORY);
+      m.addAttribute(p::Computer, "persistentMemory", 1, Integer, MANDATORY);
+      m.addAttribute(p::Computer, "serialNo", 0, String, MANDATORY);
+      
+      m.addAttribute(p::PeripheralDevice, "dataInput", 2, Boolean, MANDATORY);
+      m.addAttribute(p::PeripheralDevice, "dataOutput", 2, Boolean, MANDATORY);
+      m.addAttribute(p::PeripheralDevice, "interface", 1, String, MANDATORY);
+      m.addAttribute(p::PeripheralDevice, "serialNo", 0, String, MANDATORY);
+      
+      m.addAttribute(p::Printer, "pagesPerMinute", 1, Integer, MANDATORY);
+      m.addAttribute(p::Printer, "resolution", 1, Integer, MANDATORY);
+      
+      m.changeSlotValue(p::DMW_T450, "numOfPass", 4, Element, null);
+      m.changeSlotValue(p::DMW_T450, "drivenWheels", 4, Element, null);
+      m.changeSlotValue(p::DMW_T450, "engineType", "Diesel", Element, null);
+      m.changeSlotValue(p::DMW_T450, "power", 100, Element, null);
+      m.changeSlotValue(p::DMW_T450, "salesPrice", 40000.0, Element, null);
+      m.changeSlotValue(p::DMW_T450, "weight", 1700.0, Element, null);
+      
+//      m.changeSlotValue(p::Automobile, "strategicAsset", false, Element, null);
+//      m.changeSlotValue(p::Computer, "strategicAsset", false, Element, null);
+      m.changeSlotValue(p::Computer, "unit", "piece", Element, null);
+      m.changeSlotValue(p::PeripheralDevice, "unit", "piece", Element, null);
+      
+      m.addAssociation(p, p::TransItem, p::PhysicalProduct, "transItem", "physicalProduct", "refersTo", null, 
+          m.valueList2Multiplicity([0,-1,false,false]),
+          m.valueList2Multiplicity([1, 1,true, false]),
+  	      0,0, false, true, false, false);
+
+      m.addAssociation(p, p::TransactionDocument, p::TransItem, "transactionDocument", "transItem", "includes", null, 
+          m.valueList2Multiplicity([1, 1,true, false]),
+          m.valueList2Multiplicity([1,-1,false,false]),
+  	      0,0, false, true, false, false);
+  	      
+      m.addAssociation(p, p::Customer, p::TransactionDocument, "customer", "transactionDocument", "issues", null, 
+          m.valueList2Multiplicity([1, 1,true, false]),
+          m.valueList2Multiplicity([0,-1,false,false]),
+  	      0,0, false, true, false, false);
+
+      m.addAssociation(p, p::Customer, p::MetaAddress, "customer", "address", "locatedAt", null, 
+          m.valueList2Multiplicity([1, 1,true, false]),
+          m.valueList2Multiplicity([0,-1,false,false]),
+  	      0,0, false, true, false, false);
+  	      
+  	  m.addAssociationInstance(p, p::cust44, p::ukAddr1, p.associations->select(a | a.name.toString() = "locatedAt").asSeq().at(0));
+  	  
+  	  m.addOperation(p::MetaItem, null, 2, null, 
+      "  @Operation createWithInt[monitor=true]()
+"+    "    null
+"+    "  end");
+
+  	  m.addOperation(p::MetaItem, null, 2, null, 
+      "  @Operation createWithFloat[monitor=true]()
+"+    "    null
+"+    "  end");
+  	      
+      xmf.projectManager("MyProjects").add(project);
+
+      "done"
+      
+    end
+  end
+  
+Root::Auxiliary::eur := Root::Auxiliary::Currency("€", "EUR", 1.0);
+
+Root::Auxiliary::usd := Root::Auxiliary::Currency("$", "USD", 1.0);
+Root::Auxiliary::usd.update();
+Root::Auxiliary::aud := Root::Auxiliary::Currency("$", "AUD", 1.0);
+Root::Auxiliary::aud.update();
+Root::Auxiliary::nzd := Root::Auxiliary::Currency("$", "NZD", 1.0);
+Root::Auxiliary::nzd.update();
+Root::Auxiliary::gbp := Root::Auxiliary::Currency("£", "GBP", 1.0);
+Root::Auxiliary::gbp.update()
     
     
