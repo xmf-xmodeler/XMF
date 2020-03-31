@@ -179,12 +179,11 @@ import FmmlxDiagrams;
 //        ("associations removed").println();
 
       // remove all links
-        @For link in package.associationInstances do
+        @For link in package.fmmlxAssociationInstances do
           if link.at(0) = class then links := links + [link] end;
           if link.at(1) = class then links := links + [link] end
         end;
         @For link in links do
-          ("remove link " + link).println();
           package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
         end;        
 
@@ -214,8 +213,100 @@ import FmmlxDiagrams;
     end
   
   context FmmlxManipulator  
+    @Operation addParent(heir, parent)
+      // Check for circular inheritance
+      if 
+        parent.isDescendentOf (heir) then [parent.name + " is already descendant of " + heir.name + ". Circular inheritance not allowed."] 
+      elseif
+        parent.level <> heir.level then ["Only classes from the same level may inherit from each other."]
+      else
+        let 
+          problems = []
+        in
+          @For pAtt in parent.allAttributes() do
+            @For hAtt in heir.allAttributes() do
+              if 
+                pAtt.name = hAtt.name andthen pAtt.owner <> hAtt.owner andthen pAtt.owner.isKindOf(FMML::MetaClass)
+              then 
+                problems := problems + ["Attribute collision. The name \"" + pAtt.name + "\" is present in both "+pAtt.owner.name+" and "+hAtt.owner.name +"."]
+              end end end;
+          @For pOp in parent.allOperations2() do
+            @For hOp in heir.allOperations2() do
+              if 
+                pOp.name = hOp.name andthen pOp.owner <> hOp.owner andthen pOp.owner.isKindOf(FMML::MetaClass) 
+              then 
+                problems := problems + ["Operation collision. The name \"" + pOp.name + "\" is present in both "+pOp.owner.name+" and "+hOp.owner.name +"."]
+              end end end;
+          @For assocHeir in heir.owner.associations do // using two loops over the same list -> saves some trouble later
+            @For assocParent in parent.owner.associations do
+              if assocHeir <> assocParent
+                andthen
+                  (assocHeir.source.name = assocParent.source.name 
+                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
+                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  orelse
+                  (assocHeir.source.name = assocParent.target.name 
+                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
+                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  orelse
+                  (assocHeir.target.name = assocParent.source.name 
+                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
+                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+                  orelse
+                  (assocHeir.target.name = assocParent.target.name 
+                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
+                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+              then
+                problems := problems + ["Association collision. The associations \"" + assocParent.name + "\" and "+assocHeir.name+" overlap."]
+              end end end;
+          if 
+            problems.size() = 0
+          then
+            //["The operation \"addParent\" has not been finished implementing yet."]
+            // set Parent
+            heir.parents := heir.parents + {parent};
+            // add new slots
+            @For instance in heir.allInstances() do
+              @For att in instance.of().allAttributes() do
+                if 
+                  att.instLevel = instance.level andthen not instance.hasSlot(att.name)
+                then
+                  Kernel_addAtt(instance,att.name,att.type.default())
+                end
+              end
+            end;[]
+          else
+            problems
+          end
+        end
+      end
+    end 
+     
+  context FmmlxManipulator  
     @Operation removeParent(heir, parent)
-      xmf.error("The operation \"removeParent\" has not been implemented yet.")
+      heir.parents := heir.parents - {parent};
+      
+      @For instance in heir.allInstances() do
+        let
+          allAtts = instance.of().allAttributes()
+        in
+          @For slot in instance.slots() do 
+            if 
+              not allAtts.name.contains(slot.name)
+              //att.instLevel = instance.level andthen not instance.hasSlot(att.name)
+            then
+              instance.removeStructuralFeature(slot.name)
+            end
+          end
+        end
+      end;
+      
+      []
+    end  
+    
+  context FmmlxManipulator  
+    @Operation moveParent(heir, oldParent, newParent)
+      ["The operation \"moveParent\" has not been implemented yet."]
     end
     
   context FmmlxManipulator  

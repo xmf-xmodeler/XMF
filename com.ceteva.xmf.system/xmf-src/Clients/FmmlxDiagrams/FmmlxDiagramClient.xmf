@@ -559,7 +559,57 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator()
       in
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.levelRaiseAll(self.package, amount)])
-      end  
+      end
+    end
+    
+          
+    @Operation changeParent(requestID : Seq(Integer), classId, oldList, newList)
+      self.protocol := self.protocol + "\nE      changeParent: " + oldList + "->" + newList;
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        oldSet = self.vector2Seq(oldList).asSet();
+        newSet = self.vector2Seq(newList).asSet();
+        problems = [];
+        class = self.getMapping(requestID).getMapping(classId).object
+      then
+        addSet = newSet - oldSet;
+        removeSet = oldSet - newSet
+      in
+//        if 
+//          removeSet = {} 
+//        then
+          @For parentId in addSet do
+            let
+              parentToBeAdded = self.getMapping(requestID).getMapping(parentId).object
+            in 
+              problems := problems + m.addParent(class, parentToBeAdded)
+            end
+          end
+;//        elseif 
+//          addSet = {}
+//        then
+          @For parentId in removeSet do
+            let
+              parentToBeRemoved = self.getMapping(requestID).getMapping(parentId).object
+            in 
+              problems := problems + m.removeParent(class, parentToBeRemoved)
+            end
+          end
+;//        elseif 
+//          removeSet.size() = 1 and addSet.size() = 1 // move exactly one parent
+//        then
+//          let
+//            parentToBeAdded = self.getMapping(requestID).getMapping(addSet.asSeq().at(0)).object;
+//            parentToBeRemoved = self.getMapping(requestID).getMapping(removeSet.asSeq().at(0)).object
+//          in
+//            problems := problems + m.moveParent(class, parentToBeRemoved, parentToBeAdded)
+//          end
+//        else 
+//          problems := problems + ["Only one parent may be moved at a time."]
+//        end;
+          
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
     end
     
     //////////////////////// Attribute Manipulations /////////////////////
@@ -1075,10 +1125,6 @@ context FmmlxDiagrams
       
     @Operation changeOperationType(requestID : Seq(Integer), idO, opName, newType) 
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
-    end
-      
-    @Operation changeParent(requestID : Seq(Integer), idO, oldList, newList) 
-      self.respondNotYetImplemented("changeParent", self.vector2Seq(requestID))
     end
       
     @Operation changeAttributeOwner(requestID : Seq(Integer), idO_old, name, idO_new) 

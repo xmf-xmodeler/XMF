@@ -95,16 +95,6 @@ context Clients
       // handles messaging natively.
       
       try
-        /* let message = input.read()->at(1) then
-            parameters = Seq{};
-            parameter = input.read()->at(1)
-        in @While parameter <> "<!>" do
-             parameters := parameters.append(Seq{parameter});
-             parameter := input.read()->at(1)
-           end;
-           self.processEvent(message.asSymbol(),parameters)
-        end
-        */
         let ownerName = owner.name then
             m = Kernel_read(ownerName) then
             message = m->at(0).asSymbol();
@@ -113,13 +103,28 @@ context Clients
            @Count i from 1 to m->size do
              args := args + Seq{m->at(i)}
            end;
+           //if self.of() = Clients::Mosaic::MosaicEventHandler then (message +":"+ args).println() end;
            self.processEvent(message,args)
         end
       catch(exception)
-        ("input: " + input).println()
-        ;("owner: " + owner).println()
-        ;("\n exception in EventHandler: " + exception).println()
-        //
+        ("\n input: " + input).println(); 
+        /* this happens to be null when THE BUG happens */
+        
+        ("owner: " + owner).println();
+        /* the owner happens to be an instance of MosaicClient, 
+           which does indeed have a slot name 
+           
+           There is one instance (normally) available:
+           Clients::Mosaic::MosaicClient.allInstances().at(0) ,
+           with name "com.ceteva.mosaic".
+           
+        */
+           
+        ("exception in EventHandler("+self.of().name+"): " + exception).println()
+        /* the exception seems to be a MachineException 
+           and occurs when this is an instance of MosaicEventHandler*/
+        
+        // TEST: Not raising an exception -> fail: no exceptions at all...
         ;if owner.hasSlot("name") then xmf.raise(exception) end
       end
     end

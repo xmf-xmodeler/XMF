@@ -139,6 +139,7 @@ context PropertyEditorXCore
           .setContex(element)
           .setSlotName(slotName)
       in
+        textbox.text := code; // HACK: constructor does not seem to work
         self.newCodeboxDisplay(textbox,slotName)
       end
     end

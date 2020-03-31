@@ -465,13 +465,15 @@ context Root::FMML
     end
 	
 	@Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
+	  if self = ancestor then false else
 		let tmp = self
 		in
 			@While tmp.level < ancestor.level and tmp <> FMML::MetaClass do
 				tmp := tmp.of()
 			end;
-			tmp = ancestor
-		end 
+			tmp = ancestor orelse tmp.inheritsFrom(ancestor)
+		end
+      end
 	end
 
 	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
@@ -640,6 +642,6 @@ context Root::FMML
       end
     end
   end
- 
-       
-  end
+  
+    
+end
