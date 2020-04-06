@@ -188,7 +188,7 @@ import FmmlxDiagrams;
         end;        
 
       // remove all inheritance
-        @For heir in package.getChildren() do
+        @For heir in package.classes do
           if heir.parents.contains(class) then
             heirs := heirs + [heir] end end;
 //        ("found "+heirs.size()+" heirs").println();
@@ -197,7 +197,7 @@ import FmmlxDiagrams;
 //        ("inheritance removed").println();
           
       // orphan the instances
-        @For instance in package.getChildren() do
+        @For instance in package.classes do
           if instance.of() = class then
             instances := instances + [instance] end end;
 //        ("found "+instances.size()+" instances").println();
@@ -341,7 +341,7 @@ import FmmlxDiagrams;
         oneRandomReason = null
       in 
         if amount < 0 then
-          @For obj in package.getChildren() do 
+          @For obj in package.classes do 
             if obj.isKindOf(FMML::MetaClass) then 
               if obj.level + amount < 0 then 
                 levelHighEnough := false; oneRandomReason:= "object " + obj.name
@@ -372,7 +372,7 @@ import FmmlxDiagrams;
         if 
           levelHighEnough 
         then
-          @For obj in package.getChildren() do
+          @For obj in package.classes do
             if obj.isKindOf(FMML::MetaClass) then 
               obj.level := obj.level + amount;
               @For att in obj.attributes do

@@ -72,8 +72,8 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-    	  @For c in self.package.getChildren() do
-    	    if c.isKindOf(FMML::MetaClass) 
+    	  @For c in self.package.classes do
+    	    if c <> null andthen c.isKindOf(FMML::MetaClass) // TODO: find out how a null can possibly end up there
     	    then
     	      let
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)
@@ -99,8 +99,8 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For object in self.package.getChildren() do
-          @For parent in object.parents do
+        @For object in self.package.classes do
+          if object <> null then @For parent in object.parents do
             if parent.isKindOf(FMML::MetaClass) then
               let 
                 childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
@@ -115,7 +115,7 @@ context FmmlxDiagrams
   	            mappingInfo.points // 3 points
   	          ]])
               end
-            end
+            end end
           end
         end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
@@ -189,8 +189,8 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-          @For c in self.package.getChildren() do 
-            if c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
+          @For c in self.package.classes do 
+            if c <> null andthen c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
             then 
               @For a in c.attributes do 
                 result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
@@ -207,8 +207,8 @@ context FmmlxDiagrams
           resultOther = [];
           result = []
         in 
-          @For c in self.package.getChildren() do
-            if c.isKindOf(FMML::MetaClass) and c.name.toString() = className
+          @For c in self.package.classes do
+            if c <> null andthen c.isKindOf(FMML::MetaClass) and c.name.toString() = className
             then 
               @For a in c.attributes do 
                 resultOwn   :=   resultOwn.append([[
@@ -241,8 +241,8 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-        @For o in self.package.getChildren() do 
-          if o.isKindOf(FMML::MetaClass) and o.name.toString() = objectName
+        @For o in self.package.classes do 
+          if o <> null andthen o.isKindOf(FMML::MetaClass) andthen o.name.toString() = objectName
           then 
             @For name in slotList do
               if o.hasSlot(name)
@@ -266,8 +266,8 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-        @For obj in self.package.getChildren() do 
-          if obj.isKindOf(FMML::MetaClass) and obj.name.toString() = objectName and opNames.size() > 0
+        @For obj in self.package.classes do 
+          if obj <> null andthen obj.isKindOf(FMML::MetaClass) andthen obj.name.toString() = objectName andthen opNames.size() > 0
           then 
             @For o in obj.of().allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
               if o.instLevel = obj.level then
@@ -316,8 +316,8 @@ context FmmlxDiagrams
         let 
           result = []
         in 
-          @For c in self.package.getChildren() do
-            if c.isKindOf(FMML::MetaClass) and c.name.toString() = className
+          @For c in self.package.classes do
+            if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.name.toString() = className
             then 
               @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
                 let
@@ -351,8 +351,8 @@ context FmmlxDiagrams
         let 
           result = [] 
         in 
-    	  @For e in self.package.getChildren() do
-    	    if e.isKindOf(Enum) 
+    	  @For e in self.package.classes do
+    	    if e  <> null andthen e.isKindOf(Enum) 
     	    then
     	      let
     	        enumItems = e.getChildren();
@@ -393,9 +393,9 @@ context FmmlxDiagrams
       let 
         result = [] 
       in 
-		@For obj in self.package.getChildren() do
+		@For obj in self.package.classes do if obj <> null then 
 		  @For slot in obj.slots() do
-		    if self.package.getChildren().contains(slot.type.owner) then 
+		    if self.package.classes.contains(slot.type.owner) then 
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
 		        result := result + [[
 		        "SLOT_NULL", 
@@ -457,7 +457,7 @@ context FmmlxDiagrams
 		      end // let
 		    end // if instance of
 		  end // for assoc
-		end; // for obj
+		end end; // for/if obj
     	self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end

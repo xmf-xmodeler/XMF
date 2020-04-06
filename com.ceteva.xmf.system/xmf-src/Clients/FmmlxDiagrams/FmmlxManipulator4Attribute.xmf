@@ -4,11 +4,18 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation checkAddAttribute(class, name, level, type) 
+    @Operation checkAddAttribute(class, name, level, type)
+      /* we check for a name collision for 
+         * the name itself as an attribute,
+         * as well as for getters and setters 
+         * or operations which are named as such anyway
+         
+         This check is >for now< also used for adding associations, 
+         to avoid collisions with the getter from the association */
       let 
         problems = [];
         camelCaseName = name.toString().subString(0,1).toUpper() + name.toString().subString(1,name.toString().size())
-      then
+      then 
         getterName = "get"+camelCaseName;
         setterName = "set"+camelCaseName
       in 
