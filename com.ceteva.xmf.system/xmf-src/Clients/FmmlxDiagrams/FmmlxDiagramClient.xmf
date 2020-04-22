@@ -498,7 +498,7 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) // temporary empty result 
     end 
     
-    @Operation addInstance(requestID : Seq(Integer), ofId, name, parents, abstract, x, y)
+    @Operation addInstance(requestID : Seq(Integer), ofId, name, parents, abstract, x, y, slotValueList)
       self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
         try
           let 
@@ -1240,6 +1240,37 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation evalList(requestID : Seq(Integer), text)
+      ("eval List start: " + text).println();
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        result = [];
+        error = [];
+        parseResult = m.evalString(text, self.package)
+      in
+        if 
+          parseResult.at(1) = null 
+        then
+          parseResult.at(0).println();
+          if
+            parseResult.at(0).isKindOf(Seq(Element))
+          then
+            @For element in parseResult.at(0) do
+              result := result + [element.toString()]
+            end
+          else
+            result:=["The expression " + text + " does not evaluate to a list."]
+          end
+        else
+          parseResult.at(1).println();
+          result:=[parseResult.at(1)]
+        end;
+        "eval List done".println();
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+        
     @Operation addDefaultEnums(p:Package)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
