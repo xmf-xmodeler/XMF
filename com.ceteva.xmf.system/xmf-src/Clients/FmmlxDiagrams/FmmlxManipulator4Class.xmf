@@ -133,12 +133,15 @@ import FmmlxDiagrams;
 
         @For pair in slotValueList do
           let
-            slotName = pair.at(0);
-            slotValueExpr = pair.at(1);
+            pairSeq = FmmlxDiagramClient::vector2Seq(pair)
+          then
+            slotName = pairSeq.at(0);
+            slotValueExpr = pairSeq.at(1)
+          then
             foundAtt = self.findAttributeForSlot(obj, slotName)
           then
             requiredType = if foundAtt <> null then foundAtt.name else Element end;
-            parseResult = m.evalString(slotValueExpr, package)
+            parseResult = self.evalString(slotValueExpr, package)
           in
             ("Trying to set initial slot value: " + slotName + " <-- " + slotValueExpr).println();
             if parseResult.at(1) = null andthen foundAtt <> null then
