@@ -15,4 +15,19 @@ import FmmlxDiagrams;
       end
     end
     
-    
+  context FmmlxManipulator
+    @Operation findAttributeForSlot(instanceWhereTheSlotResides, nameOfTheSlot)
+      let
+        class = instanceWhereTheSlotResides.of()
+      then
+        atts = class.allAttributesForLevel(instanceWhereTheSlotResides.level);
+        foundAtt = null
+      in
+        @For att in atts do
+          if att.name.toString() = nameOfTheSlot.toString() then
+            foundAtt := att
+          end
+        end;
+        foundAtt
+      end
+    end

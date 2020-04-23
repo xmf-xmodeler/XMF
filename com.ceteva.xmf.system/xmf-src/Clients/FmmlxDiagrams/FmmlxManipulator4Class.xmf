@@ -31,7 +31,7 @@ import FmmlxDiagrams;
   
   */
   context FmmlxManipulator
-    @Operation addInstance(package, ofClass, name, parents, abstract):Object
+    @Operation addInstance(package, ofClass, name, parents, abstract, slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
       if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
@@ -128,6 +128,27 @@ import FmmlxDiagrams;
         
         obj.isAbstract := abstract; // todo: check level 0
         obj.addParent(FMML::MetaClass);
+        
+        // set initial slot values where supplied
+
+        @For pair in slotValueList do
+          let
+            slotName = pair.at(0);
+            slotValueExpr = pair.at(1);
+            foundAtt = self.findAttributeForSlot(obj, slotName)
+          then
+            requiredType = if foundAtt <> null then foundAtt.name else Element end;
+            parseResult = m.evalString(slotValueExpr, package)
+          in
+            ("Trying to set initial slot value: " + slotName + " <-- " + slotValueExpr).println();
+            if parseResult.at(1) = null andthen foundAtt <> null then
+              if obj.hasSlot(slotName) then
+                self.changeSlotValue(obj, slotName, parseResult.at(0), requiredType, package)
+              end
+            end
+          end
+        end;       
+        
         obj
       end
     end

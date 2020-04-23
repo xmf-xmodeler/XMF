@@ -498,7 +498,14 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) // temporary empty result 
     end 
     
-    @Operation addInstance(requestID : Seq(Integer), ofId, name, parents, abstract, x, y, slotValueList)
+    @Operation addInstance(
+            requestID : Seq(Integer), 
+            ofId, 
+            name, 
+            parents, 
+            abstract, 
+            x, y, 
+            slotValueList: Seq(Seq(String)) )
       self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
         try
           let 
@@ -508,7 +515,7 @@ context FmmlxDiagrams
           then
             parentsList = self.getParentsList(requestID, parents)
           then 
-            newInstance = m.addInstance(self.package, ofClass, name, parentsList, abstract)
+            newInstance = m.addInstance(self.package, ofClass, name, parentsList, abstract, slotValueList)
           then
             mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
           in 
@@ -706,18 +713,18 @@ context FmmlxDiagrams
     end    
       
     //////////////////////// Slot Manipulations /////////////////////
-
+    
     @Operation changeSlotValue(requestID : Seq(Integer), objId, slotName, valueToBeParsed)
       self.protocol := self.protocol + "\n  S    changeSlotValue: " + objId + " | " + slotName + " | " + valueToBeParsed;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         obj = self.getMapping(requestID).getMapping(objId).object;
         error = null
+//      then
+//        class = obj.of()
       then
-        class = obj.of()
-      then
-        atts = class.allAttributesForLevel(obj.level);
-        foundAtt = null
+//        atts = class.allAttributesForLevel(obj.level);
+        foundAtt = m.findAttributeForSlot(obj, slotName)
       in
         @For att in atts do
           if att.name.toString() = slotName.toString() then
