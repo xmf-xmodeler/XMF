@@ -95,6 +95,60 @@ context FmmlxDiagrams
         end
     end
     
+    @Operation getAllDelegationEdges(requestID : Seq(Integer))
+      let
+        result = []
+      in
+        @For object in self.package.classes do
+          if object <> null then if object.delegatesTo <> null then
+            if object.delegatesTo.isKindOf(FMML::MetaClass) then
+              let 
+                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
+                parentID = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).id
+              then 
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping"+childID+"/"+parentID).asSymbol())
+              in 
+                result := result.append([[
+  	            mappingInfo.id, // 0 ID
+  	            childID, // 1 start ID
+  	            parentID, // 2 end ID
+  	            mappingInfo.points // 3 points
+  	          ]])
+              end
+            end end
+          end
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
+    @Operation getAllRoleFillerEdges(requestID : Seq(Integer))
+      let
+        result = []
+      in
+        @For object in self.package.classes do
+          if object <> null then if object.roleFiller <> null then
+            if object.roleFiller.isKindOf(FMML::MetaClass) then
+              let 
+                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
+                parentID = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).id
+              then 
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping"+childID+"/"+parentID).asSymbol())
+              in 
+                result := result.append([[
+  	            mappingInfo.id, // 0 ID
+  	            childID, // 1 start ID
+  	            parentID, // 2 end ID
+  	            mappingInfo.points // 3 points
+  	          ]])
+              end
+            end end
+          end
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation getAllInheritanceEdges(requestID : Seq(Integer))
       let
         result = []
@@ -405,6 +459,15 @@ context FmmlxDiagrams
 		      end // if null and mandatory
 		    end // if slot fmmlx
 		  end; // for slots
+		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
+		  then result := result + [[
+		    "NO_ROLE_FILLER",
+		    "A role filler is required",
+		    [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		    ["addRoleFiller", 
+		      self.getMapping(requestID).addOrGetObjectMapping(obj).id, 
+		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
+		  end;
 		  @For assoc in self.package.associations do
 		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) // if obj fits sourceDef
 		    then
@@ -726,11 +789,11 @@ context FmmlxDiagrams
 //        atts = class.allAttributesForLevel(obj.level);
         foundAtt = m.findAttributeForSlot(obj, slotName)
       in
-        @For att in atts do
-          if att.name.toString() = slotName.toString() then
-            foundAtt := att
-          end
-        end;
+//        @For att in atts do
+//          if att.name.toString() = slotName.toString() then
+//            foundAtt := att
+//          end
+//        end;
         if 
           foundAtt <> null 
         then
@@ -939,6 +1002,39 @@ context FmmlxDiagrams
       end
     end
     
+    ////////////////// Operations for delegation ///////////////////////////
+    
+        
+    @Operation addDelegation(
+      requestID   : Seq(Integer), 
+      delegateFromID  : Integer, 
+      delegateToID    : Integer)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        delegateFrom = self.getMapping(requestID).getMapping(delegateFromID).object;
+        delegateTo = self.getMapping(requestID).getMapping(delegateToID).object
+      then 
+        problems = m.addDelegation(delegateFrom, delegateTo)
+      in
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
+    
+    @Operation setRoleFiller(
+      requestID   : Seq(Integer), 
+      delegateFromID  : Integer, 
+      delegateToID    : Integer)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        delegateFrom = self.getMapping(requestID).getMapping(delegateFromID).object;
+        delegateTo = self.getMapping(requestID).getMapping(delegateToID).object
+      then 
+        problems = m.setRoleFiller(delegateFrom, delegateTo)
+      in
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
+
     ////////////////// Operations for editing operations ///////////////////
 
     @Operation changeOperationName(requestID : Seq(Integer), classId, oldName, newName) 
@@ -1310,4 +1406,6 @@ context FmmlxDiagrams
           m.addEnumerationValue(p, "Unit", "crate") end
       end
     end
+
+    
 end

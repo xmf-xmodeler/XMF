@@ -1,0 +1,45 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator
+    @Operation addDelegation(delegateFrom, delegateTo)
+      if 
+        delegateFrom.delegatesTo <> null 
+      then 
+        ["The class " + delegateFrom.name + " already delegates to " + delegateFrom.delegatesTo.name]
+      elseif
+        delegateFrom.level <> delegateTo.level
+      then 
+        ["The class " + delegateFrom.name + " is not on the same level as " + delegateTo.name]
+      elseif
+        self.transitivelyDelegatesTo(delegateTo, delegateFrom)
+      then
+        ["The class " + delegateTo.name + " already delegates to " + delegateFrom.name]
+      else
+        delegateFrom.delegatesTo := delegateTo;[]
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation setRoleFiller(delegateFrom, delegateTo)
+      if
+        delegateTo.isKindOf(delegateFrom.of().delegatesTo)
+      then
+        delegateFrom.roleFiller := delegateTo;[]
+      else
+        [delegateTo + " cannot be roe filler for " + delegateFrom +"."]
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation transitivelyDelegatesTo(delegateFrom, delegateTo)
+      if 
+        delegateFrom.delegatesTo = delegateTo 
+      then 
+        true
+      else
+        false // TODO: check more cases
+      end
+    end

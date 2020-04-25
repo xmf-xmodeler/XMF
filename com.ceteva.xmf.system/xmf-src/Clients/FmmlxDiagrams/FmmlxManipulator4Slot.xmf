@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation changeSlotValue(obj, slotName, valueToBeAdded, requiredType, env:Package) 
+    @Operation changeSlotValue(obj, slotName, valueToBeAdded, requiredType, env:Package)
       if valueToBeAdded.isKindOf(requiredType) 
         orelse valueToBeAdded.isKindOf(Seq(requiredType))
         orelse valueToBeAdded.isKindOf(Set(requiredType))

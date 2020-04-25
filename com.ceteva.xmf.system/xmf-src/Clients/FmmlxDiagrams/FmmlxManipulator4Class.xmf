@@ -140,10 +140,9 @@ import FmmlxDiagrams;
           then
             foundAtt = self.findAttributeForSlot(obj, slotName)
           then
-            requiredType = if foundAtt <> null then foundAtt.name else Element end;
+            requiredType = if foundAtt <> null then foundAtt.type else Element end;
             parseResult = self.evalString(slotValueExpr, package)
           in
-            ("Trying to set initial slot value: " + slotName + " <-- " + slotValueExpr).println();
             if parseResult.at(1) = null andthen foundAtt <> null then
               if obj.hasSlot(slotName) then
                 self.changeSlotValue(obj, slotName, parseResult.at(0), requiredType, package)
@@ -151,7 +150,6 @@ import FmmlxDiagrams;
             end
           end
         end;       
-        
         obj
       end
     end
