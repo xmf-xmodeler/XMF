@@ -617,12 +617,12 @@ context Root::FMML
            if not alreadyChecked.contains(currentClass.of()) then
              toBeChecked := toBeChecked + [currentClass.of()]
            end
-         end;
+         end/*;
          if (not currentClass.delegatesTo = null) andthen  currentClass.delegatesTo.isKindOf(FMML::MetaClass) then        // delegation
            if not alreadyChecked.contains(currentClass.delegatesTo) then
              toBeChecked := toBeChecked + [currentClass.delegatesTo]
            end
-         end
+         end*/
        end; // while
        myOps.asSeq()
      end // let

@@ -64,3 +64,120 @@ context Root::FMML
     end
   end
 end
+  
+context Root
+  @Operation getSuperClasses(c : Class)
+    let 
+      supers = {}; 
+      nextSupers = {c}
+    in
+      @While
+        nextSupers.size() > supers.size()
+      do
+        supers := nextSupers;
+//        nextSupers := {};
+        @For x in supers do
+          nextSupers := nextSupers + x.parents;
+          nextSupers := nextSupers + {x.of()}
+        end
+      end;
+      nextSupers - {Classifier, Object, Element, DocumentedElement, NamedElement,
+                    IndexedContainer, NameSpace, Contained, Container, Class}
+    end
+  end  
+
+context Root
+  @Operation packStat()
+    let 
+      i = 0;
+      numberOfClasses = [];
+      sumOfClasses = 0;
+      maxClasses = [-1,null];
+      numberOfAtts = [];
+      sumOfAtts = 0;
+      maxAtts = [-1,null];
+      numberOfOps = [];
+      sumOfOps = 0;
+      maxOps = [-1,null];
+      numberOfSupers = [];
+      sumOfSupers = 0;
+      maxSupers = [-1,null];
+      setOfDep = {}
+    in
+      @For p in Package.allInstances() do if p.path().indexOf("Root::",0)=0 then
+        (i + ": ").println();
+//        p.path().subString(6,p.path().size()).println();
+//        p.name().println();
+//        (if p.documentation = null then "NULL" else p.documentation.doc end).println();
+//        "".println();
+        
+        numberOfClasses := numberOfClasses + [p.classes.size()]; sumOfClasses := sumOfClasses + p.classes.size();
+        if p.classes.size() > maxClasses.at(0) then maxClasses := [p.classes.size(), p.path()]; ("Class:  New record: " + p.classes.size() + " (" + p + ")!").println() end;
+        @For c in p.classes do if c.owner <> null then
+        
+          @For s in c.parents do
+            if s.owner <> c.owner andthen s.owner <> null then
+//              ("    " + c.owner.path() + " (" + c.name +") uses " + if s.owner = null then "ERROR" else s.owner.path() end + " (" + s.name +")").println();
+              let depItem = [c.owner, s.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not s.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end
+          end;
+          
+          numberOfSupers := numberOfSupers + [getSuperClasses(c).size()]; sumOfSupers := sumOfSupers + getSuperClasses(c).size();
+          if getSuperClasses(c).size() > maxSupers.at(0) then maxSupers := [getSuperClasses(c).size(), c.path()]; ("Supers: New record: " + getSuperClasses(c).size() + " (" + c + ")!").println() end;
+          
+          numberOfAtts := numberOfAtts + [c.attributes.size()]; sumOfAtts := sumOfAtts + c.attributes.size();
+          if c.attributes.size() > maxAtts.at(0) then maxAtts := [c.attributes.size(), c.path()]; ("Atts:   New record: " + c.attributes.size() + " (" + c + ")!").println() end;
+          @For a in c.attributes do
+            if a.type.owner <> c.owner andthen a.type.owner <> null then
+//              ("    " + c.owner.path() + " (" + c.name +") uses " + if a.type.owner = null then "ERROR" else a.type.owner.path() end + " (" + a.type.name +")").println();
+              let depItem = [c.owner, a.type.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not a.type.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end
+          end;
+          
+          numberOfOps := numberOfOps + [c.operations.size()]; sumOfOps := sumOfOps + c.operations.size();
+          if c.operations.size() > maxOps.at(0) then maxOps := [c.operations.size(), c.path()]; ("Ops:    New record: " + c.operations.size() + " (" + c + ")!").println() end;
+          @For o in c.operations do
+            if o.type.owner <> c.owner andthen o.type.owner <> null then
+              let depItem = [c.owner, o.type.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not o.type.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end;
+            
+            @For t in o.paramTypes() do
+              if t.owner <> c.owner andthen t.owner <> null then
+                let depItem = [c.owner, t.owner]; found = false in
+                  @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                  if not found andthen not t.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+                end
+              end
+            end
+          end
+          
+        end end;
+        
+        i := i+1
+      end end;
+        
+//      @For item in setOfDep do
+//        (item.at(0).path() + " uses " + item.at(1).path()).println()
+//      end;
+
+      //numberOfClasses.println()
+      (sumOfClasses + " classes found in " + i + " packages. (avg.: " + ((1.0 * sumOfClasses) / i) + ")").println();
+      (sumOfAtts + " attributes found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfAtts) / sumOfClasses) + "/cls, " + ((1.0 * sumOfAtts) / i)+"/pkg)").println();
+      (sumOfOps + " operations found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfOps) / sumOfClasses) + "/cls, " + ((1.0 * sumOfOps) / i)+"/pkg)").println();
+      (sumOfSupers + " super classes found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfSupers) / sumOfClasses) + "/cls, " + ((1.0 * sumOfSupers) / i)+"/pkg)").println();
+      
+      ("max Classes: " + maxClasses).println();
+      ("max Attributes: " + maxAtts).println();
+      ("max Operations: " + maxOps).println();
+      ("max Super Classes: " + maxSupers).println()
+    end
+  end

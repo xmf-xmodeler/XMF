@@ -9,7 +9,7 @@ context FmmlxDiagrams
 
     @Attribute package : Package end
     @Attribute communicator : Element end
-    @Attribute protocol : String = "" end
+    @Attribute protocol : Seq(Element) = [] end
     @Attribute name : String = "no name set yet" end
     @Attribute diagrams : Table = Table(10) end
     /* TEMP */ @Attribute diagram : FmmlxDiagram end
@@ -545,7 +545,7 @@ context FmmlxDiagrams
     ////////////////// Class Manipulations ///////////////////
     
     @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y)
-        self.protocol := self.protocol + "\nE      addMetaClass: " + name + " | " + level + " | " + parents + " | " + abstract;
+//        self.protocol := self.protocol + "\nE      addMetaClass: " + name + " | " + level + " | " + parents + " | " + abstract;
         let 
           m = FmmlxDiagrams::FmmlxManipulator() 
         then 
@@ -558,6 +558,7 @@ context FmmlxDiagrams
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end;
+        self.protocol := self.protocol + [["addMetaClass", ["name",name] , ["level",level+""] , ["parents",self.getParentsPaths(requestID, parents)] , ["abstract",abstract+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) // temporary empty result 
     end 
     
@@ -569,7 +570,7 @@ context FmmlxDiagrams
             abstract, 
             x, y, 
             slotValueList: Seq(Seq(String)) )
-      self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
+//      self.protocol := self.protocol + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
         try
           let 
             m = FmmlxDiagrams::FmmlxManipulator() 
@@ -583,7 +584,8 @@ context FmmlxDiagrams
             mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
           in 
             mappingInfo.lastKnownDiagramX := x;
-            mappingInfo.lastKnownDiagramY := y
+            mappingInfo.lastKnownDiagramY := y;
+            self.protocol := self.protocol + [["addInstance", ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parents)] , ["abstract",abstract+""]]]
           end;
           self.communicator.sendMessageToJava([self.vector2Seq(requestID), []]) 
         catch (exception)
@@ -592,49 +594,52 @@ context FmmlxDiagrams
     end 
     
     @Operation removeClass(requestID : Seq(Integer), classId, strategy) 
-      self.protocol := self.protocol + "\nE      removeClass: " + classId;
+//      self.protocol := self.protocol + "\nE      removeClass: " + classId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       in
         m.removeClass(class, strategy)
       end;
+      self.protocol := self.protocol + 	[["removeClass", ["class", class.path()]]];
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
     end
     
     @Operation changeClassName(requestID : Seq(Integer), classId, newName) 
-      self.protocol := self.protocol + "\nE      changeClassName: " + classId + " | " + newName;
+//      self.protocol := self.protocol + "\nE      changeClassName: " + classId + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       in
         m.changeClassName(class, newName)
       end;
+      self.protocol := self.protocol + [["changeClassName", ["class", class.path()] , ["newName",newName]]];
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), []])
     end
       
     @Operation setClassAbstract(requestID : Seq(Integer), classId, isAbstract) 
-      self.protocol := self.protocol + "\nE      setClassAbstract: " + classId + " | " + isAbstract;
+//      self.protocol := self.protocol + "\nE      setClassAbstract: " + classId + " | " + isAbstract;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       in
+        self.protocol := self.protocol + [["setClassAbstract", ["class", class.path()] , ["abstract",abstract+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeClassAbstract(class, isAbstract)])
       end      
     end 
     
     @Operation levelRaiseAll(requestID : Seq(Integer), amount)
-      self.protocol := self.protocol + "\nE      levelRaiseAll: " + amount;
+//      self.protocol := self.protocol + "\nE      levelRaiseAll: " + amount;
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       in
+        self.protocol := self.protocol + [["levelRaiseAll"]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.levelRaiseAll(self.package, amount)])
       end
     end
     
-          
     @Operation changeParent(requestID : Seq(Integer), classId, oldList, newList)
-      self.protocol := self.protocol + "\nE      changeParent: " + oldList + "->" + newList;
+//      self.protocol := self.protocol + "\nE      changeParent: " + oldList + "->" + newList;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         oldSet = self.vector2Seq(oldList).asSet();
@@ -677,7 +682,7 @@ context FmmlxDiagrams
 //        else 
 //          problems := problems + ["Only one parent may be moved at a time."]
 //        end;
-          
+        self.protocol := self.protocol + [["changeParent" , ["old",self.getParentsPaths(requestID, oldList)], ["new",self.getParentsPaths(requestID, newList)]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -685,7 +690,7 @@ context FmmlxDiagrams
     //////////////////////// Attribute Manipulations /////////////////////
     
     @Operation addAttribute(requestID : Seq(Integer), classId, name, level, typeName, multiplicityV)
-      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + name + " | " + level + " | " + typeName;
+//      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + name + " | " + level + " | " + typeName;
       let 
         m = FmmlxDiagrams::FmmlxManipulator()
       then 
@@ -704,12 +709,18 @@ context FmmlxDiagrams
             [("addAttribute failed during transaction: " + e.message)]
           end // try
         end; // if
+        self.protocol := self.protocol + [["addAttribute", 
+                                            ["class", class.path()],
+                                            ["name", name], 
+                                            ["level", level+""],
+                                            ["type", type.path()],
+                                            ["multiplicity", multiplicity+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end // in       
     end 
     
     @Operation removeAttribute(requestID : Seq(Integer), classId, attName, strategy) 
-      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + attName;
+//      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + attName;
      // for now: ignore strategy and simply delete 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
@@ -717,50 +728,60 @@ context FmmlxDiagrams
       in
         m.removeAttribute(class, attName, strategy)
       end;
+      self.protocol := self.protocol + [["removeAttribute", ["class", class.path()], ["name", attName]]];
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
     end
     
     @Operation changeAttributeName(requestID : Seq(Integer), classId, oldName, newName)
-      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
+//      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       then 
         problems = m.checkChangeAttributeName(class, oldName, newName)
       in
-        if problems.isEmpty() then m.changeAttributeName(class, oldName, newName) end;
+        if problems.isEmpty() then 
+          m.changeAttributeName(class, oldName, newName);
+          self.protocol := self.protocol + [["changeAttributeName", ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
+          end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
     
     @Operation changeAttributeLevel(requestID : Seq(Integer), classId, attName, oldLevel, newLevel)
-      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newLevel;
+//      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newLevel;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       then         
         problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
       in
-        if problems.isEmpty() then m.changeAttributeLevel(class, attName, oldLevel, newLevel) end;
+        if problems.isEmpty() then 
+          m.changeAttributeLevel(class, attName, oldLevel, newLevel);
+          self.protocol := self.protocol + [["changeAttributeLevel", ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
+          end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
       
     @Operation changeAttributeType(requestID : Seq(Integer), classId, attName, oldTypeName, newTypeName)
-      self.protocol := self.protocol + "\n A     changeAttributeType: " + classId + " | " + attName + " | " + newTypeName;
+//      self.protocol := self.protocol + "\n A     changeAttributeType: " + classId + " | " + attName + " | " + newTypeName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       then         
         problems = m.checkChangeAttributeType(class, attName, oldTypeName, newTypeName, self.package)
       in
-        if problems.isEmpty() then m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.package) end;
+        if problems.isEmpty() then 
+          m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.package);
+          self.protocol := self.protocol + [["changeAttributeType", ["class", class.path()] , ["name", attName] , ["oldType", oldTypeName] , ["newType", newTypeName]]]
+          end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
     
     @Operation changeAttributeMultiplicity(requestID : Seq(Integer), classId, attName, oldMul, newMul)
-      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newMul;
+//      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newMul;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
@@ -770,7 +791,10 @@ context FmmlxDiagrams
 //        problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
           problems = []
       in
-        if problems.isEmpty() then m.changeAttributeMultiplicity(class, attName, null, newMult) end;
+        if problems.isEmpty() then 
+          m.changeAttributeMultiplicity(class, attName, null, newMult);
+          self.protocol := self.protocol + [["changeAttributeMultiplicity", ["class", class.path()] , ["name", attName] , ["oldMul", oldMul+""] , ["newMul", newMul+""]]]
+          end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end    
@@ -778,7 +802,7 @@ context FmmlxDiagrams
     //////////////////////// Slot Manipulations /////////////////////
     
     @Operation changeSlotValue(requestID : Seq(Integer), objId, slotName, valueToBeParsed)
-      self.protocol := self.protocol + "\n  S    changeSlotValue: " + objId + " | " + slotName + " | " + valueToBeParsed;
+//      self.protocol := self.protocol + "\n  S    changeSlotValue: " + objId + " | " + slotName + " | " + valueToBeParsed;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         obj = self.getMapping(requestID).getMapping(objId).object;
@@ -810,6 +834,10 @@ context FmmlxDiagrams
         else
           error := "no Slot Found"
         end;
+		self.protocol := self.protocol + [["changeSlotValue", 
+                                            ["obj", obj.path()],
+                                            ["slotName", slotName], 
+                                            ["valueToBeParsed", valueToBeParsed]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), if error = null then null else [error] end]) // temporary empty result 
       end
     end
@@ -829,6 +857,15 @@ context FmmlxDiagrams
       let list = [] in
         @For id in parentIds do
           if not id = -1 then list := list.append([self.getMapping(requestID).getMapping(id).object]) end
+        end; // for
+        list
+      end// let      
+    end
+    
+    @Operation getParentsPaths(requestID, parentIds) // for local use
+      let list = "" in
+        @For id in parentIds do
+          if not id = -1 then list := list + self.getMapping(requestID).getMapping(id).object.path() + "," end
         end; // for
         list
       end// let      
@@ -865,7 +902,7 @@ context FmmlxDiagrams
 	  isSymmetric : Boolean,
 	  isTransitive : Boolean):XCore::Element
   	  
-      self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
+//      self.protocol := self.protocol + "\n   Z   addAssociation: " + class1Id + " | " + class2Id + " | " + fwName;
       
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
@@ -890,8 +927,16 @@ context FmmlxDiagrams
   	        mult1, mult2,
   	        instLevel1, instLevel2,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
-  	        isSymmetric, isTransitive)
-  	    end;
+  	        isSymmetric, isTransitive);
+          self.protocol := self.protocol + [["addAssociation", 
+            ["class1", class1.path()] ,["class2", class2.path()] , 
+            ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] 
+            ["fwName", fwName],
+            ["mult1", mult1+""] , ["mult2", mult2+""] 
+            ["instLevel1", instLevel1+""] , ["instLevel2", instLevel2+""] 
+            ["sourceVisibleFromTarget", sourceVisibleFromTarget] , ["targetVisibleFromSource", targetVisibleFromSource] 
+            ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
+   	    end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end  	  
   	end    
@@ -900,13 +945,14 @@ context FmmlxDiagrams
       requestID  : Seq(Integer), 
       assocId    : Integer)
       
-      self.protocol := self.protocol + "\n   Z   removeAssociation: " + assocId;
+//      self.protocol := self.protocol + "\n   Z   removeAssociation: " + assocId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = self.getMapping(requestID).getMapping(assocId).object
       then 
         problems = m.removeAssociation(assoc)
       in
+        self.protocol := self.protocol + [["removeAssociation", ["name", assoc.name]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -931,38 +977,43 @@ context FmmlxDiagrams
       assocId    : Integer, 
       newName    : String)
       
-      self.protocol := self.protocol + "\n   Z   changeAssociationForwardName: " + assocId + " | " + newName;
+//      self.protocol := self.protocol + "\n   Z   changeAssociationForwardName: " + assocId + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = self.getMapping(requestID).getMapping(assocId).object
-      then 
+      then
+        oldName = assoc.name
+      then
         problems = m.changeAssociationForwardName(assoc, newName)
       in
+        self.protocol := self.protocol + [["changeAssociationForwardName", ["newName", newName], ["oldName", oldName]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
     
    @Operation changeAssociationEnd2StartMultiplicity(requestID : Seq(Integer), associationID, multV)
 
-      self.protocol := self.protocol + "\n   Z   changeAssociationEnd2StartMultiplicity: " + associationID + " | " + multV;
+//      self.protocol := self.protocol + "\n   Z   changeAssociationEnd2StartMultiplicity: " + associationID + " | " + multV;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         a = self.getMapping(requestID).getMapping(associationID).object
       then 
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
+        self.protocol := self.protocol + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["mult", m+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, newMult, null)])
       end
     end
       
     @Operation changeAssociationStart2EndMultiplicity(requestID : Seq(Integer), associationID, multV) 
-      self.protocol := self.protocol + "\n   Z   changeAssociationStart2EndMultiplicity: " + associationID + " | " + multV;
+//      self.protocol := self.protocol + "\n   Z   changeAssociationStart2EndMultiplicity: " + associationID + " | " + multV;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         a = self.getMapping(requestID).getMapping(associationID).object
       then 
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
+        self.protocol := self.protocol + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["mult", m+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, null, newMult)])
       end
     end
@@ -974,7 +1025,7 @@ context FmmlxDiagrams
       obj2Id  : Integer,
       assocId : Integer)
       
-      self.protocol := self.protocol + "\n    L  addAssociationInstance: " + assocId + " | " + obj1Id + " | " + obj2Id;
+//      self.protocol := self.protocol + "\n    L  addAssociationInstance: " + assocId + " | " + obj1Id + " | " + obj2Id;
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    obj1 = self.getMapping(requestID).getMapping(obj1Id).object;
@@ -983,6 +1034,7 @@ context FmmlxDiagrams
   	  then 
         problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
+  	    self.protocol := self.protocol + [["addLink", ["association", a.name], ["obj1", obj1.path()], ["obj2", obj2.path()]]];
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
     end
@@ -991,13 +1043,14 @@ context FmmlxDiagrams
       requestID   : Seq(Integer), 
       assocInstId    : Integer)
       
-      self.protocol := self.protocol + "\n    L  removeAssociationInstance: " + assocInstId;
+//      self.protocol := self.protocol + "\n    L  removeAssociationInstance: " + assocInstId;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assocInstSeq = self.getMapping(requestID).getMapping(assocInstId).object
       then 
         problems = m.removeAssociationInstance(assocInstSeq)
       in
+  	    self.protocol := self.protocol + [["removeLink", ["todo", "don't use id here"]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1039,21 +1092,24 @@ context FmmlxDiagrams
 
     @Operation changeOperationName(requestID : Seq(Integer), classId, oldName, newName) 
     
-      self.protocol := self.protocol + "\n     O changeOperationName: " + classId + " | " + oldName + " | " + newName;
+//      self.protocol := self.protocol + "\n     O changeOperationName: " + classId + " | " + oldName + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
       then 
         problems = m.checkChangeOperationName(class, oldName, newName)
       in
-        if problems.isEmpty() then m.changeOperationName(class, oldName, newName) end;
+        if problems.isEmpty() then 
+          m.changeOperationName(class, oldName, newName);
+          self.protocol := self.protocol + [["changeOperationName", ["oldName", oldName] , ["newName", newName] , ["class", class.path()]]]
+          end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
     
     @Operation changeOperationLevel(requestID : Seq(Integer), classId, name, oldLevel, newLevel) 
     
-      self.protocol := self.protocol + "\n     O changeOperationLevel: " + classId + " | " + name + " | " + newLevel;
+//      self.protocol := self.protocol + "\n     O changeOperationLevel: " + classId + " | " + name + " | " + newLevel;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
@@ -1062,6 +1118,7 @@ context FmmlxDiagrams
       then 
         problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
+        self.protocol := self.protocol + [["changeOperationLevel", ["newLevel", newLevel+""] , ["newName", newName] , ["class", class.path()]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1074,7 +1131,7 @@ context FmmlxDiagrams
       returnType : String,
       body       : String)
       
-      self.protocol := self.protocol + "\n     O addOperation: " + classId + " | " + opName + " | " + level;
+//      self.protocol := self.protocol + "\n     O addOperation: " + classId + " | " + opName + " | " + level;
       
       let
         m = FmmlxDiagrams::FmmlxManipulator();
@@ -1093,7 +1150,7 @@ context FmmlxDiagrams
       level      : Integer, 
       body       : String)
       
-      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
+//      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
       
       let
         m = FmmlxDiagrams::FmmlxManipulator();
@@ -1110,7 +1167,7 @@ context FmmlxDiagrams
       classId    : Integer,
       opName     : String)
       
-      self.protocol := self.protocol + "\n     O removeOperation: " + classId + " | " + opName;
+//      self.protocol := self.protocol + "\n     O removeOperation: " + classId + " | " + opName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
@@ -1137,7 +1194,7 @@ context FmmlxDiagrams
     
     @Operation changeOperationOwner(requestID : Seq(Integer), idO_old, name, idO_new) 
       
-      self.protocol := self.protocol + "\n     O changeOperationOwner: " + classId + " | " + name + " | " + idO_new;
+//      self.protocol := self.protocol + "\n     O changeOperationOwner: " + classId + " | " + name + " | " + idO_new;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         oldOwner = self.getMapping(requestID).getMapping(idO_old).object;
@@ -1162,7 +1219,7 @@ context FmmlxDiagrams
         
     @Operation changeOperationBody(requestID : Seq(Integer), classId:Integer, oldName:String, body:String)
       
-      self.protocol := self.protocol + "\n     O changeOperationBody: " + classId + " | " + oldName;
+//      self.protocol := self.protocol + "\n     O changeOperationBody: " + classId + " | " + oldName;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object;
@@ -1407,5 +1464,11 @@ context FmmlxDiagrams
       end
     end
 
-    
+    @Operation getDiagramData(requestID : Seq(Integer))
+        //let 
+        //  result = [protocol] 
+        //in
+    	  self.communicator.sendMessageToJava([self.vector2Seq(requestID), if protocol.size() = 0 then ["protocol"] else ["protocol"] + protocol end])
+        //end
+    end
 end
