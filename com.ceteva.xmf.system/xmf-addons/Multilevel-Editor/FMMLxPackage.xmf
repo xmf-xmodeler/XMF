@@ -165,9 +165,9 @@ context Root
         i := i+1
       end end;
         
-//      @For item in setOfDep do
-//        (item.at(0).path() + " uses " + item.at(1).path()).println()
-//      end;
+      @For item in setOfDep do
+        (item.at(0).path() + " uses " + item.at(1).path()).println()
+      end;
 
       //numberOfClasses.println()
       (sumOfClasses + " classes found in " + i + " packages. (avg.: " + ((1.0 * sumOfClasses) / i) + ")").println();

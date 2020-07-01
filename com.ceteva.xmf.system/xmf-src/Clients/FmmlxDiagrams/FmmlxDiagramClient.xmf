@@ -12,7 +12,7 @@ context FmmlxDiagrams
     @Attribute protocol : Seq(Element) = [] end
     @Attribute name : String = "no name set yet" end
     @Attribute diagrams : Table = Table(10) end
-    /* TEMP */ @Attribute diagram : FmmlxDiagram end
+//    /* TEMP */ @Attribute diagram : FmmlxDiagram end
     
     @Constructor(name)
 //      self.setCommandInterpreter(DiagramCommandInterpreter());
@@ -21,6 +21,40 @@ context FmmlxDiagrams
     end
     
     @Operation createDiagram(package,name)
+      let
+        selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagrams.values().diagramName,{},null)
+      in
+        if selectedNames = -1 then selectedNames := [] end;
+        if 
+          selectedNames.size() = 0
+        then 
+          self.createDiagram2(package,name)
+        elseif
+          selectedNames.size() = 1
+        then
+          ("diagrams: " + diagrams).println();
+          let 
+            selectedName = selectedNames.at(0);
+            keys = self.diagrams.keys();
+            key = null;
+            keyCount = 0
+          in
+            @While key = null and keyCount < keys.size() do
+              if diagrams.get(keys.at(keyCount)).diagramName.toString() = selectedName.toString() then key := keys.at(keyCount) end;
+              keyCount := keyCount + 1
+            end;
+            if key <> null then 
+//              self.communicator.reopenDiagram(key, selectedName.toString(), diagrams.get(key).package.path())
+              self.communicator.newDiagram(key, diagrams.get(key).diagramName.toString(), diagrams.get(key).package.path())
+            else
+              "diagram not found".println()
+            end
+          end
+        end
+      end
+    end
+    
+    @Operation createDiagram2(package,name)
         self.package := package;
         
         ///////////FIND ALTERNATIVE TO THIS///////////////////
@@ -37,25 +71,27 @@ context FmmlxDiagrams
         let 
           FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self);
-//          diagram = FmmlxDiagram();
+          diagram = FmmlxDiagram();
           newID = 0
         in
-        
-          if diagram = null then self.diagram := FmmlxDiagram() end;
-          /* FUTURE: @While diagrams.hasKey(newID) do newID := newID + 1 end;
+          //if diagram = null then self.diagram := FmmlxDiagram() end;
+          //* FUTURE: 
+          @While diagrams.hasKey(newID) do newID := newID + 1 end;
           
-          self.diagrams.put(newID, self.diagram);
+          diagram.diagramName := ("Diagram " + package.name + " " + newID);
+          diagram.package := package;
+          self.diagrams.put(newID, diagram);
           
           if self.communicator = null then 
             self.communicator := FmmlxDiagramCommunicator();
             self.communicator.setHandle(handle)
-          end;*/
+          end;//*/
           
           // TEMP
-          self.diagrams.put(newID, self.diagram);
-          self.communicator := FmmlxDiagramCommunicator();
-          self.communicator.setHandle(handle);          
-          self.communicator.newDiagram(newID, name.toString(), self.package.path());
+          //self.diagrams.put(newID, self.diagram);
+          //self.communicator := FmmlxDiagramCommunicator();
+          //self.communicator.setHandle(handle);          
+          self.communicator.newDiagram(newID, diagram.diagramName.toString(), self.package.path());
           
           diagram // vestigial return value for diagram manager
         end
@@ -930,11 +966,11 @@ context FmmlxDiagrams
   	        isSymmetric, isTransitive);
           self.protocol := self.protocol + [["addAssociation", 
             ["class1", class1.path()] ,["class2", class2.path()] , 
-            ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] 
+            ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
             ["fwName", fwName],
-            ["mult1", mult1+""] , ["mult2", mult2+""] 
-            ["instLevel1", instLevel1+""] , ["instLevel2", instLevel2+""] 
-            ["sourceVisibleFromTarget", sourceVisibleFromTarget] , ["targetVisibleFromSource", targetVisibleFromSource] 
+            ["mult1", mult1+""] , ["mult2", mult2+""] ,
+            ["instLevel1", instLevel1+""] , ["instLevel2", instLevel2+""] ,
+            ["sourceVisibleFromTarget", sourceVisibleFromTarget] , ["targetVisibleFromSource", targetVisibleFromSource] ,
             ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
    	    end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems

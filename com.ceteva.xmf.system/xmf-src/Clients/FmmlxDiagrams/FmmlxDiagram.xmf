@@ -9,7 +9,9 @@ context FmmlxDiagrams
   @Class FmmlxDiagram
   
   @Attribute mapping : FmmlxDiagramMapping = FmmlxDiagramMapping() end
-  @Attribute name:Symbol end
+  //@Attribute name:Symbol end
+  @Attribute package:Element end
+  @Attribute diagramName:Symbol end
 
     @Operation newDiagram()
         //@Command(self) newDiagramCommand(self) end;
