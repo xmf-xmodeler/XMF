@@ -1,3 +1,5 @@
+
+
 parserImport XOCL;
 
 import Clients;
@@ -125,6 +127,15 @@ context Root
     let file = xmf.openFile(xmf.projDir(),"*.xmf") in
       if file.fileExists() then
         XmfFile(null,file).editText()
+      end
+    end
+  end
+
+context Root
+  @Operation openXmlFile()
+    let file = xmf.openFile(xmf.projDir(),"*.xml") in
+      if file.fileExists() then
+        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().openXmlFile(file)
       end
     end
   end

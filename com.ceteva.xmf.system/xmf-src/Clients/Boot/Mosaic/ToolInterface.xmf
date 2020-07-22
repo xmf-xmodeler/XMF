@@ -131,7 +131,16 @@ in
       }
     )
   );
-  
+
+   registry.addContribution(id,
+     TypeLessContribution(
+       Seq{
+         Seq{"&File","File","Open Xml File ..."},
+         Root::openXmlFile
+       }
+     )
+   );
+
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
@@ -142,7 +151,7 @@ in
       }
     )
   );
-  
+
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
@@ -151,7 +160,7 @@ in
       }
     )
   )
-  
+
 end;
 
 // namespace view protection
@@ -178,7 +187,7 @@ in
   registry.addContribution(id,TypeLessContribution(Assembler,Seq{}));
   registry.addContribution(id,TypeLessContribution(Compiler,Seq{}));
   registry.addContribution(id,TypeLessContribution(IO,Seq{}));
-  registry.addContribution(id,TypeLessContribution(Projects,Seq{}))  
+  registry.addContribution(id,TypeLessContribution(Projects,Seq{}))
 end;
 
 // boot init file
@@ -197,7 +206,7 @@ end;
 
 context Root
 @Operation compileAll()
-(xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir()) 
+(xmf.homeDir() + "/Manifest.o").loadBin(false).build(xmf.homeDir())
 end
 
 context Root
@@ -205,8 +214,8 @@ context Root
     @XML::Parser::Grammar Test
       XModeler ::= <XModeler date=savedAt saver=user> Browser </XModeler>.
       Browser  ::= <Browser> BrowserElement* </Browser>.
-      BrowserElement ::= <Directory p=path/> { 
-        xmf.browseDirectory(p) 
+      BrowserElement ::= <Directory p=path/> {
+        xmf.browseDirectory(p)
       }.
     end
   end
@@ -218,11 +227,11 @@ context XMF
     else false
     end
   end
-    
+
 context XMF
   @Operation loadXModelerState(file:String):Boolean
     if file.fileExists()
-    then 
+    then
       try
         @WithOpenFile(fin <- file)
           let xin = XML::Parser::ParserChannel(fin,XModelerStateRestorer)
@@ -236,17 +245,17 @@ context XMF
     else false
     end
   end
-  
+
 context XMF
-  @Operation saveXModelerState():Boolean    
+  @Operation saveXModelerState():Boolean
     if self.projDir().isKindOf(String) andthen self.projDir().fileExists()
     then self.saveXModelerState(self.projDir() + "/xmodeler.xml")
     else false
     end
   end
-  
+
 context XMF
-  @Operation saveXModelerState(file:String):Boolean   
+  @Operation saveXModelerState(file:String):Boolean
     try
       @WithOpenFile(out -> file)
         @XML::PrintXML::XML(out)
@@ -262,21 +271,21 @@ context XMF
         end
       end;
       true
-    catch(exception) 
+    catch(exception)
       false
     end
   end
-  
+
 context XMF
   @Operation browseDirectory(path:String):Boolean
     if path.fileExists()
-    then 
+    then
       let fileMappingClient = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
-          dir = IO::Directory(path,Seq{".*.txt",".*.xmf",".*.xml",".*.java",".*.adb",".*.html"},0) 
+          dir = IO::Directory(path,Seq{".*.txt",".*.xmf",".*.xml",".*.java",".*.adb",".*.html"},0)
       in fileMappingClient.add(dir);
-         true    
+         true
       end
     else false
     end
   end
-  
+
