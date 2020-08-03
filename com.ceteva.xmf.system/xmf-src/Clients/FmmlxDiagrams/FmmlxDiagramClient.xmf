@@ -20,6 +20,18 @@ context FmmlxDiagrams
         null
     end
     
+    @Operation getCommunicator()
+      if self.communicator = null then 
+        let
+          FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator")
+        in
+          self.communicator := FmmlxDiagramCommunicator();
+          self.communicator.setHandle(handle)
+        end
+      end;
+      self.communicator
+    end
+    
     @Operation createDiagram(package,name)
       let
         selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagrams.values().diagramName,{},null)
@@ -69,7 +81,7 @@ context FmmlxDiagrams
         //////////////////////////////////////////////////////
         
         let 
-          FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
+          //FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self);
           diagram = FmmlxDiagram();
           newID = 0
@@ -82,10 +94,11 @@ context FmmlxDiagrams
           diagram.package := package;
           self.diagrams.put(newID, diagram);
           
-          if self.communicator = null then 
-            self.communicator := FmmlxDiagramCommunicator();
-            self.communicator.setHandle(handle)
-          end;//*/
+          //if self.communicator = null then 
+          //  self.communicator := FmmlxDiagramCommunicator();
+          //  self.communicator.setHandle(handle)
+          //end;//*/
+          self.getCommunicator();
           
           // TEMP
           //self.diagrams.put(newID, self.diagram);
@@ -634,10 +647,12 @@ context FmmlxDiagrams
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
+      then
+        classPath4Log = class.path()
       in
-        m.removeClass(class, strategy)
+        m.removeClass(class, strategy);
+        self.protocol := self.protocol + 	[["removeClass", ["class", classPath4Log]]]
       end;
-      self.protocol := self.protocol + 	[["removeClass", ["class", class.path()]]];
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
     end
     
@@ -1036,7 +1051,7 @@ context FmmlxDiagrams
       then 
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
-        self.protocol := self.protocol + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["mult", m+""]]];
+        self.protocol := self.protocol + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["mult", newMult+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, newMult, null)])
       end
     end
@@ -1049,7 +1064,7 @@ context FmmlxDiagrams
       then 
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
-        self.protocol := self.protocol + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["mult", m+""]]];
+        self.protocol := self.protocol + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["mult", newMult+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, null, newMult)])
       end
     end
@@ -1070,7 +1085,7 @@ context FmmlxDiagrams
   	  then 
         problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
-  	    self.protocol := self.protocol + [["addLink", ["association", a.name], ["obj1", obj1.path()], ["obj2", obj2.path()]]];
+  	    self.protocol := self.protocol + [["addLink", ["association", association.name], ["obj1", obj1.path()], ["obj2", obj2.path()]]];
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
     end
@@ -1154,7 +1169,7 @@ context FmmlxDiagrams
       then 
         problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
-        self.protocol := self.protocol + [["changeOperationLevel", ["newLevel", newLevel+""] , ["newName", newName] , ["class", class.path()]]];
+        self.protocol := self.protocol + [["changeOperationLevel", ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
