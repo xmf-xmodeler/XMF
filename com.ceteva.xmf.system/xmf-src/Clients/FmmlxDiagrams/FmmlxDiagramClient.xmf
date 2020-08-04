@@ -32,7 +32,6 @@ context FmmlxDiagrams
       end;
       self.communicator
     end
-
     @Operation createDiagram(package,name)
       let
         selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagrams.values().diagramName,{},null)
@@ -80,10 +79,10 @@ context FmmlxDiagrams
 
         self.addDefaultEnums(package);
         //////////////////////////////////////////////////////
-
-        let
+        
+        let 
           //FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
-          //handle = xmf.getHandle(self);
+          handle = xmf.getHandle(self);
           diagram = FmmlxDiagram();
           newID = 0
         in
@@ -94,13 +93,14 @@ context FmmlxDiagrams
           diagram.diagramName := ("Diagram " + package.name + " " + newID);
           diagram.package := package;
           self.diagrams.put(newID, diagram);
-
-          //if self.communicator = null then
+          
+          //if self.communicator = null then 
           //  self.communicator := FmmlxDiagramCommunicator();
           //  self.communicator.setHandle(handle)
           //end;//*/
           self.getCommunicator();
 
+          
           // TEMP
           //self.diagrams.put(newID, self.diagram);
           //self.communicator := FmmlxDiagramCommunicator();
@@ -654,7 +654,7 @@ context FmmlxDiagrams
         m.removeClass(class, strategy);
         self.protocol := self.protocol + 	[["removeClass", ["class", classPath4Log]]]
       end;
-      self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result
+      self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
     end
 
     @Operation changeClassName(requestID : Seq(Integer), classId, newName)
@@ -1051,7 +1051,7 @@ context FmmlxDiagrams
         a = self.getMapping(requestID).getMapping(associationID).object
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
-      in
+      in 
         self.protocol := self.protocol + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["mult", newMult+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, newMult, null)])
       end
@@ -1064,7 +1064,7 @@ context FmmlxDiagrams
         a = self.getMapping(requestID).getMapping(associationID).object
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
-      in
+      in 
         self.protocol := self.protocol + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["mult", newMult+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, null, newMult)])
       end
