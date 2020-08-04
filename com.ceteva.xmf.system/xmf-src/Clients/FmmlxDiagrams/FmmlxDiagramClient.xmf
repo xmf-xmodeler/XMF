@@ -741,16 +741,16 @@ context FmmlxDiagrams
 
     //////////////////////// Attribute Manipulations /////////////////////
 
-    @Operation addAttribute(requestID : Seq(Integer), classId, name, level, typeName, multiplicityV)
-//      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + name + " | " + level + " | " + typeName;
+    @Operation addAttribute(requestID : Seq(Integer), className, name, level, typeName, multiplicityV)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
-        class = self.getMapping(requestID).getMapping(classId).object;
+        class = if package.hasElement(className) then package.getElement(className) else null end;
+//        class = self.getMapping(requestID).getMapping(classId).object;
         type = m.getTypeForName(typeName, self.package);
         multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then
-        problems = m.checkAddAttribute(class, name, level, typeName)
+        problems = if class <> null then m.checkAddAttribute(class, name, level, typeName) else ["Class not found"] end
       in
         if
           problems.isEmpty()
