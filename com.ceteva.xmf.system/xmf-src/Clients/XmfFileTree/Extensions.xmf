@@ -135,6 +135,7 @@ context Root
   @Operation openXmlFile()
     let file = xmf.openFile(xmf.projDir(),"*.xml") in
       if file.fileExists() then
+        (file).println()
         xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().openXmlFile(file)
       end
     end

@@ -1441,6 +1441,28 @@ context FmmlxDiagrams
         []
       end
     end
+
+    @Operation loadProjectFromXml(requestID : Seq(Integer), name : String)
+        (name).println();
+
+            let package : XCore::Element = XCore::Package(name)
+        	in
+        	let project : XCore::Element = Projects::Project(package,"",null)
+        		in
+        		Root.add(package);
+        			//self.add(project);
+                    xmf.projectManager("MyProjects").add(project);
+        			if Root.hasElement("FMML")
+        			then
+        				package.addParent(FMML);
+        				package.removeParent(Object)
+        			end
+        		end
+        	end
+        	[]
+        end
+    
+
     
     @Operation updateAll(obj:Element)
       let 

@@ -27,7 +27,7 @@ context Clients
 
     @Operation newProject() 
       (xmf.projectManager("MyProjects")).newProject()
-    end  
+    end
   
     @Operation openProject()
       (xmf.projectManager("MyProjects").loadFixedProject(false))()
