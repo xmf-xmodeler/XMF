@@ -771,6 +771,25 @@ context FmmlxDiagrams
       end // in
     end
 
+    @Operation changeAttributeName(requestID : Seq(Integer), className, oldName, newName)
+    //      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+		class = if package.hasElement(className) then package.getElement(className) else null end
+            	//class = self.getMapping(requestID).getMapping(classId).object
+          then
+            problems = if class <> null then m.checkChangeAttributeName(class, oldName, newName) else ["Class not found"] end
+            //problems = m.checkChangeAttributeName(class, oldName, newName)
+          in
+            if problems.isEmpty() then
+              m.changeAttributeName(class, oldName, newName);
+              self.protocol := self.protocol + [["changeAttributeName", ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
+              end;
+            self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+          end
+        end
+
     @Operation removeAttribute(requestID : Seq(Integer), classId, attName, strategy)
 //      self.protocol := self.protocol + "\n A     addAttribute: " + classId + " | " + attName;
      // for now: ignore strategy and simply delete
@@ -784,21 +803,7 @@ context FmmlxDiagrams
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result
     end
 
-    @Operation changeAttributeName(requestID : Seq(Integer), classId, oldName, newName)
-//      self.protocol := self.protocol + "\n A     changeAttributeName: " + classId + " | " + oldName + " | " + newName;
-      let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = self.getMapping(requestID).getMapping(classId).object
-      then
-        problems = m.checkChangeAttributeName(class, oldName, newName)
-      in
-        if problems.isEmpty() then
-          m.changeAttributeName(class, oldName, newName);
-          self.protocol := self.protocol + [["changeAttributeName", ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
-          end;
-        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
-      end
-    end
+
 
     @Operation changeAttributeLevel(requestID : Seq(Integer), classId, attName, oldLevel, newLevel)
 //      self.protocol := self.protocol + "\n A     changeAttributeLevel: " + classId + " | " + attName + " | " + newLevel;
