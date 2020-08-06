@@ -1153,14 +1153,16 @@ context FmmlxDiagrams
 
     ////////////////// Operations for editing operations ///////////////////
 
-    @Operation changeOperationName(requestID : Seq(Integer), classId, oldName, newName)
+    @Operation changeOperationName(requestID : Seq(Integer), className, oldName, newName)
 
 //      self.protocol := self.protocol + "\n     O changeOperationName: " + classId + " | " + oldName + " | " + newName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = self.getMapping(requestID).getMapping(classId).object
+        class = if package.hasElement(className) then package.getElement(className) else null end
+        //class = self.getMapping(requestID).getMapping(classId).object
       then
-        problems = m.checkChangeOperationName(class, oldName, newName)
+        problems = if class <> null then m.checkChangeOperationName(class, oldName, newName) else ["Class not found"] end
+        //problems = m.checkChangeOperationName(class, oldName, newName)
       in
         if problems.isEmpty() then
           m.changeOperationName(class, oldName, newName);
@@ -1170,16 +1172,18 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeOperationLevel(requestID : Seq(Integer), classId, name, oldLevel, newLevel)
+    @Operation changeOperationLevel(requestID : Seq(Integer), className, name, oldLevel, newLevel)
 
 //      self.protocol := self.protocol + "\n     O changeOperationLevel: " + classId + " | " + name + " | " + newLevel;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = self.getMapping(requestID).getMapping(classId).object
+        class = if package.hasElement(className) then package.getElement(className) else null end
+        //class = self.getMapping(requestID).getMapping(classId).object
       then
         o = m.findOperation(class,name)
       then
-        problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
+        problems = if class <> null then m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o)) else ["Class not found"] end
+        //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
         self.protocol := self.protocol + [["changeOperationLevel", ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
@@ -1208,34 +1212,38 @@ context FmmlxDiagrams
     end
     
     @Operation addOperation2(
-      requestID  : Seq(Integer), 
-      classId    : Integer,
-      level      : Integer, 
-      body       : String)
-      
-//      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
-      
-      let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = self.getMapping(requestID).getMapping(classId).object
-      then 
-        problems = m.addOperation2(class, level, body)
-      in
-        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
-      end
-    end
+            requestID  : Seq(Integer),
+            className  : String,
+            level      : Integer,
+            body       : String)
+
+      //      self.protocol := self.protocol + "\n     O addOperation2: " + classId + " | ??? | " + level;
+
+            let
+              m = FmmlxDiagrams::FmmlxManipulator();
+              class = if package.hasElement(className) then package.getElement(className) else null end
+              //class = self.getMapping(requestID).getMapping(classId).object
+            then
+              problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
+              //problems = m.addOperation2(class, level, body)
+            in
+              self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+            end
+          end
     
     @Operation removeOperation(
       requestID  : Seq(Integer), 
-      classId    : Integer,
+      className    : String,
       opName     : String)
       
 //      self.protocol := self.protocol + "\n     O removeOperation: " + classId + " | " + opName;
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        class = self.getMapping(requestID).getMapping(classId).object
+        //class = self.getMapping(requestID).getMapping(classId).object
+        class = if package.hasElement(className) then package.getElement(className) else null end
       then 
-        problems = m.removeOperation(class, opName)
+        //problems = m.removeOperation(class, opName)
+        problems = if class<>null then m.removeOperation(class, opName) else ["Class not found"] end
       in
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1255,13 +1263,13 @@ context FmmlxDiagrams
       end      
     end
     
-    @Operation changeOperationOwner(requestID : Seq(Integer), idO_old, name, idO_new) 
+    @Operation changeOperationOwner(requestID : Seq(Integer), className_old, name, className_new)
       
 //      self.protocol := self.protocol + "\n     O changeOperationOwner: " + classId + " | " + name + " | " + idO_new;
       let 
         m = FmmlxDiagrams::FmmlxManipulator();
-        oldOwner = self.getMapping(requestID).getMapping(idO_old).object;
-        newOwner = self.getMapping(requestID).getMapping(idO_new).object
+        oldOwner = if package.hasElement(className_old) then package.getElement(className_old) else null end;
+        newOwner = if package.hasElement(className_new) then package.getElement(className_new) else null end
       then
         operation = oldOwner.getOperation(name)
       in
@@ -1346,7 +1354,7 @@ context FmmlxDiagrams
       self.respondNotYetImplemented("checkOperationBody", self.vector2Seq(requestID))
     end
       
-    @Operation changeOperationType(requestID : Seq(Integer), idO, opName, newType) 
+    @Operation changeOperationType(requestID : Seq(Integer), className, opName, newType)
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
     end
       
