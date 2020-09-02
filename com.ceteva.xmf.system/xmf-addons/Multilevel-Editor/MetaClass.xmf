@@ -643,5 +643,11 @@ context Root::FMML
     end
   end
   
+  // ################################ Constraints ##################################
+  
+  @Constraint OneLessThenNull
+    0 > 1 fail "This isn't going to work..."
+  end
     
+ 
 end
