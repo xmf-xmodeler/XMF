@@ -1188,7 +1188,7 @@ context FmmlxDiagrams
         self.log := self.log + [["addOperation", 
         ["class", class.path()],        
         ["opName", opName],        
-        ["level", level],        
+        ["level", level+""],        
         ["returnType", returnType.path()],
         ["body", body]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
@@ -1209,7 +1209,7 @@ context FmmlxDiagrams
       in
         self.log := self.log + [["addOperation2", 
         ["class", class.path()],        
-        ["level", level],        
+        ["level", level+""],        
         ["body", body]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
