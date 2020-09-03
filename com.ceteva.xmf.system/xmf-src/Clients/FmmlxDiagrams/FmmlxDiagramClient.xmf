@@ -1556,7 +1556,7 @@ context FmmlxDiagrams
           @For op in class.operations do
             if op.name.toString() = opName.toString() then
               let paramTypes = [] in 
-                @For pt in op.paramTypes do paramTypes := paramTypes + [pt.path()] end;
+                @For pt in op.paramTypes() do paramTypes := paramTypes + [pt.path()] end;
                 result := result + [[
                   class.path(),
                   class.name.toString(),
