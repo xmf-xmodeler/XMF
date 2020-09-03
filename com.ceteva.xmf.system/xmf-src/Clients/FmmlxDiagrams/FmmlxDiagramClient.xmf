@@ -1546,4 +1546,30 @@ context FmmlxDiagrams
     	  self.communicator.sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
         //end
     end
+    
+    @Operation findOperationUsage(requestID: Seq(Integer), opName: String)
+      let
+        result = [];
+        allClasses = Class.allInstances()
+      in
+        @For class in allClasses do
+          @For op in class.operations do
+            if op.name.toString() = opName.toString() then
+              let paramTypes = [] in 
+                @For pt in op.paramTypes do paramTypes := paramTypes + [pt.path()] end;
+                result := result + [[
+                  class.path(),
+                  class.name.toString(),
+                  op.arity,
+                  op.paramNames(),
+                  paramTypes,
+                  op.type.path(),
+                  op.codeBox.source()]]
+              end
+            end
+          end
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
 end
