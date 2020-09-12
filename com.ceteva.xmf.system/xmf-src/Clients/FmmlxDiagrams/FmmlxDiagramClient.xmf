@@ -732,7 +732,7 @@ context FmmlxDiagrams
 //        else
 //          problems := problems + ["Only one parent may be moved at a time."]
 //        end;
-        self.log := self.log + [["changeParent" , ["old",self.getParentsPaths(requestID, oldList)], ["new",self.getParentsPaths(requestID, newList)]]];
+        self.log := self.log + [["changeParent" , ["class", class.path()], ["old",self.getParentsPaths(requestID, self.getParentsPaths(requestID, oldList))], ["new",self.getParentsPaths(requestID, newList)]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1056,7 +1056,7 @@ context FmmlxDiagrams
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
-        self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["mult", newMult+""]]];
+        self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, newMult, null)])
       end
     end
@@ -1068,7 +1068,7 @@ context FmmlxDiagrams
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
-        self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["mult", newMult+""]]];
+        self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeAssociationMultiplicity(a, null, newMult)])
       end
     end
@@ -1095,15 +1095,15 @@ context FmmlxDiagrams
 
     @Operation removeAssociationInstance(
       requestID   : Seq(Integer),
-      linkName    : String)
+      linkId    : Integer)
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assocInstSeq = if package.hasElement(linkName) then package.getElement(linkName) else null end
+        assocInstSeq = self.getMapping(requestID).getMapping(linkId).object
       then
         problems = m.removeAssociationInstance(assocInstSeq)
       in
-  	    self.log := self.log + [["removeLink", ["name", "linkName"]]];
+  	    self.log := self.log + [["removeLink", ["TODO", "Still using ID, no another possibility"]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
