@@ -989,11 +989,11 @@ context FmmlxDiagrams
           self.log := self.log + [["addAssociation",
             ["class1", class1.path()] ,["class2", class2.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
-            ["fwName", fwName],
-            ["reverseName", reverseName],
+            ["fwName", fwName+""],
+            ["reverseName", reverseName+""],
             ["multiplicity1", FmmlxManipulator::multiplicity2ValueList(mult1)+""] , ["multiplicity2", FmmlxManipulator::multiplicity2ValueList(mult2)+""] ,
             ["instLevel1", instLevel1+""] , ["instLevel2", instLevel2+""] ,
-            ["sourceVisibleFromTarget", sourceVisibleFromTarget] , ["targetVisibleFromSource", targetVisibleFromSource] ,
+            ["sourceVisibleFromTarget", sourceVisibleFromTarget+""] , ["targetVisibleFromSource", targetVisibleFromSource+""] ,
             ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
    	    end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
