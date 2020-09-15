@@ -1547,10 +1547,11 @@ context FmmlxDiagrams
         //end
     end
     
-    @Operation findOperationUsage(requestID: Seq(Integer), opName: String)
+    @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
       let
         result = [];
-        allClasses = Class.allInstances()
+        allClasses = Class.allInstances();
+        opName = self.vector2Seq(opNames).at(0)
       in
         @For class in allClasses do
           @For op in class.operations do
@@ -1572,4 +1573,42 @@ context FmmlxDiagrams
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
+    
+    @Operation findOperationUsage(requestID: Seq(Integer), opName: String, usage:String)
+    
+    let
+      result = [];
+      n = 0;
+      StringCheck = xmf.javaClass("tool.helper.StringCheck")
+    then
+      stringCheck = StringCheck()
+    in
+      @For class in Classifier.allInstances() do
+        @For op in class.operations do
+          n := n+1;
+          if n.mod(100) = 0 then (n + " Checking "+op.name+"...").println() end;
+          if stringCheck.contains(op.codeBox.source(), opName) then 
+            result := result + [[
+              class.path(),
+              class.name.toString(),
+              op.arity,
+              op.paramNames(),
+              paramTypes,
+              op.type.path(),
+              op.codeBox.source()]]
+          end
+        end
+      end;     
+      
+      self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+    end
+    
+    
+    
+    
+    
+    
+    
+    end
+
 end

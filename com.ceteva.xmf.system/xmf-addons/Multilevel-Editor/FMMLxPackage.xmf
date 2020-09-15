@@ -181,3 +181,40 @@ context Root
       ("max Super Classes: " + maxSupers).println()
     end
   end
+  
+context Root
+  @Operation foo()
+    let
+      C = Classifier.allInstances();
+      O = {};
+      N = {}
+    in
+      @For c in C do
+        O := O + c.operations;
+        N := N + c.operations.name
+      end;
+      //N.println();
+      ("O.size(): " + O.size()).println();
+      ("N.size(): " + N.size()).println()
+    end
+  end
+  
+context Root
+  @Operation goo(text)
+    let
+      result = {};
+      n = 0;
+      StringCheck = xmf.javaClass("tool.helper.StringCheck")
+    then
+      stringCheck = StringCheck()
+    in
+      @For c in Classifier.allInstances() do
+        @For o in c.operations do
+          n := n+1;
+          if n.mod(100) = 0 then (n + " Checking "+o.name+"...").println() end;
+          if stringCheck.contains(o.codeBox.source(), text) then result := result+{o} end
+        end
+      end;
+      result
+    end
+  end
