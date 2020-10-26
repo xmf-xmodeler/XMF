@@ -1627,19 +1627,17 @@ context FmmlxDiagrams
     
     let
       result = [];
-      n = 0;
       StringCheck = xmf.javaClass("tool.helper.StringCheck")
     then
       stringCheck = StringCheck()
     in
       @For class in Classifier.allInstances() do
         @For op in class.operations do
-          n := n+1;
-//          if n.mod(100) = 0 then (n + " Checking "+op.name+"...").println() end;
           if stringCheck.contains(op.codeBox.source(), opName) then 
             result := result + [[
               class.path(),
               class.name.toString(),
+              op.name,
               op.arity,
               op.paramNames(),
               null,
