@@ -759,12 +759,14 @@ context FmmlxDiagrams
             [("addAttribute failed during transaction: " + e.message)]
           end // try
         end; // if
-        self.log := self.log + [["addAttribute",
+        if problems.isEmpty() then
+            self.log := self.log + [["addAttribute",
                                             ["class", class.path()],
                                             ["name", name],
                                             ["level", level+""],
                                             ["type", type.path()],
-                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]];
+                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end // in
     end
@@ -1175,7 +1177,9 @@ context FmmlxDiagrams
         problems = if class <> null then m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o)) else ["Class not found"] end
         //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
-        self.protocol := self.protocol + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]];
+        if problems.isEmpty() then
+            self.protocol := self.protocol + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1195,12 +1199,14 @@ context FmmlxDiagrams
         type = m.getTypeForName(returnType, self.package);
         problems = m.addOperation(class, opName, level, type, body)
       in
-        self.log := self.log + [["addOperation", 
-        ["class", class.path()],        
-        ["opName", opName],        
-        ["level", level+""],        
-        ["returnType", returnType.path()],
-        ["body", body]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["addOperation",
+                ["class", class.path()],
+                ["opName", opName],
+                ["level", level+""],
+                ["returnType", returnType.path()],
+                ["body", body]]]
+            end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
