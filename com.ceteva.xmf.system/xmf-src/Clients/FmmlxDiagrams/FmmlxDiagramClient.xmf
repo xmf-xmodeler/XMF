@@ -126,17 +126,22 @@ context FmmlxDiagrams
     	    if c <> null andthen c.isKindOf(FMML::MetaClass) // TODO: find out how a null can possibly end up there
     	    then
     	      let
-    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)
+    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
     	      in
     	        result := result.append([[
-    	        mappingInfo.id,
-    	        c.name.toString(),
-    	        c.level, // level
-    	        if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// of-ID
-    	        self.getParentIdList(requestID, c),//[],// parents-ID
-    	        c.isAbstract,
-    	        mappingInfo.lastKnownDiagramX,
-    	        mappingInfo.lastKnownDiagramY]])
+    	        mappingInfo.id, // 0: id*
+    	        c.name.toString(), // 1: name
+    	        c.level, // level  // 2: level
+    	        if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
+    	        self.getParentIdList(requestID, c),//[],// 4: parents-ID
+    	        c.isAbstract, // 5
+    	        mappingInfo.lastKnownDiagramX, // 6
+    	        mappingInfo.lastKnownDiagramY, // 7
+				0,0, // 8+9: reserved for delegation
+				c.path(), // 10: ownPath
+				c.of().path(), // 11: ofPath
+				self.getParentsPathsList(requestID, c)// 12: parentsPaths
+    	        ]])
     	      end
     	    end
     	  end;
@@ -940,6 +945,15 @@ context FmmlxDiagrams
         list
       end// let
     end
+    
+    @Operation getParentsPathsList(requestID, c : FMML::MetaClass) // for local use
+      let list = [] in
+        @For p in c.parents do
+          if p.isKindOf(FMML::MetaClass) then list := list.append([p.path()]) end
+        end; // for
+        list
+      end// let
+    end
 
     @Operation isOperationMonitored(o)
       if o.hasProperty("monitor") then FmmlxDiagramClient::getOpProp(o, "monitor") else false end
@@ -1590,23 +1604,46 @@ context FmmlxDiagrams
       end
     end
     
+    
+    @Operation findAllOperations(requestID: Seq(Integer))
+      let
+        result = [];
+        allClasses = Class.allInstances()
+      in
+        @For class in allClasses do
+          @For op in class.operations do
+              let paramTypes = [] in 
+                @For pt in op.paramTypes() do paramTypes := paramTypes + [pt.path()] end;
+                result := result + [[
+                  class.path(),
+                  class.name.toString(),
+                  op.arity,
+                  op.paramNames(),
+                  paramTypes,
+                  op.type.path(),
+                  op.codeBox.source()]]
+              end
+          end
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation findOperationUsage(requestID: Seq(Integer), opName: String, usage:String)
     
     let
       result = [];
-      n = 0;
       StringCheck = xmf.javaClass("tool.helper.StringCheck")
     then
       stringCheck = StringCheck()
     in
       @For class in Classifier.allInstances() do
         @For op in class.operations do
-          n := n+1;
-//          if n.mod(100) = 0 then (n + " Checking "+op.name+"...").println() end;
           if stringCheck.contains(op.codeBox.source(), opName) then 
             result := result + [[
               class.path(),
               class.name.toString(),
+              op.name.toString(),
               op.arity,
               op.paramNames(),
               null,
@@ -1619,12 +1656,6 @@ context FmmlxDiagrams
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
     end
     
-    
-    
-    
-    
-    
-    
-    end
+  end
 
 end
