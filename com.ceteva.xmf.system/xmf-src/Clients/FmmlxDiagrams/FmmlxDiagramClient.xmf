@@ -680,7 +680,7 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if package.hasElement(className) then package.getElement(className) else null end
       in
-        self.log := self.log + [["setClassAbstract", ["class", class.path()] , ["abstract",abstract+""]]];
+        self.log := self.log + [["setClassAbstract", ["class", class.path()] , ["abstract",isAbstract+""]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeClassAbstract(class, isAbstract)])
       end
     end
@@ -764,14 +764,14 @@ context FmmlxDiagrams
             [("addAttribute failed during transaction: " + e.message)]
           end // try
         end; // if
-        if problems.isEmpty() then
-            self.log := self.log + [["addAttribute",
+
+        self.log := self.log + [["addAttribute",
                                             ["class", class.path()],
                                             ["name", name],
                                             ["level", level+""],
                                             ["type", type.path()],
-                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]]
-        end;
+                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]];
+
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end // in
     end
@@ -1191,9 +1191,7 @@ context FmmlxDiagrams
         problems = if class <> null then m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o)) else ["Class not found"] end
         //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
-        if problems.isEmpty() then
-            self.protocol := self.protocol + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]]
-        end;
+        self.protocol := self.protocol + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1237,10 +1235,12 @@ context FmmlxDiagrams
       then 
         problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
       in
-        self.log := self.log + [["addOperation2", 
-        ["class", class.path()],        
-        ["level", level+""],        
-        ["body", body]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["addOperation2",
+            ["class", class.path()],
+            ["level", level+""],
+            ["body", body]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1258,7 +1258,9 @@ context FmmlxDiagrams
         //problems = m.removeOperation(class, opName)
         problems = if class<>null then m.removeOperation(class, opName) else ["Class not found"] end
       in
-        self.log := self.log + [["removeOperation", ["class", class.path()], ["name", opName]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["removeOperation", ["class", class.path()], ["name", opName]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
