@@ -737,7 +737,9 @@ context FmmlxDiagrams
 //        else
 //          problems := problems + ["Only one parent may be moved at a time."]
 //        end;
-        self.log := self.log + [["changeParent" , ["class", class.path()], ["old",self.getParentsPaths(requestID, self.getParentsPaths(requestID, oldList))], ["new",self.getParentsPaths(requestID, newList)]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["changeParent" , ["class", class.path()], ["old",self.getParentsPaths(requestID, self.getParentsPaths(requestID, oldList))], ["new",self.getParentsPaths(requestID, newList)]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1138,7 +1140,9 @@ context FmmlxDiagrams
       then
         problems = m.addDelegation(delegateFrom, delegateTo)
       in
-        self.log := self.log + [["addDelegation", ["delegateFrom",  delegateFrom.path()],  ["delegateTo",  delegateTo.path()]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["addDelegation", ["delegateFrom",  delegateFrom.path()],  ["delegateTo",  delegateTo.path()]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
