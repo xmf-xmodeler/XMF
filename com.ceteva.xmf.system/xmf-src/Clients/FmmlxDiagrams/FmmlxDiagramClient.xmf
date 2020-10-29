@@ -761,19 +761,19 @@ context FmmlxDiagrams
           problems.isEmpty()
         then
           problems := try
-            m.addAttribute(class, name, level, type, multiplicity); null
+            m.addAttribute(class, name, level, type, multiplicity); []
           catch(e)
             [("addAttribute failed during transaction: " + e.message)]
           end // try
         end; // if
-
-        self.log := self.log + [["addAttribute",
+        if problems.isEmpty() then
+            self.log := self.log + [["addAttribute",
                                             ["class", class.path()],
                                             ["name", name],
                                             ["level", level+""],
                                             ["type", type.path()],
-                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]];
-
+                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end // in
     end
@@ -1106,7 +1106,9 @@ context FmmlxDiagrams
   	  then
         problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
-  	    self.log := self.log + [["addLink", ["name", association.name], ["class1", obj1.path()], ["class2", obj2.path()]]];
+  	    if problems.isEmpty() then
+  	        self.log := self.log + [["addLink", ["name", association.name], ["class1", obj1.path()], ["class2", obj2.path()]]]
+  	    end;
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
     end
@@ -1121,7 +1123,9 @@ context FmmlxDiagrams
       then
         problems = m.removeAssociationInstance(assocInstSeq)
       in
-  	    self.log := self.log + [["removeLink", ["TODO", "Still using ID, no another possibility"]]];
+        if problems.isEmpty() then
+  	        self.log := self.log + [["removeLink", ["TODO", "Still using ID, no another possibility"]]]
+  	    end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1158,7 +1162,9 @@ context FmmlxDiagrams
       then
         problems = m.setRoleFiller(role, roleFiller)
       in
-        self.log := self.log + [["setRoleFiller", ["role", role.path()], ["roleFiller", roleFiller.path()]]];
+        if problems.isEmpty() then
+            self.log := self.log + [["setRoleFiller", ["role", role.path()], ["roleFiller", roleFiller.path()]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1195,7 +1201,9 @@ context FmmlxDiagrams
         problems = if class <> null then m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o)) else ["Class not found"] end
         //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
-        self.protocol := self.protocol + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]];
+        if problems.isEmpty() then
+          self.log := self.log + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1291,9 +1299,13 @@ context FmmlxDiagrams
         newOwner = if package.hasElement(className_new) then package.getElement(className_new) else null end
       then
         operation = oldOwner.getOperation(name)
+      then
+        problems = m.changeOperationOwner(oldOwner, operation, newOwner)
       in
-        self.log := self.log + [["changeOperationOwner", ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]];
-        self.communicator.sendMessageToJava([self.vector2Seq(requestID), m.changeOperationOwner(oldOwner, operation, newOwner)])
+        if problems.isEmpty() then
+          self.log := self.log + [["changeOperationOwner", ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
+        end;
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end      
     end
           
@@ -1327,7 +1339,9 @@ context FmmlxDiagrams
         else // let the manipulator try
           problems := m.changeOperationBody(class, op, newName, body)
         end;
-        self.log := self.log + [["changeOperationBody", ["class",className] , ["name",operationName], ["body", body]]];
+        if problems.isEmpty() then
+          self.log := self.log + [["changeOperationBody", ["class",className] , ["name",operationName], ["body", body]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1392,6 +1406,9 @@ context FmmlxDiagrams
       then
         problems = m.addEnumeration(self.package, newEnumName)
       in
+        if problems.isEmpty() then
+            self.log := self.log + [["addEnumeration", ["name",newEnumName]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1422,6 +1439,9 @@ context FmmlxDiagrams
       then
         problems = m.addEnumerationValue(self.package, enumName, newEnumValueName)
       in
+        if problems.isEmpty() then
+            self.log := self.log + [["addEnumerationValue", ["enum_name",enumName], ["enum_value_name", newEnumValueName]]]
+        end;
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
