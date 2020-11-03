@@ -32,6 +32,7 @@ context FmmlxDiagrams
       end;
       self.communicator
     end
+
     @Operation createDiagram(package,name)
       let
         selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagrams.values().diagramName,{},null)
@@ -1372,7 +1373,7 @@ context FmmlxDiagrams
       self.respondNotYetImplemented("updateAssociationInstance", self.vector2Seq(requestID))
     end
 
-    @Operation changeAssociationTarget(inA : Seq(Integer), idT_o, idT_n) 
+    @Operation changeAssociationTarget(inA : Seq(Integer), nameT_o, nameT_n)
       self.respondNotYetImplemented("changeAssociationTarget", self.vector2Seq(requestID))
     end
       
@@ -1515,6 +1516,7 @@ context FmmlxDiagrams
         			then
         				package.addParent(FMML)
         				//package.removeParent(Object)
+        				//package.createFmmlxDiagram_raw(package.name.toString())
         			end
         		end
         	end
