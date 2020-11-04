@@ -1113,7 +1113,7 @@ context FmmlxDiagrams
             problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
   	    if problems.isEmpty() then
-  	        self.log := self.log + [["addLink", ["name", association.name], ["class1", obj1.path()], ["class2", obj2.path()]]]
+  	        self.log := self.log + [["addLink", ["name", association.name.toString()], ["class1", obj1.path()], ["class2", obj2.path()]]]
   	    end;
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
