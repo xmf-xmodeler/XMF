@@ -702,27 +702,28 @@ context FmmlxDiagrams
         problems = [];
         class = if package.hasElement(className) then package.getElement(className) else null end
       then
+        oldParentList = class.parents;// for Log
         addSet = newSet - oldSet;
         removeSet = oldSet - newSet
       in
 //        if
 //          removeSet = {}
 //        then
-          @For parentId in addSet do
+          @For parentName in addSet do
             let
-              parentToBeAdded = self.getMapping(requestID).getMapping(parentId).object
+              parentToBeAdded = if package.hasElement(parentName) then package.getElement(parentName) else null end
             in
-              problems := problems + m.addParent(class, parentToBeAdded)
+              problems := problems + if parentToBeAdded = null then ["Cannot find new parent " + parentName] else m.addParent(class, parentToBeAdded) end
             end
           end
 ;//        elseif
 //          addSet = {}
 //        then
-          @For parentId in removeSet do
+          @For parentName in removeSet do
             let
-              parentToBeRemoved = self.getMapping(requestID).getMapping(parentId).object
+              parentToBeRemoved = if package.hasElement(parentName) then package.getElement(parentName) else null end
             in
-              problems := problems + m.removeParent(class, parentToBeRemoved)
+              problems := problems + if parentToBeRemoved = null then ["Cannot find old parent " + parentName] else m.removeParent(class, parentToBeRemoved) end
             end
           end
 ;//        elseif
@@ -737,7 +738,11 @@ context FmmlxDiagrams
 //        else
 //          problems := problems + ["Only one parent may be moved at a time."]
 //        end;
-        self.log := self.log + [["changeParent" , ["class", class.path()], ["old",self.getParentsPaths(requestID, self.getParentsPaths(requestID, oldList))], ["new",self.getParentsPaths(requestID, newList)]]];
+        self.log := self.log + [[
+        "changeParent" , 
+        ["class", class.path()], 
+        ["old", self.getParentsPaths(requestID, oldParentList)], 
+        ["new", self.getParentsPaths(requestID, class.parents)]]];
         self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1098,9 +1103,9 @@ context FmmlxDiagrams
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    obj1 = if package.hasElement(obj1Name) then package.getElement(obj1Name) else null end;
   	    obj2 = if package.hasElement(obj2Name) then package.getElement(obj2Name) else null end;
-  	    association = if package.hasElement(assocName) then package.getElement(assocName) else null end
+  	    association = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
   	  then
-        problems = m.addAssociationInstance(self.package, obj1, obj2, association)
+            problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
   	    self.log := self.log + [["addLink", ["name", association.name], ["class1", obj1.path()], ["class2", obj2.path()]]];
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems

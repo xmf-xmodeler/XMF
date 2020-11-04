@@ -63,6 +63,37 @@ context Root::FMML
       result
     end
   end
+  
+  @Operation hasAssociation(assocName:String)
+    let 
+      found = false
+    in
+      @For assoc in self.associations do
+        found := found orelse assoc.name.toString() = assocName.toString()
+      end;
+      found
+    end
+  end  
+  
+  @Operation getAssociation(assocName:String)
+    let 
+      found = null
+    in
+      @For assoc in self.associations do
+        if
+          found = null
+        then
+          if 
+            assoc.name.toString() = assocName.toString()
+          then
+            found := assoc
+          end
+        end
+      end;
+      found
+    end
+  end
+  
 end
   
 context Root
