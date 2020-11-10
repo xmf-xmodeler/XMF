@@ -130,6 +130,13 @@ context Root
       end
     end
   end
+  
+context Root
+  @Operation unhideConsole()
+  	let console = xmf.javaClass("tool.console.Console") in
+  		console.unhide()
+  		end
+  end   
 
 context Root
   @Operation openXmlFile()

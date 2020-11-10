@@ -159,7 +159,18 @@ in
         Arrays::importAndEditCSV
       }
     )
+  );
+
+  registry.addContribution(id,
+    TypeLessContribution(
+      Seq{
+        Seq{"&File","File","Unhide Console"},
+        // Root::unhideConsole
+        Arrays::importAndEditCSV
+      }
+    )
   )
+
 
 end;
 
