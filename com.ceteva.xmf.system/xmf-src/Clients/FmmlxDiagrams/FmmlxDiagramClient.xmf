@@ -112,6 +112,10 @@ context FmmlxDiagrams
         end
 
     end
+    
+    @Operation closeDiagram(diagramHandler : Integer) 
+      ("yet unimplemented method for closing diagram " + diagramHandler).println()
+    end
 
     @Operation getMapping(requestID : Seq(Integer))
       self.diagrams.get(self.vector2Seq(requestID).at(0)).mapping
@@ -252,8 +256,8 @@ context FmmlxDiagrams
     	          null, // 6 name 2
     	          a.end2.name.toString(), // 7 name start->end slot name
     	          a.end1.name.toString(), // 8 name end->start slot name
-    	          a.end2.instLevel, // 9 level s->t
-    	          a.end1.instLevel, // 10 level t->s
+    	          a.end2.instLevel, // 9 level of source
+    	          a.end1.instLevel, // 10 level of target
     	          FmmlxManipulator::multiplicity2ValueList(a.end2.mult()), // 11 mul s->t
     	          FmmlxManipulator::multiplicity2ValueList(a.end1.mult()),  // 12 mul t->s
     	          self.getMapping(requestID).getAllLabels(mappingInfo.id), // 13 labels
@@ -970,16 +974,16 @@ context FmmlxDiagrams
     ////////////////// Operations for editing associations ///////////////////
 
   @Operation addAssociation(requestID : Seq(Integer),
-      class1Name : String,
-      class2Name : String,
+      classSourceName : String,
+      classTargetName : String,
       accessSourceFromTargetName : String,
       accessTargetFromSourceName : String,
       fwName : String,
       reverseName : String,
-      mult1S : String,
-      mult2S : String,
-      instLevel1 : Integer,
-      instLevel2 : Integer,
+      multTargetToSourceS : String,
+      multSourceToTargetS : String,
+      instLevelSource : Integer,
+      instLevelTarget : Integer,
       sourceVisibleFromTarget : Boolean,
       targetVisibleFromSource : Boolean,
 	  isSymmetric : Boolean,
@@ -988,35 +992,35 @@ context FmmlxDiagrams
 
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
-  	    class1 = if package.hasElement(class1Name) then package.getElement(class1Name) else null end;
-        class2 = if package.hasElement(class2Name) then package.getElement(class2Name) else null end
+  	    classSource = if package.hasElement(classSourceName) then package.getElement(classSourceName) else null end;
+        classTarget = if package.hasElement(classTargetName) then package.getElement(classTargetName) else null end
   	  then
-        mult1 = m.valueList2Multiplicity(self.vector2Seq(mult1S));
-        mult2 = m.valueList2Multiplicity(self.vector2Seq(mult2S))
+        multTargetToSource = m.valueList2Multiplicity(self.vector2Seq(multTargetToSourceS));
+        multSourceToTarget = m.valueList2Multiplicity(self.vector2Seq(multSourceToTargetS))
       then
         problems = [] /*m.checkAddAssociation(self.package,
-  	      class1, class2,
+  	      classSource, classTarget,
   	      accessSourceFromTargetName, accessTargetFromSourceName,
   	      fwName, reverseName,
-  	      mult1, mult2,
-  	      instLevel1, instLevel2) */
+  	      multTargetToSource, multSourceToTarget,
+  	      instLevelSource, instLevelTarget) */
       in
         if problems.isEmpty() then
   	      problems := m.addAssociation(self.package,
-  	        class1, class2,
+  	        classSource, classTarget,
   	        accessSourceFromTargetName, accessTargetFromSourceName,
   	        fwName, reverseName,
-  	        mult1, mult2,
-  	        instLevel1, instLevel2,
+  	        multTargetToSource, multSourceToTarget,
+  	        instLevelSource, instLevelTarget,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
           self.log := self.log + [["addAssociation",
-            ["class1", class1.path()] ,["class2", class2.path()] ,
+            ["classSource", classSource.path()] ,["classSource", classSource.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
             ["fwName", fwName+""],
             ["reverseName", reverseName+""],
-            ["multiplicity1", FmmlxManipulator::multiplicity2ValueList(mult1)+""] , ["multiplicity2", FmmlxManipulator::multiplicity2ValueList(mult2)+""] ,
-            ["instLevel1", instLevel1+""] , ["instLevel2", instLevel2+""] ,
+            ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(multTargetToSource)+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(multSourceToTarget)+""] ,
+            ["instLevelSource", instLevelSource+""] , ["instLevelTarget", instLevelTarget+""] ,
             ["sourceVisibleFromTarget", sourceVisibleFromTarget+""] , ["targetVisibleFromSource", targetVisibleFromSource+""] ,
             ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
    	    end;
@@ -1113,7 +1117,7 @@ context FmmlxDiagrams
             problems = m.addAssociationInstance(self.package, obj1, obj2, association)
   	  in
   	    if problems.isEmpty() then
-  	        self.log := self.log + [["addLink", ["name", association.name.toString()], ["class1", obj1.path()], ["class2", obj2.path()]]]
+  	        self.log := self.log + [["addLink", ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
   	    end;
   	    self.communicator.sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
