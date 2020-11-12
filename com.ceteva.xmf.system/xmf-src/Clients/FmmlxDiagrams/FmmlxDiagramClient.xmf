@@ -647,7 +647,7 @@ context FmmlxDiagrams
           in
             mappingInfo.lastKnownDiagramX := x;
             mappingInfo.lastKnownDiagramY := y;
-            self.log := self.log + [["addInstance", ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parents)] , ["abstract",abstract+""]]]
+            self.log := self.log + [["addInstance", ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
           end;
           self.communicator.sendMessageToJava([self.vector2Seq(requestID), []])
         catch (exception)
@@ -991,10 +991,11 @@ context FmmlxDiagrams
 
 
   	  let
-  	    m = FmmlxDiagrams::FmmlxManipulator();
-  	    classSource = if package.hasElement(classSourceName) then package.getElement(classSourceName) else null end;
-        classTarget = if package.hasElement(classTargetName) then package.getElement(classTargetName) else null end
-  	  then
+  	    m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        classSource = m.evalString(classSourceName, self.package).at(0);//if package.hasElement(classSourceName) then package.getElement(classSourceName) else null end;
+        classTarget = m.evalString(classTargetName, self.package).at(0)//if package.hasElement(classTargetName) then package.getElement(classTargetName) else null end
+      then
         multTargetToSource = m.valueList2Multiplicity(self.vector2Seq(multTargetToSourceS));
         multSourceToTarget = m.valueList2Multiplicity(self.vector2Seq(multSourceToTargetS))
       then
@@ -1015,7 +1016,7 @@ context FmmlxDiagrams
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
           self.log := self.log + [["addAssociation",
-            ["classSource", classSource.path()] ,["classSource", classSource.path()] ,
+            ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
             ["fwName", fwName+""],
             ["reverseName", reverseName+""],
