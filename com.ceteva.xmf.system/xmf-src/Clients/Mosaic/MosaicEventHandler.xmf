@@ -9,13 +9,14 @@ context Mosaic
 
     @Operation dispatchEvent(message,parameters) 
       @Case message.name of
-        "fileDropped"     do self.fileDropped(parameters)     end
-        "shutdownRequest" do self.shutdown()                  end
-        "shutDownAndSave" do self.shutDownAndSave(parameters) end
-        "consoleDot"      do self.consoleDot(parameters)      end
-        "nameLookup"      do self.nameLookup(parameters)      end
-        "send"            do self.sendEvent(parameters)       end
-        "getAllProjects"  do self.getAllProjects()            end
+        "fileDropped"      do self.fileDropped(parameters)       end
+        "shutdownRequest"  do self.shutdown()                    end
+        "shutDownAndSave"  do self.shutDownAndSave(parameters)   end
+        "consoleDot"       do self.consoleDot(parameters)        end
+        "nameLookup"       do self.nameLookup(parameters)        end
+        "send"             do self.sendEvent(parameters)         end
+        "getAllProjects"   do self.getAllProjects()              end
+        "getProjectModels" do self.getProjectModels(parameters) end
       end
     end
     
@@ -182,4 +183,36 @@ context Mosaic
         self.owner().commandInterpreter().setAllProjects(paths)
       end
     end
+ 
+    @Operation getProjectModels(parameters) 
+      let // 1
+        projectPath = parameters.at(0);
+        results = [];
+        project = null
+      in // 1
+        @For p in Projects::Project.allInstances() do // 2
+          if // 3
+            p.path() = projectPath
+          then 
+            project := p
+          end
+        end; // 2
+        if // 2
+          project <> null 
+        then 
+          let // 3
+            package = project.package
+          in
+            results := [package.path()];
+            @For pp in package.packages do
+              results :=  results + [pp.path()]
+            end
+          end // 3
+        else 
+          results := ["Project Not Found:"]
+        end; // 2
+        self.owner().commandInterpreter().setProjectModels(results)
+      end // 1
+    end // O
+    
   end

@@ -85,6 +85,12 @@ context Mosaic
       @SendCommand(self)
         setAllProjects(names)
       end
+    end
+    
+    @Operation setProjectModels(names)
+      @SendCommand(self)
+        setProjectModels(names)
+      end
     end   
     
   end
