@@ -15,6 +15,7 @@ context Mosaic
         "consoleDot"      do self.consoleDot(parameters)      end
         "nameLookup"      do self.nameLookup(parameters)      end
         "send"            do self.sendEvent(parameters)       end
+        "getAllProjects"  do self.getAllProjects()            end
       end
     end
     
@@ -163,6 +164,22 @@ context Mosaic
               end
            end
          end
+      end
+    end
+    
+    // -------------------
+    
+    @Operation getAllProjects() 
+      let 
+        P = Projects::Project.allInstances();
+        names = [];
+        paths = []
+      in
+        @For p in P do
+          names := names + [p.name()];
+          paths := paths + [p.path()]
+        end;
+        self.owner().commandInterpreter().setAllProjects(paths)
       end
     end
   end

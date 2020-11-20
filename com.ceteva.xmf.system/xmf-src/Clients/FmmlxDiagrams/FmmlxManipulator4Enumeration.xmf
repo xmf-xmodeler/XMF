@@ -27,37 +27,46 @@ import FmmlxDiagrams;
     end
 
   context FmmlxManipulator
-    @Operation changeEnumerationName(package:Package, oldEnumName:String, newEnumName:String)
-      if
-        package.hasElement(oldEnumName)
+    @Operation changeEnumerationName(package:Package, oldEnumPath:String, newEnumName:String)
+      let 
+        e = self.evalString(oldEnumPath, package).at(0)
       then
-        let 
-          e = package.getElement(oldEnumName);
-          oldNameSymbol = e.name
-        in
-          if
-            e.isKindOf(Enum)
+        oldEnumName = if e <> null then e.name else null end
+      in
+        if // 1
+          e = null
+        then
+          [oldEnumPath + " does not exist"]
+        else
+          if // 2
+            not e.isKindOf(Enum)
           then
-            if 
-              newEnumName.isValidName()
-            then
-              if 
-                package.hasElement(newEnumName)
-              then
-                ["Name already in use"]
-              else
-                e.name := newEnumName.asSymbol();
-                package.nameChanged(e,e.name,oldEnumName);
-                []
-              end
-            else
-              ["Name not valid"]
-            end
+            [oldEnumPath + " is not an Enum"]
           else
-            [oldEnumName + " is not an Enum"]
-          end
-        end
-      else ["Enum does not exist"] end
+            if // 3
+              not package.getChildren().contains(e)
+            then
+              [oldEnumPath + " is not in this package"]
+            else
+              if // 4
+                not newEnumName.isValidName()
+              then
+                [newEnumName + " is not a legal identifier"]
+              else
+                if // 5
+                  package.hasElement(newEnumName)
+                then
+                  ["Name already in use"]
+                else
+                  e.name := newEnumName.asSymbol();
+                  package.nameChanged(e,e.name,oldEnumName);
+                  []
+                end // if 5                
+              end // if 4
+            end // if 3
+          end // if 2
+        end // if 1
+      end // let
     end
 
   context FmmlxManipulator
@@ -66,100 +75,118 @@ import FmmlxDiagrams;
     end
 
   context FmmlxManipulator
-    @Operation addEnumerationValue(package:Package, enumName:String, newEnumValueName:String) 
-      if
-        package.hasElement(enumName)
-      then
-        let 
-          e = package.getElement(enumName)
-        in
-          if
-            e.isKindOf(Enum)
+    @Operation addEnumerationValue(package:Package, enumPath:String, newEnumValueName:String) 
+      let 
+        e = self.evalString(enumPath, package).at(0)
+      in
+        if // 1
+          e = null
+        then
+          [enumPath + " does not exist"]
+        else
+          if // 2
+            not e.isKindOf(Enum)
           then
-            if
+            [enumPath + " is not an Enum"]
+          else
+            if // 3
               e.hasElement(newEnumValueName)
             then
-              [newEnumValueName + " is already an element of " + enumName]
+              [newEnumValueName + " is already an element of " + enumPath]
             else
-              if
+              if // 4
                 newEnumValueName.isValidName()
               then
-                e.addEnumElement(newEnumValueName);[]
+                if // 5
+                  package.getChildren().contains(e)
+                then
+                  e.addEnumElement(newEnumValueName);[]
+                else
+                  [enumPath + " is not part of " + package.getName()]
+                end // if 5
               else
                 [newEnumValueName + " is not a legal identifier"]
-              end
-            end
-          else
-            [enumName + " is not an Enum"]
-          end
-        end
-      else 
-        ["Enum does not exist"] 
-      end
+              end // if 4
+            end // if 3
+          end // if 2
+        end // if 1
+      end // let
     end
 
   context FmmlxManipulator
-    @Operation changeEnumerationValueName(package:Package, enumName:String, oldEnumValueName:String, newEnumValueName:String) 
-      if
-        package.hasElement(enumName)
-      then
-        let 
-          e = package.getElement(enumName)
-        in
-          if
-            e.isKindOf(Enum)
+    @Operation changeEnumerationValueName(package:Package, enumPath:String, oldEnumValueName:String, newEnumValueName:String) 
+      let 
+        e = self.evalString(enumPath, package).at(0)
+      in
+        if // 1
+          e = null
+        then
+          [enumPath + " does not exist"]
+        else
+          if // 2
+            not e.isKindOf(Enum)
           then
-            if
-              e.hasElement(newEnumValueName)
+            [enumPath + " is not an Enum"]
+          else
+            if // 3
+              not package.getChildren().contains(e)
             then
-              [newEnumValueName + " is already an element of " + enumName]
+              [enumPath + " is not part of " + package.getName()]
             else
-              if
-                e.hasElement(oldEnumValueName)
+              if // 4
+                e.hasElement(newEnumValueName)
               then
-                if
-                  newEnumValueName.isValidName()
-                then
-                  e.getElement(oldEnumValueName).name := newEnumValueName;[]
-                else
-                  [newEnumValueName + " is not a legal identifier"]
-                end
+                [newEnumValueName + " is already an element of " + enumPath]
               else
-                [oldEnumValueName + " is not an element of " + enumName]
-              end
-            end
-          else
-            [enumName + " is not an Enum"]
-          end
-        end
-      else 
-        ["Enum does not exist"] 
-      end
+                if // 5
+                  not newEnumValueName.isValidName()
+                then
+                  [newEnumValueName + " is not a legal identifier"]
+                else
+                  if // 6
+                    not e.hasElement(oldEnumValueName)
+                  then
+                    [oldEnumValueName + " is not an element of " + enumPath]
+                  else
+                    e.getElement(oldEnumValueName).name := newEnumValueName;[]
+                  end // if 6
+                end // if 5
+              end // if 4
+            end // if 3
+          end // if 2
+        end // if 1
+      end // let
     end
 
   context FmmlxManipulator
-    @Operation removeEnumerationValue(package:Package, enumName:String, enumValueName:String) 
-      if
-        package.hasElement(enumName)
-      then
-        let 
-          e = package.getElement(enumName)
-        in
-          if
-            e.isKindOf(Enum)
+    @Operation removeEnumerationValue(package:Package, enumPath:String, enumValueName:String) 
+      let 
+        e = self.evalString(enumPath, package).at(0)
+      in
+        if // 1
+          e = null
+        then
+          [enumPath + " does not exist"]
+        else
+          if // 2
+            not e.isKindOf(Enum)
           then
-            if
-              e.hasElement(enumValueName)
-            then
-              e.removeEnumElement(enumValueName);[]
-            else
-              [enumValueName + " is not an element of " + enumName]
-            end
+            [enumPath + " is not an Enum"]
           else
-            [enumName + " is not an Enum"]
-          end
-        end
-      else 
-        ["Enum does not exist"] 
-      end
+            if // 3
+              not package.getChildren().contains(e)
+            then
+              [enumPath + " is not part of " + package.getName()]
+            else
+              if // 4
+                not e.hasElement(enumValueName)
+              then
+                [enumValueName + " is not an element of " + enumPath]
+              else
+                e.removeEnumElement(enumValueName);[]
+              end // if 4
+            end // if 3
+          end // if 2
+        end // if 1
+      end // let
     end
