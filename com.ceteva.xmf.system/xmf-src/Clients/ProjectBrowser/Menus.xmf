@@ -184,6 +184,11 @@ context Project
   end
 
 context Project
+  @Operation saveAsXml()
+    self.saveAsXml(self.mappings())
+  end
+
+context Project
   @Operation delete_client()
     self.deleteRecursive()
   end
