@@ -142,7 +142,8 @@ context FmmlxDiagrams
     	        c.isAbstract, // 5
     	        mappingInfo.lastKnownDiagramX, // 6
     	        mappingInfo.lastKnownDiagramY, // 7
-				0,0, // 8+9: reserved for delegation
+				mappingInfo.hidden, // 8: visibility in this diagram
+				0, // 9: reserved for delegation
 				c.path(), // 10: ownPath
 				c.of().path(), // 11: ofPath
 				self.getParentsPathsList(requestID, c)// 12: parentsPaths
@@ -865,9 +866,9 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if package.hasElement(className) then package.getElement(className) else null end
       in
-        m.removeAttribute(class, attName, strategy)
+        m.removeAttribute(class, attName, strategy);
+        self.log := self.log + [["removeAttribute", ["class", class.path()], ["name", attName]]]
       end;
-      self.log := self.log + [["removeAttribute", ["class", class.path()], ["name", attName]]];
       self.communicator.sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result
     end
 
@@ -1035,7 +1036,7 @@ context FmmlxDiagrams
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if package.hasElement(assocName) then package.getElement(assocName) else null end
+        assoc = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
       then
         problems = m.removeAssociation(assoc)
       in
@@ -1051,7 +1052,7 @@ context FmmlxDiagrams
       newVisibility  : Boolean)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if package.hasElement(assocName) then package.getElement(assocName) else null end
+        assoc = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
       then
         problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
@@ -1066,7 +1067,7 @@ context FmmlxDiagrams
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if package.hasElement(assocName) then package.getElement(assocName) else null end
+        assoc = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
       then
         oldName = assoc.name
       then
@@ -1081,7 +1082,7 @@ context FmmlxDiagrams
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if package.hasElement(assocName) then package.getElement(assocName) else null end
+        a = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
@@ -1093,7 +1094,7 @@ context FmmlxDiagrams
     @Operation changeAssociationStart2EndMultiplicity(requestID : Seq(Integer), assocName, multV)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if package.hasElement(assocName) then package.getElement(assocName) else null end
+        a = if package.hasAssociation(assocName) then package.getAssociation(assocName) else null end
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       in 
@@ -1669,31 +1670,52 @@ context FmmlxDiagrams
     
     @Operation findOperationUsage(requestID: Seq(Integer), opName: String, usage:String)
     
-    let
-      result = [];
-      StringCheck = xmf.javaClass("tool.helper.StringCheck")
-    then
-      stringCheck = StringCheck()
-    in
-      @For class in Classifier.allInstances() do
-        @For op in class.operations do
-          if stringCheck.contains(op.codeBox.source(), opName) then 
-            result := result + [[
-              class.path(),
-              class.name.toString(),
-              op.name.toString(),
-              op.arity,
-              op.paramNames(),
-              null,
-              op.type.path(),
-              op.codeBox.source()]]
+      let
+        result = [];
+        StringCheck = xmf.javaClass("tool.helper.StringCheck")
+      then
+        stringCheck = StringCheck()
+      in
+        @For class in Classifier.allInstances() do
+          @For op in class.operations do
+            if stringCheck.contains(op.codeBox.source(), opName) then 
+              result := result + [[
+                class.path(),
+                class.name.toString(),
+                op.name.toString(),
+                op.arity,
+                op.paramNames(),
+                null,
+                op.type.path(),
+                op.codeBox.source()]]
+            end
           end
-        end
-      end;     
+        end;     
       
-      self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
-    end
-    
-  end
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), result])
+      end // let    
+    end // @Op
+  
+    @Operation hideElements(requestID: Seq(Integer), elementPaths: String, hide:Boolean) 
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      in
+        @For path in elementPaths do
+          let 
+            element = m.evalString(path, self.package).at(0)
+          in
+            if 
+              element <> null
+            then
+              let
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(element)
+              in 
+                mappingInfo.hidden := hide
+              end // let
+            end // if
+          end // let
+        end // for
+      end // let
+    end // @Op
 
 end

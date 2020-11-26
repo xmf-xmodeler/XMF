@@ -169,7 +169,7 @@ context Root
     end
   end
   
-  @Operation setup2(p:Package)
+/*  @Operation setup2(p:Package)
   
     // Level 2
     self.addInstance(p, p::RacingBike, "ProRacer");
@@ -197,61 +197,8 @@ context Root
     self.addInstance(p, p::RocketA1XL, "myFrame_"+index);
     self.addInstance(p, p::XForceDJ, "myWheel_"+index)
 
-  end
+  end */
   
-  @Operation addNewClasses(p:Package)
-    self.addInstance(p, p::LightFork, "mySuperLightFork")
-  end
-  
-  @Operation addClass(p:Package, name:String, level:Integer)
-	let c = FMML::MetaClass(name, level) in p.add(c); c end
-  end 
-  
-  @Operation addInstance(p:Package, class:FMML::MetaClass, name:String)
-	let c = class(name) in p.add(c); c end
-  end 
-  
-  @Operation addAttribute(class:FMML::MetaClass, name:String, type:FMML::MetaClass, instLevel:Integer)
-    let 
-      a = Attribute(name)
-//      allInst = self.allMetaInstances(class, instLevel);
-//      allInstLevel = self.allMetaInstancesOneLevel(class, instLevel)
-    in 
-      a.isIntrinsic := true;
-      a.type := type;
-      a.instLevel := instLevel;
-      
-      class.addAttribute(a);
-      a
-    end
-  end
-  
-  	@Operation createAssociation(
-  	p: Package,
-  	class1 : MetaClass,
-  	class2 : MetaClass,
-  	role1 : String,
-  	role2 : String,
-  	lower1 : Integer,
-  	upper1 : Integer,
-  	lower2 : Integer,
-  	upper2 : Integer,
-  	inst_level1 : XCore::Element,
-  	inst_level2 : XCore::Element):XCore::Element
-      let c1 = Multiplicities::CollectionMult(false,true,lower1,upper1);
-          c2 = Multiplicities::CollectionMult(false,true,lower2,upper2)
-      in let e1 = Associations::End(role1,class1,c1);
-             e2 = Associations::End(role2,class2,c2)
-         in 
-            e1.instLevel := inst_level1;
-            e2.instLevel := inst_level2;
-            let a = Associations::Association("fwName",e1,e2)
-            in p.addAssociation(a);a
-            end
-         end
-      end
-    end
-    
   @Operation pi()
 	3.141592654
   end
