@@ -7,78 +7,68 @@ context Root::FMML
   @Class MetaClass metaclass Root::Extensions::MetaAdaptor extends Root::Extensions::MetaAdaptor
 
     @Attribute metaClass : *MetaClass end
-
-    @Attribute model : 1..1 Model end
+    @Attribute model : 1..1 Model end  // ???
   
     @Constructor(name, level)
-    	if self.of() <> FMML::MetaClass then
-			self.error("This constructor is only allowed for instantiating FMML::MetaClass")
-       	end;
-/*       	if level = 0 then
-			self.removeParent(FMML::MetaClass)
-		end; */
-		if level > 0 
-		then self.addParent(FMML::MetaClass)
-		end;
-       	self
+      if self.of() <> FMML::MetaClass then
+        self.error("This constructor is only allowed for instantiating FMML::MetaClass") end;
+      if level > 0 then self.addParent(FMML::MetaClass) end;
+      self
     end
-    
+
+   /* These constructors are not used in the new FmmlxDiagram
+
     @Constructor(name)
-    	if self.of() = FMML::MetaClass then
-	    	let	level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
-    	    in
-				if level = null then
-            		self.level := 3
-	            elseif level.asInt() < 1 then 
-    	        	self.error("Level " + level + " not allowed as metaclass.")
-        	    else
-            		self.level := level.asInt()
-	            end
-			end
-        else
-			self.level := self.of().level - 1
-        end;
-		if level > 0 
-		then self.addParent(FMML::MetaClass)
-		end;
-        self
+      if self.of() = FMML::MetaClass then
+        let level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
+        in
+          if level = null then
+            self.level := 3
+          elseif level.asInt() < 1 then 
+            self.error("Level " + level + " not allowed as metaclass.")
+          else
+            self.level := level.asInt()
+          end
+        end
+      else
+        self.level := self.of().level - 1
+      end;
+      if level > 0 then self.addParent(FMML::MetaClass) end;
+      self
     end
     
     @Constructor()
-    	if self.of() <> FMML::MetaClass then
-        	self.level := self.of().level - 1;
-	    	if level > 0 
-			then self.addParent(FMML::MetaClass)
-			end
-		end
+      if self.of() <> FMML::MetaClass then
+        self.level := self.of().level - 1;
+        if level > 0 then self.addParent(FMML::MetaClass) end
+      end
     end
     
     @Operation setLevel(level)
-    	if self.of() <> FMML::MetaClass then
-			self.error("This operation can only be executed on direct instances of FMML::MetaClass")
-		else
-			self.level := level;
-			if level > 0 
-			then self.addParent(FMML::MetaClass)
-			else self.removeParent(FMML::MetaClass)
-			end
-       	end
+      if self.of() <> FMML::MetaClass then
+        self.error("This operation can only be executed on direct instances of FMML::MetaClass")
+      else
+        self.level := level;
+        if level > 0 
+        then self.addParent(FMML::MetaClass)
+        else self.removeParent(FMML::MetaClass)
+        end
+      end
     end
+    
+    */
     
     /* This Operation should've been named send-TO-Instance. 
        It is invoked when an operation is invoked. 
-       This operation tries to find out where the operation is defined. 
+       This operation tries to find out where the operation is defined.
     */
     @Operation sendInstance(element,message,args):XCore::Element 
       let
-        found = false;
-        op = null;
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
-        //operations = element.of().allOperations()->asSeq
-        operations = self.allOperations()->asSeq;
-        moreOperations = [];
-        index = 0
+        operations = self.allOperations()->asSeq; moreOperations = [];
+        found = false; op = null;
+        index = 0 // temporary counter
       in 
     /*  "self" is the class of "element" and therefore the most obvious place
         to look for an operation. "self.allOperations()" will check the class 
@@ -115,8 +105,11 @@ context Root::FMML
           end // if 
         end; // let 1
         
-        /* now we tried to find via the traditional way, two options are left: intrinsic operations and delegation.
-        We can use allOperations2() to find all multilevel operations
+        /* now we tried to find via the traditional way.
+           If still not found, there are two options left: intrinsic operations and delegation.
+           We can use allOperations2() to find all multilevel operations
+           
+           allOperations2() will find all operations in all parent and metaclasses
         */
         moreOperations := operations;
         //(name + " found? " + found).println();
@@ -124,30 +117,37 @@ context Root::FMML
           size = operations->size;
           arity = args->size
         in 
-          //(name + " not yet found").println();
+          (name + " not yet found").println();
           index := 0;
           moreOperations := self.allOperations2(); // TODO: modify to avoid delegation here
           @While index < moreOperations->size and not found do //loop until found through all operations 
             op := moreOperations->at(index);
-            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            if 
+              op.name = name
+            andthen 
+              (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            andthen
+              op.isIntrinsic
+            andthen
+              op.instLevel = (self.level-1)
             then found := true
             else index := index + 1
             end
-          end; // while
+          end/* ; // while
           if found
           then
-            /* Now, we found the operation.
+            NO LONGER NEEDED: Now, we found the operation.
                Before we can invoke it, we must check if the intrinsic 
                level forbids us to do so.
                We'll pretend we didn't find it if the intrinsic levels is too low.
                Also if it is not intrinsic at all it should have be found in the first run,
-               if relevant for this object */
+               if relevant for this object 
             //if op.isIntrinsic then 
               //("op.instLevel: " + op.instLevel).println();
               //("objLevel: " + (self.level-1)).println()
             //end;
-            if 
-              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
+             if 
+              (op.isIntrinsic andthen op.instLevel <> (self.level-1)) // wrong level
               or 
               (not op.isIntrinsic) 
             then
@@ -156,7 +156,7 @@ context Root::FMML
               //element.noOperationFound(message,args)
               found := false
             end 
-          end // if found
+          end // if found */
         end end; // if+let 2
         /*We have tried the traditional way and the multilevel way. */
           if not found then
@@ -172,7 +172,7 @@ context Root::FMML
               //"Operation not found, throwing Exception".println();
               element.noOperationFound(message,args)
             end
-          else
+          else /* we have indeed found the operation and invoke it */
             //(element + ": Operation "+op.name+" found and to be invoked").println();
             moreOperations := moreOperations->drop(index);
             op.setSupers(moreOperations);
@@ -182,451 +182,111 @@ context Root::FMML
       end // let
     end // operation
 
-    
-    /* This Operation should've been named send-TO-Instance. 
-       It is invoked when an operation is invoked. 
-       This operation tries to find out where the operation is defined. 
-       It checks superclasses and rolefillers. */
-    @Operation sendInstance0(element,message,args):XCore::Element 
+    @Operation ownAttributes():Set(Attribute)
+      attributes
+    end
 
-      let 
-        // String to Symbol if necessary
-        name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
-        operations = element.of().allOperations()->asSeq
-      then 
-        moreOperations = operations;
-        element2 = element // for while through of's to top
-      in 
-//        @While (not element2.of() = null) andthen element2.of().isKindOf(FMML::MetaClass) do 
-//          element2 = element2.of();
-//          moreOperations = moreOperations + (element2.of().allOperations()->asSeq)
-//        end;
-        // try to find an operation with the matching name
-        let index = 0;
-           size = operations->size;
-           found = false;
-           op = null;
-           arity = args->size
-        in 
-          @While index < size and not found do //loop until found through all operations 
-            op := operations->at(index);
-            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
-            then found := true
-            else index := index + 1
-            end
-          end;
-          if found
-          then
-            /* Now, we found the operation.
-               Before we can invoke it,
-               we must check if the intrinsic 
-               level forbids us to do so.
-               We'll pretend we didn't find it 
-               if the intrinsic levels is too low */
-            if 
-              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
-//              or 
-//              ((not op.isIntrinsic) and (not operations.contains(op))) // not intrinsic, then must be in the smaller list
-            then
-              //("The level " + (self.level-1) + " object " + element 
-              //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
-              //element.noOperationFound(message,args)
-              found := false
-            end
-          end; 
-          if not found then
-            /* We have not found the operation yet.
-               But maybe we are lucky with delegation.
-               If we find a role filler forward to them. */
-            if 
-              element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
-            then
-              //("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
-              element.roleFiller.send(message,args)
-            else
-              //"Operation not found, throwing Exception".println();
-              element.noOperationFound(message,args)
-            end
-          else
-            //(element + ": Operation "+op.name+" found and to be invoked").println();
-            operations := operations->drop(index);
-            op.setSupers(operations);
-            op.invoke(element,args)
-          end
-        end
-      end
-    end
-    
-    @Operation allAssociations():XCore::Element
-      self.allEnds->collect(e |
-        e.association)
-    end
-	
-	/*@Operation allAttributesWithoutIntrinsic():XCore::Element
-      let all = super();
-          newAll = Set{}
-      in @While not all.isEmpty() do
-           let a = all.sel()
-           in if not a.isIntrinsic
-              then
-                newAll := newAll.including(a)
-              else
-                false
-              end;
-              all := all.excluding(a)
+    @Operation allAttributes():Set(Attribute)
+      let allA = attributes;
+          allP = parents; // parents and classes
+          result = {};
+          alreadyChecked = {}
+      in //("checking " + self.name + " for attributes").println();
+         allP := allP->union({self.of()});
+         @While not allP->isEmpty do
+           //("allP:= " + allP).println();
+           let p = allP->sel
+           in alreadyChecked := alreadyChecked->union({p});
+              //("  checking " + p.name + " for attributes").println();
+              @For a2Bchecked in p.attributes do
+                if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
+                  allA := allA->union({a2Bchecked})
+              end end;
+              //allA := allA->union(p.attributes);
+              if p.parents.contains(FMML::MetaClass)
+                then allP := allP->union({p.of()}) end;
+              allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
            end
          end;
-         newAll
-      end
-    end*/
-    
-  @Operation ownAttributes():Set(Attribute)
-    attributes
-  end
- 
-  @Operation allAttributes():Set(Attribute)
-    let allA = attributes;
-        allP = parents; // parents and classes
-        result = {};
-        alreadyChecked = {}
-    in //("checking " + self.name + " for attributes").println();
-       allP := allP->union({self.of()});
-       @While not allP->isEmpty do
-         //("allP:= " + allP).println();
-         let p = allP->sel
-         in alreadyChecked := alreadyChecked->union({p});
-            //("  checking " + p.name + " for attributes").println();
-            @For a2Bchecked in p.attributes do
-              if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
-                allA := allA->union({a2Bchecked})
-            end end;
-            //allA := allA->union(p.attributes);
-            if p.parents.contains(FMML::MetaClass)
-              then allP := allP->union({p.of()}) end;
-            allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
-         end
-       end;
-       // remove all intrinsic, where level is too high
-       @For a in allA do
-         if (not a.isIntrinsic) or a.instLevel < self.level then
-           result := result->union({a})
-         end
-       end;
-       result
-    end
-  end
-  
-  @Operation allAttributesForLevel(attLevel):Set(Attribute)
-    let
-      result = {};
-      allAtt = self.allAttributes()
-    in
-      @For att in allAtt do
-        if att.isIntrinsic then 
-          if att.instLevel = attLevel then 
-            result := result.union({att})
-          end
-        end
-      end;
-      result
-    end
-  end
-	
-	@Operation allEnds():XCore::Element
-      self.allAttributes()->select(a |
-        a.of() = Associations::End)
-    end
-	
-	@Operation allMEMOAttributes():XCore::Element
-      self.allAttributes()->select(a |
-        a.isCore or (a.isIntrinsic and self.level = a.instLevel + 1)) + self.attributes->select(a |
-        not a.isIntrinsic)
-    end
-	
-	@Operation checkForNeededConstraints()
-		let ends = Seq{};
-			selectedEnd = null;
-			otherEnd = null;
-			classPool = Seq{};
-			instancePool = Seq{};
-			selectedClass = null;
-			tmp = Seq{}
-		in 
-			@For att in self.attributes do
-				if att.isKindOf(Associations::End) and att.isIntrinsic
-				then
-					ends := ends.including(att)
-				end
-			end;
-			if not ends.isEmpty()
-			then 
-				if ends.size() > 1
-				then
-					tmp := Seq{};
-					@For element in ends do
-						tmp := tmp.including(Seq{element})	
-	 				end;
-					selectedEnd := xmf.treeSelection("Select End",Seq{"Ends","*",tmp},Seq{"Classes"},null)
-				else 
-					selectedEnd := ends.head()
-				end;
-				if selectedEnd <> null 
-				then 
-					if selectedEnd.association.end1 = selectedEnd
-					then 
-						otherEnd := selectedEnd.association.end2
-					else
-						otherEnd := selectedEnd.association.end1
-					end;
-					classPool := classPool.including(otherEnd.owner);
-					@While not classPool.isEmpty() andthen classPool.head().level > otherEnd.instLevel + 1
-					do
-						@For c in classPool do
-						  instancePool := instancePool + c.allDirectInstances()/*;
-							("classPool: "+classPool.toString()).println();
-							("otherEnd: "+otherEnd.toString()).println();
-							("otherEnd.instLevel: "+otherEnd.instLevel).println();
-							("instancePool: "+instancePool.toString()).println();
-							("instancePool.of(): "+instancePool.of()).println();
-							("c.allDirectInstances(): "+c.allDirectInstances()).println();
-							("c: "+c).println()*/
-						end;
-						classPool := instancePool;
-						instancePool := Seq{}
-					end;
-					@For element in classPool do
-						@Find( c, element.constraints)
-						when c.name.toString().hasPrefix(otherEnd.name.toString()) and c.of() = Constraint
-						do
-						  	classPool := classPool.excluding(element)
-						end	
-		 			end;
-					if not classPool.isEmpty()
-					then
-						tmp := Seq{};
-						@For element in classPool do
-							tmp := tmp.including(Seq{element})	
-		 				end;
-						selectedClass := xmf.treeSelection("Select Target",Seq{"Classes","*",tmp},Seq{"Classes"},null);
-						if selectedClass <> null and selectedClass <> "Classes"
-						then 
-							self.newIntrinsicAssociationConstraint(selectedEnd, selectedClass);
-							if self.owner = null 
-							then self.setOwner(selectedClass.owner)
-							end;
-							selectedClass.newIntrinsicAssociationConstraint(otherEnd, self);
-							self.createIntrinsicAssociationEdge(self, selectedClass,selectedEnd.association )
-						end
-					else
-						xmf.warning("There is no class which is a suited counterpart for the intrinsic association")
-					end
-				end
-			end
-		end
-	end
-
-	@Operation createAssociation(elem2 : MetaEntity,role1 : String,role2 : String,lower1 : Integer,upper1 : Integer,lower2 : Integer,upper2 : Integer,inst_lev : XCore::Element):XCore::Element
-      let c1 = CollectionMult(false,true,lower1,upper1);
-          c2 = CollectionMult(false,true,lower2,upper2)
-      in let e1 = Associations::End(role1,self.of(),c1);
-             e2 = Associations::End(role2,elem2.of(),c2)
-         in let a = Associations::Association("regular","regularOther",e1,e2)
-            in a.instLevel := inst_lev
-            end
-         end
-      end
-    end
-    
-    @Operation createIntrinsicAssociationEdge(source, target, association)
-		let mapping = xmf.clientManager().findClientByName("com.ceteva.mappingMapping").mappingsFor(self.owner).head()
-		in
-      		@Find(sourceMap, mapping.classMaps)
-		    when sourceMap.class = source do
-    	  		@Find(targetMap, mapping.classMaps)
-      			when targetMap.class = target do
-					mapping.addIntrinsicAssociationEdge(sourceMap,targetMap, association)
-      			end
-      		end
-		end      
-    end
-	
-	@Operation getInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
-      Kernel_setDefaultGetMOP(object.of(),true);
-      Kernel_getSlotValue(object,name)
-    end
-	
-	@Operation hasInstanceSlot(object : XCore::Element,name : XCore::Element):XCore::Element
-      if not Kernel_hasSlot(object,name)
-      then
-        false//throw Exception(name + " is intrinsic and cannot be accessed on this level.")
-      else
-        true
-      end
-    end
-	
-	@Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
-	  if self = ancestor then false else
-		let tmp = self
-		in
-			@While tmp.level < ancestor.level and tmp <> FMML::MetaClass do
-				tmp := tmp.of()
-			end;
-			tmp = ancestor orelse tmp.inheritsFrom(ancestor)
-		end
-      end
-	end
-
-	@Operation isInstantiableAttOfName(name : String):XCore::Boolean
-      if self.of() = FMML::MetaClass
-      then
-        true
-      else
-        let a = self.of().retrieveAttribute(name)
-        in if a <> null
-           then
-             if a.isIntrinsic and a.instLevel < self.level
-             then
-               false
-             else
-               true
-             end
-           else
-             false
+         // remove all intrinsic, where level is too high
+         @For a in allA do
+           if (not a.isIntrinsic) or a.instLevel < self.level then
+             result := result->union({a})
            end
-        end
+         end;
+         result
       end
     end
 
-	@Operation newIntrinsicAssociationConstraint(slot, classifier):XCore::Element
-      let name : XCore::Element = self.newName(slot.name) then
-      	  constraintString : XCore::Element = "@Constraint " + name + " self." + slot.name + if slot.type.isKindOf(Set)
-      																			 			then 
-      																						"->forAll(s| s.of() = " + classifier.path()  +")"
-			      																			else
-																						      ".of() = " + classifier.path() 
-																							 end + 
-      	" fail \"Unspecified Reason\" end" then
-          conAS : XCore::Element = OCL::OCL.grammar.parseString(constraintString,"Exp1",Seq{XOCL}) then
-          conASfun : XCore::Element = Compiler::compileToFun("",conAS,Seq{},Seq{Seq{2 | Root.contents},Seq{2 | XCore.contents}},true) then
-          constraint : XCore::Element = conASfun()
-       in constraint.setName(name);
-          self.add(constraint);
-          constraint
-      end
-    end
-
-	@Operation retrieveAttribute(n : String):XCore::Attribute
-      let attList = self.allAttributes()->select(a |
-                      a.name = n.asSymbol())
-      in if not attList.isEmpty()
-         then
-           attList.sel()
-         else
-           null
-         end
-      end
-    end
-	
-	@Operation set(name : String,value : Element):Element
-      if not self.isInstantiableAttOfName(name)
-      then
-        throw Exception(name + " is intrinsic and cannot be instantiated on this level.")
-      else
-        if self.of().of() = XCore::Class
-        	then
-          		Kernel_setSlotValue(self,name,value)
-        	else
-          		self.of().setInstanceSlot(self,name,value)
+    @Operation allAttributesForLevel(attLevel):Set(Attribute)
+      let
+        result = {};
+        allAtt = self.allAttributes()
+      in
+        @For att in allAtt do
+          if att.isIntrinsic then 
+            if att.instLevel = attLevel then 
+              result := result.union({att})
+            end
+          end
         end;
-        self
+        result
       end
     end
-    
-    /*@Operation getInternal(name : String):Element
-      if self.of().of() = XCore::Class
-      then
-        if self.hasSlot(name)
-        then
-          Kernel_getSlotValue(self,name)
-        else
-          self.slotMissing(name)
+
+    @Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
+      if self = ancestor then false else
+        let tmp = self
+        in
+          @While tmp.level < ancestor.level and tmp <> FMML::MetaClass do
+            tmp := tmp.of()
+          end;
+          tmp = ancestor orelse tmp.inheritsFrom(ancestor)
         end
-      else
-        self.of().getInstanceSlot(self,name)
       end
     end
-    
-    @Operation get(name : String):Element
-      	if Root.hasElement("AuxiliaryClasses") andthen self.getInternal(name).of().of() = Root::AuxiliaryClasses::Unit
-        then
-          self.getInternal(name).get("value")
-        else
-	      if self.of().of() = XCore::Class
-    	  then
-	        if self.hasSlot(name)
-    	    then
-        	  Kernel_getSlotValue(self,name)
-        	else
-          		self.slotMissing(name)
-	        end
-    	  else
-        	self.of().getInstanceSlot(self,name)
-      	end
-      end
-    end */
-    
-    /*@Operation defaultParents():Set(Classifier)
-      if self.level > 0 then
-      	Set{FMML::MetaClass}
-      else	
-      	Set{Object}
-      end */
-      
-    //end
-    
-    
-      /* This is not used internally for invoking operations which would cause an infinite loop */
-      @Operation allOperations2():Seq(Operation)
-      let 
+
+    /* This is not used internally for invoking operations which would cause an infinite loop 
+       It is invoked by sendInstance and finds all Operations by starting with itself, 
+       adding all operation to the results, 
+       where the level is higher and recursively checking all parent classes and metaclasses.
+    */ 
+    @Operation allOperations2():Seq(Operation)
+      let
         myOps = {};
         alreadyChecked = {};
         toBeChecked = [self];
         currentClass = null
-      in   
-       @While toBeChecked.size() > 0 do 
-         currentClass := toBeChecked.at(0);
-         toBeChecked := toBeChecked - [currentClass];
-         //("Checking " + currentClass.name).println();
-         @For o in currentClass.operations do
-           if (o.isIntrinsic andthen o.instLevel <= self.level - 1)         // intrinsic and right level
+      in
+        @While toBeChecked.size() > 0 do 
+          currentClass := toBeChecked.at(0);
+          toBeChecked := toBeChecked - [currentClass];
+          //("Checking " + currentClass.name).println();
+          @For o in currentClass.operations do
+            if (o.isIntrinsic andthen o.instLevel <= self.level - 1)        // intrinsic and right level
                                                                             or
               ((not o.isIntrinsic) andthen currentClass.level = self.level) // non-intrinsic and one above the instance
-           then
-             myOps := myOps + {o}
-           end
-         end;
-         alreadyChecked = alreadyChecked + {currentClass};
-         @For p in currentClass.parents do                                 // inheritance
-           if p.isKindOf(FMML::MetaClass) then
-             if not alreadyChecked.contains(p) then
-               toBeChecked := toBeChecked + [p]
-             end
-           end
-         end;
-         if (not currentClass.of() = null) andthen currentClass.of().isKindOf(FMML::MetaClass) then               // instantiation
-           if not alreadyChecked.contains(currentClass.of()) then
-             toBeChecked := toBeChecked + [currentClass.of()]
-           end
-         end/*;
-         if (not currentClass.delegatesTo = null) andthen  currentClass.delegatesTo.isKindOf(FMML::MetaClass) then        // delegation
-           if not alreadyChecked.contains(currentClass.delegatesTo) then
-             toBeChecked := toBeChecked + [currentClass.delegatesTo]
-           end
-         end*/
-       end; // while
-       myOps.asSeq()
-     end // let
-   end // operation
+            then
+              myOps := myOps + {o}
+            end
+          end;
+          alreadyChecked := alreadyChecked + {currentClass};
+          @For p in currentClass.parents do                                 // inheritance
+            if p.isKindOf(FMML::MetaClass) then
+              if not alreadyChecked.contains(p) then
+                toBeChecked := toBeChecked + [p]
+              end
+            end
+          end;
+          if (not currentClass.of() = null) andthen currentClass.of().isKindOf(FMML::MetaClass) then               // instantiation
+            if not alreadyChecked.contains(currentClass.of()) then
+              toBeChecked := toBeChecked + [currentClass.of()]
+            end
+          end
+        end; // while
+        myOps.asSeq()
+      end // let
+    end // operation
    
   @Operation allMetaInstances()
     if level = 0 then [] else

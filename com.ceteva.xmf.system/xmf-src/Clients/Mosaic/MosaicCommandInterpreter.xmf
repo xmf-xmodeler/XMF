@@ -78,4 +78,19 @@ context Mosaic
         loadImage()
       end
     end
+    
+    // -----------
+    
+    @Operation setAllProjects(names)
+      @SendCommand(self)
+        setAllProjects(names)
+      end
+    end
+    
+    @Operation setProjectModels(names)
+      @SendCommand(self)
+        setProjectModels(names)
+      end
+    end   
+    
   end
