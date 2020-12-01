@@ -35,6 +35,7 @@ context FmmlxDiagrams
 
     @Operation createDiagram(package,name)
       let
+	
         selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagrams.values().diagramName,{},null)
       in
         if selectedNames = -1 then selectedNames := [] end;
@@ -1514,20 +1515,16 @@ context FmmlxDiagrams
     end
 
     @Operation loadProjectFromXml(requestID : Seq(Integer), name : String)
-        (name).println();
-
             let package : XCore::Element = XCore::Package(name)
-        	in
-        	let project : XCore::Element = Projects::Project(package,"",null)
+        	  in let project : XCore::Element = Projects::Project(package,"",null)
         		in
-        		Root.add(package);
-        			//self.add(project);
+        		    Root.add(package);
                     xmf.projectManager("MyProjects").add(project);
         			if Root.hasElement("FMML")
         			then
-        				package.addParent(FMML)
-        				//package.removeParent(Object)
-        				//package.createFmmlxDiagram_raw(package.name.toString())
+        				package.addParent(FMML);
+        				package.removeParent(Object);
+        				package.createFmmlxDiagram_raw(package.name.toString())
         			end
         		end
         	end
