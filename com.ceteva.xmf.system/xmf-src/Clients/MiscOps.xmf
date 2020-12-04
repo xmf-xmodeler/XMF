@@ -482,13 +482,14 @@ context XCore::Package
   
   
 context XCore::Package
+  // this operation actually creates AND SHOWS the diagram
   @Operation createFmmlxDiagram_raw(name)
       let fmmlxClient = xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient)
       in
           if fmmlxClient <> null
           then
-              fmmlxClient.createDiagram(self, name)
-          else format(stdout,"Class diagram client not available.~%")
+              fmmlxClient.showDiagram(self, name)
+          else format(stdout,"FmmlxDiagram client not available.~%")
           end
       end
   end 

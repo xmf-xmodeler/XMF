@@ -16,7 +16,8 @@ context Mosaic
         "nameLookup"       do self.nameLookup(parameters)        end
         "send"             do self.sendEvent(parameters)         end
         "getAllProjects"   do self.getAllProjects()              end
-        "getProjectModels" do self.getProjectModels(parameters) end
+        "getProjectModels" do self.getProjectModels(parameters)  end
+        "startFmmlxClient" do xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator() end
       end
     end
     
@@ -176,10 +177,10 @@ context Mosaic
         names = [];
         paths = []
       in
-        @For p in P do
+        @For p in P do if p.owner <> null then
           names := names + [p.name()];
           paths := paths + [p.path()]
-        end;
+        end end;
         self.owner().commandInterpreter().setAllProjects(paths)
       end
     end
@@ -203,10 +204,12 @@ context Mosaic
           let // 3
             package = project.package
           in
-            results := [package.path()];
-            @For pp in package.packages do
-              results :=  results + [pp.path()]
-            end
+            if package.owner <> null then  // 4
+              results := [package.path()];
+              @For pp in package.packages do if pp.owner <> null then
+                results :=  results + [pp.path()]
+              end end
+            end // 4
           end // 3
         else 
           results := ["Project Not Found:"]
