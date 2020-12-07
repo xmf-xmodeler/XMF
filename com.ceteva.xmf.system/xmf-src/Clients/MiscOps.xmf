@@ -494,6 +494,18 @@ context XCore::Package
   end
 
 context XCore::Package
+  @Operation openFmmlxDiagrams(name, diagramsNames)
+      let fmmlxClient = xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient)
+      in
+          if fmmlxClient <> null
+          then
+              fmmlxClient.openDiagram(self, name, diagramsNames)
+          else format(stdout,"Class diagram client not available.~%")
+          end
+      end
+  end
+
+context XCore::Package
   @Operation openDiagramsFromXml(name)
       let fmmlxClient = xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient)
       in

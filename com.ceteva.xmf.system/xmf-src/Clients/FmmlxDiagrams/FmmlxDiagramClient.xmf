@@ -33,6 +33,41 @@ context FmmlxDiagrams
       self.communicator
     end
 
+    @Operation openDiagram(package,name, diagramsNames)
+          let
+
+            selectedNames = xmf.selects("Select Diagram","select existing diagram - or none for new", diagramsNames,{},null)
+          in
+            if selectedNames = -1 then selectedNames := [] end;
+            if
+              selectedNames.size() = 0
+            then
+              self.createDiagram2(package,name)
+            elseif
+              selectedNames.size() = 1
+            then
+              ("diagrams: " + diagrams).println();
+              let
+                selectedName = selectedNames.at(0);
+                keys = self.diagrams.keys();
+                key = null;
+                keyCount = 0
+              in
+                @While key = null and keyCount < keys.size() do
+                  if diagrams.get(keys.at(keyCount)).diagramName.toString() = selectedName.toString() then key := keys.at(keyCount) end;
+                  keyCount := keyCount + 1
+                end;
+                if key <> null then
+    //              self.communicator.reopenDiagram(key, selectedName.toString(), diagrams.get(key).package.path())
+                  self.communicator.newDiagram(key, diagrams.get(key).diagramName.toString(), diagrams.get(key).package.path())
+                else
+                  "diagram not found".println()
+                end
+              end
+            end
+          end
+        end
+
     @Operation createDiagram(package,name)
       let
 	
@@ -1514,7 +1549,7 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation loadProjectFromXml(requestID : Seq(Integer), name : String)
+    @Operation loadProjectFromXml(requestID : Seq(Integer), name : String, diagramsNames: Seq(String))
             let package : XCore::Element = XCore::Package(name)
         	  in let project : XCore::Element = Projects::Project(package,"",null)
         		in
@@ -1524,7 +1559,7 @@ context FmmlxDiagrams
         			then
         				package.addParent(FMML);
         				package.removeParent(Object);
-        				package.createFmmlxDiagram_raw(package.name.toString())
+        				package.openFmmlxDiagrams(package.name.toString(), diagramsNames)
         			end
         		end
         	end
