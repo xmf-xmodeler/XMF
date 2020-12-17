@@ -1546,28 +1546,6 @@ context FmmlxDiagrams
         []
       end
     end
-
-    @Operation loadProjectFromXml(requestID : Seq(Integer), name : String)
-        (name).println();
-
-            let package : XCore::Element = XCore::Package(name)
-        	in
-        	let project : XCore::Element = Projects::Project(package,"",null)
-        		in
-        		Root.add(package);
-        			//self.add(project);
-                    xmf.projectManager("MyProjects").add(project);
-        			if Root.hasElement("FMML")
-        			then
-        				package.addParent(FMML)
-        				//package.removeParent(Object)
-        				//package.createFmmlxDiagram_raw(package.name.toString())
-
-        			end
-        		end
-        	end
-        	[]
-        end
     
     @Operation updateAll(obj:Element)
       let 
@@ -1752,5 +1730,28 @@ context FmmlxDiagrams
         end // for
       end // let
     end // @Op
+
+    @Operation loadProjectFromXml(requestID : Seq(Integer), packageName : String, diagramNames : Seq(String))
+      let
+        package : XCore::Element = XCore::Package(packageName)
+      in
+        let
+          project : XCore::Element = Projects::Project(package,"",null)
+        in
+          Root.add(package);
+          xmf.projectManager("MyProjects").add(project);
+          if Root.hasElement("FMML")
+          then
+            package.addParent(FMML);
+            @For diagramName in diagramNames do
+              diagramName.println()
+              //self.getCommunicator().createDiagram(package.path(), diagramName)
+            end
+            //self.getCommunicator().populateDiagram()
+          end
+        end
+      end
+      []
+    end
 
 end
