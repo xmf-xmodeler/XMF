@@ -247,6 +247,63 @@ context Projects
          end
       end
     end
+
+    @Operation saveAsXml(extraInfo)
+
+              let initName =
+                    if resourceName = ""
+                    then self.name + ".xml"
+                    else resourceName.toString().splitBy("/",0,0)->last
+                    end then
+                  file = xmf.saveFile(xmf.projDir(),"*.xml",initName)
+              in
+                 if file <> "" then
+                   self.saveAsXml(file,extraInfo,true)
+                 end
+              end
+            end
+
+        @Operation saveAsXml(file:String,extraInfo,confirm:Boolean)
+
+              // Save the project to a XML file. Exclude all elements that are
+              // not contained in the project name space by setting up a sequence
+              // of excluded name spaces for the save machine. We do not save the
+              // daemons associated with the elements in the package.
+
+               let write = true
+               in
+                  if not file.isReadOnly()
+                  then
+                    if file.fileExists() and self.loaded() and confirm
+                    then write := xmf.confirm(file + " exists. Overwite?")
+                    end;
+                    if write //and self.ensureDir(dir)
+                    then
+                      let dialog = xmf.busy("Saving")
+                      in
+
+                        self.savedBy := xmf.user();
+                        self.saveDate := xmf.date();
+                        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().saveXmlFile(file, self.package.toString())
+
+                        // The following is commented out pending an update on code
+                        // generation on models. The current mechanism is very slow.
+                        // self.saveSource(dir);
+
+                      end;
+
+                      xmf.message(
+                        "Project " + self.name().toString() +
+                        " saved (xml format).\nProject saved in file " + file + " on " + saveDate + ".\n" +
+                        "Project created by " + creator + " on " + creationDate + ".\n" +
+                        "Project saved by " + savedBy + ".\n")
+                    end
+                  else
+                    xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
+                  end
+               end
+
+            end
     
     @Operation saveAs(file:String,extraInfo,confirm:Boolean)
       
