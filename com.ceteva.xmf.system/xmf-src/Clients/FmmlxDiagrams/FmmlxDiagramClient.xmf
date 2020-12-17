@@ -56,8 +56,8 @@ context FmmlxDiagrams
       then
         self.getCommunicator().newDiagram( // <-- from the java's point of view a NEW diagram is created
           key, 
-          diagrams.get(key).diagramName.toString(), 
-          diagrams.get(key).package.path())
+          self.diagrams.get(key).diagramName.toString(), 
+          self.diagrams.get(key).package.path())
       end
     end    
     
@@ -106,45 +106,41 @@ context FmmlxDiagrams
       then
         package = m.evalString(packagePath, Root).at(0)
       then
-        diagram = self.createNewDiagram(package,diagramName)
+        newID = self.createNewDiagram(package,diagramName)
       in
-        @For key in self.diagrams.keys() do 
-          if self.diagrams.get(key) = diagram then 
-            self.communicator.setNewDiagramId(key)
-          end
-        end
+        self.communicator.setNewDiagramId(newID)
       end      
     end
 
-    /* This Operation creates a new diagram, ... */
+    /* This Operation creates a new diagram, 
+       and returns its key!!! ... */
     @Operation createNewDiagram(package,name)
-        //self.package := package;
-
-        ///////////FIND ALTERNATIVE TO THIS///////////////////
-        if
-          package.of() <> FMML::FMMLxPackage
-        then
-          package.setOf(FMML::FMMLxPackage);
-          Kernel_addAtt(package,"fmmlxAssociationInstances",{})
-        end;
-
+      //null.foo;
+      ("name: " + name).println();
+      //self.package := package;
+       ///////////FIND ALTERNATIVE TO THIS///////////////////
+      if
+        package.of() <> FMML::FMMLxPackage
+      then
+        package.setOf(FMML::FMMLxPackage);
+        Kernel_addAtt(package,"fmmlxAssociationInstances",{})
+      end;
         self.addDefaultEnums(package);
-        //////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////
         
-        let 
-          handle = xmf.getHandle(self);
-          diagram = FmmlxDiagram();
-          newID = 0
-        in
-          @While diagrams.hasKey(newID) do newID := newID + 1 end;
-
-          diagram.diagramName := ("Diagram " + package.name + " " + newID);
-          diagram.package := package;
-          self.diagrams.put(newID, diagram);
-          
-          diagram
-        end
-
+      let 
+        handle = xmf.getHandle(self);
+        diagram = FmmlxDiagram();
+        newID = 0
+      in
+        @While diagrams.hasKey(newID) do newID := newID + 1 end;
+          diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
+        diagram.package := package;
+        self.diagrams.put(newID, diagram);
+        
+        //diagram
+        newID
+      end
     end
     
     @Operation closeDiagram(requestID, diagramHandler : Integer) 
