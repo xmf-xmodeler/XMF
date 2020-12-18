@@ -364,7 +364,7 @@ context FmmlxDiagrams
                     a.type.name.toString(),
                     a.instLevel,
                     FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                    self.getMapping(requestID).getMappingId(c)
+                    c.path()
                     ]])
               end;
               @For a in (c.allAttributes() - c.attributes) do
@@ -374,7 +374,7 @@ context FmmlxDiagrams
                     a.type.name.toString(),
                     a.instLevel,
                     FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                    self.getMapping(requestID).getMappingId(a.owner)
+                    a.owner.path()
                     ]])
                 end
               end
@@ -483,7 +483,8 @@ context FmmlxDiagrams
                   o.instLevel,
                   self.getReturnPathAsString(o),
                   o.source(),
-                  if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                  o.owner.path(),
+                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
                   [0,1,false,true], // to-do: multiplicity
                   self.isOperationMonitored(o)
                   ]])
@@ -621,8 +622,8 @@ context FmmlxDiagrams
 
     ///////////////////// Updates to the View ////////////////////
 
-    @Operation sendNewPosition(requestID : Seq(Integer), objectID, x, y)
-        self.getMapping(requestID).setNewPosition(objectID, x, y);
+    @Operation sendNewPosition(requestID : Seq(Integer), objectPath, x, y)
+        self.getMapping(requestID).setNewPosition(objectPath, x, y);
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
     end
 

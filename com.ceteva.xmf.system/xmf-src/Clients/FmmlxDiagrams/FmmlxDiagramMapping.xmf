@@ -26,10 +26,9 @@ context FmmlxDiagrams
         else
           let 
             newMappingInfo = MappingInfo()
-          in 
-            self.nextID := self.nextID + 1;
+          in
             newMappingInfo.object := o;
-            newMappingInfo.id := self.nextID;
+            newMappingInfo.id := o.path();
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             self.mapping := self.mapping + {newMappingInfo};
@@ -57,7 +56,7 @@ context FmmlxDiagrams
       end // let 
     end
     
-    @Operation setNewPosition(objectID, x, y) 
+    @Operation setNewPosition(objectID, x, y)
       @For mappingInfo in mapping do
         if mappingInfo.id = objectID
         then 
