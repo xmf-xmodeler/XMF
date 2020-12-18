@@ -102,7 +102,7 @@ context FmmlxDiagrams
 
     @Operation createDiagramFromJava(packagePath, diagramName) 
       let
-  	m = FmmlxDiagrams::FmmlxManipulator()
+  	    m = FmmlxDiagrams::FmmlxManipulator()
       then
         package = m.evalString(packagePath, Root).at(0)
       then
@@ -116,7 +116,6 @@ context FmmlxDiagrams
        and returns its key!!! ... */
     @Operation createNewDiagram(package,name)
       //null.foo;
-      ("name: " + name).println();
       //self.package := package;
        ///////////FIND ALTERNATIVE TO THIS///////////////////
       if
@@ -1731,7 +1730,7 @@ context FmmlxDiagrams
       end // let
     end // @Op
 
-    @Operation loadProjectFromXml(requestID : Seq(Integer), packageName : String, diagramNames : Seq(String))
+    @Operation loadProjectFromXml(requestID : Seq(Integer), packageName : String, diagramNames : Seq(String), file : String)
       let
         package : XCore::Element = XCore::Package(packageName)
       in
@@ -1743,14 +1742,14 @@ context FmmlxDiagrams
           if Root.hasElement("FMML")
           then
             package.addParent(FMML);
+
             @For diagramName in diagramNames do
-              diagramName.println()
-              //self.getCommunicator().createDiagram(package.path(), diagramName)
-            end
-            //self.getCommunicator().populateDiagram()
+                self.getCommunicator().createDiagram(package.path(), diagramName)
+            end;
+            self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
           end
         end
-      end
+      end;
       []
     end
 
