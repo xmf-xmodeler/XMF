@@ -623,7 +623,7 @@ context FmmlxDiagrams
     ///////////////////// Updates to the View ////////////////////
 
     @Operation sendNewPosition(requestID : Seq(Integer), objectName, x, y)
-        self.getMapping(requestID).setNewPosition(self.getPackage(requestID).getElement(objectName), x, y);
+        self.getMapping(requestID).setNewPosition(self.getPackage(requestID).getElement(objectName).id, x, y);
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
     end
 
