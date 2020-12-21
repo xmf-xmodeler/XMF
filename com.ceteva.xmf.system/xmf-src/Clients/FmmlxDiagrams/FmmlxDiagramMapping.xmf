@@ -28,7 +28,7 @@ context FmmlxDiagrams
             newMappingInfo = MappingInfo()
           in
             newMappingInfo.object := o;
-            newMappingInfo.id := o.path();
+            newMappingInfo.id := if o.isKindOf(Symbol) then o else o.path() end;
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             self.mapping := self.mapping + {newMappingInfo};

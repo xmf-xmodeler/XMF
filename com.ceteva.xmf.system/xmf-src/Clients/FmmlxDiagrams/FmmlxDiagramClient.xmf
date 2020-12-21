@@ -200,7 +200,7 @@ context FmmlxDiagrams
                 childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
                 parentID = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).id
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping:"+childID+"/"+parentID).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
@@ -227,7 +227,7 @@ context FmmlxDiagrams
                 childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
                 parentID = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).id
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping:"+childID+"/"+parentID).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
@@ -254,7 +254,7 @@ context FmmlxDiagrams
                 childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
                 parentID = self.getMapping(requestID).addOrGetObjectMapping(parent).id
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping:"+childID+"/"+parentID).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
@@ -282,8 +282,10 @@ context FmmlxDiagrams
     	      in
     	        result := result.append([[
     	          mappingInfo.id, // 0 ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(a.end1.type).id, // 1 source ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(a.end2.type).id, // 2 target ID
+    	          a.end1.type.path(), // 1 source ID
+    	          a.end2.type.path(), // 2 target ID
+    	          //self.getMapping(requestID).addOrGetObjectMapping(a.end1.type).id, 
+    	          //self.getMapping(requestID).addOrGetObjectMapping(a.end2.type).id, 
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
@@ -320,9 +322,9 @@ context FmmlxDiagrams
     	      in
     	        result := result.append([[
     	          mappingInfo.id, // 0 ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(i.at(0)).id, // 1 start ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(i.at(1)).id, // 2 end ID
-    	          self.getMapping(requestID).addOrGetObjectMapping(i.at(2)).id, // 3 assoc ID
+    	          i.at(0).path(), // 1 start ID
+    	          i.at(1).path(), // 2 end ID
+    	          i.at(2).path(), // 3 assoc ID
     	          mappingInfo.points, // 4 points
     	          self.getMapping(requestID).getAllLabels(mappingInfo.id) // 5 labels
     	        ]])
