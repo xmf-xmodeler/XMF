@@ -197,15 +197,11 @@ context FmmlxDiagrams
           if object <> null then if object.delegatesTo <> null then
             if object.delegatesTo.isKindOf(FMML::MetaClass) then
               let
-                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
-                parentID = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).id
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping:"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping:"+childPath+"/"+parentPath).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
-  	            childID, // 1 start ID
-  	            parentID, // 2 end ID
   	            mappingInfo.points // 3 points
   	          ]])
               end
@@ -224,15 +220,15 @@ context FmmlxDiagrams
           if object <> null then if object.roleFiller <> null then
             if object.roleFiller.isKindOf(FMML::MetaClass) then
               let
-                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
-                parentID = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).id
+                childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
+                parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping:"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping:"+childPath+"/"+parentPath).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
-  	            childID, // 1 start ID
-  	            parentID, // 2 end ID
+  	            childPath, // 1 start ID
+  	            parentPath, // 2 end ID
   	            mappingInfo.points // 3 points
   	          ]])
               end
@@ -251,15 +247,15 @@ context FmmlxDiagrams
           if object <> null then @For parent in object.parents do
             if parent.isKindOf(FMML::MetaClass) then
               let
-                childID = self.getMapping(requestID).addOrGetObjectMapping(object).id;
-                parentID = self.getMapping(requestID).addOrGetObjectMapping(parent).id
+                childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
+                parentPath = self.getMapping(requestID).addOrGetObjectMapping(parent).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping:"+childID+"/"+parentID).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping:"+childPath+"/"+parentPath).asSymbol())
               in
                 result := result.append([[
   	            mappingInfo.id, // 0 ID
-  	            childID, // 1 start ID
-  	            parentID, // 2 end ID
+  	            childPath, // 1 start ID
+  	            parentPath, // 2 end ID
   	            mappingInfo.points // 3 points
   	          ]])
               end
@@ -284,8 +280,6 @@ context FmmlxDiagrams
     	          mappingInfo.id, // 0 ID
     	          a.end1.type.path(), // 1 source ID
     	          a.end2.type.path(), // 2 target ID
-    	          //self.getMapping(requestID).addOrGetObjectMapping(a.end1.type).id, 
-    	          //self.getMapping(requestID).addOrGetObjectMapping(a.end2.type).id, 
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
@@ -624,8 +618,8 @@ context FmmlxDiagrams
 
     ///////////////////// Updates to the View ////////////////////
 
-    @Operation sendNewPosition(requestID : Seq(Integer), objectPath, x, y)
-        self.getMapping(requestID).setNewPosition(objectPath, x, y);
+    @Operation sendNewPosition(requestID : Seq(Integer), objectName, x, y)
+        self.getMapping(requestID).setNewPosition(self.getPackage(requestID).getElement(objectName).id, x, y);
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
     end
 
@@ -1416,7 +1410,7 @@ context FmmlxDiagrams
       self.respondNotYetImplemented("changeAssociationEnd2StartLevel", self.vector2Seq(requestID))
     end
       
-    @Operation updateAssociationInstance(requestID : Seq(Integer), id1, id2) 
+    @Operation updateAssociationInstance(requestID : Seq(Integer), startObjectPath : String, endObjectPath : String)
       self.respondNotYetImplemented("updateAssociationInstance", self.vector2Seq(requestID))
     end
 
@@ -1436,7 +1430,7 @@ context FmmlxDiagrams
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
     end
       
-    @Operation changeAttributeOwner(requestID : Seq(Integer), idO_old, name, idO_new) 
+    @Operation changeAttributeOwner(requestID : Seq(Integer), path_old, name, path_new)
       self.respondNotYetImplemented("changeAttributeOwner", self.vector2Seq(requestID))
     end
       
@@ -1523,7 +1517,7 @@ context FmmlxDiagrams
       self.log.println()
     end
     
-    @Operation assignToGlobal(requestID : Seq(Integer), objID:Integer, varName:String)
+    @Operation assignToGlobal(requestID : Seq(Integer), objPath:String, varName:String)
       let 
         class = self.getMapping(requestID).getMapping(objID).object
       in
