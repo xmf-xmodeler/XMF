@@ -227,7 +227,7 @@ context FmmlxDiagrams
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createRoleFillerKey(childPath, parentPath))
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createRoleKey(childPath, parentPath))
               in
                 result := result.append([[
   	            mappingInfo.id.toString(), // 0 ID
