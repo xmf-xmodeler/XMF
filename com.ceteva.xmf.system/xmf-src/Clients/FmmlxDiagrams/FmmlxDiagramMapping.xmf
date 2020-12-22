@@ -28,7 +28,7 @@ context FmmlxDiagrams
             newMappingInfo = MappingInfo()
           in
             newMappingInfo.object := o;
-            newMappingInfo.id := if o.isKindOf(Symbol) then o else o.path() end;
+            newMappingInfo.id := if o.isKindOf(Symbol) then o.toString() else o.path() end;
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             self.mapping := self.mapping + {newMappingInfo};
@@ -79,13 +79,30 @@ context FmmlxDiagrams
     @Operation getMapping(objectID) 
       let result = null in 
         @For mappingInfo in mapping do
-          if mappingInfo.id = objectID
+          if mappingInfo.id = objectID.toString()
           then 
             result := mappingInfo
           end // if
         end; // for
         result
       end //let
+    end
+    
+    //self.getMapping(requestID).updateKey(oldPath, class.path());
+    @Operation updateKey(oldKey, newKey)
+      let 
+        item = self.getMapping(oldKey.toString());
+        testForNewKey = self.getMapping(newKey.toString())
+      in
+        if 
+          item <> null andthen testForNewKey = null
+        then 
+          item.id := if o.isKindOf(Symbol) then o.toString() else o.path() end
+        else
+          throw(Exception("Cannot change key. Either oldKey does not exist or newKey already exists."))
+        end
+      end
+          
     end
     
     @Operation cleanUpMapping() null end
