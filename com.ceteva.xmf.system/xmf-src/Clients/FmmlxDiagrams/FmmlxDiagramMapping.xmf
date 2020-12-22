@@ -59,7 +59,7 @@ context FmmlxDiagrams
     @Operation setNewPosition(objectID, x, y)
       @For mappingInfo in mapping do
         if mappingInfo.id = objectID
-        then 
+        then
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y
         end // if
