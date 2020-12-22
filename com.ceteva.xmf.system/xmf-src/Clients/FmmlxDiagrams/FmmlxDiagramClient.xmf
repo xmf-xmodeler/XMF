@@ -197,15 +197,15 @@ context FmmlxDiagrams
           if object <> null then if object.delegatesTo <> null then
             if object.delegatesTo.isKindOf(FMML::MetaClass) then
               let
-                childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
-                parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).object.path()
+                delegatesFromPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
+                delegatesToPath = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("DelegatesToMapping:"+childPath+"/"+parentPath).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createDelegationKey(delegatesFromPath, delegatesToPath))
               in
                 result := result.append([[
   	            mappingInfo.id.toString(), // 0 ID
-  	            childPath, // 1 start Path
-  	            parentPath, // 2 end Path
+  	            delegatesFromPath, // 1 start Path
+  	            delegatesToPath, // 2 end Path
   	            mappingInfo.points // 3 points
   	          ]])
               end
@@ -227,7 +227,7 @@ context FmmlxDiagrams
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("RoleFillerMapping:"+childPath+"/"+parentPath).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createRoleFillerKey(childPath, parentPath))
               in
                 result := result.append([[
   	            mappingInfo.id.toString(), // 0 ID
@@ -254,7 +254,7 @@ context FmmlxDiagrams
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(parent).object.path()
               then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(("InheritanceMapping:"+childPath+"/"+parentPath).asSymbol())
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createInheritanceKey(childPath, parentPath))
               in
                 result := result.append([[
   	            mappingInfo.id.toString(), // 0 ID
@@ -316,7 +316,7 @@ context FmmlxDiagrams
     	  @For i in (if self.getPackage(requestID).fmmlxAssociationInstances = null then {} else self.getPackage(requestID).fmmlxAssociationInstances end) do
 
     	      let
-    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(i)
+    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createAssociationLinkKey(i.at(0).path(), i.at(1).path(), i.at(2).path()))
     	      in
     	        result := result.append([[
     	          mappingInfo.id, // 0 ID

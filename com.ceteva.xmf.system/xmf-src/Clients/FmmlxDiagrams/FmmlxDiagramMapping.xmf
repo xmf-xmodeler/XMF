@@ -142,4 +142,9 @@ context FmmlxDiagrams
       end 
     end
     
+    @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo).asSymbol() end
+    @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent).asSymbol() end
+    @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc).asSymbol() end
+    @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller).asSymbol() end
+    
 end // Class
