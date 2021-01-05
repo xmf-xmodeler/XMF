@@ -66,9 +66,11 @@ context Root::FMML
       let
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
-        operations = self.allOperations()->asSeq; moreOperations = [];
-        found = false; op = null;
-        index = 0 // temporary counter
+        ownOperations = self.allOperations()->asSeq; 
+        allOperations = [];
+        delToClassOps = [];
+        found = false; op = null; foundDelToClass = false;
+        index = 0; delToClassIndex = 0 // temporary counter
       in 
     /*  "self" is the class of "element" and therefore the most obvious place
         to look for an operation. "self.allOperations()" will check the class 
@@ -77,12 +79,12 @@ context Root::FMML
         can be invoked  
     */    
         let  // let 1
-          size = operations->size;
+          size = ownOperations->size;
           arity = args->size
         in 
           index := 0;
           @While index < size and not found do //loop until found through all operations 
-            op := operations->at(index);
+            op := ownOperations->at(index);
             if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
             then found := true
             else index := index + 1
@@ -111,17 +113,16 @@ context Root::FMML
            
            allOperations2() will find all operations in all parent and metaclasses
         */
-        moreOperations := operations;
+        allOperations := ownOperations;
         //(name + " found? " + found).println();
         if not found then let  // if+let 2
-          size = operations->size;
+          //size = operations->size;
           arity = args->size
-        in 
-          (name + " not yet found").println();
+        in
           index := 0;
-          moreOperations := self.allOperations2(); // TODO: modify to avoid delegation here
-          @While index < moreOperations->size and not found do //loop until found through all operations 
-            op := moreOperations->at(index);
+          allOperations := self.allOperations2(); // TODO?: modify to avoid delegation here
+          @While index < allOperations->size and not found do //loop until found through all operations 
+            op := allOperations->at(index);
             if 
               op.name = name
             andthen 
@@ -133,52 +134,58 @@ context Root::FMML
             then found := true
             else index := index + 1
             end
-          end/* ; // while
-          if found
-          then
-            NO LONGER NEEDED: Now, we found the operation.
-               Before we can invoke it, we must check if the intrinsic 
-               level forbids us to do so.
-               We'll pretend we didn't find it if the intrinsic levels is too low.
-               Also if it is not intrinsic at all it should have be found in the first run,
-               if relevant for this object 
-            //if op.isIntrinsic then 
-              //("op.instLevel: " + op.instLevel).println();
-              //("objLevel: " + (self.level-1)).println()
-            //end;
-             if 
-              (op.isIntrinsic andthen op.instLevel <> (self.level-1)) // wrong level
-              or 
-              (not op.isIntrinsic) 
-            then
-              //("The level " + (self.level-1) + " object " + element 
-              //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
-              //element.noOperationFound(message,args)
-              found := false
-            end 
-          end // if found */
+          end
         end end; // if+let 2
-        /*We have tried the traditional way and the multilevel way. */
-          if not found then
-            /* We have not found the operation yet.
-               But maybe we are lucky with delegation.
-               If we find a role filler forward to them. */
-            if 
-              element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
-            then
-              //("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
-              element.roleFiller.send(message,args)
-            else
-              //"Operation not found, throwing Exception".println();
-              element.noOperationFound(message,args)
-            end
-          else /* we have indeed found the operation and invoke it */
-            //(element + ": Operation "+op.name+" found and to be invoked").println();
-            moreOperations := moreOperations->drop(index);
-            op.setSupers(moreOperations);
-            op.invoke(element,args)
-          end        
         
+        /*We have tried the traditional way and the multilevel way. 
+          We try delegateToClass next if not found yet.
+        */
+        
+        if not found then let // if+let 3
+          delegateToClassOps = self.getOperationsAvailableThroughDelegateToClass()
+        then
+          arity = args->size
+        in 
+          delToClassIndex := 0;
+          @While delToClassIndex < delegateToClassOps->size and not foundDelToClass do //loop until found through all operations 
+            op := delegateToClassOps->at(delToClassIndex);
+            if 
+              op.name = name
+            andthen 
+              (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            andthen
+              op.isIntrinsic
+            andthen
+              op.instLevel =  self.level // !! the level of the class (not the instance must match)
+            then foundDelToClass := true
+            else delToClassIndex := delToClassIndex + 1
+            end // if
+          end // while
+        end end; // if+let 3
+        
+        if not found and not foundDelToClass then
+          /* We have not found the operation yet.
+             But maybe we are lucky with delegation.
+             If we find a role filler, then forward to them. */
+          if 
+            element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
+          then
+            //("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
+            element.roleFiller.send(message,args)
+          else
+            //"Operation not found, throwing Exception".println();
+            element.noOperationFound(message,args)
+          end
+        elseif foundDelToClass then // at least found an operation available through delegation to class
+          ("Delegate To Class: " + element.name + "->" + self.name).println();
+          self.send(message, args)
+        else /* we have indeed found the operation and invoke it */
+          //(element + ": Operation "+op.name+" found and to be invoked").println();
+          allOperations := allOperations->drop(index);
+          op.setSupers(allOperations); /// WHAT?
+          op.invoke(element,args)
+        end        
+      
       end // let
     end // operation
 
@@ -303,11 +310,28 @@ context Root::FMML
     end
   end
   
+  @Operation getOperationsAvailableThroughDelegateToClass()
+    if self.of().isKindOf(MetaClass) then 
+     let 
+       ops = {}
+     in
+       @For o in self.of().allOperations2() do
+         if (let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end) then
+           ops := ops + {o}
+         end
+       end;
+     ops.asSeq()
+     end
+    else [] end
+  end
+  
   // ################################ Constraints ##################################
   
   @Constraint OneLessThenNull
     0 > 1 fail "This isn't going to work..."
   end
+    
+    
     
  
 end
