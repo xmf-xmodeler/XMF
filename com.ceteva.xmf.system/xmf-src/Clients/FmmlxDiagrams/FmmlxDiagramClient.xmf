@@ -57,7 +57,8 @@ context FmmlxDiagrams
         self.getCommunicator().newDiagram( // <-- from the java's point of view a NEW diagram is created
           key, 
           self.diagrams.get(key).diagramName.toString(), 
-          self.diagrams.get(key).package.path())
+          self.diagrams.get(key).package.path(),
+          self.diagrams.get(key).file.toString())
       end
     end    
     
@@ -73,7 +74,7 @@ context FmmlxDiagrams
         if
           selectedNames.size() = 0
         then
-          self.createNewDiagram(package,name) // <-- create a new diagram
+          self.createNewDiagram(package,name, "") // <-- create a new diagram
         elseif
           selectedNames.size() = 1
         then // if one name supplied: find it!
@@ -100,13 +101,13 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation createDiagramFromJava(packagePath, diagramName) 
+    @Operation createDiagramFromJava(packagePath, diagramName, file)
       let
   	    m = FmmlxDiagrams::FmmlxManipulator()
       then
         package = m.evalString(packagePath, Root).at(0)
       then
-        newID = self.createNewDiagram(package,diagramName)
+        newID = self.createNewDiagram(package,diagramName, file)
       in
         self.communicator.setNewDiagramId(newID)
       end      
@@ -114,7 +115,7 @@ context FmmlxDiagrams
 
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
-    @Operation createNewDiagram(package,name)
+    @Operation createNewDiagram(package,name, file)
       //null.foo;
       //self.package := package;
        ///////////FIND ALTERNATIVE TO THIS///////////////////
@@ -135,6 +136,7 @@ context FmmlxDiagrams
         @While diagrams.hasKey(newID) do newID := newID + 1 end;
           diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
+        diagram.file := file;
         self.diagrams.put(newID, diagram);
         
         //diagram
@@ -1767,7 +1769,7 @@ context FmmlxDiagrams
             package.addParent(FMML);
 
             @For diagramName in diagramNames do
-                self.getCommunicator().createDiagram(package.path(), diagramName)
+                self.getCommunicator().createDiagram(package.path(), diagramName, file)
             end;
             self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
           end
