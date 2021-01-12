@@ -57,7 +57,8 @@ context FmmlxDiagrams
         self.getCommunicator().newDiagram( // <-- from the java's point of view a NEW diagram is created
           key, 
           self.diagrams.get(key).diagramName.toString(), 
-          self.diagrams.get(key).package.path())
+          self.diagrams.get(key).package.path(),
+          self.diagrams.get(key).file.toString())
       end
     end    
     
@@ -73,7 +74,7 @@ context FmmlxDiagrams
         if
           selectedNames.size() = 0
         then
-          self.createNewDiagram(package,name) // <-- create a new diagram
+          self.createNewDiagram(package,name, "") // <-- create a new diagram
         elseif
           selectedNames.size() = 1
         then // if one name supplied: find it!
@@ -100,13 +101,13 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation createDiagramFromJava(packagePath, diagramName) 
+    @Operation createDiagramFromJava(packagePath, diagramName, file)
       let
   	    m = FmmlxDiagrams::FmmlxManipulator()
       then
         package = m.evalString(packagePath, Root).at(0)
       then
-        newID = self.createNewDiagram(package,diagramName)
+        newID = self.createNewDiagram(package,diagramName, file)
       in
         self.communicator.setNewDiagramId(newID)
       end      
@@ -114,7 +115,7 @@ context FmmlxDiagrams
 
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
-    @Operation createNewDiagram(package,name)
+    @Operation createNewDiagram(package,name, file)
       //null.foo;
       //self.package := package;
        ///////////FIND ALTERNATIVE TO THIS///////////////////
@@ -135,6 +136,7 @@ context FmmlxDiagrams
         @While diagrams.hasKey(newID) do newID := newID + 1 end;
           diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
+        diagram.file := file;
         self.diagrams.put(newID, diagram);
         
         //diagram
@@ -1296,19 +1298,19 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
-    
+
     @Operation addOperation(
-      requestID  : Seq(Integer), 
+      requestID  : Seq(Integer),
       classId    : Integer,
-      opName     : String, 
-      level      : Integer, 
+      opName     : String,
+      level      : Integer,
       returnType : String,
       body       : String)
-      
+
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = self.getMapping(requestID).getMapping(classId).object
-      then 
+      then
         type = m.getTypeForName(returnType, self.getPackage(requestID));
         problems = m.addOperation(class, opName, level, type, body)
       in
@@ -1323,17 +1325,17 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
-    
+
     @Operation addOperation2(
-      requestID  : Seq(Integer), 
+      requestID  : Seq(Integer),
       className  : String,
-      level      : Integer, 
+      level      : Integer,
       body       : String)
-      
+
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
-      then 
+      then
         problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
       in
         if problems.isEmpty() then
@@ -1345,17 +1347,17 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
-    
+
     @Operation removeOperation(
-      requestID  : Seq(Integer), 
+      requestID  : Seq(Integer),
       className    : String,
       opName     : String)
-      
+
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         //class = self.getMapping(requestID).getMapping(classId).object
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
-      then 
+      then
         //problems = m.removeOperation(class, opName)
         problems = if class<>null then m.removeOperation(class, opName) else ["Class not found"] end
       in
@@ -1365,24 +1367,24 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
-    
+
     @Operation getOpProp(operation, name) // for local use
       let
         properties = operation.properties();
         tagFound = null
-      in 
-        @For property in properties do  
+      in
+        @For property in properties do
           if property->head() = name
             then tagFound := property->tail()
           end
         end;
         tagFound
-      end      
+      end
     end
-    
+
     @Operation changeOperationOwner(requestID : Seq(Integer), className_old, name, className_new)
-      
-      let 
+
+      let
         m = FmmlxDiagrams::FmmlxManipulator();
         oldOwner = if self.getPackage(requestID).hasElement(className_old) then self.getPackage(requestID).getElement(className_old) else null end;
         newOwner = if self.getPackage(requestID).hasElement(className_new) then self.getPackage(requestID).getElement(className_new) else null end
@@ -1395,9 +1397,9 @@ context FmmlxDiagrams
           self.log := self.log + [["changeOperationOwner", ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
-      end      
+      end
     end
-          
+
     @Operation checkOperationNameLegal(op, name):Boolean // todo: check for duplicates, consider arity
       let nameSymbol = Symbol(name) in
         if nameSymbol = op.name()
@@ -1408,10 +1410,10 @@ context FmmlxDiagrams
         end
       end
     end
-        
+
     @Operation changeOperationBody(requestID : Seq(Integer), className:String, operationName:String, body:String)
-      
-      let 
+
+      let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
         problems = []
@@ -1423,7 +1425,7 @@ context FmmlxDiagrams
         if operationName.toString() <> newName.toString() then
           problems := ["name change not allowed here"]
         elseif
-          op = null then 
+          op = null then
           problems := ["operation not found"]
         else // let the manipulator try
           problems := m.changeOperationBody(class, op, newName, body)
@@ -1434,29 +1436,29 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-    
+
     // Not yet implemented
-    
+
     @Operation respondNotYetImplemented(name: String, requestID : Seq(Integer))
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["The feature \"" + name + "\" is temporarily unavailable. Please try again later."]])
     end
-      
-    @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), associationID, name) 
+
+    @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), associationID, name)
       self.respondNotYetImplemented("changeAssociationStart2EndAccessName", self.vector2Seq(requestID))
     end
-      
-    @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), associationID, name) 
+
+    @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), associationID, name)
       self.respondNotYetImplemented("changeAssociationEnd2StartAccessName", self.vector2Seq(requestID))
     end
-      
-    @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), associationID, level) 
+
+    @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), associationID, level)
       self.respondNotYetImplemented("changeAssociationStart2EndLevel", self.vector2Seq(requestID))
     end
-      
-    @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), associationID,level) 
+
+    @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), associationID,level)
       self.respondNotYetImplemented("changeAssociationEnd2StartLevel", self.vector2Seq(requestID))
     end
-      
+
     @Operation updateAssociationInstance(requestID : Seq(Integer), startObjectPath : String, endObjectPath : String)
       self.respondNotYetImplemented("updateAssociationInstance", self.vector2Seq(requestID))
     end
@@ -1464,33 +1466,33 @@ context FmmlxDiagrams
     @Operation changeAssociationTarget(inA : Seq(Integer), nameT_o, nameT_n)
       self.respondNotYetImplemented("changeAssociationTarget", self.vector2Seq(requestID))
     end
-      
-    @Operation changeAssociationSource(inA : Seq(Integer), idS_o, idS_n) 
+
+    @Operation changeAssociationSource(inA : Seq(Integer), idS_o, idS_n)
       self.respondNotYetImplemented("changeAssociationSource", self.vector2Seq(requestID))
     end
-      
-    @Operation checkOperationBody(requestID : Seq(Integer), operationBodyToBeChecked) 
+
+    @Operation checkOperationBody(requestID : Seq(Integer), operationBodyToBeChecked)
       self.respondNotYetImplemented("checkOperationBody", self.vector2Seq(requestID))
     end
-      
+
     @Operation changeOperationType(requestID : Seq(Integer), className, opName, newType)
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
     end
-      
+
     @Operation changeAttributeOwner(requestID : Seq(Integer), path_old, name, path_new)
       self.respondNotYetImplemented("changeAttributeOwner", self.vector2Seq(requestID))
     end
-      
-    @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new) 
+
+    @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new)
       self.respondNotYetImplemented("changeOf", self.vector2Seq(requestID))
     end
-      
-    @Operation changeClassLevel(requestID : Seq(Integer), idO, newLevel) 
+
+    @Operation changeClassLevel(requestID : Seq(Integer), idO, newLevel)
       self.respondNotYetImplemented("changeClassLevel", self.vector2Seq(requestID))
-    end   
-       
+    end
+
     @Operation addEnumeration(requestID : Seq(Integer), newEnumName:String)
-      let 
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.addEnumeration(self.getPackage(requestID), newEnumName)
@@ -1502,8 +1504,8 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeEnumerationName(requestID : Seq(Integer), oldEnumName:String, newEnumName:String) 
-      let 
+    @Operation changeEnumerationName(requestID : Seq(Integer), oldEnumName:String, newEnumName:String)
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.changeEnumerationName(self.getPackage(requestID), oldEnumName, newEnumName)
@@ -1512,8 +1514,8 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation removeEnumeration(requestID : Seq(Integer), enumName:String) 
-      let 
+    @Operation removeEnumeration(requestID : Seq(Integer), enumName:String)
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.removeEnumeration(self.getPackage(requestID), enumName)
@@ -1521,9 +1523,9 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-    
-    @Operation addEnumerationValue(requestID : Seq(Integer), enumName:String, newEnumValueName:String) 
-      let 
+
+    @Operation addEnumerationValue(requestID : Seq(Integer), enumName:String, newEnumValueName:String)
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.addEnumerationValue(self.getPackage(requestID), enumName, newEnumValueName)
@@ -1534,9 +1536,9 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-    
-    @Operation changeEnumerationValueName(requestID : Seq(Integer), enumName:String, oldEnumValueName:String, newEnumValueName:String) 
-      let 
+
+    @Operation changeEnumerationValueName(requestID : Seq(Integer), enumName:String, oldEnumValueName:String, newEnumValueName:String)
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.changeEnumerationValueName(self.getPackage(requestID), enumName, oldEnumValueName, newEnumValueName)
@@ -1544,9 +1546,9 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-    
-    @Operation removeEnumerationValue(requestID : Seq(Integer), enumName:String, enumValueName:String) 
-      let 
+
+    @Operation removeEnumerationValue(requestID : Seq(Integer), enumName:String, enumValueName:String)
+      let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
         problems = m.removeEnumerationValue(self.getPackage(requestID), enumName, enumValueName)
@@ -1555,20 +1557,20 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-    
+
     @Operation printProtocol(requestID : Seq(Integer)) // to be removed
       self.log.println()
     end
-    
+
     @Operation printLog(requestID : Seq(Integer))
       self.log.println()
     end
-    
+
     @Operation assignToGlobal(requestID : Seq(Integer), objPath:String, varName:String)
-      let 
+      let
         class = self.getMapping(requestID).getMapping(objID).object
       in
-        if 
+        if
           class <> null
         then
           class.assignToGlobal(varName)
@@ -1576,12 +1578,12 @@ context FmmlxDiagrams
         []
       end
     end
-        
+
     @Operation showBody(requestID : Seq(Integer), objID:Integer, opName:String, arity:Integer)
-      let 
+      let
         class = self.getMapping(requestID).getMapping(objID).object
       in
-        if 
+        if
           class <> null andthen class.getOperation(opName) <> null
         then
           class.getOperation(opName).edit()
@@ -1589,17 +1591,17 @@ context FmmlxDiagrams
         []
       end
     end
-    
+
     @Operation updateAll(obj:Element)
-      let 
+      let
         clients = Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances()->select(a | a.package = obj.owner)
       in
-        @For client in clients do 
+        @For client in clients do
           client.communicator.triggerUpdate()
         end
       end
     end
-    
+
     @Operation evalList(requestID : Seq(Integer), text)
       ("eval List start: " + text).println();
       let
@@ -1609,8 +1611,8 @@ context FmmlxDiagrams
         error = [];
         parseResult = m.evalString(text, self.getPackage(requestID))
       in
-        if 
-          parseResult.at(1) = null 
+        if
+          parseResult.at(1) = null
         then
           parseResult.at(0).println();
           if
@@ -1630,7 +1632,7 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
-        
+
     @Operation addDefaultEnums(p:Package)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
@@ -1665,13 +1667,13 @@ context FmmlxDiagrams
     end
 
     @Operation getDiagramData(requestID : Seq(Integer))
-        //let 
-        //  result = [log] 
+        //let
+        //  result = [log]
         //in
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
         //end
     end
-    
+
     @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
       let
         result = [];
@@ -1681,7 +1683,7 @@ context FmmlxDiagrams
         @For class in allClasses do
           @For op in class.operations do
             if op.name.toString() = opName.toString() then
-              let paramTypes = [] in 
+              let paramTypes = [] in
                 @For pt in op.paramTypes() do paramTypes := paramTypes + [pt.path()] end;
                 result := result + [[
                   class.path(),
@@ -1698,8 +1700,8 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
-    
-    
+
+
     @Operation findAllOperations(requestID: Seq(Integer))
       let
         result = [];
@@ -1707,7 +1709,7 @@ context FmmlxDiagrams
       in
         @For class in allClasses do
           @For op in class.operations do
-              let paramTypes = [] in 
+              let paramTypes = [] in
                 @For pt in op.paramTypes() do paramTypes := paramTypes + [pt.path()] end;
                 result := result + [[
                   class.path(),
@@ -1723,9 +1725,9 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
-    
+
     @Operation findOperationUsage(requestID: Seq(Integer), opName: String, usage:String)
-    
+
       let
         result = [];
         StringCheck = xmf.javaClass("tool.helper.StringCheck")
@@ -1734,7 +1736,7 @@ context FmmlxDiagrams
       in
         @For class in Classifier.allInstances() do
           @For op in class.operations do
-            if stringCheck.contains(op.codeBox.source(), opName) then 
+            if stringCheck.contains(op.codeBox.source(), opName) then
               result := result + [[
                 class.path(),
                 class.name.toString(),
@@ -1746,26 +1748,26 @@ context FmmlxDiagrams
                 op.codeBox.source()]]
             end
           end
-        end;     
-      
+        end;
+
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-      end // let    
+      end // let
     end // @Op
-  
-    @Operation hideElements(requestID: Seq(Integer), elementPaths: String, hide:Boolean) 
+
+    @Operation hideElements(requestID: Seq(Integer), elementPaths: String, hide:Boolean)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       in
         @For path in elementPaths do
-          let 
+          let
             element = m.evalString(path, self.getPackage(requestID)).at(0)
           in
-            if 
+            if
               element <> null
             then
               let
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(element)
-              in 
+              in
                 mappingInfo.hidden := hide
               end // let
             end // if
@@ -1788,13 +1790,63 @@ context FmmlxDiagrams
             package.addParent(FMML);
 
             @For diagramName in diagramNames do
-                self.getCommunicator().createDiagram(package.path(), diagramName)
+                self.getCommunicator().createDiagram(package.path(), diagramName, file)
             end;
             self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
           end
         end
       end;
       []
+    end
+
+    @Operation saveAsXml(requestID : Seq(Integer), packagePath, resourceName)
+        let initName =
+            if resourceName = ""
+            then self.name + ".xml"
+            else resourceName.toString().splitBy("/",0,0)->last
+        end then
+            file = xmf.saveFile(xmf.projDir(),"*.xml",initName)
+        in
+            if file <> "" then
+            self.saveAsXml(requestID, file,packagePath, true)
+        end
+      end
+    end
+
+    @Operation saveAsXml(requestID : Seq(Integer), file:String, packagePath, confirm:Boolean)
+        let write = true
+        then
+            package = self.getPackage(requestID)
+        then
+            project : XCore::Element = Projects::Project(package,"",null)
+        in
+            if not file.isReadOnly()
+            then
+                if file.fileExists() and self.loaded(package) and confirm
+                then write := xmf.confirm(file + " exists. Overwrite?")
+                end;
+                if write //and self.ensureDir(dir)
+                then
+                    let dialog = xmf.busy("Saving")
+                    in
+                        project.savedBy := xmf.user();
+                        project.saveDate := xmf.date();
+                        self.getCommunicator().saveXmlFile(file, package.toString())
+                    end;
+                    xmf.message(
+                        "Project " + project.name().toString() +
+                        " saved (xml format).\nProject saved in file " + file + " on " + project.saveDate + ".\n" +
+                        "Project created by " + project.creator + " on " + project.creationDate + ".\n" +
+                        "Project saved by " + project.savedBy + ".\n")
+                    end
+                else
+                    xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
+                end
+        end
+    end
+
+    @Operation loaded(package):Boolean
+          package <> null
     end
 
 end
