@@ -163,6 +163,7 @@ let
          Kernel_addAtt(class,"isFinal",false);
          Kernel_addAtt(class,"resourceName","");
          Kernel_addAtt(class,"delegatesTo",null);
+         Kernel_addAtt(class,"delegatesToLevel",null);
          class
       end;
       
@@ -566,7 +567,8 @@ let
                  mkAtt("isAbstract",Boolean,Class,false),
                  mkAtt("resourceName",String,Class,false),
                  mkAtt("constructors",mkSeqType(Constructor),Class,true),          
-                 mkAtt("delegatesTo",Class,Class,false)},       
+                 mkAtt("delegatesTo",Class,Class,false),           
+                 mkAtt("delegatesToLevel",Class,Class,false)},       
              "Class",
              Set{},
              Set{},

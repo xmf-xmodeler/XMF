@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation addDelegation(delegateFrom, delegateTo)
+    @Operation addDelegation(delegateFrom, delegateTo, delegateToLevel)
       if 
         delegateFrom.delegatesTo <> null 
       then 
@@ -17,19 +17,40 @@ import FmmlxDiagrams;
         self.transitivelyDelegatesTo(delegateTo, delegateFrom)
       then
         ["The class " + delegateTo.name + " already delegates to " + delegateFrom.name]
+      elseif
+        delegateToLevel < 0
+      then
+        ["Delegation level cannot be negative"]
+      elseif
+        delegateToLevel >= delegateTo.level
+      then
+        ["Delegation level must be lower then the level where it is defined"]
       else
-        delegateFrom.delegatesTo := delegateTo;[]
+        delegateFrom.delegatesTo := delegateTo;
+        delegateFrom.delegatesToLevel := delegateToLevel;
+        []
       end
     end
     
   context FmmlxManipulator
     @Operation setRoleFiller(delegateFrom, delegateTo)
-      if
-        delegateTo.isKindOf(delegateFrom.of().delegatesTo)
-      then
-        delegateFrom.roleFiller := delegateTo;[]
-      else
-        [delegateTo + " cannot be roe filler for " + delegateFrom +"."]
+      let
+        delegatorClass = delegateFrom.of()
+      in
+        @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel <> delegateFrom.level) do
+          delegatorClass = delegatorClass.of()
+        end;
+        if 
+          delegatorClass = delegatorClass.of() 
+        then 
+          ["no delegator class found"]
+        elseif
+          self.isInstanceOf(delegateTo, delegatorClass.delegatesTo, delegatorClass.delegatesToLevel)
+        then
+          delegateFrom.roleFiller := delegateTo;[]
+        else
+          [delegateTo + " cannot be role filler for " + delegateFrom +"."]
+        end
       end
     end
     

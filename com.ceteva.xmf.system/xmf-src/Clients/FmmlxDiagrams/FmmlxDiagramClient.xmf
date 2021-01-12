@@ -194,11 +194,14 @@ context FmmlxDiagrams
         result = []
       in
         @For object in self.getPackage(requestID).classes do
-          if object <> null then if object.delegatesTo <> null then
+          if object <> null andthen object.delegatesTo <> null then
             if object.delegatesTo.isKindOf(FMML::MetaClass) then
               let
-                delegatesFromPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
-                delegatesToPath = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).object.path()
+                //delegatesFromPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
+                //delegatesToPath = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).object.path();
+                //delegatesToLevel = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesToLevel).object.path()
+                delegatesFromPath = object.path();
+                delegatesToPath = object.delegatesTo.path()
               then
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createDelegationKey(delegatesFromPath, delegatesToPath))
               in
@@ -206,10 +209,11 @@ context FmmlxDiagrams
   	            mappingInfo.id.toString(), // 0 ID
   	            delegatesFromPath, // 1 start Path
   	            delegatesToPath, // 2 end Path
-  	            mappingInfo.points // 3 points
+  	            object.delegatesToLevel, // 3 level
+  	            mappingInfo.points // 4 points
   	          ]])
               end
-            end end
+            end
           end
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
@@ -486,7 +490,8 @@ context FmmlxDiagrams
                   o.owner.path(),
                   //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
                   [0,1,false,true], // to-do: multiplicity
-                  self.isOperationMonitored(o)
+                  self.isOperationMonitored(o),
+                  let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
                   ]])
                 end
               end end
@@ -554,7 +559,19 @@ context FmmlxDiagrams
 		      end // if null and mandatory
 		    end // if slot fmmlx
 		  end; // for slots
-		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
+		  if obj.delegatesTo <> null then @For otherObj in self.getPackage(requestID).classes do // if for (check delegation)
+		    if FmmlxManipulator::isInstanceOf(otherObj, obj, obj.delegatesToLevel) andthen 
+		     ( otherObj.roleFiller = null orelse not FmmlxManipulator::isInstanceOf(otherObj.roleFiller, obj.delegatesTo, obj.delegatesToLevel))
+			then result := result + [[
+			    "NO_ROLE_FILLER",
+			    "A role filler is required",
+			    [self.getMapping(requestID).addOrGetObjectMapping(otherObj).id],
+			    ["addRoleFiller",
+			      self.getMapping(requestID).addOrGetObjectMapping(otherObj).id,
+			      self.getMapping(requestID).addOrGetObjectMapping(obj.delegatesTo).id]]]
+			end
+		  end end; // for/if delegation
+/*		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
 		  then result := result + [[
 		    "NO_ROLE_FILLER",
 		    "A role filler is required",
@@ -563,7 +580,7 @@ context FmmlxDiagrams
 		      self.getMapping(requestID).addOrGetObjectMapping(obj).id,
 		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
 		  end;
-		  @For assoc in self.getPackage(requestID).associations do
+*/		  @For assoc in self.getPackage(requestID).associations do
 		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) // if obj fits sourceDef
 		    then
 		      let
@@ -1204,16 +1221,20 @@ context FmmlxDiagrams
     @Operation addDelegation(
       requestID   : Seq(Integer),
       delegateFromName  : String,
-      delegateToName    : String)
+      delegateToName    : String,
+      delegateToLevel   : Integer)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         delegateFrom = if self.getPackage(requestID).hasElement(delegateFromName) then self.getPackage(requestID).getElement(delegateFromName) else null end;
         delegateTo = if self.getPackage(requestID).hasElement(delegateToName) then self.getPackage(requestID).getElement(delegateToName) else null end
       then
-        problems = m.addDelegation(delegateFrom, delegateTo)
+        problems = m.addDelegation(delegateFrom, delegateTo, delegateToLevel)
       in
         if problems.isEmpty() then
-            self.log := self.log + [["addDelegation", ["delegateFrom",  delegateFrom.path()],  ["delegateTo",  delegateTo.path()]]]
+            self.log := self.log + [["addDelegation", 
+              ["delegateFrom",  delegateFrom.path()],  
+              ["delegateTo",  delegateTo.path()],  
+              ["delegateToLevel",  delegateToLevel+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
