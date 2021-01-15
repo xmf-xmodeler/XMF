@@ -147,6 +147,15 @@ context FmmlxDiagrams
     @Operation closeDiagram(requestID, diagramHandler : Integer) 
       ("yet unimplemented method for closing diagram " + diagramHandler).println()
     end
+    
+    // This operation is invoked by the java side while the window is closing
+    @Operation removeDiagram(requestID, diagramHandler : Integer) 
+      let
+        diagramID = self.vector2Seq(requestID).at(0)
+      in
+        self.diagrams.remove(diagramID)
+      end
+    end
 
     @Operation getMapping(requestID : Seq(Integer))
       self.diagrams.get(self.vector2Seq(requestID).at(0)).mapping
@@ -659,7 +668,6 @@ context FmmlxDiagrams
     ////////////////// Class Manipulations ///////////////////
 
     @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y)
-//        self.log := self.log + "\nE      addMetaClass: " + name + " | " + level + " | " + parents + " | " + abstract;
         let
           m = FmmlxDiagrams::FmmlxManipulator()
         then
@@ -671,7 +679,7 @@ context FmmlxDiagrams
         in
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y;
-	        self.log := self.log + [["addMetaClass", ["name",name] , ["level",level+""] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
+	        self.log := self.log + [["addMetaClass", ["package", newClass.owner.path()], ["name",name] , ["level",level+""] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
         end;
          
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []]) // temporary empty result
@@ -685,7 +693,6 @@ context FmmlxDiagrams
             abstract,
             x, y,
             slotValueList: Seq(Seq(String)) )
-//      self.log := self.log + "\nE      addInstance: " + ofId + " | " + name + " | " + parents + " | " + abstract;
         try
           let
             m = FmmlxDiagrams::FmmlxManipulator()
@@ -701,7 +708,7 @@ context FmmlxDiagrams
           in
             mappingInfo.lastKnownDiagramX := x;
             mappingInfo.lastKnownDiagramY := y;
-            self.log := self.log + [["addInstance", ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
+            self.log := self.log + [["addInstance", ["package", newInstance.owner.path()], ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
           end;
           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
         catch (exception)
@@ -717,7 +724,7 @@ context FmmlxDiagrams
         classPath4Log = class.path()
       in
         m.removeClass(class, strategy);
-        self.log := self.log + 	[["removeClass", ["class", classPath4Log]]]
+        self.log := self.log + 	[["removeClass", ["package", self.getPackage(requestID).path()], ["class", classPath4Log]]]
       end;
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
     end
@@ -731,7 +738,7 @@ context FmmlxDiagrams
       in
         m.changeClassName(class, newName);
         self.getMapping(requestID).updateKey(oldPath, class.path());
-        self.log := self.log + [["changeClassName", ["class", className] , ["newName",newName]]]
+        self.log := self.log + [["changeClassName", ["package", class.owner.path()], ["class", className] , ["newName",newName]]]
       end;
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
     end
@@ -744,7 +751,7 @@ context FmmlxDiagrams
         problems = if class <> null then m.changeClassAbstract(class, isAbstract) else ["Class not found"] end
       in
         if problems.isEmpty() then
-          self.log := self.log + [["setClassAbstract", ["class", class.path()] , ["abstract",isAbstract+""]]]
+          self.log := self.log + [["setClassAbstract", ["package", class.owner.path()], ["class", class.path()] , ["abstract",isAbstract+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -757,7 +764,7 @@ context FmmlxDiagrams
         problems = m.levelRaiseAll(self.getPackage(requestID), amount)
       in
         if problems.isEmpty() then
-           self.log := self.log + [["levelRaiseAll", ["amount", amount+""]]]
+           self.log := self.log + [["levelRaiseAll", ["package", self.getPackage(requestID).path()], ["amount", amount+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -809,7 +816,8 @@ context FmmlxDiagrams
 //        end;
         if problems.isEmpty() then
           self.log := self.log + [[
-          "changeParent" , 
+          "changeParent", 
+          ["package", class.owner.path()], 
           ["class", class.path()], 
           ["old", self.getParentsPaths(requestID, oldParentList)], 
           ["new", self.getParentsPaths(requestID, class.parents)]]]
@@ -841,7 +849,8 @@ context FmmlxDiagrams
           end // try
         end; // if
         if problems.isEmpty() then
-            self.log := self.log + [["addAttribute",
+            self.log := self.log + [["addAttribute", 
+                                            ["package", class.owner.path()],
                                             ["class", class.path()],
                                             ["name", name],
                                             ["level", level+""],
@@ -862,7 +871,7 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
           m.changeAttributeName(class, oldName, newName);
-          self.log := self.log + [["changeAttributeName", ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
+          self.log := self.log + [["changeAttributeName", ["package", class.owner.path()], ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -879,7 +888,7 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
           m.changeAttributeLevel(class, attName, oldLevel, newLevel);
-          self.log := self.log + [["changeAttributeLevel", ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
+          self.log := self.log + [["changeAttributeLevel", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -895,7 +904,7 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
           m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.getPackage(requestID));
-          self.log := self.log + [["changeAttributeType", ["class", class.path()] , ["name", attName] , ["oldType", oldTypeName] , ["newType", newTypeName]]]
+          self.log := self.log + [["changeAttributeType", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldType", oldTypeName] , ["newType", newTypeName]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -917,7 +926,7 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
           m.changeAttributeMultiplicity(class, attName, null, newMult);
-          self.log := self.log + [["changeAttributeMultiplicity", ["class", class.path()] , ["name", attName] , ["oldMul", FmmlxManipulator::multiplicity2ValueList(oldMult)+""] , ["newMul", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+          self.log := self.log + [["changeAttributeMultiplicity", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldMul", FmmlxManipulator::multiplicity2ValueList(oldMult)+""] , ["newMul", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -930,7 +939,7 @@ context FmmlxDiagrams
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
       in
         m.removeAttribute(class, attName, strategy);
-        self.log := self.log + [["removeAttribute", ["class", class.path()], ["name", attName]]]
+        self.log := self.log + [["removeAttribute", ["package", class.owner.path()], ["class", class.path()], ["name", attName]]]
       end;
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result
     end
@@ -969,7 +978,7 @@ context FmmlxDiagrams
         else
           error := "no Slot Found"
         end;
-		self.log := self.log + [["changeSlotValue",
+		self.log := self.log + [["changeSlotValue", ["package", class.owner.path()],
                                             ["class", obj.path()],
                                             ["slotName", slotName],
                                             ["valueToBeParsed", valueToBeParsed]]];
@@ -1079,7 +1088,7 @@ context FmmlxDiagrams
   	        instLevelSource, instLevelTarget,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
-          self.log := self.log + [["addAssociation",
+          self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
             ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
             ["fwName", fwName+""],
@@ -1104,7 +1113,7 @@ context FmmlxDiagrams
         problems = m.removeAssociation(assoc)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["removeAssociation", ["name", assoc.name]]]
+          self.log := self.log + [["removeAssociation", ["package", assoc.owner.path()], ["name", assoc.name]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1112,14 +1121,14 @@ context FmmlxDiagrams
 
     @Operation setAssociationEndVisibility(
       requestID      : Seq(Integer),
-      assocName        : String,
+      assocName      : String,
       concernsTarget : Boolean,
       newVisibility  : Boolean)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
+        problems = m.setAssociationEndVisibility(assoc, ["package", assoc.owner.path()], concernsTarget, newVisibility)
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1139,7 +1148,7 @@ context FmmlxDiagrams
         problems = m.changeAssociationForwardName(assoc, newName)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationForwardName", ["newFwName", newName], ["oldFwName", oldName]]]
+          self.log := self.log + [["changeAssociationForwardName", ["package", assoc.owner.path()], ["newFwName", newName], ["oldFwName", oldName]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1156,7 +1165,7 @@ context FmmlxDiagrams
         problems = m.changeAssociationMultiplicity(a, newMult, null)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -1172,7 +1181,7 @@ context FmmlxDiagrams
         problems = m.changeAssociationMultiplicity(a, null, newMult)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -1191,10 +1200,10 @@ context FmmlxDiagrams
   	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end;
   	    association = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
   	  then
-            problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
+        problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
   	  in
   	    if problems.isEmpty() then
-  	        self.log := self.log + [["addLink", ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+  	        self.log := self.log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
   	    end;
   	    self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
@@ -1233,7 +1242,7 @@ context FmmlxDiagrams
         problems = m.addDelegation(delegateFrom, delegateTo, delegateToLevel)
       in
         if problems.isEmpty() then
-            self.log := self.log + [["addDelegation", 
+            self.log := self.log + [["addDelegation", ["package", delegateFrom.owner.path()],
               ["delegateFrom",  delegateFrom.path()],  
               ["delegateTo",  delegateTo.path()],  
               ["delegateToLevel",  delegateToLevel+""]]]
@@ -1254,7 +1263,7 @@ context FmmlxDiagrams
         problems = m.setRoleFiller(role, roleFiller)
       in
         if problems.isEmpty() then
-            self.log := self.log + [["setRoleFiller", ["role", role.path()], ["roleFiller", roleFiller.path()]]]
+            self.log := self.log + [["setRoleFiller", ["package", role.owner.path()], ["role", role.path()], ["roleFiller", roleFiller.path()]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1274,7 +1283,7 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
           m.changeOperationName(class, oldName, newName);
-          self.log := self.log + [["changeOperationName", ["oldName", oldName] , ["newName", newName] , ["class", class.path()]]]
+          self.log := self.log + [["changeOperationName", ["package", class.owner.path()], ["oldName", oldName] , ["newName", newName] , ["class", class.path()]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1293,7 +1302,7 @@ context FmmlxDiagrams
         //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeOperationLevel", ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]]
+          self.log := self.log + [["changeOperationLevel", ["package", class.owner.path()], ["oldLevel", oldLevel+""], ["newLevel", newLevel+""] , ["name", name] , ["class", class.path()]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1315,7 +1324,7 @@ context FmmlxDiagrams
         problems = m.addOperation(class, opName, level, type, body)
       in
         if problems.isEmpty() then
-            self.log := self.log + [["addOperation",
+            self.log := self.log + [["addOperation", ["package", class.owner.path()],
                 ["class", class.path()],
                 ["opName", opName],
                 ["level", level+""],
@@ -1339,7 +1348,7 @@ context FmmlxDiagrams
         problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
       in
         if problems.isEmpty() then
-            self.log := self.log + [["addOperation2",
+            self.log := self.log + [["addOperation2", ["package", class.owner.path()],
             ["class", class.path()],
             ["level", level+""],
             ["body", body]]]
@@ -1362,7 +1371,7 @@ context FmmlxDiagrams
         problems = if class<>null then m.removeOperation(class, opName) else ["Class not found"] end
       in
         if problems.isEmpty() then
-            self.log := self.log + [["removeOperation", ["class", class.path()], ["name", opName]]]
+            self.log := self.log + [["removeOperation", ["package", class.owner.path()], ["class", class.path()], ["name", opName]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1394,7 +1403,7 @@ context FmmlxDiagrams
         problems = m.changeOperationOwner(oldOwner, operation, newOwner)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeOperationOwner", ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
+          self.log := self.log + [["changeOperationOwner", ["package", class.owner.path()], ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -1431,7 +1440,7 @@ context FmmlxDiagrams
           problems := m.changeOperationBody(class, op, newName, body)
         end;
         if problems.isEmpty() then
-          self.log := self.log + [["changeOperationBody", ["class",className] , ["name",operationName], ["body", body]]]
+          self.log := self.log + [["changeOperationBody", ["package", class.owner.path()], ["class",className] , ["name",operationName], ["body", body]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
