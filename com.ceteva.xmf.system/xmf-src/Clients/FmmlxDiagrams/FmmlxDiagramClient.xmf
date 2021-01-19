@@ -553,6 +553,21 @@ context FmmlxDiagrams
     	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
+    
+    @Operation getAllDiagrams(requestID : Seq(Integer), packagePath : String) 
+      let 
+        result = []      
+      in
+        @For key in diagrams.keys() do
+          if 
+            diagrams.get(key).package.path().equals(packagePath)
+          then
+            result := result + [key]
+          end
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
 
     @Operation getAllIssues(requestID : Seq(Integer))
       let
