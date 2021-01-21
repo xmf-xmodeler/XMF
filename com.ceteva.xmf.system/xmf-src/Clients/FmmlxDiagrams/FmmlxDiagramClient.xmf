@@ -125,7 +125,7 @@ context FmmlxDiagrams
         package.setOf(FMML::FMMLxPackage);
         Kernel_addAtt(package,"fmmlxAssociationInstances",{})
       end;
-        self.addDefaultEnums(package);
+        //self.addDefaultEnums(package);
       //////////////////////////////////////////////////////
         
       let 
@@ -193,6 +193,18 @@ context FmmlxDiagrams
 				self.getParentsPathsList(requestID, c)// 12: parentsPaths
     	        ]])
     	      end
+    	    else
+    	      result := result + [[
+    	      -2, // fake
+    	      c.name.toString(),
+    	      -1, // non-intrinsic
+    	      -2, [],
+    	      c.isAbstract,
+    	      0,0,false,0,
+              c.path(), // 10: ownPath
+              c.of().path(), // 11: ofPath
+              self.getParentsPathsList(requestID, c)// 12: parentsPaths
+    	      ]]
     	    end
     	  end;
     	  // clean up mapping ?
@@ -348,21 +360,25 @@ context FmmlxDiagrams
         end
     end
 
-    @Operation getOwnAttributes(requestID : Seq(Integer), className)
+    /*@Operation getOwnAttributes(requestID : Seq(Integer), className)
         let
           result = []
         in
           @For c in self.getPackage(requestID).classes do
-            if c <> null andthen c.isKindOf(FMML::MetaClass) and c.name.toString()  = className
-            then
+            if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.name.toString() = className then
               @For a in c.attributes do
                 result := result.append([[a.name.toString(), a.type.name.toString(), a.instLevel, a.mult()]])
               end
+            elseif c <> null andthen c.name.toString() = className then
+              @For a in c.attributes do
+                result := result.append([[a.name.toString(), a.type.name.toString(), -1, a.mult()]])
+              end
             end
           end;
+          ("").println();
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
         end
-    end
+    end*/
 
     @Operation getAllAttributes(requestID : Seq(Integer), className)
         let
@@ -371,13 +387,13 @@ context FmmlxDiagrams
           result = []
         in
           @For c in self.getPackage(requestID).classes do
-            if c <> null andthen c.isKindOf(FMML::MetaClass) and c.name.toString() = className
+            if c <> null andthen /*c.isKindOf(FMML::MetaClass) and*/ c.name.toString() = className
             then
               @For a in c.attributes do
                 resultOwn   :=   resultOwn.append([[
                     a.name.toString(),
                     a.type.name.toString(),
-                    a.instLevel,
+                    if a.isIntrinsic then a.instLevel else -1 end,
                     FmmlxManipulator::multiplicity2ValueList(a.mult()),
                     c.path()
                     ]])
@@ -387,7 +403,7 @@ context FmmlxDiagrams
                   resultOther := resultOther.append([[
                     a.name.toString(),
                     a.type.name.toString(),
-                    a.instLevel,
+                    if a.isIntrinsic then a.instLevel else -1 end,
                     FmmlxManipulator::multiplicity2ValueList(a.mult()),
                     a.owner.path()
                     ]])
@@ -480,7 +496,9 @@ context FmmlxDiagrams
           result = []
         in
           @For c in self.getPackage(requestID).classes do
-            if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.name.toString() = className
+            if c <> null 
+              andthen c.isKindOf(FMML::MetaClass) 
+              andthen c.name.toString() = className
             then
               @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
                 let
@@ -503,6 +521,36 @@ context FmmlxDiagrams
                   [0,1,false,true], // to-do: multiplicity
                   self.isOperationMonitored(o),
                   let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
+                  ]])
+                end
+              end end
+            end;
+            
+            if c <> null 
+              andthen (not c.isKindOf(FMML::MetaClass))
+              andthen c.name.toString() = className
+            then
+              @For o in c.operations do if (not o.owner = null) then
+                let
+                  paramNames = o.paramNames();
+                  paramTypesRaw = o.paramTypes();
+                  paramTypes = []
+                in
+                  @For type in paramTypesRaw do
+                    paramTypes := paramTypes.append([self.getPathAsString(type)])
+                  end;
+                  result := result.append([[
+                  o.name.toString(),
+                  paramNames,
+                  paramTypes,
+                  -1,
+                  self.getReturnPathAsString(o),
+                  o.source(),
+                  o.owner.path(),
+                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                  [0,1,false,true], // to-do: multiplicity
+                  self.isOperationMonitored(o),
+                  false
                   ]])
                 end
               end end
@@ -1049,7 +1097,8 @@ context FmmlxDiagrams
     @Operation getParentsPathsList(requestID, c : FMML::MetaClass) // for local use
       let list = [] in
         @For p in c.parents do
-          if p.isKindOf(FMML::MetaClass) then list := list.append([p.path()]) end
+          //if p.isKindOf(FMML::MetaClass) then 
+            list := list.append([p.path()]) //end
         end; // for
         list
       end// let
