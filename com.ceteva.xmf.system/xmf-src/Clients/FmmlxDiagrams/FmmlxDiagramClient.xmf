@@ -1014,17 +1014,10 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         obj = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
         error = null
-//      then
-//        class = obj.of()
       then
-//        atts = class.allAttributesForLevel(obj.level);
+        class = obj.of();
         foundAtt = m.findAttributeForSlot(obj, slotName)
       in
-//        @For att in atts do
-//          if att.name.toString() = slotName.toString() then
-//            foundAtt := att
-//          end
-//        end;
         if
           foundAtt <> null
         then
@@ -1041,10 +1034,11 @@ context FmmlxDiagrams
         else
           error := "no Slot Found"
         end;
-		self.log := self.log + [["changeSlotValue", ["package", class.owner.path()],
-                                            ["class", obj.path()],
-                                            ["slotName", slotName],
-                                            ["valueToBeParsed", valueToBeParsed]]];
+	  self.log := self.log + [["changeSlotValue", 
+                                  ["package", class.owner.path()],
+                                  ["class", obj.path()],
+                                  ["slotName", slotName],
+                                  ["valueToBeParsed", valueToBeParsed]]];
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if error = null then null else [error] end]) // temporary empty result
       end
     end
