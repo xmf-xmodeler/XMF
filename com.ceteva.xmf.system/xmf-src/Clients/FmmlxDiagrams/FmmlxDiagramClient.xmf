@@ -166,6 +166,30 @@ context FmmlxDiagrams
     end
 
     //////////////////////// Queries ///////////////////////////////
+    
+    @Operation getAllObjectPositions(requestID : Seq(Integer), diagramID)
+      let 
+        result = [];
+        diagram = self.diagrams.get(diagramID)
+      then
+        package = diagram.package;
+        mapping = diagram.mapping
+      in
+        @For c in package.classes do
+          let
+    	    mappingInfo = mapping.addOrGetObjectMapping(c)	        
+    	  in
+    	    result := result.append([[
+			  c.path(), // ownPath
+    	      mappingInfo.lastKnownDiagramX,
+    	      mappingInfo.lastKnownDiagramY,
+			  mappingInfo.hidden
+			  ]])
+	      end
+	    end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end    
 
     @Operation getAllObjects(requestID : Seq(Integer))
         let
