@@ -97,7 +97,7 @@ context FmmlxDiagrams
         if 
           item <> null andthen testForNewKey = null
         then 
-          item.id := if o.isKindOf(Symbol) then o.toString() else o.path() end
+          item.id := newKey//if o.isKindOf(Symbol) then o.toString() else o.path() end
         else
           throw(Exception("Cannot change key. Either oldKey does not exist or newKey already exists."))
         end
