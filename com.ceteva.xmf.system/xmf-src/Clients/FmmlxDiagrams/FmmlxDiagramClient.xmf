@@ -202,19 +202,19 @@ context FmmlxDiagrams
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
     	      in
     	        result := result.append([[
-    	        mappingInfo.id, // 0: id*
+    	        -1, //mappingInfo.id, // 0: id*
     	        c.name.toString(), // 1: name
     	        c.level, // level  // 2: level
-    	        if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
-    	        self.getParentIdList(requestID, c),//[],// 4: parents-ID
+    	        -1, //if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
+    	        -1, // self.getParentIdList(requestID, c),//[],// 4: parents-ID
     	        c.isAbstract, // 5
     	        mappingInfo.lastKnownDiagramX, // 6
     	        mappingInfo.lastKnownDiagramY, // 7
-				mappingInfo.hidden, // 8: visibility in this diagram
-				0, // 9: reserved for delegation
-				c.path(), // 10: ownPath
-				c.of().path(), // 11: ofPath
-				self.getParentsPathsList(requestID, c)// 12: parentsPaths
+    	        mappingInfo.hidden, // 8: visibility in this diagram
+    	        -1, // 9: reserved for delegation
+    	        c.path(), // 10: ownPath
+    	        c.of().path(), // 11: ofPath
+    	        self.getParentsPathsList(requestID, c)// 12: parentsPaths
     	        ]])
     	      end
     	    else
@@ -232,7 +232,7 @@ context FmmlxDiagrams
     	    end
     	  end;
     	  // clean up mapping ?
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+    	  if requestID <> -3 then self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result]) end
         end
     end
 
@@ -1192,10 +1192,12 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.removeAssociation(assoc)
+        problems = m.removeAssociation(assoc);
+        packagePath = assoc.owner.path();
+        assocName =  assoc.name
       in
         if problems.isEmpty() then
-          self.log := self.log + [["removeAssociation", ["package", assoc.owner.path()], ["name", assoc.name]]]
+          self.log := self.log + [["removeAssociation", ["package", packagePath], ["name", assocName]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
