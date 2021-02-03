@@ -189,7 +189,41 @@ context FmmlxDiagrams
 	    end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
-    end    
+    end
+    
+    @Operation getAllEdgePositions(requestID : Seq(Integer), diagramID)
+      let 
+        result = [];
+        diagram = self.diagrams.get(diagramID)
+      then
+        package = diagram.package;
+        mapping = diagram.mapping
+      in
+        @For mappingItem in mapping.mapping do
+          let
+    	    obj = mappingItem.object
+    	  then
+    	    key = if o.isKindOf(Associations::Association) then o.name else o end
+    	  in
+    	    result := result.append([[
+              key,
+              mappingInfo.points]])
+          end
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
+    @Operation getAllLabelPositions(requestID : Seq(Integer), diagramID)
+      self.getCommunicator()
+          .sendMessageToJava([self.vector2Seq(requestID), 
+               self
+                  .diagrams
+                  .get(diagramID)
+                  .mapping
+                  .labelMapping
+                  .asSeq()])
+    end
 
     @Operation getAllObjects(requestID : Seq(Integer))
         let
@@ -874,7 +908,9 @@ context FmmlxDiagrams
 //        then
           @For parentName in addSet do
             let
-              parentToBeAdded = if self.getPackage(requestID).hasElement(parentName) then self.getPackage(requestID).getElement(parentName) else null end
+              pr = m.evalString(parentName, self.getPackage(requestID))
+            then
+              parentToBeAdded = if pr.at(1) = null then pr.at(0) else null end
             in
               problems := problems + if parentToBeAdded = null then ["Cannot find new parent " + parentName] else m.addParent(class, parentToBeAdded) end
             end
@@ -884,7 +920,9 @@ context FmmlxDiagrams
 //        then
           @For parentName in removeSet do
             let
-              parentToBeRemoved = if self.getPackage(requestID).hasElement(parentName) then self.getPackage(requestID).getElement(parentName) else null end
+              pr = m.evalString(parentName, self.getPackage(requestID))
+            then
+              parentToBeRemoved = if pr.at(1) = null then pr.at(0) else null end
             in
               problems := problems + if parentToBeRemoved = null then ["Cannot find old parent " + parentName] else m.removeParent(class, parentToBeRemoved) end
             end
@@ -1100,15 +1138,6 @@ context FmmlxDiagrams
           if not parent = null then list := list + parent.path() + "," end
         end; // for
         list.subString(0, list.size()-1)
-      end// let
-    end
-
-    @Operation getParentIdList(requestID, c : FMML::MetaClass) // for local use
-      let list = [] in
-        @For p in c.parents do
-          if p.isKindOf(FMML::MetaClass) then list := list.append([self.getMapping(requestID).addOrGetObjectMapping(p).id]) end
-        end; // for
-        list
       end// let
     end
     
