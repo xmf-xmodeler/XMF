@@ -62,7 +62,11 @@ context Root::FMML
        It is invoked when an operation is invoked. 
        This operation tries to find out where the operation is defined.
     */
-    @Operation sendInstance(element,message,args):XCore::Element 
+    @Operation sendInstance(element,message,args):XCore::Element
+      if "sendInstance".equals(message.toString()) then 
+        FMML::MetaClass.getOperation("sendInstance").invoke(element,args)
+      else
+//       ("[sendInstance] " + element.name + ":" + self.name + ": Operation "+message).println();
       let
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
@@ -187,6 +191,7 @@ context Root::FMML
         end        
       
       end // let
+      end // test
     end // operation
 
     @Operation ownAttributes():Set(Attribute)
@@ -330,8 +335,5 @@ context Root::FMML
   @Constraint OneLessThenNull
     0 > 1 fail "This isn't going to work..."
   end
-    
-    
-    
- 
+  
 end
