@@ -206,9 +206,11 @@ context FmmlxDiagrams
     	  then
     	    key = if obj.isKindOf(Associations::Association) then obj.name else obj end
     	  in
-    	    result := result.append([[
-              key.toString(),
-              mappingItem.points]])
+    	    if not obj.isKindOf(FMML::MetaClass) then 
+    	      result := result.append([[
+                key.toString(),
+                mappingItem.points]])
+            end
           end
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
