@@ -14,7 +14,7 @@ parserImport XOCL;
 context Object 
   @Constraint AllSlotsTypeCorrect
     self.of().allAttributes()->forAll(a |
-      (a.isIntrinsic and a.instLevel <> self.level) 
+      (a.isIntrinsic andthen self.hasAttribute("level") andthen a.instLevel <> self.level) 
       orelse
       self.get(a.name).isKindOf(a.type))
     fail

@@ -791,21 +791,30 @@ context FmmlxDiagrams
     ////////////////// Class Manipulations ///////////////////
 
     @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y)
-        let
-          m = FmmlxDiagrams::FmmlxManipulator()
-        then
-          parentsList = self.getParentsList(requestID, parents)
-        then
-          newClass = m.addMetaClass(self.getPackage(requestID), name, level, parentsList, abstract)
-        then
-          mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass)
-        in
-          mappingInfo.lastKnownDiagramX := x;
-          mappingInfo.lastKnownDiagramY := y;
-	        self.log := self.log + [["addMetaClass", ["package", newClass.owner.path()], ["name",name] , ["level",level+""] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        parentsList = self.getParentsList(requestID, parents);
+        problems = []
+      in
+        problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
+        if problems.isEmpty() then
+          let 
+            newClass = m.addMetaClass(self.getPackage(requestID), name, level, parentsList, abstract)
+          then
+            mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass)
+          in
+            mappingInfo.lastKnownDiagramX := x;
+            mappingInfo.lastKnownDiagramY := y;
+            self.log := self.log + [["addMetaClass", 
+              ["package", newClass.owner.path()], 
+              ["name",name], 
+              ["level",level+""], 
+              ["parents",self.getParentsPaths(requestID, parentsList)], 
+              ["abstract",abstract+""]]]
+          end
         end;
-         
-        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []]) // temporary empty result
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end  
     end
 
     @Operation addInstance(
@@ -1560,6 +1569,36 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
+    
+    ///////////////////////// Constraints ///////////////////////////
+    
+    @Operation addConstraint(
+      requestID  : Seq(Integer),
+      classPath  : String,
+      constName  : String,
+      instLevel  : Integer,
+      body       : String,
+      reason     : String)
+
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0);
+        constSymbol = constName.asSymbol()
+      then
+        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel) else ["Class "+classPath+" not found."] end
+      in
+        if problems.isEmpty() then
+            self.log := self.log + [["addConstraint", ["package", class.owner.path()],
+            ["class", class.path()],
+            ["constName", constName],
+            ["instLevel", instLevel+""],
+            ["body", body],
+            ["reason", reason]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
 
     // Not yet implemented
 
@@ -1692,7 +1731,7 @@ context FmmlxDiagrams
 
     @Operation assignToGlobal(requestID : Seq(Integer), objPath:String, varName:String)
       let
-        class = self.getMapping(requestID).getMapping(objID).object
+        class = FmmlxDiagrams::FmmlxManipulator().evalString(objPath, self.getPackage(requestID)).at(0)
       in
         if
           class <> null
@@ -1703,9 +1742,9 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation showBody(requestID : Seq(Integer), objID:Integer, opName:String, arity:Integer)
+    @Operation showBody(requestID : Seq(Integer), objPath:String, opName:String, arity:Integer)
       let
-        class = self.getMapping(requestID).getMapping(objID).object
+        class = FmmlxDiagrams::FmmlxManipulator().evalString(objPath, self.getPackage(requestID)).at(0)
       in
         if
           class <> null andthen class.getOperation(opName) <> null

@@ -1,0 +1,109 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+  context FmmlxManipulator 
+    @Operation addConstraint(
+      class      : FMML::MetaClass, 
+      name       : Symbol, 
+      bodyCode   : String, 
+      reasonCode : String, 
+      instLevel  : Integer)
+
+      if
+        class = null
+      then
+        ["Class not found. (Should have been detected earlier.)"]
+      elseif
+        class.hasElement(name)
+      then
+        ["Name " + name + " already exists."]
+      elseif
+        not name.isValidName()
+      then
+        ["Name " + name + " is not a valid name."]
+      elseif
+        not instLevel.isKindOf(Integer)
+      then
+        ["Instantiation level " + instLevel + " is not valid."]
+      elseif
+        instLevel >= class.level
+      then
+        ["Instantiation level " + instLevel + " not legal for a class on level " + class.level + "."]
+      else
+        let
+          body1 = null;
+          reason1 = null;
+          body2 = null;
+          reason2 = null;            
+          body3 = null;
+          reason3 = null;
+          problems = []
+        in           
+          bodyCode :=  "@Operation body(classifier : Element, level : Element) "
+                     + "if level = 1 "
+                     + "then " + bodyCode 
+                     + " else true"
+                     + " end"
+                     + " end";
+          reasonCode:= "@Operation reason(classifier : Element, level : Element) " + reasonCode + " end";
+
+          body1   := try [OCL::OCL.grammar.parseString(bodyCode,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error: " + exception.message]] end;
+          reason1 := try [OCL::OCL.grammar.parseString(reasonCode,"Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error: " + exception.message]] end;
+
+          body2 := if body1.at(0) <> null  
+          then try [Compiler::compileToFun("",body1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error: " + exception.message]] end
+          else body1 
+          end;
+            
+          reason2 := if reason1.at(0) <> null 
+          then try [Compiler::compileToFun("",reason1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error: " + exception.message]] end
+          else reason1
+          end;
+            
+          body3 := if body2.at(0) <> null
+          then try [(body2.at(0))(),null] catch(exception) [null,["Instantiation Error: " + exception.message]] end
+          else body2
+          end;
+            
+          reason3 := if reason2.at(0) <> null
+          then try [(reason2.at(0))(),null] catch(exception) [null,["Instantiation Error: " + exception.message]] end
+          else reason2
+          end;
+          
+          if body3.at(0) <> null then
+            body3.at(0).isIntrinsic := true;
+            body3.at(0).instLevel := instLevel
+          else
+            problems := problems + body3.at(1) 
+          end;
+          
+          if reason3.at(0) <> null then
+            reason3.at(0).isIntrinsic := true;
+            reason3.at(0).instLevel := instLevel
+          else
+            problems := problems + reason3.at(1) 
+          end;
+          
+          if problems.isEmpty() then
+            if body3.at(0) <> null and reason3.at(0) <> null
+            then
+              try
+                let 
+                  c = Constraint(name, body3.at(0), reason3.at(0))
+                in
+                  class.add(c)
+                end; []
+              catch(e4)
+                [e4.message]
+              end
+            else
+              ["operation addConstraint mysteriously failed"]
+            end
+          else
+            problems
+          end
+        end
+      end      
+    end
