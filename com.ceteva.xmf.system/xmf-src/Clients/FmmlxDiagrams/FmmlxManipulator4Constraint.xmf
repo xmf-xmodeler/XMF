@@ -32,68 +32,39 @@ import FmmlxDiagrams;
       then
         ["Instantiation level " + instLevel + " not legal for a class on level " + class.level + "."]
       else
-        let
-          body1 = null;
-          reason1 = null;
-          body2 = null;
-          reason2 = null;            
-          body3 = null;
-          reason3 = null;
+        let            
+          bodyO = null;
+          reasonO = null;
           problems = []
         in           
-          bodyCode :=  "@Operation body(classifier : Element, level : Element) "
-                     + "if level = 1 "
-                     + "then " + bodyCode 
-                     + " else true"
-                     + " end"
-                     + " end";
-          reasonCode:= "@Operation reason(classifier : Element, level : Element) " + reasonCode + " end";
-
-          body1   := try [OCL::OCL.grammar.parseString(bodyCode,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error: " + exception.message]] end;
-          reason1 := try [OCL::OCL.grammar.parseString(reasonCode,"Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error: " + exception.message]] end;
-
-          body2 := if body1.at(0) <> null  
-          then try [Compiler::compileToFun("",body1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error: " + exception.message]] end
-          else body1 
-          end;
-            
-          reason2 := if reason1.at(0) <> null 
-          then try [Compiler::compileToFun("",reason1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error: " + exception.message]] end
-          else reason1
-          end;
-            
-          body3 := if body2.at(0) <> null
-          then try [(body2.at(0))(),null] catch(exception) [null,["Instantiation Error: " + exception.message]] end
-          else body2
-          end;
-            
-          reason3 := if reason2.at(0) <> null
-          then try [(reason2.at(0))(),null] catch(exception) [null,["Instantiation Error: " + exception.message]] end
-          else reason2
+         
+          bodyO   := self.createOperationForConstraint(bodyCode,   "body");
+          reasonO := self.createOperationForConstraint(reasonCode, "reason");
+          
+          if bodyO.at(0) <> null then
+            bodyO.at(0).isIntrinsic := true;
+            bodyO.at(0).instLevel := instLevel
+          else
+            problems := problems + bodyO.at(1) 
           end;
           
-          if body3.at(0) <> null then
-            body3.at(0).isIntrinsic := true;
-            body3.at(0).instLevel := instLevel
+          if reasonO.at(0) <> null then
+            reasonO.at(0).isIntrinsic := true;
+            reasonO.at(0).instLevel := instLevel
           else
-            problems := problems + body3.at(1) 
-          end;
-          
-          if reason3.at(0) <> null then
-            reason3.at(0).isIntrinsic := true;
-            reason3.at(0).instLevel := instLevel
-          else
-            problems := problems + reason3.at(1) 
+            problems := problems + reasonO.at(1) 
           end;
           
           if problems.isEmpty() then
-            if body3.at(0) <> null and reason3.at(0) <> null
+            if bodyO.at(0) <> null and reasonO.at(0) <> null
             then
               try
                 let 
-                  c = Constraint(name, body3.at(0), reason3.at(0))
+                  con = Constraint(name, bodyO.at(0), reasonO.at(0))
                 in
-                  class.add(c)
+                  con.body.setProperty("raw", bodyCode);
+                  con.reason.setProperty("raw", reasonCode);
+                  class.add(con)
                 end; []
               catch(e4)
                 [e4.message]
@@ -106,4 +77,161 @@ import FmmlxDiagrams;
           end
         end
       end      
+    end
+    
+  context FmmlxManipulator
+    @Operation createOperationForConstraint(code: String, type: String)
+      let code1 = null; code2 = null; code3 = null in
+      if type = "body" then code :=  "@Operation body(classifier : Element, level : Element) "
+                     + "if level = 1 "
+                     + "then " + code 
+                     + " else true"
+                     + " end"
+                     + " end"
+      elseif type = "reason" then code:= "@Operation reason(classifier : Element, level : Element) " + code + " end"
+      else throw Exception("Illegal Type")
+      end;
+      
+      code1 := try [OCL::OCL.grammar.parseString(code,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error ("+type+"): " + exception.message]] end;
+
+      code2 := if code1.at(0) <> null  
+      then try [Compiler::compileToFun("",code1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error ("+type+"): " + exception.message]] end
+      else code1 
+      end;
+             
+      code3 := if code2.at(0) <> null
+      then try [(code2.at(0))(),null] catch(exception) [null,["Instantiation Error ("+type+"): " + exception.message]] end
+      else code2
+      end;
+      
+      code3
+      
+    end end
+    
+  context FmmlxManipulator
+    @Operation changeConstraintName(
+      class         : FMML::MetaClass, 
+      oldName       : String, 
+      newNameSymbol : Symbol)
+      
+      let
+        con = if class = null then null else class.getConstraint(name) end
+      in
+        if class = null then ["Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        elseif class.hasElement(newNameSymbol) then ["Name " + newNameSymbol + " already exists."] 
+        elseif not newNameSymbol.isValidName() then ["Name " + newNameSymbol + " is not a valid name."]
+        else
+          con.setName(newNameSymbol); []
+        end
+      end
+    end
+
+  context FmmlxManipulator
+    @Operation changeConstraintLevel(
+      class     : FMML::MetaClass, 
+      name      : String, 
+      instLevel : Integer)
+      
+      let
+        con = if class = null then null else class.getConstraint(name) end
+      in
+        if class = null then ["Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        elseif not instLevel.isKindOf(Integer) then ["Instantiation level " + instLevel + " is not valid."]
+        elseif instLevel >= class.level then ["Instantiation level " + instLevel + " not legal for a class on level " + class.level + "."]
+        else
+          con.body.instLevel   := instLevel;
+          con.reason.instLevel := instLevel
+        end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeConstraintBody(
+      class      : FMML::MetaClass, 
+      name       : String, 
+      bodyCode   : String)
+      
+      let
+        con = if class = null then null else class.getConstraint(name) end;
+        body = self.createOperationForConstraint(bodyCode, "body")
+      in
+        if class = null then ["Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        elseif body.at(0) = null then body.at(1) 
+        else
+          body.at(0).isIntrinsic := true;
+          body.at(0).instLevel := con.body.instLevel;
+          con.body.owner := null;
+          con.body := body.at(0);
+          con.body.setProperty("raw", bodyCode);
+          con.body.owner := con; []
+        end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeConstraintReason(
+      class      : FMML::MetaClass, 
+      name       : String, 
+      reasonCode : String)
+      
+      let
+        con = if class = null then null else class.getConstraint(name) end;
+        reason = self.createOperationForConstraint(reasonCode, "reason")
+      in
+        if class = null then ["Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        elseif reason.at(0) = null then reason.at(1) 
+        else
+          reason.at(0).isIntrinsic := true;
+          reason.at(0).instLevel := con.body.instLevel;
+          con.reason.owner := null;
+          con.reason := reason.at(0);
+          con.reason.setProperty("raw", reasonCode);
+          con.reason.owner := con; []
+        end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation changeConstraintOwner(
+      oldClass : FMML::MetaClass, 
+      newClass : FMML::MetaClass, 
+      name     : String)
+      
+      let
+        con = if oldClass = null then null else oldClass.getConstraint(name) end
+      then
+        instLevel = if con = null then null else con.body.instLevel end
+      in
+        if     oldClass = null then ["Old Class not found. (Should have been detected earlier.)"]
+        elseif newClass = null then ["New Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        elseif newClass.hasElement(name) then ["Name " + name + " already exists."] 
+        elseif not newNameSymbol.isValidName() then ["Name " + name + " is not a valid name."]
+        elseif not instLevel.isKindOf(Integer) then ["Instantiation level " + instLevel + " is not valid."]
+        elseif instLevel >= newClass.level then ["Instantiation level " + instLevel + " not legal for a class on level " + newClass.level + "."]
+        else
+          oldClass.remove(con);
+          newClass.add(con); []
+        end
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation removeConstraint(
+      class : FMML::MetaClass, 
+      name  : String)
+      
+      let
+        con = if class = null then null else class.getConstraint(name) end
+      in
+        if class = null then ["Class not found. (Should have been detected earlier.)"]
+        elseif con = null then ["Constraint not found"]
+        else
+          class.remove(con); []
+        end
+      end
     end
