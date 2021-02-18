@@ -613,9 +613,9 @@ context FmmlxDiagrams
               result := result.append([[
                 con.name.toString(),
                 con.body.instLevel,
-                con.body.getProperty("raw"),
+                con.body.getProperty("raw", "Error: raw source not found"),
                 con.body.source(),
-                con.reason.getProperty("raw"),
+                con.reason.getProperty("raw", "Error: raw source not found"),
                 con.reason.source()]])
             end end // for+if
           end // if
@@ -1418,10 +1418,8 @@ context FmmlxDiagrams
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
-        //class = self.getMapping(requestID).getMapping(classId).object
       then
         problems = if class <> null then m.checkChangeOperationName(class, oldName, newName) else ["Class not found"] end
-        //problems = m.checkChangeOperationName(class, oldName, newName)
       in
         if problems.isEmpty() then
           m.changeOperationName(class, oldName, newName);
@@ -1450,7 +1448,7 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation addOperation(
+    /* @Operation addOperation(
       requestID  : Seq(Integer),
       classId    : Integer,
       opName     : String,
@@ -1475,7 +1473,7 @@ context FmmlxDiagrams
             end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
-    end
+    end */
 
     @Operation addOperation2(
       requestID  : Seq(Integer),
@@ -1573,9 +1571,10 @@ context FmmlxDiagrams
       then
         newName = body.splitBy("()[]",0,0)->head.subst("","@Operation ",false)
       in
-        if operationName.toString() <> newName.toString() then
-          problems := ["name change not allowed here"]
-        elseif
+//        if operationName.toString() <> newName.toString() then
+//          problems := ["name change not allowed here"]
+//        else
+        if
           op = null then
           problems := ["operation not found"]
         else // let the manipulator try

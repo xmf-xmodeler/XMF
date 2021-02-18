@@ -3,7 +3,7 @@ parserImport XOCL;
 import Clients;
 import FmmlxDiagrams;
 
-  context FmmlxManipulator 
+/*  context FmmlxManipulator 
     @Operation addOperation(class, opName, level, returnType, opString)
       let
         problems = [];
@@ -63,6 +63,7 @@ import FmmlxDiagrams;
         problems
       end 
     end
+  */  
     
   context FmmlxManipulator 
     @Operation addOperation2(class, level, opString)
@@ -178,9 +179,10 @@ import FmmlxDiagrams;
       then
         tempName = self.getFreeOpName(class, level)
       in
-        self.changeOperationName(class, opName, tempName); // temporarily rename the current operation
+        //self.changeOperationName(class, opName, tempName); // temporarily rename the current operation
+        class.remove(oldOp);
         problems := try
-          self.addOperation(class, opName, level, returnType, body)
+          self.addOperation2(class, level, body)
         catch(e)
           ["Something unforeseen went wrong while updating the operation: " + e.message]
         end;
@@ -188,9 +190,10 @@ import FmmlxDiagrams;
         if 
           problems.isEmpty()
         then // remove old op
-          self.removeOperation(class, tempName)
+          null // already done: self.removeOperation(class, tempName)
         else // restore old op
-          self.changeOperationName(class, tempName, opName)
+          class.add(oldOp)
+          //self.changeOperationName(class, tempName, opName)
         end;
         problems
       end
