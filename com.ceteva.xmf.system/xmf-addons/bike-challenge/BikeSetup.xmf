@@ -25,13 +25,13 @@ context Root
           m.valueList2Multiplicity([0, 2,true, false]),
   	      4,4, true, true, false, false);
   	      
-  	  m.addOperation(p::Configuration, null, 4, null, 
+  	  m.addOperation2(p::Configuration, 4,  
       "  @Operation time[monitor=true]()
 "+    "    xmf.date()
 "+    "  end");
   	  
   	      
-  	  m.addOperation(p::Configuration, null, 3, null, 
+  	  m.addOperation2(p::Configuration, 3,  
       "  @Operation totalRevenues[monitor=true]()
 "+    "    self.allInstances().size() * 3.141592654
 "+    "  end");
@@ -68,7 +68,7 @@ context Root
       m.addAttribute(p::Bicycle, "partSalesPrice", 0, Float, m.valueList2Multiplicity([1,1,true,false]));
       m.addAttribute(p::Bicycle, "serialNo",       0, String, m.valueList2Multiplicity([1,1,true,false]));
       
-  	  m.addOperation(p::Configuration, null, 2, null, 
+  	  m.addOperation2(p::Configuration, 2, 
       "  @Operation highestPrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"N/A\"
@@ -83,7 +83,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation(p::Configuration, null, 2, null, 
+  	  m.addOperation2(p::Configuration, 2, 
       "  @Operation averagePrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"div/zero\"
@@ -99,7 +99,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation(p::Configuration, null, 0, null, 
+  	  m.addOperation2(p::Configuration, 0, 
       "  @Operation isBikeComplete[monitor=true]()
 "+    "    if self.frame = null then \"a Frame is missing\"
 "+    "    elseif self.fork = null then \"a Fork is missing\"
