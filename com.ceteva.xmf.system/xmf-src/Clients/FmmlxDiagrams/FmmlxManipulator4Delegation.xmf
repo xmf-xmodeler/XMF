@@ -4,12 +4,12 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation addDelegation(delegateFrom, delegateTo, delegateToLevel)
-      if 
+    @Operation setDelegation(delegateFrom, delegateTo, delegateToLevel)
+      /*if // replacing delegation is ok
         delegateFrom.delegatesTo <> null 
       then 
         ["The class " + delegateFrom.name + " already delegates to " + delegateFrom.delegatesTo.name]
-      elseif
+      else*/if
         delegateFrom.level <> delegateTo.level
       then 
         ["The class " + delegateFrom.name + " is not on the same level as " + delegateTo.name]
@@ -22,6 +22,22 @@ import FmmlxDiagrams;
       then
         ["Delegation level cannot be negative"]
       elseif
+        delegateFrom.allParents().contains(delegateTo)
+      then
+        ["The class " + delegateTo.name + " is already superclass of " + delegateFrom.name]
+      elseif
+        delegateTo.allParents().contains(delegateFrom)
+      then
+        ["The class " + delegateFrom.name + " is already superclass of " + delegateTo.name]
+      elseif
+        delegateTo.isKindOf(delegateFrom)
+      then
+        ["The class " + delegateTo.name + " is already kind of " + delegateFrom.name]
+      elseif
+        delegateFrom.isKindOf(delegateTo)
+      then
+        ["The class " + delegateFrom.name + " is already kind of " + delegateTo.name]
+      elseif
         delegateToLevel >= delegateTo.level
       then
         ["Delegation level must be lower then the level where it is defined"]
@@ -33,12 +49,37 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
+    @Operation removeDelegation(delegateFrom) 
+      if 
+        delegateFrom = null
+      then 
+        ["delegateFrom is null"]
+      else
+        delegateFrom.delegatesTo := null;
+        delegateFrom.delegatesToLevel := null;
+        []
+      end
+    end     
+    
+  context FmmlxManipulator
+    @Operation removeRoleFiller(role) 
+      if 
+        role = null
+      then 
+        ["role is null"]
+      else
+        role.roleFiller := null;
+        []
+      end
+    end      
+    
+  context FmmlxManipulator
     @Operation setRoleFiller(delegateFrom, delegateTo)
       let
         delegatorClass = delegateFrom.of()
       in
         @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel <> delegateFrom.level) do
-          delegatorClass = delegatorClass.of()
+          delegatorClass := delegatorClass.of()
         end;
         if 
           delegatorClass = delegatorClass.of() 

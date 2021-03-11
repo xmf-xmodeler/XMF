@@ -181,6 +181,7 @@ import FmmlxDiagrams;
       in
         //self.changeOperationName(class, opName, tempName); // temporarily rename the current operation
         class.remove(oldOp);
+        resetOperatorTable();
         problems := try
           self.addOperation2(class, level, body)
         catch(e)
@@ -190,9 +191,11 @@ import FmmlxDiagrams;
         if 
           problems.isEmpty()
         then // remove old op
-          null // already done: self.removeOperation(class, tempName)
+          problems := ["Compiled successfully!"]
+          // already done: self.removeOperation(class, tempName)
         else // restore old op
-          class.add(oldOp)
+          class.add(oldOp); 
+          resetOperatorTable()
           //self.changeOperationName(class, tempName, opName)
         end;
         problems
