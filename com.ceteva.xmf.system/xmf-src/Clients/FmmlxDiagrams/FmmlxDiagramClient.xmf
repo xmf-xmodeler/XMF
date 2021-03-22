@@ -134,7 +134,7 @@ context FmmlxDiagrams
         newID = 0
       in
         @While diagrams.hasKey(newID) do newID := newID + 1 end;
-          diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
+        diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
         diagram.file := file;
         self.diagrams.put(newID, diagram);
@@ -144,16 +144,12 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation closeDiagram(requestID, diagramHandler : Integer) 
-      ("yet unimplemented method for closing diagram " + diagramHandler).println()
-    end
-    
     // This operation is invoked by the java side while the window is closing
-    @Operation removeDiagram(requestID, diagramHandler : Integer) 
+    @Operation closeDiagram(requestID, keepDiagram : Boolean) 
       let
         diagramID = self.vector2Seq(requestID).at(0)
       in
-        self.diagrams.remove(diagramID)
+        if not keepDiagram then self.diagrams.remove(diagramID) end
       end
     end
 
@@ -2018,12 +2014,39 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation getDiagramData(requestID : Seq(Integer))
-        //let
-        //  result = [log]
-        //in
+    @Operation getDiagramData(requestID : Seq(Integer)) /*
+       let 
+         log = ["log"]
+       in
+         let 
+           c = classes;
+         then 
+           sort classes; ????? how to sort? if impossible leave it to java
+         in 
+           for classes beginning with highest level
+             if class without metaclass then
+               log = log + new metaclass
+             else
+               log = log + new instance
+           for class in classes  
+             for att/ops in class.atts/ops...
+               log = lot + newAtt/newOp/...
+           for class in classes  // new for to make sure att exists
+             for slotValue in class.slots
+               log = log + ...
+           for assoc in p.assoc
+             log...
+           for link in p.assocInstances
+             log...
+         end (let);
+             
+       
+         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
+       end */
+
+    
+    
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
-        //end
     end
 
     @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
@@ -2139,12 +2162,14 @@ context FmmlxDiagrams
           xmf.projectManager("MyProjects").add(project);
           if Root.hasElement("FMML")
           then
-            package.addParent(FMML);
+            package.addParent(FMML)
+            
+            //;
 
-            @For diagramName in diagramNames do
-                self.getCommunicator().createDiagram(package.path(), diagramName, file)
-            end;
-            self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
+            //@For diagramName in diagramNames do
+            //    self.getCommunicator().createDiagram(package.path(), diagramName, file)
+            //end;
+            //self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
           end
         end
       end;
