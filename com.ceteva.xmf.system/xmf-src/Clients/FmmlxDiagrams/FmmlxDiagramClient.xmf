@@ -1266,8 +1266,11 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.setAssociationEndVisibility(assoc, ["package", assoc.owner.path()], concernsTarget, newVisibility)
+        problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
+        if problems.isEmpty() then
+          self.log := self.log + [["setAssociationEndVisibility", ["package", assoc.owner.path()], ["concernsTarget", concernsTarget], ["newVisibility", newVisibility]]]
+        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
