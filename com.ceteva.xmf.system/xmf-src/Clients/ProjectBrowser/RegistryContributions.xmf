@@ -104,8 +104,12 @@ end;
   Projects::Project::createFmmlxDiagram
 end;
 
-@Menu "Save as XML" on Projects::Project
+@Menu "Save as XML ..." on Projects::Project
   Projects::Project::saveAsXml
+end;
+
+@Menu "Save XML" on Projects::Project
+  Projects::Project::saveXml
 end;
 
 @Menu "Save" on Projects::Project

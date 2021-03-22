@@ -239,16 +239,16 @@ context FmmlxDiagrams
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
     	      in
     	        result := result.append([[
-    	        -1, //mappingInfo.id, // 0: id*
+    	        					-1, //mappingInfo.id, // 0: id*
     	        c.name.toString(), // 1: name
     	        c.level, // level  // 2: level
-    	        -1, //if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
-    	        -1, // self.getParentIdList(requestID, c),//[],// 4: parents-ID
+    	        					-1, //if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
+    	        					-1, // self.getParentIdList(requestID, c),//[],// 4: parents-ID
     	        c.isAbstract, // 5
     	        mappingInfo.lastKnownDiagramX, // 6
     	        mappingInfo.lastKnownDiagramY, // 7
     	        mappingInfo.hidden, // 8: visibility in this diagram
-    	        -1, // 9: reserved for delegation
+    	        					-1, // 9: reserved for delegation
     	        c.path(), // 10: ownPath
     	        c.of().path(), // 11: ofPath
     	        self.getParentsPathsList(requestID, c)// 12: parentsPaths
@@ -1371,7 +1371,6 @@ context FmmlxDiagrams
 
     ////////////////// Operations for delegation ///////////////////////////
 
-
     @Operation addDelegation(
       requestID   : Seq(Integer),
       delegateFromName  : String,
@@ -1382,7 +1381,7 @@ context FmmlxDiagrams
         delegateFrom = if self.getPackage(requestID).hasElement(delegateFromName) then self.getPackage(requestID).getElement(delegateFromName) else null end;
         delegateTo = if self.getPackage(requestID).hasElement(delegateToName) then self.getPackage(requestID).getElement(delegateToName) else null end
       then
-        problems = m.addDelegation(delegateFrom, delegateTo, delegateToLevel)
+        problems = m.setDelegation(delegateFrom, delegateTo, delegateToLevel)
       in
         if problems.isEmpty() then
             self.log := self.log + [["addDelegation", ["package", delegateFrom.owner.path()],
@@ -1393,6 +1392,24 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+    
+    @Operation removeDelegation(
+      requestID   : Seq(Integer),
+      delegateFromName  : String)
+    let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        delegateFrom = if self.getPackage(requestID).hasElement(delegateFromName) then self.getPackage(requestID).getElement(delegateFromName) else null end
+      then
+        problems = m.removeDelegation(delegateFrom)
+      in
+        if problems.isEmpty() then
+            self.log := self.log + [["removeDelegation", ["package", delegateFrom.owner.path()],
+              ["delegateFrom",  delegateFrom.path()]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
+    
 
     @Operation setRoleFiller(
       requestID   : Seq(Integer),
@@ -1407,6 +1424,23 @@ context FmmlxDiagrams
       in
         if problems.isEmpty() then
             self.log := self.log + [["setRoleFiller", ["package", role.owner.path()], ["role", role.path()], ["roleFiller", roleFiller.path()]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
+    
+    @Operation removeRoleFiller(
+      requestID   : Seq(Integer),
+      roleName    : String)
+    let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        role = if self.getPackage(requestID).hasElement(roleName) then self.getPackage(requestID).getElement(roleName) else null end
+      then
+        problems = m.removeRoleFiller(role)
+      in
+        if problems.isEmpty() then
+            self.log := self.log + [["removeRoleFiller", ["package", role.owner.path()],
+              ["role",  role.path()]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -2106,12 +2140,7 @@ context FmmlxDiagrams
           xmf.projectManager("MyProjects").add(project);
           if Root.hasElement("FMML")
           then
-            package.addParent(FMML);
-
-            @For diagramName in diagramNames do
-                self.getCommunicator().createDiagram(package.path(), diagramName, file)
-            end;
-            self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
+            package.addParent(FMML)
           end
         end
       end;
