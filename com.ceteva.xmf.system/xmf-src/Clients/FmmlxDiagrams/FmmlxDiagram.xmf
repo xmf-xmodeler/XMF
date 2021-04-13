@@ -5,6 +5,9 @@ import Diagrams;
 import FmmlxDiagrams;
 
 context FmmlxDiagrams
+  @XOCL::Enum FmmlxDiagramType (ClassDiagram, ModelBrowser) end
+
+context FmmlxDiagrams
 
   @Class FmmlxDiagram
   
@@ -13,6 +16,7 @@ context FmmlxDiagrams
   @Attribute package:Element end
   @Attribute diagramName:Symbol end
   @Attribute file:String end
+  @Attribute diagramType:FmmlxDiagramType end
 
     @Operation newDiagram()
         //@Command(self) newDiagramCommand(self) end;

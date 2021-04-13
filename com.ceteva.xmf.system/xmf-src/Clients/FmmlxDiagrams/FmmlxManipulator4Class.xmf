@@ -31,7 +31,26 @@ import FmmlxDiagrams;
   
   */
   context FmmlxManipulator
-    @Operation addInstance(package, ofClass, name, parents, abstract, slotValueList: Seq(Seq(String))):Object
+    @Operation addInstance(
+      package : Package, 
+      ofClass : MetaClass, 
+      name, 
+      parents, 
+      abstract : Boolean, 
+      slotValueList: Seq(Seq(String))):Object
+      
+      self.addInstance(package, ofPackage, name, [], false, [])
+      
+  end
+  
+  context FmmlxManipulator
+    @Operation addInstance(
+      package : Package, 
+      ofClass : MetaClass, 
+      name, 
+      parents, 
+      abstract : Boolean, 
+      slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
       if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;

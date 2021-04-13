@@ -66,7 +66,7 @@ context FmmlxDiagrams
       let
         selectedNames = xmf.selects("Select Diagram",
           "select existing diagram - or none for new", 
-          diagrams.values().diagramName,
+          diagrams.values()->select(d | d.diagramType = FmmlxDiagramType::ClassDiagram).diagramName,
           {},
           null)
       in
@@ -74,7 +74,7 @@ context FmmlxDiagrams
         if
           selectedNames.size() = 0
         then
-          self.createNewDiagram(package,name, "") // <-- create a new diagram
+          self.createNewDiagram(package,name, "", FmmlxDiagramType::ClassDiagram) // <-- create a new diagram (always a class diagram)
         elseif
           selectedNames.size() = 1
         then // if one name supplied: find it!
@@ -101,13 +101,14 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation createDiagramFromJava(packagePath, diagramName, file)
+    @Operation createDiagramFromJava(packagePath, diagramName, file, typeAsString)
       let
-  	    m = FmmlxDiagrams::FmmlxManipulator()
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    type = FmmlxDiagramType.getElement(typeAsString)
       then
         package = m.evalString(packagePath, Root).at(0)
       then
-        newID = self.createNewDiagram(package,diagramName, file)
+        newID = self.createNewDiagram(package, diagramName, file, type)
       in
         self.communicator.setNewDiagramId(newID)
       end      
@@ -115,7 +116,7 @@ context FmmlxDiagrams
 
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
-    @Operation createNewDiagram(package,name, file)
+    @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType)
       //null.foo;
       //self.package := package;
        ///////////FIND ALTERNATIVE TO THIS///////////////////
@@ -137,6 +138,7 @@ context FmmlxDiagrams
         diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
         diagram.file := file;
+        diagram.diagramType := type;
         self.diagrams.put(newID, diagram);
         
         //diagram
@@ -480,43 +482,36 @@ context FmmlxDiagrams
 
     @Operation getOperationValues(requestID : Seq(Integer), objectName, opNames)
       let
-        result = []
+        result = [];
+        p = self.getPackage(requestID)        
       in
-        @For obj in self.getPackage(requestID).classes do
-          if obj <> null andthen obj.isKindOf(FMML::MetaClass) andthen obj.name.toString() = objectName andthen opNames.size() > 0
+        @For n in opNames do
+          let
+            opResult = FmmlxDiagrams::FmmlxManipulator().evalString(objectName + "." + n + "()", p)
           then
-            @For o in obj.of().allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
-              if o.instLevel = obj.level then
-                @For name in opNames do
-                  if name = o.name.toString() then
-                    let
-                      opResult = try [o.invoke(obj,{}),null] catch (e) [null, e] end
-                    then
-                      value = opResult.at(0);
-                      error = opResult.at(1);
-                      monMin = o.hasProperty("monitorMin");
-                      monMax = o.hasProperty("monitorMax")
-                    then
-                      minVal = if monMin then FmmlxDiagramClient::getOpProp(o, "monitorMin") else null end;
-                      maxVal = if monMax then FmmlxDiagramClient::getOpProp(o, "monitorMax") else null end
-                    then
-                      hasRange = monMin or monMax or error <> null;
-                      isInRange = (error = null) andthen
-                                  if monMin then minVal <= value else true end andthen
-                                  if monMax then maxVal >= value else true end
-                    in
-                      result := result.append([[
-                        o.name.toString(),
-                        if error = null then value else error.message.toString() end,
-                        hasRange,
-                        isInRange]])
-                    end
-                end end // if contains // for
-              end // if level
-            end end // if // for
-          end
-        end;
-    	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+            value = opResult.at(0);
+            error = opResult.at(1);
+            monMin = false;//o.hasProperty("monitorMin");
+            monMax = false//o.hasProperty("monitorMax")
+          then
+            minVal = null;//if monMin then FmmlxDiagramClient::getOpProp(o, "monitorMin") else null end;
+            maxVal = null//if monMax then FmmlxDiagramClient::getOpProp(o, "monitorMax") else null end
+          then
+            hasRange = monMin or monMax or error <> null;
+            isInRange = (error = null) andthen
+                        if monMin then minVal <= value else true end andthen
+                        if monMax then maxVal >= value else true end
+          in
+            result := result.append([[
+              n,
+              if error = null then value.toString() else error.message.toString() end,
+              hasRange,
+              isInRange]])
+          end // let
+        end; // for names
+//          end // if obj <> null
+//        end; // for obj
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
 
@@ -670,6 +665,8 @@ context FmmlxDiagrams
         @For key in diagrams.keys() do
           if 
             diagrams.get(key).package.path().equals(packagePath)
+          andthen
+            diagrams.get(key).diagramType = FmmlxDiagramType::ClassDiagram
           then
             result := result + [key]
           end
@@ -844,20 +841,30 @@ context FmmlxDiagrams
           let
             m = FmmlxDiagrams::FmmlxManipulator()
           then
-            ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end
-            //ofClass = self.getMapping(requestID).getMapping(ofId).object
-          then
+            ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
             parentsList = self.getParentsList(requestID, parents)
-          then
-            newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
-          then
-            mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
           in
-            mappingInfo.lastKnownDiagramX := x;
-            mappingInfo.lastKnownDiagramY := y;
-            self.log := self.log + [["addInstance", ["package", newInstance.owner.path()], ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]]
-          end;
-          self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
+            if 
+              ofClass.isAbstract 
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Abstract class " + ofClass.name.toString() + " cannot be instantiated."]])
+            elseif 
+              not Symbol(name).isValidName() 
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["name " + name + " not legal."]])
+            else
+              let
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+              then
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
+              in
+                mappingInfo.lastKnownDiagramX := x;
+                mappingInfo.lastKnownDiagramY := y;
+                self.log := self.log + [["addInstance", ["package", newInstance.owner.path()], ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]];
+                self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
+              end
+            end
+          end          
         catch (exception)
           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), [exception.message]])
         end
@@ -1614,7 +1621,7 @@ context FmmlxDiagrams
         else // let the manipulator try
           problems := m.changeOperationBody(class, op, newName, body)
         end;
-        if problems.isEmpty() then
+        if problems.isEmpty() orelse problems.equals(["Compiled successfully!"]) then
           self.log := self.log + [["changeOperationBody", ["package", class.owner.path()], ["class",className] , ["name",operationName], ["body", body]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
@@ -2018,7 +2025,7 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation getDiagramData(requestID : Seq(Integer)) /*
+    @Operation getDiagramData(requestID : Seq(Integer), packagePath: String) /*
        let 
          log = ["log"]
        in
@@ -2050,7 +2057,7 @@ context FmmlxDiagrams
 
     
     
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + self.log end])
     end
 
     @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
