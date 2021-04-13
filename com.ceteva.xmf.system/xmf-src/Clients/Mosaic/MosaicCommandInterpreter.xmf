@@ -87,9 +87,21 @@ context Mosaic
       end
     end
     
+    @Operation setAllCategories(names)
+      @SendCommand(self)
+        setAllCategories(names)
+      end
+    end
+    
     @Operation setProjectModels(names)
       @SendCommand(self)
         setProjectModels(names)
+      end
+    end 
+    
+    @Operation setModelDiagrams(names)
+      @SendCommand(self)
+        setModelDiagrams(names)
       end
     end   
     
