@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation checkAddAttribute(class, name, level, type)
+    @Operation checkAddAttribute(class, name, level, type, oldProperty)
       /* we check for a name collision for 
          * the name itself as an attribute,
          * as well as for getters and setters 
@@ -22,29 +22,29 @@ import FmmlxDiagrams;
         if type = null then problems := problems + [("null is not a valid type")] end;
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
         @For attribute in class.allAttributes() do 
-          if attribute.name.toString() = name
+          if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel = level)
             then problems := problems + [("Identifier " + name + " already in use (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
         @For operation in class.allOperations() do
-          if operation.name.toString() = getterName
+          if oldProperty <> operation andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
             then problems := problems + [("Identifier " + getterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
           end;
-          if operation.name.toString() = setterName
+          if oldProperty <> operation andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
             then problems := problems + [("Identifier " + setterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
           end
         end;
         @For child in class.allMetaInstances() do
           @For attribute in child.of().allAttributes() do 
-            if attribute.name.toString() = name
+            if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel = level)
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
             end
           end;
           @For operation in child.of().allOperations() do
-            if operation.name.toString() = getterName
+            if oldProperty <> operation andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
               then problems := problems + [("Identifier " + getterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end;
-            if operation.name.toString() = setterName
+            if oldProperty <> operation andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
               then problems := problems + [("Identifier " + setterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end
           end
@@ -66,7 +66,7 @@ import FmmlxDiagrams;
 		end;
 		if attribute = null then problems := ["Attribute " + oldName + " not found in " + class.name + "."] 
 		else
-		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type)
+		  problems := self.checkAddAttribute(class, newName, attribute.instLevel, attribute.type, null)
 		  // add further tests here...
 		end
        ;problems
@@ -79,20 +79,19 @@ import FmmlxDiagrams;
         attribute = null;
         problems = []
       in
-	@For att in class.attributes do
-	  if att.name.toString() = attName then
-	    attribute := att
-	  end
-	end;
-	if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
-	else
-	  problems
-      // add further tests here...
+	  @For att in class.attributes do
+	    if att.name.toString() = attName then
+	      attribute := att
+	    end
+	  end;
+	  if attribute = null then problems := ["Attribute " + attName + " not found in " + class.name + "."] 
+	  else
+	    problems := problems + self.checkAddAttribute(class, attName, newLevel, attribute.type, attribute) 
+        // add further tests here...
 	end
-       ;problems
-     end
+      ;problems
     end
-    
+  end 
     
   context FmmlxManipulator   
     @Operation checkChangeAttributeType(class, attName, oldType, newType, env:Package)

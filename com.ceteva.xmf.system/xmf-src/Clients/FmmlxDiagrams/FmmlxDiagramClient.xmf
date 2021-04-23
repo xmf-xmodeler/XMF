@@ -995,7 +995,7 @@ context FmmlxDiagrams
         type = m.getTypeForName(typeName, self.getPackage(requestID));
         multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then
-        problems = if class <> null then m.checkAddAttribute(class, name, level, typeName) else ["Class not found"] end
+        problems = if class <> null then m.checkAddAttribute(class, name, level, typeName, null) else ["Class not found"] end
       in
         if
           problems.isEmpty()

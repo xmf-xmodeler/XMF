@@ -186,7 +186,12 @@ context Mosaic
     
     // -------------------
     
-    @Operation getAllCategories(parameters) 
+    @Operation getAllCategories() 
+//        let 
+//           pmc = xmf.projectManager()
+//        then
+//        in
+//        end;
         self.owner().commandInterpreter().setAllCategories(["First Category", "Second Category", "Fourth Category"])
     end
     
