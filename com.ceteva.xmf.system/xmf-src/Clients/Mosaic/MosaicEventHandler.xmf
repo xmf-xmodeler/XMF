@@ -242,12 +242,27 @@ context Mosaic
       end // 1
     end // O
     
+    @Operation addProject(parameters) 
+      let
+        projectName = parameters.at(0)
+      then
+        model = FMML::FMMLxPackage(projectName)
+  	  then
+  	    project = Projects::Project(model, projectName, null)
+  	  in
+  	    model.addParent(FMML);
+        model.fmmlxAssociationInstances:={};
+        Root.add(model);
+        xmf.projectManager("MyProjects").add(project)
+      end
+        // throw(Exception("not yet implemented (param:" + projectName + ")")) 
+    end
+    
     
     @Operation addCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation renameCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation removeCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     
-    @Operation addProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation renameProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation removeProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation assignCategoryToProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
