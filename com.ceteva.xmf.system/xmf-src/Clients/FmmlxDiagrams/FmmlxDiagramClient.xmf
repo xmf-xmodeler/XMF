@@ -438,7 +438,7 @@ context FmmlxDiagrams
                     ]])
               end;
               @For a in (c.allAttributes() - c.attributes) do
-                if a.isIntrinsic then
+                if a.isIntrinsic orelse self.attIsInList(a) then
                   resultOther := resultOther.append([[
                     a.name.toString(),
                     a.type.name.toString(),
@@ -454,6 +454,12 @@ context FmmlxDiagrams
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
         end
     end
+    
+    @Operation attIsInList(a) false end
+//      if a.owner = NamedElement andthen a.name.toString() = "name" then true
+//      elseif a.owner = Class  andthen a.name.toString() = "level" then true
+//      else false end
+//    end
 
     @Operation getSlots(requestID : Seq(Integer), objectName, slotList)
       let
@@ -1127,7 +1133,7 @@ context FmmlxDiagrams
           end
 
         else
-          error := "no Slot Found"
+          error := "slot " + slotName + " not found in " + className
         end;
 	  self.log := self.log + [["changeSlotValue", 
                                   ["package", class.owner.path()],
@@ -1352,24 +1358,29 @@ context FmmlxDiagrams
         problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
   	  in
   	    if problems.isEmpty() then
-  	        self.log := self.log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+  	      self.log := self.log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
   	    end;
   	    self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
     end
 
     @Operation removeAssociationInstance(
-      requestID   : Seq(Integer),
-      linkId    : Integer)
+      requestID : Seq(Integer),
+      assocName : String,
+      obj1Name  : String,
+      obj2Name  : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        assocInstSeq = self.getMapping(requestID).getMapping(linkId).object
+        m = FmmlxDiagrams::FmmlxManipulator()
       then
-        problems = m.removeAssociationInstance(assocInstSeq)
+        obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
+        obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end;
+        association = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      then
+        problems = m.removeAssociationInstance(association,obj1,obj2)
       in
         if problems.isEmpty() then
-  	        self.log := self.log + [["removeLink", ["TODO", "Still using ID, no another possibility"]]]
+          self.log := self.log + [["removeLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
   	    end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end

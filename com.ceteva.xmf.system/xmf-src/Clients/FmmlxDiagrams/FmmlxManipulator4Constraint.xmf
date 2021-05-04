@@ -82,13 +82,8 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation createOperationForConstraint(code: String, type: String)
       let code1 = null; code2 = null; code3 = null in
-      if type = "body" then code :=  "@Operation body(classifier : Element, level : Element) "
-                     + "if level = 1 "
-                     + "then " + code 
-                     + " else true"
-                     + " end"
-                     + " end"
-      elseif type = "reason" then code:= "@Operation reason(classifier : Element, level : Element) " + code + " end"
+      if type = "body" then code := "@Operation body(classifier : Class, level : Integer) : Boolean " + code + " end"
+      elseif type = "reason" then code:= "@Operation reason(classifier : Class, level : Integer) : String " + code + " end"
       else throw Exception("Illegal Type")
       end;
       

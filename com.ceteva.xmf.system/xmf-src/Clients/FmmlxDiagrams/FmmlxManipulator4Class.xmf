@@ -282,21 +282,21 @@ import FmmlxDiagrams;
             @For assocParent in parent.owner.associations do
               if assocHeir <> assocParent
                 andthen
-                  (assocHeir.source.name = assocParent.source.name 
-                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
-                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  (assocHeir.end1.name = assocParent.end1.name 
+                    andthen (parent.isDescendentOf(assocParent.end1.type) or parent = assocParent.end1)
+                    andthen (  heir.isDescendentOf(assocHeir.end1.type) or   heir = assocHeir.end1))
                   orelse
-                  (assocHeir.source.name = assocParent.target.name 
-                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
-                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  (assocHeir.end1.name = assocParent.end2.name 
+                    andthen (parent.isDescendentOf(assocParent.end2.type) or parent = assocParent.end2)
+                    andthen (  heir.isDescendentOf(assocHeir.end1.type) or   heir = assocHeir.end1))
                   orelse
-                  (assocHeir.target.name = assocParent.source.name 
-                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
-                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+                  (assocHeir.end2.name = assocParent.end1.name 
+                    andthen (parent.isDescendentOf(assocParent.end1.type) or parent = assocParent.end1)
+                    andthen (  heir.isDescendentOf(assocHeir.end2.type) or   heir = assocHeir.end2))
                   orelse
-                  (assocHeir.target.name = assocParent.target.name 
-                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
-                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+                  (assocHeir.end2.name = assocParent.end2.name 
+                    andthen (parent.isDescendentOf(assocParent.end2.type) or parent = assocParent.end2)
+                    andthen (  heir.isDescendentOf(assocHeir.end2.type) or   heir = assocHeir.end2))
               then
                 problems := problems + ["Association collision. The associations \"" + assocParent.name + "\" and "+assocHeir.name+" overlap."]
               end end end;

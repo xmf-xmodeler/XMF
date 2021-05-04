@@ -27,10 +27,10 @@ import FmmlxDiagrams;
           end
         end;
         @For operation in class.allOperations() do
-          if oldProperty <> operation andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
+          if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
             then problems := problems + [("Identifier " + getterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
           end;
-          if oldProperty <> operation andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
+          if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
             then problems := problems + [("Identifier " + setterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
           end
         end;
@@ -41,10 +41,10 @@ import FmmlxDiagrams;
             end
           end;
           @For operation in child.of().allOperations() do
-            if oldProperty <> operation andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
+            if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
               then problems := problems + [("Identifier " + getterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end;
-            if oldProperty <> operation andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
+            if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
               then problems := problems + [("Identifier " + setterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end
           end
@@ -311,7 +311,7 @@ import FmmlxDiagrams;
       in
         @While result = null do
           let testName = name + counter in
-            if self.checkAddAttribute(class, testName, newLevel, Boolean).isEmpty() then// i.e. no problem
+            if self.checkAddAttribute(class, testName, newLevel, Boolean, null).isEmpty() then// i.e. no problem
               result := testName
             end               
           end

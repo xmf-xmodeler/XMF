@@ -365,7 +365,6 @@ context Root::FMML
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
       @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
-        constraint.println();
         reports := reports->including(
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
