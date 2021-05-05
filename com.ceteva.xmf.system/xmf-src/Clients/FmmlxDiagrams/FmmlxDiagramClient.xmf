@@ -938,7 +938,7 @@ context FmmlxDiagrams
         problems = [];
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
       then
-        oldParentList = class.parents;// for Log
+        oldParentList = class.parents->select(c | c.owner = class.owner); // for Log
         addSet = newSet - oldSet;
         removeSet = oldSet - newSet
       in
@@ -984,7 +984,7 @@ context FmmlxDiagrams
           ["package", class.owner.path()], 
           ["class", class.path()], 
           ["old", self.getParentsPaths(requestID, oldParentList)], 
-          ["new", self.getParentsPaths(requestID, class.parents)]]]
+          ["new", self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner))]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -1595,7 +1595,7 @@ context FmmlxDiagrams
         problems = m.changeOperationOwner(oldOwner, operation, newOwner)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["changeOperationOwner", ["package", class.owner.path()], ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
+          self.log := self.log + [["changeOperationOwner", ["package", oldOwner.owner.path()], ["class_old", oldOwner.path()], ["class_new",newOwner.path()] , ["name",name]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -1716,33 +1716,11 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation changeConstraintBody(
+    @Operation changeConstraintBodyAndReason(
       requestID  : Seq(Integer),
       classPath  : String,
       name       : String,
-      body       : String)
-      
-      let
-        m = FmmlxDiagrams::FmmlxManipulator()
-      then
-        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
-      then
-        problems = if class <> null then m.changeConstraintBody(class, name, body) else ["Class "+classPath+" not found."] end
-      in
-        if problems.isEmpty() then
-            self.log := self.log + [["changeConstraintBody", ["package", class.owner.path()],
-            ["class", class.path()],
-            ["name", name],
-            ["body", body+""]]]
-        end;
-        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
-      end
-    end
-    
-    @Operation changeConstraintReason(
-      requestID  : Seq(Integer),
-      classPath  : String,
-      name       : String,
+      body       : String,
       reason     : String)
       
       let
@@ -1750,13 +1728,26 @@ context FmmlxDiagrams
       then
         class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       then
-        problems = if class <> null then m.changeConstraintReason(class, name, reason) else ["Class "+classPath+" not found."] end
+        problems = if class <> null then m.changeConstraintBodyAndReason(class, name, body, reason) else ["Class "+classPath+" not found."] end
       in
-        if problems.isEmpty() then
-            self.log := self.log + [["changeConstraintReason", ["package", class.owner.path()],
+        /*if problems.isEmpty() then
+            self.log := self.log + [["changeConstraintBodyAndReason", ["package", class.owner.path()],
             ["class", class.path()],
             ["name", name],
+            ["body", body+""],
             ["reason", reason+""]]]
+        end;*/
+        if problems.isEmpty() then
+            self.log := self.log 
+            + [["removeConstraint", ["package", class.owner.path()],
+            ["class", class.path()],
+            ["name", name]]] 
+            + [["addConstraint", ["package", class.owner.path()],
+            ["class", class.path()],
+            ["name", name],
+            ["instLevel", class.getConstraint(name).body.instLevel+""],
+            ["body", body],
+            ["reason", reason]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1810,7 +1801,7 @@ context FmmlxDiagrams
     // Not yet implemented
 
     @Operation respondNotYetImplemented(name: String, requestID : Seq(Integer))
-      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["The feature \"" + name + "\" is temporarily unavailable. Please try again later."]])
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["The feature \"" + name + "\" is temporarily unavailable. Please try again in later version."]])
     end
 
     @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), associationID, name)

@@ -229,25 +229,25 @@ import FmmlxDiagrams;
         if arity <> 0 and monitor = true 
           then problems := problems + ["Monitored Operation must have an arity of zero."] end;
         // First: Check whether the new operation would interfere with an existing one.
-        @For operation in operations do
-          if operation.name.toString() = name.toString() and not ignoreList.contains(operation) then
+        @For operation in class.operations do // for now only check those in the same class
+          if operation.name.toString() = name.toString() and not ignoreList.contains(operation) and arity = operation.arity then
             // and arity equal and level equal...
-            // But for now no duplicate names at all
+            // But for now no duplicate names at all (... unless arity)
             problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
           end
         end; // done with conflicts from classes from above.
-        @For instance in class.allMetaInstances() do  // check all instances which could be affected
+        /* @For instance in class.allMetaInstances() do  // check all instances which could be affected [on second thought, don't. they may overwite if they wish]
           let theirOperations = instance.allOperations().asSet() + instance.allOperations2().asSet()
           in
             @For operation in theirOperations do
-              if operation.name.toString() = name.toString() and not ignoreList.contains(operation) then
+              if operation.name.toString() = name.toString() and not ignoreList.contains(operation) and arity = operation.arity then
                 // and arity equal and level equal...
-                // But for now no duplicate names at all
+                // But for now no duplicate names at all (... unless arity)
                 problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
               end // if
             end // for
           end // let
-        end; // for
+        end; // for */
         problems
       end // let
     end

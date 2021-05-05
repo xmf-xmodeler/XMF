@@ -38,7 +38,7 @@ import FmmlxDiagrams;
           problems = []
         in           
          
-          bodyO   := self.createOperationForConstraint(bodyCode,   "body");
+          bodyO   := self.createOperationForConstraint(bodyCode, "body");
           reasonO := self.createOperationForConstraint(reasonCode, "reason");
           
           if bodyO.at(0) <> null then
@@ -80,12 +80,17 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
-    @Operation createOperationForConstraint(code: String, type: String)
+    @Operation createOperationForConstraint(code:String, requiredName:String)
       let code1 = null; code2 = null; code3 = null in
-      if type = "body" then code := "@Operation body(classifier : Class, level : Integer) : Boolean " + code + " end"
-      elseif type = "reason" then code:= "@Operation reason(classifier : Class, level : Integer) : String " + code + " end"
-      else throw Exception("Illegal Type")
-      end;
+      
+      /*if 
+        addPrefix
+      then
+        if type = "body" then code := "@Operation body(classifier : Class, level : Integer) : Boolean " + code + " end"
+        elseif type = "reason" then code:= "@Operation reason(classifier : Class, level : Integer) : String " + code + " end"
+        else throw Exception("Illegal Type")
+        end
+      end;*/
       
       code1 := try [OCL::OCL.grammar.parseString(code,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error ("+type+"): " + exception.message]] end;
 
@@ -99,8 +104,25 @@ import FmmlxDiagrams;
       else code2
       end;
       
-      code3
+      if 
+        code3.at(0) <> null 
+      then
+        if 
+          requiredName <> code3.at(0).name.toString() 
+        then 
+          [null,["operation ("+code3.at(0).name.toString()+" must be named \"" + requiredName+"\"."]]
+        elseif 
+          code3.at(0).arity <> 2
+        then
+          [null,["operation ("+code3.at(0).name.toString()+" must have arity 2."]]
+        else
+          code3
+        end
+      else
+        code3
+      end
       
+            
     end end
     
   context FmmlxManipulator
@@ -143,45 +165,30 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
-    @Operation changeConstraintBody(
+    @Operation changeConstraintBodyAndReason(
       class      : FMML::MetaClass, 
       name       : String, 
-      bodyCode   : String)
+      bodyCode   : String, 
+      reasonCode : String)
       
       let
         con = if class = null then null else class.getConstraint(name) end;
-        body = self.createOperationForConstraint(bodyCode, "body")
+        body = self.createOperationForConstraint(bodyCode, "body");
+        reason = self.createOperationForConstraint(reasonCode, "reason")
       in
         if class = null then ["Class not found. (Should have been detected earlier.)"]
         elseif con = null then ["Constraint not found"]
-        elseif body.at(0) = null then body.at(1) 
+        elseif body.at(0) = null or reason.at(0) = null then body.at(1) + reason.at(1)
         else
           body.at(0).isIntrinsic := true;
           body.at(0).instLevel := con.body.instLevel;
           con.body.owner := null;
           con.body := body.at(0);
           con.body.setProperty("raw", bodyCode);
-          con.body.owner := con; []
-        end
-      end
-    end
-    
-  context FmmlxManipulator
-    @Operation changeConstraintReason(
-      class      : FMML::MetaClass, 
-      name       : String, 
-      reasonCode : String)
-      
-      let
-        con = if class = null then null else class.getConstraint(name) end;
-        reason = self.createOperationForConstraint(reasonCode, "reason")
-      in
-        if class = null then ["Class not found. (Should have been detected earlier.)"]
-        elseif con = null then ["Constraint not found"]
-        elseif reason.at(0) = null then reason.at(1) 
-        else
+          con.body.owner := con;
+
           reason.at(0).isIntrinsic := true;
-          reason.at(0).instLevel := con.body.instLevel;
+          reason.at(0).instLevel := con.reason.instLevel;
           con.reason.owner := null;
           con.reason := reason.at(0);
           con.reason.setProperty("raw", reasonCode);
