@@ -231,7 +231,7 @@ context FmmlxDiagrams
           result = []
         in
     	  @For c in self.getPackage(requestID).classes do
-    	    if c <> null andthen c.isKindOf(FMML::MetaClass) // TODO: find out how a null can possibly end up there
+    	    if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.level > -1 // TODO: find out how a null can possibly end up there
     	    then
     	      let
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
@@ -252,7 +252,7 @@ context FmmlxDiagrams
     	        self.getParentsPathsList(requestID, c)// 12: parentsPaths
     	        ]])
     	      end
-    	    else
+    	    /*else
     	      result := result + [[
     	      -2, // fake
     	      c.name.toString(),
@@ -263,7 +263,7 @@ context FmmlxDiagrams
               c.path(), // 10: ownPath
               c.of().path(), // 11: ofPath
               self.getParentsPathsList(requestID, c)// 12: parentsPaths
-    	      ]]
+    	      ]]*/
     	    end
     	  end;
     	  // clean up mapping ?
@@ -1016,7 +1016,7 @@ context FmmlxDiagrams
             self.log := self.log + [["addAttribute", 
                                             ["package", class.owner.path()],
                                             ["class", class.path()],
-                                            ["name", name],
+                                            ["name", name.toString()],
                                             ["level", level+""],
                                             ["type", type.path()],
                                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(multiplicity)+""]]]
@@ -1283,7 +1283,7 @@ context FmmlxDiagrams
         problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
         if problems.isEmpty() then
-          self.log := self.log + [["setAssociationEndVisibility", ["package", assoc.owner.path()], ["concernsTarget", concernsTarget], ["newVisibility", newVisibility]]]
+          self.log := self.log + [["setAssociationEndVisibility", ["package", assoc.owner.path()], ["concernsTarget", concernsTarget+""], ["newVisibility", newVisibility+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1291,7 +1291,7 @@ context FmmlxDiagrams
 
     @Operation changeAssociationForwardName(
       requestID  : Seq(Integer),
-      assocName    : String,
+      assocName  : String,
       newName    : String)
 
       let

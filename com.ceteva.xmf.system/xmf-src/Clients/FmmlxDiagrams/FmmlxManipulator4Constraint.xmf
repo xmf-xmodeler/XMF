@@ -92,15 +92,15 @@ import FmmlxDiagrams;
         end
       end;*/
       
-      code1 := try [OCL::OCL.grammar.parseString(code,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error ("+type+"): " + exception.message]] end;
+      code1 := try [OCL::OCL.grammar.parseString(code,  "Exp1",Seq{XOCL}),null] catch(exception) [null,["Parse Error ("+requiredName+"): " + exception.message]] end;
 
       code2 := if code1.at(0) <> null  
-      then try [Compiler::compileToFun("",code1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error ("+type+"): " + exception.message]] end
+      then try [Compiler::compileToFun("",code1.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,["Compile Error ("+requiredName+"): " + exception.message]] end
       else code1 
       end;
              
       code3 := if code2.at(0) <> null
-      then try [(code2.at(0))(),null] catch(exception) [null,["Instantiation Error ("+type+"): " + exception.message]] end
+      then try [(code2.at(0))(),null] catch(exception) [null,["Instantiation Error ("+requiredName+"): " + exception.message]] end
       else code2
       end;
       
