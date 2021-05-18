@@ -322,7 +322,7 @@ import FmmlxDiagrams;
             newOwner.operations := newOwner.operations + {operation};
             resetOperatorTable();
             []
-          else ["Name already in use."]
+          else ["Name " + operation.name + " already in use in " + newOwner.name + "."]
           end
         end
       end

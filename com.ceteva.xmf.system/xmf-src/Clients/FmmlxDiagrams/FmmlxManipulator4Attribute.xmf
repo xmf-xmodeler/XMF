@@ -23,15 +23,15 @@ import FmmlxDiagrams;
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
         @For attribute in class.allAttributes() do 
           if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel = level)
-            then problems := problems + [("Identifier " + name + " already in use (see " +attribute.owner.name.toString()+ ").")] 
+            then problems := problems + [("Identifier " + name + " already in use in " + class.name + " (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
         @For operation in class.allOperations() do
           if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
-            then problems := problems + [("Identifier " + getterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
+            then problems := problems + [("Identifier " + getterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end;
           if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
-            then problems := problems + [("Identifier " + setterName + " already in use (see " +operation.owner.name.toString()+ ").")] 
+            then problems := problems + [("Identifier " + setterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end
         end;
         @For child in class.allMetaInstances() do

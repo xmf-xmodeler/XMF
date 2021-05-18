@@ -307,7 +307,7 @@ import FmmlxDiagrams;
             // set Parent
             heir.parents := heir.parents + {parent};
             // add new slots
-            @For instance in heir.allInstances() do
+            @For instance in heir.allMetaInstances() do
               @For att in instance.of().allAttributes() do
                 if 
                   att.instLevel = instance.level andthen not instance.hasSlot(att.name)
@@ -327,7 +327,7 @@ import FmmlxDiagrams;
     @Operation removeParent(heir, parent)
       heir.parents := heir.parents - {parent};
       
-      @For instance in heir.allInstances() do
+      @For instance in heir.allMetaInstances() do
         let
           allAtts = instance.of().allAttributes()
         in

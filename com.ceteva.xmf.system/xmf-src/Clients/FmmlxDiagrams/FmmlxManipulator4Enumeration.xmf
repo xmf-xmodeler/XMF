@@ -11,7 +11,7 @@ import FmmlxDiagrams;
         if 
           package.hasElement(newEnumName)
         then
-          ["Name already in use"]
+          ["Name " + newEnumName + " already in use"]
         else
           let
             e = Enum(newEnumName,[])
@@ -56,7 +56,7 @@ import FmmlxDiagrams;
                 if // 5
                   package.hasElement(newEnumName)
                 then
-                  ["Name already in use"]
+                  ["Name " + newEnumName + " already in use"]
                 else
                   e.name := newEnumName.asSymbol();
                   package.nameChanged(e,e.name,oldEnumName);

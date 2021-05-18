@@ -173,7 +173,7 @@ context FmmlxDiagrams
         package = diagram.package;
         mapping = diagram.mapping
       in
-        @For c in package.classes do
+        @For c in package.classes->select(x | x.isKindOf(FMML::MetaClass)) do
           let
     	    mappingInfo = mapping.addOrGetObjectMapping(c)	        
     	  in
@@ -685,7 +685,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-		@For obj in self.getPackage(requestID).classes do if obj <> null then
+		@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) then
 		  @For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
@@ -791,8 +791,8 @@ context FmmlxDiagrams
 
     ///////////////////// Updates to the View ////////////////////
 
-    @Operation sendNewPosition(requestID : Seq(Integer), objectPath, x, y)
-        self.getMapping(requestID).setNewPosition(objectPath, x, y);
+    @Operation sendNewPosition(requestID : Seq(Integer), objectPath, x:Integer, y:Integer, hidden:Boolean)
+        self.getMapping(requestID).setNewPosition(objectPath, x, y, hidden);
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
     end
 
@@ -815,6 +815,7 @@ context FmmlxDiagrams
         problems = []
       in
         problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
+        problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
         if problems.isEmpty() then
           let 
             newClass = m.addMetaClass(self.getPackage(requestID), name, level, parentsList, abstract)
@@ -858,6 +859,10 @@ context FmmlxDiagrams
               not Symbol(name).isValidName() 
             then 
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["name " + name + " not legal."]])
+            elseif 
+              self.getPackage(requestID).hasElement(name)
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["name " + name + " already in use."]])
             else
               let
                 newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
@@ -1238,7 +1243,7 @@ context FmmlxDiagrams
   	        instLevelSource, instLevelTarget,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
-          self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
+          if problems.isEmpty() then self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
             ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
             ["fwName", fwName+""],
@@ -1246,7 +1251,7 @@ context FmmlxDiagrams
             ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(multTargetToSource)+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(multSourceToTarget)+""] ,
             ["instLevelSource", instLevelSource+""] , ["instLevelTarget", instLevelTarget+""] ,
             ["sourceVisibleFromTarget", sourceVisibleFromTarget+""] , ["targetVisibleFromSource", targetVisibleFromSource+""] ,
-            ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
+            ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]] end
    	    end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
