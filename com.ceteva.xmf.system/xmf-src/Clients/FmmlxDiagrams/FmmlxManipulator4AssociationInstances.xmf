@@ -120,13 +120,12 @@ context FmmlxManipulator
     end
     
   context FmmlxManipulator
-    @Operation removeAssociationInstance(link)
+    @Operation removeAssociationInstance(a, o1, o2)
       let
-        a = link.at(2)
-      then
         p = a.owner()
       in
-        p.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
-      end
+        p.removeAssociationInstance(o1, o2, a) 
+      end;
+      []
     end 
     

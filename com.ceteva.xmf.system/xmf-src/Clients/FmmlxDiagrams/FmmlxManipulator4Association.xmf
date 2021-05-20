@@ -33,12 +33,12 @@ import FmmlxDiagrams;
   	  // IGNORE 2 check if reverseName is valid and unique in p (and obviously different from fwName)
   	  
   	  elseif // 3 check if accessSourceFromTargetName is valid and unique in Target ! (in Target!)
-  	    [] <> self.checkAddAttribute(target, accessSourceFromTargetName, instLevelTarget, source) 
+  	    [] <> self.checkAddAttribute(target, accessSourceFromTargetName, instLevelTarget, source, null) 
   	  then
   	    [accessSourceFromTargetName + " is not unique in " + target.name]
   	  
   	  elseif //  4 check if accessTargetFromSourceName is valid and unique in Source !
-  	    [] <> self.checkAddAttribute(source, accessTargetFromSourceName, instLevelSource, target) 
+  	    [] <> self.checkAddAttribute(source, accessTargetFromSourceName, instLevelSource, target, null) 
   	  then
   	    [accessTargetFromSourceName + " is not unique in " + source.name]
   	    

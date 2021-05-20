@@ -31,7 +31,26 @@ import FmmlxDiagrams;
   
   */
   context FmmlxManipulator
-    @Operation addInstance(package, ofClass, name, parents, abstract, slotValueList: Seq(Seq(String))):Object
+    @Operation addInstance(
+      package : Package, 
+      ofClass : MetaClass, 
+      name, 
+      parents, 
+      abstract : Boolean, 
+      slotValueList: Seq(Seq(String))):Object
+      
+      self.addInstance(package, ofPackage, name, [], false, [])
+      
+  end
+  
+  context FmmlxManipulator
+    @Operation addInstance(
+      package : Package, 
+      ofClass : MetaClass, 
+      name, 
+      parents, 
+      abstract : Boolean, 
+      slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
       if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
@@ -263,21 +282,21 @@ import FmmlxDiagrams;
             @For assocParent in parent.owner.associations do
               if assocHeir <> assocParent
                 andthen
-                  (assocHeir.source.name = assocParent.source.name 
-                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
-                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  (assocHeir.end1.name = assocParent.end1.name 
+                    andthen (parent.isDescendentOf(assocParent.end1.type) or parent = assocParent.end1)
+                    andthen (  heir.isDescendentOf(assocHeir.end1.type) or   heir = assocHeir.end1))
                   orelse
-                  (assocHeir.source.name = assocParent.target.name 
-                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
-                    andthen (  heir.isDecendentOf(assocHeir.source.type) or   heir = assocHeir.source))
+                  (assocHeir.end1.name = assocParent.end2.name 
+                    andthen (parent.isDescendentOf(assocParent.end2.type) or parent = assocParent.end2)
+                    andthen (  heir.isDescendentOf(assocHeir.end1.type) or   heir = assocHeir.end1))
                   orelse
-                  (assocHeir.target.name = assocParent.source.name 
-                    andthen (parent.isDecendentOf(assocParent.source.type) or parent = assocParent.source)
-                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+                  (assocHeir.end2.name = assocParent.end1.name 
+                    andthen (parent.isDescendentOf(assocParent.end1.type) or parent = assocParent.end1)
+                    andthen (  heir.isDescendentOf(assocHeir.end2.type) or   heir = assocHeir.end2))
                   orelse
-                  (assocHeir.target.name = assocParent.target.name 
-                    andthen (parent.isDecendentOf(assocParent.target.type) or parent = assocParent.target)
-                    andthen (  heir.isDecendentOf(assocHeir.target.type) or   heir = assocHeir.target))
+                  (assocHeir.end2.name = assocParent.end2.name 
+                    andthen (parent.isDescendentOf(assocParent.end2.type) or parent = assocParent.end2)
+                    andthen (  heir.isDescendentOf(assocHeir.end2.type) or   heir = assocHeir.end2))
               then
                 problems := problems + ["Association collision. The associations \"" + assocParent.name + "\" and "+assocHeir.name+" overlap."]
               end end end;
@@ -288,7 +307,7 @@ import FmmlxDiagrams;
             // set Parent
             heir.parents := heir.parents + {parent};
             // add new slots
-            @For instance in heir.allInstances() do
+            @For instance in heir.allMetaInstances() do
               @For att in instance.of().allAttributes() do
                 if 
                   att.instLevel = instance.level andthen not instance.hasSlot(att.name)
@@ -308,7 +327,7 @@ import FmmlxDiagrams;
     @Operation removeParent(heir, parent)
       heir.parents := heir.parents - {parent};
       
-      @For instance in heir.allInstances() do
+      @For instance in heir.allMetaInstances() do
         let
           allAtts = instance.of().allAttributes()
         in

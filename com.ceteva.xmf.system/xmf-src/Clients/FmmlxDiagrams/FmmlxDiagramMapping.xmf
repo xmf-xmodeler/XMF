@@ -56,12 +56,13 @@ context FmmlxDiagrams
       end // let 
     end
     
-    @Operation setNewPosition(objectID, x, y)
+    @Operation setNewPosition(objectID, x, y, hidden)
       @For mappingInfo in mapping do
         if mappingInfo.id = objectID
         then
           mappingInfo.lastKnownDiagramX := x;
-          mappingInfo.lastKnownDiagramY := y
+          mappingInfo.lastKnownDiagramY := y;
+          mappingInfo.hidden := hidden
         end // if
       end // for
     end
@@ -99,7 +100,7 @@ context FmmlxDiagrams
         then 
           item.id := newKey//if o.isKindOf(Symbol) then o.toString() else o.path() end
         else
-          throw(Exception("Cannot change key. Either oldKey does not exist or newKey already exists."))
+          null//throw(Exception("Cannot change key. Either oldKey does not exist or newKey already exists."))
         end
       end
           

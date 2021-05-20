@@ -6,9 +6,6 @@ context Root::FMML
 
   @Class MetaClass metaclass Root::Extensions::MetaAdaptor extends Root::Extensions::MetaAdaptor
 
-    @Attribute metaClass : *MetaClass end
-    @Attribute model : 1..1 Model end  // ???
-  
     @Constructor(name, level)
       if self.of() <> FMML::MetaClass then
         self.error("This constructor is only allowed for instantiating FMML::MetaClass") end;
@@ -330,4 +327,56 @@ context Root::FMML
     else [] end
   end
    
+   
+  @Operation allConstraints():Set(Constraint)
+    let
+      allC = constraints;
+      allP = parents; // parents and classes
+      result = {};
+      alreadyChecked = {}
+    in
+      allP := allP->union({self.of()});
+      @While not allP->isEmpty do
+        let p = allP->sel
+        in alreadyChecked := alreadyChecked->union({p});
+          @For c2Bchecked in p.constraints do
+            if c2Bchecked.body.isIntrinsic or self.allParents().contains(p) then 
+              allC := allC->union({c2Bchecked})
+          end end;
+          if p.parents.contains(FMML::MetaClass)
+            then allP := allP->union({p.of()}) end;
+          allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
+        end
+      end;
+      // remove all intrinsic, where level is too high
+      @For c in allC do
+         if (not c.body.isIntrinsic) or c.body.instLevel < self.level then
+           result := result->union({c})
+         end
+       end;
+       result
+    end
+  end
+    
+  @Operation checkConstraints():Seq(ConstraintReport)
+    let
+      constraints = self.of().allConstraints();
+      reports = [];
+      LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
+    in
+      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
+        reports := reports->including(
+          try 
+            if constraint.body.invoke(self,Seq{self.of(), LEVEL})
+              then ConstraintReport(self,constraint,true)
+              else ConstraintReport(self,constraint,false,constraint.reason.invoke(self,Seq{self.of(), LEVEL}))
+    	    end
+          catch(exception)
+            ConstraintReport(self,constraint,false,"Error while performing classification: " + exception.message)
+          end)
+      end;
+      ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
+    end
+  end
+  
 end
