@@ -2018,69 +2018,119 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation getDiagramData(requestID : Seq(Integer)) /*
-       let 
+     @Operation getDiagramData2(requestID : Seq(Integer))
+            //let
+            //  result = [log]
+            //in
+        	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
+            //end
+        end
+
+    @Operation getDiagramData(requestID : Seq(Integer))
+       //self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
+       let
+         diagramID = self.vector2Seq(requestID).at(0)
+       then
+         diagram = self.diagrams.get(diagramID)
+       then
+         package = diagram.package;
          log = ["log"]
        in
          let
-           classes = [...] //TODO
-         then 
-           sort classes; //TODO ????? how to sort? if impossible leave it to java
-         in 
-           @For class in classes.asSeq() do //TODO beginning with highest level
-             if class without metaClass then
-             let
-               log = log + [["addMetaClass",
-                                         ["package", class.owner.path()],
-                                         ["name",class.name],
-                                         ["level",class.level+""],
-                                         ["parents",self.getParentsPathsList(requestID, class)],
-                                         ["abstract",class.isAbstract+""]]]
-             else
-               log = log + [["addInstance", ["package", class.owner.path()], ["of", class.of().path()] , ["name",class.name] , ["parents",self.getParentsPathsList(requestID, class)] , ["abstract", class.isAbstract+""]]]
-           end
+           maxLevel = 0;
+           classes = package.classes;
+           associations = package.associations;
+           links = package.fmmlxAssociationInstances
+         //then
+           //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
+         in
+           @For class in classes do
+             if class.level>maxLevel then
+               maxLevel := class.level
+             end
+           end;
+           @For level in (-maxLevel).to(0) do
+             @For class in classes do
+               if class.level=(-level) then
+                 if class.of()=FMML::MetaClass then
+                   log := log + [["addMetaClass",
+                     ["package", class.owner.path()],
+                     ["name",class.name.toString()],
+                     ["level",class.level+""],
+                     ["parents",self.getParentsPathsList(requestID, class)],
+                     ["abstract",class.isAbstract+""]]]
+                 else
+                   log := log + [["addInstance", ["package", class.owner.path()], ["of", class.of().path()] , ["name",class.name.toString()] , ["parents",self.getParentsPathsList(requestID, class)] , ["abstract", class.isAbstract+""]]]
+                 end
+               end
+             end
+           end;
+/*
            @For class in classes do
              @For att in class.attributes.asSeq() do
-               log = log + [["addAttribute", ["package", class.owner.path()],
+               log := log + [["addAttribute", ["package", class.owner.path()],
                                             ["class", class.path()],
-                                            ["name", att.name],
-                                            ["level", att.level+""],
+                                            ["name", att.name.toString()],
+                                            ["level", att.instLevel+""],
                                             ["type", att.type.path()],
                                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
-             end
+             end;
              @For op in class.operations.asSeq() do
-               log = log + [["addOperation2", ["package", class.owner.path()],
+               log := log + [["addOperation2", ["package", class.owner.path()],
                                                          ["class", class.path()],
                                                          ["level", op.instLevel+""],
-                                                         ["body", body]]] //TODO
-             end
-           end
-           @For class in classes  // new for to make sure att exists
-             @For slot in class.slots().asSeq()
-               log = log + [["changeSlotValue", ["package", class.owner.path()],
+                                                         ["body", op.codeBox.source()]]]
+             end;
+             @For constraint in class.constraints.asSeq() do
+               log := log + [["addConstraint", ["package", class.owner.path()],
+                                       ["class", class.path()],
+                                       ["constName", constraint.name.toString()],
+                                       ["instLevel", constraint.body.instLevel+""],
+                                       ["body", constraint.body.codeBox.source()],
+                                       ["reason", constraint.reason.codeBox.source()]]]
+            end
+           end;
+           @For class in classes  do// new for to make sure att exists
+             @For slot in class.slots().asSeq() do
+               log := log + [["changeSlotValue", ["package", class.owner.path()],
                                                  ["class", class.path()],
-                                                 ["slotName", slot.name],
-                                                 ["valueToBeParsed", slot.value]]]
+                                                 ["slotName", slot.name.toString()],
+                                                 ["valueToBeParsed", slot.value.toString()]]]
              end
-           end
-           for assoc in p.assoc //TODO all .  how about inheritanceEdge and roleFilerEedge?
-             log = log + [["addAssociation", ["package", classSource.owner.path()],
-                                     ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
-                                     ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
-                                     ["fwName", fwName+""],
-                                     ["reverseName", reverseName+""],
-                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(multTargetToSource)+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(multSourceToTarget)+""] ,
-                                     ["instLevelSource", instLevelSource+""] , ["instLevelTarget", instLevelTarget+""] ,
-                                     ["sourceVisibleFromTarget", sourceVisibleFromTarget+""] , ["targetVisibleFromSource", targetVisibleFromSource+""] ,
-                                     ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
-           end
-           for link in p.assocInstances
-             log = log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
-           end
-         end (let);
-         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
-       end */
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
+           end;
+           @For assoc in associations.asSeq() do
+             log := log + [["addAssociation", ["package", assoc.end1.type.owner.path()],
+                                     ["classSource", assoc.end1.type.path()] ,["classTarget", assoc.end2.type.path()] ,
+                                     ["accessSourceFromTargetName", assoc.end2.name.toString()] , ["accessTargetFromSourceName", assoc.end1.name.toString()] ,
+                                     ["fwName", assoc.name.toString()+""],
+                                     ["reverseName", "-1"],
+                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] ,
+                                     ["instLevelSource", assoc.end1.instLevel+""] , ["instLevelTarget", assoc.end2.instLevel+""] ,
+                                     ["sourceVisibleFromTarget", assoc.end2.visible+""] , ["targetVisibleFromSource", assoc.end1.visible+""] ,
+                                     ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
+           end;
+           @For link in links.asSeq() do
+             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(1).path()], ["classTarget", link.asSeq().at(1).path()]]]
+           end;
+           @For class in classes do
+             if
+               class.delegatesTo <> null
+             then
+               log := log + [["addDelegation", ["package", class.owner.path()],
+                                         ["delegateFrom",  class.path()],
+                                         ["delegateTo",  class.delegatesTo],
+                                         ["delegateToLevel",  class.delegatesToLevel+""]]]
+             end;
+             if
+               class.roleFiller <> null
+             then
+               log := log + self.log + [["setRoleFiller", ["package", class.owner.path()], ["role", class.path()], ["roleFiller", class.roleFiller.path()]]]
+             end
+           end;
+           */
+           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
+         end //(let);
+       end
     end
 
     @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
