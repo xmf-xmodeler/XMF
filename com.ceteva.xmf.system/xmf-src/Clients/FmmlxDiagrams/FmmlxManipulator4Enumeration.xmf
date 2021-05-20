@@ -70,8 +70,47 @@ import FmmlxDiagrams;
     end
 
   context FmmlxManipulator
-    @Operation removeEnumeration(package:Package, enumName:String) 
-      ["Not yet implemented"]
+    @Operation removeEnumeration(package:Package, enumPath:String)
+      let 
+        enumEval = self.evalString(enumPath, package)
+      then
+        e = enumEval.at(0)
+      in
+        if 
+          e = null
+        then
+          [enumEval.at(1)]
+        else
+          if // 2
+            not e.isKindOf(Enum)
+          then
+            [enumPath + " is not an Enum"]
+          else
+            if // 3
+              not package.getChildren().contains(e)
+            then
+              [enumPath + " is not part of " + package.getName()]
+            else
+              let // 4
+                usingAtts = package.getChildren()->iterate(c a = {} | a + c.attributes.asSet()) -> select(a | a.type = e).asSeq()
+              in
+                if // 5 
+                  not usingAtts.isEmpty()
+                then
+                  [enumPath 
+                  + " in use in " 
+                  + usingAtts.at(0).owner.name 
+                  + "::"
+                  + usingAtts.at(0).name 
+                  + if usingAtts.size()>1 then (" and " + (usingAtts.size()-1) + " others.") else "." end]
+                else
+                  package.remove(e); []
+                end // if 5
+              end // let 4
+            end // if 3
+          end // if 2
+        end // if 1
+      end // let
     end
 
   context FmmlxManipulator
