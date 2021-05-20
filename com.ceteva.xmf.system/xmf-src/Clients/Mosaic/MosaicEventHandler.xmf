@@ -15,8 +15,24 @@ context Mosaic
         "consoleDot"       do self.consoleDot(parameters)        end
         "nameLookup"       do self.nameLookup(parameters)        end
         "send"             do self.sendEvent(parameters)         end
-        "getAllProjects"   do self.getAllProjects()              end
+        "getAllCategories" do self.getAllCategories()            end
+        "getAllProjects"   do self.getAllProjects(parameters)    end
         "getProjectModels" do self.getProjectModels(parameters)  end
+        "getModelDiagrams" do self.getModelDiagrams(parameters)  end
+        "addCategory"      do self.addCategory(parameters)       end
+        "renameCategory"   do self.renameCategory(parameters)    end
+        "removeCategory"   do self.removeCategory(parameters)    end
+        "addProject"       do self.addProject(parameters)        end
+        "renameProject"    do self.renameProject(parameters)     end
+        "removeProject"    do self.removeProject(parameters)     end
+        "assignCategoryToProject" do self.assignCategoryToProject(parameters)  end
+        "unassignCategoryFromProject" do self.unassignCategoryFromProject(parameters)  end
+        "addModel"         do self.addModel(parameters)          end
+        "renameModel"      do self.renameModel(parameters)       end
+        "removeModel"      do self.removeModel(parameters)       end
+        "addDiagram"       do self.addDiagram(parameters)        end
+        "renameDiagram"    do self.renameDiagram(parameters)     end
+        "removeDiagram"    do self.removeDiagram(parameters)     end
         "startFmmlxClient" do xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator() end
       end
     end
@@ -32,8 +48,7 @@ context Mosaic
            (file.truncate(file->size - 4) + ".o").loadBin(true)
          end
       end
-    end
-      
+    end      
     
     @Operation sendEvent(parameters)
       self.debug("send",parameters);
@@ -171,7 +186,16 @@ context Mosaic
     
     // -------------------
     
-    @Operation getAllProjects() 
+    @Operation getAllCategories() 
+//        let 
+//           pmc = xmf.projectManager()
+//        then
+//        in
+//        end;
+        self.owner().commandInterpreter().setAllCategories(["First Category", "Second Category", "Fourth Category"])
+    end
+    
+    @Operation getAllProjects(parameters) 
       let 
         P = Projects::Project.allInstances();
         names = [];
@@ -217,5 +241,42 @@ context Mosaic
         self.owner().commandInterpreter().setProjectModels(results)
       end // 1
     end // O
+    
+    @Operation addProject(parameters) 
+      if 
+        parameters.at(0).isValidName() 
+      then 
+        let
+          projectName = parameters.at(0)
+        then
+          model = FMML::FMMLxPackage(projectName)
+    	  then
+    	  project = Projects::Project(model, projectName, null)
+  	    in
+  	      model.addParent(FMML);
+          model.fmmlxAssociationInstances:={};
+          Root.add(model);
+          xmf.projectManager("MyProjects").add(project)
+        end
+      end
+        // throw(Exception("not yet implemented (param:" + projectName + ")")) 
+    end
+    
+    @Operation addCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation renameCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation removeCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    
+    @Operation renameProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation removeProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation assignCategoryToProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation unAassignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    
+    @Operation addModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation renameModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation removeModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    
+    @Operation addDiagram(parameters)  throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation renameDiagram(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation removeDiagram(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     
   end

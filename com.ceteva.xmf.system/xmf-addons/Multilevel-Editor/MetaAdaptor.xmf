@@ -188,5 +188,30 @@ context Root::Extensions
     end
   end
 
+  @Operation totalNumOfInstancesAtLevel(m): Integer
+    let list = self.totalInstances();
+      coll = []
+    in
+      list->collect (i | if i.level = m then coll := coll->including(i) end);
+      coll.size()
+    end
+  end
+  
+  @Operation totalNumOfInstances(): Integer
+    let sum = 0
+    in
+      self.allInstances().asSeq()->collect (i | sum := sum + i.totalNumOfInstances());
+      self.allInstances().size() + sum
+    end
+  end
+  
+  @Operation totalInstances(): Integer
+    let list = []
+    in
+      self.allInstances().asSeq()->collect (i | list := list + i.totalInstances());
+      list + self.allInstances().asSeq()
+    end
+  end
+
 end
  
