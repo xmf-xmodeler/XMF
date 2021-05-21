@@ -2071,7 +2071,8 @@ context FmmlxDiagrams
                      ["package", class.owner.path()],
                      ["name",class.name.toString()],
                      ["level",class.level+""],
-                     ["parents",self.getParentsPathsList(requestID, class)],
+                     ["parents",""],
+                     //["parents",self.getParentsPathsList(requestID, class)],
                      ["abstract",class.isAbstract+""]]]
                  else
                    log := log + [["addInstance", ["package", class.owner.path()], ["of", class.of().path()] , ["name",class.name.toString()] , ["parents",self.getParentsPathsList(requestID, class)] , ["abstract", class.isAbstract+""]]]
@@ -2079,7 +2080,16 @@ context FmmlxDiagrams
                end
              end
            end;
-/*
+           @For class in classes do
+             if self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner)) <> "" then
+               log:= log + [["changeParent",
+                            ["package", class.owner.path()],
+                            ["class", class.path()],
+                            ["old", ""],
+                            ["new", self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner))]]]
+             end
+           end;
+
            @For class in classes do
              @For att in class.attributes.asSeq() do
                log := log + [["addAttribute", ["package", class.owner.path()],
@@ -2090,10 +2100,12 @@ context FmmlxDiagrams
                                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
              end;
              @For op in class.operations.asSeq() do
-               log := log + [["addOperation2", ["package", class.owner.path()],
+               if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
+                 log := log + [["addOperation2", ["package", class.owner.path()],
                                                          ["class", class.path()],
                                                          ["level", op.instLevel+""],
                                                          ["body", op.codeBox.source()]]]
+               end
              end;
              @For constraint in class.constraints.asSeq() do
                log := log + [["addConstraint", ["package", class.owner.path()],
@@ -2102,14 +2114,22 @@ context FmmlxDiagrams
                                        ["instLevel", constraint.body.instLevel+""],
                                        ["body", constraint.body.codeBox.source()],
                                        ["reason", constraint.reason.codeBox.source()]]]
-            end
+             end
            end;
            @For class in classes  do// new for to make sure att exists
-             @For slot in class.slots().asSeq() do
-               log := log + [["changeSlotValue", ["package", class.owner.path()],
-                                                 ["class", class.path()],
-                                                 ["slotName", slot.name.toString()],
-                                                 ["valueToBeParsed", slot.value.toString()]]]
+             let
+               slots = class.slots()
+             then
+               slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMML::MetaClass)).name
+             in
+               @For slot in slots do
+                 if slotNames.contains(slot.name) then
+                   log := log + [["changeSlotValue", ["package", class.owner.path()],
+                                ["class", class.path()],
+                                ["slotName", slot.name.toString()],
+                                ["valueToBeParsed", slot.value.toString()]]]
+                 end
+               end
              end
            end;
            @For assoc in associations.asSeq() do
@@ -2134,14 +2154,14 @@ context FmmlxDiagrams
                                          ["delegateFrom",  class.path()],
                                          ["delegateTo",  class.delegatesTo],
                                          ["delegateToLevel",  class.delegatesToLevel+""]]]
-             end;
-             if
-               class.roleFiller <> null
+             end
+           end;
+           @For class in classes do
+             if class.roleFiller <> null
              then
                log := log + self.log + [["setRoleFiller", ["package", class.owner.path()], ["role", class.path()], ["roleFiller", class.roleFiller.path()]]]
              end
            end;
-           */
            self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
          end //(let);
        end
