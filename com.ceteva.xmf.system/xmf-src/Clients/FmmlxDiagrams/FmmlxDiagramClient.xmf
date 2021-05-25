@@ -2081,6 +2081,18 @@ context FmmlxDiagrams
              end
            end;
            @For class in classes do
+             if class  <> null andthen class.isKindOf(Enum) then
+               let
+                 enumItems = class.getChildren()
+               in
+                 log:= log + [["addEnumeration", ["name",class.name.toString()]]];
+                 @For item in enumItems do
+                   log:= log + [["addEnumerationValue", ["enum_name",class.name.toString()], ["enum_value_name", item.name.toString()]]]
+		         end
+               end
+             end
+           end;
+           @For class in classes do
              if self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner)) <> "" then
                log:= log + [["changeParent",
                             ["package", class.owner.path()],
@@ -2281,9 +2293,7 @@ context FmmlxDiagrams
           if Root.hasElement("FMML")
           then
             package.addParent(FMML)
-            
             //;
-
             //@For diagramName in diagramNames do
             //    self.getCommunicator().createDiagram(package.path(), diagramName, file)
             //end;
