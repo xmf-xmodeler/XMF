@@ -2101,7 +2101,6 @@ context FmmlxDiagrams
                             ["new", self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner))]]]
              end
            end;
-
            @For class in classes do
              @For att in class.attributes.asSeq() do
                log := log + [["addAttribute", ["package", class.owner.path()],
@@ -2156,7 +2155,7 @@ context FmmlxDiagrams
                                      ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
            end;
            @For link in links.asSeq() do
-             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(1).path()], ["classTarget", link.asSeq().at(1).path()]]]
+             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(0).path()], ["classTarget", link.asSeq().at(1).path()]]]
            end;
            @For class in classes do
              if
@@ -2205,7 +2204,6 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
-
 
     @Operation findAllOperations(requestID: Seq(Integer))
       let
