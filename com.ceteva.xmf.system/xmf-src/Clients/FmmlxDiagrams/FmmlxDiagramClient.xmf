@@ -419,41 +419,146 @@ context FmmlxDiagrams
         end
     end
 
-    @Operation getAllAttributes(requestID : Seq(Integer), className)
+    @Operation getAllAttributes(requestID : Seq(Integer))
         let
-          resultOwn   = [];
-          resultOther = [];
           result = []
         in
-          @For c in self.getPackage(requestID).classes do
-            if c <> null andthen /*c.isKindOf(FMML::MetaClass) and*/ c.name.toString() = className
-            then
-              @For a in c.attributes do
-                resultOwn   :=   resultOwn.append([[
-                    a.name.toString(),
-                    a.type.name.toString(),
-                    if a.isIntrinsic then a.instLevel else -1 end,
-                    FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                    c.path()
-                    ]])
-              end;
-              @For a in (c.allAttributes() - c.attributes) do
-                if a.isIntrinsic orelse self.attIsInList(a) then
-                  resultOther := resultOther.append([[
-                    a.name.toString(),
-                    a.type.name.toString(),
-                    if a.isIntrinsic then a.instLevel else -1 end,
-                    FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                    a.owner.path()
-                    ]])
-                end
-              end
-            end
-          end;
-          result := [resultOwn, resultOther];
+          @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+            let
+              resultOwn   = [];
+              resultOther = []
+            in
+              if c <> null
+              then
+                @For a in c.attributes do
+                  resultOwn   :=   resultOwn.append([[
+                      a.name.toString(),
+                      a.type.name.toString(),
+                      if a.isIntrinsic then a.instLevel else -1 end,
+                      FmmlxManipulator::multiplicity2ValueList(a.mult()),
+                      c.path()
+                      ]])
+                end; // for own
+                @For a in (c.allAttributes() - c.attributes) do
+                  if a.isIntrinsic orelse self.attIsInList(a) then
+                    resultOther := resultOther.append([[
+                      a.name.toString(),
+                      a.type.name.toString(),
+                      if a.isIntrinsic then a.instLevel else -1 end,
+                      FmmlxManipulator::multiplicity2ValueList(a.mult()),
+                      a.owner.path()
+                      ]])
+                  end
+                end; // for other
+                result := result + [[c.path(), resultOwn, resultOther]]
+              end // let
+            end // if <> null
+          end; // for
+          //result := [resultOwn, resultOther];
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-        end
+        end // let
     end
+    
+    @Operation getAllOperations(requestID : Seq(Integer))
+      let
+        result = []
+      in
+        @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+          let 
+            resultLocal = []
+          in            
+            if c <> null 
+              andthen c.isKindOf(FMML::MetaClass)
+            then
+              @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+                let
+                  paramNames = o.paramNames();
+                  paramTypesRaw = o.paramTypes();
+                  paramTypes = []
+                in
+                  @For type in paramTypesRaw do
+                    paramTypes := paramTypes.append([self.getPathAsString(type)])
+                  end;
+                  resultLocal := resultLocal.append([[
+                  o.name.toString(),
+                  paramNames,
+                  paramTypes,
+                  o.instLevel,
+                  self.getReturnPathAsString(o),
+                  o.source(),
+                  o.owner.path(),
+                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                  [0,1,false,true], // to-do: multiplicity
+                  self.isOperationMonitored(o),
+                  let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
+                  ]])
+                end
+              end end
+            end;
+            
+            if c <> null 
+              andthen (not c.isKindOf(FMML::MetaClass))
+            then
+              @For o in c.operations do if (not o.owner = null) then
+                let
+                  paramNames = o.paramNames();
+                  paramTypesRaw = o.paramTypes();
+                  paramTypes = []
+                in
+                  @For type in paramTypesRaw do
+                    paramTypes := paramTypes.append([self.getPathAsString(type)])
+                  end;
+                  resultLocal := resultLocal.append([[
+                  o.name.toString(),
+                  paramNames,
+                  paramTypes,
+                  -1,
+                  self.getReturnPathAsString(o),
+                  o.source(),
+                  o.owner.path(),
+                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                  [0,1,false,true], // to-do: multiplicity
+                  self.isOperationMonitored(o),
+                  false
+                  ]])
+                end
+              end end
+            end; // if <> null
+            result := result + [[c.path(), resultLocal]]
+          end // let
+        end; // for
+  	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end // let
+    end
+    
+    @Operation getAllConstraints(requestID : Seq(Integer))
+      let
+        result = []
+      in
+        @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+          let
+            localResult = []
+          in
+            if c <> null 
+              andthen c.isKindOf(FMML::MetaClass) 
+            then
+              @For con in c.constraints do if (not con.owner = null) then
+                localResult := localResult.append([[
+                  con.name.toString(),
+                  con.body.instLevel,
+                  con.body.getProperty("raw", "Error: raw source not found"),
+                  con.body.source(),
+                  con.reason.getProperty("raw", "Error: raw source not found"),
+                  con.reason.source()]])
+              end end; // for+if
+              result := result + [[c.path(), localResult]]
+            end // if <> null
+          end // let local
+        end; // for
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end  // let
+    end // O
+    
     
     @Operation attIsInList(a) false end
 //      if a.owner = NamedElement andthen a.name.toString() = "name" then true
@@ -510,7 +615,7 @@ context FmmlxDiagrams
           in
             result := result.append([[
               n,
-              if error = null then value.toString() else error.message.toString() end,
+              if error = null then value.toString() else error.toString() end, // error should be of type String
               hasRange,
               isInRange]])
           end // let
@@ -528,100 +633,7 @@ context FmmlxDiagrams
     @Operation getReturnPathAsString(o) //:Operation
       try o.type().path() catch(e) Element.path() end
     end
-
-    @Operation getOwnOperations(requestID : Seq(Integer), className)
-        let
-          result = []
-        in
-          @For c in self.getPackage(requestID).classes do
-            if c <> null 
-              andthen c.isKindOf(FMML::MetaClass) 
-              andthen c.name.toString() = className
-            then
-              @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
-                let
-                  paramNames = o.paramNames();
-                  paramTypesRaw = o.paramTypes();
-                  paramTypes = []
-                in
-                  @For type in paramTypesRaw do
-                    paramTypes := paramTypes.append([self.getPathAsString(type)])
-                  end;
-                  result := result.append([[
-                  o.name.toString(),
-                  paramNames,
-                  paramTypes,
-                  o.instLevel,
-                  self.getReturnPathAsString(o),
-                  o.source(),
-                  o.owner.path(),
-                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                  [0,1,false,true], // to-do: multiplicity
-                  self.isOperationMonitored(o),
-                  let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
-                  ]])
-                end
-              end end
-            end;
-            
-            if c <> null 
-              andthen (not c.isKindOf(FMML::MetaClass))
-              andthen c.name.toString() = className
-            then
-              @For o in c.operations do if (not o.owner = null) then
-                let
-                  paramNames = o.paramNames();
-                  paramTypesRaw = o.paramTypes();
-                  paramTypes = []
-                in
-                  @For type in paramTypesRaw do
-                    paramTypes := paramTypes.append([self.getPathAsString(type)])
-                  end;
-                  result := result.append([[
-                  o.name.toString(),
-                  paramNames,
-                  paramTypes,
-                  -1,
-                  self.getReturnPathAsString(o),
-                  o.source(),
-                  o.owner.path(),
-                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                  [0,1,false,true], // to-do: multiplicity
-                  self.isOperationMonitored(o),
-                  false
-                  ]])
-                end
-              end end
-            end
-          end;
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-        end
-    end
     
-    @Operation getConstraints(requestID : Seq(Integer), className)
-      let
-        result = []
-      in
-        @For c in self.getPackage(requestID).classes do
-          if c <> null 
-            andthen c.isKindOf(FMML::MetaClass) 
-            andthen c.name.toString() = className
-          then
-            @For con in c.constraints do if (not con.owner = null) then
-              result := result.append([[
-                con.name.toString(),
-                con.body.instLevel,
-                con.body.getProperty("raw", "Error: raw source not found"),
-                con.body.source(),
-                con.reason.getProperty("raw", "Error: raw source not found"),
-                con.reason.source()]])
-            end end // for+if
-          end // if
-        end; // for
-        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-      end  // let
-    end // O
-
     @Operation getAllEnums(requestID : Seq(Integer))
         let
           result = []
@@ -685,7 +697,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-		@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) then
+        @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) then
 		  @For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
@@ -2243,5 +2255,22 @@ context FmmlxDiagrams
     @Operation loaded(package):Boolean
           package <> null
     end
-
+    
+    @Operation toParseableString(o:Element, p: package):String 
+      if o = null orelse o.isKindOf(Integer) orelse o.isKindOf(Boolean)
+        then o.toString()
+      elseif o.isKindOf(Float) 
+        then if o = 1/0 then "1/0" elseif o = 0/0 then "0/0" elseif o = -1/0 then "-1/0" else o.toString() end
+      elseif o.isKindOf(String)
+        then o.asSeq() + ".asString()"
+      elseif o.of().isKindOf(Enum) orelse o.owner() = p 
+        then o.path()
+      elseif o.of().owner() = Auxiliary // all classes in that package are supposed have that operation
+        then o.toParseableString()
+      else
+        ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();
+        "null"
+      end
+    end
+    
 end

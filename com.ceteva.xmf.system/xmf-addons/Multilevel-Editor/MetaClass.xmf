@@ -62,6 +62,8 @@ context Root::FMML
     @Operation sendInstance(element,message,args):XCore::Element
       if "sendInstance".equals(message.toString()) then 
         FMML::MetaClass.getOperation("sendInstance").invoke(element,args)
+      elseif "allAttributes".equals(message.toString()) then 
+        FMML::MetaClass.getOperation("allAttributes").invoke(element,args)
       else
 //       ("[sendInstance] " + element.name + ":" + self.name + ": Operation "+message).println();
       let
