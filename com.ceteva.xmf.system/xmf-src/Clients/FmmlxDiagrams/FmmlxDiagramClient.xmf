@@ -2048,35 +2048,65 @@ context FmmlxDiagrams
        let 
          log = ["log"]
        in
-         let 
-           c = classes;
+         let
+           classes = [...] //TODO
          then 
-           sort classes; ????? how to sort? if impossible leave it to java
+           sort classes; //TODO ????? how to sort? if impossible leave it to java
          in 
-           for classes beginning with highest level
-             if class without metaclass then
-               log = log + new metaclass
+           @For class in classes.asSeq() do //TODO beginning with highest level
+             if class without metaClass then
+             let
+               log = log + [["addMetaClass",
+                                         ["package", class.owner.path()],
+                                         ["name",class.name],
+                                         ["level",class.level+""],
+                                         ["parents",self.getParentsPathsList(requestID, class)],
+                                         ["abstract",class.isAbstract+""]]]
              else
-               log = log + new instance
-           for class in classes  
-             for att/ops in class.atts/ops...
-               log = lot + newAtt/newOp/...
-           for class in classes  // new for to make sure att exists
-             for slotValue in class.slots
-               log = log + ...
-           for assoc in p.assoc
-             log...
+               log = log + [["addInstance", ["package", class.owner.path()], ["of", class.of().path()] , ["name",class.name] , ["parents",self.getParentsPathsList(requestID, class)] , ["abstract", class.isAbstract+""]]]
+           end
+           @For class in classes do
+             @For att in class.attributes.asSeq() do
+               log = log + [["addAttribute", ["package", class.owner.path()],
+                                            ["class", class.path()],
+                                            ["name", att.name],
+                                            ["level", att.level+""],
+                                            ["type", att.type.path()],
+                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
+             end
+             @For op in class.operations.asSeq() do
+               log = log + [["addOperation2", ["package", class.owner.path()],
+                                                         ["class", class.path()],
+                                                         ["level", op.instLevel+""],
+                                                         ["body", body]]] //TODO
+             end
+           end
+           @For class in classes  // new for to make sure att exists
+             @For slot in class.slots().asSeq()
+               log = log + [["changeSlotValue", ["package", class.owner.path()],
+                                                 ["class", class.path()],
+                                                 ["slotName", slot.name],
+                                                 ["valueToBeParsed", slot.value]]]
+             end
+           end
+           for assoc in p.assoc //TODO all .  how about inheritanceEdge and roleFilerEedge?
+             log = log + [["addAssociation", ["package", classSource.owner.path()],
+                                     ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
+                                     ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
+                                     ["fwName", fwName+""],
+                                     ["reverseName", reverseName+""],
+                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(multTargetToSource)+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(multSourceToTarget)+""] ,
+                                     ["instLevelSource", instLevelSource+""] , ["instLevelTarget", instLevelTarget+""] ,
+                                     ["sourceVisibleFromTarget", sourceVisibleFromTarget+""] , ["targetVisibleFromSource", targetVisibleFromSource+""] ,
+                                     ["isSymmetric", isSymmetric+""] , ["isTransitive", isTransitive+""]]]
+           end
            for link in p.assocInstances
-             log...
+             log = log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+           end
          end (let);
-             
-       
          self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
        end */
-
-    
-    
-      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + self.log end])
+    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + self.log end])
     end
 
     @Operation findOperationImplementation(requestID: Seq(Integer), opNames: Seq(String), model:String, arity:String, returnType:String)
