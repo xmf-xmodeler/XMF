@@ -14,17 +14,17 @@ context Root::Extensions
     @Attribute created : Integer end
     @Attribute level : Integer end
     @Attribute instances : *Element end
-    @Attribute children : *Element end
+    @Attribute subclasses : *Element end
 
     //@Attribute model : 1..1 Model end
  
   @Operation deleteRecursive()
-	  self.of().instances := self.of().instances.excluding(self);
+    self.of().instances := self.of().instances.excluding(self);
     super();
     self
   end
 
-	@Operation new():Object
+  @Operation new():Object
 
       if self.level < 1 then self.error("Level " + self.level + " does not allow instantiation.") end;
 
@@ -179,7 +179,7 @@ context Root::Extensions
     let 
       i = instances
     in
-      @For c in children do 
+      @For c in subclasses do 
         if c.isKindOf(FMML::MetaClass) then 
           i := i + c.allInstances()
         end//if

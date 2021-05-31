@@ -2044,14 +2044,6 @@ context FmmlxDiagrams
       end
     end
 
-     @Operation getDiagramData2(requestID : Seq(Integer))
-            //let
-            //  result = [log]
-            //in
-        	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
-            //end
-        end
-
     @Operation getDiagramData(requestID : Seq(Integer))
        //self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if log.size() = 0 then ["log"] else ["log"] + log end])
        let
@@ -2079,21 +2071,36 @@ context FmmlxDiagrams
              @For class in classes do
                if class.level=(-level) then
                  if class.of()=FMML::MetaClass then
-                   log := log + [["addMetaClass",
-                     ["package", class.owner.path()],
-                     ["name",class.name.toString()],
-                     ["level",class.level+""],
-                     ["parents",""],
-                     //["parents",self.getParentsPathsList(requestID, class)],
-                     ["abstract",class.isAbstract+""]]]
+                   log := log + 
+                     [["addMetaClass",
+                      ["package", class.owner.path()],
+                      ["name",class.name.toString()],
+                      ["level",class.level+""],
+                      ["parents",""],
+                      ["abstract",class.isAbstract+""]]]
+                 elseif class.isKindOf(Enum) then
+                   let
+                     enumItems = class.getChildren()
+                   in
+                     log:= log + [["addEnumeration", ["name",class.name.toString()]]];
+                     @For item in enumItems do
+                       log:= log + [["addEnumerationValue", ["enum_name",class.name.toString()], ["enum_value_name", item.name.toString()]]]
+		             end
+                   end
                  else
-                   log := log + [["addInstance", ["package", class.owner.path()], ["of", class.of().path()] , ["name",class.name.toString()] , ["parents",self.getParentsPathsList(requestID, class)] , ["abstract", class.isAbstract+""]]]
+                   log := log + 
+                     [["addInstance", 
+                      ["package", class.owner.path()], 
+                      ["of", class.of().path()] , 
+                      ["name",class.name.toString()] , 
+                      ["parents",""], 
+                      ["abstract", class.isAbstract+""]]]
                  end
                end
              end
            end;
-           @For class in classes do
-             if class  <> null andthen class.isKindOf(Enum) then
+/*           @For class in classes do
+             if class <> null andthen class.isKindOf(Enum) then
                let
                  enumItems = class.getChildren()
                in
@@ -2103,7 +2110,7 @@ context FmmlxDiagrams
 		         end
                end
              end
-           end;
+           end;*/
            @For class in classes do
              if self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner)) <> "" then
                log:= log + [["changeParent",
@@ -2124,10 +2131,10 @@ context FmmlxDiagrams
              end;
              @For op in class.operations.asSeq() do
                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
-                 log := log + [["addOperation2", ["package", class.owner.path()],
-                                                         ["class", class.path()],
-                                                         ["level", op.instLevel+""],
-                                                         ["body", op.codeBox.source()]]]
+                 log := log + [["addOperation", ["package", class.owner.path()],
+                                                ["class", class.path()],
+                                                ["level", op.instLevel+""],
+                                                ["body", op.codeBox.source()]]]
                end
              end;
              @For constraint in class.constraints.asSeq() do
@@ -2150,7 +2157,7 @@ context FmmlxDiagrams
                    log := log + [["changeSlotValue", ["package", class.owner.path()],
                                 ["class", class.path()],
                                 ["slotName", slot.name.toString()],
-                                ["valueToBeParsed", slot.value.toString()]]]
+                                ["valueToBeParsed", self.toParseableString(slot.value, class.owner)]]]
                  end
                end
              end
@@ -2158,10 +2165,10 @@ context FmmlxDiagrams
            @For assoc in associations.asSeq() do
              log := log + [["addAssociation", ["package", assoc.end1.type.owner.path()],
                                      ["classSource", assoc.end1.type.path()] ,["classTarget", assoc.end2.type.path()] ,
-                                     ["accessSourceFromTargetName", assoc.end2.name.toString()] , ["accessTargetFromSourceName", assoc.end1.name.toString()] ,
+                                     ["accessSourceFromTargetName", assoc.end1.name.toString()] , ["accessTargetFromSourceName", assoc.end2.name.toString()] ,
                                      ["fwName", assoc.name.toString()+""],
                                      ["reverseName", "-1"],
-                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] ,
+                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] ,
                                      ["instLevelSource", assoc.end1.instLevel+""] , ["instLevelTarget", assoc.end2.instLevel+""] ,
                                      ["sourceVisibleFromTarget", assoc.end2.visible+""] , ["targetVisibleFromSource", assoc.end1.visible+""] ,
                                      ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
@@ -2175,14 +2182,14 @@ context FmmlxDiagrams
              then
                log := log + [["addDelegation", ["package", class.owner.path()],
                                          ["delegateFrom",  class.path()],
-                                         ["delegateTo",  class.delegatesTo],
+                                         ["delegateTo",  class.delegatesTo.path()],
                                          ["delegateToLevel",  class.delegatesToLevel+""]]]
              end
            end;
            @For class in classes do
              if class.roleFiller <> null
              then
-               log := log + self.log + [["setRoleFiller", ["package", class.owner.path()], ["role", class.path()], ["roleFiller", class.roleFiller.path()]]]
+               log := log + [["setRoleFiller", ["package", class.owner.path()], ["role", class.path()], ["roleFiller", class.roleFiller.path()]]]
              end
            end;
            self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), log])
@@ -2370,10 +2377,10 @@ context FmmlxDiagrams
       elseif o.isKindOf(Float) 
         then if o = 1/0 then "1/0" elseif o = 0/0 then "0/0" elseif o = -1/0 then "-1/0" else o.toString() end
       elseif o.isKindOf(String)
-        then o.asSeq() + ".asString()"
-      elseif o.of().isKindOf(Enum) orelse o.owner() = p 
+        then o.asSeq().pprint() + ".asString()"
+      elseif o.of().isKindOf(Enum) orelse try o.owner() = p catch(e) false end
         then o.path()
-      elseif o.of().owner() = Auxiliary // all classes in that package are supposed have that operation
+      elseif try o.of().owner() = Auxiliary catch(e) false end // all classes in that package are supposed have that operation
         then o.toParseableString()
       else
         ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();

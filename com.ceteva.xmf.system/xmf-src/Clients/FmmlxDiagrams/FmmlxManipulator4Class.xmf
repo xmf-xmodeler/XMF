@@ -12,11 +12,11 @@ import FmmlxDiagrams;
       newClass.isAbstract := abstract;
       if parents.size() > 0 then newClass.parents := parents.asSet() end;
       
-      @For p in newClass.parents do
-	    if p.isKindOf(FMML::MetaClass) then
-	      p.children := p.children + {newClass}
-	    end
-	  end;
+      @For parent in newClass.parents do
+        if parent.isKindOf(FMML::MetaClass) then
+          parent.subclasses := parent.subclasses + {newClass}
+        end
+      end;
       
       newClass
     end    
@@ -228,7 +228,7 @@ import FmmlxDiagrams;
           package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
         end;        
 
-      // remove all inheritance
+      // remove all inheritance in the subclasses
         @For heir in package.classes do
           if heir.parents.contains(class) then
             heirs := heirs + [heir] end end;
@@ -236,6 +236,13 @@ import FmmlxDiagrams;
         @For heir in heirs do
           self.removeParent(heir, class) end;
 //        ("inheritance removed").println();
+
+      // remove all inheritance in the superclasses
+        let parents = {} + class.parents in // avoid concurrent modification
+          @For parent in parents do
+            self.removeParent(class, parent)
+          end
+        end;
           
       // orphan the instances
         @For instance in package.classes do
@@ -303,9 +310,10 @@ import FmmlxDiagrams;
           if 
             problems.size() = 0
           then
-            //["The operation \"addParent\" has not been finished implementing yet."]
             // set Parent
             heir.parents := heir.parents + {parent};
+            // don't forget to add the subclass in the parent for performance purposes
+            parent.subclasses := parent.subclasses + {heir};
             // add new slots
             @For instance in heir.allMetaInstances() do
               @For att in instance.of().allAttributes() do
@@ -326,6 +334,8 @@ import FmmlxDiagrams;
   context FmmlxManipulator  
     @Operation removeParent(heir, parent)
       heir.parents := heir.parents - {parent};
+      // don't forget to remove the subclass from the parent we earlier added for performance purposes
+      parent.subclasses := parent.subclasses - {heir};
       
       @For instance in heir.allMetaInstances() do
         let

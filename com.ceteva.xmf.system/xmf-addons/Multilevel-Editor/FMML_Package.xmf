@@ -94,7 +94,7 @@ context Root::Auxiliary
     @Operation update() self.refValue := if "EUR"=self.abbreviation then 1.0 else 1.0 / xmf.javaClass("tool.helper.CurrencyRates").getpriceOf1EUR(abbreviation) end end
 
     @Operation toParseableString():String 
-      "Auxiliary::Currency(" + symbol + ", " + abbreviation + ", " + refValue + ")"
+      "Auxiliary::Currency(\"" + symbol + "\", \"" + abbreviation + "\", " + refValue + ")"
     end
   end
 
@@ -115,7 +115,7 @@ context Root::Auxiliary
     @Operation sub(other:MonetaryValue):MonetaryValue self.add(other.mul(-1)) end
     
     @Operation toParseableString():String 
-      "Auxiliary::MonetaryValue(" + amount + ", " + currency.toParseableString() + ")"
+      "Auxiliary::MonetaryValue(" + self.amount + ", " + self.currency.toParseableString() + ")"
     end
     
   end
@@ -212,7 +212,7 @@ context Root::Auxiliary
         then
           "Auxiliary::Date::createDateAndTime(" + year + ", " + month + ", " + day + ", " + hour + ", " + minute + ", " + second +")"
         else
-          "Auxiliary::Date::createDateAndTime(" + year + ", " + month + ", " + day +")"
+          "Auxiliary::Date::createDate(" + year + ", " + month + ", " + day +")"
         end
       end
     end
