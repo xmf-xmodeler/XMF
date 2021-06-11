@@ -119,6 +119,38 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
+    @Operation changeAssociationLevel(association, newEnd1Level, newEnd2Level)
+      
+      if     newEnd1Level <> null andthen newEnd1Level < 0 
+        then ["source level too small"]
+      elseif newEnd2Level <> null andthen newEnd2Level < 0 
+        then ["target level too small"]
+      elseif newEnd1Level <> null andthen newEnd1Level >= association.end1.type.level
+        then ["source level too high"]
+      elseif newEnd2Level <> null andthen newEnd2Level >= association.end2.type.level
+        then ["target level too high"]
+      elseif newEnd1Level <> null andthen newEnd1Level <> association.end1.instLevel 
+             andthen [] <> self.checkAddAttribute(association.end2.type, association.end1.name, newEnd1Level, association.end1.type, null)
+        then ["source level cannot be changed due to potential getter name collision"]
+      elseif newEnd2Level <> null andthen newEnd2Level <> association.end2.instLevel 
+             andthen [] <> self.checkAddAttribute(association.end1.type, association.end2.name, newEnd2Level, association.end2.type, null)
+        then ["target level cannot be changed due to potential getter name collision"]
+      else 
+        ["All checks have passed but the change operation has not been implemented yet "]
+      end
+        
+      // check new level
+      // remove-add-assoc?
+      // remove links
+      
+    end   
+     
+  context FmmlxManipulator
+    @Operation changeAssociationAccessName(association, newEnd1Name, newEnd2Name)
+      ["Not yet implemented"]
+    end
+    
+  context FmmlxManipulator
     @Operation changeAssociationMultiplicity(association, newSourceMult, newTargetMult)
       let 
         package = association.owner;
