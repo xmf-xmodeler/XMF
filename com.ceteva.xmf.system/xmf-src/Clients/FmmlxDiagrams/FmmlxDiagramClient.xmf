@@ -1358,6 +1358,50 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
+    
+    @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), assocName, name)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      then
+        problems = m.changeAssociationAccessName(a, null, name)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+
+    @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), assocName, name)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      then
+        problems = m.changeAssociationAccessName(a, name, null)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+
+    @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), assocName, level)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      then
+        problems = m.changeAssociationLevel(a, null, level)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+
+    @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), assocName, level)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      then
+        problems = m.changeAssociationLevel(a, level, null)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
 
     //////////////////////////////////////////////////////////
 
@@ -1819,22 +1863,6 @@ context FmmlxDiagrams
 
     @Operation respondNotYetImplemented(name: String, requestID : Seq(Integer))
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["The feature \"" + name + "\" is temporarily unavailable. Please try again in later version."]])
-    end
-
-    @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), associationID, name)
-      self.respondNotYetImplemented("changeAssociationStart2EndAccessName", self.vector2Seq(requestID))
-    end
-
-    @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), associationID, name)
-      self.respondNotYetImplemented("changeAssociationEnd2StartAccessName", self.vector2Seq(requestID))
-    end
-
-    @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), associationID, level)
-      self.respondNotYetImplemented("changeAssociationStart2EndLevel", self.vector2Seq(requestID))
-    end
-
-    @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), associationID,level)
-      self.respondNotYetImplemented("changeAssociationEnd2StartLevel", self.vector2Seq(requestID))
     end
 
     @Operation updateAssociationInstance(requestID : Seq(Integer), startObjectPath : String, endObjectPath : String)
@@ -2351,19 +2379,31 @@ context FmmlxDiagrams
                 then
                     let dialog = xmf.busy("Saving")
                     in
-                        project.savedBy := xmf.user();
-                        project.saveDate := xmf.date();
                         self.getCommunicator().saveXmlFile(file, package.toString())
-                    end;
-                    xmf.message(
-                        "Project " + project.name().toString() +
-                        " saved (xml format).\nProject saved in file " + file + " on " + project.saveDate + ".\n" +
-                        "Project created by " + project.creator + " on " + project.creationDate + ".\n" +
-                        "Project saved by " + project.savedBy + ".\n")
                     end
-                else
-                    xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
                 end
+            else
+                xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
+            end
+        end
+    end
+
+    @Operation isSaved(requestID : Seq(Integer), file:String)
+        let
+            package = self.getPackage(requestID)
+        then
+            project : XCore::Element= Projects::Project(package,"",null)
+        in
+            let
+                write = true
+            in
+                project.savedBy := xmf.user();
+                project.saveDate := xmf.date()
+            end;
+            xmf.message("Project " + project.name().toString() +
+                    " saved (xml format).\nProject saved in file " + file + " on " + project.saveDate + ".\n" +
+                    "Project created by " + project.creator + " on " + project.creationDate + ".\n" +
+                    "Project saved by " + project.savedBy + ".\n")
         end
     end
 
