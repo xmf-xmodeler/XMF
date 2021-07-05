@@ -55,21 +55,27 @@ context Root::FMML
     
     */
     
+    @Attribute cachedOpSendInstance : Operation end
+    @Attribute cachedOpAllAttributes : Operation end
+    
     /* This Operation should've been named send-TO-Instance. 
        It is invoked when an operation is invoked. 
        This operation tries to find out where the operation is defined.
     */
     @Operation sendInstance(element,message,args):XCore::Element
       if "sendInstance".equals(message.toString()) then 
-        FMML::MetaClass.getOperation("sendInstance").invoke(element,args)
+        if self.cachedOpSendInstance = null then self.cachedOpSendInstance := FMML::MetaClass.getOperation("sendInstance") end;
+        self.cachedOpSendInstance.invoke(element,args)
       elseif "allAttributes".equals(message.toString()) then 
-        FMML::MetaClass.getOperation("allAttributes").invoke(element,args)
+        if self.cachedOpAllAttributes = null then self.cachedOpAllAttributes := FMML::MetaClass.getOperation("allAttributes") end;
+        self.cachedOpAllAttributes.invoke(element,args)
       else
 //       ("[sendInstance] " + element.name + ":" + self.name + ": Operation "+message).println();
       let
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
-        ownOperations = self.allOperations()->asSeq; 
+//        ownOperations = self.allOperations()->asSeq; 
+        ownOperations = Kernel_operatorPrecedenceList(self)->asSeq; 
         allOperations = [];
         delToClassOps = [];
         found = false; op = null; foundDelToClass = false;
@@ -201,8 +207,20 @@ context Root::FMML
       let allA = attributes;
           allP = parents; // parents and classes
           result = {};
-          alreadyChecked = {}
-      in //("checking " + self.name + " for attributes").println();
+          alreadyChecked = {};
+          selfAllParents = null
+      in 
+          // caching selfAllParentsFirst:
+          let P = parents; allP = Seq{}
+          in @While not P->isEmpty do
+            let p = P->sel
+            in allP := Seq{p | allP->excluding(p)};
+              P := P->excluding(p)->union(p.parents)
+            end end;
+            selfAllParents := allP->reverse()->asSet
+          end;
+      
+         //("checking " + self.name + " for attributes").println();
          allP := allP->union({self.of()});
          @While not allP->isEmpty do
            //("allP:= " + allP).println();
@@ -210,7 +228,8 @@ context Root::FMML
            in alreadyChecked := alreadyChecked->union({p});
               //("  checking " + p.name + " for attributes").println();
               @For a2Bchecked in p.attributes do
-                if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
+                if a2Bchecked.isIntrinsic or selfAllParents.contains(p) then 
+//                    if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
                   allA := allA->union({a2Bchecked})
               end end;
               //allA := allA->union(p.attributes);
@@ -289,9 +308,14 @@ context Root::FMML
               end
             end
           end;
-          if (not currentClass.of() = null) andthen currentClass.of().isKindOf(FMML::MetaClass) then               // instantiation
-            if not alreadyChecked.contains(currentClass.of()) then
-              toBeChecked := toBeChecked + [currentClass.of()]
+          let OF = Kernel_of(currentClass) in
+            if (not OF = null) // instantiation
+              /*andthen OF.isKindOf(FMML::MetaClass) */
+              andthen OF <> Class
+            then                    
+              if not alreadyChecked.contains(OF) then
+                toBeChecked := toBeChecked + [OF]
+              end
             end
           end
         end; // while

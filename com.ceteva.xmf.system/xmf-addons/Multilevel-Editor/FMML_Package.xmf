@@ -71,6 +71,10 @@ context Root::Auxiliary
     
     @Operation pi() Complex(-1,0).argument() end
     
+    @Operation toParseableString():String 
+      "Auxiliary::Complex(" + self.real + ", " + self.imaginary + ")"
+    end
+    
   end
   
 context Root::Auxiliary
@@ -201,7 +205,7 @@ context Root::Auxiliary
         dateHelper = (xmf.javaClass("tool.helper.XDate"))()
       then
         year   = dateHelper.getYear(self.time);
-        month  = dateHelper.getMonth(self.time);
+        month  = dateHelper.getMonth(self.time) + 1;
         day    = dateHelper.getDay(self.time);
         hour   = dateHelper.getHour(self.time);
         minute = dateHelper.getMinute(self.time);
@@ -223,6 +227,16 @@ context Root::Auxiliary
       in 
         dateClass().age(self.time)
       end
+    end
+  end
+  
+context Root
+  @Operation testPath(max, o)
+    let s = 0 in
+      @For i in 0.to(max) do
+        s := s + o.pathSeq().size()
+      end;
+      s
     end
   end
   

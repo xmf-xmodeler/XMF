@@ -10,6 +10,7 @@ context FmmlxDiagrams
     @Attribute communicator : Element end
     @Attribute log : Seq(Element) = [] end
     @Attribute diagrams : Table = Table(10) end
+    @Attribute cachedPaths : Table = null end
     
     @Constructor(name)
       ("invoking FmmlxDiagramClient: " +  name).println();
@@ -228,9 +229,11 @@ context FmmlxDiagrams
 
     @Operation getAllObjects(requestID : Seq(Integer))
         let
-          result = []
+          result = [];
+          classes = self.getPackage(requestID).classes
         in
-    	  @For c in self.getPackage(requestID).classes do
+          self.cachedPaths := Table(classes.size());
+    	  @For c in classes do
     	    if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.level > -1 // TODO: find out how a null can possibly end up there
     	    then
     	      let
@@ -247,8 +250,8 @@ context FmmlxDiagrams
     	        mappingInfo.lastKnownDiagramY, // 7
     	        mappingInfo.hidden, // 8: visibility in this diagram
     	        					-1, // 9: reserved for delegation
-    	        c.path(), // 10: ownPath
-    	        c.of().path(), // 11: ofPath
+    	        self.getCachedPath(c), // 10: ownPath
+    	        self.getCachedPath(c.of()), // 11: ofPath
     	        self.getParentsPathsList(requestID, c)// 12: parentsPaths
     	        ]])
     	      end
@@ -421,9 +424,10 @@ context FmmlxDiagrams
 
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
-          result = []
+          result = [];
+          classes = self.getPackage(requestID).classes->select(x | x.level > 0)
         in
-          @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+          @For c in classes do
             let
               resultOwn   = [];
               resultOther = []
@@ -436,7 +440,7 @@ context FmmlxDiagrams
                       a.type.name.toString(),
                       if a.isIntrinsic then a.instLevel else -1 end,
                       FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                      c.path()
+                      self.getCachedPath(c)
                       ]])
                 end; // for own
                 @For a in (c.allAttributes() - c.attributes) do
@@ -446,7 +450,7 @@ context FmmlxDiagrams
                       a.type.name.toString(),
                       if a.isIntrinsic then a.instLevel else -1 end,
                       FmmlxManipulator::multiplicity2ValueList(a.mult()),
-                      a.owner.path()
+                      self.getCachedPath(a.owner)
                       ]])
                   end
                 end; // for other
@@ -461,73 +465,72 @@ context FmmlxDiagrams
     
     @Operation getAllOperations(requestID : Seq(Integer))
       let
-        result = []
+        result = null;
+        classes = self.getPackage(requestID).classes->select(x | x.level > 0).asSeq()
+        ; O = 0 ; S = ""
       in
-        @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+        // done in allObjects already: self.cachedPaths := Table(classes.size());
+      
+        result := Vector(classes.size());
+        @For classCount in 0.to(classes.size()-1) do
           let 
-            resultLocal = []
+//           resultLocal = null;
+            c = classes.at(classCount)
           in            
             if c <> null 
               andthen c.isKindOf(FMML::MetaClass)
             then
-              @For o in c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
-                let
-                  paramNames = o.paramNames();
-                  paramTypesRaw = o.paramTypes();
-                  paramTypes = []
-                in
-                  @For type in paramTypesRaw do
-                    paramTypes := paramTypes.append([self.getPathAsString(type)])
-                  end;
-                  resultLocal := resultLocal.append([[
-                  o.name.toString(),
-                  paramNames,
-                  paramTypes,
-                  o.instLevel,
-                  self.getReturnPathAsString(o),
-                  o.source(),
-                  o.owner.path(),
-                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                  [0,1,false,true], // to-do: multiplicity
-                  self.isOperationMonitored(o),
-                  let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
-                  ]])
-                end
-              end end
-            end;
-            
-            if c <> null 
-              andthen (not c.isKindOf(FMML::MetaClass))
-            then
-              @For o in c.operations do if (not o.owner = null) then
-                let
-                  paramNames = o.paramNames();
-                  paramTypesRaw = o.paramTypes();
-                  paramTypes = []
-                in
-                  @For type in paramTypesRaw do
-                    paramTypes := paramTypes.append([self.getPathAsString(type)])
-                  end;
-                  resultLocal := resultLocal.append([[
-                  o.name.toString(),
-                  paramNames,
-                  paramTypes,
-                  -1,
-                  self.getReturnPathAsString(o),
-                  o.source(),
-                  o.owner.path(),
-                  //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
-                  [0,1,false,true], // to-do: multiplicity
-                  self.isOperationMonitored(o),
-                  false
-                  ]])
-                end
-              end end
-            end; // if <> null
-            result := result + [[c.path(), resultLocal]]
+              let
+                allOps = c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
+              then
+                allOpSize = allOps.size()
+              then
+                resultLocal = Vector(allOpSize)
+              in
+                @For oCount in 0.to(allOpSize-1) do //c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+                  let
+                    o = allOps.at(oCount)
+                  then
+                    paramNames = o.paramNames();
+                    paramTypesRaw = o.paramTypes()
+                  then
+                    paramSize = paramTypesRaw.size()
+                  then
+                    paramTypes = Vector(paramSize);
+                    ownerPath = ""
+                  in
+                    //@For x in 0.to(0) do ownerPath :=  end;
+                    ownerPath := self.getCachedPath(o.owner);                   
+                    
+                    //@For type in paramTypesRaw do
+                    //  paramTypes := paramTypes.append([self.getPathAsString(type)])
+                    //end;
+                    @For i in 0.to(paramTypesRaw.size()-1) do
+                      paramTypes.put(i, self.getPathAsString(paramTypesRaw.at(i)))
+                    end;
+                    resultLocal.put(oCount, [
+                      o.name.toString(),
+                      paramNames,
+                      paramTypes.asSeq(),
+                      o.instLevel,
+                      self.getReturnPathAsString(o),
+                      o.source(),
+                      ownerPath,
+                    //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
+                      [0,1,false,true], // to-do: multiplicity
+                      self.isOperationMonitored(o),
+                      let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
+                    ])
+                  end // let
+                end; // for
+                //null
+                result.put(classCount, [c.path(), resultLocal.asSeq()])
+              end // let
+            end // if 
+
           end // let
         end; // for
-  	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+  	    self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result.asSeq()])
       end // let
     end
     
@@ -1199,9 +1202,8 @@ context FmmlxDiagrams
     
     @Operation getParentsPathsList(requestID, c : FMML::MetaClass) // for local use
       let list = [] in
-        @For p in c.parents do
-          //if p.isKindOf(FMML::MetaClass) then 
-            list := list.append([p.path()]) //end
+        @For parent in c.parents do 
+            list := list.append([self.getCachedPath(parent)]) //end
         end; // for
         list
       end// let
@@ -1228,7 +1230,6 @@ context FmmlxDiagrams
       targetVisibleFromSource : Boolean,
 	  isSymmetric : Boolean,
 	  isTransitive : Boolean):XCore::Element
-
 
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator()
@@ -2396,10 +2397,14 @@ context FmmlxDiagrams
     end
 
     @Operation loaded(package):Boolean
-          package <> null
+      package <> null
+    end
+        
+    @Operation getCachedPath(o : Object) 
+      if self.cachedPaths.hasKey(o) then self.cachedPaths.get(o) else let p = o.path() in self.cachedPaths.put(o, p); p end end
     end
     
-    @Operation toParseableString(o:Element, p: package):String 
+    @Operation toParseableString(o:Element, p: Package):String 
       if o = null orelse o.isKindOf(Integer) orelse o.isKindOf(Boolean)
         then o.toString()
       elseif o.isKindOf(Float) 
