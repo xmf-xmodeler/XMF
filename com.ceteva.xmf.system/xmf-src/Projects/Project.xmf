@@ -249,10 +249,7 @@ context Projects
     end
 
     @Operation saveXml(extraInfo)
-        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().saveFile(self.package.toString());
-        xmf.message(
-                                "Project " + self.name().toString() +
-                                " saved (xml format).")
+        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().saveFile(self.package.toString())
     end
 
     @Operation saveAsXml(extraInfo)

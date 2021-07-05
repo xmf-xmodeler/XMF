@@ -2380,19 +2380,31 @@ context FmmlxDiagrams
                 then
                     let dialog = xmf.busy("Saving")
                     in
-                        project.savedBy := xmf.user();
-                        project.saveDate := xmf.date();
                         self.getCommunicator().saveXmlFile(file, package.toString())
-                    end;
-                    xmf.message(
-                        "Project " + project.name().toString() +
-                        " saved (xml format).\nProject saved in file " + file + " on " + project.saveDate + ".\n" +
-                        "Project created by " + project.creator + " on " + project.creationDate + ".\n" +
-                        "Project saved by " + project.savedBy + ".\n")
                     end
-                else
-                    xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
                 end
+            else
+                xmf.message("File " + file + " exists and is read only.  Cannot save to this file.")
+            end
+        end
+    end
+
+    @Operation isSaved(requestID : Seq(Integer), file:String)
+        let
+            package = self.getPackage(requestID)
+        then
+            project : XCore::Element= Projects::Project(package,"",null)
+        in
+            let
+                write = true
+            in
+                project.savedBy := xmf.user();
+                project.saveDate := xmf.date()
+            end;
+            xmf.message("Project " + project.name().toString() +
+                    " saved (xml format).\nProject saved in file " + file + " on " + project.saveDate + ".\n" +
+                    "Project created by " + project.creator + " on " + project.creationDate + ".\n" +
+                    "Project saved by " + project.savedBy + ".\n")
         end
     end
 
