@@ -31,17 +31,19 @@ import FmmlxDiagrams;
   
   */
   context FmmlxManipulator
-    @Operation addInstance(
+    @Operation addInstances(
       package : Package, 
       ofClass : MetaClass, 
       name, 
       parents, 
       abstract : Boolean, 
-      slotValueList: Seq(Seq(String))):Object
+      slotValueList: Seq(Seq(String)),
+      number: Integer):Object
       
-      self.addInstance(package, ofPackage, name, [], false, [])
-      
-  end
+      @For i in 1.to(number) do 
+        self.addInstance(package, ofClass, name + i, parents, false, slotValueList)
+      end
+    end
   
   context FmmlxManipulator
     @Operation addInstance(

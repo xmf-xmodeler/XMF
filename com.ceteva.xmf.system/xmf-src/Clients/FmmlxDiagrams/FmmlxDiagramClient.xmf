@@ -432,7 +432,7 @@ context FmmlxDiagrams
               resultOwn   = [];
               resultOther = []
             in
-              if c <> null
+              if c <> null andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
               then
                 @For a in c.attributes do
                   resultOwn   :=   resultOwn.append([[
@@ -479,6 +479,7 @@ context FmmlxDiagrams
           in            
             if c <> null 
               andthen c.isKindOf(FMML::MetaClass)
+              andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
             then
               let
                 allOps = c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
@@ -700,7 +701,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) then
+        @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden then
 		  @For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
