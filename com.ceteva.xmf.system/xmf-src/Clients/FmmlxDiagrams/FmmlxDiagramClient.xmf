@@ -136,7 +136,7 @@ context FmmlxDiagrams
         newID = 0
       in
         @While diagrams.hasKey(newID) do newID := newID + 1 end;
-        diagram.diagramName := ("Diagram " + package.name + " (id " + newID + ")");
+        diagram.diagramName := name;//("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
         diagram.file := file;
         diagram.diagramType := type;
@@ -432,7 +432,7 @@ context FmmlxDiagrams
               resultOwn   = [];
               resultOther = []
             in
-              if c <> null andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
+              if c <> null // andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
               then
                 @For a in c.attributes do
                   resultOwn   :=   resultOwn.append([[
@@ -479,7 +479,7 @@ context FmmlxDiagrams
           in            
             if c <> null 
               andthen c.isKindOf(FMML::MetaClass)
-              andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
+              // andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
             then
               let
                 allOps = c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
@@ -701,7 +701,8 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden then
+        @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
+          then
 		  @For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
@@ -824,7 +825,7 @@ context FmmlxDiagrams
 
     ////////////////// Class Manipulations ///////////////////
 
-    @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y)
+    @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y, hidden)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         parentsList = self.getParentsList(requestID, parents);
@@ -840,6 +841,7 @@ context FmmlxDiagrams
           in
             mappingInfo.lastKnownDiagramX := x;
             mappingInfo.lastKnownDiagramY := y;
+            mappingInfo.hidden := hidden;
             self.log := self.log + [["addMetaClass", 
               ["package", newClass.owner.path()], 
               ["name",name], 
@@ -859,6 +861,7 @@ context FmmlxDiagrams
             parents,
             abstract,
             x, y,
+            hidden,
             slotValueList: Seq(Seq(String)) )
         try
           let
@@ -887,6 +890,7 @@ context FmmlxDiagrams
               in
                 mappingInfo.lastKnownDiagramX := x;
                 mappingInfo.lastKnownDiagramY := y;
+                mappingInfo.hidden := hidden;
                 self.log := self.log + [["addInstance", ["package", newInstance.owner.path()], ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(requestID, parentsList)] , ["abstract",abstract+""]]];
                 self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
               end
