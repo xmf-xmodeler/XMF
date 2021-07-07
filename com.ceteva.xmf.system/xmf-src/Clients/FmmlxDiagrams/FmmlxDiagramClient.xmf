@@ -64,23 +64,24 @@ context FmmlxDiagrams
     end    
     
     @Operation findDiagram(package,name)    
-      let
-        selectedNames = xmf.selects("Select Diagram",
-          "select existing diagram - or none for new", 
-          diagrams.values()->select(d | d.diagramType = FmmlxDiagramType::ClassDiagram).diagramName,
-          {},
-          null)
-      in
-        if selectedNames = -1 then selectedNames := [] end;
-        if
-          selectedNames.size() = 0
-        then
-          self.createNewDiagram(package,name, "", FmmlxDiagramType::ClassDiagram) // <-- create a new diagram (always a class diagram)
-        elseif
-          selectedNames.size() = 1
-        then // if one name supplied: find it!
+     // let
+     //   selectedNames = xmf.selects("Select Diagram",
+     //     "select existing diagram - or none for new", 
+     //     diagrams.values()->select(d | d.diagramType = FmmlxDiagramType::ClassDiagram).diagramName,
+     //     {},
+     //     null)
+     // in
+     // if selectedNames = -1 then selectedNames := [] end;
+     //   if
+     //     selectedNames.size() = 0
+     //   then
+     //     self.createNewDiagram(package,name, "", FmmlxDiagramType::ClassDiagram) // <-- create a new diagram (always a class diagram)
+     //   elseif
+     //     selectedNames.size() = 1
+     //   then // if one name supplied: find it!
           let
-            selectedName = selectedNames.at(0);
+     //       selectedName = selectedNames.at(0);
+     		selectedName = name;
             keys = self.diagrams.keys();
             key = null;
             keyCount = 0
@@ -99,8 +100,8 @@ context FmmlxDiagrams
             end
           end
         end
-      end
-    end
+  //    end
+  // end
 
     @Operation createDiagramFromJava(packagePath, diagramName, file, typeAsString)
       let
