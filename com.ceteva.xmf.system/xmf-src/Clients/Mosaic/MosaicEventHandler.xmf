@@ -17,6 +17,7 @@ context Mosaic
         "send"             do self.sendEvent(parameters)         end
         "getAllCategories" do self.getAllCategories()            end
         "getAllProjects"   do self.getAllProjects(parameters)    end
+        "getDiagrams"      do self.getDiagrams(parameters)       end
         "getProjectModels" do self.getProjectModels(parameters)  end
         "getModelDiagrams" do self.getModelDiagrams(parameters)  end
         "addCategory"      do self.addCategory(parameters)       end
@@ -208,7 +209,28 @@ context Mosaic
         self.owner().commandInterpreter().setAllProjects(paths)
       end
     end
- 
+    
+    @Operation getDiagrams(parameters)
+	  let 
+		result=[];
+		packagePath = parameters.at(0);
+		client = xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient) 
+	  then
+		diagrams = client.diagrams
+	  in
+	    @For key in diagrams.keys() do
+	      let
+	        diagram=diagrams.get(key)
+	      in
+	      	if diagram.package.path()=packagePath then
+	      	  result:=result+[[key,diagram.diagramName.toString()]]
+	        end	  
+	      end  
+	    end;
+	    self.owner().commandInterpreter().setDiagrams(result)	  
+	  end	      			
+	end
+	 
     @Operation getProjectModels(parameters) 
       let // 1
         projectPath = parameters.at(0);

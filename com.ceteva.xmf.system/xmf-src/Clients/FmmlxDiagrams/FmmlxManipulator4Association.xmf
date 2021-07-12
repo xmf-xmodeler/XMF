@@ -147,7 +147,18 @@ import FmmlxDiagrams;
      
   context FmmlxManipulator
     @Operation changeAssociationAccessName(association, newEnd1Name, newEnd2Name)
-      ["Not yet implemented"]
+      if
+             (newEnd1Name <> null orelse newEnd1Name.toString() = association.end1.name)
+             andthen self.checkAddAttribute(association.end2.type, newEnd1Name, association.end1.level, association.end1.type, null)
+      then
+        ["source name duplicate"]
+      elseif (newEnd2Name <> null orelse newEnd2Name.toString() = association.end2.name)
+             andthen self.checkAddAttribute(association.end1.type, newEnd2Name, association.end2.level, association.end2.type, null)
+      then
+        ["target name duplicate"]
+      else
+        ["All checks have passed but the change operation has not been implemented yet"]
+      end
     end
     
   context FmmlxManipulator
