@@ -161,12 +161,12 @@ try
           end;
           
           // create a project browser
-
-          let client = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
-              userProjectManager = xmf.projectManager("MyProjects")
-          in client.add(userProjectManager);
-             client.setClosable(userProjectManager,false)
-          end;
+          
+//          let client = xmf.findClient(Clients::ModelBrowserXCore::MappingClient);
+//              userProjectManager = xmf.projectManager("MyProjects")
+//          in client.add(userProjectManager);
+//             client.setClosable(userProjectManager,false)
+//          end;
           
           // Do this here so that we can give the user a warning if anything goes wrong.
           // Use xmf.message to inform the user of any problems with the init file. Client
