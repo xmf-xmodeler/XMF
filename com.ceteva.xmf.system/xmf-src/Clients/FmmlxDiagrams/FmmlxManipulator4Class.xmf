@@ -119,7 +119,7 @@ import FmmlxDiagrams;
 
 	     @For p in obj.parents do
 	       if p.isKindOf(FMML::MetaClass) then
-	         p.children := p.children + {obj}
+	         p.subclasses := p.subclasses + {obj}
 	       end
 	     end;
 
