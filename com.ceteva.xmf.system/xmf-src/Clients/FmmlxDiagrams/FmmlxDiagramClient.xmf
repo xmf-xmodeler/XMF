@@ -2200,7 +2200,7 @@ context FmmlxDiagrams
            @For assoc in associations.asSeq() do
              log := log + [["addAssociation", ["package", assoc.end1.type.owner.path()],
                                      ["classSource", assoc.end1.type.path()] ,["classTarget", assoc.end2.type.path()] ,
-                                     ["accessSourceFromTargetName", assoc.end1.name.toString()] , ["accessTargetFromSourceName", assoc.end2.name.toString()] ,
+                                     ["accessSourceFromTargetName", assoc.end2.name.toString()] , ["accessTargetFromSourceName", assoc.end1.name.toString()] ,
                                      ["fwName", assoc.name.toString()+""],
                                      ["reverseName", "-1"],
                                      ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] ,

@@ -63,7 +63,7 @@ context NamedElement
   // case they act as the root.
   
   @Operation pathSeq():Seq(String)
-    let owner = self.owner() in
+    let owner = self.owner in
       if owner = self or owner = null
       then Seq{self.name.toString()}
       else owner.pathSeq() + Seq{self.name.toString()}
