@@ -159,7 +159,8 @@ import FmmlxDiagrams;
         elseif instLevel >= class.level then ["Instantiation level " + instLevel + " not legal for a class on level " + class.level + "."]
         else
           con.body.instLevel   := instLevel;
-          con.reason.instLevel := instLevel
+          con.reason.instLevel := instLevel; []
+          
         end
       end
     end
