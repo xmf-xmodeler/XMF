@@ -132,7 +132,7 @@ import FmmlxDiagrams;
       newNameSymbol : Symbol)
       
       let
-        con = if class = null then null else class.getConstraint(name) end
+        con = if class = null then null else class.getConstraint(oldName) end
       in
         if class = null then ["Class not found. (Should have been detected earlier.)"]
         elseif con = null then ["Constraint not found"]
