@@ -946,6 +946,10 @@ context FmmlxDiagrams
               then
                 ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
                 parentsList = self.getParentsList(requestID, parents)
+              then
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+              then
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
               in
                 mappingInfo.lastKnownDiagramX := x;
                 mappingInfo.lastKnownDiagramY := y;
@@ -1385,6 +1389,50 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
   	end
+
+  	@Operation mergeAssociation(requestID : Seq(Integer),
+          classSourceName : String,
+          classTargetName : String,
+          accessSourceFromTargetName : String,
+          accessTargetFromSourceName : String,
+          fwName : String,
+          reverseName : String,
+          multTargetToSourceS : String,
+          multSourceToTargetS : String,
+          instLevelSource : Integer,
+          instLevelTarget : Integer,
+          sourceVisibleFromTarget : Boolean,
+          targetVisibleFromSource : Boolean,
+    	  isSymmetric : Boolean,
+    	  isTransitive : Boolean):XCore::Element
+      	  let
+      	    m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            classSource = m.evalString(classSourceName, self.getPackage(requestID)).at(0);//if package.hasElement(classSourceName) then package.getElement(classSourceName) else null end;
+            classTarget = m.evalString(classTargetName, self.getPackage(requestID)).at(0)//if package.hasElement(classTargetName) then package.getElement(classTargetName) else null end
+          then
+            multTargetToSource = m.valueList2Multiplicity(self.vector2Seq(multTargetToSourceS));
+            multSourceToTarget = m.valueList2Multiplicity(self.vector2Seq(multSourceToTargetS))
+          then
+            problems = [] /*m.checkAddAssociation(self.getPackage(requestID),
+      	      classSource, classTarget,
+      	      accessSourceFromTargetName, accessTargetFromSourceName,
+      	      fwName, reverseName,
+      	      multTargetToSource, multSourceToTarget,
+      	      instLevelSource, instLevelTarget) */
+          in
+            if problems.isEmpty() then
+      	      problems := m.addAssociation(self.getPackage(requestID),
+      	        classSource, classTarget,
+      	        accessSourceFromTargetName, accessTargetFromSourceName,
+      	        fwName, reverseName,
+      	        multTargetToSource, multSourceToTarget,
+      	        instLevelSource, instLevelTarget,
+      	        sourceVisibleFromTarget, targetVisibleFromSource,
+      	        isSymmetric, isTransitive)
+       	    end
+          end
+    end
 
     @Operation removeAssociation(
       requestID  : Seq(Integer),
