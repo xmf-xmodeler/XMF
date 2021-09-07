@@ -946,14 +946,20 @@ context FmmlxDiagrams
               then
                 ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
                 parentsList = self.getParentsList(requestID, parents)
-              then
-                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
-              then
-                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
               in
-                mappingInfo.lastKnownDiagramX := x;
-                mappingInfo.lastKnownDiagramY := y;
-                mappingInfo.hidden := hidden
+                if
+                  not self.getPackage(requestID).hasElement(name)
+                then
+                  let
+                    newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+                  then
+                    mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
+                  in
+                    mappingInfo.lastKnownDiagramX := x;
+                    mappingInfo.lastKnownDiagramY := y;
+                    mappingInfo.hidden := hidden
+                  end
+		        end
               end
             catch (exception)
               exception.message.println()
@@ -1588,6 +1594,25 @@ context FmmlxDiagrams
   	    end;
   	    self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
   	  end
+    end
+
+    @Operation mergeAssociationInstance(requestID : Seq(Integer),
+          obj1Name  : String,
+          obj2Name  : String,
+          assocName : String)
+
+      	  let
+      	    m = FmmlxDiagrams::FmmlxManipulator();
+      	    obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
+      	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end;
+      	    association = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      	  then
+            problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
+      	  in
+      	    if problems.isEmpty() then
+      	      self.log := self.log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+      	    end
+      	  end
     end
 
     @Operation removeAssociationInstance(
@@ -2386,7 +2411,7 @@ context FmmlxDiagrams
                                      ["fwName", assoc.name.toString()+""],
                                      ["reverseName", "-1"],
                                      ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] ,
-                                     ["instLevelSource", assoc.end1.instLevel+""] , ["instLevelTarget", assoc.end2.instLevel+""] ,
+                                     ["instLevelSource", assoc.end2.instLevel+""] , ["instLevelTarget", assoc.end1.instLevel+""] ,
                                      ["sourceVisibleFromTarget", assoc.end1.visible+""] , ["targetVisibleFromSource", assoc.end2.visible+""] ,
                                      ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
            end;
