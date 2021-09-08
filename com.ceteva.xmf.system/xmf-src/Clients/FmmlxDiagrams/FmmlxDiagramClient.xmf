@@ -1660,6 +1660,27 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+
+    @Operation mergeDelegation(
+          requestID   : Seq(Integer),
+          delegateFromName  : String,
+          delegateToName    : String,
+          delegateToLevel   : Integer)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            delegateFrom = if self.getPackage(requestID).hasElement(delegateFromName) then self.getPackage(requestID).getElement(delegateFromName) else null end;
+            delegateTo = if self.getPackage(requestID).hasElement(delegateToName) then self.getPackage(requestID).getElement(delegateToName) else null end
+          then
+            problems = m.setDelegation(delegateFrom, delegateTo, delegateToLevel)
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addDelegation", ["package", delegateFrom.owner.path()],
+                  ["delegateFrom",  delegateFrom.path()],
+                  ["delegateTo",  delegateTo.path()],
+                  ["delegateToLevel",  delegateToLevel+""]]]
+            end
+          end
+        end
     
     @Operation removeDelegation(
       requestID   : Seq(Integer),
@@ -1696,6 +1717,23 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+
+    @Operation mergeRoleFiller(
+          requestID   : Seq(Integer),
+          roleName  : String,
+          roleFillerName    : String)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            role = if self.getPackage(requestID).hasElement(roleName) then self.getPackage(requestID).getElement(roleName) else null end;
+            roleFiller = if self.getPackage(requestID).hasElement(roleFillerName) then self.getPackage(requestID).getElement(roleFillerName) else null end
+          then
+            problems = m.setRoleFiller(role, roleFiller)
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["setRoleFiller", ["package", role.owner.path()], ["role", role.path()], ["roleFiller", roleFiller.path()]]]
+            end
+          end
+        end
     
     @Operation removeRoleFiller(
       requestID   : Seq(Integer),
@@ -1918,6 +1956,33 @@ context FmmlxDiagrams
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
+    end
+
+    @Operation mergeConstraint(
+          requestID  : Seq(Integer),
+          classPath  : String,
+          constName  : String,
+          instLevel  : Integer,
+          body       : String,
+          reason     : String)
+
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            class = m.evalString(classPath, self.getPackage(requestID)).at(0);
+            constSymbol = constName.asSymbol()
+          then
+            problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel) else ["Class "+classPath+" not found."] end
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addConstraint", ["package", class.owner.path()],
+                ["class", class.path()],
+                ["constName", constName],
+                ["instLevel", instLevel+""],
+                ["body", body],
+                ["reason", reason]]]
+            end
+          end
     end
     
     @Operation changeConstraintName(
