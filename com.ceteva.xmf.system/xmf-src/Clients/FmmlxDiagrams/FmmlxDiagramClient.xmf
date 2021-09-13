@@ -2437,12 +2437,30 @@ context FmmlxDiagrams
                                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
              end;
              @For op in class.operations.asSeq() do
-               if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
-                 log := log + [["addOperation", ["package", class.owner.path()],
-                                                ["class", class.path()],
-                                                ["level", op.instLevel+""],
-                                                ["body", op.codeBox.source()]]]
-               end
+             let
+               paramTypesRaw = op.paramTypes()
+             then
+               paramSize = paramTypesRaw.size()
+             then
+               paramTypes = Vector(paramSize)
+             in
+                @For i in 0.to(paramTypesRaw.size()-1) do
+                  paramTypes.put(i, self.getPathAsString(paramTypesRaw.at(i)))
+                end;
+                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
+                                  log := log + [["addOperation", ["package", class.owner.path()],
+                                                               ["class", class.path()],
+                                                               ["name", op.name.toString()],
+                                                               ["paramNames", self.getListFromSeq(requestID, op.paramNames())],
+                                                               ["paramTypes", self.getListFromSeq(requestID, paramTypes.asSeq())],
+                                                               ["type", self.getReturnPathAsString(op)],
+                                                               ["level", op.instLevel+""],
+                                                               ["monitored", self.isOperationMonitored(op).toString()],
+                                                               ["body", op.codeBox.source()]]]
+
+                end
+             end
+
              end;
              @For constraint in class.constraints.asSeq() do
                log := log + [["addConstraint", ["package", class.owner.path()],
@@ -2709,6 +2727,15 @@ context FmmlxDiagrams
         ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();
         "null"
       end
+    end
+
+    @Operation getListFromSeq(requestID : Seq(Integer), items) // for local use
+          let list = "" in
+            @For item in items do
+              if not item = null then list := list + item + "," end
+            end; // for
+            list.subString(0, list.size()-1)
+          end// let
     end
     
 end
