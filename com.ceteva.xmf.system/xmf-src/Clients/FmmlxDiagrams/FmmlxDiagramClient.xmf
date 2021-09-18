@@ -1290,6 +1290,39 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation mergeSlotValue(requestID : Seq(Integer), className, slotName, valueToBeParsed)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            obj = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
+            error = null
+          then
+            class = obj.of();
+            foundAtt = m.findAttributeForSlot(obj, slotName)
+          in
+            if
+              foundAtt <> null
+            then
+              let
+                parseResult = m.evalString(valueToBeParsed, self.getPackage(requestID))
+              in
+                if parseResult.at(1) = null then
+                  error := m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.getPackage(requestID))
+                else
+                  error := parseResult.at(1) // error as message or as return value? maybe try exceptions...
+                end
+              end
+
+            else
+              error := "slot " + slotName + " not found in " + className
+            end;
+    	  self.log := self.log + [["changeSlotValue",
+                                      ["package", class.owner.path()],
+                                      ["class", obj.path()],
+                                      ["slotName", slotName],
+                                      ["valueToBeParsed", valueToBeParsed]]]
+          end
+    end
+
     //////////////// Local Operations ///////////////////
 
     @Operation vector2Seq(vec) // for local use
