@@ -1871,6 +1871,27 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation mergeOperation(
+          requestID  : Seq(Integer),
+          className  : String,
+          level      : Integer,
+          body       : String)
+
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+          then
+            problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addOperation2", ["package", class.owner.path()],
+                ["class", class.path()],
+                ["level", level+""],
+                ["body", body]]]
+            end
+          end
+        end
+
     @Operation removeOperation(
       requestID  : Seq(Integer),
       className    : String,
