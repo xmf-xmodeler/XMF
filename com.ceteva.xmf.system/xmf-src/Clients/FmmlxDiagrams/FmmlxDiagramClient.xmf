@@ -9,6 +9,7 @@ context FmmlxDiagrams
 
     @Attribute communicator : Element end
     @Attribute log : Seq(Element) = [] end
+    @Attribute errorLog : Seq(Element) = [] end
     @Attribute diagrams : Table = Table(10) end
     @Attribute cachedPaths : Table = null end
     
@@ -855,6 +856,34 @@ context FmmlxDiagrams
       end  
     end
 
+    @Operation mergeMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y, hidden)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            parentsList = self.getParentsList(requestID, parents);
+            problems = []
+          in
+            problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
+            problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
+            if problems.isEmpty() then
+              let
+                newClass = m.addMetaClass(self.getPackage(requestID), name, level, parentsList, abstract)
+              then
+                mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass)
+              in
+                mappingInfo.lastKnownDiagramX := x;
+                mappingInfo.lastKnownDiagramY := y;
+                mappingInfo.hidden := hidden;
+                self.log := self.log + [["addMetaClass",
+                  ["package", newClass.owner.path()],
+                  ["name",name],
+                  ["level",level+""],
+                  ["parents",self.getParentsPaths(requestID, parentsList)],
+                  ["abstract",abstract+""]]]
+              end
+            end
+          end
+    end
+
     @Operation addInstance(
             requestID : Seq(Integer),
             ofName,
@@ -900,6 +929,41 @@ context FmmlxDiagrams
         catch (exception)
           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), [exception.message]])
         end
+    end
+
+    @Operation mergeInstance(
+                requestID : Seq(Integer),
+                ofName,
+                name,
+                parents,
+                abstract,
+                x, y,
+                hidden,
+                slotValueList: Seq(Seq(String)) )
+            try
+              let
+                m = FmmlxDiagrams::FmmlxManipulator()
+              then
+                ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
+                parentsList = self.getParentsList(requestID, parents)
+              in
+                if
+                  not self.getPackage(requestID).hasElement(name)
+                then
+                  let
+                    newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+                  then
+                    mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
+                  in
+                    mappingInfo.lastKnownDiagramX := x;
+                    mappingInfo.lastKnownDiagramY := y;
+                    mappingInfo.hidden := hidden
+                  end
+		        end
+              end
+            catch (exception)
+              exception.message.println()
+            end
     end
 
     @Operation removeClass(requestID : Seq(Integer), className, strategy)
@@ -1016,6 +1080,39 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation mergeParent(requestID : Seq(Integer), className, oldList, newList)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            oldSet = self.vector2Seq(oldList).asSet();
+            newSet = self.vector2Seq(newList).asSet();
+            problems = [];
+            class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+          then
+            oldParentList = class.parents->select(c | c.owner = class.owner); // for Log
+            addSet = newSet - oldSet;
+            removeSet = oldSet - newSet
+          in
+              @For parentName in addSet do
+                let
+                  pr = m.evalString(parentName, self.getPackage(requestID))
+                then
+                  parentToBeAdded = if pr.at(1) = null then pr.at(0) else null end
+                in
+                  problems := problems + if parentToBeAdded = null then ["Cannot find new parent " + parentName] else m.addParent(class, parentToBeAdded) end
+                end
+              end;
+              @For parentName in removeSet do
+                let
+                  pr = m.evalString(parentName, self.getPackage(requestID))
+                then
+                  parentToBeRemoved = if pr.at(1) = null then pr.at(0) else null end
+                in
+                  problems := problems + if parentToBeRemoved = null then ["Cannot find old parent " + parentName] else m.removeParent(class, parentToBeRemoved) end
+                end
+              end
+          end
+    end
+
     //////////////////////// Attribute Manipulations /////////////////////
 
     @Operation addAttribute(requestID : Seq(Integer), className, name, level, typeName, multiplicityV)
@@ -1049,6 +1146,29 @@ context FmmlxDiagrams
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end // in
+    end
+
+    @Operation mergeAttribute(requestID : Seq(Integer), className, name, level, typeName, multiplicityV)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
+    //        class = self.getMapping(requestID).getMapping(classId).object;
+            type = m.getTypeForName(typeName, self.getPackage(requestID));
+            multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
+          then
+            problems = if class <> null then m.checkAddAttribute(class, name, level, typeName, null) else ["Class not found"] end
+          in
+            if
+              problems.isEmpty()
+            then
+              problems := try
+                m.addAttribute(class, name, level, type, multiplicity); []
+              catch(e)
+                [("addAttribute failed during transaction: " + e.message)]
+              end // try
+            end
+          end // in
     end
 
     @Operation changeAttributeName(requestID : Seq(Integer), className, oldName, newName)
@@ -1170,6 +1290,39 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation mergeSlotValue(requestID : Seq(Integer), className, slotName, valueToBeParsed)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            obj = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
+            error = null
+          then
+            class = obj.of();
+            foundAtt = m.findAttributeForSlot(obj, slotName)
+          in
+            if
+              foundAtt <> null
+            then
+              let
+                parseResult = m.evalString(valueToBeParsed, self.getPackage(requestID))
+              in
+                if parseResult.at(1) = null then
+                  error := m.changeSlotValue(obj, slotName, parseResult.at(0), foundAtt.type, self.getPackage(requestID))
+                else
+                  error := parseResult.at(1) // error as message or as return value? maybe try exceptions...
+                end
+              end
+
+            else
+              error := "slot " + slotName + " not found in " + className
+            end;
+    	  self.log := self.log + [["changeSlotValue",
+                                      ["package", class.owner.path()],
+                                      ["class", obj.path()],
+                                      ["slotName", slotName],
+                                      ["valueToBeParsed", valueToBeParsed]]]
+          end
+    end
+
     //////////////// Local Operations ///////////////////
 
     @Operation vector2Seq(vec) // for local use
@@ -1275,6 +1428,50 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
   	end
+
+  	@Operation mergeAssociation(requestID : Seq(Integer),
+          classSourceName : String,
+          classTargetName : String,
+          accessSourceFromTargetName : String,
+          accessTargetFromSourceName : String,
+          fwName : String,
+          reverseName : String,
+          multTargetToSourceS : String,
+          multSourceToTargetS : String,
+          instLevelSource : Integer,
+          instLevelTarget : Integer,
+          sourceVisibleFromTarget : Boolean,
+          targetVisibleFromSource : Boolean,
+    	  isSymmetric : Boolean,
+    	  isTransitive : Boolean):XCore::Element
+      	  let
+      	    m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            classSource = m.evalString(classSourceName, self.getPackage(requestID)).at(0);//if package.hasElement(classSourceName) then package.getElement(classSourceName) else null end;
+            classTarget = m.evalString(classTargetName, self.getPackage(requestID)).at(0)//if package.hasElement(classTargetName) then package.getElement(classTargetName) else null end
+          then
+            multTargetToSource = m.valueList2Multiplicity(self.vector2Seq(multTargetToSourceS));
+            multSourceToTarget = m.valueList2Multiplicity(self.vector2Seq(multSourceToTargetS))
+          then
+            problems = [] /*m.checkAddAssociation(self.getPackage(requestID),
+      	      classSource, classTarget,
+      	      accessSourceFromTargetName, accessTargetFromSourceName,
+      	      fwName, reverseName,
+      	      multTargetToSource, multSourceToTarget,
+      	      instLevelSource, instLevelTarget) */
+          in
+            if problems.isEmpty() then
+      	      problems := m.addAssociation(self.getPackage(requestID),
+      	        classSource, classTarget,
+      	        accessSourceFromTargetName, accessTargetFromSourceName,
+      	        fwName, reverseName,
+      	        multTargetToSource, multSourceToTarget,
+      	        instLevelSource, instLevelTarget,
+      	        sourceVisibleFromTarget, targetVisibleFromSource,
+      	        isSymmetric, isTransitive)
+       	    end
+          end
+    end
 
     @Operation removeAssociation(
       requestID  : Seq(Integer),
@@ -1432,6 +1629,25 @@ context FmmlxDiagrams
   	  end
     end
 
+    @Operation mergeAssociationInstance(requestID : Seq(Integer),
+          obj1Name  : String,
+          obj2Name  : String,
+          assocName : String)
+
+      	  let
+      	    m = FmmlxDiagrams::FmmlxManipulator();
+      	    obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
+      	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end;
+      	    association = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+      	  then
+            problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
+      	  in
+      	    if problems.isEmpty() then
+      	      self.log := self.log + [["addLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+      	    end
+      	  end
+    end
+
     @Operation removeAssociationInstance(
       requestID : Seq(Integer),
       assocName : String,
@@ -1477,6 +1693,27 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+
+    @Operation mergeDelegation(
+          requestID   : Seq(Integer),
+          delegateFromName  : String,
+          delegateToName    : String,
+          delegateToLevel   : Integer)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            delegateFrom = if self.getPackage(requestID).hasElement(delegateFromName) then self.getPackage(requestID).getElement(delegateFromName) else null end;
+            delegateTo = if self.getPackage(requestID).hasElement(delegateToName) then self.getPackage(requestID).getElement(delegateToName) else null end
+          then
+            problems = m.setDelegation(delegateFrom, delegateTo, delegateToLevel)
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addDelegation", ["package", delegateFrom.owner.path()],
+                  ["delegateFrom",  delegateFrom.path()],
+                  ["delegateTo",  delegateTo.path()],
+                  ["delegateToLevel",  delegateToLevel+""]]]
+            end
+          end
+        end
     
     @Operation removeDelegation(
       requestID   : Seq(Integer),
@@ -1513,6 +1750,23 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+
+    @Operation mergeRoleFiller(
+          requestID   : Seq(Integer),
+          roleName  : String,
+          roleFillerName    : String)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            role = if self.getPackage(requestID).hasElement(roleName) then self.getPackage(requestID).getElement(roleName) else null end;
+            roleFiller = if self.getPackage(requestID).hasElement(roleFillerName) then self.getPackage(requestID).getElement(roleFillerName) else null end
+          then
+            problems = m.setRoleFiller(role, roleFiller)
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["setRoleFiller", ["package", role.owner.path()], ["role", role.path()], ["roleFiller", roleFiller.path()]]]
+            end
+          end
+        end
     
     @Operation removeRoleFiller(
       requestID   : Seq(Integer),
@@ -1616,6 +1870,27 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
+
+    @Operation mergeOperation(
+          requestID  : Seq(Integer),
+          className  : String,
+          level      : Integer,
+          body       : String)
+
+          let
+            m = FmmlxDiagrams::FmmlxManipulator();
+            class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+          then
+            problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addOperation2", ["package", class.owner.path()],
+                ["class", class.path()],
+                ["level", level+""],
+                ["body", body]]]
+            end
+          end
+        end
 
     @Operation removeOperation(
       requestID  : Seq(Integer),
@@ -1735,6 +2010,33 @@ context FmmlxDiagrams
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
+    end
+
+    @Operation mergeConstraint(
+          requestID  : Seq(Integer),
+          classPath  : String,
+          constName  : String,
+          instLevel  : Integer,
+          body       : String,
+          reason     : String)
+
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            class = m.evalString(classPath, self.getPackage(requestID)).at(0);
+            constSymbol = constName.asSymbol()
+          then
+            problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel) else ["Class "+classPath+" not found."] end
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addConstraint", ["package", class.owner.path()],
+                ["class", class.path()],
+                ["constName", constName],
+                ["instLevel", instLevel+""],
+                ["body", body],
+                ["reason", reason]]]
+            end
+          end
     end
     
     @Operation changeConstraintName(
@@ -1917,6 +2219,18 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation mergeEnumeration(requestID : Seq(Integer), newEnumName:String)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        problems = m.addEnumeration(self.getPackage(requestID), newEnumName)
+      in
+        if problems.isEmpty() then
+            self.log := self.log + [["addEnumeration", ["name",newEnumName]]]
+        end
+      end
+    end
+
     @Operation changeEnumerationName(requestID : Seq(Integer), oldEnumName:String, newEnumName:String)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
@@ -1949,6 +2263,18 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
+
+    @Operation mergeEnumerationValue(requestID : Seq(Integer), enumName:String, newEnumValueName:String)
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            problems = m.addEnumerationValue(self.getPackage(requestID), enumName, newEnumValueName)
+          in
+            if problems.isEmpty() then
+                self.log := self.log + [["addEnumerationValue", ["enum_name",enumName], ["enum_value_name", newEnumValueName]]]
+            end
+          end
+        end
 
     @Operation changeEnumerationValueName(requestID : Seq(Integer), enumName:String, oldEnumValueName:String, newEnumValueName:String)
       let
@@ -2165,12 +2491,30 @@ context FmmlxDiagrams
                                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
              end;
              @For op in class.operations.asSeq() do
-               if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
-                 log := log + [["addOperation", ["package", class.owner.path()],
-                                                ["class", class.path()],
-                                                ["level", op.instLevel+""],
-                                                ["body", op.codeBox.source()]]]
-               end
+             let
+               paramTypesRaw = op.paramTypes()
+             then
+               paramSize = paramTypesRaw.size()
+             then
+               paramTypes = Vector(paramSize)
+             in
+                @For i in 0.to(paramTypesRaw.size()-1) do
+                  paramTypes.put(i, self.getPathAsString(paramTypesRaw.at(i)))
+                end;
+                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
+                                  log := log + [["addOperation", ["package", class.owner.path()],
+                                                               ["class", class.path()],
+                                                               ["name", op.name.toString()],
+                                                               ["paramNames", self.getListFromSeq(requestID, op.paramNames())],
+                                                               ["paramTypes", self.getListFromSeq(requestID, paramTypes.asSeq())],
+                                                               ["type", self.getReturnPathAsString(op)],
+                                                               ["level", op.instLevel+""],
+                                                               ["monitored", self.isOperationMonitored(op).toString()],
+                                                               ["body", op.codeBox.source()]]]
+
+                end
+             end
+
              end;
              @For constraint in class.constraints.asSeq() do
                log := log + [["addConstraint", ["package", class.owner.path()],
@@ -2437,6 +2781,15 @@ context FmmlxDiagrams
         ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();
         "null"
       end
+    end
+
+    @Operation getListFromSeq(requestID : Seq(Integer), items) // for local use
+          let list = "" in
+            @For item in items do
+              if not item = null then list := list + item + "," end
+            end; // for
+            list.subString(0, list.size()-1)
+          end// let
     end
     
 end
