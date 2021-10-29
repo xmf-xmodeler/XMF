@@ -50,99 +50,89 @@ import FmmlxDiagrams;
       package : Package, 
       ofClass : MetaClass, 
       name, 
+      aLevel, // a -> from arguments
       parents, 
       abstract : Boolean, 
       slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
-      if ofClass.level < 1 then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
+      if (ofClass.level < 1 andthen ofClass.level <> -1) then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
       if not Symbol(name).isValidName()  then self.error("name " + name + " not legal.") end;
       
 	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
       let 
           // create new Object
         obj = Kernel_mkObj(); 
-        myLevel = ofClass.level - 1;
+        myLevel = if ofClass.level = -1 then aLevel else ofClass.level - 1 end;
         
           // We prepare a set of all Attributes from the class and a set of all Operations
           // !!! This needs to be changed to fit its purpose here.
           // !!! We need a list of all Attributes which are to be instantiated here.
-        A = ofClass.allAttributes();
-        O = ofClass.allOperations();
+        A = ofClass.allAttributes()
+        //;O = ofClass.allOperations()
 
-          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
-          // !!! This can probably be dropped
-        intrinsicA = Set{};
-        intrinsicO = Set{}
+//          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
+//          // !!! This can probably be dropped
+//        intrinsicA = Set{};
+//        intrinsicO = Set{}
       in 
         Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
       
          // Then we loop through the Attributes
-         @While not A->isEmpty do
-           let a = A->sel // pick any one Attribute
-           in if a.isIntrinsic andthen a.instLevel < myLevel
-              then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
-                intrinsicA := intrinsicA.including(a)
-              else // otherwise it becomes a slot and is initialised
-                if a.init <> null
-                then
-                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
-                else
-                  Kernel_addAtt(obj,a.name,a.type.default())
-                end;
-                if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
-              end;
-              A := A->excluding(a) // we remove that attribute from the list as it has been handled
-           end
-         end;
+        @While not A->isEmpty do
+          let a = A->sel // pick any one Attribute
+          in if a.isIntrinsic andthen a.instLevel < myLevel
+             then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+               null//intrinsicA := intrinsicA.including(a)
+             else // otherwise it becomes a slot and is initialised
+               if a.init <> null
+               then
+                 Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
+               else
+                 Kernel_addAtt(obj,a.name,a.type.default())
+               end;
+               if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+             end;
+             A := A->excluding(a) // we remove that attribute from the list as it has been handled
+          end
+        end;
+        
+        /*
+        ////////// We do nothing at all with Operations as they care for themselves
+        // Then we loop through the Operations
+        @While not O->isEmpty do
+          let op = O->sel // pick any one Operation
+          in if op.isIntrinsic andthen op.instLevel < myLevel 
+             then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
+               intrinsicO := intrinsicO.including(op)
+             //else // otherwise it becomes available and we do nothing
+             end;
+             O := O->excluding(op) // we remove that attribute from the list as it has been handled
+          end
+        end; */
          
-         // Then we loop through the Operations
-         @While not O->isEmpty do
-           let op = O->sel // pick any one Operation
-           in if op.isIntrinsic andthen op.instLevel < myLevel 
-              then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
-                intrinsicO := intrinsicO.including(op)
-              //else // otherwise it becomes available and we do nothing
-              end;
-              O := O->excluding(op) // we remove that attribute from the list as it has been handled
-           end
-         end;
-         
-         if ofClass.inheritsFrom(Classifier)
-         then
-           obj.parents := obj.defaultParents()
-         else
-           false
-         end;
+        if ofClass.inheritsFrom(Classifier)
+        then
+          obj.parents := obj.defaultParents()
+        else
+          false
+        end;
 
-	     if parents.size() > 0 then obj.parents := parents.asSet() end;
+	    if parents.size() > 0 then obj.parents := parents.asSet() end;
 
-	     @For p in obj.parents do
-	       if p.isKindOf(FMML::MetaClass) then
-	         p.subclasses := p.subclasses + {obj}
-	       end
-	     end;
+	    @For p in obj.parents do
+	      if p.isKindOf(FMML::MetaClass) then
+	        p.subclasses := p.subclasses + {obj}
+	      end
+	    end;
 
-         //then newClass.parents := parents.asSet() end; // test: may work or not...
-         
-         obj.init();
-         
-//                DON'T             
-
-//
-//		   if ofClass.delegatesTo <> null	
-//		   then ofClass.selectRoleFiller(obj, ofClass) end;
-//
-//         if Root.contents.keys().includes("TargetPackage".asSymbol())
-//         then
-//           TargetPackage.add(obj)
-//         else
-//           false
-//         end;
-
-         ofClass.instances := ofClass.instances.including(obj);
-         
-         // todo: name, parents, abstract ...
+        //then newClass.parents := parents.asSet() end; // test: may work or not...
+        
+        obj.init();
+        
+        ofClass.instances := ofClass.instances.including(obj);
+        
+        // todo: name, parents, abstract ...
         obj.level := myLevel;
         package.add(obj);
         obj.setName(Symbol(name)); // todo: test name

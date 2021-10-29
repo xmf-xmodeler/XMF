@@ -9,7 +9,8 @@ context Root::FMML
     @Constructor(name, level)
       if self.of() <> FMML::MetaClass then
         self.error("This constructor is only allowed for instantiating FMML::MetaClass") end;
-      if level > 0 then self.addParent(FMML::MetaClass) end;
+//      if level > 0 then self.addParent(FMML::MetaClass) end;
+        self.addParent(FMML::MetaClass);
       self
     end
 

@@ -236,7 +236,7 @@ context FmmlxDiagrams
         in
           self.cachedPaths := Table(classes.size());
     	  @For c in classes do
-    	    if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.level > -1 // TODO: find out how a null can possibly end up there
+    	    if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.level > -2 // TODO: find out how a null can possibly end up there
     	    then
     	      let
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
@@ -427,7 +427,7 @@ context FmmlxDiagrams
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).classes->select(x | x.level > 0)
+          classes = self.getPackage(requestID).classes->select(x | (x.level > 0 orelse x.level = -1))
         in
           @For c in classes do
             let
@@ -888,6 +888,7 @@ context FmmlxDiagrams
             requestID : Seq(Integer),
             ofName,
             name,
+            level,
             parents,
             abstract,
             x, y,
@@ -914,7 +915,7 @@ context FmmlxDiagrams
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["name " + name + " already in use."]])
             else
               let
-                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, slotValueList)
               then
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
               in

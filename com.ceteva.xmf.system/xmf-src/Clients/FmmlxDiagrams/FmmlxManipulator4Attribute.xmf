@@ -124,7 +124,7 @@ import FmmlxDiagrams;
         getterName = "get"+camelCaseName;
         setterName = "set"+camelCaseName
       in 
-        a.isIntrinsic := true;
+        a.isIntrinsic := (instLevel <> -1); // true;
         a.type := type;
         a.instLevel := instLevel;
         //a.setMult(mult);
@@ -133,14 +133,18 @@ import FmmlxDiagrams;
         class.addAttribute(a);
         
         @For instance in allInst do
-          if instance.level = instLevel then 
+          if a.isIntrinsic andthen instance.level = instLevel then
             //if a.init <> null
             //then
             //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
             //else
               Kernel_addAtt(instance,a.name,a.type.default())
             //end;
+          end;
+          if (not a.isIntrinsic) andthen class.allInstances().contains(instance) then
+            Kernel_addAtt(instance,a.name,a.type.default())
           end
+          
         end;
         
         self.addGettersAndSetters(class, name, instLevel, type);
