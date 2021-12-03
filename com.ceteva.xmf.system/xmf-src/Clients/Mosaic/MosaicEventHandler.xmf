@@ -223,7 +223,7 @@ context Mosaic
 	        diagram=diagrams.get(key)
 	      in
 	      	if diagram.package.path()=packagePath then
-	      	  result:=result+[[key,diagram.diagramName.toString()]]
+	      	  result:=result+[[key,diagram.diagramName.toString(),diagram.diagramType.name.toString()]]
 	        end	  
 	      end  
 	    end;
