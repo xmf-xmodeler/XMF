@@ -60,49 +60,25 @@ context FmmlxDiagrams
           key, 
           self.diagrams.get(key).diagramName.toString(), 
           self.diagrams.get(key).package.path(),
-          self.diagrams.get(key).file.toString())
+          self.diagrams.get(key).file.toString(),
+          self.diagrams.get(key).views)
       end
     end    
     
-    @Operation findDiagram(package,name)    
-     // let
-     //   selectedNames = xmf.selects("Select Diagram",
-     //     "select existing diagram - or none for new", 
-     //     diagrams.values()->select(d | d.diagramType = FmmlxDiagramType::ClassDiagram).diagramName,
-     //     {},
-     //     null)
-     // in
-     // if selectedNames = -1 then selectedNames := [] end;
-     //   if
-     //     selectedNames.size() = 0
-     //   then
-     //     self.createNewDiagram(package,name, "", FmmlxDiagramType::ClassDiagram) // <-- create a new diagram (always a class diagram)
-     //   elseif
-     //     selectedNames.size() = 1
-     //   then // if one name supplied: find it!
-          let
-     //       selectedName = selectedNames.at(0);
-     		selectedName = name;
-            keys = self.diagrams.keys();
-            key = null;
-            keyCount = 0
-          in
-            @While key = null and keyCount < keys.size() do
-              if diagrams.get(keys.at(keyCount)).diagramName.toString() = selectedName.toString() then key := keys.at(keyCount) end;
-              keyCount := keyCount + 1
-            end;
-            if key <> null then // <-- found an old diagram with that name
-              //self.communicator.reopenDiagram(key, selectedName.toString(), diagrams.get(key).package.path())
-              key
-              //self.communicator.newDiagram(key, diagrams.get(key).diagramName.toString(), diagrams.get(key).package.path()) // <-- from the java's point of view a NEW diagram is created
-            else
-              null
-              //"diagram not found".println()
-            end
-          end
-        end
-  //    end
-  // end
+    @Operation findDiagram(package,name)   
+      let
+ 		selectedName = name;
+        keys = self.diagrams.keys();
+        key = null;
+        keyCount = 0
+      in
+        @While key = null and keyCount < keys.size() do
+        if diagrams.get(keys.at(keyCount)).diagramName.toString() = selectedName.toString() then key := keys.at(keyCount) end;
+          keyCount := keyCount + 1
+        end;
+        key
+      end
+    end
 
     @Operation createDiagramFromJava(packagePath, diagramName, file, typeAsString)
       let
@@ -120,16 +96,13 @@ context FmmlxDiagrams
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
     @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType)
-      //null.foo;
-      //self.package := package;
-       ///////////FIND ALTERNATIVE TO THIS///////////////////
+      ///////////FIND ALTERNATIVE TO THIS///////////////////
       if
         package.of() <> FMML::FMMLxPackage
       then
         package.setOf(FMML::FMMLxPackage);
         Kernel_addAtt(package,"fmmlxAssociationInstances",{})
       end;
-        //self.addDefaultEnums(package);
       //////////////////////////////////////////////////////
         
       let 
@@ -142,6 +115,7 @@ context FmmlxDiagrams
         diagram.package := package;
         diagram.file := file;
         diagram.diagramType := type;
+        diagram.views := [["Main View", 1.0, 0.0, 0.0]];
         self.diagrams.put(newID, diagram);
         
         //diagram
@@ -2785,12 +2759,32 @@ context FmmlxDiagrams
     end
 
     @Operation getListFromSeq(requestID : Seq(Integer), items) // for local use
-          let list = "" in
-            @For item in items do
-              if not item = null then list := list + item + "," end
-            end; // for
-            list.subString(0, list.size()-1)
-          end// let
+      let list = "" in
+        @For item in items do
+          if not item = null then list := list + item + "," end
+        end; // for
+        list.subString(0, list.size()-1)
+      end // let
+    end
+    
+    @Operation sendViewStatusToModel(requestID : Seq(Integer), listOfViews) 
+      let
+        diagramID = self.vector2Seq(requestID).at(0)
+      then
+        diagram = diagrams.get(diagramID)
+      in
+        let seq = [] in
+          @For view in listOfViews do
+            let viewSeq = [] in
+              @For item in view do
+                viewSeq := viewSeq + [item]
+              end;
+              seq := seq + [viewSeq] 
+            end
+          end;      
+          diagram.views := seq
+        end
+      end
     end
     
 end
