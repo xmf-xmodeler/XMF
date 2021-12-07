@@ -61,7 +61,8 @@ context FmmlxDiagrams
           self.diagrams.get(key).diagramName.toString(), 
           self.diagrams.get(key).package.path(),
           self.diagrams.get(key).file.toString(),
-          self.diagrams.get(key).views)
+          self.diagrams.get(key).views,
+          self.diagrams.get(key).options)
       end
     end    
     
@@ -116,6 +117,7 @@ context FmmlxDiagrams
         diagram.file := file;
         diagram.diagramType := type;
         diagram.views := [["Main View", 1.0, 0.0, 0.0]];
+        diagram.options := [];
         self.diagrams.put(newID, diagram);
         
         //diagram
@@ -2316,6 +2318,16 @@ context FmmlxDiagrams
       end
     end
 
+	@Operation runOperation(requestID : Seq(Integer), text)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        parseResult = m.evalString(text, self.getPackage(requestID))
+      in
+        null
+      end
+	end
+
     @Operation evalList(requestID : Seq(Integer), text)
       ("eval List start: " + text).println();
       let
@@ -2786,6 +2798,34 @@ context FmmlxDiagrams
           diagram.views := seq
         end
       end
+    end
+    
+    @Operation getAllViews(requestID : Seq(Integer))
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).views])
+    end
+    
+    @Operation sendViewOptions(requestID : Seq(Integer), listOfOptions) 
+      let
+        diagramID = self.vector2Seq(requestID).at(0)
+      then
+        diagram = diagrams.get(diagramID)
+      in
+        let seq = [] in
+          @For option in listOfOptions do
+            let optionSeq = [] in
+              @For item in option do
+                optionSeq := optionSeq + [item]
+              end;
+              seq := seq + [optionSeq] 
+            end
+          end;      
+          diagram.options := seq
+        end
+      end
+    end
+    
+    @Operation getViewOptions(requestID : Seq(Integer))
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).options])
     end
     
 end
