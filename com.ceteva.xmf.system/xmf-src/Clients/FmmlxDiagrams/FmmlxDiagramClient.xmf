@@ -714,7 +714,7 @@ context FmmlxDiagrams
 		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
 		  end;
 */		  @For assoc in self.getPackage(requestID).associations do
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end1.instLevel) // if obj fits sourceDef
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end2.instLevel) // if obj fits sourceDef
 		    then
 		      let
 		        count = FmmlxManipulator::countOccurences(obj, self.getPackage(requestID), assoc, true, false) // how many links go out of obj as source
@@ -739,7 +739,7 @@ context FmmlxDiagrams
 		        end
 		      end // let
 		    end; // if instance of
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end2.instLevel) // if obj fits targetDef
+		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end1.instLevel) // if obj fits targetDef
 		    then
 		      let
 		        count = FmmlxManipulator::countOccurences(obj, self.getPackage(requestID), assoc, false, true)
