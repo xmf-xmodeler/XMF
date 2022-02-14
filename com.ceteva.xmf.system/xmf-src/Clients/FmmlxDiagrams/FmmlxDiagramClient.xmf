@@ -1562,6 +1562,19 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation changeDelegationLevel(requestID : Seq(Integer), className, level)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        c = m.evalString(className, self.getPackage(requestID)).at(0)
+      then
+        problems = ["This change has been accepted but not been propagated. Check the role fillers."]
+      in
+        c.delegatesToLevel := level;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+    
     @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), assocName, level)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
