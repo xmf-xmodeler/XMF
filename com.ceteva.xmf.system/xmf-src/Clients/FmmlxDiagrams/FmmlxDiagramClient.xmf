@@ -528,9 +528,9 @@ context FmmlxDiagrams
                 localResult := localResult.append([[
                   con.name.toString(),
                   con.body.instLevel,
-                  con.body.getProperty("raw", "Error: raw source not found"),
+                  OCL::OCL.grammar.parseString(con.get("body").source(),"Exp1",Seq{XOCL}).performable.pprint(3),
                   con.body.source(),
-                  con.reason.getProperty("raw", "Error: raw source not found"),
+                  OCL::OCL.grammar.parseString(con.get("reason").source(),"Exp1",Seq{XOCL}).performable.pprint(3),
                   con.reason.source()]])
               end end; // for+if
               result := result + [[c.path(), localResult]]
@@ -2521,8 +2521,8 @@ context FmmlxDiagrams
                                        ["class", class.path()],
                                        ["constName", constraint.name.toString()],
                                        ["instLevel", constraint.body.instLevel+""],
-                                       ["body", constraint.body.codeBox.source()],
-                                       ["reason", constraint.reason.codeBox.source()]]]
+                                       ["body", OCL::OCL.grammar.parseString(constraint.get("body").source(),"Exp1",Seq{XOCL}).performable.pprint(3)],
+                                       ["reason", OCL::OCL.grammar.parseString(constraint.get("reason").source(),"Exp1",Seq{XOCL}).performable.pprint(3)]]]
              end
            end;
            @For class in classes  do// new for to make sure att exists

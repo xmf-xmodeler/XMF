@@ -38,8 +38,8 @@ import FmmlxDiagrams;
           problems = []
         in           
          
-          bodyO   := self.createOperationForConstraint(bodyCode, "body");
-          reasonO := self.createOperationForConstraint(reasonCode, "reason");
+          bodyO := self.createOperationForConstraint("@Operation body(classifier : Class, level : Integer) : Boolean " + bodyCode + " end", "body");
+          reasonO := self.createOperationForConstraint("@Operation reason(classifier : Class, level : Integer) : String " + reasonCode + " end", "reason");
           
           if bodyO.at(0) <> null then
             bodyO.at(0).isIntrinsic := true;
@@ -174,8 +174,8 @@ import FmmlxDiagrams;
       
       let
         con = if class = null then null else class.getConstraint(name) end;
-        body = self.createOperationForConstraint(bodyCode, "body");
-        reason = self.createOperationForConstraint(reasonCode, "reason")
+        body = self.createOperationForConstraint("@Operation body(classifier : Class, level : Integer) : Boolean " + bodyCode + " end", "body");
+        reason = self.createOperationForConstraint("@Operation reason(classifier : Class, level : Integer) : String " + reasonCode + " end", "reason")
       in
         if class = null then ["Class not found. (Should have been detected earlier.)"]
         elseif con = null then ["Constraint not found"]
