@@ -67,11 +67,11 @@ import FmmlxDiagrams;
             a.transitive := isTransitive;
             
             if sourceVisibleFromTarget then 
-              self.addGettersAndSetters4Links(target, accessSourceFromTargetName, instLevelTarget, source, a, false)
+              self.addGettersAndSetters4Links(target, accessSourceFromTargetName, instLevelTarget, source, a, false, multTargetToSource)
             end;
             
             if targetVisibleFromSource then 
-              self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevelSource, target, a, true)
+              self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevelSource, target, a, true, multSourceToTarget)
             end;
             
             []
@@ -227,11 +227,12 @@ import FmmlxDiagrams;
         type          = End.type;
         name          = End.name;
         instLevel     = End.instLevel;
-        oldVisibility = End.visible
+        oldVisibility = End.visible;
+        mult          = End.mult
       in
         End.visible := newVisibility;
         if newVisibility and not oldVisibility then 
-          self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc, concernsTarget) end;
+          self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc, concernsTarget, mult) end;
         if oldVisibility and not newVisibility then 
           self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;
         []
@@ -249,19 +250,48 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
-    @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc, selfIsSource) // actually, only one getter
+    @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc, selfIsSource, multiplicity) // actually, only one getter
       // selfIsSource => true  where self is on the source side
       // selfIsSource => false where self is on the target side
+      
+      /*
+      If multiplicity max = 1 then add "getX", "setX" where all use a single Object
+      If multiplicity max = 1 then add "getXs", "addX", "removeX", "replaceX?" where all use Set
+      */
+      
       let
-        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
+        camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size());
+        max1 = multiplicity.hasUpperBound andthen multiplicity.upperBound < 2
       then
-        getterName = "get"+camelCaseName;
-        setterName = "set"+camelCaseName;
+        get1Name = "get"+camelCaseName;
+        set1Name = "set"+camelCaseName;
+        getAllName = "get" + camelCaseName + "s";
+        addAllName = "add" + camelCaseName + "s";
+        remAllName = "remove" + camelCaseName + "s";        
         pName = assoc.owner.path()
       in
-        self.addOperation2(class, instLevel, 
-        "  @Operation "+getterName+"[getterKey=\""+name+"\"]():"+type.path()+"
-"+      "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+")
-"+      "  end")
+        if max1 then
+          self.addOperation2(class, instLevel, 
+          "  @Operation "+get1Name+"[getterKey=\""+name+"\"]():"+type.path()+"
+"+        "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+").asSeq().at(0)
+"+        "  end")/*;
+		  self.addOperation2(class, instLevel, 
+          "  @Operation "+set1Name+"[setterKey=\""+name+"\"](newLinkEnd:"+type.path()+"):Element  
+"+        "    self.addAssociationInstance("+pName+", self, newLinkEnd, pName.getAssociation(assoc.name.toString()))
+"+        "  end")*/
+        else
+          self.addOperation2(class, instLevel, 
+          "  @Operation "+getAllName+"[getterKey=\""+name+"\"]():Set("+type.path()+")
+"+        "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+")
+"+        "  end")/*;
+          self.addOperation2(class, instLevel, 
+          "  @Operation "+addAllName+"[setterKey=\""+name+"\"](newLinkEnds:Set("+type.path()+")):Element 
+"+        "    @For newLinkEnd in newLinkEnds do self.addAssociationInstance("+pName+", self, newLinkEnd, pName.getAssociation(assoc.name.toString())) end
+"+        "  end");
+          self.addOperation2(class, instLevel, 
+          "  @Operation "+remAllName+"[setterKey=\""+name+"\"](oldLinkEnds:Set("+type.path()+")):Element 
+"+        "    @For oldLinkEnd in oldLinkEnds do " + pName + ".removeAssociationInstance(self, oldLinkEnd, pName.getAssociation(assoc.name.toString())) end
+"+        "  end")*/
+        end
       end
     end    
