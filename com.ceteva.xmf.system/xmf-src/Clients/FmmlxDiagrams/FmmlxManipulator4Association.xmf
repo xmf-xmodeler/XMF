@@ -271,10 +271,26 @@ import FmmlxDiagrams;
         pName = assoc.owner.path()
       in
         if max1 then
-          self.addOperation2(class, instLevel, 
-          "  @Operation "+get1Name+"[getterKey=\""+name+"\"]():"+type.path()+"
-"+        "    " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+").asSeq().at(0)
-"+        "  end")/*;
+          if multiplicity.lowerBound = 0 then 
+            self.addOperation2(class, instLevel, 
+            "  @Operation "+get1Name+"[getterKey=\""+name+"\"]():"+type.path()+"
+"+          "    try            
+"+          "      " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+").asSeq().at(0)
+"+          "    catch(ex)            
+"+          "      null                  
+"+          "    end            
+"+          "  end") 
+          else
+            self.addOperation2(class, instLevel, 
+            "  @Operation "+get1Name+"[getterKey=\""+name+"\"]():"+type.path()+"
+"+          "    try            
+"+          "      " + pName + ".getLinkEnds(self, \"" + assoc.name.toString() + "\","+(not selfIsSource)+","+selfIsSource+").asSeq().at(0)
+"+          "    catch(ex)  
+"+          "      throw(Exception(\"No link found in obligatory association.\"))               
+"+          "    end            
+"+          "  end") 
+          end
+/*;
 		  self.addOperation2(class, instLevel, 
           "  @Operation "+set1Name+"[setterKey=\""+name+"\"](newLinkEnd:"+type.path()+"):Element  
 "+        "    self.addAssociationInstance("+pName+", self, newLinkEnd, pName.getAssociation(assoc.name.toString()))
