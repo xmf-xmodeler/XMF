@@ -119,6 +119,8 @@ import FmmlxDiagrams;
           class.operations := class.operations + {operation.at(0)};
           operation.at(0).owner := class;
           resetOperatorTable()
+        else
+          problems := problems + [["addOperation:failed", class.name.toString(), level, opString]]
         end;
         
         // return any problem that occurred

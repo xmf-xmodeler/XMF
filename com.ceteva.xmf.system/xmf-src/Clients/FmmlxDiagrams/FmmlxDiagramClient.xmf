@@ -2773,7 +2773,13 @@ context FmmlxDiagrams
       elseif o.isKindOf(Float) 
         then if o = 1/0 then "1/0" elseif o = 0/0 then "0/0" elseif o = -1/0 then "-1/0" else o.toString() end
       elseif o.isKindOf(String)
-        then o.asSeq().pprint() + ".asString()"
+        // NOT then o.asSeq().pprint() + ".asString()" BECAUSE pprint caps at 10
+        then
+          let s = "["; seq = o.asSeq() in
+            @For i in 0.to(seq.size()-1) do
+              s := s + if i = 0 then "" else "," end + seq.at(i)
+            end; s + "].asString()"
+          end
       elseif o.of().isKindOf(Enum) orelse try o.owner() = p catch(e) false end
         then o.path()
       elseif try o.of().owner() = Auxiliary catch(e) false end // all classes in that package are supposed have that operation
