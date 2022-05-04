@@ -942,6 +942,15 @@ context FmmlxDiagrams
               exception.message.println()
             end
     end
+    
+    @Operation classify(requestID : Seq(Integer), classNames)
+      "classify".println();
+      classNames := vector2Seq(classNames);
+      classNames.println();
+      classNames.of().println();
+      
+      null
+    end
 
     @Operation removeClass(requestID : Seq(Integer), className, strategy)
       let
