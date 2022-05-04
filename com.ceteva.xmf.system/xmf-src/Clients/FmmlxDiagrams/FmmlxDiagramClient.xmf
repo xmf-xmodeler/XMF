@@ -2346,7 +2346,9 @@ context FmmlxDiagrams
       then
         parseResult = m.evalString(text, self.getPackage(requestID))
       in
-        null
+        if parseResult.at(1) <> null then 
+           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), [parseResult.at(1)]])
+        end
       end
 	end
 

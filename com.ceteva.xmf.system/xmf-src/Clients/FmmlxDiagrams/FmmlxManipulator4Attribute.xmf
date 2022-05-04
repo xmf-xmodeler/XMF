@@ -342,7 +342,7 @@ import FmmlxDiagrams;
 "+      "    let 
 "+      "      m = Clients::FmmlxDiagrams::FmmlxManipulator()
 "+      "    then
-"+      "      error = m.changeSlotValue(self, \""+name+"\", value, "+type.path()+", self.package)
+"+      "      error = m.changeSlotValue(self, \""+name+"\", value, "+type.path()+", self.owner)
 "+      "    in
 "+      "      if error <> null then throw(Exception(error)) end
 "+      "    end
