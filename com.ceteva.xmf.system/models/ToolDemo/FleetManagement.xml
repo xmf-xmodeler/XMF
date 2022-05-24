@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XModeler>
+  <Version>2</Version>
+  <Categories/>
+  <Projects>
+    <Project name="Root::FleetManagement"/>
+  </Projects>
+  <Diagrams>
+    <Diagram label="Fleet" package_path="Root::FleetManagement" showConstraintReports="true" showConstraints="true" showDerivedAttributes="true" showDerivedOperations="false" showGettersAndSetters="false" showMetaClassName="false" showOperationValues="true" showOperations="true" showSlots="true">
+      <Categories/>
+      <Owners/>
+      <Objects>
+        <Object hidden="false" ref="Root::FleetManagement::Truck" x="688" y="220"/>
+        <Object hidden="false" ref="Root::FleetManagement::Person" x="-245" y="408"/>
+        <Object hidden="false" ref="Root::FleetManagement::VW_Golf" x="364" y="501"/>
+        <Object hidden="false" ref="Root::FleetManagement::Employee" x="-4" y="430"/>
+        <Object hidden="false" ref="Root::FleetManagement::Vehicle" x="367" y="36"/>
+        <Object hidden="false" ref="Root::FleetManagement::employee1" x="86" y="680"/>
+        <Object hidden="false" ref="Root::FleetManagement::Car" x="348" y="237"/>
+        <Object hidden="false" ref="Root::FleetManagement::vW_Golf1" x="407" y="742"/>
+        <Object hidden="false" ref="Root::FleetManagement::p1" x="-203" y="671"/>
+        <Object hidden="false" ref="Root::FleetManagement::vW_Golf2" x="617" y="739"/>
+        <Object hidden="false" ref="Root::FleetManagement::vW_Golf3" x="687" y="574"/>
+      </Objects>
+      <Edges>
+        <Edge ref="DelegationMapping: Root::FleetManagement::Employee/Root::FleetManagement::Person" source_port="WEST" target_port="EAST" type="delegation">
+          <IntermediatePoints>
+            <IntermediatePoint x="-38.571533" y="474.7422"/>
+            <IntermediatePoint x="-38.571533" y="474.25534"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::FleetManagement::employee1/Root::FleetManagement::vW_Golf1/Root::FleetManagement::assignedTo" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="288.66327" y="726.7422"/>
+            <IntermediatePoint x="288.66327" y="819.3587"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="RoleFillerMapping: Root::FleetManagement::employee1/Root::FleetManagement::p1" source_port="WEST" target_port="EAST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="49.767334" y="739.05273"/>
+            <IntermediatePoint x="49.767334" y="739.84094"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="assignedTo" parent_association="VOID" ref="Root::FleetManagement::assignedTo" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="273.531" y="474.7422"/>
+            <IntermediatePoint x="273.531" y="358.43832"/>
+          </IntermediatePoints>
+        </Edge>
+      </Edges>
+      <Labels>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::FleetManagement::employee1/Root::FleetManagement::vW_Golf1/Root::FleetManagement::assignedTo" x="-15.856094" y="10.122987"/>
+        <Label localID="0" ownerID="Root::FleetManagement::assignedTo" x="-102.27181" y="25.186277"/>
+      </Labels>
+      <Preferences/>
+      <View name="Main View" tx="244.59743" ty="-9.56832" xx="0.8408964"/>
+    </Diagram>
+  </Diagrams>
+  <Logs>
+    <addMetaClass abstract="false" level="3" name="Vehicle" package="Root::FleetManagement" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Person" package="Root::FleetManagement" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Employee" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="Truck" of="Root::FleetManagement::Vehicle" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="Car" of="Root::FleetManagement::Vehicle" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="VW_Golf" of="Root::FleetManagement::Car" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="vW_Golf3" of="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="vW_Golf2" of="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="employee1" of="Root::FleetManagement::Employee" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="p1" of="Root::FleetManagement::Person" package="Root::FleetManagement" parents=""/>
+    <addInstance abstract="false" name="vW_Golf1" of="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" parents=""/>
+    <addEnumeration name="Style"/>
+    <addEnumerationValue enum_name="Style" enum_value_name="SUV"/>
+    <addEnumerationValue enum_name="Style" enum_value_name="estate"/>
+    <addEnumerationValue enum_name="Style" enum_value_name="saloon"/>
+    <addAttribute class="Root::FleetManagement::Car" level="1" multiplicity="Seq{1,1,true,false}" name="horsepower" package="Root::FleetManagement" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::FleetManagement::Car" level="1" multiplicity="Seq{1,1,true,false}" name="style" package="Root::FleetManagement" type="Root::FleetManagement::Style"/>
+    <addAttribute class="Root::FleetManagement::Employee" level="0" multiplicity="Seq{1,1,true,false}" name="emplID" package="Root::FleetManagement" type="Root::XCore::String"/>
+    <addAttribute class="Root::FleetManagement::Person" level="0" multiplicity="Seq{1,1,true,false}" name="dateOfBirth" package="Root::FleetManagement" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::FleetManagement::Person" level="0" multiplicity="Seq{1,1,true,false}" name="firstName" package="Root::FleetManagement" type="Root::XCore::String"/>
+    <addAttribute class="Root::FleetManagement::Person" level="0" multiplicity="Seq{1,1,true,false}" name="lastName" package="Root::FleetManagement" type="Root::XCore::String"/>
+    <addAttribute class="Root::FleetManagement::Vehicle" level="0" multiplicity="Seq{1,1,true,false}" name="acquired" package="Root::FleetManagement" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::FleetManagement::Vehicle" level="0" multiplicity="Seq{1,1,true,false}" name="mileage" package="Root::FleetManagement" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::FleetManagement::Vehicle" level="0" multiplicity="Seq{1,1,true,false}" name="numberPlate" package="Root::FleetManagement" type="Root::XCore::String"/>
+    <addAttribute class="Root::FleetManagement::Vehicle" level="0" multiplicity="Seq{1,1,true,false}" name="price" package="Root::FleetManagement" type="Root::Auxiliary::MonetaryValue"/>
+    <addAttribute class="Root::FleetManagement::Vehicle" level="1" multiplicity="Seq{1,1,true,false}" name="officialPrice" package="Root::FleetManagement" type="Root::Auxiliary::MonetaryValue"/>
+    <addOperation body="@Operation noOfModels[monitor=true,delToClassAllowed=false]():XCore::Integer&#10;  self.allInstances().size()&#10;end" class="Root::FleetManagement::Vehicle" level="2" monitored="true" name="noOfModels" package="Root::FleetManagement" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation numOfExemplars[monitor=true,delToClassAllowed=false]():XCore::Integer&#10;  self.allInstances().size()&#10;end" class="Root::FleetManagement::Car" level="1" monitored="true" name="numOfExemplars" package="Root::FleetManagement" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation yearsOfAge[monitor=true,delToClassAllowed=false]():XCore::Integer&#10;  self.getDateOfBirth().age()&#10;end" class="Root::FleetManagement::Person" level="0" monitored="true" name="yearsOfAge" package="Root::FleetManagement" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addConstraint body="self.getCar() &lt;&gt; null implies self.yearsOfAge() &gt; 17" class="Root::FleetManagement::Employee" constName="minAge" instLevel="0" package="Root::FleetManagement" reason="&quot;too young!&quot;"/>
+    <changeSlotValue class="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" slotName="horsepower" valueToBeParsed="100"/>
+    <changeSlotValue class="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" slotName="officialPrice" valueToBeParsed="Auxiliary::MonetaryValue(21000, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::FleetManagement::VW_Golf" package="Root::FleetManagement" slotName="style" valueToBeParsed="Root::FleetManagement::Style::saloon"/>
+    <changeSlotValue class="Root::FleetManagement::employee1" package="Root::FleetManagement" slotName="emplID" valueToBeParsed="[90,56,51].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::p1" package="Root::FleetManagement" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(2005, 5, 17)"/>
+    <changeSlotValue class="Root::FleetManagement::p1" package="Root::FleetManagement" slotName="firstName" valueToBeParsed="[80,101,116,101,114].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::p1" package="Root::FleetManagement" slotName="lastName" valueToBeParsed="[80,97,110].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf1" package="Root::FleetManagement" slotName="acquired" valueToBeParsed="Auxiliary::Date::createDate(2020, 5, 13)"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf1" package="Root::FleetManagement" slotName="mileage" valueToBeParsed="10000"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf1" package="Root::FleetManagement" slotName="numberPlate" valueToBeParsed="[82,84,95,57,57,57].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf1" package="Root::FleetManagement" slotName="price" valueToBeParsed="Auxiliary::MonetaryValue(20000, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf2" package="Root::FleetManagement" slotName="acquired" valueToBeParsed="Auxiliary::Date::createDate(2022, 5, 18)"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf2" package="Root::FleetManagement" slotName="mileage" valueToBeParsed="0"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf2" package="Root::FleetManagement" slotName="numberPlate" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf2" package="Root::FleetManagement" slotName="price" valueToBeParsed="Auxiliary::MonetaryValue(205000, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf3" package="Root::FleetManagement" slotName="acquired" valueToBeParsed="Auxiliary::Date::createDate(2022, 5, 17)"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf3" package="Root::FleetManagement" slotName="mileage" valueToBeParsed="0"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf3" package="Root::FleetManagement" slotName="numberPlate" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::FleetManagement::vW_Golf3" package="Root::FleetManagement" slotName="price" valueToBeParsed="Auxiliary::MonetaryValue(18000, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <addAssociation accessSourceFromTargetName="employee" accessTargetFromSourceName="car" classSource="Root::FleetManagement::Employee" classTarget="Root::FleetManagement::Car" fwName="assignedTo" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::FleetManagement" reverseName="-1" sourceVisibleFromTarget="true" targetVisibleFromSource="true"/>
+    <addLink classSource="Root::FleetManagement::employee1" classTarget="Root::FleetManagement::vW_Golf1" name="assignedTo" package="Root::FleetManagement"/>
+    <addDelegation delegateFrom="Root::FleetManagement::Employee" delegateTo="Root::FleetManagement::Person" delegateToLevel="0" package="Root::FleetManagement"/>
+    <setRoleFiller package="Root::FleetManagement" role="Root::FleetManagement::employee1" roleFiller="Root::FleetManagement::p1"/>
+  </Logs>
+</XModeler>
