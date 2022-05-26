@@ -548,6 +548,42 @@ context FmmlxDiagrams
 //      else false end
 //    end
 
+    @Operation getAllSlots(requestID : Seq(Integer), objectSlotList)
+      let 
+        result = []
+      in
+        //objectSlotList.println();
+        @For objectSlotElement in objectSlotList do
+          //objectSlotElement.println();
+          let
+            localResult = [];
+            objectName = self.vector2Seq(objectSlotElement).at(0);
+            slotList = self.vector2Seq(objectSlotElement).at(1)
+          in
+            @For o in self.getPackage(requestID).classes do
+              if o <> null andthen o.isKindOf(FMML::MetaClass) andthen o.name.toString() = objectName
+              then
+                @For name in slotList do
+                  if o.hasSlot(name)
+                  then
+                    let
+                      value = o.get(name)
+                    then
+                      text = if value.of().isKindOf(Enum) then value.name().toString() else value.toString() end
+                    in
+                      localResult := localResult.append([[name.toString(), text]])
+                    end
+                  end
+                end
+              end
+            end;
+            result := result.append([[objectName.toString(), localResult]])
+          end          
+        end;
+    	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+
     @Operation getSlots(requestID : Seq(Integer), objectName, slotList)
       let
         result = []
@@ -573,6 +609,51 @@ context FmmlxDiagrams
       end
     end
 
+    @Operation getAllOperationValues(requestID : Seq(Integer), objectOpValList)
+      let 
+        result = [];
+        p = self.getPackage(requestID)   
+      in
+        @For objectOpValElement in objectOpValList do
+          let
+            localResult = [];
+            objectName = self.vector2Seq(objectOpValElement).at(0);
+            opNames = self.vector2Seq(objectOpValElement).at(1)
+          in
+            @For n in opNames do
+              n.println();
+              let
+                opResult = FmmlxDiagrams::FmmlxManipulator().evalString(objectName + "." + n + "()", p)
+              then
+                value = opResult.at(0);
+                error = opResult.at(1);
+                monMin = false;//o.hasProperty("monitorMin");
+                monMax = false//o.hasProperty("monitorMax")
+              then
+                minVal = null;//if monMin then FmmlxDiagramClient::getOpProp(o, "monitorMin") else null end;
+                maxVal = null//if monMax then FmmlxDiagramClient::getOpProp(o, "monitorMax") else null end
+              then
+                hasRange = monMin or monMax or error <> null;
+                isInRange = (error = null) andthen
+                        if monMin then minVal <= value else true end andthen
+                        if monMax then maxVal >= value else true end
+              in
+                localResult := localResult.append([[
+                  n,
+                  if error = null then value.toString() else error.toString() end, // error should be of type String
+                  hasRange,
+                  isInRange]])
+              end // let
+            end; // for names
+            localResult.println();
+            result := result.append([[objectName.toString(), localResult]])
+          end          
+        end;
+        result.println();
+    	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation getOperationValues(requestID : Seq(Integer), objectName, opNames)
       let
         result = [];
@@ -602,8 +683,6 @@ context FmmlxDiagrams
               isInRange]])
           end // let
         end; // for names
-//          end // if obj <> null
-//        end; // for obj
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
@@ -943,14 +1022,50 @@ context FmmlxDiagrams
             end
     end
     
-    @Operation classify(requestID : Seq(Integer), classNames)
+    @Operation classify(requestID : Seq(Integer), objectNames, newClassName)
+      ////// TEST
       "classify".println();
-      classNames := vector2Seq(classNames);
-      classNames.println();
-      classNames.of().println();
-      
-      null
+      objectNames := self.vector2Seq(objectNames);
+      objectNames.println();
+      objectNames.of().println();
+      //////
+      let
+        instances = [];
+        m = FmmlxDiagrams::FmmlxManipulator();
+        problems = [];
+        level = null
+      in
+        @For oName in objectNames do
+          let 
+            instance = if self.getPackage(requestID).hasElement(oName) then self.getPackage(requestID).getElement(oName) else null end
+          in
+            problems := problems + if instance = null then ["element " + oName + " does not exist."] else [] end;
+            instances := instances + [instance];
+            if level = null then level:=instance.level end;
+	        problems := problems + if instance.level <> level then ["element " + oName + " is on wrong level."] else [] end
+          end
+        end;
+        ("level: " + level).println();
+        ("problems: " + problems).println();
+        problems := problems + if not Symbol(newClassName).isValidName() then ["name " + newClassName + " not legal."] else [] end;
+        problems := problems + if self.getPackage(requestID).hasElement(newClassName) then ["name " + newClassName + " already in use."] else [] end;
+        if problems.isEmpty() then
+          let
+            newClass = m.addMetaClass(self.getPackage(requestID), newClassName, level+1, [], false)
+          then
+            mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass)
+          in
+            ("newClass: " + newClass).println();
+            @For instance in instances do
+               problems := problems + ["element " + instance.name + " cannot be migrated yet. Please try again in a later version."]
+            end
+            ;("problems: " + problems).println()
+          end
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), if problems.isEmpty() then [] else [problems.at(0)] end])
+      end
     end
+    
 
     @Operation removeClass(requestID : Seq(Integer), className, strategy)
       let
@@ -2541,7 +2656,10 @@ context FmmlxDiagrams
                slots = class.slots()
              then
                slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMML::MetaClass)).name
-             in
+             in 
+               // evil unorthodox hack
+               slotNames := slotNames + {"lastUpdated".asSymbol()};
+
                @For slot in slots do
                  if slotNames.contains(slot.name) then
                    log := log + [["changeSlotValue", ["package", class.owner.path()],
