@@ -2976,4 +2976,47 @@ context FmmlxDiagrams
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).options])
     end
     
+    @Operation checkSyntax(requestID : Seq(Integer), opString : String)
+      let
+        problems = [];
+        opAS = null;
+        opASfun = null;
+        operation = null;
+        result = null
+      in 
+        // first parse
+        opAS := try [OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}),null] catch(exception) [null,[exception]] end;
+
+        // then compile
+        if 
+          opAS.at(0) <> null 
+        then 
+          opASfun := try [Compiler::compileToFun("",opAS.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,[exception]] end
+        else
+          opASfun := opAS
+        end;
+
+        // create an instance of the operation
+        if 
+          opASfun.at(0) <> null
+        then 
+          operation := try [(opASfun.at(0))(),null] catch(exception) [null,[exception]] end
+        else
+          operation := opASfun
+        end;
+        
+        if 
+          operation.at(0) = null
+        then // otherwise leave result at []
+          let 
+            exception = operation.at(1)
+          in
+            result := [exception.message, exception.lineCount, exception.charCount]
+          end
+        end;
+        
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
 end
