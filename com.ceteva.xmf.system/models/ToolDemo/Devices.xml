@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XModeler>
+  <Version>2</Version>
+  <Categories/>
+  <Projects>
+    <Project name="Root::Devices"/>
+  </Projects>
+  <Diagrams>
+    <Diagram label="Peripherals" package_path="Root::Devices" showConstraintReports="true" showConstraints="true" showDerivedAttributes="true" showDerivedOperations="false" showGettersAndSetters="false" showMetaClassName="false" showOperationValues="true" showOperations="true" showSlots="true">
+      <Categories/>
+      <Owners/>
+      <Objects>
+        <Object hidden="false" ref="Root::Devices::PeripheralDevice" x="151" y="15"/>
+        <Object hidden="false" ref="Root::Devices::CPL_844" x="113" y="450"/>
+        <Object hidden="false" ref="Root::Devices::p352" x="214" y="660"/>
+        <Object hidden="false" ref="Root::Devices::Printer" x="110" y="195"/>
+      </Objects>
+      <Edges/>
+      <Labels/>
+      <Preferences/>
+      <View name="Main View" tx="30.0" ty="31.388664" xx="1.0"/>
+    </Diagram>
+  </Diagrams>
+  <Logs>
+    <addMetaClass abstract="false" level="3" name="PeripheralDevice" package="Root::Devices" parents=""/>
+    <addInstance abstract="false" name="Printer" of="Root::Devices::PeripheralDevice" package="Root::Devices" parents=""/>
+    <addInstance abstract="false" name="CPL_844" of="Root::Devices::Printer" package="Root::Devices" parents=""/>
+    <addInstance abstract="false" name="p352" of="Root::Devices::CPL_844" package="Root::Devices" parents=""/>
+    <addAttribute class="Root::Devices::PeripheralDevice" level="0" multiplicity="Seq{1,1,true,false}" name="partPrice" package="Root::Devices" type="Root::Auxiliary::MonetaryValue"/>
+    <addAttribute class="Root::Devices::PeripheralDevice" level="0" multiplicity="Seq{1,1,true,false}" name="serialNo" package="Root::Devices" type="Root::XCore::String"/>
+    <addAttribute class="Root::Devices::PeripheralDevice" level="1" multiplicity="Seq{1,1,true,false}" name="salesPrice" package="Root::Devices" type="Root::Auxiliary::MonetaryValue"/>
+    <addAttribute class="Root::Devices::PeripheralDevice" level="2" multiplicity="Seq{1,1,true,false}" name="maxModels" package="Root::Devices" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Devices::Printer" level="1" multiplicity="Seq{1,1,true,false}" name="pagesPerMin" package="Root::Devices" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Devices::Printer" level="1" multiplicity="Seq{1,1,true,false}" name="resolution" package="Root::Devices" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation revenues[monitor=true]():Auxiliary::MonetaryValue&#10;  Auxiliary::MonetaryValue(6382.38,Auxiliary::Currency(&quot; EUR&quot;,&quot;EURO&quot;,1))&#10;end" class="Root::Devices::Printer" level="1" monitored="true" name="revenues" package="Root::Devices" paramNames="" paramTypes="" type="Root::Auxiliary::MonetaryValue"/>
+    <addOperation body="@Operation totalRevenues[monitor=true,delToClassAllowed=true]():Auxiliary::MonetaryValue&#10;  Auxiliary::MonetaryValue(45926.78,Auxiliary::Currency(&quot; EUR&quot;,&quot;EURO&quot;,1))&#10;end" class="Root::Devices::PeripheralDevice" level="2" monitored="true" name="totalRevenues" package="Root::Devices" paramNames="" paramTypes="" type="Root::Auxiliary::MonetaryValue"/>
+    <changeSlotValue class="Root::Devices::CPL_844" package="Root::Devices" slotName="pagesPerMin" valueToBeParsed="0"/>
+    <changeSlotValue class="Root::Devices::CPL_844" package="Root::Devices" slotName="resolution" valueToBeParsed="0"/>
+    <changeSlotValue class="Root::Devices::CPL_844" package="Root::Devices" slotName="salesPrice" valueToBeParsed="Auxiliary::MonetaryValue(199.99, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::Devices::Printer" package="Root::Devices" slotName="maxModels" valueToBeParsed="10"/>
+    <changeSlotValue class="Root::Devices::p352" package="Root::Devices" slotName="partPrice" valueToBeParsed="Auxiliary::MonetaryValue(189.99, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::Devices::p352" package="Root::Devices" slotName="serialNo" valueToBeParsed="[80,82,95,112,51,53,50].asString()"/>
+  </Logs>
+</XModeler>
