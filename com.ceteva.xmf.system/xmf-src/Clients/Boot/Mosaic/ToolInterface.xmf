@@ -65,7 +65,14 @@ in
     )
   );
 
-
+registry.addContribution(id,
+    TypeLessContribution(
+      Seq{
+        Seq{"&Browse","Projects","Unhide Console"},
+        Root::unhideConsole
+      }
+    )
+  );
 
   registry.addContribution(id,
     TypeLessContribution(
@@ -105,14 +112,15 @@ in
 //    )
 //  );
 
-  registry.addContribution(id,
-    TypeLessContribution(
+/*  registry.addContribution(id,
+   TypeLessContribution(
       Seq{
-        Seq{"&File","Other","&Show Welcome Page"},
-        Root::showWelcomePage
-      }
+       Seq{"&File","Other","&Show Welcome Page"},
+       Root::showWelcomePage
+     }
     )
   );
+*/
   
   registry.addContribution(id,
     TypeLessContribution(
@@ -126,7 +134,7 @@ in
   registry.addContribution(id,
     TypeLessContribution(
       Seq{
-        Seq{"&File","File","Open File ..."},
+        Seq{"&File","File","Open XMF File"},
         Root::openSingleFile
       }
     )
@@ -135,13 +143,13 @@ in
    registry.addContribution(id,
      TypeLessContribution(
        Seq{
-         Seq{"&File","File","Open Xml File ..."},
+         Seq{"&File","File","Load Model"},
          Root::openXmlFile
        }
      )
    );
 
-  /* registry.addContribution(id,
+/* registry.addContribution(id,
     TypeLessContribution(
       Seq{
         Seq{"&File","Projects","Load Image"},
@@ -150,7 +158,8 @@ in
  		end
       }
     )
-  ); */
+  ); 
+*/
 
   registry.addContribution(id,
     TypeLessContribution(
@@ -159,18 +168,8 @@ in
         Arrays::importAndEditCSV
       }
     )
-  );
-
-  registry.addContribution(id,
-    TypeLessContribution(
-      Seq{
-        Seq{"&File","File","Unhide Console"},
-        Root::unhideConsole
-      }
-    )
   )
-
-
+  
 end;
 
 // namespace view protection
