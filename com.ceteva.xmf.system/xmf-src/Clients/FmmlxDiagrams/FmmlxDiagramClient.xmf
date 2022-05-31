@@ -552,9 +552,7 @@ context FmmlxDiagrams
       let 
         result = []
       in
-        //objectSlotList.println();
         @For objectSlotElement in objectSlotList do
-          //objectSlotElement.println();
           let
             localResult = [];
             objectName = self.vector2Seq(objectSlotElement).at(0);
@@ -645,11 +643,9 @@ context FmmlxDiagrams
                   isInRange]])
               end // let
             end; // for names
-            localResult.println();
             result := result.append([[objectName.toString(), localResult]])
           end          
         end;
-        result.println();
     	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
@@ -2985,14 +2981,15 @@ context FmmlxDiagrams
         result = null
       in 
         // first parse
-        opAS := try [OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}),null] catch(exception) [null,[exception]] end;
+        opAS := try [OCL::OCL.grammar.parseString(opString,"Exp1",Seq{XOCL}),null] catch(exception) [null, exception] end;
 
         // then compile
         if 
           opAS.at(0) <> null 
         then 
-          opASfun := try [Compiler::compileToFun("",opAS.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null,[exception]] end
+          opASfun := try [Compiler::compileToFun("",opAS.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null, exception] end
         else
+          opAS.at(1).pprint();
           opASfun := opAS
         end;
 
@@ -3000,7 +2997,7 @@ context FmmlxDiagrams
         if 
           opASfun.at(0) <> null
         then 
-          operation := try [(opASfun.at(0))(),null] catch(exception) [null,[exception]] end
+          operation := try [(opASfun.at(0))(),null] catch(exception) [null, exception] end
         else
           operation := opASfun
         end;
@@ -3011,7 +3008,7 @@ context FmmlxDiagrams
           let 
             exception = operation.at(1)
           in
-            result := [exception.message, exception.lineCount, exception.charCount]
+            result := [exception.message, exception.lineCount, exception.charCount, exception.pprint(), exception.errorPos]
           end
         end;
         
