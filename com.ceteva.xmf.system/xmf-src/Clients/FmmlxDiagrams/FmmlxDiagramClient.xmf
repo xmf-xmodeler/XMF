@@ -2989,7 +2989,6 @@ context FmmlxDiagrams
         then 
           opASfun := try [Compiler::compileToFun("",opAS.at(0),Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true),null] catch(exception) [null, exception] end
         else
-          opAS.at(1).pprint();
           opASfun := opAS
         end;
 
@@ -3007,8 +3006,14 @@ context FmmlxDiagrams
         then // otherwise leave result at []
           let 
             exception = operation.at(1)
+//          then
+//            ep = try exception.errorPos catch(e) -1 end
           in
-            result := [exception.message, exception.lineCount, exception.charCount, exception.pprint(), exception.errorPos]
+            result := [exception.message]//, 
+//                       exception.lineCount, 
+//                       exception.charCount, 
+//                       exception.pprint(), 
+//                       ep]
           end
         end;
         
