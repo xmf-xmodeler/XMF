@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XModeler>
+    
+  <Version>2</Version>
+    
+  <Categories/>
+    
+  <Projects>
+    <Project name="Root::Invoicing"/>
+  </Projects>
+    
+  <Diagrams>
+    <Diagram label="Diagram Invoicing" package_path="Root::Invoicing" showDerivedAttributes="true" showDerivedOperations="true" showGettersAndSetters="true" showOperationValues="true" showOperations="true" showSlots="true">
+      <Categories/>
+      <Owners/>
+      <Objects>
+        <Object hidden="false" ref="Root::Invoicing::CustomerManager" x="-271" y="153"/>
+        <Object hidden="false" ref="Root::Invoicing::HP200" x="1483" y="607"/>
+        <Object hidden="false" ref="Root::Invoicing::InvoiceItem" x="877" y="533"/>
+        <Object hidden="false" ref="Root::Invoicing::customer1" x="-124" y="1108"/>
+        <Object hidden="false" ref="Root::Invoicing::customer2" x="1650" y="1730"/>
+        <Object hidden="false" ref="Root::Invoicing::ABC50" x="1485" y="832"/>
+        <Object hidden="false" ref="Root::Invoicing::customer3" x="263" y="1280"/>
+        <Object hidden="false" ref="Root::Invoicing::TV_Set" x="1971" y="222"/>
+        <Object hidden="false" ref="Root::Invoicing::i22" x="917" y="1268"/>
+        <Object hidden="false" ref="Root::Invoicing::InvoiceManager" x="903" y="205"/>
+        <Object hidden="false" ref="Root::Invoicing::i23" x="2108" y="1244"/>
+        <Object hidden="false" ref="Root::Invoicing::Customer" x="-107" y="452"/>
+        <Object hidden="false" ref="Root::Invoicing::hP2002" x="2077" y="865"/>
+        <Object hidden="false" ref="Root::Invoicing::Product" x="1451" y="-47"/>
+        <Object hidden="false" ref="Root::Invoicing::SonyX3" x="2052" y="503"/>
+        <Object hidden="false" ref="Root::Invoicing::ProductManager" x="798" y="28"/>
+        <Object hidden="false" ref="Root::Invoicing::Printer" x="1578" y="247"/>
+        <Object hidden="false" ref="Root::Invoicing::productManager1" x="1114" y="751"/>
+        <Object hidden="false" ref="Root::Invoicing::customerManager1" x="-310" y="842"/>
+        <Object hidden="false" ref="Root::Invoicing::Invoice" x="297" y="427"/>
+        <Object hidden="false" ref="Root::Invoicing::BusinessDocument" x="445" y="261"/>
+        <Object hidden="false" ref="Root::Invoicing::invoiceManager1" x="61" y="817"/>
+        <Object hidden="false" ref="Root::Invoicing::i3" x="443" y="1644"/>
+        <Object hidden="false" ref="Root::Invoicing::hP2001" x="1216" y="927"/>
+        <Object hidden="false" ref="Root::Invoicing::invoice2" x="901" y="1521"/>
+        <Object hidden="false" ref="Root::Invoicing::i1" x="806" y="815"/>
+        <Object hidden="false" ref="Root::Invoicing::i2" x="773" y="1097"/>
+        <Object hidden="false" ref="Root::Invoicing::invoice1" x="279" y="950"/>
+        <Object hidden="false" ref="Root::Invoicing::aBC501" x="1340" y="1100"/>
+      </Objects>
+      <Edges>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i2/Root::Invoicing::aBC501/Root::Invoicing::refersTo" source_port="null" target_port="null" type="link">
+          <IntermediatePoints/>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i1/Root::Invoicing::includes" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="604.45306" y="1004.15045"/>
+            <IntermediatePoint x="604.45306" y="861.7422"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i1/Root::Invoicing::aBC501/Root::Invoicing::refersTo" source_port="null" target_port="null" type="link">
+          <IntermediatePoints/>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::customer2/Root::Invoicing::issuedFor" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1501.7783" y="1642.0107"/>
+            <IntermediatePoint x="1501.7783" y="1809.1738"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i2/Root::Invoicing::hP2001/Root::Invoicing::refersTo" source_port="null" target_port="null" type="link">
+          <IntermediatePoints/>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::customerManager1/Root::Invoicing::customer1/Root::Invoicing::selected" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="-18.493408" y="864.1211"/>
+            <IntermediatePoint x="-18.493408" y="1187.5725"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::i22/Root::Invoicing::includes" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="956.1382" y="1561.3369"/>
+            <IntermediatePoint x="956.1382" y="1314.7422"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::customer1/Root::Invoicing::issuedFor" source_port="WEST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="360.5" y="1004.15045"/>
+            <IntermediatePoint x="360.5" y="1187.1738"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="issuedFor" parent_association="VOID" ref="Root::Invoicing::issuedFor" source_port="WEST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="390.25" y="612.2793"/>
+            <IntermediatePoint x="390.25" y="615.6582"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i3/Root::Invoicing::aBC501/Root::Invoicing::refersTo" source_port="NORTH" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="0.0" y="1614.0"/>
+            <IntermediatePoint x="952.9514" y="1614.0"/>
+            <IntermediatePoint x="952.9514" y="1167.8633"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="InheritanceMapping: Root::Invoicing::Invoice/Root::Invoicing::BusinessDocument" source_port="NORTH" target_port="SOUTH" type="inheritance">
+          <IntermediatePoints>
+            <IntermediatePoint x="513.6201" y="420.75"/>
+            <IntermediatePoint x="569.875" y="420.75"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::productManager1/Root::Invoicing::HP200/Root::Invoicing::selectedProduct1" source_port="NORTH" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1199.0815" y="721.0"/>
+            <IntermediatePoint x="1425.0149" y="721.0"/>
+            <IntermediatePoint x="1425.0149" y="717.6913"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i1/Root::Invoicing::hP2001/Root::Invoicing::refersTo" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="998.5" y="861.26196"/>
+            <IntermediatePoint x="998.5" y="972.2422"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i3/Root::Invoicing::includes" source_port="WEST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="295.28467" y="1057.5651"/>
+            <IntermediatePoint x="295.28467" y="1703.0586"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selected" parent_association="VOID" ref="Root::Invoicing::selected" source_port="EAST" target_port="NORTH" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="9.308482" y="187.43164"/>
+            <IntermediatePoint x="9.308482" y="422.0"/>
+            <IntermediatePoint x="13.698242" y="422.0"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="refersTo" parent_association="VOID" ref="Root::Invoicing::refersTo" source_port="EAST" target_port="SOUTH" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1290.0" y="650.7973"/>
+            <IntermediatePoint x="1290.0" y="192.44379"/>
+            <IntermediatePoint x="1614.6517" y="192.44379"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::i23/Root::Invoicing::includes" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1519.7783" y="1601.6738"/>
+            <IntermediatePoint x="1519.7783" y="1306.3229"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selectedItem" parent_association="VOID" ref="Root::Invoicing::selectedItem" source_port="EAST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1268.6666" y="314.60547"/>
+            <IntermediatePoint x="1268.6666" y="592.14105"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i2/Root::Invoicing::includes" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="651.75" y="1057.933"/>
+            <IntermediatePoint x="651.75" y="1143.7422"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="includes" parent_association="VOID" ref="Root::Invoicing::includes" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="722.75" y="661.625"/>
+            <IntermediatePoint x="722.75" y="621.4692"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i23/Root::Invoicing::hP2001/Root::Invoicing::refersTo" source_port="WEST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1469.6724" y="1275.0259"/>
+            <IntermediatePoint x="1469.6724" y="972.2422"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i22/Root::Invoicing::aBC501/Root::Invoicing::refersTo" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1282.4514" y="1314.4246"/>
+            <IntermediatePoint x="1282.4514" y="1160.3229"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selectedProduct1" parent_association="VOID" ref="Root::Invoicing::selectedProduct1" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1266.3783" y="96.33281"/>
+            <IntermediatePoint x="1266.3783" y="70.3125"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selectedProduct0" parent_association="VOID" ref="Root::Invoicing::selectedProduct0" source_port="EAST" target_port="SOUTH" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1235.6484" y="117.68437"/>
+            <IntermediatePoint x="1235.6484" y="158.96875"/>
+            <IntermediatePoint x="0.0" y="158.96875"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::invoiceManager1/Root::Invoicing::invoice1/Root::Invoicing::selectedInvoice" source_port="WEST" target_port="NORTH" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="509.83505" y="863.7422"/>
+            <IntermediatePoint x="509.83505" y="908.7417"/>
+            <IntermediatePoint x="420.65048" y="908.7417"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selectedProduct2" parent_association="VOID" ref="Root::Invoicing::selectedProduct2" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1239.6484" y="73.711716"/>
+            <IntermediatePoint x="1239.6484" y="23.3875"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="selectedInvoice" parent_association="VOID" ref="Root::Invoicing::selectedInvoice" source_port="WEST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="866.6667" y="314.60547"/>
+            <IntermediatePoint x="866.6667" y="550.51953"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::productManager1/Root::Invoicing::hP2001/Root::Invoicing::selectedProduct0" source_port="EAST" target_port="NORTH" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1417.6763" y="773.1211"/>
+            <IntermediatePoint x="1417.6763" y="885.8207"/>
+            <IntermediatePoint x="1271.4224" y="885.8207"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::Invoicing::i3/Root::Invoicing::hP2001/Root::Invoicing::refersTo" source_port="null" target_port="null" type="link">
+          <IntermediatePoints/>
+        </Edge>
+      </Edges>
+      <Labels>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::i22/Root::Invoicing::aBC501/Root::Invoicing::refersTo" x="0.0" y="-27.93164"/>
+        <Label localID="0" ownerID="Root::Invoicing::includes" x="7.3333335" y="-16.598305"/>
+        <Label localID="0" ownerID="Root::Invoicing::selectedProduct2" x="57.06094" y="-20.150599"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::i22/Root::Invoicing::includes" x="0.0" y="-27.93164"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::i23/Root::Invoicing::includes" x="0.0" y="-27.93164"/>
+        <Label localID="2" ownerID="Root::Invoicing::includes" x="143.80273" y="-57.94922"/>
+        <Label localID="4" ownerID="Root::Invoicing::selectedProduct2" x="132.73877" y="34.083202"/>
+        <Label localID="5" ownerID="Root::Invoicing::selectedProduct2" x="-135.66455" y="10.0"/>
+        <Label localID="2" ownerID="Root::Invoicing::selectedProduct2" x="132.73877" y="-4.5378904"/>
+        <Label localID="3" ownerID="Root::Invoicing::selectedProduct2" x="-122.04736" y="-28.621094"/>
+        <Label localID="5" ownerID="Root::Invoicing::selectedProduct1" x="-135.66455" y="38.026367"/>
+        <Label localID="5" ownerID="Root::Invoicing::selected" x="-127.32471" y="10.0"/>
+        <Label localID="3" ownerID="Root::Invoicing::selected" x="-113.70752" y="-28.621094"/>
+        <Label localID="4" ownerID="Root::Invoicing::selected" x="130.69824" y="-44.552734"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::i23/Root::Invoicing::hP2001/Root::Invoicing::refersTo" x="0.0" y="-27.93164"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i2/Root::Invoicing::includes" x="15.9270115" y="-5.775887"/>
+        <Label localID="2" ownerID="Root::Invoicing::selected" x="130.69824" y="-83.17383"/>
+        <Label localID="0" ownerID="Root::Invoicing::selectedProduct1" x="29.395031" y="-81.53434"/>
+        <Label localID="0" ownerID="Root::Invoicing::selected" x="3.4582388" y="-221.59302"/>
+        <Label localID="3" ownerID="Root::Invoicing::selectedProduct1" x="-122.04736" y="-0.59472656"/>
+        <Label localID="4" ownerID="Root::Invoicing::selectedProduct1" x="132.73877" y="-14.083203"/>
+        <Label localID="2" ownerID="Root::Invoicing::selectedProduct1" x="132.73877" y="-52.704296"/>
+        <Label localID="5" ownerID="Root::Invoicing::selectedProduct0" x="-135.66455" y="-18.026367"/>
+        <Label localID="4" ownerID="Root::Invoicing::selectedProduct0" x="132.73877" y="82.24961"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice2/Root::Invoicing::customer2/Root::Invoicing::issuedFor" x="0.0" y="-27.93164"/>
+        <Label localID="4" ownerID="Root::Invoicing::selectedInvoice" x="226.62012" y="10.0"/>
+        <Label localID="5" ownerID="Root::Invoicing::selectedInvoice" x="-177.3501" y="46.535156"/>
+        <Label localID="2" ownerID="Root::Invoicing::selectedInvoice" x="226.62012" y="-28.621094"/>
+        <Label localID="3" ownerID="Root::Invoicing::selectedInvoice" x="-163.73291" y="7.9140625"/>
+        <Label localID="0" ownerID="Root::Invoicing::selectedInvoice" x="-48.0" y="-167.26497"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::customer1/Root::Invoicing::issuedFor" x="-37.041386" y="45.95323"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::productManager1/Root::Invoicing::HP200/Root::Invoicing::selectedProduct1" x="-168.58914" y="-40.900036"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoiceManager1/Root::Invoicing::invoice1/Root::Invoicing::selectedInvoice" x="-98.55981" y="-141.18896"/>
+        <Label localID="0" ownerID="Root::Invoicing::selectedProduct0" x="49.279903" y="68.034485"/>
+        <Label localID="3" ownerID="Root::Invoicing::selectedProduct0" x="-122.04736" y="-56.64746"/>
+        <Label localID="2" ownerID="Root::Invoicing::selectedProduct0" x="132.73877" y="43.628517"/>
+        <Label localID="4" ownerID="Root::Invoicing::includes" x="143.80273" y="-19.328125"/>
+        <Label localID="3" ownerID="Root::Invoicing::includes" x="-234.16699" y="-90.38086"/>
+        <Label localID="5" ownerID="Root::Invoicing::includes" x="-234.16699" y="-51.759766"/>
+        <Label localID="2" ownerID="Root::Invoicing::refersTo" x="132.73877" y="-100.870705"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::productManager1/Root::Invoicing::hP2001/Root::Invoicing::selectedProduct0" x="90.77877" y="-124.76233"/>
+        <Label localID="3" ownerID="Root::Invoicing::refersTo" x="-151.34961" y="-28.621094"/>
+        <Label localID="4" ownerID="Root::Invoicing::refersTo" x="132.73877" y="-62.24961"/>
+        <Label localID="0" ownerID="Root::Invoicing::issuedFor" x="-49.875095" y="-31.308634"/>
+        <Label localID="5" ownerID="Root::Invoicing::refersTo" x="-163.25781" y="10.0"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i3/Root::Invoicing::includes" x="0.0" y="-27.93164"/>
+        <Label localID="3" ownerID="Root::Invoicing::issuedFor" x="-234.16699" y="33.13867"/>
+        <Label localID="2" ownerID="Root::Invoicing::issuedFor" x="130.69824" y="25.93164"/>
+        <Label localID="5" ownerID="Root::Invoicing::issuedFor" x="-246.0752" y="71.759766"/>
+        <Label localID="0" ownerID="Root::Invoicing::refersTo" x="81.93679" y="-150.19273"/>
+        <Label localID="4" ownerID="Root::Invoicing::issuedFor" x="130.69824" y="64.552734"/>
+        <Label localID="0" ownerID="Root::Invoicing::selectedItem" x="135.40633" y="79.318924"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::i1/Root::Invoicing::hP2001/Root::Invoicing::refersTo" x="-24.0" y="-30.661518"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::customerManager1/Root::Invoicing::customer1/Root::Invoicing::selected" x="-25.072231" y="-174.47452"/>
+        <Label localID="4" ownerID="Root::Invoicing::selectedItem" x="143.80273" y="39.328125"/>
+        <Label localID="5" ownerID="Root::Invoicing::selectedItem" x="-177.3501" y="-26.535156"/>
+        <Label localID="2" ownerID="Root::Invoicing::selectedItem" x="143.80273" y="0.70703125"/>
+        <Label localID="3" ownerID="Root::Invoicing::selectedItem" x="-163.73291" y="-65.15625"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::Invoicing::invoice1/Root::Invoicing::i1/Root::Invoicing::includes" x="-4.5726094" y="-45.297333"/>
+      </Labels>
+      <Preferences/>
+      <View name="default view" tx="-100.80014" ty="-122.66226" xx="0.45850196"/>
+    </Diagram>
+  </Diagrams>
+    
+  <Logs>
+    <addMetaClass abstract="false" level="3" name="Product" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="ProductManager" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="CustomerManager" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="BusinessDocument" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Invoice" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Customer" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="InvoiceItem" package="Root::Invoicing" parents=""/>
+    <addMetaClass abstract="false" level="1" name="InvoiceManager" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="Printer" of="Root::Invoicing::Product" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="TV_Set" of="Root::Invoicing::Product" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="SonyX3" of="Root::Invoicing::TV_Set" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="HP200" of="Root::Invoicing::Printer" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="ABC50" of="Root::Invoicing::Printer" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="i3" of="Root::Invoicing::InvoiceItem" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="customer3" of="Root::Invoicing::Customer" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="customer2" of="Root::Invoicing::Customer" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="customerManager1" of="Root::Invoicing::CustomerManager" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="hP2001" of="Root::Invoicing::HP200" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="hP2002" of="Root::Invoicing::HP200" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="aBC501" of="Root::Invoicing::ABC50" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="invoice1" of="Root::Invoicing::Invoice" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="customer1" of="Root::Invoicing::Customer" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="i1" of="Root::Invoicing::InvoiceItem" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="invoiceManager1" of="Root::Invoicing::InvoiceManager" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="productManager1" of="Root::Invoicing::ProductManager" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="invoice2" of="Root::Invoicing::Invoice" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="i22" of="Root::Invoicing::InvoiceItem" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="i23" of="Root::Invoicing::InvoiceItem" package="Root::Invoicing" parents=""/>
+    <addInstance abstract="false" name="i2" of="Root::Invoicing::InvoiceItem" package="Root::Invoicing" parents=""/>
+    <changeParent class="Root::Invoicing::Invoice" new="Root::Invoicing::BusinessDocument" old="" package="Root::Invoicing"/>
+    <addAttribute class="Root::Invoicing::BusinessDocument" level="0" multiplicity="Seq{1,1,true,false}" name="creationDate" package="Root::Invoicing" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::Invoicing::Customer" level="0" multiplicity="Seq{1,1,true,false}" name="dateOfBirth" package="Root::Invoicing" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::Invoicing::Customer" level="0" multiplicity="Seq{1,1,true,false}" name="firstName" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::Customer" level="0" multiplicity="Seq{1,1,true,false}" name="id" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::Customer" level="0" multiplicity="Seq{1,1,true,false}" name="lastName" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::Invoice" level="0" multiplicity="Seq{1,1,true,false}" name="id" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::InvoiceItem" level="0" multiplicity="Seq{1,1,true,false}" name="amount" package="Root::Invoicing" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Invoicing::InvoiceManager" level="0" multiplicity="Seq{1,1,true,false}" name="currentInvoiceNo" package="Root::Invoicing" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Invoicing::Printer" level="0" multiplicity="Seq{1,1,true,false}" name="serialNo" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::Printer" level="1" multiplicity="Seq{1,1,true,false}" name="pagesPerMin" package="Root::Invoicing" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Invoicing::Product" level="0" multiplicity="Seq{1,1,true,false}" name="productID" package="Root::Invoicing" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::Invoicing::Product" level="1" multiplicity="Seq{1,1,true,false}" name="salesPrice" package="Root::Invoicing" type="Root::XCore::Float"/>
+    <addAttribute class="Root::Invoicing::Product" level="2" multiplicity="Seq{1,1,true,false}" name="unit" package="Root::Invoicing" type="Root::XCore::String"/>
+    <addAttribute class="Root::Invoicing::TV_Set" level="1" multiplicity="Seq{1,1,true,false}" name="screenSize" package="Root::Invoicing" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation addInvoiceItem[monitor=false,delToClassAllowed=false]():XCore::Boolean&#10;  null&#10;end" class="Root::Invoicing::InvoiceManager" level="0" monitored="false" name="addInvoiceItem" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Boolean"/>
+    <addOperation body="@Operation age[monitor=true]():XCore::Integer&#10;  if self.dateOfBirth &lt;&gt; null&#10;  then self.dateOfBirth.age()&#10;  else &quot;No date of birth entered&quot;&#10;  end &#10;end" class="Root::Invoicing::Customer" level="0" monitored="true" name="age" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation changeCustomer[monitor=false,delToClassAllowed=false](customer : XCore::String):XCore::String&#10;  let a = Clients::FmmlxDiagrams::FmmlxManipulator()&#10;  in @For cust in Invoicing::Customer.allInstances() do&#10;       if (cust.id = customer)&#10;       then &#10;         a.removeAssociationInstance(Invoicing.getAssociation(&quot;issuedFor&quot;),self,self.getCustomer());&#10;         a.addAssociationInstance(Invoicing,self,cust,Invoicing.getAssociation(&quot;issuedFor&quot;))&#10;       else false&#10;       end &#10;     end&#10;  end&#10;end" class="Root::Invoicing::Invoice" level="0" monitored="false" name="changeCustomer" package="Root::Invoicing" paramNames="customer" paramTypes="Root::XCore::String" type="Root::XCore::String"/>
+    <addOperation body="@Operation changeProduct[monitor=false,delToClassAllowed=false](product : XCore::Element):XCore::Integer&#10;  let m = Clients::FmmlxDiagrams::FmmlxManipulator() then&#10;      b = self.owner.classes-&gt;select(a |&#10;            a.level = 0 andthen a.isDescendentOf(Invoicing::Product) andthen a.productID.equals(product))&#10;  in if b.size() &lt;&gt; 0&#10;     then &#10;       if try&#10;         self.getProduct();&#10;         true&#10;       catch(e)&#10;         false&#10;       end&#10;       then m.removeAssociationInstance(Invoicing.getAssociation(&quot;refersTo&quot;),self,self.getProduct())&#10;       else false&#10;       end ;&#10;       m.addAssociationInstance(Invoicing,self,b.asSeq().at(0),Invoicing.getAssociation(&quot;refersTo&quot;))&#10;     else false&#10;     end &#10;  end&#10;end" class="Root::Invoicing::InvoiceItem" level="0" monitored="false" name="changeProduct" package="Root::Invoicing" paramNames="product" paramTypes="Root::XCore::Element" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation createInvoiceItem[monitor=false,delToClassAllowed=false]():Invoicing::InvoiceItem&#10;  null&#10;end" class="Root::Invoicing::InvoiceManager" level="0" monitored="false" name="createInvoiceItem" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::Invoicing::InvoiceItem"/>
+    <addOperation body="@Operation deleteInvoiceItem[monitor=false,delToClassAllowed=false](i : Invoicing::InvoiceItem):XCore::Boolean&#10;  null&#10;end" class="Root::Invoicing::InvoiceManager" level="0" monitored="false" name="deleteInvoiceItem" package="Root::Invoicing" paramNames="i" paramTypes="Root::Invoicing::InvoiceItem" type="Root::XCore::Boolean"/>
+    <addOperation body="@Operation invoiceTotal[monitor=true]():XCore::Float&#10;  try&#10;    let sum = 0&#10;    in self.getInvoiceItems()-&gt;collect(i |&#10;         sum := sum + i.itemTotal());&#10;       sum&#10;    end&#10;  catch(e)&#10;    &quot;Invoice contains invalid item&quot;&#10;  end&#10;end" class="Root::Invoicing::Invoice" level="0" monitored="true" name="invoiceTotal" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Float"/>
+    <addOperation body="@Operation itemTotal[monitor=true]():XCore::Float&#10;  self.getProduct().of().getSalesPrice() * amount&#10;end" class="Root::Invoicing::InvoiceItem" level="0" monitored="true" name="itemTotal" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Float"/>
+    <addOperation body="@Operation newInvoiceItem[monitor=false,delToClassAllowed=false]():XCore::Element&#10;  let a = Clients::FmmlxDiagrams::FmmlxManipulator() then&#10;      ins = null then&#10;      i = 2&#10;  in @While Invoicing.hasElement(&quot;i&quot; + i) do&#10;       i := i + 1&#10;     end;&#10;     ins := a.addInstance(Invoicing,Invoicing::InvoiceItem,&quot;i&quot; + i,0,Seq{},false,Seq{});&#10;     a.addAssociationInstance(Invoicing,self,ins,Invoicing.getAssociation(&quot;includes&quot;))&#10;  end&#10;end" class="Root::Invoicing::Invoice" level="0" monitored="false" name="newInvoiceItem" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Element"/>
+    <addOperation body="@Operation noOfInvoices[monitor=true,delToClassAllowed=false]():XCore::Element&#10;  Invoicing::Invoice.allInstances().size()&#10;end" class="Root::Invoicing::Invoice" level="0" monitored="true" name="noOfInvoices" package="Root::Invoicing" paramNames="" paramTypes="" type="Root::XCore::Element"/>
+    <addOperation body="@Operation removeInvoiceItem[monitor=false,delToClassAllowed=false](invoiceItem : XCore::String):XCore::Element&#10;  let a = Clients::FmmlxDiagrams::FmmlxManipulator()&#10;  in a.removeAssociationInstance(Invoicing.getAssociation(&quot;includes&quot;),self,Invoicing.getElement(invoiceItem));&#10;     a.removeClass(Invoicing.getElement(invoiceItem),&quot;&quot;)&#10;  end&#10;end" class="Root::Invoicing::Invoice" level="0" monitored="false" name="removeInvoiceItem" package="Root::Invoicing" paramNames="invoiceItem" paramTypes="Root::XCore::String" type="Root::XCore::Element"/>
+    <addConstraint body="self.invoiceTotal() &lt;= 5000" class="Root::Invoicing::Invoice" constName="limit" instLevel="0" package="Root::Invoicing" reason="&quot;Total must not exceed 5.000.&quot;"/>
+    <changeSlotValue class="Root::Invoicing::ABC50" package="Root::Invoicing" slotName="pagesPerMin" valueToBeParsed="60"/>
+    <changeSlotValue class="Root::Invoicing::ABC50" package="Root::Invoicing" slotName="salesPrice" valueToBeParsed="69.9"/>
+    <changeSlotValue class="Root::Invoicing::HP200" package="Root::Invoicing" slotName="pagesPerMin" valueToBeParsed="100"/>
+    <changeSlotValue class="Root::Invoicing::HP200" package="Root::Invoicing" slotName="salesPrice" valueToBeParsed="109.99"/>
+    <changeSlotValue class="Root::Invoicing::Printer" package="Root::Invoicing" slotName="unit" valueToBeParsed="[112,105,101,99,101].asString()"/>
+    <changeSlotValue class="Root::Invoicing::SonyX3" package="Root::Invoicing" slotName="salesPrice" valueToBeParsed="555.99"/>
+    <changeSlotValue class="Root::Invoicing::SonyX3" package="Root::Invoicing" slotName="screenSize" valueToBeParsed="55"/>
+    <changeSlotValue class="Root::Invoicing::TV_Set" package="Root::Invoicing" slotName="unit" valueToBeParsed="[112,105,101,99,101].asString()"/>
+    <changeSlotValue class="Root::Invoicing::aBC501" package="Root::Invoicing" slotName="productID" valueToBeParsed="2"/>
+    <changeSlotValue class="Root::Invoicing::aBC501" package="Root::Invoicing" slotName="serialNo" valueToBeParsed="[65,50,48].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer1" package="Root::Invoicing" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(1992, 6, 12)"/>
+    <changeSlotValue class="Root::Invoicing::customer1" package="Root::Invoicing" slotName="firstName" valueToBeParsed="[74,105,109].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer1" package="Root::Invoicing" slotName="id" valueToBeParsed="[99,53,48,51].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer1" package="Root::Invoicing" slotName="lastName" valueToBeParsed="[83,109,105,116,104].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer2" package="Root::Invoicing" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(1998, 7, 31)"/>
+    <changeSlotValue class="Root::Invoicing::customer2" package="Root::Invoicing" slotName="firstName" valueToBeParsed="[78,105,110,97].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer2" package="Root::Invoicing" slotName="id" valueToBeParsed="[99,53,48,52].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer2" package="Root::Invoicing" slotName="lastName" valueToBeParsed="[72,105,109,109,101,108].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer3" package="Root::Invoicing" slotName="dateOfBirth" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::Invoicing::customer3" package="Root::Invoicing" slotName="firstName" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer3" package="Root::Invoicing" slotName="id" valueToBeParsed="[99,53,48,50].asString()"/>
+    <changeSlotValue class="Root::Invoicing::customer3" package="Root::Invoicing" slotName="lastName" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::Invoicing::hP2001" package="Root::Invoicing" slotName="productID" valueToBeParsed="1"/>
+    <changeSlotValue class="Root::Invoicing::hP2001" package="Root::Invoicing" slotName="serialNo" valueToBeParsed="[72,51,48,50].asString()"/>
+    <changeSlotValue class="Root::Invoicing::hP2002" package="Root::Invoicing" slotName="productID" valueToBeParsed="3"/>
+    <changeSlotValue class="Root::Invoicing::hP2002" package="Root::Invoicing" slotName="serialNo" valueToBeParsed="[72,51,48,51].asString()"/>
+    <changeSlotValue class="Root::Invoicing::i1" package="Root::Invoicing" slotName="amount" valueToBeParsed="70"/>
+    <changeSlotValue class="Root::Invoicing::i2" package="Root::Invoicing" slotName="amount" valueToBeParsed="50"/>
+    <changeSlotValue class="Root::Invoicing::i22" package="Root::Invoicing" slotName="amount" valueToBeParsed="5"/>
+    <changeSlotValue class="Root::Invoicing::i23" package="Root::Invoicing" slotName="amount" valueToBeParsed="10"/>
+    <changeSlotValue class="Root::Invoicing::i3" package="Root::Invoicing" slotName="amount" valueToBeParsed="20"/>
+    <changeSlotValue class="Root::Invoicing::invoice1" package="Root::Invoicing" slotName="creationDate" valueToBeParsed="Auxiliary::Date::createDate(2022, 4, 12)"/>
+    <changeSlotValue class="Root::Invoicing::invoice1" package="Root::Invoicing" slotName="id" valueToBeParsed="[73,56,48,48].asString()"/>
+    <changeSlotValue class="Root::Invoicing::invoice2" package="Root::Invoicing" slotName="creationDate" valueToBeParsed="Auxiliary::Date::createDate(1993, 4, 12)"/>
+    <changeSlotValue class="Root::Invoicing::invoice2" package="Root::Invoicing" slotName="id" valueToBeParsed="[73,57,48,48].asString()"/>
+    <changeSlotValue class="Root::Invoicing::invoiceManager1" package="Root::Invoicing" slotName="currentInvoiceNo" valueToBeParsed="0"/>
+    <addAssociation accessSourceFromTargetName="customerManager" accessTargetFromSourceName="actCustomer" classSource="Root::Invoicing::CustomerManager" classTarget="Root::Invoicing::Customer" fwName="selected" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="invoice" accessTargetFromSourceName="customer" classSource="Root::Invoicing::Invoice" classTarget="Root::Invoicing::Customer" fwName="issuedFor" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="invoice" accessTargetFromSourceName="invoiceItem" classSource="Root::Invoicing::Invoice" classTarget="Root::Invoicing::InvoiceItem" fwName="includes" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="invoiceItem" accessTargetFromSourceName="product" classSource="Root::Invoicing::InvoiceItem" classTarget="Root::Invoicing::Product" fwName="refersTo" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="invoiceManager" accessTargetFromSourceName="invoice" classSource="Root::Invoicing::InvoiceManager" classTarget="Root::Invoicing::Invoice" fwName="selectedInvoice" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="invoiceManager" accessTargetFromSourceName="invoiceItem" classSource="Root::Invoicing::InvoiceManager" classTarget="Root::Invoicing::InvoiceItem" fwName="selectedItem" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="productManager" accessTargetFromSourceName="actProduct1" classSource="Root::Invoicing::ProductManager" classTarget="Root::Invoicing::Product" fwName="selectedProduct1" instLevelSource="0" instLevelTarget="1" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="productManager" accessTargetFromSourceName="product" classSource="Root::Invoicing::ProductManager" classTarget="Root::Invoicing::Product" fwName="selectedProduct2" instLevelSource="0" instLevelTarget="2" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="productManager" accessTargetFromSourceName="selectedProduct0" classSource="Root::Invoicing::ProductManager" classTarget="Root::Invoicing::Product" fwName="selectedProduct0" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::Invoicing" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addLink classSource="Root::Invoicing::customerManager1" classTarget="Root::Invoicing::customer1" name="selected" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::i1" classTarget="Root::Invoicing::hP2001" name="refersTo" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::i2" classTarget="Root::Invoicing::aBC501" name="refersTo" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::i22" classTarget="Root::Invoicing::aBC501" name="refersTo" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::i23" classTarget="Root::Invoicing::hP2001" name="refersTo" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::i3" classTarget="Root::Invoicing::hP2001" name="refersTo" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice1" classTarget="Root::Invoicing::customer1" name="issuedFor" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice1" classTarget="Root::Invoicing::i1" name="includes" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice1" classTarget="Root::Invoicing::i2" name="includes" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice1" classTarget="Root::Invoicing::i3" name="includes" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice2" classTarget="Root::Invoicing::customer2" name="issuedFor" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice2" classTarget="Root::Invoicing::i22" name="includes" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoice2" classTarget="Root::Invoicing::i23" name="includes" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::invoiceManager1" classTarget="Root::Invoicing::invoice1" name="selectedInvoice" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::productManager1" classTarget="Root::Invoicing::HP200" name="selectedProduct1" package="Root::Invoicing"/>
+    <addLink classSource="Root::Invoicing::productManager1" classTarget="Root::Invoicing::hP2001" name="selectedProduct0" package="Root::Invoicing"/>
+  </Logs>
+  
+</XModeler>
