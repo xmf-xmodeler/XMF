@@ -3009,7 +3009,7 @@ context FmmlxDiagrams
 //          then
 //            ep = try exception.errorPos catch(e) -1 end
           in
-            result := [exception.message]//, 
+            result := [if exception = null then "Exception not found" else exception.message end]//, 
 //                       exception.lineCount, 
 //                       exception.charCount, 
 //                       exception.pprint(), 
