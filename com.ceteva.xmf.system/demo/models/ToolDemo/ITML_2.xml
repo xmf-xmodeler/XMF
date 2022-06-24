@@ -23,9 +23,9 @@
         <Object hidden="false" ref="Root::ITML::p1" x="871" y="821"/>
         <Object hidden="false" ref="Root::ITML::ERP1" x="654" y="532"/>
         <Object hidden="false" ref="Root::ITML::Desktop" x="305" y="370"/>
+        <Object hidden="false" ref="Root::ITML::Application" x="245" y="516"/>
         <Object hidden="false" ref="Root::ITML::Printer" x="-83" y="367"/>
         <Object hidden="false" ref="Root::ITML::OrgUnit" x="436" y="-102"/>
-        <Object hidden="false" ref="Root::ITML::Application" x="245" y="516"/>
         <Object hidden="false" ref="Root::ITML::SalesAgent" x="871" y="704"/>
         <Object hidden="false" ref="Root::ITML::e2" x="752" y="1012"/>
         <Object hidden="false" ref="Root::ITML::e1" x="681" y="821"/>
@@ -36,7 +36,7 @@
         <Object hidden="false" ref="Root::ITML::aCD_4001" x="-46" y="940"/>
         <Object hidden="false" ref="Root::ITML::Scanner" x="111" y="364"/>
         <Object hidden="false" ref="Root::ITML::Employee" x="843" y="359"/>
-        <Object hidden="false" ref="Root::ITML::aCD_4002" x="-27" y="1062"/>
+        <Object hidden="false" ref="Root::ITML::aCD_4002" x="-45" y="1091"/>
       </Objects>
       <Edges>
         <Edge ref="InheritanceMapping: Root::ITML::Computer/Root::ITML::DigitalDevice" source_port="NORTH" target_port="SOUTH" type="inheritance">
@@ -70,14 +70,17 @@
             <IntermediatePoint x="492.48853" y="111.24219"/>
           </IntermediatePoints>
         </Edge>
+        <Edge ref="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::iT_Manager1/Root::ITML::managedBy" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="206.33813" y="1014.737"/>
+            <IntermediatePoint x="206.33813" y="1136.9545"/>
+          </IntermediatePoints>
+        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ITML::ACD_400/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
             <IntermediatePoint x="583.5489" y="904.6296"/>
             <IntermediatePoint x="583.5489" y="762.9089"/>
           </IntermediatePoints>
-        </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::iT_Manager1/Root::ITML::managedBy" source_port="null" target_port="null" type="link">
-          <IntermediatePoints/>
         </Edge>
         <Edge name="mayUse" parent_association="VOID" ref="Root::ITML::mayUse" source_port="WEST" target_port="EAST" type="association">
           <IntermediatePoints>
@@ -85,16 +88,22 @@
             <IntermediatePoint x="245.49019" y="91.25013"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ITML::P1/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" source_port="EAST" target_port="WEST" type="link">
+        <Edge ref="AssociationLinkMapping: Root::ITML::aCD_4002/Root::ITML::iT_Manager1/Root::ITML::managedBy" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="151.87834" y="787.1566"/>
-            <IntermediatePoint x="151.87834" y="739.9544"/>
+            <IntermediatePoint x="199.34717" y="1159.6953"/>
+            <IntermediatePoint x="199.34717" y="1159.9088"/>
           </IntermediatePoints>
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ITML::ERP1/Root::ITML::ACD_400/Root::ITML::runsOn" source_port="WEST" target_port="EAST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="551.5602" y="577.42957"/>
-            <IntermediatePoint x="551.5602" y="859.0541"/>
+            <IntermediatePoint x="551.5602" y="577.2422"/>
+            <IntermediatePoint x="551.5602" y="858.5755"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::ITML::P1/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="151.87834" y="787.1566"/>
+            <IntermediatePoint x="151.87834" y="739.9544"/>
           </IntermediatePoints>
         </Edge>
         <Edge name="installedOn" parent_association="VOID" ref="Root::ITML::installedOn" source_port="WEST" target_port="EAST" type="association">
@@ -122,6 +131,12 @@
             <IntermediatePoint x="48.176105" y="38.26517"/>
           </IntermediatePoints>
         </Edge>
+        <Edge ref="RoleFillerMapping: Root::ITML::e1/Root::ITML::p1" source_port="EAST" target_port="WEST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="826.07764" y="866.6658"/>
+            <IntermediatePoint x="826.07764" y="866.6658"/>
+          </IntermediatePoints>
+        </Edge>
         <Edge ref="DelegationMapping: Root::ITML::Employee/Root::ITML::Person" source_port="EAST" target_port="WEST" type="delegation">
           <IntermediatePoints>
             <IntermediatePoint x="1046.9368" y="402.2422"/>
@@ -135,16 +150,22 @@
             <IntermediatePoint x="-1.752258" y="178.97517"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="RoleFillerMapping: Root::ITML::e1/Root::ITML::p1" source_port="EAST" target_port="WEST" type="rolefilleredge">
-          <IntermediatePoints>
-            <IntermediatePoint x="826.07764" y="866.6658"/>
-            <IntermediatePoint x="826.07764" y="866.6658"/>
-          </IntermediatePoints>
-        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::s1/Root::ITML::usedBy" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
             <IntermediatePoint x="230.54501" y="1019.5974"/>
             <IntermediatePoint x="230.54501" y="1018.8552"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="fills" parent_association="VOID" ref="Root::ITML::fills" source_port="WEST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="839.20325" y="402.2422"/>
+            <IntermediatePoint x="839.20325" y="402.29202"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="usedBy" parent_association="VOID" ref="Root::ITML::usedBy" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="377.87836" y="-69.10156"/>
+            <IntermediatePoint x="377.87836" y="-69.56836"/>
           </IntermediatePoints>
         </Edge>
         <Edge name="mayBeManagedBy" parent_association="VOID" ref="Root::ITML::mayBeManagedBy" source_port="NORTH" target_port="EAST" type="association">
@@ -154,61 +175,58 @@
             <IntermediatePoint x="632.72363" y="-69.56836"/>
           </IntermediatePoints>
         </Edge>
-        <Edge name="usedBy" parent_association="VOID" ref="Root::ITML::usedBy" source_port="EAST" target_port="WEST" type="association">
-          <IntermediatePoints>
-            <IntermediatePoint x="377.87836" y="-69.10156"/>
-            <IntermediatePoint x="377.87836" y="-69.56836"/>
-          </IntermediatePoints>
-        </Edge>
-        <Edge name="fills" parent_association="VOID" ref="Root::ITML::fills" source_port="WEST" target_port="EAST" type="association">
-          <IntermediatePoints>
-            <IntermediatePoint x="839.20325" y="402.2422"/>
-            <IntermediatePoint x="839.20325" y="402.29202"/>
-          </IntermediatePoints>
-        </Edge>
       </Edges>
       <Labels>
         <Label localID="0" ownerID="Root::ITML::runsOn" x="16.25733" y="-104.73351"/>
-        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::e1/Root::ITML::s1/Root::ITML::fills" x="-46.686222" y="53.336967"/>
+        <Label localID="2" ownerID="Root::ITML::runsOn" x="90.70801" y="-6.5"/>
         <Label localID="0" ownerID="Root::ITML::uses" x="-61.497997" y="41.835197"/>
-        <Label localID="0" ownerID="Root::ITML::installedOn" x="-28.590479" y="-12.795505"/>
         <Label localID="0" ownerID="Root::ITML::usedBy" x="-2.0084796" y="-8.512549"/>
-        <Label localID="2" ownerID="Root::ITML::uses" x="93.77734" y="-14.707031"/>
+        <Label localID="2" ownerID="Root::ITML::uses" x="93.77734" y="-17.810547"/>
         <Label localID="3" ownerID="Root::ITML::usedBy" x="-127.311035" y="-28.621094"/>
-        <Label localID="3" ownerID="Root::ITML::uses" x="-98.25488" y="-53.845703"/>
+        <Label localID="3" ownerID="Root::ITML::uses" x="-98.25488" y="-50.742188"/>
         <Label localID="2" ownerID="Root::ITML::usedBy" x="87.36182" y="-28.621094"/>
-        <Label localID="4" ownerID="Root::ITML::uses" x="93.77734" y="23.914062"/>
+        <Label localID="4" ownerID="Root::ITML::uses" x="93.77734" y="20.810547"/>
         <Label localID="5" ownerID="Root::ITML::usedBy" x="-139.21924" y="10.0"/>
-        <Label localID="5" ownerID="Root::ITML::uses" x="-110.163086" y="-15.224609"/>
+        <Label localID="5" ownerID="Root::ITML::uses" x="-110.163086" y="-12.121094"/>
         <Label localID="4" ownerID="Root::ITML::usedBy" x="87.36182" y="10.0"/>
-        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::ACD_400/Root::ITML::P1/Root::ITML::mayUse" x="-8.927769" y="1.4746803"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::aCD_4002/Root::ITML::iT_Manager1/Root::ITML::managedBy" x="-64.80162" y="-16.927591"/>
         <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::P1/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" x="-39.083523" y="-73.35903"/>
-        <Label localID="4" ownerID="Root::ITML::managedBy" x="87.36182" y="-6.2158203"/>
-        <Label localID="5" ownerID="Root::ITML::managedBy" x="-139.21924" y="48.586914"/>
-        <Label localID="2" ownerID="Root::ITML::managedBy" x="87.36182" y="-44.836914"/>
-        <Label localID="3" ownerID="Root::ITML::managedBy" x="-127.311035" y="9.96582"/>
-        <Label localID="0" ownerID="Root::ITML::managedBy" x="41.6468" y="-94.72488"/>
         <Label localID="0" ownerID="Root::ITML::fills" x="0.0" y="-27.93164"/>
-        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::ACD_400/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" x="-135.36116" y="15.941941"/>
-        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::iT_Manager1/Root::ITML::managedBy" x="-2.5936792" y="44.691376"/>
-        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::e2/Root::ITML::iT_Manager1/Root::ITML::fills" x="-80.40405" y="23.077383"/>
         <Label localID="2" ownerID="Root::ITML::fills" x="74.643555" y="-28.621094"/>
         <Label localID="3" ownerID="Root::ITML::fills" x="-82.30859" y="-43.035156"/>
         <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::ERP1/Root::ITML::ACD_400/Root::ITML::runsOn" x="83.86229" y="-173.17767"/>
-        <Label localID="4" ownerID="Root::ITML::mayUse" x="93.77734" y="-3.9140625"/>
+        <Label localID="4" ownerID="Root::ITML::mayUse" x="93.77734" y="-0.8105469"/>
         <Label localID="4" ownerID="Root::ITML::fills" x="74.643555" y="10.0"/>
-        <Label localID="5" ownerID="Root::ITML::mayUse" x="-110.163086" y="35.22461"/>
+        <Label localID="5" ownerID="Root::ITML::mayUse" x="-110.163086" y="32.121094"/>
         <Label localID="5" ownerID="Root::ITML::fills" x="-82.30859" y="-4.4140625"/>
-        <Label localID="2" ownerID="Root::ITML::mayUse" x="93.77734" y="-42.535156"/>
-        <Label localID="3" ownerID="Root::ITML::mayUse" x="-98.25488" y="-3.3964844"/>
+        <Label localID="2" ownerID="Root::ITML::mayUse" x="93.77734" y="-39.43164"/>
+        <Label localID="3" ownerID="Root::ITML::mayUse" x="-98.25488" y="-6.5"/>
         <Label localID="0" ownerID="Root::ITML::mayUse" x="-26.46291" y="-42.906513"/>
-        <Label localID="3" ownerID="Root::ITML::mayBeManagedBy" x="-127.311035" y="-67.20801"/>
-        <Label localID="2" ownerID="Root::ITML::mayBeManagedBy" x="87.36182" y="-12.405273"/>
-        <Label localID="5" ownerID="Root::ITML::mayBeManagedBy" x="-139.21924" y="-28.586914"/>
         <Label localID="2" ownerID="DelegationMapping: Root::ITML::Employee/Root::ITML::Person" x="78.38623" y="-28.621094"/>
-        <Label localID="4" ownerID="Root::ITML::mayBeManagedBy" x="87.36182" y="26.21582"/>
-        <Label localID="0" ownerID="Root::ITML::mayBeManagedBy" x="4.1761565" y="-165.43376"/>
         <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::s1/Root::ITML::usedBy" x="-36.70729" y="-55.211544"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::e1/Root::ITML::s1/Root::ITML::fills" x="-46.686222" y="53.336967"/>
+        <Label localID="0" ownerID="Root::ITML::installedOn" x="-28.590479" y="-12.795505"/>
+        <Label localID="3" ownerID="Root::ITML::installedOn" x="-103.81592" y="-14.207031"/>
+        <Label localID="4" ownerID="Root::ITML::installedOn" x="90.70801" y="-12.121094"/>
+        <Label localID="2" ownerID="Root::ITML::installedOn" x="90.70801" y="-50.742188"/>
+        <Label localID="5" ownerID="Root::ITML::installedOn" x="-115.72412" y="24.414062"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::ACD_400/Root::ITML::P1/Root::ITML::mayUse" x="-8.927769" y="1.4746803"/>
+        <Label localID="4" ownerID="Root::ITML::managedBy" x="87.36182" y="-6.2158203"/>
+        <Label localID="5" ownerID="Root::ITML::managedBy" x="-139.21924" y="54.742188"/>
+        <Label localID="2" ownerID="Root::ITML::managedBy" x="87.36182" y="-44.836914"/>
+        <Label localID="3" ownerID="Root::ITML::managedBy" x="-127.311035" y="16.121094"/>
+        <Label localID="0" ownerID="Root::ITML::managedBy" x="41.6468" y="-94.72488"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::aCD_4001/Root::ITML::iT_Manager1/Root::ITML::managedBy" x="3.519681" y="38.578014"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::e2/Root::ITML::iT_Manager1/Root::ITML::fills" x="-80.40405" y="23.077383"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::ITML::ACD_400/Root::ITML::IT_Manager/Root::ITML::mayBeManagedBy" x="-135.36116" y="15.941941"/>
+        <Label localID="3" ownerID="Root::ITML::mayBeManagedBy" x="-127.311035" y="-73.36328"/>
+        <Label localID="2" ownerID="Root::ITML::mayBeManagedBy" x="87.36182" y="-12.405273"/>
+        <Label localID="5" ownerID="Root::ITML::mayBeManagedBy" x="-139.21924" y="-34.742188"/>
+        <Label localID="4" ownerID="Root::ITML::mayBeManagedBy" x="87.36182" y="26.21582"/>
+        <Label localID="4" ownerID="Root::ITML::runsOn" x="90.70801" y="32.121094"/>
+        <Label localID="3" ownerID="Root::ITML::runsOn" x="-103.81592" y="-43.035156"/>
+        <Label localID="0" ownerID="Root::ITML::mayBeManagedBy" x="4.1761565" y="-165.43376"/>
+        <Label localID="5" ownerID="Root::ITML::runsOn" x="-115.72412" y="-4.4140625"/>
       </Labels>
       <Preferences/>
       <View name="Overview" tx="278.8187" ty="207.14401" xx="0.5452539"/>
@@ -278,37 +296,64 @@
     <addConstraint body="self.getPartPeriphs()-&gt;forAll(i |&#10;     self.of().getPossPeriphs()-&gt;exists(c |&#10;     i.isDescendentOf(c)))" class="Root::ITML::Computer" constName="compatible" instLevel="0" package="Root::ITML" reason="&quot;The device is not compatible.&quot;"/>
     <addConstraint body="self.of().getPossManageUnits()-&gt;includes(self.getManagingUnit().of())" class="Root::ITML::DigitalDevice" constName="properlyManaged" instLevel="0" package="Root::ITML" reason="&quot;Can be managed only by appropriate position.&quot;"/>
     <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="defOperatingLife" valueToBeParsed="5"/>
+    <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="maxMemory" valueToBeParsed="16"/>
     <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="powerCon" valueToBeParsed="48"/>
     <changeSlotValue class="Root::ITML::Application" package="Root::ITML" slotName="infrastructure" valueToBeParsed="false"/>
+    <changeSlotValue class="Root::ITML::Application" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::Computer" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::Desktop" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::Desktop" package="Root::ITML" slotName="portable" valueToBeParsed="false"/>
-    <changeSlotValue class="Root::ITML::ERP1" package="Root::ITML" slotName="domain" valueToBeParsed="[77,97,110,117,102,97,99,116,117,114,...].asString()"/>
+    <changeSlotValue class="Root::ITML::DigitalDevice" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::ERP1" package="Root::ITML" slotName="domain" valueToBeParsed="[70,105,110,97,110,99,101].asString()"/>
+    <changeSlotValue class="Root::ITML::ERP1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::ERP1" package="Root::ITML" slotName="version" valueToBeParsed="[52,46,49].asString()"/>
-    <changeSlotValue class="Root::ITML::IT_Manager" package="Root::ITML" slotName="reqQuali" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::ITML::Employee" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::IT_Manager" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::IT_Manager" package="Root::ITML" slotName="reqQuali" valueToBeParsed="[65,110,32,73,84,32,109,97,110,97,103,101,114,32,46,46,46].asString()"/>
+    <changeSlotValue class="Root::ITML::Laptop" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::Laptop" package="Root::ITML" slotName="portable" valueToBeParsed="false"/>
+    <changeSlotValue class="Root::ITML::OrgUnit" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="bothSided" valueToBeParsed="false"/>
     <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="defOperatingLife" valueToBeParsed="4"/>
+    <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="pagePerMin" valueToBeParsed="80"/>
     <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="powerCon" valueToBeParsed="85"/>
     <changeSlotValue class="Root::ITML::P1" package="Root::ITML" slotName="resolution" valueToBeParsed="600"/>
+    <changeSlotValue class="Root::ITML::PeripheralDevice" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::Person" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::Position" package="Root::ITML" slotName="composed" valueToBeParsed="false"/>
+    <changeSlotValue class="Root::ITML::Position" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::Printer" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::Printer" package="Root::ITML" slotName="operatorReq" valueToBeParsed="false"/>
+    <changeSlotValue class="Root::ITML::SalesAgent" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::SalesAgent" package="Root::ITML" slotName="reqQuali" valueToBeParsed="[65,32,115,97,108,101,115,32,46,46].asString()"/>
+    <changeSlotValue class="Root::ITML::Scanner" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::Scanner" package="Root::ITML" slotName="operatorReq" valueToBeParsed="true"/>
+    <changeSlotValue class="Root::ITML::Software" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::Version" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::aCD_4001" package="Root::ITML" slotName="actMemory" valueToBeParsed="8"/>
+    <changeSlotValue class="Root::ITML::aCD_4001" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::aCD_4001" package="Root::ITML" slotName="purchasePrice" valueToBeParsed="Auxiliary::MonetaryValue(199.99, Auxiliary::Currency(&quot; EUR&quot;, &quot;EURO&quot;, 1))"/>
     <changeSlotValue class="Root::ITML::aCD_4001" package="Root::ITML" slotName="serialNo" valueToBeParsed="[65,67,56,57,51].asString()"/>
     <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="actMemory" valueToBeParsed="0"/>
-    <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="purchasePrice" valueToBeParsed="null"/>
-    <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="serialNo" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="purchasePrice" valueToBeParsed="Auxiliary::MonetaryValue(900, Auxiliary::Currency(&quot;EUR&quot;, &quot;EUR&quot;, 1.0))"/>
+    <changeSlotValue class="Root::ITML::aCD_4002" package="Root::ITML" slotName="serialNo" valueToBeParsed="[65,67,95,55,56,51,54].asString()"/>
     <changeSlotValue class="Root::ITML::e1" package="Root::ITML" slotName="hired" valueToBeParsed="Auxiliary::Date::createDate(2018, 2, 14)"/>
     <changeSlotValue class="Root::ITML::e1" package="Root::ITML" slotName="id" valueToBeParsed="[70,56,51,48,84].asString()"/>
+    <changeSlotValue class="Root::ITML::e1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::e2" package="Root::ITML" slotName="hired" valueToBeParsed="Auxiliary::Date::createDate(2022, 3, 1)"/>
     <changeSlotValue class="Root::ITML::e2" package="Root::ITML" slotName="id" valueToBeParsed="[].asString()"/>
+    <changeSlotValue class="Root::ITML::e2" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::iT_Manager1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::p1" package="Root::ITML" slotName="firstName" valueToBeParsed="[77,97,110,102,114,101,100].asString()"/>
     <changeSlotValue class="Root::ITML::p1" package="Root::ITML" slotName="lastName" valueToBeParsed="[77,97,110,110].asString()"/>
+    <changeSlotValue class="Root::ITML::p1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ITML::p2" package="Root::ITML" slotName="firstName" valueToBeParsed="[84,105,110,97].asString()"/>
     <changeSlotValue class="Root::ITML::p2" package="Root::ITML" slotName="lastName" valueToBeParsed="[84,117,114,110,101,114].asString()"/>
+    <changeSlotValue class="Root::ITML::p2" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
+    <changeSlotValue class="Root::ITML::s1" package="Root::ITML" slotName="lastUpdated" valueToBeParsed="null"/>
     <addAssociation accessSourceFromTargetName="comp" accessTargetFromSourceName="possPeriph" classSource="Root::ITML::Computer" classTarget="Root::ITML::PeripheralDevice" fwName="mayUse" instLevelSource="1" instLevelTarget="1" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,-1,false,false}" package="Root::ITML" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
     <addAssociation accessSourceFromTargetName="employee" accessTargetFromSourceName="position" classSource="Root::ITML::Employee" classTarget="Root::ITML::Position" fwName="fills" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{1,1,true,false}" package="Root::ITML" reverseName="-1" sourceVisibleFromTarget="true" targetVisibleFromSource="true"/>
     <addAssociation accessSourceFromTargetName="installSoftware" accessTargetFromSourceName="installComputer" classSource="Root::ITML::Software" classTarget="Root::ITML::Computer" fwName="installedOn" instLevelSource="1" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::ITML" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
@@ -323,6 +368,7 @@
     <addLink classSource="Root::ITML::P1" classTarget="Root::ITML::IT_Manager" name="mayBeManagedBy" package="Root::ITML"/>
     <addLink classSource="Root::ITML::aCD_4001" classTarget="Root::ITML::iT_Manager1" name="managedBy" package="Root::ITML"/>
     <addLink classSource="Root::ITML::aCD_4001" classTarget="Root::ITML::s1" name="usedBy" package="Root::ITML"/>
+    <addLink classSource="Root::ITML::aCD_4002" classTarget="Root::ITML::iT_Manager1" name="managedBy" package="Root::ITML"/>
     <addLink classSource="Root::ITML::e1" classTarget="Root::ITML::s1" name="fills" package="Root::ITML"/>
     <addLink classSource="Root::ITML::e2" classTarget="Root::ITML::iT_Manager1" name="fills" package="Root::ITML"/>
     <addDelegation delegateFrom="Root::ITML::Employee" delegateTo="Root::ITML::Person" delegateToLevel="0" package="Root::ITML"/>

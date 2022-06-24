@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XModeler>
+  <Version>2</Version>
+  <Categories/>
+  <Projects>
+    <Project name="Root::University"/>
+  </Projects>
+  <Diagrams>
+    <Diagram label="Assignment" package_path="Root::University" showDerivedAttributes="true" showDerivedOperations="false" showGettersAndSetters="false" showOperationValues="true" showOperations="true" showSlots="true">
+      <Categories/>
+      <Owners/>
+      <Objects>
+        <Object hidden="false" ref="Root::University::s1" x="488" y="586"/>
+        <Object hidden="false" ref="Root::University::s2" x="454" y="752"/>
+        <Object hidden="false" ref="Root::University::Exam" x="686" y="43"/>
+        <Object hidden="false" ref="Root::University::Modeling" x="791" y="620"/>
+        <Object hidden="false" ref="Root::University::Course" x="744" y="239"/>
+        <Object hidden="false" ref="Root::University::Lecturer" x="621" y="448"/>
+        <Object hidden="false" ref="Root::University::Student" x="409" y="249"/>
+        <Object hidden="false" ref="Root::University::e1" x="480" y="912"/>
+        <Object hidden="false" ref="Root::University::p2" x="193" y="753"/>
+        <Object hidden="false" ref="Root::University::p3" x="802" y="809"/>
+        <Object hidden="false" ref="Root::University::Person" x="231" y="414"/>
+        <Object hidden="false" ref="Root::University::s3" x="333" y="1016"/>
+        <Object hidden="false" ref="Root::University::p1" x="209" y="596"/>
+        <Object hidden="false" ref="Root::University::l1" x="943" y="1000"/>
+      </Objects>
+      <Edges>
+        <Edge ref="AssociationLinkMapping: Root::University::l1/Root::University::Modeling/Root::University::teaches" source_port="EAST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="1097.0746" y="1046.505"/>
+            <IntermediatePoint x="1097.0746" y="679.05273"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::e1/Root::University::Modeling/Root::University::relatesTo" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="737.94495" y="943.16144"/>
+            <IntermediatePoint x="737.94495" y="689.90607"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::l1/Root::University::e1/Root::University::grades" source_port="WEST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="884.94257" y="1046.505"/>
+            <IntermediatePoint x="884.94257" y="974.32294"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::s2/Root::University::Modeling/Root::University::registeredFor" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="693.5479" y="809.55273"/>
+            <IntermediatePoint x="693.5479" y="666.535"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="DelegationMapping: Root::University::Student/Root::University::Person" source_port="WEST" target_port="NORTH" type="delegation">
+          <IntermediatePoints>
+            <IntermediatePoint x="304.65118" y="306.05273"/>
+            <IntermediatePoint x="304.65118" y="370.96356"/>
+            <IntermediatePoint x="305.0122" y="370.96356"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="DelegationMapping: Root::University::Lecturer/Root::University::Person" source_port="WEST" target_port="EAST" type="delegation">
+          <IntermediatePoints>
+            <IntermediatePoint x="716.0" y="480.4357"/>
+            <IntermediatePoint x="716.0" y="480.36328"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="RoleFillerMapping: Root::University::l1/Root::University::p3" source_port="NORTH" target_port="EAST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="1003.41095" y="933.53125"/>
+            <IntermediatePoint x="1003.7365" y="933.53125"/>
+            <IntermediatePoint x="1003.7365" y="877.3633"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::s3/Root::University::Modeling/Root::University::registeredFor" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="752.9493" y="1054.7657"/>
+            <IntermediatePoint x="752.9493" y="690.8633"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="grades" parent_association="VOID" ref="Root::University::grades" source_port="SOUTH" target_port="NORTH" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="685.7617" y="553.22314"/>
+            <IntermediatePoint x="1084.716" y="553.22314"/>
+            <IntermediatePoint x="1084.716" y="14.024741"/>
+            <IntermediatePoint x="780.4838" y="14.024741"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::s1/Root::University::Modeling/Root::University::registeredFor" source_port="EAST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="778.63354" y="643.55273"/>
+            <IntermediatePoint x="778.63354" y="643.1639"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::University::s2/Root::University::e1/Root::University::takes" source_port="WEST" target_port="WEST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="383.56125" y="845.15106"/>
+            <IntermediatePoint x="383.56125" y="982.3223"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="teaches" parent_association="VOID" ref="Root::University::teaches" source_port="EAST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1015.52344" y="480.43164"/>
+            <IntermediatePoint x="1015.52344" y="329.48438"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="registeredFor" parent_association="VOID" ref="Root::University::registeredFor" source_port="EAST" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="666.7617" y="306.05273"/>
+            <IntermediatePoint x="666.7617" y="306.86328"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="RoleFillerMapping: Root::University::s1/Root::University::p1" source_port="WEST" target_port="EAST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="445.4348" y="655.4576"/>
+            <IntermediatePoint x="445.4348" y="664.3633"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="RoleFillerMapping: Root::University::s3/Root::University::p3" source_port="EAST" target_port="WEST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="767.872" y="1093.1343"/>
+            <IntermediatePoint x="767.872" y="877.3633"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="RoleFillerMapping: Root::University::s2/Root::University::p2" source_port="WEST" target_port="EAST" type="rolefilleredge">
+          <IntermediatePoints>
+            <IntermediatePoint x="420.20215" y="821.4576"/>
+            <IntermediatePoint x="420.20215" y="821.64246"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="takes" parent_association="VOID" ref="Root::University::takes" source_port="NORTH" target_port="WEST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="491.8763" y="99.611786"/>
+            <IntermediatePoint x="650.0" y="99.611786"/>
+            <IntermediatePoint x="650.0" y="100.052734"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge name="relatesTo" parent_association="VOID" ref="Root::University::relatesTo" source_port="EAST" target_port="EAST" type="association">
+          <IntermediatePoints>
+            <IntermediatePoint x="1042.5338" y="100.052734"/>
+            <IntermediatePoint x="1042.5338" y="284.2422"/>
+          </IntermediatePoints>
+        </Edge>
+      </Edges>
+      <Labels>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::l1/Root::University::Modeling/Root::University::teaches" x="65.997055" y="-210.751"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::s1/Root::University::Modeling/Root::University::registeredFor" x="-53.91072" y="-39.030907"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::e1/Root::University::Modeling/Root::University::relatesTo" x="-50.739502" y="102.88114"/>
+        <Label localID="5" ownerID="Root::University::teaches" x="-82.30859" y="10.0"/>
+        <Label localID="3" ownerID="Root::University::teaches" x="-82.30859" y="-28.621094"/>
+        <Label localID="4" ownerID="Root::University::teaches" x="96.79199" y="10.0"/>
+        <Label localID="5" ownerID="Root::University::registeredFor" x="-112.538574" y="10.0"/>
+        <Label localID="0" ownerID="Root::University::grades" x="85.443985" y="237.49481"/>
+        <Label localID="3" ownerID="Root::University::grades" x="-82.30859" y="-44.836914"/>
+        <Label localID="3" ownerID="Root::University::registeredFor" x="-100.63037" y="-28.621094"/>
+        <Label localID="2" ownerID="Root::University::grades" x="104.01416" y="-47.63867"/>
+        <Label localID="4" ownerID="Root::University::registeredFor" x="96.79199" y="43.93164"/>
+        <Label localID="2" ownerID="Root::University::registeredFor" x="96.79199" y="5.310547"/>
+        <Label localID="0" ownerID="Root::University::registeredFor" x="-49.06748" y="-23.912743"/>
+        <Label localID="5" ownerID="Root::University::grades" x="-82.30859" y="-6.2158203"/>
+        <Label localID="4" ownerID="Root::University::grades" x="104.01416" y="-9.017578"/>
+        <Label localID="5" ownerID="Root::University::takes" x="-112.538574" y="-18.526367"/>
+        <Label localID="4" ownerID="Root::University::takes" x="104.01416" y="29.017578"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::s3/Root::University::Modeling/Root::University::registeredFor" x="-80.13877" y="152.14488"/>
+        <Label localID="3" ownerID="Root::University::relatesTo" x="-111.561035" y="-28.621094"/>
+        <Label localID="4" ownerID="Root::University::relatesTo" x="96.79199" y="-23.93164"/>
+        <Label localID="2" ownerID="Root::University::relatesTo" x="96.79199" y="-62.552734"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::l1/Root::University::e1/Root::University::grades" x="41.483597" y="-50.55906"/>
+        <Label localID="0" ownerID="Root::University::relatesTo" x="102.821396" y="-124.55603"/>
+        <Label localID="0" ownerID="Root::University::takes" x="-68.95598" y="-129.2889"/>
+        <Label localID="3" ownerID="Root::University::takes" x="-100.63037" y="-57.14746"/>
+        <Label localID="2" ownerID="Root::University::takes" x="104.01416" y="-9.603516"/>
+        <Label localID="2" ownerID="Root::University::teaches" x="96.79199" y="-28.621094"/>
+        <Label localID="0" ownerID="Root::University::teaches" x="81.831314" y="67.51235"/>
+        <Label localID="2" ownerID="DelegationMapping: Root::University::Lecturer/Root::University::Person" x="84.01221" y="-6.5"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::s2/Root::University::Modeling/Root::University::registeredFor" x="-97.730255" y="41.982185"/>
+        <Label localID="5" ownerID="Root::University::relatesTo" x="-125.17822" y="10.0"/>
+        <Label localID="2" ownerID="DelegationMapping: Root::University::Student/Root::University::Person" x="84.01221" y="-50.742188"/>
+        <Label localID="0" ownerID="AssociationLinkMapping: Root::University::s2/Root::University::e1/Root::University::takes" x="-135.5696" y="52.93444"/>
+      </Labels>
+      <Preferences/>
+      <View name="Main View" tx="-95.21845" ty="5.36016" xx="0.7711054"/>
+    </Diagram>
+  </Diagrams>
+  <Logs>
+    <addMetaClass abstract="false" level="1" name="Course" package="Root::University" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Exam" package="Root::University" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Lecturer" package="Root::University" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Student" package="Root::University" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Person" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="s3" of="Root::University::Student" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="e1" of="Root::University::Exam" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="l1" of="Root::University::Lecturer" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="Modeling" of="Root::University::Course" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="s2" of="Root::University::Student" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="s1" of="Root::University::Student" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="p3" of="Root::University::Person" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="p2" of="Root::University::Person" package="Root::University" parents=""/>
+    <addInstance abstract="false" name="p1" of="Root::University::Person" package="Root::University" parents=""/>
+    <addAttribute class="Root::University::Course" level="0" multiplicity="Seq{1,1,true,false}" name="credits" package="Root::University" type="Root::XCore::Integer"/>
+    <addAttribute class="Root::University::Exam" level="0" multiplicity="Seq{1,1,true,false}" name="date" package="Root::University" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::University::Lecturer" level="0" multiplicity="Seq{1,1,true,false}" name="title" package="Root::University" type="Root::XCore::String"/>
+    <addAttribute class="Root::University::Person" level="0" multiplicity="Seq{1,1,true,false}" name="dateOfBirth" package="Root::University" type="Root::Auxiliary::Date"/>
+    <addAttribute class="Root::University::Person" level="0" multiplicity="Seq{1,1,true,false}" name="firstName" package="Root::University" type="Root::XCore::String"/>
+    <addAttribute class="Root::University::Person" level="0" multiplicity="Seq{1,1,true,false}" name="lastName" package="Root::University" type="Root::XCore::String"/>
+    <addAttribute class="Root::University::Student" level="0" multiplicity="Seq{1,1,true,false}" name="matNo" package="Root::University" type="Root::XCore::String"/>
+    <addOperation body="@Operation numOfCandidates[monitor=true]():XCore::Integer&#10;  University::Student.allInstances()-&gt;select(i |&#10;    i.getExams()-&gt;includes(self)).size()&#10;end" class="Root::University::Exam" level="0" monitored="true" name="numOfCandidates" package="Root::University" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation numOfStudents[monitor=true]():XCore::Integer&#10;  University::Student.allInstances()-&gt;select(i |&#10;    i.getCourses()-&gt;includes(self)).size()&#10;end" class="Root::University::Course" level="0" monitored="true" name="numOfStudents" package="Root::University" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation numbOfExams[monitor=true]():XCore::Integer&#10;  self.getExams().size()&#10;end" class="Root::University::Student" level="0" monitored="true" name="numbOfExams" package="Root::University" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addOperation body="@Operation regStudents[monitor=false,delToClassAllowed=false]():XCore::Element&#10;  University::Student.allInstances()-&gt;select(i |&#10;    i.getCourses()-&gt;includes(self))&#10;end" class="Root::University::Course" level="0" monitored="false" name="regStudents" package="Root::University" paramNames="" paramTypes="" type="Root::XCore::Element"/>
+    <addOperation body="@Operation yearsOfAge[monitor=true,delToClassAllowed=false]():XCore::Integer&#10;  self.dateOfBirth.age()&#10;end" class="Root::University::Person" level="0" monitored="true" name="yearsOfAge" package="Root::University" paramNames="" paramTypes="" type="Root::XCore::Integer"/>
+    <addConstraint body="not self.regStudents().asSeq()-&gt;exists(i |&#10;     i.roleFiller = self.getLecturer().roleFiller)" class="Root::University::Course" constName="noLecturerAsStudent" instLevel="0" package="Root::University" reason="&quot;Lecturer must not register as student.&quot;"/>
+    <addConstraint body="self.getExams().size() = 0 or self.getExams().asSeq()-&gt;exists(i |&#10;     self.getCourses()-&gt;includes(i.getCourse()))" class="Root::University::Student" constName="eligibleForExam" instLevel="0" package="Root::University" reason="&quot;Only eligible for exam if registered for course.&quot;"/>
+    <addConstraint body="self.getLecturer() = self.getCourse().getLecturer()" class="Root::University::Exam" constName="properLecturer" instLevel="0" package="Root::University" reason="&quot;Lecturer must teach corresponding course.&quot;"/>
+    <changeSlotValue class="Root::University::Modeling" package="Root::University" slotName="credits" valueToBeParsed="0"/>
+    <changeSlotValue class="Root::University::e1" package="Root::University" slotName="date" valueToBeParsed="Auxiliary::Date::createDate(2022, 2, 14)"/>
+    <changeSlotValue class="Root::University::l1" package="Root::University" slotName="title" valueToBeParsed="[80,114,111,102].asString()"/>
+    <changeSlotValue class="Root::University::p1" package="Root::University" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(2002, 4, 28)"/>
+    <changeSlotValue class="Root::University::p1" package="Root::University" slotName="firstName" valueToBeParsed="[80,101,116,101,114].asString()"/>
+    <changeSlotValue class="Root::University::p1" package="Root::University" slotName="lastName" valueToBeParsed="[80,97,110].asString()"/>
+    <changeSlotValue class="Root::University::p2" package="Root::University" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(2000, 8, 12)"/>
+    <changeSlotValue class="Root::University::p2" package="Root::University" slotName="firstName" valueToBeParsed="[72,97,114,114,121].asString()"/>
+    <changeSlotValue class="Root::University::p2" package="Root::University" slotName="lastName" valueToBeParsed="[80,111,116,116,101,114].asString()"/>
+    <changeSlotValue class="Root::University::p3" package="Root::University" slotName="dateOfBirth" valueToBeParsed="Auxiliary::Date::createDate(1962, 10, 28)"/>
+    <changeSlotValue class="Root::University::p3" package="Root::University" slotName="firstName" valueToBeParsed="[82,117,100,121].asString()"/>
+    <changeSlotValue class="Root::University::p3" package="Root::University" slotName="lastName" valueToBeParsed="[66,108,111,111,109].asString()"/>
+    <changeSlotValue class="Root::University::s1" package="Root::University" slotName="matNo" valueToBeParsed="[77,55,51,57].asString()"/>
+    <changeSlotValue class="Root::University::s2" package="Root::University" slotName="matNo" valueToBeParsed="[90,50,56,53].asString()"/>
+    <changeSlotValue class="Root::University::s3" package="Root::University" slotName="matNo" valueToBeParsed="[].asString()"/>
+    <addAssociation accessSourceFromTargetName="exam" accessTargetFromSourceName="course" classSource="Root::University::Exam" classTarget="Root::University::Course" fwName="relatesTo" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::University" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="lecturer" accessTargetFromSourceName="course" classSource="Root::University::Lecturer" classTarget="Root::University::Course" fwName="teaches" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,1,true,false}" package="Root::University" reverseName="-1" sourceVisibleFromTarget="true" targetVisibleFromSource="false"/>
+    <addAssociation accessSourceFromTargetName="lecturer" accessTargetFromSourceName="exam" classSource="Root::University::Lecturer" classTarget="Root::University::Exam" fwName="grades" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,1,true,false}" package="Root::University" reverseName="-1" sourceVisibleFromTarget="true" targetVisibleFromSource="false"/>
+    <addAssociation accessSourceFromTargetName="student" accessTargetFromSourceName="course" classSource="Root::University::Student" classTarget="Root::University::Course" fwName="registeredFor" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,-1,false,false}" package="Root::University" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="student" accessTargetFromSourceName="exam" classSource="Root::University::Student" classTarget="Root::University::Exam" fwName="takes" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,-1,false,false}" multTargetToSource="Seq{1,-1,false,false}" package="Root::University" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addLink classSource="Root::University::e1" classTarget="Root::University::Modeling" name="relatesTo" package="Root::University"/>
+    <addLink classSource="Root::University::l1" classTarget="Root::University::Modeling" name="teaches" package="Root::University"/>
+    <addLink classSource="Root::University::l1" classTarget="Root::University::e1" name="grades" package="Root::University"/>
+    <addLink classSource="Root::University::s1" classTarget="Root::University::Modeling" name="registeredFor" package="Root::University"/>
+    <addLink classSource="Root::University::s2" classTarget="Root::University::Modeling" name="registeredFor" package="Root::University"/>
+    <addLink classSource="Root::University::s2" classTarget="Root::University::e1" name="takes" package="Root::University"/>
+    <addLink classSource="Root::University::s3" classTarget="Root::University::Modeling" name="registeredFor" package="Root::University"/>
+    <addDelegation delegateFrom="Root::University::Lecturer" delegateTo="Root::University::Person" delegateToLevel="0" package="Root::University"/>
+    <addDelegation delegateFrom="Root::University::Student" delegateTo="Root::University::Person" delegateToLevel="0" package="Root::University"/>
+    <setRoleFiller package="Root::University" role="Root::University::l1" roleFiller="Root::University::p3"/>
+    <setRoleFiller package="Root::University" role="Root::University::s1" roleFiller="Root::University::p1"/>
+    <setRoleFiller package="Root::University" role="Root::University::s2" roleFiller="Root::University::p2"/>
+    <setRoleFiller package="Root::University" role="Root::University::s3" roleFiller="Root::University::p3"/>
+  </Logs>
+</XModeler>
