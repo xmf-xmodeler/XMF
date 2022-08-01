@@ -619,7 +619,6 @@ context FmmlxDiagrams
             opNames = self.vector2Seq(objectOpValElement).at(1)
           in
             @For n in opNames do
-              n.println();
               let
                 opResult = FmmlxDiagrams::FmmlxManipulator().evalString(objectName + "." + n + "()", p)
               then
@@ -2090,6 +2089,31 @@ context FmmlxDiagrams
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
+    end
+    
+    ///////////////////////// Bottom-Up Modelling ///////////////////
+    
+    @Operation mergeProperties(
+      requestID  : Seq(Integer),
+      classPath  : String,
+      mergeItemsVec  : Seq(Element)) 
+      
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        mergeItems = self.vector2Seq(mergeItemsVec)
+      then
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
+      in
+        @For mergeItemVec in mergeItems do
+          let 
+            mergeItem = self.vector2Seq(mergeItemVec)
+          in
+            mergeItem.println();
+            mergeItem.of().println()
+          end
+        end
+      end
+      
     end
     
     ///////////////////////// Constraints ///////////////////////////

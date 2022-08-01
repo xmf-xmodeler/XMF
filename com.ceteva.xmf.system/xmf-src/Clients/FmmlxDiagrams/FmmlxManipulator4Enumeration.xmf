@@ -187,7 +187,7 @@ import FmmlxDiagrams;
                   then
                     [oldEnumValueName + " is not an element of " + enumPath]
                   else
-                    e.getElement(oldEnumValueName).name := newEnumValueName;[]
+                    e.getElement(oldEnumValueName).name := newEnumValueName.asSymbol();[]
                   end // if 6
                 end // if 5
               end // if 4
