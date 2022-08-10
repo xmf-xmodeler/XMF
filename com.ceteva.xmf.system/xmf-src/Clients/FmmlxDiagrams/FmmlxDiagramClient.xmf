@@ -762,7 +762,8 @@ context FmmlxDiagrams
 		        "SLOT_NULL",
 		        "The slot " + slot.name + " must not be empty.",
 		        [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		        ["setSlotValue", self.getMapping(requestID).addOrGetObjectMapping(obj).id, slot.name.toString()]]]
+		        ["setSlotValue", self.getMapping(requestID).addOrGetObjectMapping(obj).id, slot.name.toString()],
+		        FMML::Severity::NORMAL.name.toString()]]
 		      end // if null and mandatory
 		    end // if slot fmmlx
 		  end; // for slots
@@ -775,7 +776,8 @@ context FmmlxDiagrams
 			    [self.getMapping(requestID).addOrGetObjectMapping(otherObj).id],
 			    ["addRoleFiller",
 			      self.getMapping(requestID).addOrGetObjectMapping(otherObj).id,
-			      self.getMapping(requestID).addOrGetObjectMapping(obj.delegatesTo).id]]]
+			      self.getMapping(requestID).addOrGetObjectMapping(obj.delegatesTo).id],
+		          FMML::Severity::NORMAL.name.toString()]]
 			end
 		  end end; // for/if delegation
 /*		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
@@ -800,7 +802,8 @@ context FmmlxDiagrams
 		            "ASSOC_MULT_LOW",
 		            "The association " + assoc.name + " requires more links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
+		            FMML::Severity::NORMAL.name.toString()]]
 		        end;
 		        if
 		          assoc.end2.mult().hasUpperBound() andthen count > assoc.end2.mult().upperBound()
@@ -809,7 +812,8 @@ context FmmlxDiagrams
 		            "ASSOC_MULT_HIGH",
 		            "The association " + assoc.name + " requires fewer links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
+		            FMML::Severity::NORMAL.name.toString()]]
 		        end
 		      end // let
 		    end; // if instance of
@@ -825,7 +829,8 @@ context FmmlxDiagrams
 		            "ASSOC_MULT_LOW",
 		            "The association " + assoc.name + " requires more links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
+		            FMML::Severity::NORMAL.name.toString()]]
 		        end;
 		        if
 		          assoc.end1.mult().hasUpperBound() andthen count > assoc.end1.mult().upperBound()
@@ -834,7 +839,8 @@ context FmmlxDiagrams
 		            "ASSOC_MULT_HIGH",
 		            "The association " + assoc.name + " requires fewer links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id]]]
+		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
+		            FMML::Severity::NORMAL.name.toString()]]
 		        end
 		      end // let
 		    end // if instance of
@@ -844,12 +850,23 @@ context FmmlxDiagrams
 		    constraintReport = obj.checkConstraints()
 		  in
 		    @For crItem in constraintReport.failures() do //constraintReport.children() do
-		      // crItem.reason
-		      result := result + [[
-		        "CONSTRAINT_FAILURE",
-		        crItem.reason,
-		        [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		        ["no solution available"]]]
+		      if 
+		        crItem.constraint.isKindOf(FMML::Issue)
+		      then
+		        result := result + [[
+		          "CONSTRAINT_FAILURE",
+		          crItem.reason,
+		          [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		          [crItem.constraint.getSolution(obj)],
+		          crItem.constraint.severity.name.toString()]]
+		      else
+    	        result := result + [[
+		          "CONSTRAINT_FAILURE",
+		          crItem.reason,
+		          [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+		          ["no solution available"],
+		          FMML::Severity::USER_DEFINED.name.toString()]]
+		      end
 		    end
 		  end		    
 
@@ -2132,7 +2149,7 @@ context FmmlxDiagrams
         class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         constSymbol = constName.asSymbol()
       then
-        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel) else ["Class "+classPath+" not found."] end
+        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel, FMML::Severity::USER_DEFINED, "NO_SOLUTION") else ["Class "+classPath+" not found."] end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addConstraint", ["package", class.owner.path()],

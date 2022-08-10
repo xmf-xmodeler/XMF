@@ -41,6 +41,9 @@ in
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaClass.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/MetaClass.o").loadBin(true);
 
+			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Issue.xmf",true,true);
+			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Issue.o").loadBin(true);
+
 			Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Association.xmf",true,true);
 			(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/Association.o").loadBin(true);
 			FMML::MetaClass.level := 2;

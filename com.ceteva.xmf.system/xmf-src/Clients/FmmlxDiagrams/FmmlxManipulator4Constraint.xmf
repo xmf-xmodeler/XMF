@@ -9,7 +9,9 @@ import FmmlxDiagrams;
       name       : Symbol, 
       bodyCode   : String, 
       reasonCode : String, 
-      instLevel  : Integer)
+      instLevel  : Integer,
+      severity   : FMML::Severity,
+      solutionKey: String)
 
       if
         class = null
@@ -35,11 +37,13 @@ import FmmlxDiagrams;
         let            
           bodyO = null;
           reasonO = null;
+          solutionO = null;
           problems = []
         in           
          
           bodyO := self.createOperationForConstraint("@Operation body(classifier : Class, level : Integer) : Boolean " + bodyCode + " end", "body");
           reasonO := self.createOperationForConstraint("@Operation reason(classifier : Class, level : Integer) : String " + reasonCode + " end", "reason");
+          solutionO := self.createOperationForConstraint("@Operation solution(classifier : Class, level : Integer) : String null end", "solution");
           
           if bodyO.at(0) <> null then
             bodyO.at(0).isIntrinsic := true;
@@ -60,7 +64,7 @@ import FmmlxDiagrams;
             then
               try
                 let 
-                  con = Constraint(name, bodyO.at(0), reasonO.at(0))
+                  con = FMML::Issue(name, bodyO.at(0), reasonO.at(0), solutionO.at(0), severity)
                 in
                   con.body.setProperty("raw", bodyCode);
                   con.reason.setProperty("raw", reasonCode);

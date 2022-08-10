@@ -1,0 +1,100 @@
+parserImport XOCL;
+
+import Root::FMML;
+
+context Root::FMML
+  @Enum Severity(BAD_PRACTICE,NORMAL,FATAL,USER_DEFINED) end
+
+context Root::FMML
+  @Class Issue extends Constraint
+    
+  @Attribute severity : Severity end
+  @Attribute solution : Element end
+  
+    @Constructor(name,body,reason,solution,severity)
+      body.owner := self;
+      reason.owner := self;
+      self
+    end
+    
+    @Operation getSolution(e : Element) 
+      solution.invoke(e,[e,e.level])
+    end
+    
+    @Operation createConstraint(
+      class        : Class, 
+      name         : Symbol, 
+      bodyCode     : String, 
+      reasonCode   : String,
+      solutionCode : String,
+      severity     : FMML::Severity)
+      
+      if class.hasElement(name) then throw Ecxeption("Duplicate Name") end;
+      if not name.isValidName() then throw Ecxeption("Invalid Name") end;
+      
+      let            
+        bodyO = null;
+        reasonO = null;
+        solutionO = null;
+        problems = []
+      in           
+       
+        bodyO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation body(classifier : Class, level : Integer) : Boolean " + bodyCode + " end", "body");
+        reasonO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation reason(classifier : Class, level : Integer) : String " + reasonCode + " end", "reason");
+        solutionO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation solution(classifier : Class, level : Integer) : String " + solutionCode + " end", "solution");
+        
+        if bodyO.at(0) = null then
+          problems := problems + bodyO.at(1) 
+        end;
+          
+        if reasonO.at(0) = null then
+          problems := problems + reasonO.at(1) 
+        end;
+          
+        if solutionO.at(0) = null then
+          problems := problems + solutionO.at(1) 
+        end;
+          
+        if problems.isEmpty() then
+          if bodyO.at(0) <> null and reasonO.at(0) <> null and solutionO.at(0) <> null
+          then
+            //try
+              let 
+                con = FMML::Issue(name, bodyO.at(0), reasonO.at(0), solutionO.at(0), severity)
+              in
+//                con.body.setProperty("raw", bodyCode);
+//                con.reason.setProperty("raw", reasonCode);
+                class.add(con)
+              end; "success"
+            //catch(e4)
+            //  [e4.message]
+            //end
+          else
+            throw Exception("operation addConstraint mysteriously failed")
+          end
+        else
+          throw Exception(problems.toString())
+        end
+      end      
+    end    
+  end
+  
+  FMML::Issue::createConstraint(FMML::MetaClass, "varNameTooShort", "
+    self.attributes->forAll( a | 
+      a.name.toString().size() > 3)      
+    ","
+    let 
+      shortAtts = self.attributes->select(a |      
+      a.name.toString().size() <= 3)
+    in
+    \"The variable names \" + (shortAtts.name).pprint() + \" are too short.\"
+    end
+    ","
+    let 
+      shortAtts = self.attributes->select(a |      
+      a.name.toString().size() <= 3)
+    in
+    \"CHANGE_ATTRIBUTE_NAME: \" + (shortAtts.name).pprint()
+    end
+    ",
+    FMML::Severity::BAD_PRACTICE);
