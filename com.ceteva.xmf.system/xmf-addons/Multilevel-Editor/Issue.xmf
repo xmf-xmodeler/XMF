@@ -79,7 +79,7 @@ context Root::FMML
     end    
   end
   
-  FMML::Issue::createConstraint(FMML::MetaClass, "varNameTooShort", "
+  FMML::Issue::createConstraint(FMML::MetaClass, "noShortAttNames", "
     self.attributes->forAll( a | 
       a.name.toString().size() > 3)      
     ","
@@ -94,7 +94,39 @@ context Root::FMML
       shortAtts = self.attributes->select(a |      
       a.name.toString().size() <= 3)
     in
-    \"CHANGE_ATTRIBUTE_NAME: \" + (shortAtts.name).pprint()
+    \"CHANGE_ATTRIBUTE_NAME:\" + self.name.toString() + \":\" + (shortAtts.name).pprint()
     end
     ",
     FMML::Severity::BAD_PRACTICE);
+    
+  FMML::Issue::createConstraint(FMML::MetaClass, "levelOneLessThanClass", "
+    self.of() = FMML::MetaClass or self.level + 1 = self.of().level
+    ","
+    \"This class must be on level \" + (self.of().level - 1) + \".\"
+    ","
+    \"VOID\"
+    ", FMML::Severity::FATAL);
+      
+  FMML::Issue::createConstraint(FMML::MetaClass, "noInstancesOfAbstractClass", "
+    not self.of().isAbstract
+    ","
+    \"This element is an instance of abstract class \" + self.of().name.toString() + \".\"
+    ","
+    \"MAKE_CLASS_CONCRETE:\" + self.name.toString()
+    ", FMML::Severity::NORMAL);
+    
+  FMML::Issue::createConstraint(FMML::MetaClass, "slotCorrectTypeSingle", "
+    self.owner.classes
+      ->select(c | self.isDescendantOf(c))
+        ->collect(c | c.attributes)->flatten
+          ->select(a | a.instLevel = self.level)
+            ->forAll(a |
+              (a.mult().lowerBound=0 and a.mult().upperBound=1 and self.get(a.name).isKindOf(a.type)) or
+              (a.mult().lowerBound=1 and a.mult().upperBound=1 and self.get(a.name).isReallyKindOf(a.type)) or
+               a.mult().lowerBound>1 or a.mult().upperBound>1)
+    
+    ","
+    \"Some slots have an incorrect type.\"
+    ","
+    \"CHANGE_SLOT_VALUE:\" + self.name.toString() + \":{list not yet available}\"
+    ", FMML::Severity::NORMAL);

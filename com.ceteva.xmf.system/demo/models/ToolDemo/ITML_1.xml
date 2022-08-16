@@ -228,7 +228,7 @@
     <addAttribute class="Root::ITML::Scanner" level="1" multiplicity="Seq{1,1,true,false}" name="docFeed" package="Root::ITML" type="Root::XCore::Boolean"/>
     <addAttribute class="Root::ITML::Scanner" level="1" multiplicity="Seq{1,1,true,false}" name="resolution" package="Root::ITML" type="Root::XCore::Integer"/>
     <addOperation body="@Operation filled[monitor=true,delToClassAllowed=false]():XCore::Boolean&#10;  self.getEmployee() &lt;&gt; null&#10;end" class="Root::ITML::Position" level="0" monitored="true" name="filled" package="Root::ITML" paramNames="" paramTypes="" type="Root::XCore::Boolean"/>
-    <addConstraint body="self.getPartPeriphs()-&gt;forAll(i |&#10;     self.of().getPossPeriphs()-&gt;exists(c |&#10;     i.isDescendentOf(c)))" class="Root::ITML::Computer" constName="compatible" instLevel="0" package="Root::ITML" reason="&quot;The device is not compatible.&quot;"/>
+    <addConstraint body="self.getPartPeriphs()-&gt;forAll(i |&#10;     self.of().getPossPeriphs()-&gt;exists(c |&#10;     i.isDescendantOf(c)))" class="Root::ITML::Computer" constName="compatible" instLevel="0" package="Root::ITML" reason="&quot;The device is not compatible.&quot;"/>
     <addConstraint body="self.of().getPossManageUnits()-&gt;includes(self.getManagingUnit().of())" class="Root::ITML::DigitalDevice" constName="properlyManaged" instLevel="0" package="Root::ITML" reason="&quot;Can be managed only by appropriate position.&quot;"/>
     <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="defOperatingLife" valueToBeParsed="5"/>
     <changeSlotValue class="Root::ITML::ACD_400" package="Root::ITML" slotName="maxMemory" valueToBeParsed="16"/>

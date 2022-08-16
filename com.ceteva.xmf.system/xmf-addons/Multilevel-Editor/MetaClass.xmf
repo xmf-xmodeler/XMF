@@ -265,7 +265,7 @@ context Root::FMML
       end
     end
 
-    @Operation isDescendentOf(ancestor : MetaClass): XCore::Boolean
+    @Operation isDescendantOf(ancestor : MetaClass): XCore::Boolean
       if self = ancestor then false else
         let tmp = self
         in

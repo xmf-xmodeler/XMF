@@ -428,15 +428,19 @@ context Integer
      s := s + temp;
      s
     end
-  end    
+  end
   
-//  context Integer
-//  @Operation loopInfinitely():Integer
-//  let 
-//  i = 0
-//  in 
-//  @ While not (i = 1) do
-//     i = 0
-//     end
-//    end
-//  end  
+  context Integer
+  @Operation getPrimeFactorSet():Element
+  let 
+  temp = self;
+  set = {}
+  in 
+  @While not (temp = temp.getFirstPrimeFactor()) do
+     set := set + {temp.getFirstPrimeFactor()};
+     temp := temp.div(temp.getFirstPrimeFactor())
+     end;
+     set := set + {temp};
+     set
+    end
+  end    
