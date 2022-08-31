@@ -99,6 +99,12 @@ context Root::FMML
     ",
     FMML::Severity::BAD_PRACTICE);
     
+    
+    
+  /**************************************************************************
+  ***** Constraints for Classes and Instances (Level, Inheritance, ...) ***** 
+  **************************************************************************/
+  
   FMML::Issue::createConstraint(FMML::MetaClass, "levelOneLessThanClass", "
     self.of() = FMML::MetaClass or self.level + 1 = self.of().level
     ","
@@ -115,6 +121,10 @@ context Root::FMML
     \"MAKE_CLASS_CONCRETE:\" + self.name.toString()
     ", FMML::Severity::NORMAL);
     
+  /**************************************************************************
+  ***** Constraints for Slots (where, type, mult, ...) ********************** 
+  **************************************************************************/
+
   FMML::Issue::createConstraint(FMML::MetaClass, "slotCorrectTypeSingle", "
     self.owner.classes
       ->select(c | self.isDescendantOf(c))

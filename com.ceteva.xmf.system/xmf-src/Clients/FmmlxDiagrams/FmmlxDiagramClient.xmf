@@ -1261,6 +1261,7 @@ context FmmlxDiagrams
       end // in
     end
 
+    // used for merging two projects into one
     @Operation mergeAttribute(requestID : Seq(Integer), className, name, level, typeName, multiplicityV)
           let
             m = FmmlxDiagrams::FmmlxManipulator()
@@ -1353,7 +1354,32 @@ context FmmlxDiagrams
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
+    end    
+
+    @Operation changeAttributeOwner(requestID : Seq(Integer), oldName, name, newName)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+        ;problems = null
+      then
+        oldClass = if self.getPackage(requestID).hasElement(oldName) then self.getPackage(requestID).getElement(oldName) else null end;
+        newClass = if self.getPackage(requestID).hasElement(newName) then self.getPackage(requestID).getElement(newName) else null end
+      in
+        problems := try
+          m.changeAttributeOwner(oldClass, name, newClass); []
+        catch(e)
+          [("changeAttributeOwner failed during transaction: " + e.message)]
+        end; // try
+        if problems.isEmpty() then
+          self.log := self.log + [["changeAttributeOwner", 
+                                  ["package", class.owner.path()],
+                                  ["oldName", oldName],
+                                  ["name", name],
+                                  ["newName", newName]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end // in
     end
+
 
     @Operation removeAttribute(requestID : Seq(Integer), className, attName, strategy)
      // for now: ignore strategy and simply delete
@@ -2121,17 +2147,43 @@ context FmmlxDiagrams
       then
         class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       in
+        ("Merge Properties into " + class.name).println();
         @For mergeItemVec in mergeItems do
           let 
             mergeItem = self.vector2Seq(mergeItemVec)
+          then
+            propType = mergeItem.at(0);
+            propOwner = mergeItem.at(1);
+            propName = mergeItem.at(2);
+            propAction = mergeItem.at(3);
+            propArg0 =  mergeItem.at(4)
+          then
+            owner = m.evalString(propOwner, self.getPackage(requestID)).at(0)
           in
-            mergeItem.println();
-            mergeItem.of().println()
-          end
-        end
-      end
-      
-    end
+            if "Attribute".equals(propType) then
+              (propName + " -> " + propAction).println();
+              if "DROP".equals(propAction) then
+                ("action: removeAttribute(" + propOwner + "," + propName + ")").println();
+                m.removeAttribute(owner, propName, null);
+                self.log := self.log + [["removeAttribute", ["package", owner.owner.path()], ["class", owner.path()], ["name", propName]]]
+              elseif "KEEP_AS".equals(propAction) then
+                ("action: changeAttributeName(" + propOwner + "," + propName + "," + propArg0 + ")").println();
+                m.changeAttributeName(owner, propName, propArg0);
+                self.log := self.log + [["changeAttributeName", ["package", owner.owner.path()], ["class", owner.path()] , ["oldName", propName] , ["newName", propArg0]]]
+              elseif "MERGE_INTO".equals(propAction) then
+                ("not yet implemented: mergeSlotValuesInto(" + propOwner + "," + propName + "," + propArg0 + ")").println()
+              elseif "PULL_UP".equals(propAction) then
+                ("action: changeAttributeOwner(" + propOwner + "," + propName + "," + class.name + ")").println();
+                m.changeAttributeOwner(propOwner, propName, propArg0);
+                self.log := self.log + [["changeAttributeOwner",["package", propOwner.owner.path()],["oldName", oldName],["name", name],["newName", newName]]]
+              else
+                ("Command not yet implemented: " + propAction).println()
+              end // if action
+            end // if attribute        
+          end // let
+        end // for each mergeItem
+      end // let
+    end // @
     
     ///////////////////////// Constraints ///////////////////////////
     
@@ -2343,10 +2395,6 @@ context FmmlxDiagrams
 
     @Operation changeOperationType(requestID : Seq(Integer), className, opName, newType)
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
-    end
-
-    @Operation changeAttributeOwner(requestID : Seq(Integer), path_old, name, path_new)
-      self.respondNotYetImplemented("changeAttributeOwner", self.vector2Seq(requestID))
     end
 
     @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new)

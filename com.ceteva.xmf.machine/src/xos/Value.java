@@ -114,6 +114,7 @@ public class Value implements XData {
                 if (i + 1 < values.length)
                     s = s + ",";
             }
+            s = s + ")";
             break;
         default:
             System.out.println("Unknown message arg type: " + type);
