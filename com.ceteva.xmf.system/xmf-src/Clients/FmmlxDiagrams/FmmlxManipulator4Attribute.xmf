@@ -118,7 +118,7 @@ import FmmlxDiagrams;
       // for now assume that checkAddAttribute did not return any trouble
       let
         a = Attribute(name);
-        allInst = class.allMetaInstances();
+        allInst = class.allMetaInstances() + [class];
         camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
       then
         getterName = "get"+camelCaseName;
