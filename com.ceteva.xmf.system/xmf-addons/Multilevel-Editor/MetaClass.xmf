@@ -205,14 +205,14 @@ context Root::FMML
     end
 
     @Operation allAttributes():Set(Attribute)
-      let allA = attributes;
-          allP = parents; // parents and classes
+      let allA = self.attributes;
+          allP = self.parents; // parents and classes
           result = {};
           alreadyChecked = {};
           selfAllParents = null
       in 
           // caching selfAllParentsFirst:
-          let P = parents; allP = Seq{}
+          let P = self.parents; allP = Seq{}
           in @While not P->isEmpty do
             let p = P->sel
             in allP := Seq{p | allP->excluding(p)};
@@ -337,6 +337,10 @@ context Root::FMML
         instances.asSeq()
       end
     end
+  end
+  
+  @Operation getAllDescendants(p:Package)
+    p.classes->select(c | c.isKindOf(MetaClass) andthen c.isDescendantOf(self))
   end
   
   @Operation getOperationsAvailableThroughDelegateToClass()

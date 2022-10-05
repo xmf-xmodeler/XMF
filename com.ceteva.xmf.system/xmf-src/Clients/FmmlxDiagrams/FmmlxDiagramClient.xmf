@@ -348,7 +348,7 @@ context FmmlxDiagrams
     	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(a)
     	      in
     	        result := result.append([[
-    	          mappingInfo.id, // 0 ID
+    	          a.path(), //a.mappingInfo.id, // 0 ID
     	          a.end1.type.path(), // 1 source ID
     	          a.end2.type.path(), // 2 target ID
     	          -1, // 3 parent ID

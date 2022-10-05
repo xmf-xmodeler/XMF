@@ -87,7 +87,7 @@ context Root::FMML
       shortAtts = self.attributes->select(a |      
       a.name.toString().size() <= 3)
     in
-    \"The variable names \" + (shortAtts.name).pprint() + \" are too short.\"
+    \"The attribute names \" + (shortAtts.name).pprint() + \" are too short.\"
     end
     ","
     let 
@@ -104,7 +104,7 @@ context Root::FMML
   /**************************************************************************
   ***** Constraints for Classes and Instances (Level, Inheritance, ...) ***** 
   **************************************************************************/
-  
+    
   FMML::Issue::createConstraint(FMML::MetaClass, "levelOneLessThanClass", "
     self.of() = FMML::MetaClass or self.level + 1 = self.of().level
     ","
