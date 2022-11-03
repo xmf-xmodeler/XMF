@@ -2937,9 +2937,6 @@ context FmmlxDiagrams
         in
             if not file.isReadOnly()
             then
-                if file.fileExists() and self.loaded(package) and confirm
-                then write := xmf.confirm(file + " exists. Overwrite?")
-                end;
                 if write //and self.ensureDir(dir)
                 then
                     let dialog = xmf.busy("Saving")
