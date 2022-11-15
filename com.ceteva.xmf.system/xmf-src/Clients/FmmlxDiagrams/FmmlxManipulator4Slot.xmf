@@ -22,7 +22,7 @@ import FmmlxDiagrams;
       let
         class = instanceWhereTheSlotResides.of()
       then
-        atts = instanceWhereTheSlotResides.allAttributesForLevel(instanceWhereTheSlotResides.level);
+        atts = class.allAttributesForLevel(instanceWhereTheSlotResides.level);
         foundAtt = null
       in
         @For att in atts do
