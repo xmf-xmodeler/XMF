@@ -1159,8 +1159,14 @@ context FmmlxDiagrams
         addSet = newSet - oldSet;
         removeSet = oldSet - newSet
       in
-        @For p in newSet do
-          if p.of() <> class.of() orelse p.level <> level then allParentsLegal := false end
+        @For pName in newSet do
+          let
+            pParse = m.evalString(pName, self.getPackage(requestID))
+          then
+            p = if pParse.at(1) = null then pParse.at(0) else null end
+          in
+            if p = null orelse p.of() <> class.of() orelse p.level <> class.level then allParentsLegal := false end
+          end
         end;
         problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;      
       
