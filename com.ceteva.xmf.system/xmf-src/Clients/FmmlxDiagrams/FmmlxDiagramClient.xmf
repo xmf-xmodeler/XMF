@@ -780,16 +780,16 @@ context FmmlxDiagrams
 		          FMML::Severity::NORMAL.name.toString()]]
 			end
 		  end end; // for/if delegation
-/*		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
-		  then result := result + [[
-		    "NO_ROLE_FILLER",
-		    "A role filler is required",
-		    [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-		    ["addRoleFiller",
-		      self.getMapping(requestID).addOrGetObjectMapping(obj).id,
-		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
-		  end;
-*/		  @For assoc in self.getPackage(requestID).associations do
+//		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
+//		  then result := result + [[
+//		    "NO_ROLE_FILLER",
+//		    "A role filler is required",
+//		    [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
+//		    ["addRoleFiller",
+//		      self.getMapping(requestID).addOrGetObjectMapping(obj).id,
+//		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
+//		  end;
+		  @For assoc in self.getPackage(requestID).associations do
 		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end2.instLevel) // if obj fits sourceDef
 		    then
 		      let
@@ -853,19 +853,19 @@ context FmmlxDiagrams
 		      if 
 		        crItem.constraint.isKindOf(FMML::Issue)
 		      then
-		        result := result + [[
+		        result := [[
 		          "CONSTRAINT_FAILURE",
 		          crItem.reason,
 		          [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		          [crItem.constraint.getSolution(obj)],
-		          crItem.constraint.severity.name.toString()]]
+		          crItem.constraint.severity.name.toString()]] + result
 		      else
-    	        result := result + [[
+    	        result := [[
 		          "CONSTRAINT_FAILURE",
 		          crItem.reason,
 		          [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		          ["no solution available"],
-		          FMML::Severity::USER_DEFINED.name.toString()]]
+		          FMML::Severity::USER_DEFINED.name.toString()]] + result
 		      end
 		    end
 		  end		    
@@ -1012,6 +1012,63 @@ context FmmlxDiagrams
         end
     end
 
+	@Operation addGeneratedInstance(
+                requestID      : Seq(Integer),
+                ofName         : String,
+                level          : Integer,
+                prefix         : String,
+                slotValueList  : Seq(Seq(String)),
+                constraintList : Seq(String))
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        package = self.getPackage(requestID);
+        instanceSuffixCount = 0
+      then
+        ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end
+      in
+        @While package.hasElement(prefix+instanceSuffixCount) do
+          instanceSuffixCount := instanceSuffixCount + 1
+        end;
+        let 
+          newInstance = try m.addInstance(self.getPackage(requestID), ofClass, prefix+instanceSuffixCount, level, [], false, slotValueList) catch (exception) null end
+        in
+          if
+            newInstance <> null 
+          then
+            let
+              failures = newInstance.checkConstraints().failures();
+              ok = true
+            in
+              @For failure in failures do
+                @For constraint in constraintList do
+                  ok := ok andthen not constraint.equals(failure.constraint.name.toString())
+                end
+              end;
+              if 
+                not ok
+              then
+                m.removeClass(newInstance, null)
+              end;
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ok])
+            end
+          else
+            self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), false])
+          end
+        
+          
+        end
+      end
+      // generateInstance 
+      //"addGeneratedInstance".println();
+      //("prefix:" + prefix).println();
+      //("slotValueList:" + slotValueList).println();
+      //("constraintList:" + constraintList).println();
+      // ....
+      // and then if successful:
+      
+    end                
+	
+
     @Operation mergeInstance(
                 requestID : Seq(Integer),
                 ofName,
@@ -1021,30 +1078,30 @@ context FmmlxDiagrams
                 x, y,
                 hidden,
                 slotValueList: Seq(Seq(String)) )
-            try
-              let
-                m = FmmlxDiagrams::FmmlxManipulator()
-              then
-                ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
-                parentsList = self.getParentsList(requestID, parents)
-              in
-                if
-                  not self.getPackage(requestID).hasElement(name)
-                then
-                  let
-                    newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
-                  then
-                    mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
-                  in
-                    mappingInfo.lastKnownDiagramX := x;
-                    mappingInfo.lastKnownDiagramY := y;
-                    mappingInfo.hidden := hidden
-                  end
-		        end
-              end
-            catch (exception)
-              exception.message.println()
-            end
+	    try
+	      let
+	        m = FmmlxDiagrams::FmmlxManipulator()
+	      then
+	        ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
+	        parentsList = self.getParentsList(requestID, parents)
+	      in
+	        if
+	          not self.getPackage(requestID).hasElement(name)
+	        then
+	          let
+	            newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, parentsList, abstract, slotValueList)
+	          then
+	            mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
+	          in
+	            mappingInfo.lastKnownDiagramX := x;
+	            mappingInfo.lastKnownDiagramY := y;
+	            mappingInfo.hidden := hidden
+	          end
+	        end
+	      end
+	    catch (exception)
+	      exception.message.println()
+	    end
     end
     
     @Operation classify(requestID : Seq(Integer), objectNames, newClassName)
@@ -3082,6 +3139,19 @@ context FmmlxDiagrams
     
     @Operation getViewOptions(requestID : Seq(Integer))
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).options])
+    end
+    
+    @Operation evalString(requestID : Seq(Integer), text) 
+      let
+  	    m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        eval = m.evalString(text, Root)
+      then
+        val = eval.at(0);
+        problems = eval.at(1)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), [val+"", problems]])
+      end
     end
     
     @Operation checkSyntax(requestID : Seq(Integer), opString : String)

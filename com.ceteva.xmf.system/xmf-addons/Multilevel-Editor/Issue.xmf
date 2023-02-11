@@ -81,23 +81,23 @@ context Root::FMML
   
   FMML::Issue::createConstraint(FMML::MetaClass, "noShortAttNames", "
     self.attributes->forAll( a | 
-      a.name.toString().size() > 3)      
+      a.name.toString().toUpper().at(0) <> a.name.toString().at(0))      
     ","
     let 
-      shortAtts = self.attributes->select(a |      
-      a.name.toString().size() <= 3)
+      shortAtts = self.attributes->select(a |   
+      a.name.toString().toUpper().at(0) = a.name.toString().at(0))
     in
-    \"The attribute names \" + (shortAtts.name).pprint() + \" are too short.\"
+    \"The attribute names \" + (shortAtts.name).pprint() + \" don't start with lower case letter.\"
     end
     ","
     let 
-      shortAtts = self.attributes->select(a |      
-      a.name.toString().size() <= 3)
+      shortAtts = self.attributes->select(a |  
+      a.name.toString().toUpper().at(0) = a.name.toString().at(0))
     in
     \"CHANGE_ATTRIBUTE_NAME:\" + self.name.toString() + \":\" + (shortAtts.name).pprint()
     end
     ",
-    FMML::Severity::BAD_PRACTICE);
+    FMML::Severity::FATAL);
     
     
     
@@ -124,7 +124,7 @@ context Root::FMML
   /**************************************************************************
   ***** Constraints for Slots (where, type, mult, ...) ********************** 
   **************************************************************************/
-
+/*
   FMML::Issue::createConstraint(FMML::MetaClass, "slotCorrectTypeSingle", "
     self.owner.classes
       ->select(c | self.isDescendantOf(c))
@@ -139,4 +139,4 @@ context Root::FMML
     \"Some slots have an incorrect type.\"
     ","
     \"CHANGE_SLOT_VALUE:\" + self.name.toString() + \":{list not yet available}\"
-    ", FMML::Severity::NORMAL);
+    ", FMML::Severity::NORMAL);*/

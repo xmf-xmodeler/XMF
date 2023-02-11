@@ -431,16 +431,26 @@ context Integer
   end
   
   context Integer
-  @Operation getPrimeFactorSet():Element
+  @Operation getPrimeFactorSeq():Element
   let 
   temp = self;
-  set = {}
+  seq = []
   in 
   @While not (temp = temp.getFirstPrimeFactor()) do
-     set := set + {temp.getFirstPrimeFactor()};
+     seq := seq + [temp.getFirstPrimeFactor()];
      temp := temp.div(temp.getFirstPrimeFactor())
      end;
-     set := set + {temp};
-     set
+     seq := seq + [temp];
+     seq
     end
-  end    
+  end
+  
+  context Integer
+  @Operation nextPrime():Integer
+    if self.isPrime() then self else (self +1).nextPrime() end
+  end
+  
+  context Integer
+  @Operation nextPrimeTwin():Element
+	if self.isPrime() andthen (self+2).isPrime() then [self, self+2] else (self+1).nextPrimeTwin() end
+  end

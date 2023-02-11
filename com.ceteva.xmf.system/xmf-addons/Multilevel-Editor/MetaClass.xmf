@@ -396,7 +396,7 @@ context Root::FMML
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
       @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
-        reports := reports->including(
+        reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
               then ConstraintReport(self,constraint,true)
@@ -404,7 +404,7 @@ context Root::FMML
     	    end
           catch(exception)
             ConstraintReport(self,constraint,false,"Error while performing classification: " + exception.message)
-          end)
+          end] + reports
       end;
       ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
     end
