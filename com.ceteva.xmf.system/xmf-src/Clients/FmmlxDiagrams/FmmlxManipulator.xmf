@@ -56,7 +56,7 @@ context FmmlxDiagrams
     
     @Operation isInstanceOf(objectS, typeS, instLevelS)
       if 
-        objectS.level = instLevelS // orelse instLevelS == null
+        objectS.level = instLevelS orelse instLevelS = -1
       then // instLevel given and matching
         let
           ancestors = {objectS.of()};
