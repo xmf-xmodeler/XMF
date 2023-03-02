@@ -205,14 +205,14 @@ context Root::FMML
     end
 
     @Operation allAttributes():Set(Attribute)
-      let allA = attributes;
-          allP = parents; // parents and classes
+      let allA = self.attributes;
+          allP = self.parents; // parents and classes
           result = {};
           alreadyChecked = {};
           selfAllParents = null
       in 
           // caching selfAllParentsFirst:
-          let P = parents; allP = Seq{}
+          let P = self.parents; allP = Seq{}
           in @While not P->isEmpty do
             let p = P->sel
             in allP := Seq{p | allP->excluding(p)};
@@ -339,6 +339,10 @@ context Root::FMML
     end
   end
   
+  @Operation getAllDescendants(p:Package)
+    p.classes->select(c | c.isKindOf(MetaClass) andthen c.isDescendantOf(self))
+  end
+  
   @Operation getOperationsAvailableThroughDelegateToClass()
     if self.of().isKindOf(MetaClass) then 
      let 
@@ -392,7 +396,7 @@ context Root::FMML
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
       @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
-        reports := reports->including(
+        reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
               then ConstraintReport(self,constraint,true)
@@ -400,7 +404,7 @@ context Root::FMML
     	    end
           catch(exception)
             ConstraintReport(self,constraint,false,"Error while performing classification: " + exception.message)
-          end)
+          end] + reports
       end;
       ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
     end

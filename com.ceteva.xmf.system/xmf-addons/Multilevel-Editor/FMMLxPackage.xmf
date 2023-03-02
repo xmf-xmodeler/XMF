@@ -249,3 +249,94 @@ context Root
       result
     end
   end
+  
+context Root
+  @Operation exportProject(p : FMMLxPackage)
+    if (p.classes->select(a | a.name.equals("Asset".asSymbol()))).isEmpty() orelse p::Asset.level <> 4 then throw Exception("There is no class \"Asset\" on level 4") end;
+    if (p.classes->select(a | a.name.equals("AssetAssociation".asSymbol()))).isEmpty() orelse p::AssetAssociation.level <> 2 then throw Exception("There is no class \"AssetAssociation\" on level 2") end;
+    if  p.getAssociation("realization") = null then throw Exception("There is no association \"realization\"") end;
+    let
+      text = "";
+      nodes = p.classes->select(n | n.level = 0 andthen n.isDescendantOf(p::Asset));
+      assocs = p.classes->select(e | e.level = 0 andthen e.isDescendantOf(p::AssetAssociation));
+      links = p.fmmlxAssociationInstances->select(link | link.at(2) = p.getAssociation("realization"));
+      eCount=0
+    in
+      text := text + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+      text := text + "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"";
+      text := text + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+      text := text + " xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">\n";
+      text := text + "<key id=\"d0\" for=\"node\" attr.name=\"name\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d1\" for=\"node\" attr.name=\"abstract\" attr.type=\"boolean\"/>\n";
+      text := text + "<key id=\"d2\" for=\"node\" attr.name=\"type\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d7\" for=\"node\" attr.name=\"activeDefense\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d3\" for=\"edge\" attr.name=\"type\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d5\" for=\"edge\" attr.name=\"name\" attributes.type=\"string\"/>\n";
+      text := text + "<key id=\"d6\" for=\"edge\" attr.name=\"abstract\" attr.type=\"boolean\" />\n";
+      text := text + "<key id=\"d4\" for=\"edge\" attr.name=\"attacksurface\" attr.type=\"string\"/>\n";
+      text := text + "<graph id=\"G\" edgedefault=\"directed\">\n";      
+
+      @For node in nodes do
+        let
+          hasParents = not (node.of().parents - {FMML::MetaClass}).isEmpty();
+          usesRealizationLink =  not p.getLinkEnds(node,"realization").isEmpty()
+        then
+          d2Name = if hasParents 
+                     then (node.of().parents - {FMML::MetaClass}).asSeq().at(0).name 
+                     else node.of().name
+                   end;
+          abs = (not hasParents) or usesRealizationLink
+        in
+          text := text + ("<node id=\""+node.name+"\">") + "\n";
+          text := text + ("  <data key=\"d0\">" + node.name + "</data>") + "\n";
+          text := text + ("  <data key=\"d1\">" + abs + "</data>") + "\n";
+          text := text + ("  <data key=\"d2\">" + d2Name + "</data>") + "\n";
+          text := text + ("</node>") + "\n"
+        end
+      end;
+      @For assoc in assocs do
+        let
+          hasParents = not (assoc.of().parents - {FMML::MetaClass}).isEmpty();
+          source = p.getLinkEnds(assoc,"hasSource").asSeq().at(0);
+          target = p.getLinkEnds(assoc,"hasTarget").asSeq().at(0)
+        then
+          eAbstract = null;
+          d3Name = if hasParents 
+                     then (assoc.of().parents - {FMML::MetaClass}).asSeq().at(0).name 
+                     else assoc.of().name
+                   end
+        in
+          text := text + ("<edge id=\"e" + eCount + "\" source=\"" + source.name + "\" target=\"" + target.name + "\">") + "\n";
+          text := text + ("  <data key=\"d3\">" + d3Name + "</data>") + "\n";
+          text := text + ("  <data key=\"d5\">" + assoc.name + "</data>") + "\n";
+          text := text + ("  <data key=\"d6\">" + "false" + "</data>") + "\n";
+          text := text + ("</edge>") + "\n";
+          eCount := eCount + 1
+        end
+      end;
+      @For link in links do
+        let
+          source = link.at(0);
+          target = link.at(1)
+        in
+          text := text + ("<edge id=\"e" + eCount + "\" source=\"" + source.name + "\" target=\"" + target.name + "\">") + "\n";
+          text := text + ("  <data key=\"d3\">Realization</data>") + "\n";
+          text := text + ("</edge>") + "\n";
+          eCount := eCount + 1
+        end
+      end;
+      text := text + "</graph></graphml>";
+      let file = xmf.saveFile(xmf.projDir(),"*.xml")
+      in
+        if file <> "" then
+          let 
+            fout = IO::FileOutputChannel(file) 
+          in 
+            //fout.writeValue("Hello");
+            format(fout,"~S",Seq{text});
+            fout.close()
+          end
+        end
+      end
+    end
+  end
