@@ -208,44 +208,32 @@ context FmmlxDiagrams
     @Operation getAllObjects(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).classes
+          classes = self.getPackage(requestID).contents()
         in
           self.cachedPaths := Table(classes.size());
     	  @For c in classes do
-    	    if c <> null andthen c.isKindOf(FMML::MetaClass) andthen c.level > -2 // TODO: find out how a null can possibly end up there
-    	    then
-    	      let
-    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c)	        
-    	      in
-    	        result := result.append([[
-    	        					-1, //mappingInfo.id, // 0: id*
-    	        c.name.toString(), // 1: name
-    	        c.level, // level  // 2: level
-    	        					-1, //if c.of().isKindOf(FMML::MetaClass) then self.getMapping(requestID).addOrGetObjectMapping(c.of()).id else -1 end,// 3: of-ID
-    	        					-1, // self.getParentIdList(requestID, c),//[],// 4: parents-ID
-    	        c.isAbstract, // 5
-    	        mappingInfo.lastKnownDiagramX, // 6
-    	        mappingInfo.lastKnownDiagramY, // 7
-    	        mappingInfo.hidden, // 8: visibility in this diagram
-    	        					-1, // 9: reserved for delegation
-    	        self.getCachedPath(c), // 10: ownPath
-    	        self.getCachedPath(c.of()), // 11: ofPath
-    	        self.getParentsPathsList(requestID, c)// 12: parentsPaths
-    	        ]])
-    	      end
-    	    /*else
-    	      result := result + [[
-    	      -2, // fake
-    	      c.name.toString(),
-    	      -1, // non-intrinsic
-    	      -2, [],
-    	      c.isAbstract,
-    	      0,0,false,0,
-              c.path(), // 10: ownPath
-              c.of().path(), // 11: ofPath
-              self.getParentsPathsList(requestID, c)// 12: parentsPaths
-    	      ]]*/
-    	    end
+    	    if c <> null then let 
+    	      mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c);
+    	      level = if c.isKindOf(FMML::FmmlxObject) then c.level else -1 end;
+    	      isAbstract = if c.isKindOf(Class) then c.isAbstract else false end;
+    	      parents = if c.isKindOf(Class) then self.getParentsPathsList(requestID, c) else [] end
+    	    in
+    	      result := result.append([[
+    	      					           -1, // 0: UNUSED
+                c.name.toString(),             // 1: name
+                level,                         // 2: level
+    	      					           -1, // 3: UNUSED
+    	      					           -1, // 4: UNUSED
+                isAbstract,                    // 5
+                mappingInfo.lastKnownDiagramX, // 6
+                mappingInfo.lastKnownDiagramY, // 7
+                mappingInfo.hidden,            // 8: visibility in this diagram
+    	      					           -1, // 9: UNUSED
+    	        self.getCachedPath(c),         // 10: ownPath
+    	        self.getCachedPath(c.of()),    // 11: ofPath
+    	        parents                        // 12: parentsPaths
+    	      ]])
+    	    end end
     	  end;
     	  // clean up mapping ?
     	  if requestID <> -3 then self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result]) end
@@ -257,7 +245,7 @@ context FmmlxDiagrams
         result = []
       in
         @For object in self.getPackage(requestID).classes do
-          if object <> null andthen object.delegatesTo <> null then
+          if object.isKindOf(Class) andthen object.delegatesTo <> null then
             if object.delegatesTo.isKindOf(FMML::MetaClass) then
               let
                 //delegatesFromPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
@@ -315,7 +303,7 @@ context FmmlxDiagrams
         result = []
       in
         @For object in self.getPackage(requestID).classes do
-          if object <> null then @For parent in object.parents do
+          if object.isKindOf(Class) then @For parent in object.parents do
             if parent.isKindOf(FMML::MetaClass) then
               let
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
@@ -403,7 +391,7 @@ context FmmlxDiagrams
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).classes->select(x | (x.level > 0 orelse x.level = -1))
+          classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class))
         in
           @For c in classes do
             let
@@ -444,8 +432,9 @@ context FmmlxDiagrams
     @Operation getAllOperations(requestID : Seq(Integer))
       let
         result = null;
-        classes = self.getPackage(requestID).classes->select(x | x.level > 0).asSeq()
-        ; O = 0 ; S = ""
+        classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class)).asSeq()
+//        O = 0;
+//        S = ""
       in
         // done in allObjects already: self.cachedPaths := Table(classes.size());
       
@@ -456,17 +445,20 @@ context FmmlxDiagrams
             c = classes.at(classCount)
           in            
             if c <> null 
-              andthen c.isKindOf(FMML::MetaClass)
+              // andthen c.isKindOf(FMML::MetaClass)
               // andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
             then
               let
-                allOps = c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
+                allOps = if c.isKindOf(FMML::MetaClass) 
+                then c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
+                else c.allOperations()
+                end
               then
                 allOpSize = allOps.size()
               then
                 resultLocal = Vector(allOpSize)
               in
-                @For oCount in 0.to(allOpSize-1) do //c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+                @For oCount in 0.to(allOpSize-1) do if (not allOps.at(oCount).owner = null) then//c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
                   let
                     o = allOps.at(oCount)
                   then
@@ -495,13 +487,12 @@ context FmmlxDiagrams
                       self.getReturnPathAsString(o),
                       o.source(),
                       ownerPath,
-                    //if o.owner.isKindOf(FMML::MetaClass) then self.getMapping(requestID).getMappingId(o.owner) else -1 end,
                       [0,1,false,true], // to-do: multiplicity
                       self.isOperationMonitored(o),
                       let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
                     ])
                   end // let
-                end; // for
+                end end; // for+if
                 //null
                 result.put(classCount, [c.path(), resultLocal.asSeq()])
               end // let
@@ -517,7 +508,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For c in self.getPackage(requestID).classes->select(x | x.level > 0) do
+        @For c in self.getPackage(requestID).classes->select(x |  x.hasSlot("level") andthen x.level > 0) do
           let
             localResult = []
           in
@@ -558,8 +549,8 @@ context FmmlxDiagrams
             objectName = self.vector2Seq(objectSlotElement).at(0);
             slotList = self.vector2Seq(objectSlotElement).at(1)
           in
-            @For o in self.getPackage(requestID).classes do
-              if o <> null andthen o.isKindOf(FMML::MetaClass) andthen o.name.toString() = objectName
+            @For o in self.getPackage(requestID).contents() do
+              if o <> null andthen o.isKindOf(NamedElement) andthen o.name.toString() = objectName
               then
                 @For name in slotList do
                   if o.hasSlot(name)
@@ -755,7 +746,7 @@ context FmmlxDiagrams
       in
         @For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
           then
-		  @For slot in obj.slots() do
+		  /*@For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
 		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
 		        result := result + [[
@@ -766,7 +757,7 @@ context FmmlxDiagrams
 		        FMML::Severity::NORMAL.name.toString()]]
 		      end // if null and mandatory
 		    end // if slot fmmlx
-		  end; // for slots
+		  end; // for slots */
 		  if obj.delegatesTo <> null then @For otherObj in self.getPackage(requestID).classes do // if for (check delegation)
 		    if FmmlxManipulator::isInstanceOf(otherObj, obj, obj.delegatesToLevel) andthen 
 		     ( otherObj.roleFiller = null orelse not FmmlxManipulator::isInstanceOf(otherObj.roleFiller, obj.delegatesTo, obj.delegatesToLevel))

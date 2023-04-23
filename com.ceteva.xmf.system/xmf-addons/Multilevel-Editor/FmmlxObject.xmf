@@ -4,44 +4,10 @@ import Root::FMML;
 
 context Root::FMML
 
-  @Class MetaClass metaclass Root::Extensions::MetaAdaptor extends Root::Extensions::MetaAdaptor, FmmlxObject
+  @Class FmmlxObject extends NamedElement
+  
+  @Attribute level : Integer end
 
-    @Constructor(name, level)
-      if self.of() <> FMML::MetaClass then
-        self.error("This constructor is only allowed for instantiating FMML::MetaClass") end;
-//      if level > 0 then self.addParent(FMML::MetaClass) end;
-        self.addParent(FMML::MetaClass);
-      self
-    end
-
-   /* These constructors are not used in the new FmmlxDiagram
-
-    @Constructor(name)
-      if self.of() = FMML::MetaClass then
-        let level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
-        in
-          if level = null then
-            self.level := 3
-          elseif level.asInt() < 1 then 
-            self.error("Level " + level + " not allowed as metaclass.")
-          else
-            self.level := level.asInt()
-          end
-        end
-      else
-        self.level := self.of().level - 1
-      end;
-      if level > 0 then self.addParent(FMML::MetaClass) end;
-      self
-    end
-    
-    @Constructor()
-      if self.of() <> FMML::MetaClass then
-        self.level := self.of().level - 1;
-        if level > 0 then self.addParent(FMML::MetaClass) end
-      end
-    end
-    
     @Operation setLevel(level)
       if self.of() <> FMML::MetaClass then
         self.error("This operation can only be executed on direct instances of FMML::MetaClass")
@@ -53,8 +19,6 @@ context Root::FMML
         end
       end
     end
-    
-    */
     
     @Attribute cachedOpSendInstance : Operation end
     @Attribute cachedOpAllAttributes : Operation end
@@ -200,68 +164,16 @@ context Root::FMML
       end // test
     end // operation
 
-    @Operation ownAttributes():Set(Attribute)
-      attributes
-    end
-
-    @Operation allAttributes():Set(Attribute)
-      let allA = self.attributes;
-          allP = self.parents; // parents and classes
-          result = {};
-          alreadyChecked = {};
-          selfAllParents = null
-      in 
-          // caching selfAllParentsFirst:
-          let P = self.parents; allP = Seq{}
-          in @While not P->isEmpty do
-            let p = P->sel
-            in allP := Seq{p | allP->excluding(p)};
-              P := P->excluding(p)->union(p.parents)
-            end end;
-            selfAllParents := allP->reverse()->asSet
+    // MOVED
+    @Operation isDescendantOf(ancestor : MetaClass): XCore::Boolean
+      if self = ancestor then false else
+        let tmp = self
+        in
+          @While tmp.level < ancestor.level and tmp <> FMML::MetaClass do
+            tmp := tmp.of()
           end;
-      
-         //("checking " + self.name + " for attributes").println();
-         allP := allP->union({self.of()});
-         @While not allP->isEmpty do
-           //("allP:= " + allP).println();
-           let p = allP->sel
-           in alreadyChecked := alreadyChecked->union({p});
-              //("  checking " + p.name + " for attributes").println();
-              @For a2Bchecked in p.attributes do
-                if a2Bchecked.isIntrinsic or selfAllParents.contains(p) then 
-//                    if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
-                  allA := allA->union({a2Bchecked})
-              end end;
-              //allA := allA->union(p.attributes);
-              if p.parents.contains(FMML::MetaClass)
-                then allP := allP->union({p.of()}) end;
-              allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
-           end
-         end;
-         // remove all intrinsic, where level is too high
-         @For a in allA do
-           if (not a.isIntrinsic) or a.instLevel < self.level then
-             result := result->union({a})
-           end
-         end;
-         result
-      end
-    end
-
-    @Operation allAttributesForLevel(attLevel):Set(Attribute)
-      let
-        result = {};
-        allAtt = self.allAttributes()
-      in
-        @For att in allAtt do
-          if att.isIntrinsic then 
-            if att.instLevel = attLevel then 
-              result := result.union({att})
-            end
-          end
-        end;
-        result
+          tmp = ancestor orelse tmp.inheritsFrom(ancestor)
+        end
       end
     end
 
@@ -282,9 +194,9 @@ context Root::FMML
           toBeChecked := toBeChecked - [currentClass];
           //("Checking " + currentClass.name).println();
           @For o in currentClass.operations do
-            if o.isIntrinsic andthen (o.instLevel <= self.level - 1)        // intrinsic and right level
+            if (o.isIntrinsic andthen o.instLevel <= self.level - 1)        // intrinsic and right level
                                                                             or
-              ((not o.isIntrinsic) andthen (currentClass.hasSlot("level") andthen currentClass.level = self.level)) // non-intrinsic and one above the instance
+              ((not o.isIntrinsic) andthen currentClass.level = self.level) // non-intrinsic and one above the instance
             then
               myOps := myOps + {o}
             end
@@ -311,25 +223,6 @@ context Root::FMML
         myOps.asSeq()
       end // let
     end // operation
-   
-  @Operation allMetaInstances()
-    if level = 0 then [] else
-      let 
-        instances = {};
-        myInstances = self.allInstances()
-      in
-        @For instance in myInstances do
-          instances := instances + instance.allMetaInstances().asSet()
-        end;
-        instances := instances + myInstances.asSet();
-        instances.asSeq()
-      end
-    end
-  end
-  
-  @Operation getAllDescendants(p:Package)
-    p.classes->select(c | c.isKindOf(MetaClass) andthen c.isDescendantOf(self))
-  end
   
   @Operation getOperationsAvailableThroughDelegateToClass()
     if self.of().isKindOf(MetaClass) then 
@@ -345,7 +238,6 @@ context Root::FMML
      end
     else [] end
   end
-   
    
   @Operation allConstraints():Set(Constraint)
     let

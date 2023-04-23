@@ -5,19 +5,14 @@ context Root
 @Package Extensions metapackage XCore extends XCore
 end
 
-//import Root::Extensions;
-
 context Root::Extensions
 
   @Class MetaAdaptor metaclass Class extends Class
 
     @Attribute created : Integer end
-    @Attribute level : Integer end
     @Attribute instances : *Element end
     @Attribute subclasses : *Element end
     @Attribute lastUpdated : Element end
-
-    //@Attribute model : 1..1 Model end
  
   @Operation deleteRecursive()
     self.of().instances := self.of().instances.excluding(self);
@@ -25,8 +20,8 @@ context Root::Extensions
     self
   end
 
-  @Operation new():Object
-
+  /* @Operation new():Object
+      "using MetaAdaptor::new()".println();
       if self.level < 1 then self.error("Level " + self.level + " does not allow instantiation.") end;
 
 	  // We instantiate a new object "obj", whereas the class is "self". Therefore: obj.of()=self
@@ -81,46 +76,7 @@ context Root::Extensions
          end;
          
          obj.init();
-         
-/*         if self.hasStructuralFeature("level") andthen self.level > 0
-         then 
-	        if self.level > 1 //or self = FMML::MetaClass
-    	    then
-	   	    	obj.addParent(FMML::MetaClass)
-			end;
-			obj.level := self.level - 1
-         end; */
-		 /*if self.of() = Extensions::MetaAdaptor
-         then
-		   let
-               level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
-           in
-               if level = null
-               then
-                   obj.level := 3
-               else
-                   obj.level := level.asInt()
-               end
-           end;
-           if obj.level < 1 then self.error("Level " + obj.level + " not allowed as metaclass.") end;          
-           obj.addParent(FMML::MetaClass)
-         else
-           if obj.of().level > 2
-           then
-             obj.addParent(FMML::MetaClass);
-             if obj.of().of().allAttributes()->exists(a |
-               a.name = "level".asSymbol())
-             then
-               obj.level := obj.of().level - 1
-             else
-               obj.level := 2
-             end
-           else
-             obj.level := obj.of().level - 1
-           end
-         end;
-         */
-         
+          
          // Now copy the intrinsic attributes to the object
          @While not intrinsicA.isEmpty() do
            let intA = intrinsicA.sel()
@@ -153,7 +109,7 @@ context Root::Extensions
          
          obj
       end
-    end
+    end */
     
     @Operation selectRoleFiller(object, class)
       let type = class.delegatesTo

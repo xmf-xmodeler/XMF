@@ -113,22 +113,30 @@ import FmmlxDiagrams;
              O := O->excluding(op) // we remove that attribute from the list as it has been handled
           end
         end; */
-         
-        if ofClass.inheritsFrom(Classifier)
-        then
-          obj.parents := obj.defaultParents()
-        else
-          false
+        
+        
+        obj.level := myLevel;
+        obj.setName(Symbol(name)); // todo: test name
+        
+        // copying the default super-classes and setting the initial superclasses.
+        // skip for level = 0
+        
+        if obj.level > 0 then 
+          if ofClass.inheritsFrom(Classifier) then
+            obj.parents := obj.defaultParents()
+          else
+            false
+          end;
+
+	      if parents.size() > 0 then obj.parents := parents.asSet() end;
+
+	      @For p in obj.parents do
+	        if p.isKindOf(FMML::MetaClass) then
+	          p.subclasses := p.subclasses + {obj}
+	        end
+  	      end
+
         end;
-
-	    if parents.size() > 0 then obj.parents := parents.asSet() end;
-
-	    @For p in obj.parents do
-	      if p.isKindOf(FMML::MetaClass) then
-	        p.subclasses := p.subclasses + {obj}
-	      end
-	    end;
-
         //then newClass.parents := parents.asSet() end; // test: may work or not...
         
         obj.init();
@@ -136,12 +144,24 @@ import FmmlxDiagrams;
         ofClass.instances := ofClass.instances.including(obj);
         
         // todo: name, parents, abstract ...
-        obj.level := myLevel;
-        package.add(obj);
-        obj.setName(Symbol(name)); // todo: test name
         
-        obj.isAbstract := abstract; // todo: check level 0
-        obj.addParent(FMML::MetaClass);
+        if obj.level > 1 then // it's a metaclass, therefore its instances are classes
+          package.add(obj);
+          obj.isAbstract := abstract; 
+          obj.addParent(FMML::MetaClass)
+        end;
+        if obj.level = 1 then // it's a simple class, therefore its instances are not classes
+          package.add(obj);
+          obj.isAbstract := abstract;
+          obj.addParent(FMML::FmmlxObject)
+        end; 
+        if obj.level = 0 then //  it's not a class at all, and parent and abstract do not apply
+          // However, package.add does not add the object to the list of classes and it has to be done manually
+          // Hopefully that has no side effects as the list of classes will contain non-classes
+          // Alternatively, a second list for non-classes would be needed.
+          package.addClass(obj);
+          package.add(obj)
+        end;        
         
         // set initial slot values where supplied
 
