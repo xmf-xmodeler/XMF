@@ -106,7 +106,7 @@ context Root::FMML
   **************************************************************************/
     
   FMML::Issue::createConstraint(FMML::MetaClass, "levelOneLessThanClass", "
-    self.of() = FMML::MetaClass orelse self.level + 1 = self.of().level
+    self.of() = FMML::MetaClass orelse (self.level + 1 = self.of().level or self.of().level = -1)
     ","
     \"This class must be on level \" + (self.of().level - 1) + \".\"
     ","
