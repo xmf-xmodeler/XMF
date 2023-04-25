@@ -22,18 +22,18 @@ context FmmlxDiagrams
     
     /* This operation returns an instance of 
       the java class "FmmlxDiagramCommunicator",
-    For the only instance of FmmlxDiagramClient,
+      For the only instance of FmmlxDiagramClient,
       there is only one instance of the communicator, 
       which is created once, if not yet present.
     */
     @Operation getCommunicator()
       if self.communicator = null then
+        "initCommunicator".println();
         let
           FmmlxDiagramCommunicator = xmf.javaClass("tool.clients.fmmlxdiagrams.FmmlxDiagramCommunicator");
           handle = xmf.getHandle(self)
         in
-          self.communicator := FmmlxDiagramCommunicator();
-          self.communicator.setHandle(handle)
+          self.communicator := FmmlxDiagramCommunicator(handle)
         end
       end;
       self.communicator
@@ -90,7 +90,7 @@ context FmmlxDiagrams
       then
         newID = self.createNewDiagram(package, diagramName, file, type)
       in
-        self.communicator.setNewDiagramId(newID)
+        self.communicator.notifyDiagramCreated(packagePath, diagramName, newID)
       end      
     end
 
@@ -2965,7 +2965,7 @@ context FmmlxDiagrams
       end // let
     end // @Op
 
-    @Operation loadProjectFromXml(requestID : Seq(Integer), packageName : String, diagramNames : Seq(String), file : String)
+    @Operation loadProjectFromXml(requestID : Seq(Integer), packageName : String, file : String)
       let
         package : XCore::Element = XCore::Package(packageName)
       in
@@ -2977,11 +2977,6 @@ context FmmlxDiagrams
           if Root.hasElement("FMML")
           then
             package.addParent(FMML)
-            //;
-            //@For diagramName in diagramNames do
-            //    self.getCommunicator().createDiagram(package.path(), diagramName, file)
-            //end;
-            //self.getCommunicator().populateDiagram(file, self.vector2Seq(diagramNames).at(0))
           end
         end
       end;

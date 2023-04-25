@@ -318,9 +318,9 @@ context Root::FMML
         instances = {};
         myInstances = self.allInstances()
       in
-        @For instance in myInstances do
+        @For instance in myInstances do if instance.isKindOf(MetaClass) then
           instances := instances + instance.allMetaInstances().asSet()
-        end;
+        end end;
         instances := instances + myInstances.asSet();
         instances.asSeq()
       end
