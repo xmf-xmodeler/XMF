@@ -99,9 +99,9 @@ context FmmlxDiagrams
     @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType)
       ///////////FIND ALTERNATIVE TO THIS///////////////////
       if
-        package.of() <> FMML::FMMLxPackage
+        package.of() <> FMMLx::FmmlxPackage
       then
-        package.setOf(FMML::FMMLxPackage);
+        package.setOf(FMMLx::FmmlxPackage);
         Kernel_addAtt(package,"fmmlxAssociationInstances",{})
       end;
       //////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ context FmmlxDiagrams
         package = diagram.package;
         mapping = diagram.mapping
       in
-        @For c in package.classes->select(x | x.isKindOf(FMML::MetaClass)) do
+        @For c in package.classes->select(x | x.isKindOf(FMMLx::MetaClass)) do
           let
     	    mappingInfo = mapping.addOrGetObjectMapping(c)	        
     	  in
@@ -183,7 +183,7 @@ context FmmlxDiagrams
     	  then
     	    key = if obj.isKindOf(Associations::Association) then obj.name else obj end
     	  in
-    	    if not obj.isKindOf(FMML::MetaClass) then 
+    	    if not obj.isKindOf(FMMLx::MetaClass) then 
     	      result := result.append([[
                 key.toString(),
                 mappingItem.points]])
@@ -212,12 +212,12 @@ context FmmlxDiagrams
         in
           self.cachedPaths := Table(classes.size());
     	  @For c in classes do
-    	    if c <> null andthen (c.isKindOf(FMML::FmmlxObject) or c.isKindOf(Class)) then let 
+    	    if c <> null andthen (c.isKindOf(FMMLx::FmmlxObject) or c.isKindOf(Class)) then let 
     	      mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c);
-    	      level = if c.isKindOf(FMML::FmmlxObject) then c.level else -1 end;
+    	      level = if c.isKindOf(FMMLx::FmmlxObject) then c.level else -1 end;
     	      isAbstract = if c.isKindOf(Class) then c.isAbstract else false end;
     	      parents = if c.isKindOf(Class) then self.getParentsPathsList(requestID, c) else [] end;
-    	      type = if c.isKindOf(FMML::FmmlxObject) then "FMMLX" else if c.isKindOf(Enum) then "ENUM" else if c.isKindOf(Class) then "CLASS" else "UNDEFINED" end end end
+    	      type = if c.isKindOf(FMMLx::FmmlxObject) then "FMMLX" else if c.isKindOf(Enum) then "ENUM" else if c.isKindOf(Class) then "CLASS" else "UNDEFINED" end end end
     	    in
     	      result := result.append([[
     	      	type				         , // 0: UNUSED
@@ -247,7 +247,7 @@ context FmmlxDiagrams
       in
         @For object in self.getPackage(requestID).classes do
           if object.isKindOf(Class) andthen object.delegatesTo <> null then
-            if object.delegatesTo.isKindOf(FMML::MetaClass) then
+            if object.delegatesTo.isKindOf(FMMLx::MetaClass) then
               let
                 //delegatesFromPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 //delegatesToPath = self.getMapping(requestID).addOrGetObjectMapping(object.delegatesTo).object.path();
@@ -278,7 +278,7 @@ context FmmlxDiagrams
       in
         @For object in self.getPackage(requestID).classes do
           if object <> null then if object.roleFiller <> null then
-            if object.roleFiller.isKindOf(FMML::MetaClass) then
+            if object.roleFiller.isKindOf(FMMLx::MetaClass) then
               let
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).object.path()
@@ -305,7 +305,7 @@ context FmmlxDiagrams
       in
         @For object in self.getPackage(requestID).classes do
           if object.isKindOf(Class) then @For parent in object.parents do
-            if parent.isKindOf(FMML::MetaClass) then
+            if parent.isKindOf(FMMLx::MetaClass) then
               let
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(parent).object.path()
@@ -446,12 +446,12 @@ context FmmlxDiagrams
             c = classes.at(classCount)
           in            
             if c <> null 
-              // andthen c.isKindOf(FMML::MetaClass)
+              // andthen c.isKindOf(FMMLx::MetaClass)
               // andthen not self.getMapping(requestID).addOrGetObjectMapping(c).hidden
             then
               let
-                allOps = if c.isKindOf(FMML::MetaClass) 
-                then c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMML::MetaClass))
+                allOps = if c.isKindOf(FMMLx::MetaClass) 
+                then c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
                 else c.allOperations()
                 end
               then
@@ -459,7 +459,7 @@ context FmmlxDiagrams
               then
                 resultLocal = Vector(allOpSize)
               in
-                @For oCount in 0.to(allOpSize-1) do if (not allOps.at(oCount).owner = null) then//c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMML::MetaClass) then
+                @For oCount in 0.to(allOpSize-1) do if (not allOps.at(oCount).owner = null) then//c.allOperations2() do if (not o.owner = null) and o.owner.isKindOf(FMMLx::MetaClass) then
                   let
                     o = allOps.at(oCount)
                   then
@@ -514,7 +514,7 @@ context FmmlxDiagrams
             localResult = []
           in
             if c <> null 
-              andthen c.isKindOf(FMML::MetaClass) 
+              andthen c.isKindOf(FMMLx::MetaClass) 
             then
               @For con in c.constraints do if (not con.owner = null) then
                 localResult := localResult.append([[
@@ -579,7 +579,7 @@ context FmmlxDiagrams
         result = []
       in
         @For o in self.getPackage(requestID).classes do
-          if o <> null andthen o.isKindOf(FMML::MetaClass) andthen o.name.toString() = objectName
+          if o <> null andthen o.isKindOf(FMMLx::MetaClass) andthen o.name.toString() = objectName
           then
             @For name in slotList do
               if o.hasSlot(name)
@@ -745,8 +745,8 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For obj in self.getPackage(requestID).contents()->select(x | x.isKindOf(FMML::FmmlxObject)) do
-        //@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMML::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
+        @For obj in self.getPackage(requestID).contents()->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
+        //@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMMLx::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
         //  then
 		  /*@For slot in obj.slots() do
 		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
@@ -756,7 +756,7 @@ context FmmlxDiagrams
 		        "The slot " + slot.name + " must not be empty.",
 		        [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		        ["setSlotValue", self.getMapping(requestID).addOrGetObjectMapping(obj).id, slot.name.toString()],
-		        FMML::Severity::NORMAL.name.toString()]]
+		        FMMLx::Severity::NORMAL.name.toString()]]
 		      end // if null and mandatory
 		    end // if slot fmmlx
 		  end; // for slots */
@@ -770,10 +770,10 @@ context FmmlxDiagrams
 			    ["addRoleFiller",
 			      self.getMapping(requestID).addOrGetObjectMapping(otherObj).id,
 			      self.getMapping(requestID).addOrGetObjectMapping(obj.delegatesTo).id],
-		          FMML::Severity::NORMAL.name.toString()]]
+		          FMMLx::Severity::NORMAL.name.toString()]]
 			end
 		  end end; // for/if delegation */
-//		  if obj.of().isKindOf(FMML::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
+//		  if obj.of().isKindOf(FMMLx::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
 //		  then result := result + [[
 //		    "NO_ROLE_FILLER",
 //		    "A role filler is required",
@@ -796,7 +796,7 @@ context FmmlxDiagrams
 		            "The association " + assoc.name + " requires more links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMML::Severity::NORMAL.name.toString()]]
+		            FMMLx::Severity::NORMAL.name.toString()]]
 		        end;
 		        if
 		          assoc.end2.mult().hasUpperBound() andthen count > assoc.end2.mult().upperBound()
@@ -806,7 +806,7 @@ context FmmlxDiagrams
 		            "The association " + assoc.name + " requires fewer links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMML::Severity::NORMAL.name.toString()]]
+		            FMMLx::Severity::NORMAL.name.toString()]]
 		        end
 		      end // let
 		    end; // if instance of
@@ -823,7 +823,7 @@ context FmmlxDiagrams
 		            "The association " + assoc.name + " requires more links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMML::Severity::NORMAL.name.toString()]]
+		            FMMLx::Severity::NORMAL.name.toString()]]
 		        end;
 		        if
 		          assoc.end1.mult().hasUpperBound() andthen count > assoc.end1.mult().upperBound()
@@ -833,7 +833,7 @@ context FmmlxDiagrams
 		            "The association " + assoc.name + " requires fewer links.",
 		            [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMML::Severity::NORMAL.name.toString()]]
+		            FMMLx::Severity::NORMAL.name.toString()]]
 		        end
 		      end // let
 		    end // if instance of
@@ -844,7 +844,7 @@ context FmmlxDiagrams
 		  in
 		    @For crItem in constraintReport.failures() do //constraintReport.children() do
 		      if 
-		        crItem.constraint.isKindOf(FMML::Issue)
+		        crItem.constraint.isKindOf(FMMLx::Issue)
 		      then
 		        result := [[
 		          "CONSTRAINT_FAILURE",
@@ -858,7 +858,7 @@ context FmmlxDiagrams
 		          crItem.reason,
 		          [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
 		          ["no solution available"],
-		          FMML::Severity::USER_DEFINED.name.toString()]] + result
+		          FMMLx::Severity::USER_DEFINED.name.toString()]] + result
 		      end
 		    end
 		  end		    
@@ -895,7 +895,7 @@ context FmmlxDiagrams
         allParentsLegal = true
       in
         @For p in parentsList do
-          if p.of() <> FMML::MetaClass orelse p.level <> level then allParentsLegal := false end
+          if p.of() <> FMMLx::MetaClass orelse p.level <> level then allParentsLegal := false end
         end;
         problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;
         problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
@@ -1574,7 +1574,7 @@ context FmmlxDiagrams
       end// let
     end
     
-    @Operation getParentsPathsList(requestID, c : FMML::MetaClass) // for local use
+    @Operation getParentsPathsList(requestID, c : FMMLx::MetaClass) // for local use
       let list = [] in
         @For parent in c.parents do 
             list := list.append([self.getCachedPath(parent)]) //end
@@ -2277,7 +2277,7 @@ context FmmlxDiagrams
         class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         constSymbol = constName.asSymbol()
       then
-        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel, FMML::Severity::USER_DEFINED, "NO_SOLUTION") else ["Class "+classPath+" not found."] end
+        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, instLevel, FMMLx::Severity::USER_DEFINED, "NO_SOLUTION") else ["Class "+classPath+" not found."] end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addConstraint", ["package", class.owner.path()],
@@ -2718,7 +2718,7 @@ context FmmlxDiagrams
            @For level in (-maxLevel).to(0) do
              @For class in classes do
                if class.level=(-level) then
-                 if class.of()=FMML::MetaClass then
+                 if class.of()=FMMLx::MetaClass then
                    log := log + 
                      [["addMetaClass",
                       ["package", class.owner.path()],
@@ -2816,7 +2816,7 @@ context FmmlxDiagrams
              let
                slots = class.slots()
              then
-               slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMML::MetaClass)).name
+               slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMMLx::MetaClass)).name
              in 
                // evil unorthodox hack
                slotNames := slotNames + {"lastUpdated".asSymbol()};
@@ -2984,9 +2984,9 @@ context FmmlxDiagrams
         in
           Root.add(package);
           xmf.projectManager("MyProjects").add(project);
-          if Root.hasElement("FMML")
+          if Root.hasElement("FMMLx")
           then
-            package.addParent(FMML)
+            package.addParent(FMMLx)
           end
         end
       end;

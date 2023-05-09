@@ -5,12 +5,12 @@ import FmmlxDiagrams;
 
   context FmmlxManipulator 
     @Operation addConstraint(
-      class      : FMML::MetaClass, 
+      class      : FMMLx::MetaClass, 
       name       : Symbol, 
       bodyCode   : String, 
       reasonCode : String, 
       instLevel  : Integer,
-      severity   : FMML::Severity,
+      severity   : FMMLx::Severity,
       solutionKey: String)
 
       if
@@ -64,7 +64,7 @@ import FmmlxDiagrams;
             then
               try
                 let 
-                  con = FMML::Issue(name, bodyO.at(0), reasonO.at(0), solutionO.at(0), severity)
+                  con = FMMLx::Issue(name, bodyO.at(0), reasonO.at(0), solutionO.at(0), severity)
                 in
                   con.body.setProperty("raw", bodyCode);
                   con.reason.setProperty("raw", reasonCode);
@@ -131,7 +131,7 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation changeConstraintName(
-      class         : FMML::MetaClass, 
+      class         : FMMLx::MetaClass, 
       oldName       : String, 
       newNameSymbol : Symbol)
       
@@ -150,7 +150,7 @@ import FmmlxDiagrams;
 
   context FmmlxManipulator
     @Operation changeConstraintLevel(
-      class     : FMML::MetaClass, 
+      class     : FMMLx::MetaClass, 
       name      : String, 
       instLevel : Integer)
       
@@ -171,7 +171,7 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation changeConstraintBodyAndReason(
-      class      : FMML::MetaClass, 
+      class      : FMMLx::MetaClass, 
       name       : String, 
       bodyCode   : String, 
       reasonCode : String)
@@ -204,8 +204,8 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation changeConstraintOwner(
-      oldClass : FMML::MetaClass, 
-      newClass : FMML::MetaClass, 
+      oldClass : FMMLx::MetaClass, 
+      newClass : FMMLx::MetaClass, 
       name     : String)
       
       let
@@ -229,7 +229,7 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation removeConstraint(
-      class : FMML::MetaClass, 
+      class : FMMLx::MetaClass, 
       name  : String)
       
       let

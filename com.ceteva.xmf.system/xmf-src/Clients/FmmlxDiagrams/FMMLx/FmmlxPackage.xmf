@@ -1,0 +1,342 @@
+parserImport XOCL;
+
+import Root::FMMLx;
+
+context Root::FMMLx
+@Class FmmlxPackage extends Package
+
+  @Attribute fmmlxAssociationInstances : Set end
+  
+  @Operation addAssociationInstance(source, target, association)
+    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
+    self.fmmlxAssociationInstances := self.fmmlxAssociationInstances + {[source,target,association]}
+   end
+  
+  @Operation removeAssociationInstance(source, target, association) 
+    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
+    let
+      toBeRemoved = {}
+    in
+      @For link in self.fmmlxAssociationInstances do
+        if 
+          source = link.at(0) andthen target = link.at(1) andthen association = link.at(2)
+        then
+          toBeRemoved := toBeRemoved + {link}
+        end
+      end;
+      if 
+        toBeRemoved.size() <> 1 
+      then 
+        throw Exception("associationInstance not found") 
+      else
+        self.fmmlxAssociationInstances := self.fmmlxAssociationInstances - toBeRemoved
+      end
+    end
+  end
+   
+  @Operation hasAssociationInstance(source, target, association)
+    if self.fmmlxAssociationInstances = null then false 
+      else
+      let 
+        found = false
+      in
+        @For link in self.fmmlxAssociationInstances do
+          if link.at(0) = source andthen link.at(1) = target andthen link.at(2) = association then found := true end;
+          if link.at(1) = source andthen link.at(0) = target andthen link.at(2) = association then found := true end
+        end;
+        found
+      end
+    end 
+  end
+  
+  @Operation getLinkEnds(obj:MetaClass, assocName:String) self.getLinkEnds(obj,assocName,true,true) end
+  
+  @Operation getLinkEnds(obj:MetaClass, assocName:String, findSourceEnds:Boolean, findTargetEnds:Boolean)
+    // findSourceEnds => find those where obj is target (at 1) and links to objects on the source (at 0) end
+    let
+      result = {}
+    in
+      @For link in self.fmmlxAssociationInstances do
+        if findTargetEnds andthen link.at(0) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(1)} end;
+        if findSourceEnds andthen link.at(1) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(0)} end
+      end;
+      result
+    end
+  end
+  
+  @Operation hasAssociation(assocName:String)
+    let 
+      found = false
+    in
+      @For assoc in self.associations do
+        found := found orelse assoc.name.toString() = assocName.toString()
+      end;
+      found
+    end
+  end  
+  
+  @Operation getAssociation(assocName:String)
+    let 
+      found = null
+    in
+      @For assoc in self.associations do
+        if
+          found = null
+        then
+          if 
+            assoc.name.toString() = assocName.toString()
+          then
+            found := assoc
+          end
+        end
+      end;
+      found
+    end
+  end
+  
+end
+  
+context Root
+  @Operation getSuperClasses(c : Class)
+    let 
+      supers = {}; 
+      nextSupers = {c}
+    in
+      @While
+        nextSupers.size() > supers.size()
+      do
+        supers := nextSupers;
+//        nextSupers := {};
+        @For x in supers do
+          nextSupers := nextSupers + x.parents;
+          nextSupers := nextSupers + {x.of()}
+        end
+      end;
+      nextSupers - {Classifier, Object, Element, DocumentedElement, NamedElement,
+                    IndexedContainer, NameSpace, Contained, Container, Class}
+    end
+  end  
+
+context Root
+  @Operation packStat()
+    let 
+      i = 0;
+      numberOfClasses = [];
+      sumOfClasses = 0;
+      maxClasses = [-1,null];
+      numberOfAtts = [];
+      sumOfAtts = 0;
+      maxAtts = [-1,null];
+      numberOfOps = [];
+      sumOfOps = 0;
+      maxOps = [-1,null];
+      numberOfSupers = [];
+      sumOfSupers = 0;
+      maxSupers = [-1,null];
+      setOfDep = {}
+    in
+      @For p in Package.allInstances() do if p.path().indexOf("Root::",0)=0 then
+        (i + ": ").println();
+//        p.path().subString(6,p.path().size()).println();
+//        p.name().println();
+//        (if p.documentation = null then "NULL" else p.documentation.doc end).println();
+//        "".println();
+        
+        numberOfClasses := numberOfClasses + [p.classes.size()]; sumOfClasses := sumOfClasses + p.classes.size();
+        if p.classes.size() > maxClasses.at(0) then maxClasses := [p.classes.size(), p.path()]; ("Class:  New record: " + p.classes.size() + " (" + p + ")!").println() end;
+        @For c in p.classes do if c.owner <> null then
+        
+          @For s in c.parents do
+            if s.owner <> c.owner andthen s.owner <> null then
+//              ("    " + c.owner.path() + " (" + c.name +") uses " + if s.owner = null then "ERROR" else s.owner.path() end + " (" + s.name +")").println();
+              let depItem = [c.owner, s.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not s.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end
+          end;
+          
+          numberOfSupers := numberOfSupers + [getSuperClasses(c).size()]; sumOfSupers := sumOfSupers + getSuperClasses(c).size();
+          if getSuperClasses(c).size() > maxSupers.at(0) then maxSupers := [getSuperClasses(c).size(), c.path()]; ("Supers: New record: " + getSuperClasses(c).size() + " (" + c + ")!").println() end;
+          
+          numberOfAtts := numberOfAtts + [c.attributes.size()]; sumOfAtts := sumOfAtts + c.attributes.size();
+          if c.attributes.size() > maxAtts.at(0) then maxAtts := [c.attributes.size(), c.path()]; ("Atts:   New record: " + c.attributes.size() + " (" + c + ")!").println() end;
+          @For a in c.attributes do
+            if a.type.owner <> c.owner andthen a.type.owner <> null then
+//              ("    " + c.owner.path() + " (" + c.name +") uses " + if a.type.owner = null then "ERROR" else a.type.owner.path() end + " (" + a.type.name +")").println();
+              let depItem = [c.owner, a.type.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not a.type.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end
+          end;
+          
+          numberOfOps := numberOfOps + [c.operations.size()]; sumOfOps := sumOfOps + c.operations.size();
+          if c.operations.size() > maxOps.at(0) then maxOps := [c.operations.size(), c.path()]; ("Ops:    New record: " + c.operations.size() + " (" + c + ")!").println() end;
+          @For o in c.operations do
+            if o.type.owner <> c.owner andthen o.type.owner <> null then
+              let depItem = [c.owner, o.type.owner]; found = false in
+                @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                if not found andthen not o.type.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+              end
+            end;
+            
+            @For t in o.paramTypes() do
+              if t.owner <> c.owner andthen t.owner <> null then
+                let depItem = [c.owner, t.owner]; found = false in
+                  @For item in setOfDep do if (not found) andthen item.equals(depItem) then found:=true end end;
+                  if not found andthen not t.owner = Root::XCore then setOfDep := setOfDep + {depItem} end
+                end
+              end
+            end
+          end
+          
+        end end;
+        
+        i := i+1
+      end end;
+        
+      @For item in setOfDep do
+        (item.at(0).path() + " uses " + item.at(1).path()).println()
+      end;
+
+      //numberOfClasses.println()
+      (sumOfClasses + " classes found in " + i + " packages. (avg.: " + ((1.0 * sumOfClasses) / i) + ")").println();
+      (sumOfAtts + " attributes found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfAtts) / sumOfClasses) + "/cls, " + ((1.0 * sumOfAtts) / i)+"/pkg)").println();
+      (sumOfOps + " operations found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfOps) / sumOfClasses) + "/cls, " + ((1.0 * sumOfOps) / i)+"/pkg)").println();
+      (sumOfSupers + " super classes found in " + sumOfClasses + " classes. (avg.: " + ((1.0 * sumOfSupers) / sumOfClasses) + "/cls, " + ((1.0 * sumOfSupers) / i)+"/pkg)").println();
+      
+      ("max Classes: " + maxClasses).println();
+      ("max Attributes: " + maxAtts).println();
+      ("max Operations: " + maxOps).println();
+      ("max Super Classes: " + maxSupers).println()
+    end
+  end
+  
+context Root
+  @Operation foo()
+    let
+      C = Classifier.allInstances();
+      O = {};
+      N = {}
+    in
+      @For c in C do
+        O := O + c.operations;
+        N := N + c.operations.name
+      end;
+      //N.println();
+      ("O.size(): " + O.size()).println();
+      ("N.size(): " + N.size()).println()
+    end
+  end
+  
+context Root
+  @Operation goo(text)
+    let
+      result = {};
+      n = 0;
+      StringCheck = xmf.javaClass("tool.helper.StringCheck")
+    then
+      stringCheck = StringCheck()
+    in
+      @For c in Classifier.allInstances() do
+        @For o in c.operations do
+          n := n+1;
+          if n.mod(100) = 0 then (n + " Checking "+o.name+"...").println() end;
+          if stringCheck.contains(o.codeBox.source(), text) then result := result+{o} end
+        end
+      end;
+      result
+    end
+  end
+  
+context Root
+  @Operation exportProject(p : FmmlxPackage)
+    if (p.classes->select(a | a.name.equals("Asset".asSymbol()))).isEmpty() orelse p::Asset.level <> 4 then throw Exception("There is no class \"Asset\" on level 4") end;
+    if (p.classes->select(a | a.name.equals("AssetAssociation".asSymbol()))).isEmpty() orelse p::AssetAssociation.level <> 2 then throw Exception("There is no class \"AssetAssociation\" on level 2") end;
+    if  p.getAssociation("realization") = null then throw Exception("There is no association \"realization\"") end;
+    let
+      text = "";
+      nodes = p.classes->select(n | n.level = 0 andthen n.isDescendantOf(p::Asset));
+      assocs = p.classes->select(e | e.level = 0 andthen e.isDescendantOf(p::AssetAssociation));
+      links = p.fmmlxAssociationInstances->select(link | link.at(2) = p.getAssociation("realization"));
+      eCount=0
+    in
+      text := text + "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+      text := text + "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"";
+      text := text + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+      text := text + " xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">\n";
+      text := text + "<key id=\"d0\" for=\"node\" attr.name=\"name\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d1\" for=\"node\" attr.name=\"abstract\" attr.type=\"boolean\"/>\n";
+      text := text + "<key id=\"d2\" for=\"node\" attr.name=\"type\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d7\" for=\"node\" attr.name=\"activeDefense\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d3\" for=\"edge\" attr.name=\"type\" attr.type=\"string\"/>\n";
+      text := text + "<key id=\"d5\" for=\"edge\" attr.name=\"name\" attributes.type=\"string\"/>\n";
+      text := text + "<key id=\"d6\" for=\"edge\" attr.name=\"abstract\" attr.type=\"boolean\" />\n";
+      text := text + "<key id=\"d4\" for=\"edge\" attr.name=\"attacksurface\" attr.type=\"string\"/>\n";
+      text := text + "<graph id=\"G\" edgedefault=\"directed\">\n";      
+
+      @For node in nodes do
+        let
+          hasParents = not (node.of().parents - {FMMLx::MetaClass}).isEmpty();
+          usesRealizationLink =  not p.getLinkEnds(node,"realization").isEmpty()
+        then
+          d2Name = if hasParents 
+                     then (node.of().parents - {FMMLx::MetaClass}).asSeq().at(0).name 
+                     else node.of().name
+                   end;
+          abs = (not hasParents) or usesRealizationLink
+        in
+          text := text + ("<node id=\""+node.name+"\">") + "\n";
+          text := text + ("  <data key=\"d0\">" + node.name + "</data>") + "\n";
+          text := text + ("  <data key=\"d1\">" + abs + "</data>") + "\n";
+          text := text + ("  <data key=\"d2\">" + d2Name + "</data>") + "\n";
+          text := text + ("</node>") + "\n"
+        end
+      end;
+      @For assoc in assocs do
+        let
+          hasParents = not (assoc.of().parents - {FMMLx::MetaClass}).isEmpty();
+          source = p.getLinkEnds(assoc,"hasSource").asSeq().at(0);
+          target = p.getLinkEnds(assoc,"hasTarget").asSeq().at(0)
+        then
+          eAbstract = null;
+          d3Name = if hasParents 
+                     then (assoc.of().parents - {FMMLx::MetaClass}).asSeq().at(0).name 
+                     else assoc.of().name
+                   end
+        in
+          text := text + ("<edge id=\"e" + eCount + "\" source=\"" + source.name + "\" target=\"" + target.name + "\">") + "\n";
+          text := text + ("  <data key=\"d3\">" + d3Name + "</data>") + "\n";
+          text := text + ("  <data key=\"d5\">" + assoc.name + "</data>") + "\n";
+          text := text + ("  <data key=\"d6\">" + "false" + "</data>") + "\n";
+          text := text + ("</edge>") + "\n";
+          eCount := eCount + 1
+        end
+      end;
+      @For link in links do
+        let
+          source = link.at(0);
+          target = link.at(1)
+        in
+          text := text + ("<edge id=\"e" + eCount + "\" source=\"" + source.name + "\" target=\"" + target.name + "\">") + "\n";
+          text := text + ("  <data key=\"d3\">Realization</data>") + "\n";
+          text := text + ("</edge>") + "\n";
+          eCount := eCount + 1
+        end
+      end;
+      text := text + "</graph></graphml>";
+      let file = xmf.saveFile(xmf.projDir(),"*.xml")
+      in
+        if file <> "" then
+          let 
+            fout = IO::FileOutputChannel(file) 
+          in 
+            //fout.writeValue("Hello");
+            format(fout,"~S",Seq{text});
+            fout.close()
+          end
+        end
+      end
+    end
+  end

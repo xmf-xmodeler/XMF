@@ -28,12 +28,12 @@ context FmmlxManipulator
   @Operation countOccurencesForType(
     type        : Class,
     level       : int,
-    package     : FMMLxPackage,
+    package     : FmmlxPackage,
     association : Association,
     countSourceOccurences : Boolean,
     countTargetOccurences : Boolean)
    	  
-    if not type.isKindOf(FMML::MetaClass) then null else
+    if not type.isKindOf(FMMLx::MetaClass) then null else
      
       let
         minCount = null;

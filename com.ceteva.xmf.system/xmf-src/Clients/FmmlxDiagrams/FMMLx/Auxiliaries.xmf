@@ -1,0 +1,285 @@
+parserImport XOCL;
+
+//context Root
+//
+//  @Package FMML metapackage XCore extends XCore
+//  end
+
+context Root
+  @Package Auxiliary end
+  
+context Root::Auxiliary
+  @Class Complex
+    @Attribute real:Number end
+    @Attribute imaginary:Number end
+    
+    @Constructor(real,imaginary) end
+        
+    @Operation toString()  
+      let 
+        iText = 
+          if     imaginary =  1 then  "i"
+          elseif imaginary = -1 then "-i"
+          else  (imaginary + "i") end
+      in
+        ""+
+        if 
+          imaginary = 0 
+        then 
+          real
+        else
+          if 
+            real = 0
+          then
+            iText
+          else
+            real + if imaginary > 0 then "+" else "" end + iText
+          end
+        end
+      end
+    end
+    
+    @Operation magnitude() ((self.real*self.real)+(self.imaginary*self.imaginary)).sqrt() end
+    @Operation argument() xmf.javaClass("java.lang.Math").atan2(self.imaginary+0.0,self.real+0.0) end
+    
+    @Operation add(other) Complex(self.real+other.real,self.imaginary+other.imaginary) end
+    @Operation sub(other) Complex(self.real-other.real,self.imaginary-other.imaginary) end
+    @Operation mul(other) Complex((self.real*other.real)-(self.imaginary*other.imaginary),(self.real*other.imaginary)+(other.real*self.imaginary)) end
+    @Operation div(other) Complex(
+        ((self.real*other.real)+(self.imaginary*other.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)),
+        ((self.real*other.imaginary)-(other.real*self.imaginary))/((other.real*other.real)+(other.imaginary*other.imaginary)))
+    end
+    
+    @Operation createFromPolar(magnitude, argument) 
+      Complex(magnitude * xmf.javaClass("java.lang.Math").cos(argument), magnitude * xmf.javaClass("java.lang.Math").sin(argument))
+    end
+    
+    @Operation rotate(angle) 
+      Complex::createFromPolar(self.magnitude(), self.argument() + angle)
+    end
+    
+    @Operation exp(z:Complex)
+      let 
+        a = xmf.javaClass("java.lang.Math").exp(z.real) 
+      in
+      Complex(
+        a * xmf.javaClass("java.lang.Math").cos(z.imaginary),
+        a * xmf.javaClass("java.lang.Math").sin(z.imaginary)
+        )
+      end
+    end
+    
+    @Operation pi() Complex(-1,0).argument() end
+    
+    @Operation toParseableString():String 
+      "Auxiliary::Complex(" + self.real + ", " + self.imaginary + ")"
+    end
+    
+  end
+  
+context Root::Auxiliary
+  @Class AuxiliaryClass isabstract
+    @Attribute symbol:String end
+    @Attribute abbreviation:String end
+    @Attribute refValue:Float end
+    
+    @AbstractOp getAsString():String end
+    @AbstractOp setAsString(s:String) end
+  end
+  
+context Root::Auxiliary
+  @Class Currency
+    @Attribute symbol:String end
+    @Attribute abbreviation:String end
+    @Attribute refValue:Float end
+    
+    @Constructor(symbol, abbreviation, refValue) end
+    
+    @Operation update() self.refValue := if "EUR"=self.abbreviation then 1.0 else 1.0 / xmf.javaClass("tool.helper.CurrencyRates").getpriceOf1EUR(abbreviation) end end
+
+    @Operation toParseableString():String 
+      "Auxiliary::Currency(\"" + symbol + "\", \"" + abbreviation + "\", " + refValue + ")"
+    end
+  end
+
+context Root::Auxiliary
+  @Class MonetaryValue
+    @Attribute amount:Float end
+    @Attribute currency:Root::Auxiliary::Currency end
+    
+    @Constructor(amount, currency) end
+    
+    @Operation toString():String self.amount + self.currency.symbol end
+    @Operation getAmountIn(otherCurrency:Root::Auxiliary::Currency):Float self.amount * self.currency.refValue / otherCurrency.refValue end
+    @Operation getAmount():Float self.amount end
+    @Operation getCurrency():Root::Auxiliary::Currency self.currency end
+    
+    @Operation mul(factor:Float):Root::Auxiliary::Currency MonetaryValue(self.amount*factor, self.currency) end
+    @Operation add(other:MonetaryValue):MonetaryValue MonetaryValue(self.amount + other.getAmountIn(self.currency), self.currency) end
+    @Operation sub(other:MonetaryValue):MonetaryValue self.add(other.mul(-1)) end
+    
+    @Operation toParseableString():String 
+      "Auxiliary::MonetaryValue(" + self.amount + ", " + self.currency.toParseableString() + ")"
+    end
+    
+  end
+  
+context Root::Auxiliary
+  @Class Date
+    @Attribute time : String end
+    @Attribute showTimeOfDay : Boolean end
+  	
+    @Constructor() 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.time := dateClass().getNow();
+        self.showTimeOfDay := true
+      end
+    end
+    
+    @Constructor(year, month, day) 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, 12, 0, 0);
+        self.showTimeOfDay := false
+      end
+    end    
+    
+    @Constructor(year, month, day, hour, minute, second) 
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        self.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        self.showTimeOfDay := true
+      end
+    end
+  	
+    @Operation createDate(year, month, day):Date
+      let
+        d = Date();
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in
+        d.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, 12, 0, 0);
+        d.showTimeOfDay := false;
+        d
+      end
+    end
+  	
+    @Operation createDateAndTime(year, month, day, hour, minute, second):Date
+      let
+        d = Date();
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in
+        d.time := dateClass().getYearMonthDayHourMinuteSecond(year, month, day, hour, minute, second);
+        d.showTimeOfDay := true;
+        d
+      end
+    end
+
+    @Operation diff(other):String
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        dateClass().getDifference(self.time, other.time)
+      end
+    end
+
+    @Operation toString():String
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in
+        if 
+          self.showTimeOfDay
+        then
+          dateClass().printDate(self.time, "dd MMM yyyy HH:mm:ss")
+        else
+          dateClass().printDate(self.time, "dd MMM yyyy")
+        end
+      end
+    end
+    
+    @Operation toParseableString():String
+      let 
+        dateHelper = (xmf.javaClass("tool.helper.XDate"))()
+      then
+        year   = dateHelper.getYear(self.time);
+        month  = dateHelper.getMonth(self.time) + 1;
+        day    = dateHelper.getDay(self.time);
+        hour   = dateHelper.getHour(self.time);
+        minute = dateHelper.getMinute(self.time);
+        second = dateHelper.getSecond(self.time)
+      in 
+         if 
+          self.showTimeOfDay
+        then
+          "Auxiliary::Date::createDateAndTime(" + year + ", " + month + ", " + day + ", " + hour + ", " + minute + ", " + second +")"
+        else
+          "Auxiliary::Date::createDate(" + year + ", " + month + ", " + day +")"
+        end
+      end
+    end
+    
+    @Operation age():Integer
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        dateClass().age(self.time)
+      end
+    end
+  end
+  
+context Root
+  @Operation testPath(max, o)
+    let s = 0 in
+      @For i in 0.to(max) do
+        s := s + o.pathSeq().size()
+      end;
+      s
+    end
+  end
+  
+context Root
+  @Operation test13()
+    let
+      p = FMMLx::FMMLxPackage("Test13");
+      m = Clients::FmmlxDiagrams::FmmlxManipulator()
+    then
+      project = Projects::Project(p, "Test13Project", null)
+    in
+      p.addParent(FMML);
+      p.fmmlxAssociationInstances:={};
+      Root.add(p);
+      
+      m.addMetaClass(p,  "A", 13, [], false);
+      m.addInstance(p, p::A, "B", [], false, []);
+      m.addInstance(p, p::B, "C", [], false, []);
+      m.addInstance(p, p::C, "D", [], false, []);
+      m.addInstance(p, p::D, "E", [], false, []);
+      m.addInstance(p, p::E, "F", [], false, []);
+      m.addInstance(p, p::F, "G", [], false, []);
+      m.addInstance(p, p::G, "H", [], false, []);
+      m.addInstance(p, p::H, "I", [], false, []);
+      m.addInstance(p, p::I, "J", [], false, []);
+      m.addInstance(p, p::J, "K", [], false, []);/*
+      m.addInstance(p, p::K, "L", [], false, []);
+      m.addInstance(p, p::L, "M", [], false, []);
+      m.addInstance(p, p::M, "N", [], false, []);*/
+
+      "done"
+    end
+  end
+    
+Root::Auxiliary::eur := Root::Auxiliary::Currency("EUR", "EUR", 1.0);
+
+//Root::Auxiliary::usd := Root::Auxiliary::Currency("$", "USD", 1.0);
+//Root::Auxiliary::usd.update();
+//Root::Auxiliary::aud := Root::Auxiliary::Currency("$", "AUD", 1.0);
+//Root::Auxiliary::aud.update();
+//Root::Auxiliary::nzd := Root::Auxiliary::Currency("$", "NZD", 1.0);
+//Root::Auxiliary::nzd.update();
+//Root::Auxiliary::gbp := Root::Auxiliary::Currency("£", "GBP", 1.0);
+//Root::Auxiliary::gbp.update();
+    
+    

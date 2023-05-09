@@ -1,0 +1,142 @@
+parserImport XOCL;
+
+import Root::FMMLx;
+
+context Root::FMMLx
+  @Enum Severity(BAD_PRACTICE,NORMAL,FATAL,USER_DEFINED) end
+
+context Root::FMMLx
+  @Class Issue extends Constraint
+    
+  @Attribute severity : Severity end
+  @Attribute solution : Element end
+  
+    @Constructor(name,body,reason,solution,severity)
+      body.owner := self;
+      reason.owner := self;
+      self
+    end
+    
+    @Operation getSolution(e : Element) 
+      solution.invoke(e,[e,e.level])
+    end
+    
+    @Operation createConstraint(
+      class        : Class, 
+      name         : Symbol, 
+      bodyCode     : String, 
+      reasonCode   : String,
+      solutionCode : String,
+      severity     : FMMLx::Severity)
+      
+      if class.hasElement(name) then throw Ecxeption("Duplicate Name") end;
+      if not name.isValidName() then throw Ecxeption("Invalid Name") end;
+      
+      let            
+        bodyO = null;
+        reasonO = null;
+        solutionO = null;
+        problems = []
+      in           
+       
+        bodyO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation body(classifier : Class, level : Integer) : Boolean " + bodyCode + " end", "body");
+        reasonO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation reason(classifier : Class, level : Integer) : String " + reasonCode + " end", "reason");
+        solutionO := Clients::FmmlxDiagrams::FmmlxManipulator::createOperationForConstraint("@Operation solution(classifier : Class, level : Integer) : String " + solutionCode + " end", "solution");
+        
+        if bodyO.at(0) = null then
+          problems := problems + bodyO.at(1) 
+        end;
+          
+        if reasonO.at(0) = null then
+          problems := problems + reasonO.at(1) 
+        end;
+          
+        if solutionO.at(0) = null then
+          problems := problems + solutionO.at(1) 
+        end;
+          
+        if problems.isEmpty() then
+          if bodyO.at(0) <> null and reasonO.at(0) <> null and solutionO.at(0) <> null
+          then
+            //try
+              let 
+                con = FMMLx::Issue(name, bodyO.at(0), reasonO.at(0), solutionO.at(0), severity)
+              in
+//                con.body.setProperty("raw", bodyCode);
+//                con.reason.setProperty("raw", reasonCode);
+                class.add(con)
+              end; "success"
+            //catch(e4)
+            //  [e4.message]
+            //end
+          else
+            throw Exception("operation addConstraint mysteriously failed")
+          end
+        else
+          throw Exception(problems.toString())
+        end
+      end      
+    end    
+  end
+  
+  FMMLx::Issue::createConstraint(FMMLx::MetaClass, "noShortAttNames", "
+    self.attributes->forAll( a | 
+      a.name.toString().toUpper().at(0) <> a.name.toString().at(0))      
+    ","
+    let 
+      shortAtts = self.attributes->select(a |   
+      a.name.toString().toUpper().at(0) = a.name.toString().at(0))
+    in
+    \"The attribute names \" + (shortAtts.name).pprint() + \" don't start with lower case letter.\"
+    end
+    ","
+    let 
+      shortAtts = self.attributes->select(a |  
+      a.name.toString().toUpper().at(0) = a.name.toString().at(0))
+    in
+    \"CHANGE_ATTRIBUTE_NAME:\" + self.name.toString() + \":\" + (shortAtts.name).pprint()
+    end
+    ",
+    FMMLx::Severity::FATAL);
+    
+    
+    
+  /**************************************************************************
+  ***** Constraints for Classes and Instances (Level, Inheritance, ...) ***** 
+  **************************************************************************/
+    
+  FMMLx::Issue::createConstraint(FMMLx::MetaClass, "levelOneLessThanClass", "
+    self.of() = FMMLx::MetaClass orelse (self.level + 1 = self.of().level or self.of().level = -1)
+    ","
+    \"This class must be on level \" + (self.of().level - 1) + \".\"
+    ","
+    \"VOID\"
+    ", FMMLx::Severity::FATAL);
+      
+  FMMLx::Issue::createConstraint(FMMLx::MetaClass, "noInstancesOfAbstractClass", "
+    not self.of().isAbstract
+    ","
+    \"This element is an instance of abstract class \" + self.of().name.toString() + \".\"
+    ","
+    \"MAKE_CLASS_CONCRETE:\" + self.name.toString()
+    ", FMMLx::Severity::NORMAL);
+    
+  /**************************************************************************
+  ***** Constraints for Slots (where, type, mult, ...) ********************** 
+  **************************************************************************/
+/*
+  FMMLx::Issue::createConstraint(FMMLx::MetaClass, "slotCorrectTypeSingle", "
+    self.owner.classes
+      ->select(c | self.isDescendantOf(c))
+        ->collect(c | c.attributes)->flatten
+          ->select(a | a.instLevel = self.level)
+            ->forAll(a |
+              (a.mult().lowerBound=0 and a.mult().upperBound=1 and self.get(a.name).isKindOf(a.type)) or
+              (a.mult().lowerBound=1 and a.mult().upperBound=1 and self.get(a.name).isReallyKindOf(a.type)) or
+               a.mult().lowerBound>1 or a.mult().upperBound>1)
+    
+    ","
+    \"Some slots have an incorrect type.\"
+    ","
+    \"CHANGE_SLOT_VALUE:\" + self.name.toString() + \":{list not yet available}\"
+    ", FMMLx::Severity::NORMAL);*/

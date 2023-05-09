@@ -71,8 +71,8 @@ context Root
   
 xmf.attributeEdge := true;
 xmf.setPreference("ShowLongDocumentation",true);
-Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.xmf",true,true);
-(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
+//Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.xmf",true,true);
+//(xmf.homeDir()+"/../xmf-addons/Multilevel-Editor/boot_XMF2.o").loadBin(true);
                         
 //Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.xmf",true,true);
 //(xmf.homeDir()+"/../xmf-addons/ModelManipulator/Manipulator.o").loadBin(true);
@@ -88,19 +88,18 @@ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.xmf
  
  
 let 
-  model = FMML::FMMLxPackage("BikePackage")
+  model = FMMLx::FmmlxPackage("BikePackage")
 //  model2 = Package("SecondPackage")
 in 
   
-  model.addParent(FMML);
+  model.addParent(FMMLx);
   model.fmmlxAssociationInstances:={};
   Root.add(model);
-//  model2.addParent(FMML);
-//  Root.add(model2);
   let 
     project = Projects::Project(model, "BikeProject", null)
   in
-    xmf.projectManager("MyProjects").add(project)
+    xmf.projectManager("MyProjects").add(project);
+    xmf.projectManager("MyProjects").add(Projects::Project(FMMLx, "Fmmlx", null))
   end
   
 end;

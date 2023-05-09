@@ -6,14 +6,14 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation addMetaClass(package, name, level, parents, abstract)
     let 
-      newClass = FMML::MetaClass(name, level)
+      newClass = FMMLx::MetaClass(name, level)
     in
       package.add(newClass);
       newClass.isAbstract := abstract;
       if parents.size() > 0 then newClass.parents := parents.asSet() end;
       
       @For parent in newClass.parents do
-        if parent.isKindOf(FMML::MetaClass) then
+        if parent.isKindOf(FMMLx::MetaClass) then
           parent.subclasses := parent.subclasses + {newClass}
         end
       end;
@@ -131,7 +131,7 @@ import FmmlxDiagrams;
 	      if parents.size() > 0 then obj.parents := parents.asSet() end;
 
 	      @For p in obj.parents do
-	        if p.isKindOf(FMML::MetaClass) then
+	        if p.isKindOf(FMMLx::MetaClass) then
 	          p.subclasses := p.subclasses + {obj}
 	        end
   	      end
@@ -148,12 +148,12 @@ import FmmlxDiagrams;
         if obj.level > 1 then // it's a metaclass, therefore its instances are classes
           package.add(obj);
           obj.isAbstract := abstract; 
-          obj.addParent(FMML::MetaClass)
+          obj.addParent(FMMLx::MetaClass)
         end;
         if obj.level = 1 then // it's a simple class, therefore its instances are not classes
           package.add(obj);
           obj.isAbstract := abstract;
-          obj.addParent(FMML::FmmlxObject)
+          obj.addParent(FMMLx::FmmlxObject)
         end; 
         if obj.level = 0 then //  it's not a class at all, and parent and abstract do not apply
           // However, package.add does not add the object to the list of classes and it has to be done manually
@@ -242,7 +242,7 @@ import FmmlxDiagrams;
         @For link in links do
           package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
         end;        
-
+if class.isKindOf(FMMLx::MetaClass) then 
       // remove all inheritance in the subclasses
         @For heir in package.classes do
           if heir.parents.contains(class) then
@@ -265,8 +265,9 @@ import FmmlxDiagrams;
             instances := instances + [instance] end end;
 //        ("found "+instances.size()+" instances").println();
         @For instance in instances do
-          self.orphanInstance(instance) end;
-//        ("instances orphaned").println();
+          self.orphanInstance(instance) end
+//        ("instances orphaned").println()
+end; // only if class
 
       // remove class
         package.remove(class);
@@ -289,14 +290,14 @@ import FmmlxDiagrams;
           @For pAtt in parent.allAttributes() do
             @For hAtt in heir.allAttributes() do
               if 
-                pAtt.name = hAtt.name andthen pAtt.owner <> hAtt.owner andthen pAtt.owner.isKindOf(FMML::MetaClass)
+                pAtt.name = hAtt.name andthen pAtt.owner <> hAtt.owner andthen pAtt.owner.isKindOf(FMMLx::MetaClass)
               then 
                 problems := problems + ["Attribute collision. The name \"" + pAtt.name + "\" is present in both "+pAtt.owner.name+" and "+hAtt.owner.name +"."]
               end end end;
           @For pOp in parent.allOperations2() do
             @For hOp in heir.allOperations2() do
               if 
-                pOp.name = hOp.name andthen pOp.owner <> hOp.owner andthen pOp.owner.isKindOf(FMML::MetaClass) 
+                pOp.name = hOp.name andthen pOp.owner <> hOp.owner andthen pOp.owner.isKindOf(FMMLx::MetaClass) 
               then 
                 problems := problems + ["Operation collision. The name \"" + pOp.name + "\" is present in both "+pOp.owner.name+" and "+hOp.owner.name +"."]
               end end end;
@@ -350,7 +351,8 @@ import FmmlxDiagrams;
     @Operation removeParent(heir, parent)
       heir.parents := heir.parents - {parent};
       // don't forget to remove the subclass from the parent we earlier added for performance purposes
-      parent.subclasses := parent.subclasses - {heir};
+      if parent.isKindOf(FMMLx::MetaClass) then 
+        parent.subclasses := parent.subclasses - {heir} end;
       
       @For instance in heir.allMetaInstances() do
         let
@@ -408,7 +410,7 @@ import FmmlxDiagrams;
       in 
         if amount < 0 then
           @For obj in package.classes do 
-            if obj.isKindOf(FMML::MetaClass) then 
+            if obj.isKindOf(FMMLx::MetaClass) then 
               if obj.level + amount < 0 then 
                 levelHighEnough := false; oneRandomReason:= "object " + obj.name
               end;
@@ -439,7 +441,7 @@ import FmmlxDiagrams;
           levelHighEnough 
         then
           @For obj in package.classes do
-            if obj.isKindOf(FMML::MetaClass) then 
+            if obj.isKindOf(FMMLx::MetaClass) then 
               obj.level := obj.level + amount;
               @For att in obj.attributes do
                 att.instLevel := att.instLevel + amount

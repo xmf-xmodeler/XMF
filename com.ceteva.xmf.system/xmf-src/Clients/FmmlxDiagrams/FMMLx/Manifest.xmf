@@ -1,0 +1,16 @@
+parserImport XOCL;
+parserImport Manifests;
+
+import Projects;
+
+@Manifest FMMLx
+  FMMLx = @File FMMLx end
+  @File ^None Boot end
+  @File MetaAdaptor end
+  @File FmmlxObject end
+  @File FmmlxPackage end
+  @File MetaClass end
+  @File Issue end
+  @File Auxiliaries end
+do Project(FMMLx,dir,self)
+end;

@@ -1,0 +1,169 @@
+parserImport XOCL;
+
+context Root::FMMLx
+
+  @Class MetaAdaptor metaclass Class extends Class
+
+    @Attribute created : Integer end
+    @Attribute instances : *Element end
+    @Attribute subclasses : *Element end
+    @Attribute lastUpdated : Element end
+ 
+  @Operation deleteRecursive()
+    self.of().instances := self.of().instances.excluding(self);
+    super();
+    self
+  end
+
+  /* @Operation new():Object
+      "using MetaAdaptor::new()".println();
+      if self.level < 1 then self.error("Level " + self.level + " does not allow instantiation.") end;
+
+	  // We instantiate a new object "obj", whereas the class is "self". Therefore: obj.of()=self
+      let obj = Kernel_mkObj(); 
+          // We prepare a set of all Attributes form the class and a set of all Operations
+          A = self.allAttributes();
+          O = self.allOperations();
+          // We also prepare a set to put (which?) Attrtibutes/Operatins into to (do what?)
+          intrinsicA = Set{};
+          intrinsicO = Set{}
+      in Kernel_setOf(obj,self); // Now we set obj.of():=self
+      
+         // Then we loop through the Attributes
+         @While not A->isEmpty do
+           let a = A->sel // pick any one Attribute
+           in if a.isIntrinsic andthen a.instLevel < obj.of().level - 1 
+              then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+                intrinsicA := intrinsicA.including(a)
+              else // otherwise it becomes a slot and is initialised
+                if a.init <> null
+                then
+                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
+                else
+                  Kernel_addAtt(obj,a.name,a.type.default())
+                end;
+                if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+              end;
+              A := A->excluding(a) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         // Then we loop through the Operations
+         @While not O->isEmpty do
+           let op = O->sel // pick any one Operation
+           in if op.isIntrinsic andthen op.instLevel < obj.of().level - 1 
+              then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
+                intrinsicO := intrinsicO.including(op)
+              //else // otherwise it becomes available and we do nothing
+              end;
+              O := O->excluding(op) // we remove that attribute from the list as it has been handled
+           end
+         end;
+         
+         //obj.addParent(FMMLx::MetaClass);
+         //obj.parents := {Object, Class, FMMLx::MetaClass};
+
+         if self.inheritsFrom(Classifier)
+         then
+           obj.parents := obj.defaultParents()
+         else
+           false
+         end;
+         
+         obj.init();
+          
+         // Now copy the intrinsic attributes to the object
+         @While not intrinsicA.isEmpty() do
+           let intA = intrinsicA.sel()
+           in 
+			obj.add(intA);
+              intrinsicA := intrinsicA.excluding(intA)
+           end
+		 end;
+         
+         // Copy the operations as well
+         @While not intrinsicO.isEmpty() do
+           let intO = intrinsicO.sel()
+           in 
+			obj.add(intO);
+              intrinsicO := intrinsicO.excluding(intO)
+           end
+		 end;
+
+		   if self.delegatesTo <> null	
+		   then self.selectRoleFiller(obj, self) end;
+
+         if Root.contents.keys().includes("TargetPackage".asSymbol())
+         then
+           TargetPackage.add(obj)
+         else
+           false
+         end;
+
+         self.instances := self.instances.including(obj);
+         
+         obj
+      end
+    end */
+    
+    @Operation selectRoleFiller(object, class)
+      let type = class.delegatesTo
+	  then list = Root.allContentsOf(type)
+	  then size = list.size()
+	  in 
+		if size = 0 
+		then xmf.questionYesOnly("No instance of role filler class found! This instance will behave erratically until the roleFiller slot is set to a non-null value.")
+		elseif size = 1
+		then xmf.questionYesOnly("The only known instance of the role filler class (" + type.name + ") will be used as role filler.");
+				object.setDelegation(list.asSeq().head())
+		else // if size > 1
+		  let choice = xmf.select("Role-filler of type " + type.name + " required","Select role-filler", list.asSeq(), list.asSeq().head(),null) 
+		  //then name = exp
+		  in //(choice.name + " selected.").println();
+			 //(choice.of()).println();
+			if choice <> null then object.setDelegation(choice) end
+		  end // let/in
+        end // if
+	  end // let/in
+	end //@Operation
+
+  @Operation allInstances()
+    let 
+      i = instances
+    in
+      @For c in subclasses do 
+        if c.isKindOf(FMMLx::MetaClass) then 
+          i := i + c.allInstances()
+        end//if
+      end;//for
+      i
+    end
+  end
+
+  @Operation totalNumOfInstancesAtLevel(m): Integer
+    let list = self.totalInstances();
+      coll = []
+    in
+      list->collect (i | if i.level = m then coll := coll->including(i) end);
+      coll.size()
+    end
+  end
+  
+  @Operation totalNumOfInstances(): Integer
+    let sum = 0
+    in
+      self.allInstances().asSeq()->collect (i | sum := sum + i.totalNumOfInstances());
+      self.allInstances().size() + sum
+    end
+  end
+  
+  @Operation totalInstances(): Integer
+    let list = []
+    in
+      self.allInstances().asSeq()->collect (i | list := list + i.totalInstances());
+      list + self.allInstances().asSeq()
+    end
+  end
+
+end
+ 

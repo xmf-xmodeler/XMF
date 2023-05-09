@@ -1,0 +1,403 @@
+parserImport XOCL;
+
+import Root::FMMLx;
+
+context Root::FMMLx
+
+  @Class MetaClass metaclass MetaAdaptor extends MetaAdaptor, FmmlxObject
+
+    @Constructor(name, level)
+      if self.of() <> FMMLx::MetaClass then
+        self.error("This constructor is only allowed for instantiating FMMLx::MetaClass") end;
+      if level > 1 
+        then self.addParent(FMMLx::MetaClass) 
+        else self.addParent(FMMLx::FmmlxObject)
+      end;
+      self
+    end
+
+   /* These constructors are not used in the new FmmlxDiagram
+
+    @Constructor(name)
+      if self.of() = FMMLx::MetaClass then
+        let level = xmf.getString("Meta-level","Meta-level of the meta type:",3.toString())
+        in
+          if level = null then
+            self.level := 3
+          elseif level.asInt() < 1 then 
+            self.error("Level " + level + " not allowed as metaclass.")
+          else
+            self.level := level.asInt()
+          end
+        end
+      else
+        self.level := self.of().level - 1
+      end;
+      if level > 0 then self.addParent(FMMLx::MetaClass) end;
+      self
+    end
+    
+    @Constructor()
+      if self.of() <> FMMLx::MetaClass then
+        self.level := self.of().level - 1;
+        if level > 0 then self.addParent(FMMLx::MetaClass) end
+      end
+    end
+    
+    @Operation setLevel(level)
+      if self.of() <> FMMLx::MetaClass then
+        self.error("This operation can only be executed on direct instances of FMMLx::MetaClass")
+      else
+        self.level := level;
+        if level > 0 
+        then self.addParent(FMMLx::MetaClass)
+        else self.removeParent(FMMLx::MetaClass)
+        end
+      end
+    end
+    
+    */
+    
+    @Attribute cachedOpSendInstance : Operation end
+    @Attribute cachedOpAllAttributes : Operation end
+    
+    /* This Operation should've been named send-TO-Instance. 
+       It is invoked when an operation is invoked. 
+       This operation tries to find out where the operation is defined.
+    */
+    @Operation sendInstance(element,message,args):XCore::Element
+      if "sendInstance".equals(message.toString()) then 
+        if self.cachedOpSendInstance = null then self.cachedOpSendInstance := FMMLx::MetaClass.getOperation("sendInstance") end;
+        self.cachedOpSendInstance.invoke(element,args)
+      elseif "allAttributes".equals(message.toString()) then 
+        if self.cachedOpAllAttributes = null then self.cachedOpAllAttributes := FMMLx::MetaClass.getOperation("allAttributes") end;
+        self.cachedOpAllAttributes.invoke(element,args)
+      else
+//       ("[sendInstance] " + element.name + ":" + self.name + ": Operation "+message).println();
+      let
+        // String to Symbol if necessary
+        name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
+//        ownOperations = self.allOperations()->asSeq; 
+        ownOperations = Kernel_operatorPrecedenceList(self)->asSeq; 
+        allOperations = [];
+        delToClassOps = [];
+        found = false; op = null; foundDelToClass = false;
+        index = 0; delToClassIndex = 0 // temporary counter
+      in 
+    /*  "self" is the class of "element" and therefore the most obvious place
+        to look for an operation. "self.allOperations()" will check the class 
+        and all its parents. I.e. where you would look in a two-level architecture.
+        If you find something there, check the level if intrinsic and the operation 
+        can be invoked  
+    */    
+        let  // let 1
+          size = ownOperations->size;
+          arity = args->size
+        in 
+          index := 0;
+          @While index < size and not found do //loop until found through all operations 
+            op := ownOperations->at(index);
+            if op.name = name andthen (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            then found := true
+            else index := index + 1
+            end
+          end; // while
+          if found
+          then
+            /* Now, we found the operation.
+               Before we can invoke it, we must check if the intrinsic 
+               level forbids us to do so.
+               We'll pretend we didn't find it if the intrinsic levels is too low */
+            if 
+              (op.isIntrinsic andthen op.instLevel < (self.level-1)) // wrong level
+            then
+              //("The level " + (self.level-1) + " object " + element 
+              //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
+              //element.noOperationFound(message,args)
+              found := false
+            end
+          end // if 
+        end; // let 1
+        
+        /* now we tried to find via the traditional way.
+           If still not found, there are two options left: intrinsic operations and delegation.
+           We can use allOperations2() to find all multilevel operations
+           
+           allOperations2() will find all operations in all parent and metaclasses
+        */
+        allOperations := ownOperations;
+        //(name + " found? " + found).println();
+        if not found then let  // if+let 2
+          //size = operations->size;
+          arity = args->size
+        in
+          index := 0;
+          allOperations := self.allOperations2(); // TODO?: modify to avoid delegation here
+          @While index < allOperations->size and not found do //loop until found through all operations 
+            op := allOperations->at(index);
+            if 
+              op.name = name
+            andthen 
+              (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            andthen
+              op.isIntrinsic
+            andthen
+              op.instLevel = (self.level-1)
+            then found := true
+            else index := index + 1
+            end
+          end
+        end end; // if+let 2
+        
+        /*We have tried the traditional way and the multilevel way. 
+          We try delegateToClass next if not found yet.
+        */
+        
+        if not found then let // if+let 3
+          delegateToClassOps = self.getOperationsAvailableThroughDelegateToClass()
+        then
+          arity = args->size
+        in 
+          delToClassIndex := 0;
+          @While delToClassIndex < delegateToClassOps->size and not foundDelToClass do //loop until found through all operations 
+            op := delegateToClassOps->at(delToClassIndex);
+            if 
+              op.name = name
+            andthen 
+              (op.arity() = arity or (op.isVarArgs() and (arity >= (op.arity() - 1))))
+            andthen
+              op.isIntrinsic
+            andthen
+              op.instLevel =  self.level // !! the level of the class (not the instance must match)
+            then foundDelToClass := true
+            else delToClassIndex := delToClassIndex + 1
+            end // if
+          end // while
+        end end; // if+let 3
+        
+        if not found and not foundDelToClass then
+          /* We have not found the operation yet.
+             But maybe we are lucky with delegation.
+             If we find a role filler, then forward to them. */
+          if 
+            element <> null andthen element.hasSlot("roleFiller") andthen element.roleFiller <> null 
+          then
+            //("Operation not found and forwarded to roleFiller " + element.roleFiller).println();
+            element.roleFiller.send(message,args)
+          else
+            //"Operation not found, throwing Exception".println();
+            element.noOperationFound(message,args)
+          end
+        elseif foundDelToClass then // at least found an operation available through delegation to class
+          ("Delegate To Class: " + element.name + "->" + self.name).println();
+          self.send(message, args)
+        else /* we have indeed found the operation and invoke it */
+          //(element + ": Operation "+op.name+" found and to be invoked").println();
+          allOperations := allOperations->drop(index);
+          op.setSupers(allOperations); /// WHAT?
+          op.invoke(element,args)
+        end        
+      
+      end // let
+      end // test
+    end // operation
+
+    @Operation ownAttributes():Set(Attribute)
+      attributes
+    end
+
+    @Operation allAttributes():Set(Attribute)
+      let allA = self.attributes;
+          allP = self.parents; // parents and classes
+          result = {};
+          alreadyChecked = {};
+          selfAllParents = null
+      in 
+          // caching selfAllParentsFirst:
+          let P = self.parents; allP = Seq{}
+          in @While not P->isEmpty do
+            let p = P->sel
+            in allP := Seq{p | allP->excluding(p)};
+              P := P->excluding(p)->union(p.parents)
+            end end;
+            selfAllParents := allP->reverse()->asSet
+          end;
+      
+         //("checking " + self.name + " for attributes").println();
+         allP := allP->union({self.of()});
+         @While not allP->isEmpty do
+           //("allP:= " + allP).println();
+           let p = allP->sel
+           in alreadyChecked := alreadyChecked->union({p});
+              //("  checking " + p.name + " for attributes").println();
+              @For a2Bchecked in p.attributes do
+                if a2Bchecked.isIntrinsic or selfAllParents.contains(p) then 
+//                    if a2Bchecked.isIntrinsic or self.allParents().contains(p) then 
+                  allA := allA->union({a2Bchecked})
+              end end;
+              //allA := allA->union(p.attributes);
+              if p.parents.contains(FMMLx::MetaClass)
+                then allP := allP->union({p.of()}) end;
+              allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
+           end
+         end;
+         // remove all intrinsic, where level is too high
+         @For a in allA do
+           if (not a.isIntrinsic) or a.instLevel < self.level then
+             result := result->union({a})
+           end
+         end;
+         result
+      end
+    end
+
+    @Operation allAttributesForLevel(attLevel):Set(Attribute)
+      let
+        result = {};
+        allAtt = self.allAttributes()
+      in
+        @For att in allAtt do
+          if att.isIntrinsic then 
+            if att.instLevel = attLevel then 
+              result := result.union({att})
+            end
+          end
+        end;
+        result
+      end
+    end
+
+    /* This is not used internally for invoking operations which would cause an infinite loop 
+       It is invoked by sendInstance and finds all Operations by starting with itself, 
+       adding all operation to the results, 
+       where the level is higher and recursively checking all parent classes and metaclasses.
+    */ 
+    @Operation allOperations2():Seq(Operation)
+      let
+        myOps = {};
+        alreadyChecked = {};
+        toBeChecked = [self];
+        currentClass = null
+      in
+        @While toBeChecked.size() > 0 do 
+          currentClass := toBeChecked.at(0);
+          toBeChecked := toBeChecked - [currentClass];
+          //("Checking " + currentClass.name).println();
+          @For o in currentClass.operations do
+            if o.isIntrinsic andthen (o.instLevel <= self.level - 1)        // intrinsic and right level
+                                                                            or
+              ((not o.isIntrinsic) andthen (currentClass.hasSlot("level") andthen currentClass.level = self.level)) // non-intrinsic and one above the instance
+            then
+              myOps := myOps + {o}
+            end
+          end;
+          alreadyChecked := alreadyChecked + {currentClass};
+          @For p in currentClass.parents do                                 // inheritance
+            if p.isKindOf(FMMLx::MetaClass) then
+              if not alreadyChecked.contains(p) then
+                toBeChecked := toBeChecked + [p]
+              end
+            end
+          end;
+          let OF = Kernel_of(currentClass) in
+            if (not OF = null) // instantiation
+              /*andthen OF.isKindOf(FMMLx::MetaClass) */
+              andthen OF <> Class
+            then                    
+              if not alreadyChecked.contains(OF) then
+                toBeChecked := toBeChecked + [OF]
+              end
+            end
+          end
+        end; // while
+        myOps.asSeq()
+      end // let
+    end // operation
+   
+  @Operation allMetaInstances()
+    if level = 0 then [] else
+      let 
+        instances = {};
+        myInstances = self.allInstances()
+      in
+        @For instance in myInstances do if instance.isKindOf(MetaClass) then
+          instances := instances + instance.allMetaInstances().asSet()
+        end end;
+        instances := instances + myInstances.asSet();
+        instances.asSeq()
+      end
+    end
+  end
+  
+  @Operation getAllDescendants(p:Package)
+    p.classes->select(c | c.isKindOf(MetaClass) andthen c.isDescendantOf(self))
+  end
+  
+  @Operation getOperationsAvailableThroughDelegateToClass()
+    if self.of().isKindOf(MetaClass) then 
+     let 
+       ops = {}
+     in
+       @For o in self.of().allOperations2() do
+         if (let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end) then
+           ops := ops + {o}
+         end
+       end;
+     ops.asSeq()
+     end
+    else [] end
+  end
+   
+   
+  @Operation allConstraints():Set(Constraint)
+    let
+      allC = constraints;
+      allP = parents; // parents and classes
+      result = {};
+      alreadyChecked = {}
+    in
+      allP := allP->union({self.of()});
+      @While not allP->isEmpty do
+        let p = allP->sel
+        in alreadyChecked := alreadyChecked->union({p});
+          @For c2Bchecked in p.constraints do
+            if c2Bchecked.body.isIntrinsic or self.allParents().contains(p) then 
+              allC := allC->union({c2Bchecked})
+          end end;
+          if p.parents.contains(FMMLx::MetaClass)
+            then allP := allP->union({p.of()}) end;
+          allP := (allP->excluding(p)->union(p.parents)) - alreadyChecked
+        end
+      end;
+      // remove all intrinsic, where level is too high
+      @For c in allC do
+         if (not c.body.isIntrinsic) or c.body.instLevel < self.level then
+           result := result->union({c})
+         end
+       end;
+       result
+    end
+  end
+    
+  @Operation checkConstraints():Seq(ConstraintReport)
+    let
+      constraints = self.of().allConstraints();
+      reports = [];
+      LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
+    in
+      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
+        reports := [
+          try 
+            if constraint.body.invoke(self,Seq{self.of(), LEVEL})
+              then ConstraintReport(self,constraint,true)
+              else ConstraintReport(self,constraint,false,constraint.reason.invoke(self,Seq{self.of(), LEVEL}))
+    	    end
+          catch(exception)
+            ConstraintReport(self,constraint,false,"Error while performing classification: " + exception.message)
+          end] + reports
+      end;
+      ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
+    end
+  end
+  
+end

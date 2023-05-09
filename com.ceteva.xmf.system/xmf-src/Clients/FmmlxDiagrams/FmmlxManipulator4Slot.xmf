@@ -18,7 +18,7 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation findAttributeForSlot(instanceWhereTheSlotResides, nameOfTheSlot)
       // EVIL HACK
-      if nameOfTheSlot.equals("lastUpdated") then FMML::MetaClass.getAttribute("lastUpdated") else
+      if nameOfTheSlot.equals("lastUpdated") then FMMLx::MetaClass.getAttribute("lastUpdated") else
       let
         class = instanceWhereTheSlotResides.of()
       then

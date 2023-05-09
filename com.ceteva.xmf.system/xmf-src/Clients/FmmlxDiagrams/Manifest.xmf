@@ -4,6 +4,8 @@ parserImport Manifests;
 import Projects;
 
 @Manifest FmmlxDiagrams
+
+
   FmmlxDiagrams = @File FmmlxDiagrams end
   @File MappingInfo end
   @File FmmlxUtilities end
@@ -21,5 +23,6 @@ import Projects;
   @File FmmlxDiagram end
   @File FmmlxDiagramClient end
   @File ^None Boot end
+  @Ref FMMLx end
 do Project(FmmlxDiagrams,dir,self)
 end;
