@@ -62,7 +62,8 @@ context FmmlxDiagrams
           self.diagrams.get(key).package.path(),
           self.diagrams.get(key).file.toString(),
           self.diagrams.get(key).views,
-          self.diagrams.get(key).options)
+          self.diagrams.get(key).options,
+          self.diagrams.get(key).umlMode)
       end
     end    
     
@@ -81,14 +82,14 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation createDiagramFromJava(packagePath, diagramName, file, typeAsString)
+    @Operation createDiagramFromJava(packagePath, diagramName, file, typeAsString, umlMode)
       let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    type = FmmlxDiagramType.getElement(typeAsString)
       then
         package = m.evalString(packagePath, Root).at(0)
       then
-        newID = self.createNewDiagram(package, diagramName, file, type)
+        newID = self.createNewDiagram(package, diagramName, file, type, umlMode)
       in
         self.communicator.notifyDiagramCreated(packagePath, diagramName, newID)
       end      
@@ -96,7 +97,7 @@ context FmmlxDiagrams
 
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
-    @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType)
+    @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType, umlMode:Boolean)
       ///////////FIND ALTERNATIVE TO THIS///////////////////
       if
         package.of() <> FMMLx::FmmlxPackage
@@ -115,6 +116,7 @@ context FmmlxDiagrams
         diagram.diagramName := name;//("Diagram " + package.name + " (id " + newID + ")");
         diagram.package := package;
         diagram.file := file;
+        diagram.umlMode := umlMode;
         diagram.diagramType := type;
         diagram.views := [["Main View", 1.0, 0.0, 0.0]];
         diagram.options := [];
@@ -2711,13 +2713,13 @@ context FmmlxDiagrams
            //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
          in
            @For class in classes do
-             if class.level>maxLevel then
+             if class.isKindOf(FMMLx::MetaClass) andthen class.level>maxLevel then
                maxLevel := class.level
              end
            end;
            @For level in (-maxLevel).to(0) do
              @For class in classes do
-               if class.level=(-level) then
+               if class.isKindOf(FMMLx::MetaClass) andthen class.level=(-level) then
                  if class.of()=FMMLx::MetaClass then
                    log := log + 
                      [["addMetaClass",
@@ -2747,19 +2749,7 @@ context FmmlxDiagrams
                end
              end
            end;
-/*           @For class in classes do
-             if class <> null andthen class.isKindOf(Enum) then
-               let
-                 enumItems = class.getChildren()
-               in
-                 log:= log + [["addEnumeration", ["name",class.name.toString()]]];
-                 @For item in enumItems do
-                   log:= log + [["addEnumerationValue", ["enum_name",class.name.toString()], ["enum_value_name", item.name.toString()]]]
-		         end
-               end
-             end
-           end;*/
-           @For class in classes do
+           @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
              if self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner)) <> "" then
                log:= log + [["changeParent",
                             ["package", class.owner.path()],
@@ -2768,7 +2758,7 @@ context FmmlxDiagrams
                             ["new", self.getParentsPaths(requestID, class.parents->select(c | c.owner = class.owner))]]]
              end
            end;
-           @For class in classes do
+           @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
              @For att in class.attributes.asSeq() do
                log := log + [["addAttribute", ["package", class.owner.path()],
                                             ["class", class.path()],
@@ -2845,7 +2835,7 @@ context FmmlxDiagrams
            @For link in links.asSeq() do
              log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(0).path()], ["classTarget", link.asSeq().at(1).path()]]]
            end;
-           @For class in classes do
+           @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
              if
                class.delegatesTo <> null
              then

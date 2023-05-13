@@ -7,6 +7,7 @@ context Root::FMMLx
   @Class FmmlxObject extends NamedElement
   
   @Attribute level : Integer end
+  @Attribute lastUpdated : Element end
 
     @Operation setLevel(level)
       if self.of() <> FMMLx::MetaClass then

@@ -244,7 +244,7 @@ import FmmlxDiagrams;
         end;        
 if class.isKindOf(FMMLx::MetaClass) then 
       // remove all inheritance in the subclasses
-        @For heir in package.classes do
+        @For heir in package.classes->select(h | h.isKindOf(FMMLx::MetaClass)) do
           if heir.parents.contains(class) then
             heirs := heirs + [heir] end end;
 //        ("found "+heirs.size()+" heirs").println();
