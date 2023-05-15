@@ -154,7 +154,7 @@ context FmmlxDiagrams
         package = diagram.package;
         mapping = diagram.mapping
       in
-        @For c in package.classes->select(x | x.isKindOf(FMMLx::MetaClass)) do
+        @For c in package.classes->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
           let
     	    mappingInfo = mapping.addOrGetObjectMapping(c)	        
     	  in
@@ -185,7 +185,7 @@ context FmmlxDiagrams
     	  then
     	    key = if obj.isKindOf(Associations::Association) then obj.name else obj end
     	  in
-    	    if not obj.isKindOf(FMMLx::MetaClass) then 
+    	    if not obj.isKindOf(FMMLx::FmmlxObject) or obj.isKindOf(Class)then 
     	      result := result.append([[
                 key.toString(),
                 mappingItem.points]])
@@ -1494,7 +1494,7 @@ context FmmlxDiagrams
               error := parseResult.at(1) // error as message or as return value? maybe try exceptions...
             end
           end
-
+		elseif slotName = "lastUpdated" then null
         else
           error := "slot " + slotName + " not found in " + className
         end;
@@ -2719,7 +2719,7 @@ context FmmlxDiagrams
            end;
            @For level in (-maxLevel).to(0) do
              @For class in classes do
-               if class.isKindOf(FMMLx::MetaClass) andthen class.level=(-level) then
+               if class.isKindOf(FMMLx::FmmlxObject) andthen class.level=(-level) then
                  if class.of()=FMMLx::MetaClass then
                    log := log + 
                      [["addMetaClass",
@@ -2728,15 +2728,6 @@ context FmmlxDiagrams
                       ["level",class.level+""],
                       ["parents",""],
                       ["abstract",class.isAbstract+""]]]
-                 elseif class.isKindOf(Enum) then
-                   let
-                     enumItems = class.getChildren()
-                   in
-                     log:= log + [["addEnumeration", ["name",class.name.toString()]]];
-                     @For item in enumItems do
-                       log:= log + [["addEnumerationValue", ["enum_name",class.name.toString()], ["enum_value_name", item.name.toString()]]]
-		             end
-                   end
                  else
                    log := log + 
                      [["addInstance", 
@@ -2744,9 +2735,19 @@ context FmmlxDiagrams
                       ["of", class.of().path()] , 
                       ["name",class.name.toString()] , 
                       ["parents",""], 
-                      ["abstract", class.isAbstract+""]]]
+                      ["abstract", "false"]]]
                  end
                end
+             end
+           end;
+           @For enumClass in classes->select(c | c.isKindOf(Enum)) do
+             let
+               enumItems = enumClass.getChildren()
+             in
+               log:= log + [["addEnumeration", ["name",enumClass.name.toString()]]];
+               @For item in enumItems do
+                 log:= log + [["addEnumerationValue", ["enum_name",enumClass.name.toString()], ["enum_value_name", item.name.toString()]]]
+   	           end
              end
            end;
            @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
@@ -2809,7 +2810,7 @@ context FmmlxDiagrams
                slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMMLx::MetaClass)).name
              in 
                // evil unorthodox hack
-               slotNames := slotNames + {"lastUpdated".asSymbol()};
+               // slotNames := slotNames + {"lastUpdated".asSymbol()};
 
                @For slot in slots do
                  if slotNames.contains(slot.name) then

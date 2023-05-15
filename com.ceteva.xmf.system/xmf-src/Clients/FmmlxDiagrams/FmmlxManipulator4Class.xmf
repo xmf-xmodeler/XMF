@@ -393,7 +393,7 @@ end; // only if class
       then 
         if class.level > 0 
         then 
-          if class.allInstances().size() = 0 
+          if class.allInstances()->select(i | i.of() = class).size() = 0 
           then class.isAbstract := true; []
           else ["Classes with instances cannot be made abstract"] end
         else ["Objects on level 0 cannot be made abstract"] end
