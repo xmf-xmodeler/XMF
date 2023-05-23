@@ -123,7 +123,16 @@ context Root::Auxiliary
     
     @Constructor(amount, currency) end
     
-    @Operation toString():String self.amount + " " + self.currency.symbol end
+    @Operation toString():String
+      let 
+        DecimalFormat = xmf.javaClass("java.text.DecimalFormat")
+      then
+        df2 = DecimalFormat("0.00")
+      in 
+        df2.format(self.amount) + " " + self.currency.symbol 
+      end
+    end
+    
     @Operation getAmountIn(otherCurrency:Root::Auxiliary::Currency):Float self.amount * self.currency.getRefValue() / otherCurrency.getRefValue() end
     @Operation getAmount():Float self.amount end
     @Operation getCurrency():Root::Auxiliary::Currency self.currency end
@@ -131,6 +140,7 @@ context Root::Auxiliary
     @Operation mul(factor:Float):Root::Auxiliary::Currency MonetaryValue(self.amount*factor, self.currency) end
     @Operation add(other:MonetaryValue):MonetaryValue MonetaryValue(self.amount + other.getAmountIn(self.currency), self.currency) end
     @Operation sub(other:MonetaryValue):MonetaryValue self.add(other.mul(-1)) end
+    @Operation round2Digits():MonetaryValue MonetaryValue((self.amount * 100).round()/100 , self.currency) end
     
     @Operation toParseableString():String 
       "Auxiliary::MonetaryValue(" + self.amount + ", " + self.currency.toParseableString() + ")"

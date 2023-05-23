@@ -55,6 +55,9 @@ import FmmlxDiagrams;
       then 
         ["delegateFrom is null"]
       else
+        @For i in delegateFrom.allMetaInstances()->select(j | j.level = delegateFrom.delegatesToLevel) do
+		  self.removeRoleFiller(i) 
+        end;
         delegateFrom.delegatesTo := null;
         delegateFrom.delegatesToLevel := null;
         []

@@ -280,7 +280,7 @@ context FmmlxDiagrams
       in
         @For object in self.getPackage(requestID).classes do
           if object <> null then if object.roleFiller <> null then
-            if object.roleFiller.isKindOf(FMMLx::MetaClass) then
+            if object.roleFiller.isKindOf(FMMLx::FmmlxObject) then
               let
                 childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
                 parentPath = self.getMapping(requestID).addOrGetObjectMapping(object.roleFiller).object.path()
@@ -736,7 +736,7 @@ context FmmlxDiagrams
           andthen
             diagrams.get(key).diagramType = FmmlxDiagramType::ClassDiagram
           then
-            result := result + [key]
+            result := result + [[key, diagrams.get(key).diagramName]]
           end
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])

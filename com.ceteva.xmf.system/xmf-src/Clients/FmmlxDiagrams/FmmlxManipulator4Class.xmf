@@ -5,22 +5,24 @@ import FmmlxDiagrams;
 
   context FmmlxManipulator
     @Operation addMetaClass(package, name, level, parents, abstract)
-    let 
-      newClass = FMMLx::MetaClass(name, level)
-    in
-      package.add(newClass);
-      newClass.isAbstract := abstract;
-      if parents.size() > 0 then newClass.parents := parents.asSet() end;
-      
-      @For parent in newClass.parents do
-        if parent.isKindOf(FMMLx::MetaClass) then
-          parent.subclasses := parent.subclasses + {newClass}
-        end
-      end;
-      
-      newClass
-    end    
-  end
+      let collectiveParents = parents->select(c | c.isCollective) in 
+        if collectiveParents.size() > 0 then self.error(collectiveParents.name + " cannot be superclasses as they are collective classes.") end end;
+      let 
+        newClass = FMMLx::MetaClass(name, level)
+      in
+        package.add(newClass);
+        newClass.isAbstract := abstract;
+        if parents.size() > 0 then newClass.parents := parents.asSet() end;
+
+        @For parent in newClass.parents do
+          if parent.isKindOf(FMMLx::MetaClass) then
+            parent.subclasses := parent.subclasses + {newClass}
+          end
+        end;
+
+        newClass
+      end    
+    end
   
     /* This operation creates a new instance. According to the attributes from its classes & parents & etc, 
      all slots need to be created. If the multiplicity of the slot mandates, a value needs to be acquired, either default or otherwise.
@@ -56,7 +58,11 @@ import FmmlxDiagrams;
       slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
+      if not ofClass.isKindOf(FMMLx::MetaClass) then self.error("Class " + ofClass.name + " is not an Fmmlx Class") end;
       if (ofClass.level < 1 andthen ofClass.level <> -1) then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
+      if ofClass.isCollective then self.error(ofClass.name + " cannot be instantiated as it is a collective class.") end;
+      let collectiveParents = parents->select(c | c.isCollective) in 
+        if collectiveParents.size() > 0 then self.error(collectiveParents.name + " cannot be superclasses as they are collective classes.") end end;
       if not Symbol(name).isValidName()  then self.error("name " + name + " not legal.") end;
       
 	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
@@ -222,9 +228,17 @@ import FmmlxDiagrams;
         links = [];
         ofClass = class.of()
       in
-//        ("remove Class "+class.name+" start").println();
+        //("remove Class "+class.name+" start").println();
 
-      // remove the associations first
+      // remove the instances
+        @For instance in package.classes do
+          if instance.of() = class then
+            instances := instances + [instance] end end;
+        //("found "+instances.size()+" instances").println();
+        @For instance in instances do
+          self.removeClass(instance, strategy) end;
+          
+                // remove the associations first
         @For association in package.associations do
           if association.end1.type = class or association.end2.type = class then
             associations := associations + [association] end end;
@@ -259,18 +273,31 @@ if class.isKindOf(FMMLx::MetaClass) then
           end
         end;
           
-      // orphan the instances
-        @For instance in package.classes do
-          if instance.of() = class then
-            instances := instances + [instance] end end;
-//        ("found "+instances.size()+" instances").println();
-        @For instance in instances do
-          self.orphanInstance(instance) end
-//        ("instances orphaned").println()
+
+          
+          
+        @For delegator in package.classes
+          ->select(d | d.isKindOf(FMMLx::MetaClass))
+          ->select(d | d.delegatesTo = class) do 
+          self.removeDelegation(delegator) end
 end; // only if class
 
+        @For role in package.classes
+        ->select(r | r.isKindOf(FMMLx::FmmlxObject))
+        ->select(r | r.roleFiller = class) do
+        r.roleFiller := null end;
+
       // remove class
-        package.remove(class);
+        if 
+          class.isKindOf(Class) 
+        then 
+          package.remove(class)
+        else // As package.removeClass(...) is meant for classes, it does not work properly for non-classes
+             // instead it's done manually.
+          package.remove(class);          
+          package.removeClass(class)
+        end;
+        
         ofClass.instances := ofClass.instances.excluding(class)
 //        ("class removed").println()
       end
@@ -278,11 +305,12 @@ end; // only if class
   
   context FmmlxManipulator  
     @Operation addParent(heir, parent)
+      if parent.level <> heir.level then ["Only classes from the same level may inherit from each other."]
       // Check for circular inheritance
-      if 
+      elseif 
         parent.isDescendantOf(heir) then [parent.name + " is already descendant of " + heir.name + ". Circular inheritance not allowed."] 
       elseif
-        parent.level <> heir.level then ["Only classes from the same level may inherit from each other."]
+        parent.isCollective then ["Collective class " + parent.name + " cannot be superclass."] 
       else
         let 
           problems = []

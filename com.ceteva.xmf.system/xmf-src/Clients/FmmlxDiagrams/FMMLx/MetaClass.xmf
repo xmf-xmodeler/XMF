@@ -5,6 +5,8 @@ import Root::FMMLx;
 context Root::FMMLx
 
   @Class MetaClass metaclass MetaAdaptor extends MetaAdaptor, FmmlxObject
+  
+    @Attribute isCollective:Boolean end
 
     @Constructor(name, level)
       if self.of() <> FMMLx::MetaClass then
