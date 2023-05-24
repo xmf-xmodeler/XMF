@@ -14,15 +14,15 @@
       <Categories/>
       <Owners/>
       <Objects>
-        <Object hidden="false" ref="Root::ControllerMapping::Action" x="1895" y="-138"/>
         <Object hidden="false" ref="Root::ControllerMapping::InvoiceItemList" x="431" y="2296"/>
+        <Object hidden="false" ref="Root::ControllerMapping::Action" x="1895" y="-138"/>
         <Object hidden="false" ref="Root::ControllerMapping::UIElement" x="892" y="-294"/>
-        <Object hidden="false" ref="Root::ControllerMapping::ProductSalesPrice" x="748" y="1944"/>
         <Object hidden="false" ref="Root::ControllerMapping::Virtual" x="1655" y="9"/>
+        <Object hidden="false" ref="Root::ControllerMapping::ProductSalesPrice" x="748" y="1944"/>
         <Object hidden="false" ref="Root::ControllerMapping::cereals" x="-1289" y="913"/>
         <Object hidden="false" ref="Root::ControllerMapping::parameter1" x="-1192" y="2651"/>
-        <Object hidden="false" ref="Root::ControllerMapping::parameter2" x="-1427" y="2210"/>
         <Object hidden="false" ref="Root::ControllerMapping::ListInjection" x="1596" y="97"/>
+        <Object hidden="false" ref="Root::ControllerMapping::parameter2" x="-1427" y="2210"/>
         <Object hidden="false" ref="Root::ControllerMapping::InvoiceItemRef" x="-355" y="1247"/>
         <Object hidden="false" ref="Root::ControllerMapping::UserInterface" x="381" y="-314"/>
         <Object hidden="false" ref="Root::ControllerMapping::Reference" x="226" y="132"/>
@@ -34,14 +34,14 @@
         <Object hidden="false" ref="Root::ControllerMapping::Sugar" x="-1146" y="605"/>
         <Object hidden="false" ref="Root::ControllerMapping::ActionInjection" x="1621" y="286"/>
         <Object hidden="false" ref="Root::ControllerMapping::Product" x="-1232" y="372"/>
-        <Object hidden="false" ref="Root::ControllerMapping::InvoiceUI" x="-1618" y="1567"/>
+        <Object hidden="false" ref="Root::ControllerMapping::InvoiceUI" x="-1879" y="1566"/>
         <Object hidden="false" ref="Root::ControllerMapping::i2" x="-1632" y="733"/>
         <Object hidden="false" ref="Root::ControllerMapping::i1" x="-1635" y="591"/>
         <Object hidden="false" ref="Root::ControllerMapping::virtual2" x="-1418" y="2002"/>
-        <Object hidden="false" ref="Root::ControllerMapping::virtual1" x="-1599" y="2484"/>
         <Object hidden="false" ref="Root::ControllerMapping::i3" x="-1649" y="901"/>
-        <Object hidden="false" ref="Root::ControllerMapping::SlotInjection" x="1638" y="396"/>
+        <Object hidden="false" ref="Root::ControllerMapping::virtual1" x="-1599" y="2484"/>
         <Object hidden="false" ref="Root::ControllerMapping::InvoiceList" x="-672" y="2266"/>
+        <Object hidden="false" ref="Root::ControllerMapping::SlotInjection" x="1638" y="396"/>
         <Object hidden="false" ref="Root::ControllerMapping::UIControlElement" x="892" y="58"/>
         <Object hidden="false" ref="Root::ControllerMapping::InvoiceRef" x="-1017" y="1379"/>
         <Object hidden="false" ref="Root::ControllerMapping::Injection" x="1334" y="-74"/>
@@ -71,16 +71,16 @@
             <IntermediatePoint x="-1167.6987" y="638.07825"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::InvoiceRef/Root::ControllerMapping::isParent" source_port="WEST" target_port="EAST" type="link">
-          <IntermediatePoints>
-            <IntermediatePoint x="44.415527" y="1293.2081"/>
-            <IntermediatePoint x="44.415527" y="1417.3685"/>
-          </IntermediatePoints>
-        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::Invoice2/Root::ControllerMapping::i3/Root::ControllerMapping::contains" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
             <IntermediatePoint x="-1693.6986" y="947.0794"/>
             <IntermediatePoint x="-1693.6986" y="948.058"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::InvoiceRef/Root::ControllerMapping::isParent" source_port="WEST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="44.415527" y="1293.2081"/>
+            <IntermediatePoint x="44.415527" y="1417.3685"/>
           </IntermediatePoints>
         </Edge>
         <Edge name="refersToStateOf" parent_association="VOID" ref="Root::ControllerMapping::refersToStateOf" source_port="SOUTH" target_port="SOUTH" type="association">
@@ -161,7 +161,7 @@
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceItemList/Root::ControllerMapping::composedOf" source_port="EAST" target_port="NORTH" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-145.96387" y="1631.5186"/>
+            <IntermediatePoint x="-145.96387" y="1630.3333"/>
             <IntermediatePoint x="-145.96387" y="2174.2942"/>
             <IntermediatePoint x="555.1667" y="2174.2942"/>
           </IntermediatePoints>
@@ -174,7 +174,7 @@
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceCreation/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-1000.0735" y="1663.5486"/>
+            <IntermediatePoint x="-1000.0735" y="1662.3634"/>
             <IntermediatePoint x="-1000.0735" y="2047.5527"/>
           </IntermediatePoints>
         </Edge>
@@ -189,7 +189,7 @@
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceList/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-270.42627" y="1647.5336"/>
+            <IntermediatePoint x="-270.42627" y="1646.3484"/>
             <IntermediatePoint x="-270.42627" y="2345.1738"/>
           </IntermediatePoints>
         </Edge>
@@ -199,17 +199,11 @@
             <IntermediatePoint x="-252.24854" y="1455.5406"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::ProductRef/Root::ControllerMapping::Sugar/Root::ControllerMapping::refersToStateOf" source_port="null" target_port="null" type="link">
-          <IntermediatePoints/>
-        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::parameter2/Root::ControllerMapping::virtual2/Root::ControllerMapping::representedAs" source_port="WEST" target_port="WEST" type="link">
           <IntermediatePoints>
             <IntermediatePoint x="-1523.5536" y="2266.0642"/>
             <IntermediatePoint x="-1523.5536" y="2036.4453"/>
           </IntermediatePoints>
-        </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::i1/Root::ControllerMapping::refersToStateOf" source_port="null" target_port="null" type="link">
-          <IntermediatePoints/>
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::action3/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::derivedFrom" source_port="NORTH" target_port="EAST" type="link">
           <IntermediatePoints>
@@ -218,17 +212,10 @@
             <IntermediatePoint x="-176.87671" y="1342.9213"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::ProductRef/Root::ControllerMapping::isChild" source_port="EAST" target_port="SOUTH" type="link">
+        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceItemAmount/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-76.90234" y="1270.1871"/>
-            <IntermediatePoint x="-76.90234" y="1271.1772"/>
-            <IntermediatePoint x="628.77344" y="1271.1772"/>
-          </IntermediatePoints>
-        </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::ProductRef/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::isParent" source_port="WEST" target_port="EAST" type="link">
-          <IntermediatePoints>
-            <IntermediatePoint x="372.06818" y="1431.7369"/>
-            <IntermediatePoint x="372.06818" y="1293.2081"/>
+            <IntermediatePoint x="-716.1975" y="1582.2881"/>
+            <IntermediatePoint x="-716.1975" y="1711.5527"/>
           </IntermediatePoints>
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::action2/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::derivedFrom" source_port="NORTH" target_port="WEST" type="link">
@@ -238,10 +225,17 @@
             <IntermediatePoint x="-402.27722" y="1329.2181"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceItemAmount/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
+        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::ProductRef/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::isParent" source_port="WEST" target_port="EAST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-716.1975" y="1583.4733"/>
-            <IntermediatePoint x="-716.1975" y="1711.5527"/>
+            <IntermediatePoint x="372.06818" y="1431.7369"/>
+            <IntermediatePoint x="372.06818" y="1293.2081"/>
+          </IntermediatePoints>
+        </Edge>
+        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::ProductRef/Root::ControllerMapping::isChild" source_port="EAST" target_port="SOUTH" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="-76.90234" y="1270.1871"/>
+            <IntermediatePoint x="-76.90234" y="1271.1772"/>
+            <IntermediatePoint x="628.77344" y="1271.1772"/>
           </IntermediatePoints>
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::action3/Root::ControllerMapping::parameter2/Root::ControllerMapping::uses" source_port="WEST" target_port="SOUTH" type="link">
@@ -292,21 +286,21 @@
             <IntermediatePoint x="-1542.4414" y="427.55273"/>
           </IntermediatePoints>
         </Edge>
-        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemCalcPrice/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::derivedFrom" source_port="EAST" target_port="EAST" type="link">
-          <IntermediatePoints>
-            <IntermediatePoint x="155.60469" y="1948.1738"/>
-            <IntermediatePoint x="155.60469" y="1339.2504"/>
-          </IntermediatePoints>
-        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::Invoice1/Root::ControllerMapping::i2/Root::ControllerMapping::contains" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
             <IntermediatePoint x="-1783.5651" y="660.9089"/>
             <IntermediatePoint x="-1783.5651" y="779.553"/>
           </IntermediatePoints>
         </Edge>
+        <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceItemCalcPrice/Root::ControllerMapping::InvoiceItemRef/Root::ControllerMapping::derivedFrom" source_port="EAST" target_port="EAST" type="link">
+          <IntermediatePoints>
+            <IntermediatePoint x="155.60469" y="1948.1738"/>
+            <IntermediatePoint x="155.60469" y="1339.2504"/>
+          </IntermediatePoints>
+        </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::ProductSalesPrice/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="13.8515625" y="1599.4884"/>
+            <IntermediatePoint x="13.8515625" y="1598.3031"/>
             <IntermediatePoint x="13.8515625" y="2001.5527"/>
           </IntermediatePoints>
         </Edge>
@@ -323,9 +317,6 @@
             <IntermediatePoint x="861.5952" y="1590.0328"/>
             <IntermediatePoint x="861.5952" y="1412.5527"/>
           </IntermediatePoints>
-        </Edge>
-        <Edge ref="InheritanceMapping: Root::ControllerMapping::ControlElement/Root::ControllerMapping::UIElement" source_port="null" target_port="null" type="inheritance">
-          <IntermediatePoints/>
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::action2/Root::ControllerMapping::parameter1/Root::ControllerMapping::uses" source_port="SOUTH" target_port="WEST" type="link">
           <IntermediatePoints>
@@ -361,7 +352,7 @@
         </Edge>
         <Edge ref="AssociationLinkMapping: Root::ControllerMapping::InvoiceUI/Root::ControllerMapping::InvoiceItemCalcPrice/Root::ControllerMapping::composedOf" source_port="EAST" target_port="WEST" type="link">
           <IntermediatePoints>
-            <IntermediatePoint x="-446.02686" y="1615.5034"/>
+            <IntermediatePoint x="-446.02686" y="1614.3182"/>
             <IntermediatePoint x="-446.02686" y="1948.1738"/>
           </IntermediatePoints>
         </Edge>
@@ -447,7 +438,7 @@
         <Label localID="0" ownerID="AssociationLinkMapping: Root::ControllerMapping::InvoiceRef/Root::ControllerMapping::Invoice1/Root::ControllerMapping::refersToStateOf" x="0.0" y="-27.93164"/>
       </Labels>
       <Preferences/>
-      <View name="Main View" tx="258.7995" ty="297.6271" xx="0.84089655"/>
+      <View name="Main View" tx="672.7599" ty="269.5295" xx="0.84089655"/>
       <View name="Mapping component model" tx="-8.397907" ty="91.160515" xx="0.6484198"/>
       <View name="Examplary model" tx="2454.8838" ty="-202.40593" xx="1.0"/>
       <View name="Instantiated Mapping" tx="1221.5209" ty="-507.04922" xx="0.4204482"/>
@@ -456,47 +447,47 @@
   </Diagrams>
     
   <Logs>
-    <addMetaClass abstract="false" level="2" name="UIElement" package="Root::ControllerMapping" parents=""/>
-    <addMetaClass abstract="false" level="2" name="CommonClass" package="Root::ControllerMapping" parents=""/>
     <addMetaClass abstract="false" level="2" name="UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addMetaClass abstract="false" level="1" name="UserInterface" package="Root::ControllerMapping" parents=""/>
-    <addMetaClass abstract="false" level="1" name="Reference" package="Root::ControllerMapping" parents=""/>
+    <addMetaClass abstract="false" level="2" name="CommonClass" package="Root::ControllerMapping" parents=""/>
+    <addMetaClass abstract="false" level="2" name="UIElement" package="Root::ControllerMapping" parents=""/>
     <addMetaClass abstract="false" level="1" name="Parameter" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="SlotInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="ListInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Injection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Action" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="ActionInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Invoice" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceItem" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Product" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
+    <addMetaClass abstract="false" level="1" name="Reference" package="Root::ControllerMapping" parents=""/>
+    <addMetaClass abstract="false" level="1" name="UserInterface" package="Root::ControllerMapping" parents=""/>
     <addInstance abstract="false" name="Virtual" of="Root::ControllerMapping::UIElement" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="ProductRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceItemRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceItemList" of="Root::ControllerMapping::ListInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceList" of="Root::ControllerMapping::ListInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceItemCalcPrice" of="Root::ControllerMapping::ActionInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Sugar" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="i1" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Invoice1" of="Root::ControllerMapping::Invoice" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="i2" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="flour" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="Invoice2" of="Root::ControllerMapping::Invoice" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="i3" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="cereals" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceUI" of="Root::ControllerMapping::UserInterface" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="action1" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceItemAmount" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="ProductSalesPrice" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="InvoiceCreation" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="action2" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="action3" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="parameter1" of="Root::ControllerMapping::Parameter" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="parameter2" of="Root::ControllerMapping::Parameter" package="Root::ControllerMapping" parents=""/>
-    <addInstance abstract="false" name="virtual1" of="Root::ControllerMapping::Virtual" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Product" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceItem" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Invoice" of="Root::ControllerMapping::CommonClass" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="ActionInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Action" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Injection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="ListInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="SlotInjection" of="Root::ControllerMapping::UIControlElement" package="Root::ControllerMapping" parents=""/>
     <addInstance abstract="false" name="virtual2" of="Root::ControllerMapping::Virtual" package="Root::ControllerMapping" parents=""/>
-    <changeParent class="Root::ControllerMapping::ActionInjection" new="Root::ControllerMapping::Action,Root::ControllerMapping::Injection" old="" package="Root::ControllerMapping"/>
+    <addInstance abstract="false" name="virtual1" of="Root::ControllerMapping::Virtual" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="parameter2" of="Root::ControllerMapping::Parameter" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="parameter1" of="Root::ControllerMapping::Parameter" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="action3" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="action2" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceCreation" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="ProductSalesPrice" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceItemAmount" of="Root::ControllerMapping::SlotInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="action1" of="Root::ControllerMapping::Action" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceUI" of="Root::ControllerMapping::UserInterface" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="cereals" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="i3" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Invoice2" of="Root::ControllerMapping::Invoice" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="flour" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="i2" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Invoice1" of="Root::ControllerMapping::Invoice" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="i1" of="Root::ControllerMapping::InvoiceItem" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="Sugar" of="Root::ControllerMapping::Product" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceItemCalcPrice" of="Root::ControllerMapping::ActionInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceList" of="Root::ControllerMapping::ListInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceItemList" of="Root::ControllerMapping::ListInjection" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="InvoiceItemRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
+    <addInstance abstract="false" name="ProductRef" of="Root::ControllerMapping::Reference" package="Root::ControllerMapping" parents=""/>
+    <changeParent class="Root::ControllerMapping::ActionInjection" new="Root::ControllerMapping::Injection,Root::ControllerMapping::Action" old="" package="Root::ControllerMapping"/>
     <changeParent class="Root::ControllerMapping::ListInjection" new="Root::ControllerMapping::Injection" old="" package="Root::ControllerMapping"/>
     <changeParent class="Root::ControllerMapping::SlotInjection" new="Root::ControllerMapping::Injection" old="" package="Root::ControllerMapping"/>
     <changeParent class="Root::ControllerMapping::UIControlElement" new="Root::ControllerMapping::UIElement" old="" package="Root::ControllerMapping"/>
@@ -572,8 +563,8 @@
     <changeSlotValue class="Root::ControllerMapping::InvoiceRef" package="Root::ControllerMapping" slotName="isHead" valueToBeParsed="true"/>
     <changeSlotValue class="Root::ControllerMapping::InvoiceRef" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
-    <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="pathToFXML" valueToBeParsed="[67,58,47,85,115,101,114,115,47,76,117,99,97,47,68,101,115,107,116,111,112,47,105,110,118,111,105,99,101,46,102,120,109,108].asString()"/>
-    <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="pathToIconOfWindow" valueToBeParsed="[67,58,47,85,115,101,114,115,47,76,117,99,97,47,68,101,115,107,116,111,112,47,105,110,118,111,105,99,101,46,112,110,103].asString()"/>
+    <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="pathToFXML" valueToBeParsed="[67,58,47,85,115,101,114,115,47,76,117,99,97,47,103,105,116,47,88,77,70,47,99,111,109,46,99,101,116,101,118,97,46,120,109,102,46,115,121,115,116,101,109,47,100,101,109,111,47,71,85,73,47,73,110,118,111,105,99,101,52,67,111,110,116,114,111,108,108,101,114,77,97,112,112,105,110,103,46,102,120,109,108].asString()"/>
+    <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="pathToIconOfWindow" valueToBeParsed="[67,58,47,85,115,101,114,115,47,76,117,99,97,47,103,105,116,47,88,77,70,47,99,111,109,46,99,101,116,101,118,97,46,120,109,102,46,115,121,115,116,101,109,47,100,101,109,111,47,71,85,73,47,73,110,118,111,105,99,101,52,67,111,110,116,114,111,108,108,101,114,77,97,112,112,105,110,103,46,112,110,103].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::InvoiceUI" package="Root::ControllerMapping" slotName="titleOfUI" valueToBeParsed="[73,110,118,111,105,99,101,32,77,97,110,97,103,101,109,101,110,116].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::ListInjection" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::Parameter" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
@@ -610,18 +601,18 @@
     <changeSlotValue class="Root::ControllerMapping::flour" package="Root::ControllerMapping" slotName="salesPrice" valueToBeParsed="0.9"/>
     <changeSlotValue class="Root::ControllerMapping::i1" package="Root::ControllerMapping" slotName="amount" valueToBeParsed="27"/>
     <changeSlotValue class="Root::ControllerMapping::i1" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
-    <changeSlotValue class="Root::ControllerMapping::i2" package="Root::ControllerMapping" slotName="amount" valueToBeParsed="15"/>
+    <changeSlotValue class="Root::ControllerMapping::i2" package="Root::ControllerMapping" slotName="amount" valueToBeParsed="17"/>
     <changeSlotValue class="Root::ControllerMapping::i2" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::i3" package="Root::ControllerMapping" slotName="amount" valueToBeParsed="41"/>
     <changeSlotValue class="Root::ControllerMapping::i3" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::parameter1" package="Root::ControllerMapping" slotName="dataType" valueToBeParsed="[73,110,116,101,103,101,114].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::parameter1" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::parameter1" package="Root::ControllerMapping" slotName="orderNo" valueToBeParsed="1"/>
-    <changeSlotValue class="Root::ControllerMapping::parameter1" package="Root::ControllerMapping" slotName="value" valueToBeParsed="[53].asString()"/>
+    <changeSlotValue class="Root::ControllerMapping::parameter1" package="Root::ControllerMapping" slotName="value" valueToBeParsed="[].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::parameter2" package="Root::ControllerMapping" slotName="dataType" valueToBeParsed="[73,110,116,101,103,101,114].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::parameter2" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::parameter2" package="Root::ControllerMapping" slotName="orderNo" valueToBeParsed="2"/>
-    <changeSlotValue class="Root::ControllerMapping::parameter2" package="Root::ControllerMapping" slotName="value" valueToBeParsed="[49,48].asString()"/>
+    <changeSlotValue class="Root::ControllerMapping::parameter2" package="Root::ControllerMapping" slotName="value" valueToBeParsed="[].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::virtual1" package="Root::ControllerMapping" slotName="idOfUIElement" valueToBeParsed="[80,65,82,49].asString()"/>
     <changeSlotValue class="Root::ControllerMapping::virtual1" package="Root::ControllerMapping" slotName="lastUpdated" valueToBeParsed="null"/>
     <changeSlotValue class="Root::ControllerMapping::virtual2" package="Root::ControllerMapping" slotName="idOfUIElement" valueToBeParsed="[80,65,82,50].asString()"/>
@@ -634,7 +625,7 @@
     <addAssociation accessSourceFromTargetName="invoiceItem" accessTargetFromSourceName="product" classSource="Root::ControllerMapping::InvoiceItem" classTarget="Root::ControllerMapping::Product" fwName="relatesTo" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::ControllerMapping" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
     <addAssociation accessSourceFromTargetName="parameter" accessTargetFromSourceName="uIElement" classSource="Root::ControllerMapping::Parameter" classTarget="Root::ControllerMapping::UIElement" fwName="representedAs" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,1,true,false}" package="Root::ControllerMapping" reverseName="-1" sourceVisibleFromTarget="true" targetVisibleFromSource="true"/>
     <addAssociation accessSourceFromTargetName="reference" accessTargetFromSourceName="commonClass" classSource="Root::ControllerMapping::Reference" classTarget="Root::ControllerMapping::CommonClass" fwName="refersToStateOf" instLevelSource="0" instLevelTarget="-1" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{1,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::ControllerMapping" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
-    <addAssociation accessSourceFromTargetName="reference" accessTargetFromSourceName="reference" classSource="Root::ControllerMapping::Reference" classTarget="Root::ControllerMapping::Reference" fwName="isParent" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::ControllerMapping" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
+    <addAssociation accessSourceFromTargetName="parent" accessTargetFromSourceName="parent" classSource="Root::ControllerMapping::Reference" classTarget="Root::ControllerMapping::Reference" fwName="isParent" instLevelSource="0" instLevelTarget="0" isSymmetric="false" isTransitive="false" multSourceToTarget="Seq{0,1,true,false}" multTargetToSource="Seq{0,-1,false,false}" package="Root::ControllerMapping" reverseName="-1" sourceVisibleFromTarget="false" targetVisibleFromSource="true"/>
     <addLink classSource="Root::ControllerMapping::Invoice1" classTarget="Root::ControllerMapping::i1" name="contains" package="Root::ControllerMapping"/>
     <addLink classSource="Root::ControllerMapping::Invoice1" classTarget="Root::ControllerMapping::i2" name="contains" package="Root::ControllerMapping"/>
     <addLink classSource="Root::ControllerMapping::Invoice2" classTarget="Root::ControllerMapping::i3" name="contains" package="Root::ControllerMapping"/>
