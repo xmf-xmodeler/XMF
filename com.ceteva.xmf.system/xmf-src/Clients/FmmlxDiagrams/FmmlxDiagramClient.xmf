@@ -154,7 +154,7 @@ context FmmlxDiagrams
         package = diagram.package;
         mapping = diagram.mapping
       in
-        @For c in package.classes->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
+        @For c in package.classes->select(x | x.isKindOf(FMMLx::FmmlxObject) orelse x.isKindOf(Class)) do
           let
     	    mappingInfo = mapping.addOrGetObjectMapping(c)	        
     	  in
@@ -185,7 +185,7 @@ context FmmlxDiagrams
     	  then
     	    key = if obj.isKindOf(Associations::Association) then obj.name else obj end
     	  in
-    	    if not obj.isKindOf(FMMLx::FmmlxObject) or obj.isKindOf(Class)then 
+    	    if mappingItem.points <> null then // not obj.isKindOf(FMMLx::FmmlxObject) or obj.isKindOf(Class) then 
     	      result := result.append([[
                 key.toString(),
                 mappingItem.points]])
@@ -2720,22 +2720,35 @@ context FmmlxDiagrams
            @For level in (-maxLevel).to(0) do
              @For class in classes do
                if class.isKindOf(FMMLx::FmmlxObject) andthen class.level=(-level) then
-                 if class.of()=FMMLx::MetaClass then
+                 if class.of() = FMMLx::MetaClass then
                    log := log + 
                      [["addMetaClass",
                       ["package", class.owner.path()],
-                      ["name",class.name.toString()],
-                      ["level",class.level+""],
-                      ["parents",""],
-                      ["abstract",class.isAbstract+""]]]
-                 else
+                      ["name", class.name.toString()],
+                      ["level", class.level+""],
+                      ["parents",""], // deprecated
+                      ["abstract", class.isAbstract+""],
+                      ["collective", class.isCollective+""]]]
+                 elseif class.isKindOf(FMMLx::MetaClass) then
                    log := log + 
                      [["addInstance", 
                       ["package", class.owner.path()], 
-                      ["of", class.of().path()] , 
-                      ["name",class.name.toString()] , 
-                      ["parents",""], 
-                      ["abstract", "false"]]]
+                      ["of", class.of().path()], 
+                      ["level", class.level+""], 
+                      ["name",class.name.toString()], 
+                      ["parents",""], // deprecated
+                      ["abstract", class.isAbstract+""],
+                      ["collective", class.isCollective+""]]]
+                 else // must be FMMLx::FmmlxObject only and therefore on level 0
+                   log := log + 
+                     [["addInstance", 
+                      ["package", class.owner.path()], 
+                      ["of", class.of().path()], 
+                      ["level", "0"], 
+                      ["name",class.name.toString()], 
+                      ["parents", ""], // deprecated
+                      ["abstract", "false"]  // deprecated
+                      ]]
                  end
                end
              end

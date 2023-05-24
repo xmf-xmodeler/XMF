@@ -32,6 +32,7 @@ context FmmlxDiagrams
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             newMappingInfo.hidden := true;
+            newMappingInfo.points := null;
             self.mapping := self.mapping + {newMappingInfo};
             newMappingInfo
           end // let
@@ -63,7 +64,8 @@ context FmmlxDiagrams
         then
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y;
-          mappingInfo.hidden := hidden
+          mappingInfo.hidden := hidden;
+          mappingInfo.points := null
         end // if
       end // for
     end
@@ -73,6 +75,11 @@ context FmmlxDiagrams
         if mappingInfo.id = objectID
         then
           mappingInfo.points := listOfPoints.asSeq();
+          
+          mappingInfo.lastKnownDiagramX := null;
+          mappingInfo.lastKnownDiagramY := null;
+          mappingInfo.hidden := null;
+          
           @For i in 0.to(mappingInfo.points.size()-1) do mappingInfo.points := mappingInfo.points.replaceAt(i, mappingInfo.points.at(i).asSeq()) end          
         end // if
       end // for
