@@ -661,6 +661,27 @@ context SeqOfElement
   end
   
 context SeqOfElement
+  // Find the min element.
+  @Operation min():Integer
+    @Doc
+      Returns the minimum valued element in the sequence.
+    end
+    if not self->tail->isEmpty
+    then self->head.min(self->tail->min)
+    else self->head
+    end
+  end
+  
+context SeqOfElement
+  // Calculate the average value of all elements.
+  @Operation avg():Float
+    @Doc
+      Returns the average value of all elements in the sequence.
+    end
+    self->sum() / self->size()
+  end
+  
+context SeqOfElement
   @Operation mul(s:Seq(Element)):Seq(Element)
     @Doc
       Generates a sequence containing all combinations of 
@@ -838,6 +859,33 @@ context SeqOfElement
          then Seq{self->head | self->tail.select(predicate)}
          else self->tail.select(predicate)
          end
+    end
+  end
+  
+context SeqOfElement
+  // Calculate the sum of a sequence of elements, which fulfill the predicate.
+  @Operation sumIf(predicate):Number
+    @Doc
+      Calculate the sum of a sequence of elements, which fulfill the predicate.
+    end
+    if self = Seq{}
+    then 0
+    else if predicate(self->head)
+         then self->head + self->tail.sum(predicate)
+         else self->tail.sumIf(predicate)
+         end
+    end
+  end
+  
+context SeqOfElement
+  // Calculate the sum of a sequence of elements.
+  @Operation sum():Number
+    @Doc
+      Calculate the sum of a sequence of elements.
+    end
+    if self = Seq{}
+    then 0
+    else self->head + self->tail.sum()
     end
   end
   
