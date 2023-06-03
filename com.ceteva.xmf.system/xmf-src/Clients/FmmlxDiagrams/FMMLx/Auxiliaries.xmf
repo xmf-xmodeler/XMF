@@ -129,8 +129,7 @@ context Root::Auxiliary
       then
         df2 = DecimalFormat("0.00")
       in 
-//        df2.format(self.amount) + " " + self.currency.symbol 
-        self.amount + " " + self.currency.symbol 
+        df2.format(self.amount + 0.0) + " " + self.currency.symbol 
       end
     end
     

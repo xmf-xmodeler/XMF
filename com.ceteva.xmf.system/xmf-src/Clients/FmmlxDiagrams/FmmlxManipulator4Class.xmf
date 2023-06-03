@@ -49,12 +49,25 @@ import FmmlxDiagrams;
   
   context FmmlxManipulator
     @Operation addInstance(
+        package : Package, 
+        ofClass : MetaClass, 
+        name, 
+        aLevel, // a -> from arguments
+        parents, 
+        abstract : Boolean, 
+        slotValueList: Seq(Seq(String))):Object
+      self.addInstance(package, ofClass, name, aLevel, parents, abstract, false, slotValueList)
+    end
+    
+  context FmmlxManipulator
+    @Operation addInstance(
       package : Package, 
       ofClass : MetaClass, 
       name, 
       aLevel, // a -> from arguments
       parents, 
       abstract : Boolean, 
+      collective : Boolean, 
       slotValueList: Seq(Seq(String))):Object
 
       // The following seems to be trivial, but better check once more
@@ -154,11 +167,13 @@ import FmmlxDiagrams;
         if obj.level > 1 then // it's a metaclass, therefore its instances are classes
           package.add(obj);
           obj.isAbstract := abstract; 
+          obj.isCollective := collective;
           obj.addParent(FMMLx::MetaClass)
         end;
         if obj.level = 1 then // it's a simple class, therefore its instances are not classes
           package.add(obj);
           obj.isAbstract := abstract;
+          obj.isCollective := collective;
           obj.addParent(FMMLx::FmmlxObject)
         end; 
         if obj.level = 0 then //  it's not a class at all, and parent and abstract do not apply
@@ -427,6 +442,21 @@ end; // only if class
         else ["Objects on level 0 cannot be made abstract"] end
       else
         class.isAbstract := false; []
+      end
+    end
+    
+  context FmmlxManipulator  
+    @Operation changeClassCollective(class, collectiveNew)
+      if collectiveNew 
+      then 
+        if class.level > 0 
+        then 
+          if class.getAllDescendants.size() = 0
+          then class.isCollective := true; []
+          else ["Classes with decendants cannot be made collective"] end
+        else ["Objects on level 0 cannot be made collective"] end
+      else
+        class.isCollective := false; []
       end
     end
     

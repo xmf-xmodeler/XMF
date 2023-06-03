@@ -218,6 +218,7 @@ context FmmlxDiagrams
     	      mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c);
     	      level = if c.isKindOf(FMMLx::FmmlxObject) then c.level else -1 end;
     	      isAbstract = if c.isKindOf(Class) then c.isAbstract else false end;
+    	      isCollective = if c.isKindOf(FMMLx::MetaClass) then c.isCollective else false end;
     	      parents = if c.isKindOf(Class) then self.getParentsPathsList(requestID, c) else [] end;
     	      type = if c.isKindOf(FMMLx::FmmlxObject) then "FMMLX" else if c.isKindOf(Enum) then "ENUM" else if c.isKindOf(Class) then "CLASS" else "UNDEFINED" end end end
     	    in
@@ -226,7 +227,7 @@ context FmmlxDiagrams
                 c.name.toString(),             // 1: name
                 level,                         // 2: level
     	      					           -1, // 3: UNUSED
-    	      					           -1, // 4: UNUSED
+    	      	isCollective,                  // 4: 
                 isAbstract,                    // 5
                 mappingInfo.lastKnownDiagramX, // 6
                 mappingInfo.lastKnownDiagramY, // 7
@@ -961,6 +962,30 @@ context FmmlxDiagrams
             x, y,
             hidden,
             slotValueList: Seq(Seq(String)))
+            
+        self.addInstance(requestID,
+            ofName,
+            name,
+            level,
+            parents,
+            abstract,
+            false,
+            x, y,
+            hidden,
+            slotValueList)
+    end
+            
+    @Operation addInstance(
+            requestID : Seq(Integer),
+            ofName,
+            name,
+            level,
+            parents,
+            abstract,
+            collective,
+            x, y,
+            hidden,
+            slotValueList: Seq(Seq(String)))
         try
           let
             m = FmmlxDiagrams::FmmlxManipulator()
@@ -973,9 +998,9 @@ context FmmlxDiagrams
               if p.of() <> ofClass then allParentsLegal := false end
             end;
             if 
-              ofClass.isAbstract 
+              ofClass.isAbstract orelse ofClass.isCollective
             then 
-              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Abstract class " + ofClass.name.toString() + " cannot be instantiated."]])
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Abstract/Collective class " + ofClass.name.toString() + " cannot be instantiated."]])
             elseif 
               not Symbol(name).isValidName() 
             then 
@@ -990,7 +1015,7 @@ context FmmlxDiagrams
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Not all superclasses are legal."]])
             else
               let
-                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, slotValueList)
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, collective, slotValueList)
               then
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
               in
@@ -1025,7 +1050,7 @@ context FmmlxDiagrams
           instanceSuffixCount := instanceSuffixCount + 1
         end;
         let 
-          newInstance = try m.addInstance(self.getPackage(requestID), ofClass, prefix+instanceSuffixCount, level, [], false, slotValueList) catch (exception) null end
+          newInstance = try m.addInstance(self.getPackage(requestID), ofClass, prefix+instanceSuffixCount, level, [], false, false, slotValueList) catch (exception) null end
         in
           if
             newInstance <> null 
@@ -1184,7 +1209,21 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-
+    
+    @Operation setClassCollective(requestID : Seq(Integer), className, isCollective)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+      then
+        problems = if class <> null then m.changeClassCollective(class, isCollective) else ["Class not found"] end
+      in
+        if problems.isEmpty() then
+          self.log := self.log + [["setClassCollective", ["package", class.owner.path()], ["class", class.path()] , ["collective",isCollective+""]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+    
     @Operation levelRaiseAll(requestID : Seq(Integer), amount)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
