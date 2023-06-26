@@ -3180,6 +3180,16 @@ context FmmlxDiagrams
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).options])
     end
     
+	@Operation undo(requestID : Seq(Integer)) 
+      xmf.undo()
+	  ;"undo".println()
+    end
+	
+	@Operation redo(requestID : Seq(Integer)) 
+      xmf.redo()
+	  ;"redo".println()
+    end
+	
     @Operation evalString(requestID : Seq(Integer), text) 
       let
   	    m = FmmlxDiagrams::FmmlxManipulator()
