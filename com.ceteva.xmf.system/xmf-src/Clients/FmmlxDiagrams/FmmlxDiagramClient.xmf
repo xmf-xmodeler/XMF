@@ -1031,6 +1031,66 @@ context FmmlxDiagrams
           self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), [exception.message]])
         end
     end
+    
+    @Operation addInstanceFreddy(
+    		requestID : Seq(Integer),
+            diagramID : Seq(Integer),
+            ofName,
+            name,
+            level,
+            parents,
+            abstract,
+            collective,
+            x, y,
+            hidden,
+            slotValueList: Seq(Seq(String)))
+          
+        try
+          let
+            m = FmmlxDiagrams::FmmlxManipulator()
+          then
+            ofClass = if self.getPackage(diagramID).hasElement(ofName) then self.getPackage(diagramID).getElement(ofName) else null end;
+            parentsList = self.getParentsList(diagramID, parents);
+            allParentsLegal = true
+          in
+            @For p in parentsList do
+              if p.of() <> ofClass then allParentsLegal := false end
+            end;
+            if 
+              ofClass.isAbstract orelse ofClass.isCollective
+            then
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(diagramID), ["Abstract/Collective class " + ofClass.name.toString() + " cannot be instantiated."]])
+            elseif 
+              not Symbol(name).isValidName() 
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(diagramID), ["name " + name + " not legal."]])
+            elseif 
+              self.getPackage(diagramID).hasElement(name)
+            then
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(diagramID), ["name " + name + " already in use."]])
+            elseif 
+              not allParentsLegal
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(diagramID), ["Not all superclasses are legal."]])
+            else
+              let
+                newInstance = m.addInstance(self.getPackage(diagramID), ofClass, name, level, parentsList, abstract, collective, slotValueList)
+              then
+                mappingInfo = self.getMapping(diagramID).addOrGetObjectMapping(newInstance)
+              in
+                requestID.println();
+                mappingInfo.lastKnownDiagramX := x;
+                mappingInfo.lastKnownDiagramY := y;
+                mappingInfo.hidden := hidden;
+                self.log := self.log + [["addInstance", ["package", newInstance.owner.path()], ["of", ofClass.path()] , ["name",name] , ["parents",self.getParentsPaths(diagramID, parentsList)] , ["abstract",abstract+""]]];
+                self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
+              end
+            end
+          end          
+        catch (exception)
+          self.getCommunicator().sendMessageToJava([self.vector2Seq(diagramID), [exception.message]])
+        end
+    end
 
 	@Operation addGeneratedInstance(
                 requestID      : Seq(Integer),
