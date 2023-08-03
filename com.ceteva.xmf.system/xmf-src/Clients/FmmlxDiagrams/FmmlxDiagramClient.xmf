@@ -2765,9 +2765,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level+""],
-                      ["parents",""], // deprecated
-                      ["abstract", class.isAbstract+""],
-                      ["collective", class.isCollective+""]]]
+                      ["abstract", class.isAbstract+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
                    log := log + 
                      [["addInstance", 
@@ -2776,8 +2774,7 @@ context FmmlxDiagrams
                       ["level", class.level+""], 
                       ["name",class.name.toString()], 
                       ["parents",""], // deprecated
-                      ["abstract", class.isAbstract+""],
-                      ["collective", class.isCollective+""]]]
+                      ["abstract", class.isAbstract+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
                    log := log + 
                      [["addInstance", 
@@ -2785,7 +2782,6 @@ context FmmlxDiagrams
                       ["of", class.of().path()], 
                       ["level", "0"], 
                       ["name",class.name.toString()], 
-                      ["parents", ""], // deprecated
                       ["abstract", "false"]  // deprecated
                       ]]
                  end
