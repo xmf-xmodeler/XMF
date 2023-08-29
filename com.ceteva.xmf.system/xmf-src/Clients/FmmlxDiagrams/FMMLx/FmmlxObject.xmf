@@ -291,4 +291,8 @@ context Root::FMMLx
     end
   end
   
+  @Operation allAncestors():Set(Class)
+    self.of() + self.allAncestors()
+  end
+  
 end

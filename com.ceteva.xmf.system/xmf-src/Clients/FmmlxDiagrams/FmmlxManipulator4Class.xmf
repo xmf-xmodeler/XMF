@@ -235,6 +235,7 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation removeClass(class, strategy)
+      ("before let").println();
       let 
         package = class.owner;
         associations = [];
@@ -243,7 +244,8 @@ import FmmlxDiagrams;
         links = [];
         ofClass = class.of()
       in
-        //("remove Class "+class.name+" start").println();
+        ("remove Class "+class.name+" start").println();
+        if class.name.toString().equals("foo") then foo() end;
 
       // remove the instances
         @For instance in package.classes do
@@ -303,18 +305,23 @@ end; // only if class
         r.roleFiller := null end;
 
       // remove class
+"removing Start".println();
         if 
           class.isKindOf(Class) 
         then 
+
+"of Class".println();
           package.remove(class)
         else // As package.removeClass(...) is meant for classes, it does not work properly for non-classes
              // instead it's done manually.
+
+"not of Class".println();
           package.remove(class);          
           package.removeClass(class)
         end;
         
         ofClass.instances := ofClass.instances.excluding(class)
-//        ("class removed").println()
+        ;("class removed").println()
       end
     end
   

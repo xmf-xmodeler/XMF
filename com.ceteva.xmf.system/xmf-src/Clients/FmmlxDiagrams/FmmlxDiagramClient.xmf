@@ -225,8 +225,8 @@ context FmmlxDiagrams
     	      result := result.append([[
     	      	type				         , // 0: UNUSED
                 c.name.toString(),             // 1: name
-                level,                         // 2: level
-    	      					           -1, // 3: UNUSED
+                if level = -1 then 2 else level end,  // 2: level
+    	      	if level = -1 then -1 else level end, // 3: UNUSED
     	      	isCollective,                  // 4: 
                 isAbstract,                    // 5
                 mappingInfo.lastKnownDiagramX, // 6
@@ -1171,15 +1171,23 @@ context FmmlxDiagrams
 
     @Operation removeClass(requestID : Seq(Integer), className, strategy)
       let
+        problems = ["no problems yet"];
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
       then
         classPath4Log = class.path()
       in
-        m.removeClass(class, strategy);
-        self.log := self.log + 	[["removeClass", ["package", self.getPackage(requestID).path()], ["class", classPath4Log]]]
-      end;
-      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), null]) // temporary empty result 
+        xmf.startUndoable();
+        problems := try        
+          m.removeClass(class, strategy);
+          self.log := self.log + 	[["removeClass", ["package", self.getPackage(requestID).path()], ["class", classPath4Log]]];
+          []
+        catch(e)
+          [e.message]
+        end;
+        xmf.endUndoable();
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // temporary empty result 
+      end
     end
 
     @Operation changeClassName(requestID : Seq(Integer), className, newName)

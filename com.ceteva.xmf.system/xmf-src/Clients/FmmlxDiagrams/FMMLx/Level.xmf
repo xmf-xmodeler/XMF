@@ -1,0 +1,95 @@
+parserImport XOCL;
+
+import Root::FMMLx;
+
+/******************************************************************************
+ *                                                                            *
+ *                                   Level                                    *
+ *                              ---------------                               *
+ *                                                                            *
+ *   This class represents level ranges for classes and properties, as simple *
+ *   integer values cannot represent the needed variations.                   *
+ *                                                                            * 
+ *   For classes with a simple integer level as used previously, minLevel and *
+ *   maxLevel are the same, and equal to the previous integer level.          *
+ *                                                                            *
+ *   For contingent level classes, a range can be given, where the minLevel   *
+ *   must be no less than 2, and the maxLevel must be greater than the        *
+ *   minLevel or left empty (null) to indicate that no upper limit is known   *
+ *   yet.                                                                     *
+ *                                                                            *
+ *   Equally, properties either have a classic fixed instantiation level      *
+ *   (i.e. minLevel = maxLevel) or are incompletely defined (similar to       * 
+ *   abstract classes.                                                        *
+ *                                                                            *
+ *   In the latter case, the property has a range as well.                    *
+ *                                                                            *
+ ******************************************************************************/ 
+ 
+
+context Root::FMMLx
+  @Class Level
+    
+  @Attribute minLevel : Integer end
+  @Attribute maxLevel : Integer end
+  
+    @Constructor(minLevel,maxLevel)
+      self
+    end
+    
+    @Constructor(minLevel)
+      self.maxLevel := minLevel;
+      self
+    end
+    
+    @Operation isValidForObject():Boolean
+      self.minLevel <> null andthen (
+        (self.maxLevel = null andthen self.minLevel >= 2) orelse
+        (self.maxLevel > self.minLevel andthen self.minLevel >= 2) orelse
+        (self.minLevel = self.maxLevel))
+    end
+    
+    @Operation isValidForProperty():Boolean
+      throw Exception("not yet implemented")
+    end
+    
+    @Operation minusOne():Level
+      Level(self.minLevel-1, if self.maxLevel=null then null else self.maxLevel-1 end)
+    end
+    
+    @Operation matchesInstantiationLevel(level:Integer):Boolean
+      self.minLevel <> null andthen 
+      self.minLevel = self.maxLevel andthen 
+      self.minLevel = level
+    end
+    
+    @Operation canBeInstantiatatedTo(candidate:Level):Boolean
+      if not self.isValidForObject() then throw Exception(self + "is not a valid Level for a class") end;
+      if not candidate.isValidForObject() then throw Exception(self + "is not a valid Level for an instance") end;
+      let 
+        nextLevel = self.minusOne()
+      in
+        (nextLevel.minLevel <= candidate.minLevel) andthen 
+        (nextLevel.maxLevel = null orelse (candidate.maxLevel <> null andthen nextLevel.maxLevel >= candidate.maxLevel))
+      end
+    end
+    
+    @Operation canHaveAPropertyOn(candidate:Level):Boolean
+      throw Exception("not yet implemented")
+    end
+    
+    @Operation toString():String
+      if 
+        self.maxLevel = null 
+      then 
+        self.minLevel + "+"
+      elseif
+        self.minLevel = self.maxLevel
+      then
+        self.minLevel + ""
+      else
+        self.minLevel + "-" + self.maxLevel
+      end
+    end
+
+  end

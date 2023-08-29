@@ -402,4 +402,19 @@ context Root::FMMLx
     end
   end
   
+  @Operation allAncestors():Set(Class)
+    let 
+      myAncestors = {self.of()} + self.parents
+    then
+      result = myAncestors
+    in
+      @For c in myAncestors do 
+        if c.isKindOf(MetaClass) then
+          result := c.allAncestors() + result
+        end
+      end;
+    result
+    end
+  end
+  
 end
