@@ -94,7 +94,20 @@ context FmmlxDiagrams
         self.communicator.notifyDiagramCreated(packagePath, diagramName, newID)
       end      
     end
-
+	
+	@Operation createDiagramFromJavaUsingAsynchCall(requestID, packagePath, diagramName, file, typeAsString, umlMode)
+      let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    type = FmmlxDiagramType.getElement(typeAsString)
+      then
+        package = m.evalString(packagePath, Root).at(0)
+      then
+        newID = self.createNewDiagram(package, diagramName, file, type, umlMode)
+      in
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), newID])
+      end      
+    end
+	
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
     @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType, umlMode:Boolean)
