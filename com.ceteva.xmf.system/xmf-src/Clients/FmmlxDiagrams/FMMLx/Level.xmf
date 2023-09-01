@@ -34,6 +34,7 @@ context Root::FMMLx
   @Attribute maxLevel : Integer end
   
     @Constructor(minLevel,maxLevel)
+      if self.maxLevel = -1 then self.maxLevel := null end; 
       self
     end
     
@@ -43,10 +44,25 @@ context Root::FMMLx
     end
     
     @Operation isValidForObject():Boolean
-      self.minLevel <> null andthen (
-        (self.maxLevel = null andthen self.minLevel >= 2) orelse
-        (self.maxLevel > self.minLevel andthen self.minLevel >= 2) orelse
-        (self.minLevel = self.maxLevel))
+      if 
+        self.minLevel = null 
+      then false else
+        if 
+          self.minLevel >= 2
+        then
+          if
+            self.maxLevel = null
+          then true else
+            self.maxLevel >= self.minLevel
+          end
+        else
+          self.minLevel = self.maxLevel
+        end
+      end
+//      self.minLevel <> null andthen (
+//        (self.maxLevel = null andthen self.minLevel >= 2) orelse
+//        (self.maxLevel > self.minLevel andthen self.minLevel >= 2) orelse
+//        (self.minLevel = self.maxLevel))
     end
     
     @Operation isValidForProperty():Boolean
@@ -64,8 +80,8 @@ context Root::FMMLx
     end
     
     @Operation canBeInstantiatatedTo(candidate:Level):Boolean
-      if not self.isValidForObject() then throw Exception(self + "is not a valid Level for a class") end;
-      if not candidate.isValidForObject() then throw Exception(self + "is not a valid Level for an instance") end;
+      if not self.isValidForObject() then throw Exception(self.toString() + " is not a valid Level for a class") end;
+      if not candidate.isValidForObject() then throw Exception(candidate.toString() + " is not a valid Level for an instance") end;
       let 
         nextLevel = self.minusOne()
       in

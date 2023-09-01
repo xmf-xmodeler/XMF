@@ -133,7 +133,7 @@ import FmmlxDiagrams;
         class.addAttribute(a);
         
         @For instance in allInst do
-          if a.isIntrinsic andthen instance.level = instLevel then
+          if a.isIntrinsic andthen instance.level.minLevel = instLevel then
             //if a.init <> null
             //then
             //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
@@ -170,7 +170,7 @@ import FmmlxDiagrams;
             // remove slots
             @For instance in class.allMetaInstances() do
               // this instance may have a slot, check level first, otherwise ignore (no else)
-              if oldAtt.instLevel = instance.level then 
+              if oldAtt.instLevel = instance.level.minLevel then 
                 // now, the slot with the given name should be the one we are looking for
                 // UNLESS: by an unknown coincidence, there is another attribute from double inheritance,
                 // should not happen, but check anyway
@@ -200,7 +200,7 @@ import FmmlxDiagrams;
         attribute.name := newName.asSymbol();
                 
         @For instance in allInst do
-          if instance.level = attribute.instLevel then 
+          if instance.level.minLevel = attribute.instLevel then 
             Kernel_addAtt(instance,newName,instance.get(oldName));
             instance.removeStructuralFeature(oldName)
           end

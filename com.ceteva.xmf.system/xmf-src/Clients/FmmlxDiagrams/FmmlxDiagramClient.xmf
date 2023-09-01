@@ -216,18 +216,24 @@ context FmmlxDiagrams
     	  @For c in classes do
     	    if c <> null andthen (c.isKindOf(FMMLx::FmmlxObject) or c.isKindOf(Class)) then let 
     	      mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c);
-    	      level = if c.isKindOf(FMMLx::FmmlxObject) then c.level else -1 end;
+    	      level_ = if c.isKindOf(FMMLx::FmmlxObject) then c.level else -1 end;
     	      isAbstract = if c.isKindOf(Class) then c.isAbstract else false end;
     	      isCollective = if c.isKindOf(FMMLx::MetaClass) then c.isCollective else false end;
     	      parents = if c.isKindOf(Class) then self.getParentsPathsList(requestID, c) else [] end;
     	      type = if c.isKindOf(FMMLx::FmmlxObject) then "FMMLX" else if c.isKindOf(Enum) then "ENUM" else if c.isKindOf(Class) then "CLASS" else "UNDEFINED" end end end
+    	    then 
+    	      level = if level_.isKindOf(Integer) then FMMLx::Level(level_) else level_ end
     	    in
     	      result := result.append([[
     	      	type				         , // 0: UNUSED
                 c.name.toString(),             // 1: name
-                if level = -1 then 2 else level end,  // 2: level
-    	      	if level = -1 then -1 else level end, // 3: UNUSED
-    	      	isCollective,                  // 4: 
+                  //if level = -1 then 2 else level end,  // 2: level
+    	      	  //if level = -1 then -1 else level end, // 3: UNUSED
+    	      	level.minLevel,                // 2: minLevel
+    	      	if level.maxLevel = null 
+    	      	  then -1 
+    	      	  else level.maxLevel end,     // 3: maxLevel
+    	      	isCollective,                  // 4: UNUSED
                 isAbstract,                    // 5
                 mappingInfo.lastKnownDiagramX, // 6
                 mappingInfo.lastKnownDiagramY, // 7
@@ -512,7 +518,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For c in self.getPackage(requestID).classes->select(x |  x.hasSlot("level") andthen x.level > 0) do
+        @For c in self.getPackage(requestID).classes->select(x |  x.hasSlot("level") andthen x.level.minLevel > 0) do
           let
             localResult = []
           in
@@ -577,7 +583,7 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation getSlots(requestID : Seq(Integer), objectName, slotList)
+    /*@Operation getSlots(requestID : Seq(Integer), objectName, slotList)
       let
         result = []
       in
@@ -600,7 +606,7 @@ context FmmlxDiagrams
         end;
     	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
-    end
+    end*/
 
     @Operation getAllOperationValues(requestID : Seq(Integer), objectOpValList)
       let 
@@ -890,7 +896,7 @@ context FmmlxDiagrams
 
     ////////////////// Class Manipulations ///////////////////
 
-    @Operation addMetaClass(requestID : Seq(Integer), name, level, parents, abstract, x, y, hidden)
+    @Operation addMetaClass(requestID : Seq(Integer), name, minLevel, maxLevel, parents, abstract, x, y, hidden)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         parentsList = self.getParentsList(requestID, parents);
@@ -898,14 +904,14 @@ context FmmlxDiagrams
         allParentsLegal = true
       in
         @For p in parentsList do
-          if p.of() <> FMMLx::MetaClass orelse p.level <> level then allParentsLegal := false end
+          if p.of() <> FMMLx::MetaClass orelse p.level.minLevel <> minLevel orelse p.level.maxLevel <> maxLevel then allParentsLegal := false end
         end;
         problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;
         problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
         problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
         if problems.isEmpty() then
           let 
-            newClass = m.addMetaClass(self.getPackage(requestID), name, level, parentsList, abstract)
+            newClass = m.addMetaClass(self.getPackage(requestID), name, FMMLx::Level(minLevel,maxLevel), parentsList, abstract)
           then
             mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass)
           in
@@ -915,7 +921,8 @@ context FmmlxDiagrams
             self.log := self.log + [["addMetaClass", 
               ["package", newClass.owner.path()], 
               ["name",name], 
-              ["level",level+""], 
+              ["minLevel",minLevel+""],
+              ["maxLevel",maxLevel+""], 
               ["parents",self.getParentsPaths(requestID, parentsList)], 
               ["abstract",abstract+""]]]
           end
@@ -956,39 +963,17 @@ context FmmlxDiagrams
             requestID : Seq(Integer),
             ofName,
             name,
-            level,
+            minLevel,
+            maxLevel,
             parents,
             abstract,
-            x, y,
-            hidden,
-            slotValueList: Seq(Seq(String)))
-            
-        self.addInstance(requestID,
-            ofName,
-            name,
-            level,
-            parents,
-            abstract,
-            false,
-            x, y,
-            hidden,
-            slotValueList)
-    end
-            
-    @Operation addInstance(
-            requestID : Seq(Integer),
-            ofName,
-            name,
-            level,
-            parents,
-            abstract,
-            collective,
             x, y,
             hidden,
             slotValueList: Seq(Seq(String)))
         try
           let
-            m = FmmlxDiagrams::FmmlxManipulator()
+            m = FmmlxDiagrams::FmmlxManipulator();
+            level = FMMLx::Level(minLevel, maxLevel)
           then
             ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
             parentsList = self.getParentsList(requestID, parents);
@@ -1013,9 +998,13 @@ context FmmlxDiagrams
               not allParentsLegal
             then 
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Not all superclasses are legal."]])
+            elseif 
+              not ofClass.level.canBeInstantiatatedTo(level)
+            then 
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Level " + ofClass.level.toString() + " cannot be instantiated to level " + level.toString() + "."]])
             else
               let
-                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, collective, slotValueList)
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, slotValueList)
               then
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance)
               in
