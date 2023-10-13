@@ -94,7 +94,20 @@ context FmmlxDiagrams
         self.communicator.notifyDiagramCreated(packagePath, diagramName, newID)
       end      
     end
-
+	
+	@Operation createDiagramFromJavaUsingAsynchCall(requestID, packagePath, diagramName, file, typeAsString, umlMode)
+      let
+  	    m = FmmlxDiagrams::FmmlxManipulator();
+  	    type = FmmlxDiagramType.getElement(typeAsString)
+      then
+        package = m.evalString(packagePath, Root).at(0)
+      then
+        newID = self.createNewDiagram(package, diagramName, file, type, umlMode)
+      in
+        self.communicator.sendMessageToJava([self.vector2Seq(requestID), newID])
+      end      
+    end
+	
     /* This Operation creates a new diagram, 
        and returns its key!!! ... */
     @Operation createNewDiagram(package:Package, name:String, file:String, type:FmmlxDiagramType, umlMode:Boolean)
@@ -2869,9 +2882,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level+""],
-                      ["parents",""], // deprecated
-                      ["abstract", class.isAbstract+""],
-                      ["collective", class.isCollective+""]]]
+                      ["abstract", class.isAbstract+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
                    log := log + 
                      [["addInstance", 
@@ -2880,8 +2891,7 @@ context FmmlxDiagrams
                       ["level", class.level+""], 
                       ["name",class.name.toString()], 
                       ["parents",""], // deprecated
-                      ["abstract", class.isAbstract+""],
-                      ["collective", class.isCollective+""]]]
+                      ["abstract", class.isAbstract+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
                    log := log + 
                      [["addInstance", 
@@ -2889,7 +2899,6 @@ context FmmlxDiagrams
                       ["of", class.of().path()], 
                       ["level", "0"], 
                       ["name",class.name.toString()], 
-                      ["parents", ""], // deprecated
                       ["abstract", "false"]  // deprecated
                       ]]
                  end
@@ -3284,6 +3293,16 @@ context FmmlxDiagrams
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), self.diagrams.get(self.vector2Seq(requestID).at(0)).options])
     end
     
+	@Operation undo(requestID : Seq(Integer)) 
+      xmf.undo()
+	  ;"undo".println()
+    end
+	
+	@Operation redo(requestID : Seq(Integer)) 
+      xmf.redo()
+	  ;"redo".println()
+    end
+	
     @Operation evalString(requestID : Seq(Integer), text) 
       let
   	    m = FmmlxDiagrams::FmmlxManipulator()
