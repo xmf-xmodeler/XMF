@@ -292,7 +292,7 @@ context Root::FMMLx
   end
   
   @Operation allAncestors():Set(Class)
-    self.of() + self.allAncestors()
+    {self.of()} + self.of().allAncestors()
   end
   
 end

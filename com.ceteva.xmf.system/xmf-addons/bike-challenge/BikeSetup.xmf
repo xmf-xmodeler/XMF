@@ -12,26 +12,33 @@ context Root
     let
       m = FmmlxDiagrams::FmmlxManipulator()
     in
+      m.addMetaClass(p, "A",     FMMLx::Level(1), [], false);
+      m.addMetaClass(p, "B",     FMMLx::Level(1), [], false);
       m.addMetaClass(p, "Component",     FMMLx::Level(5), [], false);
       m.addMetaClass(p, "Configuration", FMMLx::Level(5), [], false);
       m.addMetaClass(p, "Part",          FMMLx::Level(5), [p::Component], false);
       m.addMetaClass(p, "CompPart",      FMMLx::Level(5), [p::Component], false);
       
-      m.addAttribute(p::Component, "foo", 4, Auxiliary::Complex, m.valueList2Multiplicity([0,3,true,false]));
-      m.addAttribute(p::Component, "weight", 1, Float, m.valueList2Multiplicity([0,1,true,false]));
+      m.addAttribute(p::Component, "foo", FMMLx::Level(4), Auxiliary::Complex, m.valueList2Multiplicity([0,3,true,false]), false, false);
+      m.addAttribute(p::Component, "weight", FMMLx::Level(1), Float, m.valueList2Multiplicity([0,1,true,false]), false, false);
       
-      m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", "belongsTo", 
+      m.addAssociation(p, p::Configuration, p::Part, "role1", "role2", "has", Associations::DefaultAssociation, 
           m.valueList2Multiplicity([0,-1,false,false]),
           m.valueList2Multiplicity([0, 2,true, false]),
-  	      4,4, true, true, false, false);
+  	      FMMLx::Level(4),FMMLx::Level(4), true, true, false, false);
+
+      m.addAssociation(p, p::A, p::B, "roleA", "roleB", "testAssoc", Associations::DefaultAssociation, 
+          m.valueList2Multiplicity([0,-1,false ,false]),
+          m.valueList2Multiplicity([0,-1,false, false]),
+  	      FMMLx::Level(0),FMMLx::Level(0), true, true, false, false);
   	      
-  	  m.addOperation2(p::Configuration, 4,  
+  	  m.addOperation2(p::Configuration, FMMLx::Level(4),  
       "  @Operation time[monitor=true]()
 "+    "    xmf.date()
 "+    "  end");
   	  
   	      
-  	  m.addOperation2(p::Configuration, 3,  
+  	  m.addOperation2(p::Configuration, FMMLx::Level(3),  
       "  @Operation totalRevenues[monitor=true]()
 "+    "    self.allInstances().size() * 3.141592654
 "+    "  end");
@@ -60,15 +67,17 @@ context Root
       m = FmmlxDiagrams::FmmlxManipulator()
     in
       m.addInstance(p, p::Configuration, "Bicycle", FMMLx::Level(4),[], false, []);
-      m.addAttribute(p::Bicycle, "allTerrain",     3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "race",           3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "city",           3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "salesPrice",     1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "weight",         1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "partSalesPrice", 0, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Bicycle, "serialNo",       0, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addInstance(p, p::A, "a0", FMMLx::Level(0),[], false, []);
+      m.addInstance(p, p::B, "b0", FMMLx::Level(0),[], false, []);
+      m.addAttribute(p::Bicycle, "allTerrain",     FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "race",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "city",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "salesPrice",     FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "weight",         FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "partSalesPrice", FMMLx::Level(0), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Bicycle, "serialNo",       FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
-  	  m.addOperation2(p::Configuration, 2, 
+  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
       "  @Operation highestPrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"N/A\"
@@ -83,7 +92,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, 2, 
+  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
       "  @Operation averagePrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"div/zero\"
@@ -99,7 +108,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, 0, 
+  	  m.addOperation2(p::Configuration, FMMLx::Level(0), 
       "  @Operation isBikeComplete[monitor=true]()
 "+    "    if self.frame = null then \"a Frame is missing\"
 "+    "    elseif self.fork = null then \"a Fork is missing\"
@@ -115,30 +124,30 @@ context Root
 	    p::Fork.foo := c
 	  end;
 	  
-      m.addAttribute(p::Fork, "color",        1, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Fork, "suspension",   2, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Fork, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Fork, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Fork, "mudMount",     0, Boolean, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Fork, "color",        FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Fork, "suspension",   FMMLx::Level(2), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Fork, "material",     FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Fork, "serialNo",     FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Fork, "mudMount",     FMMLx::Level(0), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
       
       m.addInstance(p, p::Part, "Frame", FMMLx::Level(4), [], false, []);
-      m.addAttribute(p::Frame, "allTerrain",   3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "race",         3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "color",        1, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "height",       1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "width",        1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Frame, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Frame, "allTerrain",   FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "race",         FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "color",        FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "height",       FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "width",        FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "material",     FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Frame, "serialNo",     FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
       
       m.addInstance(p, p::Part, "Wheel", FMMLx::Level(4), [], false, []);
-      m.addAttribute(p::Wheel, "safetyRefl",   3, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Wheel, "size",         1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Wheel, "material",     1, String, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Wheel, "width",        1, Float, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Wheel, "tubeless",     2, Boolean, m.valueList2Multiplicity([1,1,true,false]));
-      m.addAttribute(p::Wheel, "serialNo",     0, String, m.valueList2Multiplicity([1,1,true,false]));
+      m.addAttribute(p::Wheel, "safetyRefl",   FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Wheel, "size",         FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Wheel, "material",     FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Wheel, "width",        FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Wheel, "tubeless",     FMMLx::Level(2), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
+      m.addAttribute(p::Wheel, "serialNo",     FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
       null
     end    

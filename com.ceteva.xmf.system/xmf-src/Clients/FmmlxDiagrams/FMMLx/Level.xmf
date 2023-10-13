@@ -74,9 +74,22 @@ context Root::FMMLx
     end
     
     @Operation matchesInstantiationLevel(level:Integer):Boolean
-      self.minLevel <> null andthen 
-      self.minLevel = self.maxLevel andthen 
-      self.minLevel = level
+      if 
+        level.isKindOf(Integer) 
+      then 
+        self.minLevel <> null andthen 
+        self.minLevel = self.maxLevel andthen 
+        self.minLevel = level
+      elseif 
+        level.isKindOf(Level)
+      then
+        self.minLevel <> null andthen 
+        self.minLevel = self.maxLevel andthen 
+        self.minLevel = level.maxLevel andthen
+        level.minLevel = level.maxLevel
+      else
+        throw Exception("Level is of wrong type")
+      end 
     end
     
     @Operation canBeInstantiatatedTo(candidate:Level):Boolean
@@ -107,5 +120,5 @@ context Root::FMMLx
         self.minLevel + "-" + self.maxLevel
       end
     end
-
+    
   end

@@ -1,0 +1,160 @@
+parserImport XOCL;
+import Associations;
+
+context Associations
+
+  @Class AbstractAssociation extends NamedElement
+  
+    @Attribute source : End end
+    @Attribute target : End end
+    @Attribute assocName : End end
+    
+    /*
+    @Attribute unidirectional : Boolean (?,!) end
+    @Attribute symmetric : Boolean (?,!) end // For use in FMMLx only for now
+    @Attribute transitive : Boolean (?,!) end // For use in FMMLx only for now
+    
+    @Attribute showLabel : Boolean = true end
+    @Attribute showInverseLabel : Boolean end
+    @Attribute showVarName : Boolean end
+    @Attribute showInverseVarName : Boolean end*/
+    
+    @Constructor(name,source,target) ! 
+    end
+     
+    @Operation add(element)
+      if element.isKindOf(End)
+      then 
+        self.addEnd(element);
+        super(element);
+        
+        // The owner of an end should be the class it is attached to.
+        // The end is un-owned until it is added to the attached class...
+        
+        element.setOwner(null);
+        self
+      else super(element)
+      end
+    end
+    
+    @Operation addEnd(e)
+      e.setAssociation(self)
+    end
+    
+    /*@Operation init()
+      if owner <> null
+      then
+        if end1.name.toString() = "end1" or end1.name.toString() = "end2" then
+          end1.name := end1.type.name.lowerCaseInitialLetter()
+        end;
+        if end2.name.toString() = "end1" or end2.name.toString() = "end2" then
+          end2.name := end2.type.name.lowerCaseInitialLetter()
+        end;
+        end1.setMult(end1.mult);
+        end2.setMult(end2.mult);
+        self.unidirectional := false;
+        self.symmetric := false;
+        self.transitive := false;
+        super()
+      else super()
+      end
+    end*/
+    
+    /*@Operation remove()
+    
+      // Called when the association is removed from its container.
+      // The ends are removed from the classes they are attached to...
+      
+      end1.remove();
+      end2.remove();
+      self
+    end
+    
+    @Operation setEnd1(e)
+      self.end1 := e;
+      self.add(e)
+    end
+    
+    @Operation setEnd2(e)
+      self.end2 := e;
+      self.add(e)
+    end */
+    
+    
+    @Operation checkMultiplicities()
+      let issues = {} in
+        if 
+          self.of().sourceMult = null 
+        then
+          issues := issues + {"No multiplicity rules for source supplied."}
+        elseif
+          not self.source.mult.isKindOf(Multiplicity::CollectionMult)
+        then 
+          issues := issues + {"Source multiplicity must be of type Multiplicity::CollectionMult."}
+        else
+          if self.source.lowerBound < self.of().sourceMult.at(0) then 
+            issues := issues + {"Source lower bound too small"} end;
+          if self.of().sourceMult.at(1) <> null andthen self.source.lowerBound > self.of().sourceMult.at(1) then 
+            issues := issues + {"Source lower bound too large"} end;
+          if self.source.hasUpperBound then
+            if 
+              self.of().sourceMult.at(2) = null 
+            then 
+              issues := issues + {"Source must not have an upper bound"} 
+            else
+              if self.of().sourceMult.at(2) < self.source.upperBound then 
+                issues := issues + {"Source upper bound too small"} end
+            end
+          end;
+          if self.of().sourceMult.at(3) <> null then
+            if 
+              self.source.hasUpperBound
+            then
+              if self.source.lowerBound > self.of().sourceMult.at(3) then 
+                issues := issues + {"Source upper bound too large"} end
+            else
+              issues := issues + {"Source must have an upper bound"} 
+            end
+          end
+        end;
+        
+        if 
+          self.of().targetMult = null 
+        then
+          issues := issues + {"No multiplicity rules for target supplied."}
+        elseif
+          not self.target.mult.isKindOf(Multiplicity::CollectionMult)
+        then 
+          issues := issues + {"Target multiplicity must be of type Multiplicity::CollectionMult."}
+        else
+          if self.target.lowerBound < self.of().targetMult.at(0) then 
+            issues := issues + {"Target lower bound too small"} end;
+          if self.of().targetMult.at(1) <> null andthen self.target.lowerBound > self.of().targetMult.at(1) then 
+            issues := issues + {"Target lower bound too large"} end;
+          if self.target.hasUpperBound then
+            if 
+              self.of().targetMult.at(2) = null 
+            then 
+              issues := issues + {"Target must not have an upper bound"} 
+            else
+              if self.of().targetMult.at(2) < self.target.upperBound then 
+                issues := issues + {"Target upper bound too small"} end
+            end
+          end;
+          if self.of().targetMult.at(3) <> null then
+            if 
+              self.target.hasUpperBound
+            then
+              if self.target.lowerBound > self.of().targetMult.at(3) then 
+                issues := issues + {"Target upper bound too large"} end
+            else
+              issues := issues + {"Target must have an upper bound"} 
+            end
+          end
+        end;
+        
+        issues
+      end
+    end
+    
+  end

@@ -22,29 +22,29 @@ import FmmlxDiagrams;
         if type = null then problems := problems + [("null is not a valid type")] end;
         if not name.isValidName() then problems := problems + [("Identifier " + name + " not valid.")] end;
         @For attribute in class.allAttributes() do 
-          if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel = level)
+          if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel.minLevel = level.minLevel)
             then problems := problems + [("Identifier " + name + " already in use in " + class.name + " (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
         @For operation in class.allOperations() do
-          if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
+          if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
             then problems := problems + [("Identifier " + getterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end;
-          if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
+          if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
             then problems := problems + [("Identifier " + setterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end
         end;
         @For child in class.allMetaInstances() do
           @For attribute in child.of().allAttributes() do 
-            if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel = level)
+            if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
             end
           end;
           @For operation in child.of().allOperations() do
-            if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel = level)
+            if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + getterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end;
-            if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel = level)
+            if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + setterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end
           end
@@ -114,7 +114,7 @@ import FmmlxDiagrams;
     end
     
     context FmmlxManipulator   
-    @Operation addAttribute(class, name, instLevel, type, mult) 
+    @Operation addAttribute(class, name, instLevel, type, mult, isIncomplete, isOptional) 
       // for now assume that checkAddAttribute did not return any trouble
       let
         a = Attribute(name);
@@ -124,16 +124,18 @@ import FmmlxDiagrams;
         getterName = "get"+camelCaseName;
         setterName = "set"+camelCaseName
       in 
-        a.isIntrinsic := (instLevel <> -1); // true;
+        a.isIntrinsic := instLevel <> null; 
         a.type := type;
         a.instLevel := instLevel;
-        //a.setMult(mult);
+        a.setMult(mult);
         a.setProperty("mult",mult);
+        a.isIncomplete := isIncomplete;
+        a.isOptional := isOptional;
         
         class.addAttribute(a);
         
         @For instance in allInst do
-          if a.isIntrinsic andthen instance.level.minLevel = instLevel then
+          if a.isIntrinsic andthen instance.level.minLevel = instLevel.minLevel then
             //if a.init <> null
             //then
             //  Kernel_addAtt(instance,a.name,a.init.invoke(obj,Seq{}))
@@ -326,6 +328,7 @@ import FmmlxDiagrams;
        
   context FmmlxManipulator
     @Operation addGettersAndSetters(class, name, instLevel, type)
+    //("addGettersAndSetters on Level " + instLevel.toString()).println();
       let
         camelCaseName = name.subString(0,1).toUpper() + name.subString(1,name.size())
       then

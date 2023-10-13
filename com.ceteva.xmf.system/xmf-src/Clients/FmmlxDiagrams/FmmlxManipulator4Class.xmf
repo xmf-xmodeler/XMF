@@ -63,7 +63,7 @@ import FmmlxDiagrams;
          // Then we loop through the Attributes
         @While not A->isEmpty do
           let a = A->sel // pick any one Attribute
-          in if a.isIntrinsic andthen a.instLevel < myLevel.minLevel
+          in if a.isIntrinsic andthen a.instLevel.minLevel < myLevel.minLevel
              then // 
                null//intrinsicA := intrinsicA.including(a)
              else // otherwise it becomes a slot and is initialised

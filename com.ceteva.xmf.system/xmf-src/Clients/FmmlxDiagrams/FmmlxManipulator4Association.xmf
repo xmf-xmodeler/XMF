@@ -11,7 +11,7 @@ import FmmlxDiagrams;
      accessSourceFromTargetName : String, // ref1
      accessTargetFromSourceName : String, // ref2
      fwName : String,
-     reverseName : String,
+     assocType : AssociationType,
      multTargetToSource : XCore::Element,
      multSourceToTarget : XCore::Element,
      instLevelSource : XCore::Element,
@@ -58,7 +58,17 @@ import FmmlxDiagrams;
           targetFromSourceEnd.instLevel := instLevelSource;
           sourceFromTargetEnd.visible := sourceVisibleFromTarget;
           targetFromSourceEnd.visible := targetVisibleFromSource;
-          let 
+          
+          let
+            a = assocType(fwName,sourceFromTargetEnd,targetFromSourceEnd)
+          in
+            target.addAttribute(sourceFromTargetEnd);
+            source.addAttribute(targetFromSourceEnd);
+            sourceFromTargetEnd.association := a;
+            targetFromSourceEnd.association := a
+          end;
+          
+          /*let 
             a = Associations::Association(fwName,sourceFromTargetEnd,targetFromSourceEnd)
           in 
             p.associations := p.associations->including(a);
@@ -72,10 +82,10 @@ import FmmlxDiagrams;
             
             if targetVisibleFromSource then 
               self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevelSource, target, a, true, multSourceToTarget)
-            end;
+            end;*/
             
             []
-          end
+          //end
         end
       end
     end

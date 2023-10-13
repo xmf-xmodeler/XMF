@@ -68,6 +68,9 @@ context Root::FMMLx
        This operation tries to find out where the operation is defined.
     */
     @Operation sendInstance(element,message,args):XCore::Element
+      /* First some standard operations are filtered out
+         to avoid this operation to invoke iself over and over again.
+         It would eventually succeed, but it grows exponentially. */ 
       if "sendInstance".equals(message.toString()) then 
         if self.cachedOpSendInstance = null then self.cachedOpSendInstance := FMMLx::MetaClass.getOperation("sendInstance") end;
         self.cachedOpSendInstance.invoke(element,args)
@@ -111,7 +114,7 @@ context Root::FMMLx
                level forbids us to do so.
                We'll pretend we didn't find it if the intrinsic levels is too low */
             if 
-              (op.isIntrinsic andthen op.instLevel < (self.level.minLevel-1)) // wrong level
+              (op.isIntrinsic andthen op.instLevel.minLevel < (self.level.minLevel-1)) // wrong level
             then
               //("The level " + (self.level-1) + " object " + element 
               //+ " must not invoke the level " + op.instLevel + " operation " + name + ".").println();
@@ -144,7 +147,7 @@ context Root::FMMLx
             andthen
               op.isIntrinsic
             andthen
-              op.instLevel = (self.level.minLevel-1)
+              op.instLevel.minLevel = (self.level.minLevel-1)
             then found := true
             else index := index + 1
             end
@@ -170,7 +173,7 @@ context Root::FMMLx
             andthen
               op.isIntrinsic
             andthen
-              op.instLevel =  self.level.minLevel // !! the level of the class (not the instance must match)
+              op.instLevel.minLevel = self.level.minLevel // !! the level of the class (not the instance must match)
             then foundDelToClass := true
             else delToClassIndex := delToClassIndex + 1
             end // if
@@ -245,7 +248,7 @@ context Root::FMMLx
          end;
          // remove all intrinsic, where level is too high
          @For a in allA do
-           if (not a.isIntrinsic) or a.instLevel < self.level.minLevel then
+           if (not a.isIntrinsic) orelse a.instLevel.minLevel < self.level.minLevel then
              result := result->union({a})
            end
          end;
@@ -286,7 +289,7 @@ context Root::FMMLx
           toBeChecked := toBeChecked - [currentClass];
           //("Checking " + currentClass.name).println();
           @For o in currentClass.operations do
-            if o.isIntrinsic andthen (o.instLevel <= self.level.minLevel - 1)        // intrinsic and right level
+            if o.isIntrinsic andthen (o.instLevel.minLevel <= self.level.minLevel - 1)        // intrinsic and right level
                                                                             or
               ((not o.isIntrinsic) andthen (currentClass.hasSlot("level") andthen currentClass.level = self.level)) // non-intrinsic and one above the instance
             then
