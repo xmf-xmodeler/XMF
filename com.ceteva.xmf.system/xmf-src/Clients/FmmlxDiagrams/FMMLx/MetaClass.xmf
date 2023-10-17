@@ -263,7 +263,7 @@ context Root::FMMLx
       in
         @For att in allAtt do
           if att.isIntrinsic then 
-            if att.instLevel = attLevel.minLevel then 
+            if att.instLevel.minLevel = attLevel.minLevel then 
               result := result.union({att})
             end
           end
@@ -376,7 +376,7 @@ context Root::FMMLx
       end;
       // remove all intrinsic, where level is too high
       @For c in allC do
-         if (not c.body.isIntrinsic) or c.body.instLevel < self.level.minLevel then
+         if (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel < self.level.minLevel then
            result := result->union({c})
          end
        end;
@@ -390,7 +390,7 @@ context Root::FMMLx
       reports = [];
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
-      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level.minLevel) do
+      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel) do
         reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})

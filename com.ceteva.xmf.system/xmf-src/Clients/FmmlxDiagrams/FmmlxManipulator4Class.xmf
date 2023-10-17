@@ -269,7 +269,7 @@ end; // only if class
   
   context FmmlxManipulator  
     @Operation addParent(heir, parent)
-      if parent.level <> heir.level then ["Only classes from the same level may inherit from each other."]
+      if parent.level.minLevel <> heir.level.minLevel orelse parent.level.maxLevel <> heir.level.maxLevel then ["Only classes from the same level may inherit from each other."]
       // Check for circular inheritance
       elseif 
         parent.isDescendantOf(heir) then [parent.name + " is already descendant of " + heir.name + ". Circular inheritance not allowed."] 

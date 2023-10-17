@@ -54,6 +54,8 @@ import FmmlxDiagrams;
           sourceFromTargetEnd = Associations::End(accessSourceFromTargetName,source,multTargetToSource);
           targetFromSourceEnd = Associations::End(accessTargetFromSourceName,target,multSourceToTarget)
         in 
+          sourceFromTargetEnd.isIntrinsic := true;
+          targetFromSourceEnd.isIntrinsic := true;
           sourceFromTargetEnd.instLevel := instLevelTarget;
           targetFromSourceEnd.instLevel := instLevelSource;
           sourceFromTargetEnd.visible := sourceVisibleFromTarget;
@@ -67,7 +69,9 @@ import FmmlxDiagrams;
             sourceFromTargetEnd.association := a;
             targetFromSourceEnd.association := a
           end;
-          
+          ("assoc: " + fwName).println();
+          ("sourceLevel: " + sourceFromTargetEnd.instLevel.toString()).println();
+          ("targetLevel: " + targetFromSourceEnd.instLevel.toString()).println();
           /*let 
             a = Associations::Association(fwName,sourceFromTargetEnd,targetFromSourceEnd)
           in 
@@ -89,6 +93,8 @@ import FmmlxDiagrams;
         end
       end
     end
+    
+    
   context FmmlxManipulator
     @Operation removeAssociation(association)
       let

@@ -96,7 +96,7 @@ context FmmlxManipulator
                 a.target.visible
               then
                 if
-                  a.target.mult.hasUpperBound orelse a.target.mult.upperBound > 1
+                  (not a.target.mult.hasUpperBound) orelse a.target.mult.upperBound > 1
                 then
                   "target is Set(...)".println();
                   if objectS.get(a.target.name) = null then objectS.set(a.target.name, {}) end; // make empty list if initialized with null
@@ -112,7 +112,7 @@ context FmmlxManipulator
                 a.source.visible
               then
                 if
-                  a.source.mult.hasUpperBound orelse a.source.mult.upperBound > 1
+                  (not a.source.mult.hasUpperBound) orelse a.source.mult.upperBound > 1
                 then
                   "source is Set(...)".println();
                   if objectT.get(a.source.name) = null then objectT.set(a.source.name, {}) end; // make empty list if initialized with null
@@ -176,7 +176,7 @@ context FmmlxManipulator
           then
             o2.set(a.source.name, null)
           else
-            o2.set(a.source.name, slotTargetValue - {o1})
+            o2.set(a.source.name, slotSourceValue - {o1})
           end
         end
       end;

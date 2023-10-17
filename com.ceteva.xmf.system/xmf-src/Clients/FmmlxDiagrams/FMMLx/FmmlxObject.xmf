@@ -170,7 +170,7 @@ context Root::FMMLx
       if self = ancestor then false else
         let tmp = self
         in
-          @While tmp.level < ancestor.level and tmp <> FMMLx::MetaClass do
+          @While (ancestor.level.maxLevel = null orelse tmp.level.minLevel < ancestor.level.maxLevel) and tmp <> FMMLx::MetaClass do
             tmp := tmp.of()
           end;
           tmp = ancestor orelse tmp.inheritsFrom(ancestor)

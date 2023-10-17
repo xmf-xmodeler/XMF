@@ -12,8 +12,8 @@ context Root
     let
       m = FmmlxDiagrams::FmmlxManipulator()
     in
-      m.addMetaClass(p, "A",     FMMLx::Level(1), [], false);
-      m.addMetaClass(p, "B",     FMMLx::Level(1), [], false);
+      m.addMetaClass(p, "A",     FMMLx::Level(2), [], false);
+      m.addMetaClass(p, "B",     FMMLx::Level(2), [], false);
       m.addMetaClass(p, "Component",     FMMLx::Level(5), [], false);
       m.addMetaClass(p, "Configuration", FMMLx::Level(5), [], false);
       m.addMetaClass(p, "Part",          FMMLx::Level(5), [p::Component], false);
@@ -30,7 +30,7 @@ context Root
       m.addAssociation(p, p::A, p::B, "roleA", "roleB", "testAssoc", Associations::DefaultAssociation, 
           m.valueList2Multiplicity([0,-1,false ,false]),
           m.valueList2Multiplicity([0,-1,false, false]),
-  	      FMMLx::Level(0),FMMLx::Level(0), true, true, false, false);
+  	      FMMLx::Level(1),FMMLx::Level(0), true, true, false, false);
   	      
   	  m.addOperation2(p::Configuration, FMMLx::Level(4),  
       "  @Operation time[monitor=true]()
@@ -67,8 +67,10 @@ context Root
       m = FmmlxDiagrams::FmmlxManipulator()
     in
       m.addInstance(p, p::Configuration, "Bicycle", FMMLx::Level(4),[], false, []);
-      m.addInstance(p, p::A, "a0", FMMLx::Level(0),[], false, []);
-      m.addInstance(p, p::B, "b0", FMMLx::Level(0),[], false, []);
+      m.addInstance(p, p::A, "AA", FMMLx::Level(1),[], false, []);
+      m.addInstance(p, p::B, "BB", FMMLx::Level(1),[], false, []);
+      m.addInstance(p, p::AA, "a0", FMMLx::Level(0),[], false, []);
+      m.addInstance(p, p::BB, "b0", FMMLx::Level(0),[], false, []);
       m.addAttribute(p::Bicycle, "allTerrain",     FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "race",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "city",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
