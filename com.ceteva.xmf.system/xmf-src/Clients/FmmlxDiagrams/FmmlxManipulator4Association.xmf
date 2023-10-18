@@ -72,6 +72,29 @@ import FmmlxDiagrams;
           ("assoc: " + fwName).println();
           ("sourceLevel: " + sourceFromTargetEnd.instLevel.toString()).println();
           ("targetLevel: " + targetFromSourceEnd.instLevel.toString()).println();
+          
+          /*
+          Now the slots must be set in the appropriate classes.
+          To do so, the appropriate objects are selected, 
+          and then the slots are added
+          */
+          
+          @For obj in p.classes->select(o |
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            o.isDescendantOf(source) andthen 
+            o.level.minLevel = targetFromSourceEnd.instLevel.minLevel) do
+            (obj.name + "(" + obj.level.toString() + ") needs a slot ("+targetFromSourceEnd.name+") for new association").println();
+            Kernel_addAtt(obj,targetFromSourceEnd.name,null)
+          end;
+          
+          if sourceVisibleFromTarget then @For obj in p.classes->select(o | 
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            o.isDescendantOf(target) andthen 
+            o.level.minLevel = sourceFromTargetEnd.instLevel.minLevel) do
+            (obj.name + "(" + obj.level.toString() + ") needs a slot ("+sourceFromTargetEnd.name+") for new bidirectional association").println();
+            Kernel_addAtt(obj,sourceFromTargetEnd.name,null)
+          end end;
+          
           /*let 
             a = Associations::Association(fwName,sourceFromTargetEnd,targetFromSourceEnd)
           in 

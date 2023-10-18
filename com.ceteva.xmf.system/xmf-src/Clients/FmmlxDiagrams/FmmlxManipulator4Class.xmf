@@ -5,8 +5,8 @@ import FmmlxDiagrams;
 
   context FmmlxManipulator
     @Operation addMetaClass(package, name, level, parents, abstract)
-      let collectiveParents = parents->select(c | c.isCollective) in 
-        if collectiveParents.size() > 0 then self.error(collectiveParents.name + " cannot be superclasses as they are collective classes.") end end;
+      let singletonParents = parents->select(c | c.isSingleton) in 
+        if singletonParents.size() > 0 then self.error(singletonParents.name + " cannot be superclasses as they are singletons.") end end;
       let 
         newClass = FMMLx::MetaClass(name, level)
       in
@@ -43,6 +43,7 @@ import FmmlxDiagrams;
       slotValueList: Seq(Seq(String))):Object
       
       //("Trying to instantiate " + ofClass.name + " on level " + ofClass.level.toString() + " to level " + myLevel.toString()).println();
+      if ofClass.isSingleton andthen ofClass.allInstances().size > 0 then self.error("Class " + ofClass.name + " is a Singleton") end;
 
       // The following seems to be trivial, but better check once more
       if not ofClass.isKindOf(FMMLx::MetaClass) then self.error("Class " + ofClass.name + " is not an Fmmlx Class") end;
@@ -274,7 +275,7 @@ end; // only if class
       elseif 
         parent.isDescendantOf(heir) then [parent.name + " is already descendant of " + heir.name + ". Circular inheritance not allowed."] 
       elseif
-        parent.isCollective then ["Collective class " + parent.name + " cannot be superclass."] 
+        parent.isSingleton then ["Singleton class " + parent.name + " cannot be superclass."] 
       else
         let 
           problems = []
@@ -383,7 +384,7 @@ end; // only if class
     @Operation changeClassAbstract(class, abstractNew)
       if abstractNew 
       then 
-        if class.level > 0 
+        if class.level.minLevel > 0 
         then 
           if class.allInstances()->select(i | i.of() = class).size() = 0 
           then class.isAbstract := true; []
@@ -395,17 +396,22 @@ end; // only if class
     end
     
   context FmmlxManipulator  
-    @Operation changeClassCollective(class, collectiveNew)
-      if collectiveNew 
+    @Operation changeClassSingleton(class, singletonNew)
+      if singletonNew 
       then 
-        if class.level > 0 
+        if class.level.minLevel > 0 
         then 
-          if class.getAllDescendants.size() = 0
-          then class.isCollective := true; []
-          else ["Classes with decendants cannot be made collective"] end
-        else ["Objects on level 0 cannot be made collective"] end
+          if class.allInstances()->select(i | i.of() = class).size() <= 1 
+          then 
+            if // TODO replace with something more efficient
+            // there is no class, which inherits from this class
+            FMMLx::MetaClass.allInstances()->forAll(subClass | not (subClass.parents.contains(class)))
+            then class.isSingleton := true; []
+            else ["Classes with subclasses cannot be made Singletons"] end
+          else ["Classes with more than one instance cannot be made Singletons"] end
+        else ["Objects on level 0 cannot be made Singletons"] end
       else
-        class.isCollective := false; []
+        class.isSingleton := false; []
       end
     end
     

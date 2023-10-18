@@ -165,12 +165,11 @@ context Root::FMMLx
       end // test
     end // operation
 
-    // MOVED
     @Operation isDescendantOf(ancestor : MetaClass): XCore::Boolean
       if self = ancestor then false else
         let tmp = self
         in
-          @While (ancestor.level.maxLevel = null orelse tmp.level.minLevel < ancestor.level.maxLevel) and tmp <> FMMLx::MetaClass do
+          @While tmp <> FMMLx::MetaClass andthen (ancestor.level.maxLevel = null orelse tmp.level.minLevel < ancestor.level.maxLevel) do
             tmp := tmp.of()
           end;
           tmp = ancestor orelse tmp.inheritsFrom(ancestor)

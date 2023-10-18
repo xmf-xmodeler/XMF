@@ -231,7 +231,7 @@ context FmmlxDiagrams
     	      mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(c.path());
     	      level_ = if c.isKindOf(FMMLx::FmmlxObject) then c.level else -1 end;
     	      isAbstract = if c.isKindOf(Class) then c.isAbstract else false end;
-    	      isCollective = if c.isKindOf(FMMLx::MetaClass) then c.isCollective else false end;
+    	      isSingleton = if c.isKindOf(FMMLx::MetaClass) then c.isSingleton else false end;
     	      parents = if c.isKindOf(Class) then self.getParentsPathsList(requestID, c) else [] end;
     	      type = if c.isKindOf(FMMLx::FmmlxObject) then "FMMLX" else if c.isKindOf(Enum) then "ENUM" else if c.isKindOf(Class) then "CLASS" else "UNDEFINED" end end end
     	    then 
@@ -246,7 +246,7 @@ context FmmlxDiagrams
     	      	if level.maxLevel = null 
     	      	  then -1 
     	      	  else level.maxLevel end,     // 3: maxLevel
-    	      	isCollective,                  // 4: UNUSED
+    	      	isSingleton,                   // 4: UNUSED
                 isAbstract,                    // 5
                 mappingInfo.lastKnownDiagramX, // 6
                 mappingInfo.lastKnownDiagramY, // 7
@@ -395,13 +395,13 @@ context FmmlxDiagrams
         end
     end
     
-    @Operation getAllAssociationInstances(requestID : Seq(Integer))
+    @Operation getAllLinks(requestID : Seq(Integer))
       let
         result = [];
         linkList = {}
       in
         @For object in self.getPackage(requestID).classes do
-          ("Checking " + object.name).println();
+          //("Checking " + object.name).println();
               /* to avoid duplicates, only those slots which are pointing from 
               source to target are considered. That mandates that an association 
               is either bidirectional or the target is the navigable end. 
@@ -411,7 +411,7 @@ context FmmlxDiagrams
               ->select(s | s.type.of() = Associations::End)
               ->select(s | s.type.association.target = s.type)              
           do
-            ("link: "+ link).println();
+            //("link: "+ link).println();
             if 
               link.value = null or link.value = {} 
             then 
@@ -420,10 +420,10 @@ context FmmlxDiagrams
             elseif
               link.value.isKindOf(Set(Element))
             then 
-              "found multi value".println();
+              //"found multi value".println();
               linkList := link.value
             else
-              "found single value".println();
+              //"found single value".println();
               linkList := {link.value}
             end;
             @For item in linkList do
@@ -994,7 +994,7 @@ context FmmlxDiagrams
 
     ////////////////// Class Manipulations ///////////////////
 
-    @Operation addMetaClass(requestID : Seq(Integer), name, minLevel, maxLevel, parents, abstract, x, y, hidden)
+    @Operation addMetaClass(requestID : Seq(Integer), name, minLevel, maxLevel, parents, abstract, singleton, x, y, hidden)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         parentsList = self.getParentsList(requestID, parents);
@@ -1068,6 +1068,7 @@ context FmmlxDiagrams
             maxLevel,
             parents,
             abstract,
+            singleton,
             x, y,
             hidden,
             slotValueList: Seq(Seq(String)))
@@ -1084,9 +1085,9 @@ context FmmlxDiagrams
               if p.of() <> ofClass then allParentsLegal := false end
             end;
             if 
-              ofClass.isAbstract orelse ofClass.isCollective
+              ofClass.isAbstract
             then 
-              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Abstract/Collective class " + ofClass.name.toString() + " cannot be instantiated."]])
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Abstract class " + ofClass.name.toString() + " cannot be instantiated."]])
             elseif 
               not Symbol(name).isValidName() 
             then 
@@ -1308,15 +1309,15 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation setClassCollective(requestID : Seq(Integer), className, isCollective)
+    @Operation setClassSingleton(requestID : Seq(Integer), className, isSingleton)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
       then
-        problems = if class <> null then m.changeClassCollective(class, isCollective) else ["Class not found"] end
+        problems = if class <> null then m.changeClassSingleton(class, isSingleton) else ["Class not found"] end
       in
         if problems.isEmpty() then
-          self.log := self.log + [["setClassCollective", ["package", class.owner.path()], ["class", class.path()] , ["collective",isCollective+""]]]
+          self.log := self.log + [["setClassSingleton", ["package", class.owner.path()], ["class", class.path()] , ["singleton",isSingleton+""]]]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -2891,7 +2892,8 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level.minLevel+""],
-                      ["abstract", class.isAbstract+""]]]
+                      ["abstract", class.isAbstract+""],
+                      ["singleton", class.isSingleton+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
                    log := log + 
                      [["addInstance", 
@@ -2900,7 +2902,8 @@ context FmmlxDiagrams
                       ["level", class.level.minLevel+""], 
                       ["name",class.name.toString()], 
                       ["parents",""], // deprecated
-                      ["abstract", class.isAbstract+""]]]
+                      ["abstract", class.isAbstract+""],
+                      ["singleton", class.isSingleton+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
                    log := log + 
                      [["addInstance", 

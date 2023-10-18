@@ -6,7 +6,7 @@ context Root::FMMLx
 
   @Class MetaClass metaclass MetaAdaptor extends MetaAdaptor, FmmlxObject
   
-    @Attribute isCollective:Boolean end
+    @Attribute isSingleton:Boolean end
 
     @Constructor(name, level)
       if self.of() <> FMMLx::MetaClass then
