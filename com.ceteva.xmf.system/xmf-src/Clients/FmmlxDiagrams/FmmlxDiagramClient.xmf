@@ -1012,7 +1012,7 @@ context FmmlxDiagrams
         problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
         if problems.isEmpty() then
           let 
-            newClass = m.addMetaClass(self.getPackage(requestID), name, FMMLx::Level(minLevel,maxLevel), parentsList, abstract)
+            newClass = m.addMetaClass(self.getPackage(requestID), name, FMMLx::Level(minLevel,maxLevel), parentsList, abstract, singleton)
           then
             mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newClass.path())
           in
@@ -1106,7 +1106,7 @@ context FmmlxDiagrams
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Level " + ofClass.level.toString() + " cannot be instantiated to level " + level.toString() + "."]])
             else
               let
-                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, slotValueList)
+                newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, singleton, slotValueList)
               then
                 mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(newInstance.path())
               in
@@ -1749,7 +1749,11 @@ context FmmlxDiagrams
       sourceVisibleFromTarget : Boolean,
       targetVisibleFromSource : Boolean,
 	  isSymmetric : Boolean,
-	  isTransitive : Boolean):XCore::Element
+	  isTransitive : Boolean,	  
+      sourceGetterName : String,
+      sourceSetterName : String,
+      targetGetterName : String,
+      targetSetterName : String):XCore::Element
 
   	  let
   	    m = FmmlxDiagrams::FmmlxManipulator();
@@ -1779,6 +1783,13 @@ context FmmlxDiagrams
   	        instLevelSource, instLevelTarget,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
+  	      if problems.isEmpty() then
+  	        "TODO: add getters and setters:".println();
+  	        if sourceGetterName <> -1 then ("Create Getter for Source: " + sourceGetterName + "()").println() end;
+  	        if sourceSetterName <> -1 then ("Create Setter for Source: " + sourceSetterName + "(val)").println() end;
+  	        if targetGetterName <> -1 then ("Create Getter for Target: " + targetGetterName + "()").println() end;
+  	        if targetSetterName <> -1 then ("Create Setter for Target: " + targetSetterName + "(val)").println() end
+  	      end;
           if problems.isEmpty() then self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
             ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,

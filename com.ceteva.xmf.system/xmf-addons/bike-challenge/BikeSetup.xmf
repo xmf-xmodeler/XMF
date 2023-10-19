@@ -12,12 +12,12 @@ context Root
     let
       m = FmmlxDiagrams::FmmlxManipulator()
     in
-      m.addMetaClass(p, "A",     FMMLx::Level(2), [], false);
-      m.addMetaClass(p, "B",     FMMLx::Level(2), [], false);
-      m.addMetaClass(p, "Component",     FMMLx::Level(5), [], false);
-      m.addMetaClass(p, "Configuration", FMMLx::Level(5), [], false);
-      m.addMetaClass(p, "Part",          FMMLx::Level(5), [p::Component], false);
-      m.addMetaClass(p, "CompPart",      FMMLx::Level(5), [p::Component], false);
+      m.addMetaClass(p, "A",     FMMLx::Level(2), [], false, false);
+      m.addMetaClass(p, "B",     FMMLx::Level(2), [], false, false);
+      m.addMetaClass(p, "Component",     FMMLx::Level(5), [], false, false);
+      m.addMetaClass(p, "Configuration", FMMLx::Level(5), [], false, false);
+      m.addMetaClass(p, "Part",          FMMLx::Level(5), [p::Component], false, false);
+      m.addMetaClass(p, "CompPart",      FMMLx::Level(5), [p::Component], false, false);
       
       m.addAttribute(p::Component, "foo", FMMLx::Level(4), Auxiliary::Complex, m.valueList2Multiplicity([0,3,true,false]), false, false);
       m.addAttribute(p::Component, "weight", FMMLx::Level(1), Float, m.valueList2Multiplicity([0,1,true,false]), false, false);
@@ -66,11 +66,11 @@ context Root
     let
       m = FmmlxDiagrams::FmmlxManipulator()
     in
-      m.addInstance(p, p::Configuration, "Bicycle", FMMLx::Level(4),[], false, []);
-      m.addInstance(p, p::A, "AA", FMMLx::Level(1),[], false, []);
-      m.addInstance(p, p::B, "BB", FMMLx::Level(1),[], false, []);
-      m.addInstance(p, p::AA, "a0", FMMLx::Level(0),[], false, []);
-      m.addInstance(p, p::BB, "b0", FMMLx::Level(0),[], false, []);
+      m.addInstance(p, p::Configuration, "Bicycle", FMMLx::Level(4),[], false, false, []);
+      m.addInstance(p, p::A, "AA", FMMLx::Level(1),[], false, false, []);
+      m.addInstance(p, p::B, "BB", FMMLx::Level(1),[], false, false, []);
+      m.addInstance(p, p::AA, "a0", FMMLx::Level(0),[], false, false, []);
+      m.addInstance(p, p::BB, "b0", FMMLx::Level(0),[], false, false, []);
       m.addAttribute(p::Bicycle, "allTerrain",     FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "race",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "city",           FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
@@ -119,7 +119,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-      m.addInstance(p, p::Part, "Fork", FMMLx::Level(4), [], false, []);
+      m.addInstance(p, p::Part, "Fork", FMMLx::Level(4), [], false, false, []);
 	  let c = Auxiliary::Complex() in
 	    c.real := 1; 
 	    c.imaginary := 0.5;
@@ -133,7 +133,7 @@ context Root
       m.addAttribute(p::Fork, "mudMount",     FMMLx::Level(0), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
       
-      m.addInstance(p, p::Part, "Frame", FMMLx::Level(4), [], false, []);
+      m.addInstance(p, p::Part, "Frame", FMMLx::Level(4), [], false, false, []);
       m.addAttribute(p::Frame, "allTerrain",   FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Frame, "race",         FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Frame, "color",        FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
@@ -143,7 +143,7 @@ context Root
       m.addAttribute(p::Frame, "serialNo",     FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
       
-      m.addInstance(p, p::Part, "Wheel", FMMLx::Level(4), [], false, []);
+      m.addInstance(p, p::Part, "Wheel", FMMLx::Level(4), [], false, false, []);
       m.addAttribute(p::Wheel, "safetyRefl",   FMMLx::Level(3), Boolean, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Wheel, "size",         FMMLx::Level(1), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Wheel, "material",     FMMLx::Level(1), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
@@ -162,53 +162,24 @@ context Root
     in
     
     // Level 3
-      m.addInstance(p, p::Bicycle, "RacingBike", FMMLx::Level(3), [], false, []);
-      m.addInstance(p, p::Fork, "RacingFork", FMMLx::Level(3), [], false, []);
-      m.addInstance(p, p::Frame, "RacingFrame", FMMLx::Level(3), [], false, []);
-      m.addInstance(p, p::Wheel, "RacingWheel", FMMLx::Level(3), [], false, []);
+      m.addInstance(p, p::Bicycle, "RacingBike", FMMLx::Level(3), [], false, false, []);
+      m.addInstance(p, p::Fork, "RacingFork", FMMLx::Level(3), [], false, false, []);
+      m.addInstance(p, p::Frame, "RacingFrame", FMMLx::Level(3), [], false, false, []);
+      m.addInstance(p, p::Wheel, "RacingWheel", FMMLx::Level(3), [], false, false, []);
     
-      m.addInstance(p, p::RacingBike, "ProRacer", FMMLx::Level(2), [], false, []);
-      m.addInstance(p, p::RacingFork, "LightFork", FMMLx::Level(2), [], false, []);
-      m.addInstance(p, p::RacingFrame, "ProRaceFrame", FMMLx::Level(2), [], false, []);
-      m.addInstance(p, p::RacingWheel, "ProRaceWheel", FMMLx::Level(2), [], false, []);
+      m.addInstance(p, p::RacingBike, "ProRacer", FMMLx::Level(2), [], false, false, []);
+      m.addInstance(p, p::RacingFork, "LightFork", FMMLx::Level(2), [], false, false, []);
+      m.addInstance(p, p::RacingFrame, "ProRaceFrame", FMMLx::Level(2), [], false, false, []);
+      m.addInstance(p, p::RacingWheel, "ProRaceWheel", FMMLx::Level(2), [], false, false, []);
       
-      m.addInstance(p, p::ProRacer, "ChallengerA2XL", FMMLx::Level(1), [], false, []);
-      m.addInstance(p, p::LightFork, "Superfork800", FMMLx::Level(1), [], false, []);
-      m.addInstance(p, p::ProRaceFrame, "RocketA1XL", FMMLx::Level(1), [], false, []);
-      m.addInstance(p, p::ProRaceWheel, "XForceDJ", FMMLx::Level(1), [], false, []);
+      m.addInstance(p, p::ProRacer, "ChallengerA2XL", FMMLx::Level(1), [], false, false, []);
+      m.addInstance(p, p::LightFork, "Superfork800", FMMLx::Level(1), [], false, false, []);
+      m.addInstance(p, p::ProRaceFrame, "RocketA1XL", FMMLx::Level(1), [], false, false, []);
+      m.addInstance(p, p::ProRaceWheel, "XForceDJ", FMMLx::Level(1), [], false, false, []);
       null
     end
   end
   
-/*  @Operation setup2(p:Package)
-  
-    // Level 2
-    self.addInstance(p, p::RacingBike, -2, "ProRacer");
-    self.addInstance(p, p::RacingFork, -2, "LightFork");
-    self.addInstance(p, p::RacingFrame, -2, "ProRaceFrame");
-    self.addInstance(p, p::RacingWheel, -2, "ProRaceWheel")
-    
-  end
-  
-  @Operation setup1(p:Package)
-  
-    // Level 1
-    self.addInstance(p, p::ProRacer, -2, "ChallengerA2XL");
-    self.addInstance(p, p::LightFork, -2, "Superfork800");
-    self.addInstance(p, p::ProRaceFrame, -2, "RocketA1XL");
-    self.addInstance(p, p::ProRaceWheel, -2, "XForceDJ")
-
-  end
-  
-  @Operation setup0(p:Package, index:String)
-  
-    // Level 0
-    self.addInstance(p, p::ChallengerA2XL, -2, "myBike_"+index);
-    self.addInstance(p, p::Superfork800, -2, "myFork_"+index);
-    self.addInstance(p, p::RocketA1XL, -2, "myFrame_"+index);
-    self.addInstance(p, p::XForceDJ, -2, "myWheel_"+index)
-
-  end */
   
   @Operation pi()
 	3.141592654

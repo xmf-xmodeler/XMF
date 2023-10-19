@@ -4,7 +4,7 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation addMetaClass(package, name, level, parents, abstract)
+    @Operation addMetaClass(package, name, level, parents, abstract, singleton)
       let singletonParents = parents->select(c | c.isSingleton) in 
         if singletonParents.size() > 0 then self.error(singletonParents.name + " cannot be superclasses as they are singletons.") end end;
       let 
@@ -12,6 +12,7 @@ import FmmlxDiagrams;
       in
         package.add(newClass);
         newClass.isAbstract := abstract;
+        newClass.isSingleton := singleton; 
         if parents.size() > 0 then newClass.parents := parents.asSet() end;
 
         @For parent in newClass.parents do
@@ -39,11 +40,14 @@ import FmmlxDiagrams;
       name, 
       myLevel,
       parents, 
-      abstract : Boolean, 
+      abstract : Boolean,
+      singleton : Boolean,
       slotValueList: Seq(Seq(String))):Object
       
       //("Trying to instantiate " + ofClass.name + " on level " + ofClass.level.toString() + " to level " + myLevel.toString()).println();
-      if ofClass.isSingleton andthen ofClass.allInstances().size > 0 then self.error("Class " + ofClass.name + " is a Singleton") end;
+      if ofClass.isSingleton andthen ofClass.allInstances().size() > 0 then self.error("Class " + ofClass.name + " is a Singleton") end;
+      let singletonParents = parents->select(c | c.isSingleton) in 
+        if singletonParents.size() > 0 then self.error(singletonParents.name + " cannot be superclasses as they are singletons.") end end;
 
       // The following seems to be trivial, but better check once more
       if not ofClass.isKindOf(FMMLx::MetaClass) then self.error("Class " + ofClass.name + " is not an Fmmlx Class") end;
@@ -111,11 +115,13 @@ import FmmlxDiagrams;
         
         if obj.level.minLevel > 1 then // it's a metaclass, therefore its instances are classes
           package.add(obj);
+          obj.isSingleton := singleton; 
           obj.isAbstract := abstract; 
           obj.addParent(FMMLx::MetaClass)
         end;
         if obj.level.minLevel = 1 then // it's a simple class, therefore its instances are not classes
           package.add(obj);
+          obj.isSingleton := singleton; 
           obj.isAbstract := abstract;
           obj.addParent(FMMLx::FmmlxObject)
         end; 
