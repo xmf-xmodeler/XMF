@@ -289,6 +289,35 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
+    @Operation generateAssociationGetter(
+        class      : FMMLx::MetaClass, 
+        returnType : FMMLx::MetaClass, 
+        instLevel  : FMMLx::Level,
+        slotName   : String,
+        opName     : String)
+       
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+opName+"[getterKey=\""+slotName+"\"]():"+returnType.path()+"
+"+      "    self."+slotName+"           
+"+      "  end") 
+    end
+    
+  context FmmlxManipulator
+    @Operation generateAssociationSetter(
+        class      : FMMLx::MetaClass, 
+        returnType : FMMLx::MetaClass, 
+        instLevel  : FMMLx::Level,
+        slotName   : String,
+        opName     : String)
+       
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+opName+"[setterKey=\""+slotName+"\"](val"+returnType.path()+"):Null
+"+      "    self."+slotName+" := val           
+"+      "  end") 
+    end
+    
+    
+  context FmmlxManipulator
     @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc, selfIsSource, multiplicity) // actually, only one getter
       // selfIsSource => true  where self is on the source side
       // selfIsSource => false where self is on the target side

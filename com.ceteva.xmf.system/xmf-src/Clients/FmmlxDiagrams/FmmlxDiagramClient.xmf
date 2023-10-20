@@ -1788,7 +1788,11 @@ context FmmlxDiagrams
   	        if sourceGetterName <> -1 then ("Create Getter for Source: " + sourceGetterName + "()").println() end;
   	        if sourceSetterName <> -1 then ("Create Setter for Source: " + sourceSetterName + "(val)").println() end;
   	        if targetGetterName <> -1 then ("Create Getter for Target: " + targetGetterName + "()").println() end;
-  	        if targetSetterName <> -1 then ("Create Setter for Target: " + targetSetterName + "(val)").println() end
+  	        if targetSetterName <> -1 then ("Create Setter for Target: " + targetSetterName + "(val)").println() end;
+  	        if sourceGetterName <> -1 then m.generateAssociationGetter(classTarget, classSource, instLevelSource, accessSourceFromTargetName, sourceGetterName) end;
+  	        if sourceSetterName <> -1 then m.generateAssociationSetter(classTarget, classSource, instLevelSource, accessSourceFromTargetName, sourceSetterName) end;
+  	        if targetGetterName <> -1 then m.generateAssociationGetter(classSource, classTarget, instLevelTarget, accessTargetFromSourceName, targetGetterName) end;
+  	        if targetSetterName <> -1 then m.generateAssociationSetter(classSource, classTarget, instLevelTarget, accessTargetFromSourceName, targetSetterName) end
   	      end;
           if problems.isEmpty() then self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
             ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
