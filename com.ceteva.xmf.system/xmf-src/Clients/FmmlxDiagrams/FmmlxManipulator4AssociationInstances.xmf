@@ -91,18 +91,18 @@ context FmmlxManipulator
             then
               //p.addAssociationInstance(objectS, objectT, a);
               // source->target
-              "trying to set link...".println();
+              //"trying to set link...".println();
               if 
                 a.target.visible
               then
                 if
                   (not a.target.mult.hasUpperBound) orelse a.target.mult.upperBound > 1
                 then
-                  "target is Set(...)".println();
+                  //"target is Set(...)".println();
                   if objectS.get(a.target.name) = null then objectS.set(a.target.name, {}) end; // make empty list if initialized with null
                   objectS.set(a.target.name, objectS.get(a.target.name) + {objectT})
                 else
-                  "target is not Set(...)".println();
+                  //"target is not Set(...)".println();
                   objectS.set(a.target.name, objectT)
                 end
               else "target not visible".println()

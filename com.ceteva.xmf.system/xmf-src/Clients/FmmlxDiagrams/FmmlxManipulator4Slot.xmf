@@ -52,10 +52,10 @@ import FmmlxDiagrams;
       in
         //("atts.size = " + atts.size()).println();
         //("slots.size = " + slots.size()).println();
-        ("additionalSlotNames = " + additionalSlotNames).println();
-        ("lackingSlotNames = " + lackingSlotNames).println();
+        //("additionalSlotNames = " + additionalSlotNames).println();
+        //("lackingSlotNames = " + lackingSlotNames).println();
         @For attName in lackingSlotNames do
-          ("Adding " + attName).println();
+          //("Adding " + attName).println();
           let
             att = atts->select(a | a.name.toString() = attName).asSeq().at(0)
           in
@@ -63,7 +63,7 @@ import FmmlxDiagrams;
           end
         end;
         @For attName in additionalSlotNames do
-          ("Removing " + attName).println();
+          //("Removing " + attName).println();
           obj.removeStructuralFeature(attName)
         end;
         null

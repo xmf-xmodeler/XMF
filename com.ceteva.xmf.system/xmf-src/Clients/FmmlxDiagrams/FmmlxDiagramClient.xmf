@@ -415,7 +415,7 @@ context FmmlxDiagrams
             if 
               link.value = null or link.value = {} 
             then 
-              "found empty value".println();
+              //"found empty value".println();
               null // do nothing 
             elseif
               link.value.isKindOf(Set(Element))
@@ -1783,7 +1783,7 @@ context FmmlxDiagrams
   	        instLevelSource, instLevelTarget,
   	        sourceVisibleFromTarget, targetVisibleFromSource,
   	        isSymmetric, isTransitive);
-  	      if problems.isEmpty() then
+  	      /*if problems.isEmpty() then
   	        "TODO: add getters and setters:".println();
   	        if sourceGetterName <> -1 then ("Create Getter for Source: " + sourceGetterName + "()").println() end;
   	        if sourceSetterName <> -1 then ("Create Setter for Source: " + sourceSetterName + "(val)").println() end;
@@ -1793,7 +1793,7 @@ context FmmlxDiagrams
   	        if sourceSetterName <> -1 then m.generateAssociationSetter(classTarget, classSource, instLevelSource, accessSourceFromTargetName, sourceSetterName) end;
   	        if targetGetterName <> -1 then m.generateAssociationGetter(classSource, classTarget, instLevelTarget, accessTargetFromSourceName, targetGetterName) end;
   	        if targetSetterName <> -1 then m.generateAssociationSetter(classSource, classTarget, instLevelTarget, accessTargetFromSourceName, targetSetterName) end
-  	      end;
+  	      end;*/
           if problems.isEmpty() then self.log := self.log + [["addAssociation", ["package", classSource.owner.path()],
             ["classSource", classSource.path()] ,["classTarget", classTarget.path()] ,
             ["accessSourceFromTargetName", accessSourceFromTargetName] , ["accessTargetFromSourceName", accessTargetFromSourceName] ,
@@ -2977,7 +2977,6 @@ context FmmlxDiagrams
                 @For i in 0.to(paramTypesRaw.size()-1) do
                   paramTypes.put(i, self.getPathAsString(paramTypesRaw.at(i)))
                 end;
-//                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
                 log := log + [["addOperation", ["package", class.owner.path()],
                              ["class", class.path()],
                              ["name", op.name.toString()],
@@ -2988,7 +2987,6 @@ context FmmlxDiagrams
                              ["monitored", self.isOperationMonitored(op).toString()],
                              ["body", op.codeBox.source()]]]
 
-//                end
              end
 
              end;
