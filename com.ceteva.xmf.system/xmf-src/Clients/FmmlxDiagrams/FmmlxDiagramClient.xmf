@@ -1853,20 +1853,23 @@ context FmmlxDiagrams
     end
 
     @Operation removeAssociation(
-      requestID  : Seq(Integer),
-      assocName    : String)
+      requestID     : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        m = FmmlxDiagrams::FmmlxManipulator()
       then
-        problems = m.removeAssociation(assoc);
-        packagePath = assoc.owner.path();
-        assocName =  assoc.name
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+        //problems = m.removeAssociation(assoc);
+        //packagePath = assoc.owner.path();
+        //assocName =  assoc.name
+      then
+        problems = m.removeAssociation(sourceClass, targetName)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["removeAssociation", ["package", packagePath], ["name", assocName]]]
-        end;
+        //if problems.isEmpty() then
+        //  self.log := self.log + [["removeAssociation", ["package", packagePath], ["name", assocName]]]
+        //end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -2907,6 +2910,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level.minLevel+""],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
                       ["abstract", class.isAbstract+""],
                       ["singleton", class.isSingleton+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
@@ -2915,6 +2919,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
                       ["name",class.name.toString()], 
                       ["parents",""], // deprecated
                       ["abstract", class.isAbstract+""],
@@ -2925,6 +2930,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
                       ["name",class.name.toString()], 
                       ["abstract", "false"]  // deprecated
                       ]]
@@ -2954,11 +2960,11 @@ context FmmlxDiagrams
            @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
              @For att in class.attributes.asSeq() do
                log := log + [["addAttribute", ["package", class.owner.path()],
-                                            ["class", class.path()],
-                                            ["name", att.name.toString()],
-                                            ["level", att.instLevel.minLevel+""],
-                                            ["type", att.type.path()],
-                                            ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
+                             ["class", class.path()],
+                             ["name", att.name.toString()],
+                             ["level", att.instLevel.minLevel+""],
+                             ["type", att.type.path()],
+                             ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
              end;
              @For op in class.operations.asSeq() do
              let
@@ -2971,18 +2977,18 @@ context FmmlxDiagrams
                 @For i in 0.to(paramTypesRaw.size()-1) do
                   paramTypes.put(i, self.getPathAsString(paramTypesRaw.at(i)))
                 end;
-                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
-                                  log := log + [["addOperation", ["package", class.owner.path()],
-                                                               ["class", class.path()],
-                                                               ["name", op.name.toString()],
-                                                               ["paramNames", self.getListFromSeq(requestID, op.paramNames())],
-                                                               ["paramTypes", self.getListFromSeq(requestID, paramTypes.asSeq())],
-                                                               ["type", self.getReturnPathAsString(op)],
-                                                               ["level", op.instLevel.minLevel+""],
-                                                               ["monitored", self.isOperationMonitored(op).toString()],
-                                                               ["body", op.codeBox.source()]]]
+//                if not op.hasProperty("getterKey") and not op.hasProperty("setterKey") then
+                log := log + [["addOperation", ["package", class.owner.path()],
+                             ["class", class.path()],
+                             ["name", op.name.toString()],
+                             ["paramNames", self.getListFromSeq(requestID, op.paramNames())],
+                             ["paramTypes", self.getListFromSeq(requestID, paramTypes.asSeq())],
+                             ["type", self.getReturnPathAsString(op)],
+                             ["level", op.instLevel.minLevel+""],
+                             ["monitored", self.isOperationMonitored(op).toString()],
+                             ["body", op.codeBox.source()]]]
 
-                end
+//                end
              end
 
              end;
@@ -2999,7 +3005,10 @@ context FmmlxDiagrams
              let
                slots = class.slots()
              then
-               slotNames = class.of().allAttributes()->select(a | a.owner.isKindOf(FMMLx::MetaClass)).name
+               slotNames = class.of().allAttributes()->select(a | not a.isKindOf(Associations::End))
+                                                     ->select(a | a.owner.isKindOf(FMMLx::MetaClass))
+                                                     .name
+                                                     
              in 
                // evil unorthodox hack
                // slotNames := slotNames + {"lastUpdated".asSymbol()};
@@ -3025,8 +3034,37 @@ context FmmlxDiagrams
                                      ["sourceVisibleFromTarget", assoc.end1.visible+""] , ["targetVisibleFromSource", assoc.end2.visible+""] ,
                                      ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
            end;
-           @For link in links.asSeq() do
-             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(0).path()], ["classTarget", link.asSeq().at(1).path()]]]
+//           @For link in links.asSeq() do
+//             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(0).path()], ["classTarget", link.asSeq().at(1).path()]]]
+//           end;
+           @For object in self.getPackage(requestID).classes do
+             let
+               linkList = {}
+             in
+               @For link in object.slots()
+                 ->select(s | s.type.of() = Associations::End)
+                 ->select(s | s.type.association.target = s.type)              
+               do
+                 if 
+                   link.value = null or link.value = {} 
+                 then 
+                   null // do nothing 
+                 elseif
+                   link.value.isKindOf(Set(Element))
+                 then // found multi value 
+                   linkList := link
+                 else // found single value               
+                   linkList := {link}
+                 end
+               end;
+               @For item in linkList do
+                 log := log + [["addLink", 
+                   ["package", object.owner.path()], 
+                   ["name", s.type.name.toString()], 
+                   ["classSource", object.path()], 
+                   ["classTarget", link.value.path()]]]
+               end
+             end
            end;
            @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
              if

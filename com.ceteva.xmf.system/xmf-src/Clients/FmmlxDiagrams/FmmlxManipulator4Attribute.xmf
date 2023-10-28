@@ -26,28 +26,28 @@ import FmmlxDiagrams;
             then problems := problems + [("Identifier " + name + " already in use in " + class.name + " (see " +attribute.owner.name.toString()+ ").")] 
           end
         end;
-        @For operation in class.allOperations() do
+        /*@For operation in class.allOperations() do
           if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
             then problems := problems + [("Identifier " + getterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end;
           if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
             then problems := problems + [("Identifier " + setterName + " already in use in " + class.name + " (see " +operation.owner.name.toString()+ ").")] 
           end
-        end;
+        end;*/
         @For child in class.allMetaInstances() do
           @For attribute in child.of().allAttributes() do 
             if oldProperty <> attribute andthen attribute.name.toString() = name andthen (attribute.owner = class or attribute.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + name + " already in use in " + child.name.toString() + " (see " +attribute.owner.name.toString()+ ").")] 
             end
-          end;
-          @For operation in child.of().allOperations() do
+          end
+          /*@For operation in child.of().allOperations() do
             if level = operation.instLevel andthen operation.name.toString() = getterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + getterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end;
             if level = operation.instLevel andthen operation.name.toString() = setterName andthen (operation.owner = class or operation.instLevel.minLevel = level.minLevel)
               then problems := problems + [("Identifier " + setterName + " already in use in " + child.name.toString() + " (see " +operation.owner.name.toString()+ ").")] 
             end
-          end
+          end*/
         end;
         problems
       end
@@ -149,7 +149,7 @@ import FmmlxDiagrams;
           
         end;
         
-        self.addGettersAndSetters(class, name, instLevel, type);
+        //self.addGettersAndSetters(class, name, instLevel, type);
 
         a
       end
@@ -168,7 +168,7 @@ import FmmlxDiagrams;
         if oldAtt <> null then
             // remove attribute
             class.remove(oldAtt);
-            self.removeGettersAndSetters(class, oldAtt.name.toString(), oldAtt.instLevel, oldAtt.type); 
+            //self.removeGettersAndSetters(class, oldAtt.name.toString(), oldAtt.instLevel, oldAtt.type); 
             // remove slots
             @For instance in class.allMetaInstances() do
               // this instance may have a slot, check level first, otherwise ignore (no else)
@@ -208,8 +208,8 @@ import FmmlxDiagrams;
           end
         end;
         
-        self.removeGettersAndSetters(class, oldName.toString(), attribute.instLevel, attribute.type); 
-        self.addGettersAndSetters(class, newName.toString(), attribute.instLevel, attribute.type);    
+        //self.removeGettersAndSetters(class, oldName.toString(), attribute.instLevel, attribute.type); 
+        //self.addGettersAndSetters(class, newName.toString(), attribute.instLevel, attribute.type);    
         
         null
       end
@@ -326,7 +326,7 @@ import FmmlxDiagrams;
       end
     end
        
-  context FmmlxManipulator
+/*  context FmmlxManipulator
     @Operation addGettersAndSetters(class, name, instLevel, type)
     //("addGettersAndSetters on Level " + instLevel.toString()).println();
       let
@@ -402,4 +402,4 @@ import FmmlxDiagrams;
           "Setter not found."
         end
       end
-    end
+    end*/

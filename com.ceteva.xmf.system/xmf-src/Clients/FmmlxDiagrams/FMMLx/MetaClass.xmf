@@ -69,7 +69,7 @@ context Root::FMMLx
     */
     @Operation sendInstance(element,message,args):XCore::Element
       /* First some standard operations are filtered out
-         to avoid this operation to invoke iself over and over again.
+         to avoid this operation to invoke itself over and over again.
          It would eventually succeed, but it grows exponentially. */ 
       if "sendInstance".equals(message.toString()) then 
         if self.cachedOpSendInstance = null then self.cachedOpSendInstance := FMMLx::MetaClass.getOperation("sendInstance") end;
@@ -82,7 +82,6 @@ context Root::FMMLx
       let
         // String to Symbol if necessary
         name = if message.isKindOf(Symbol) then message else Symbol(message) end; 
-//        ownOperations = self.allOperations()->asSeq; 
         ownOperations = Kernel_operatorPrecedenceList(self)->asSeq; 
         allOperations = [];
         delToClassOps = [];

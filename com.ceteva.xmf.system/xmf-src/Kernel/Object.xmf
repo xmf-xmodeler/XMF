@@ -566,7 +566,11 @@ context Object
   @Operation slots():Seq(Slot)
     self.of().allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel.minLevel <> self.level.minLevel)
       then
-        col.including(Slot(a.name,a,self.get(a.name)))
+        try
+          col.including(Slot(a.name,a,self.get(a.name)))
+        catch (exc)
+          col
+        end
       else 
         col
       end)

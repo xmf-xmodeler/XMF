@@ -69,9 +69,9 @@ import FmmlxDiagrams;
             sourceFromTargetEnd.association := a;
             targetFromSourceEnd.association := a
           end;
-          ("assoc: " + fwName).println();
-          ("sourceLevel: " + sourceFromTargetEnd.instLevel.toString()).println();
-          ("targetLevel: " + targetFromSourceEnd.instLevel.toString()).println();
+          //("assoc: " + fwName).println();
+          //("sourceLevel: " + sourceFromTargetEnd.instLevel.toString()).println();
+          //("targetLevel: " + targetFromSourceEnd.instLevel.toString()).println();
           
           /*
           Now the slots must be set in the appropriate classes.
@@ -79,7 +79,7 @@ import FmmlxDiagrams;
           and then the slots are added
           */
           
-          @For obj in p.classes->select(o |
+          /*@For obj in p.classes->select(o |
             o.isKindOf(FMMLx::FmmlxObject) andthen
             o.isDescendantOf(source) andthen 
             o.level.minLevel = targetFromSourceEnd.instLevel.minLevel) do
@@ -93,7 +93,16 @@ import FmmlxDiagrams;
             o.level.minLevel = sourceFromTargetEnd.instLevel.minLevel) do
             (obj.name + "(" + obj.level.toString() + ") needs a slot ("+sourceFromTargetEnd.name+") for new bidirectional association").println();
             Kernel_addAtt(obj,sourceFromTargetEnd.name,null)
-          end end;
+          end end;*/
+          
+          @For obj in p.classes->select(o | 
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            ((o.isDescendantOf(source) andthen 
+            o.level.minLevel = targetFromSourceEnd.instLevel.minLevel) or 
+            (o.isDescendantOf(target) andthen 
+            o.level.minLevel = sourceFromTargetEnd.instLevel.minLevel))) do
+            self.repairSlots(obj)
+          end;
           
           /*let 
             a = Associations::Association(fwName,sourceFromTargetEnd,targetFromSourceEnd)
@@ -119,6 +128,44 @@ import FmmlxDiagrams;
     
     
   context FmmlxManipulator
+    @Operation removeAssociation(sourceClass:FMMLx::MetaClass, targetName:String)
+      let 
+        associationEnds = sourceClass.allAttributes()
+          ->select(a | a.name.toString() = targetName)
+      then
+        association = if associationEnds.size() = 1 
+          then associationEnds.asSeq().at(0).association
+          else null
+        end
+      in
+        if
+          association = null
+        then
+          ["Association " + sourceClass + "::" + targetName + " not found"]
+        else
+          let 
+            targetClass = association.target.type;
+            targetFromSourceEndLevel = association.target.instLevel.minLevel;
+            sourceFromTargetEndLevel = association.source.instLevel.minLevel
+          in
+            sourceClass.remove(association.target);
+            targetClass.remove(association.source);
+     
+            @For obj in sourceClass.owner.classes->select(o | 
+              o.isKindOf(FMMLx::FmmlxObject) andthen
+              ((o.isDescendantOf(sourceClass) andthen 
+              o.level.minLevel = targetFromSourceEndLevel) or 
+              (o.isDescendantOf(targetClass) andthen 
+              o.level.minLevel = sourceFromTargetEndLevel))) do
+              self.repairSlots(obj)
+            end;
+            []
+          end
+        end
+      end      
+    end
+    
+    /*context FmmlxManipulator
     @Operation removeAssociation(association)
       let
         package = association.owner
@@ -134,7 +181,7 @@ import FmmlxDiagrams;
         package.associations := package.associations->excluding(association);
         association.owner := null; []
       end
-    end
+    end*/
     
   context FmmlxManipulator
     @Operation changeAssociationForwardName(

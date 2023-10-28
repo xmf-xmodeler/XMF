@@ -294,4 +294,8 @@ context Root::FMMLx
     {self.of()} + self.of().allAncestors()
   end
   
+  @Operation repairSlots()
+    Clients::FmmlxDiagrams::FmmlxManipulator().repairSlots(self)
+  end
+  
 end
