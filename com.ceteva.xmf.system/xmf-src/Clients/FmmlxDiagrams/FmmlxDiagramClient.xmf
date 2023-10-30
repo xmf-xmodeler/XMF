@@ -194,9 +194,9 @@ context FmmlxDiagrams
       in
         @For mappingItem in mapping.mapping do
           let
-    	    obj = mappingItem.object
+    	    obj = mappingItem.id
     	  then
-    	    key = if obj.isKindOf(Associations::Association) then obj.name else obj end
+    	    key = obj//if obj.isKindOf(Associations::Association) then obj.name else obj end
     	  in
     	    if mappingItem.points <> null then // not obj.isKindOf(FMMLx::FmmlxObject) or obj.isKindOf(Class) then 
     	      result := result.append([[
@@ -401,7 +401,6 @@ context FmmlxDiagrams
         linkList = {}
       in
         @For object in self.getPackage(requestID).classes do
-          //("Checking " + object.name).println();
               /* to avoid duplicates, only those slots which are pointing from 
               source to target are considered. That mandates that an association 
               is either bidirectional or the target is the navigable end. 
@@ -411,19 +410,16 @@ context FmmlxDiagrams
               ->select(s | s.type.of() = Associations::End)
               ->select(s | s.type.association.target = s.type)              
           do
-            //("link: "+ link).println();
+            linkList := {};
             if 
               link.value = null or link.value = {} 
             then 
-              //"found empty value".println();
               null // do nothing 
             elseif
               link.value.isKindOf(Set(Element))
             then 
-              //"found multi value".println();
               linkList := link.value
             else
-              //"found single value".println();
               linkList := {link.value}
             end;
             @For item in linkList do
@@ -2958,7 +2954,8 @@ context FmmlxDiagrams
              end
            end;
            @For class in classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
-             @For att in class.attributes.asSeq() do
+             @For att in class.attributes.asSeq()
+                         ->reject(a | a.isKindOf(Associations::End)) do
                log := log + [["addAttribute", ["package", class.owner.path()],
                              ["class", class.path()],
                              ["name", att.name.toString()],
@@ -3032,35 +3029,32 @@ context FmmlxDiagrams
                                      ["sourceVisibleFromTarget", assoc.end1.visible+""] , ["targetVisibleFromSource", assoc.end2.visible+""] ,
                                      ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
            end;
-//           @For link in links.asSeq() do
-//             log := log + [["addLink", ["package", link.asSeq().at(2).end1.type.owner.path()], ["name", link.asSeq().at(2).name.toString()], ["classSource", link.asSeq().at(0).path()], ["classTarget", link.asSeq().at(1).path()]]]
-//           end;
            @For object in self.getPackage(requestID).classes do
-             let
-               linkList = {}
-             in
-               @For link in object.slots()
-                 ->select(s | s.type.of() = Associations::End)
-                 ->select(s | s.type.association.target = s.type)              
-               do
+             @For slot in object.slots()
+               ->select(s | s.type.of() = Associations::End)
+               ->select(s | s.type.association.target = s.type)              
+             do             
+               let
+                 linkList = {}
+               in
                  if 
-                   link.value = null or link.value = {} 
+                   slot.value = null or slot.value = {} 
                  then 
                    null // do nothing 
                  elseif
-                   link.value.isKindOf(Set(Element))
+                   slot.value.isKindOf(Set(Element))
                  then // found multi value 
-                   linkList := link
+                   linkList := slot.value
                  else // found single value               
-                   linkList := {link}
+                   linkList := {slot.value}
+                 end;
+                 @For item in linkList do
+                   log := log + [["addLink", 
+                     ["package", object.owner.path()], 
+                     ["name", slot.type.name.toString()], 
+                     ["classSource", object.path()], 
+                     ["classTarget", item.path()]]]
                  end
-               end;
-               @For item in linkList do
-                 log := log + [["addLink", 
-                   ["package", object.owner.path()], 
-                   ["name", s.type.name.toString()], 
-                   ["classSource", object.path()], 
-                   ["classTarget", link.value.path()]]]
                end
              end
            end;

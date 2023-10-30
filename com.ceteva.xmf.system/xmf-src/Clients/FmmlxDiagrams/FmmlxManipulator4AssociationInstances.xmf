@@ -105,7 +105,7 @@ context FmmlxManipulator
                   //"target is not Set(...)".println();
                   objectS.set(a.target.name, objectT)
                 end
-              else "target not visible".println()
+              //else "target not visible".println()
               end;
               // target->source
               if 
@@ -114,14 +114,14 @@ context FmmlxManipulator
                 if
                   (not a.source.mult.hasUpperBound) orelse a.source.mult.upperBound > 1
                 then
-                  "source is Set(...)".println();
+                  //"source is Set(...)".println();
                   if objectT.get(a.source.name) = null then objectT.set(a.source.name, {}) end; // make empty list if initialized with null
                   objectT.set(a.source.name, objectT.get(a.source.name) + {objectS})
                 else
-                  "source is not Set(...)".println();
+                  //"source is not Set(...)".println();
                   objectT.set(a.source.name, objectS)
                 end
-              else "source not visible".println()
+              //else "source not visible".println()
               end;
               []
             else // multiplicity does not allow new link
