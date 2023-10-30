@@ -367,7 +367,7 @@ context FmmlxDiagrams
     	      in
     	        //("a is of " + a.of()).println();
     	        result := result.append([[
-    	          a.path(), //a.mappingInfo.id, // 0 ID
+    	          mappingInfo.id.toString(), // 0 ID
     	          a.source.type.path(), // 1 source ID
     	          a.target.type.path(), // 2 target ID
     	          -1, // 3 parent ID

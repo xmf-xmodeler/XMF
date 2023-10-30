@@ -12,6 +12,7 @@ context FmmlxDiagrams
     @Attribute nextID : Integer = 0 end
     
     @Operation addOrGetObjectMapping(oid : String)
+      if not oid.of() = String then throw Exception("id not String") end;
       let 
         foundMapping = null 
       in 
@@ -82,13 +83,8 @@ context FmmlxDiagrams
     
     @Operation setNewPositions(objectID, listOfPoints)
       let 
-        mappingInfo = self.addOrGetObjectMapping(objectID)//if mapping.id.contains(objectID)
-          //then mapping->select(m | m.id = objectID).asSeq().at(0)
-          //else self.addOrGetObjectMapping(objectID) end
+        mappingInfo = self.addOrGetObjectMapping(objectID)
       in   
-//      @For mappingInfo in mapping do
-//        if mappingInfo.id = objectID
-//        then
           mappingInfo.points := listOfPoints.asSeq();
           
           mappingInfo.lastKnownDiagramX := null;
@@ -96,8 +92,6 @@ context FmmlxDiagrams
           mappingInfo.hidden := null;
           
           @For i in 0.to(mappingInfo.points.size()-1) do mappingInfo.points := mappingInfo.points.replaceAt(i, mappingInfo.points.at(i).asSeq()) end          
-//        end // if
-//      end // for
       end
     end
     
@@ -167,10 +161,10 @@ context FmmlxDiagrams
       end 
     end
     
-    @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo).asSymbol() end
-    @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent).asSymbol() end
-    @Operation createAssociationKey(assoc)                     ("AssociationMapping: "+assoc.source.owner.path()+"/"+assoc.target.name).asSymbol() end
-    @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc).asSymbol() end
-    @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller).asSymbol() end
+    @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo) end
+    @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent) end
+    @Operation createAssociationKey(assoc)                     ("AssociationMapping: "+assoc.source.type.path()+"/"+assoc.target.name) end
+    @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc) end
+    @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller) end
     
 end // Class
