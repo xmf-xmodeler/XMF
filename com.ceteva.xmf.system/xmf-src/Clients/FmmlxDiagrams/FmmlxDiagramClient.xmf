@@ -3018,16 +3018,23 @@ context FmmlxDiagrams
                end
              end
            end;
-           @For assoc in associations.asSeq() do
-             log := log + [["addAssociation", ["package", assoc.end1.type.owner.path()],
-                                     ["classSource", assoc.end1.type.path()] ,["classTarget", assoc.end2.type.path()] ,
-                                     ["accessSourceFromTargetName", assoc.end1.name.toString()] , ["accessTargetFromSourceName", assoc.end2.name.toString()] ,
+           @For assoc in classes
+                         ->select(c | c.isKindOf(FMMLx::MetaClass))
+                         ->collect(c | c.allAttributes())
+                         ->flatten()
+                         ->select(a | a.isKindOf(Associations::End))
+                         ->collect(e | e.association) do
+//           @For assoc in associations.asSeq() do
+             log := log + [["addAssociation", ["package", assoc.source.type.owner.path()],
+                                     ["classSource", assoc.source.type.path()] ,["classTarget", assoc.target.type.path()] ,
+                                     ["accessSourceFromTargetName", assoc.source.name.toString()] , ["accessTargetFromSourceName", assoc.target.name.toString()] ,
                                      ["fwName", assoc.name.toString()+""],
                                      ["reverseName", "-1"],
-                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.end1.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.end2.mult())+""] ,
-                                     ["instLevelSource", assoc.end2.instLevel.minLevel+""] , ["instLevelTarget", assoc.end1.instLevel.minLevel+""] ,
-                                     ["sourceVisibleFromTarget", assoc.end1.visible+""] , ["targetVisibleFromSource", assoc.end2.visible+""] ,
-                                     ["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]]]
+                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.source.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.target.mult())+""] ,
+                                     ["instLevelSource", assoc.target.instLevel.minLevel+""] , ["instLevelTarget", assoc.source.instLevel.minLevel+""] ,
+                                     ["sourceVisibleFromTarget", assoc.source.visible+""] , ["targetVisibleFromSource", assoc.target.visible+""]
+//                                     ,["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]
+                                     ]]
            end;
            @For object in self.getPackage(requestID).classes do
              @For slot in object.slots()
