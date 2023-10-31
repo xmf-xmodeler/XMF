@@ -163,7 +163,7 @@ context FmmlxDiagrams
     
     @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo) end
     @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent) end
-    @Operation createAssociationKey(assoc)                     ("AssociationMapping: "+assoc.source.type.path()+"/"+assoc.target.name) end
+    @Operation createAssociationKey(assoc)                     assoc.getID() end
     @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc) end
     @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller) end
     

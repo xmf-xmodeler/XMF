@@ -367,7 +367,7 @@ context FmmlxDiagrams
     	      in
     	        //("a is of " + a.of()).println();
     	        result := result.append([[
-    	          mappingInfo.id.toString(), // 0 ID
+    	          a.getID(), // 0 ID
     	          a.source.type.path(), // 1 source ID
     	          a.target.type.path(), // 2 target ID
     	          -1, // 3 parent ID
@@ -428,13 +428,14 @@ context FmmlxDiagrams
                   FmmlxDiagramMapping::createAssociationLinkKey(
                   object.path(), 
                   item.path(), 
-                  link.type.association.path()))
+                  link.type.association.getID()
+                  ))
               in
                 result := result.append([[
     	          mappingInfo.id,                // 0 ID
     	          object.path(),                 // 1 start ID
     	          item.path(),                   // 2 end ID
-    	          link.type.association.path(),  // 3 assoc ID
+    	          link.type.association.getID(), // 3 assoc ID
     	          mappingInfo.points,            // 4 points
     	          self.getMapping(requestID).getAllLabels(mappingInfo.id) // 5 labels
     	        ]])
@@ -446,7 +447,7 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation getAllAssociationInstances_OLD(requestID : Seq(Integer))
+/*    @Operation getAllAssociationInstances_OLD(requestID : Seq(Integer))
         let
           result = []
         in
@@ -468,7 +469,7 @@ context FmmlxDiagrams
     	  // clean up mapping ?
     	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
         end
-    end
+    end*/
 
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
