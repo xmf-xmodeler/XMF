@@ -43,6 +43,10 @@ context Root::FMMLx
       self
     end
     
+    @Operation isContingent()
+      self.maxLevel <> self.minLevel
+    end
+    
     @Operation isValidForObject():Boolean
       if 
         self.minLevel = null 
@@ -62,7 +66,7 @@ context Root::FMMLx
 //      self.minLevel <> null andthen (
 //        (self.maxLevel = null andthen self.minLevel >= 2) orelse
 //        (self.maxLevel > self.minLevel andthen self.minLevel >= 2) orelse
-//        (self.minLevel = self.maxLevel))
+//        (self.minLevel = self.maxLevel)) 
     end
     
     @Operation isValidForProperty():Boolean
