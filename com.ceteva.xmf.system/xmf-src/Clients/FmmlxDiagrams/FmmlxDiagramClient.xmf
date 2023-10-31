@@ -1138,7 +1138,7 @@ context FmmlxDiagrams
           instanceSuffixCount := instanceSuffixCount + 1
         end;
         let 
-          newInstance = try m.addInstance(self.getPackage(requestID), ofClass, prefix+instanceSuffixCount, level, [], false, false, slotValueList) catch (exception) null end
+          newInstance = try m.addInstance(self.getPackage(requestID), ofClass, prefix+instanceSuffixCount, FMMLx::Level(level), [], false, false, slotValueList) catch (exception) null end
         in
           if
             newInstance <> null 
