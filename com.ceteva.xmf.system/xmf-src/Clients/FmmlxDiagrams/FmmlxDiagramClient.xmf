@@ -900,7 +900,7 @@ context FmmlxDiagrams
         @For p in parentsList do
           if p.of() <> FMMLx::MetaClass orelse p.level <> level then allParentsLegal := false end
         end;
-        problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;
+        problems := problems + if not allParentsLegal then ["Not all superclasses are legal. (addMetaClass)"] else [] end;
         problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
         problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
         if problems.isEmpty() then
@@ -1012,7 +1012,7 @@ context FmmlxDiagrams
             elseif 
               not allParentsLegal
             then 
-              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Not all superclasses are legal."]])
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Not all superclasses are legal. (addInstance)"]])
             else
               let
                 newInstance = m.addInstance(self.getPackage(requestID), ofClass, name, level, parentsList, abstract, collective, slotValueList)
@@ -1258,7 +1258,9 @@ context FmmlxDiagrams
         addSet = newSet - oldSet;
         removeSet = oldSet - newSet
       in
-        @For pName in newSet do
+        //addSet.println();
+        //removeSet.println();
+        @For pName in addSet do
           let
             pParse = m.evalString(pName, self.getPackage(requestID))
           then
@@ -1267,7 +1269,7 @@ context FmmlxDiagrams
             if p = null orelse p.of() <> class.of() orelse p.level <> class.level then allParentsLegal := false end
           end
         end;
-        problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;      
+        problems := problems + if not allParentsLegal then ["Not all superclasses are legal. (changeParent)"] else [] end;      
       
 //        if
 //          removeSet = {}
