@@ -411,7 +411,9 @@ end; // only if class
           then 
             if // TODO replace with something more efficient
             // there is no class, which inherits from this class
-            class.owner.classes->forAll(subClass | not (subClass.parents.contains(class)))
+            class.owner.classes
+              ->select(c | c.isKindOf(Class))
+              ->forAll(subClass | not (subClass.parents.contains(class)))
             then class.isSingleton := true; []
             else ["Classes with subclasses cannot be made Singletons"] end
           else ["Classes with more than one instance cannot be made Singletons"] end
