@@ -1873,12 +1873,17 @@ context FmmlxDiagrams
 
     @Operation setAssociationEndVisibility(
       requestID      : Seq(Integer),
-      assocName      : String,
+      sourcePath     : String,
+      targetName     : String,
       concernsTarget : Boolean,
       newVisibility  : Boolean)
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        assoc = self.findAssociation(sourceClass, targetName)
+        // assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
@@ -1890,13 +1895,17 @@ context FmmlxDiagrams
     end
 
     @Operation changeAssociationForwardName(
-      requestID  : Seq(Integer),
-      assocName  : String,
-      newName    : String)
+      requestID     : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String,
+      newName       : String)
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        assoc = self.findAssociation(sourceClass, targetName)
+        // assoc = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         oldName = assoc.name
       then
@@ -1909,11 +1918,18 @@ context FmmlxDiagrams
       end
     end
 
-   @Operation changeAssociationEnd2StartMultiplicity(requestID : Seq(Integer), assocName, multV)
+    @Operation changeAssociationEnd2StartMultiplicity(
+      requestID : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String,
+      multV)
 
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       then
@@ -1926,10 +1942,18 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAssociationStart2EndMultiplicity(requestID : Seq(Integer), assocName, multV)
+    @Operation changeAssociationStart2EndMultiplicity(
+      requestID     : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String,
+      multV)
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         newMult = m.valueList2Multiplicity(self.vector2Seq(multV))
       then
@@ -1942,10 +1966,18 @@ context FmmlxDiagrams
       end
     end
     
-    @Operation changeAssociationStart2EndAccessName(requestID : Seq(Integer), assocName, name)
+    @Operation changeAssociationStart2EndAccessName(
+      requestID : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String, 
+      name)
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         problems = m.changeAssociationAccessName(a, null, name)
       in
@@ -1953,34 +1985,36 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAssociationEnd2StartAccessName(requestID : Seq(Integer), assocName, name)
+    @Operation changeAssociationEnd2StartAccessName(
+      requestID : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String, 
+      name)
+      
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         problems = m.changeAssociationAccessName(a, name, null)
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
-
-    @Operation changeDelegationLevel(requestID : Seq(Integer), className, level)
-      let
-        m = FmmlxDiagrams::FmmlxManipulator()
-      then 
-        c = m.evalString(className, self.getPackage(requestID)).at(0)
-      then
-        problems = ["This change has been accepted but not been propagated. Check the role fillers."]
-      in
-        c.delegatesToLevel := level;
-        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
-      end
-    end
     
-    @Operation changeAssociationStart2EndLevel(requestID : Seq(Integer), assocName, level)
+    @Operation changeAssociationStart2EndLevel(
+      requestID : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String,
+      level)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         problems = m.changeAssociationLevel(a, null, level)
       in
@@ -1988,10 +2022,17 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAssociationEnd2StartLevel(requestID : Seq(Integer), assocName, level)
+    @Operation changeAssociationEnd2StartLevel(
+      requestID : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String, 
+      level)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-        a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        a = self.findAssociation(sourceClass, targetName)
+        // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
         problems = m.changeAssociationLevel(a, level, null)
       in
@@ -2044,16 +2085,13 @@ context FmmlxDiagrams
       obj2Name  : String,
       role2Name : String)
 
-          let
+      let
   	    m = FmmlxDiagrams::FmmlxManipulator();
   	    obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
   	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
   	  then
-//        association = self.findAssociation(obj1, role2Name)
-// 	  then // legacy
-//        association = if association = null then self.findAssociation(obj1, obj2, role2Name) else association end
-          association = try self.findAssociation(obj1, role2Name) catch (e) self.findAssociation(obj1, obj2, role2Name) end
- 	then
+        association = try self.findAssociation(obj1, role2Name) catch (e) self.findAssociation(obj1, obj2, role2Name) end
+ 	  then
         problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
   	  in
   	    if problems.isEmpty() then
@@ -2169,7 +2207,19 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
-    
+
+    @Operation changeDelegationLevel(requestID : Seq(Integer), className, level)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        c = m.evalString(className, self.getPackage(requestID)).at(0)
+      then
+        problems = ["This change has been accepted but not been propagated. Check the role fillers."]
+      in
+        c.delegatesToLevel := level;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
 
     @Operation setRoleFiller(
       requestID   : Seq(Integer),

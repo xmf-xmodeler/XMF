@@ -233,9 +233,9 @@ import FmmlxDiagrams;
         @For o in class.allOperations() do
           ok := ok andthen o.name.toString() <> testName.toString()
         end;
-        @For o in class.allOperations2() do
+        if class.istKindOf(FMMLx::MetaClass) then @For o in class.allOperations2() do
           ok := ok andthen (o.name.toString() <> testName.toString() or o.instLevel <> newLevel)
-        end;    
+        end end;    
         ok
       end
     end
