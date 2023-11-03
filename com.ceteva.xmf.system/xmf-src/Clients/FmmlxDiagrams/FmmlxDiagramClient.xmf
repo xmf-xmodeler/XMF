@@ -1072,9 +1072,16 @@ context FmmlxDiagrams
         try
           let
             m = FmmlxDiagrams::FmmlxManipulator();
-            level = FMMLx::Level(minLevel, maxLevel)
+            ofClass = if self.getPackage(requestID).hasElement(ofName) 
+                      then self.getPackage(requestID).getElement(ofName) 
+                      else null 
+                      end
           then
-            ofClass = if self.getPackage(requestID).hasElement(ofName) then self.getPackage(requestID).getElement(ofName) else null end;
+            level = if minLevel = -2 and maxLevel = -2 // legacy, old savefile, auto-level
+                    then FMMLx::Level(ofClass.level.minLevel-1, ofClass.level.maxLevel-1)
+                    else FMMLx::Level(minLevel, maxLevel)
+                    end
+          then
             parentsList = self.getParentsList(requestID, parents);
             allParentsLegal = true
           in
