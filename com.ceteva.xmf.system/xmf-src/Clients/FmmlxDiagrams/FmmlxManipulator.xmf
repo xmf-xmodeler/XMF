@@ -54,16 +54,16 @@ context FmmlxDiagrams
 //      end
     end
     
-    @Operation isInstanceOf(objectS, typeS, instLevelS)
+    @Operation isInstanceOf(object, type, instLevel)
       if 
-        objectS.hasSlot("level") andthen (objectS.level = instLevelS orelse instLevelS = -1)
+        object.hasSlot("level") andthen object.level.matchesInstantiationLevel(instLevel)        
       then // instLevel given and matching
         let
-          ancestors = {objectS.of()};
+          ancestors = {object.of()};
           nextIterationAncestors = null;
           searchExhausted = false
         in
-          @While (not searchExhausted) and (not ancestors.contains(typeS)) do
+          @While (not searchExhausted) and (not ancestors.contains(type)) do
             nextIterationAncestors := {} + ancestors;
             @For a in ancestors do
               nextIterationAncestors := nextIterationAncestors + {a.of()};
@@ -72,14 +72,11 @@ context FmmlxDiagrams
             searchExhausted := ancestors.size() = nextIterationAncestors.size();
             ancestors := nextIterationAncestors
           end; // while
-          ancestors.contains(typeS)
+          ancestors.contains(type)
         end
       else // wrong instLevel
         false
       end
-      
-      
-//      objectS.isKindOf(typeS) andthen objectS.level = instLevelS
     end
     
     @Operation multiplicity2ValueList(multiplicity) 

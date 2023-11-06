@@ -1,0 +1,16 @@
+parserImport XOCL;
+import Associations;
+
+Associations.add(Associations::AssociationType("DefaultAssociation", Object, Object));
+Associations.add(Associations::AssociationType("Aggregation", Object, Object));
+Associations.add(Associations::AssociationType("Composition", Object, Object));
+    
+Associations::Aggregation.addParent(Associations::DefaultAssociation);
+Associations::Composition.addParent(Associations::Aggregation);
+
+Associations::Aggregation.targetMult := [1,null,null,null];
+Associations::Composition.targetMult := [1,null,null,null];
+Associations::Composition.sourceMult := [1,1,1,1];
+
+context DefaultAssociation
+  @Operation foo() null end

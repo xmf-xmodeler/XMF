@@ -26,11 +26,11 @@ import FmmlxDiagrams;
       then
         ["Name " + name + " is not a valid name."]
       elseif
-        not instLevel.isKindOf(Integer)
+        not instLevel.isKindOf(FMMLx::Level)
       then
         ["Instantiation level " + instLevel + " is not valid."]
       elseif
-        instLevel >= class.level
+        instLevel.minLevel >= class.level.minLevel
       then
         ["Instantiation level " + instLevel + " not legal for a class on level " + class.level + "."]
       else

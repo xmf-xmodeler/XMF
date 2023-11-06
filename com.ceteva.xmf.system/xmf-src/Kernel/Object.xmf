@@ -539,7 +539,7 @@ context Object
   @Operation slotDenied(slot:Symbol)
     @Doc
       Called when an we request the slot of an object and the
-      slot is inaccesible for the se'nder.
+      slot is inaccessible for the se'nder.
     end
     throw Exceptions::SlotAccessDenied(self,slot)
   end
@@ -564,11 +564,15 @@ context Object
 
 context Object
   @Operation slots():Seq(Slot)
-    self.of().allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel < self.level )
-												    then
-						    							col.including(Slot(a.name,a,self.get(a.name)))
-													else 
-														col
-													end)
+    self.of().allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel.minLevel <> self.level.minLevel)
+      then
+        try
+          col.including(Slot(a.name,a,self.get(a.name)))
+        catch (exc)
+          col
+        end
+      else 
+        col
+      end)
   end
   

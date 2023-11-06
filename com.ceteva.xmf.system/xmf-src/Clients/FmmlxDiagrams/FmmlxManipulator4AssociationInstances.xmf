@@ -60,14 +60,15 @@ context FmmlxManipulator
     a       : Association)
   
     let 
-      typeS = a.end1.type;
-      typeT = a.end2.type;
-      instLevelS = a.end2.instLevel;
-      instLevelT = a.end1.instLevel;
+      typeS = a.source.type;
+      typeT = a.target.type;
+      instLevelS = a.target.instLevel;
+      instLevelT = a.source.instLevel;
       typesOK = false;
       objTemp = null
     in 
-     // First check if they aren't there already
+     // First check if they aren't there already ->
+     // might be unnecessary, as Sets ignore duplicates anyway
       if not p.hasAssociationInstance(objectS, objectT, a)
       then
         if self.isInstanceOf(objectS, typeS, instLevelS) andthen self.isInstanceOf(objectT, typeT, instLevelT)
@@ -79,15 +80,49 @@ context FmmlxManipulator
 
         if typesOK then 
           let 
+            // countOccurences likely does not work anymore and always returns 0 
             sCount = self.countOccurences(objectS, p, a, true, false); // how many links to t go out of objectS
             tCount = self.countOccurences(objectT, p, a, false, true); // how many links to s go out of objectT
-            sMult = a.end2.mult;  // how many links to t are allowed for objectS
-            tMult = a.end1.mult // how many links to s are allowed for objectT
+            sMult = a.target.mult;  // how many links to t are allowed for objectS
+            tMult = a.source.mult // how many links to s are allowed for objectT
           in
             if ((not sMult.hasUpperBound) orelse (sMult.upperBound > sCount)) andthen 
                ((not tMult.hasUpperBound) orelse (tMult.upperBound > tCount))  
             then
-              p.addAssociationInstance(objectS, objectT, a);
+              //p.addAssociationInstance(objectS, objectT, a);
+              // source->target
+              //"trying to set link...".println();
+              if 
+                a.target.visible
+              then
+                if
+                  (not a.target.mult.hasUpperBound) orelse a.target.mult.upperBound > 1
+                then
+                  //"target is Set(...)".println();
+                  if objectS.get(a.target.name) = null then objectS.set(a.target.name, {}) end; // make empty list if initialized with null
+                  objectS.set(a.target.name, objectS.get(a.target.name) + {objectT})
+                else
+                  //"target is not Set(...)".println();
+                  objectS.set(a.target.name, objectT)
+                end
+              //else "target not visible".println()
+              end;
+              // target->source
+              if 
+                a.source.visible
+              then
+                if
+                  (not a.source.mult.hasUpperBound) orelse a.source.mult.upperBound > 1
+                then
+                  //"source is Set(...)".println();
+                  if objectT.get(a.source.name) = null then objectT.set(a.source.name, {}) end; // make empty list if initialized with null
+                  objectT.set(a.source.name, objectT.get(a.source.name) + {objectS})
+                else
+                  //"source is not Set(...)".println();
+                  objectT.set(a.source.name, objectS)
+                end
+              //else "source not visible".println()
+              end;
               []
             else // multiplicity does not allow new link
               [" The multiplicity does not allow a new link."]
@@ -121,10 +156,29 @@ context FmmlxManipulator
     
   context FmmlxManipulator
     @Operation removeAssociationInstance(a, o1, o2)
-      let
-        p = a.owner()
+      let 
+        slotTargetValue = o1.get(a.target.name)
       in
-        p.removeAssociationInstance(o1, o2, a) 
+        if
+          a.target.mult.hasUpperBound and a.target.mult.upperBound = 1
+        then
+          o1.set(a.target.name, null)
+        else
+          o1.set(a.target.name, slotTargetValue - {o2})
+        end
+      end;
+      if a.source.visible then
+        let 
+          slotSourceValue = o2.get(a.source.name)
+        in
+          if
+            a.source.mult.hasUpperBound and a.source.mult.upperBound = 1
+          then
+            o2.set(a.source.name, null)
+          else
+            o2.set(a.source.name, slotSourceValue - {o1})
+          end
+        end
       end;
       []
     end 

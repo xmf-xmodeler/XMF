@@ -11,7 +11,7 @@ import FmmlxDiagrams;
      accessSourceFromTargetName : String, // ref1
      accessTargetFromSourceName : String, // ref2
      fwName : String,
-     reverseName : String,
+     assocType : AssociationType,
      multTargetToSource : XCore::Element,
      multSourceToTarget : XCore::Element,
      instLevelSource : XCore::Element,
@@ -54,11 +54,57 @@ import FmmlxDiagrams;
           sourceFromTargetEnd = Associations::End(accessSourceFromTargetName,source,multTargetToSource);
           targetFromSourceEnd = Associations::End(accessTargetFromSourceName,target,multSourceToTarget)
         in 
+          sourceFromTargetEnd.isIntrinsic := true;
+          targetFromSourceEnd.isIntrinsic := true;
           sourceFromTargetEnd.instLevel := instLevelTarget;
           targetFromSourceEnd.instLevel := instLevelSource;
           sourceFromTargetEnd.visible := sourceVisibleFromTarget;
           targetFromSourceEnd.visible := targetVisibleFromSource;
-          let 
+          
+          let
+            a = assocType(fwName,sourceFromTargetEnd,targetFromSourceEnd)
+          in
+            target.addAttribute(sourceFromTargetEnd);
+            source.addAttribute(targetFromSourceEnd);
+            sourceFromTargetEnd.association := a;
+            targetFromSourceEnd.association := a
+          end;
+          //("assoc: " + fwName).println();
+          //("sourceLevel: " + sourceFromTargetEnd.instLevel.toString()).println();
+          //("targetLevel: " + targetFromSourceEnd.instLevel.toString()).println();
+          
+          /*
+          Now the slots must be set in the appropriate classes.
+          To do so, the appropriate objects are selected, 
+          and then the slots are added
+          */
+          
+          /*@For obj in p.classes->select(o |
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            o.isDescendantOf(source) andthen 
+            o.level.minLevel = targetFromSourceEnd.instLevel.minLevel) do
+            (obj.name + "(" + obj.level.toString() + ") needs a slot ("+targetFromSourceEnd.name+") for new association").println();
+            Kernel_addAtt(obj,targetFromSourceEnd.name,null)
+          end;
+          
+          if sourceVisibleFromTarget then @For obj in p.classes->select(o | 
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            o.isDescendantOf(target) andthen 
+            o.level.minLevel = sourceFromTargetEnd.instLevel.minLevel) do
+            (obj.name + "(" + obj.level.toString() + ") needs a slot ("+sourceFromTargetEnd.name+") for new bidirectional association").println();
+            Kernel_addAtt(obj,sourceFromTargetEnd.name,null)
+          end end;*/
+          
+          @For obj in p.classes->select(o | 
+            o.isKindOf(FMMLx::FmmlxObject) andthen
+            ((o.isDescendantOf(source) andthen 
+            o.level.minLevel = targetFromSourceEnd.instLevel.minLevel) or 
+            (o.isDescendantOf(target) andthen 
+            o.level.minLevel = sourceFromTargetEnd.instLevel.minLevel))) do
+            self.repairSlots(obj)
+          end;
+          
+          /*let 
             a = Associations::Association(fwName,sourceFromTargetEnd,targetFromSourceEnd)
           in 
             p.associations := p.associations->including(a);
@@ -72,14 +118,54 @@ import FmmlxDiagrams;
             
             if targetVisibleFromSource then 
               self.addGettersAndSetters4Links(source, accessTargetFromSourceName, instLevelSource, target, a, true, multSourceToTarget)
-            end;
+            end;*/
             
             []
-          end
+          //end
         end
       end
     end
+    
+    
   context FmmlxManipulator
+    @Operation removeAssociation(sourceClass:FMMLx::MetaClass, targetName:String)
+      let 
+        associationEnds = sourceClass.allAttributes()
+          ->select(a | a.name.toString() = targetName)
+      then
+        association = if associationEnds.size() = 1 
+          then associationEnds.asSeq().at(0).association
+          else null
+        end
+      in
+        if
+          association = null
+        then
+          ["Association " + sourceClass + "::" + targetName + " not found"]
+        else
+          let 
+            targetClass = association.target.type;
+            targetFromSourceEndLevel = association.target.instLevel.minLevel;
+            sourceFromTargetEndLevel = association.source.instLevel.minLevel
+          in
+            sourceClass.remove(association.target);
+            targetClass.remove(association.source);
+     
+            @For obj in sourceClass.owner.classes->select(o | 
+              o.isKindOf(FMMLx::FmmlxObject) andthen
+              ((o.isDescendantOf(sourceClass) andthen 
+              o.level.minLevel = targetFromSourceEndLevel) or 
+              (o.isDescendantOf(targetClass) andthen 
+              o.level.minLevel = sourceFromTargetEndLevel))) do
+              self.repairSlots(obj)
+            end;
+            []
+          end
+        end
+      end      
+    end
+    
+    /*context FmmlxManipulator
     @Operation removeAssociation(association)
       let
         package = association.owner
@@ -95,7 +181,7 @@ import FmmlxDiagrams;
         package.associations := package.associations->excluding(association);
         association.owner := null; []
       end
-    end
+    end*/
     
   context FmmlxManipulator
     @Operation changeAssociationForwardName(
@@ -248,6 +334,35 @@ import FmmlxDiagrams;
         result
       end
     end
+    
+  context FmmlxManipulator
+    @Operation generateAssociationGetter(
+        class      : FMMLx::MetaClass, 
+        returnType : FMMLx::MetaClass, 
+        instLevel  : FMMLx::Level,
+        slotName   : String,
+        opName     : String)
+       
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+opName+"[getterKey=\""+slotName+"\"]():"+returnType.path()+"
+"+      "    self."+slotName+"           
+"+      "  end") 
+    end
+    
+  context FmmlxManipulator
+    @Operation generateAssociationSetter(
+        class      : FMMLx::MetaClass, 
+        returnType : FMMLx::MetaClass, 
+        instLevel  : FMMLx::Level,
+        slotName   : String,
+        opName     : String)
+       
+        self.addOperation2(class, instLevel, 
+        "  @Operation "+opName+"[setterKey=\""+slotName+"\"](val"+returnType.path()+"):Null
+"+      "    self."+slotName+" := val           
+"+      "  end") 
+    end
+    
     
   context FmmlxManipulator
     @Operation addGettersAndSetters4Links(class, name, instLevel, type, assoc, selfIsSource, multiplicity) // actually, only one getter
