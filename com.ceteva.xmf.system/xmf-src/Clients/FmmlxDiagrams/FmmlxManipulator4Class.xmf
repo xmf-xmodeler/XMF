@@ -182,6 +182,17 @@ import FmmlxDiagrams;
       null
     end
     
+    
+  context FmmlxManipulator
+    @Operation changeClassLevel(class, newLevel)
+      if not class.isKindOf(FMMLx::MetaClass) then throw Exception("Only instances of FMMLx::MetaClass can have their level changed.") end;
+      if class.level.minLevel < 2 then throw Exception("Objects lower than level 2 cannot have their level changed.") end;
+      if not class.allInstances()->forAll(inst | newLevel.canBeInstantiatatedTo(inst.level)) then throw Exception("One of the instances does not match the new level") end;
+      if not newLevel.isValidForObject() then throw Exception("The new level is not valid") end;
+      class.level := newLevel;
+      null
+    end
+    
   context FmmlxManipulator
     @Operation removeClass(class, strategy)
       ("before let").println();
