@@ -34,7 +34,8 @@ context Root::FMMLx
   @Attribute maxLevel : Integer end
   
     @Constructor(minLevel,maxLevel)
-      if self.maxLevel = -1 then self.maxLevel := null end; 
+      if self.maxLevel = (-1) then self.maxLevel := null end; 
+      if self.minLevel = (-1) then self.minLevel := null end; 
       self
     end
     

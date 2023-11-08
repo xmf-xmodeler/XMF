@@ -32,13 +32,13 @@ context Root
           m.valueList2Multiplicity([0,-1,false, false]),
   	      FMMLx::Level(1),FMMLx::Level(0), true, true, false, false);
   	      
-  	  m.addOperation2(p::Configuration, FMMLx::Level(4),  
+  	  m.addOperation(p::Configuration, FMMLx::Level(4),  
       "  @Operation time[monitor=true]()
 "+    "    xmf.date()
 "+    "  end");
   	  
   	      
-  	  m.addOperation2(p::Configuration, FMMLx::Level(3),  
+  	  m.addOperation(p::Configuration, FMMLx::Level(3),  
       "  @Operation totalRevenues[monitor=true]()
 "+    "    self.allInstances().size() * 3.141592654
 "+    "  end");
@@ -79,7 +79,7 @@ context Root
       m.addAttribute(p::Bicycle, "partSalesPrice", FMMLx::Level(0), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "serialNo",       FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
-  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
+  	  m.addOperation(p::Configuration, FMMLx::Level(2), 
       "  @Operation highestPrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"N/A\"
@@ -94,7 +94,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
+  	  m.addOperation(p::Configuration, FMMLx::Level(2), 
       "  @Operation averagePrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"div/zero\"
@@ -110,7 +110,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, FMMLx::Level(0), 
+  	  m.addOperation(p::Configuration, FMMLx::Level(0), 
       "  @Operation isBikeComplete[monitor=true]()
 "+    "    if self.frame = null then \"a Frame is missing\"
 "+    "    elseif self.fork = null then \"a Fork is missing\"

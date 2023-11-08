@@ -2349,7 +2349,7 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
       then
-        problems = if class <> null then m.addOperation2(class, FMMLx::Level(level), body) else ["Class not found"] end
+        problems = if class <> null then m.addOperation(class, FMMLx::Level(level), body) else ["Class not found"] end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addOperation2", ["package", class.owner.path()],
@@ -2371,7 +2371,7 @@ context FmmlxDiagrams
             m = FmmlxDiagrams::FmmlxManipulator();
             class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
           then
-            problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
+            problems = if class <> null then m.addOperation(class, level, body) else ["Class not found"] end
           in
             if problems.isEmpty() then
                 self.log := self.log + [["addOperation2", ["package", class.owner.path()],

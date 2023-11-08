@@ -4,10 +4,10 @@ import Clients;
 import FmmlxDiagrams;
 
 
-  context FmmlxManipulator 
-    @Operation addOperation2(class, level, opString)
-        self.addOperation(class, level, opString)
-    end
+//  context FmmlxManipulator 
+//    @Operation addOperation2(class, level, opString)
+//        self.addOperation(class, level, opString)
+//    end
     
   context FmmlxManipulator 
     @Operation addOperation(class, level, opString)
@@ -42,7 +42,7 @@ import FmmlxDiagrams;
         if
           operation.at(0) <> null
         then 
-          operation.at(0).isIntrinsic := true;
+          operation.at(0).isIntrinsic := level.minLevel = null andthen level.maxLevel = null;
           operation.at(0).instLevel := level;
           problems := self.checkOperationAllowed(
                            class, 
@@ -119,7 +119,7 @@ import FmmlxDiagrams;
     @Operation changeOperationBody(class, oldOp, opName, body)
       let
         problems = [];
-        level = oldOp.instLevel;
+        level = if oldOp.instLevel.isKindOf(FMMLx::Level) then oldOp.instLevel else FMMLx::Level((-1),(-1)) end;
         returnType = oldOp.type;
         problems = []
       then
@@ -129,7 +129,7 @@ import FmmlxDiagrams;
         class.remove(oldOp);
         resetOperatorTable();
         problems := try
-          self.addOperation2(class, level, body)
+          self.addOperation(class, level, body)
         catch(e)
           ["Something unforeseen went wrong while updating the operation: " + e.message]
         end;
@@ -168,10 +168,8 @@ import FmmlxDiagrams;
        
       let
         problems = [];
-        operations = class.allOperations().asSet() + class.allOperations2().asSet()
+        operations = class.allOperations().asSet() + if class.isKindOf(FMMLx::MetaClass) then class.allOperations2().asSet() else {} end
       in
-        if not isIntrinsic 
-          then problems := problems + ["Operation must be intrinsic to change the level."] end;
         if arity <> 0 and monitor = true 
           then problems := problems + ["Monitored Operation must have an arity of zero."] end;
         // First: Check whether the new operation would interfere with an existing one.
@@ -182,18 +180,6 @@ import FmmlxDiagrams;
             problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
           end
         end; // done with conflicts from classes from above.
-        /* @For instance in class.allMetaInstances() do  // check all instances which could be affected [on second thought, don't. they may overwite if they wish]
-          let theirOperations = instance.allOperations().asSet() + instance.allOperations2().asSet()
-          in
-            @For operation in theirOperations do
-              if operation.name.toString() = name.toString() and not ignoreList.contains(operation) and arity = operation.arity then
-                // and arity equal and level equal...
-                // But for now no duplicate names at all (... unless arity)
-                problems := problems + ["Operation " + name + " already exists in " + class.name + "."]
-              end // if
-            end // for
-          end // let
-        end; // for */
         problems
       end // let
     end
@@ -233,7 +219,7 @@ import FmmlxDiagrams;
         @For o in class.allOperations() do
           ok := ok andthen o.name.toString() <> testName.toString()
         end;
-        if class.istKindOf(FMMLx::MetaClass) then @For o in class.allOperations2() do
+        if class.isKindOf(FMMLx::MetaClass) then @For o in class.allOperations2() do
           ok := ok andthen (o.name.toString() <> testName.toString() or o.instLevel <> newLevel)
         end end;    
         ok
