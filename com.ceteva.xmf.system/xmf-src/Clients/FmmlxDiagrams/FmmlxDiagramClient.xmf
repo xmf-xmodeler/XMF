@@ -1930,7 +1930,8 @@ context FmmlxDiagrams
       newName       : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         assoc = self.findAssociation(sourceClass, targetName)
@@ -1940,9 +1941,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationForwardName(assoc, newName)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationForwardName", ["package", assoc.owner.path()], ["newFwName", newName], ["oldFwName", oldName]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationForwardName", ["package", assoc.owner.path()], ["newFwName", newName], ["oldFwName", oldName]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1954,7 +1955,8 @@ context FmmlxDiagrams
       multV)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -1964,9 +1966,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationMultiplicity(a, newMult, null)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -1978,7 +1980,8 @@ context FmmlxDiagrams
       multV)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -1988,9 +1991,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationMultiplicity(a, null, newMult)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -2002,7 +2005,8 @@ context FmmlxDiagrams
       name)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2021,7 +2025,8 @@ context FmmlxDiagrams
       name)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2039,13 +2044,14 @@ context FmmlxDiagrams
       targetName    : String,
       level)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
         // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.changeAssociationLevel(a, null, level)
+        problems = m.changeAssociationLevel(a, null, FMMLx::Level(level))
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -2057,13 +2063,14 @@ context FmmlxDiagrams
       targetName    : String, 
       level)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
         // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.changeAssociationLevel(a, level, null)
+        problems = m.changeAssociationLevel(a, FMMLx::Level(level), null)
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -2091,7 +2098,7 @@ context FmmlxDiagrams
     
     @Operation findAssociation(obj1, role2AccessName)
       let 
-        classes1 = obj1.allAncestors()
+        classes1 = {obj1} + obj1.allAncestors()
       then
         atts1 = classes1->collect(c | c.attributes)->flatten()
       then
