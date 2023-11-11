@@ -264,11 +264,10 @@ context Mosaic
           projectName = parameters.at(0)
         then
           model = FMMLx::FmmlxPackage(projectName)
-    	  then
+    	then
     	  project = Projects::Project(model, projectName, null)
-  	    in
-  	      model.addParent(FMMLx);
-          model.fmmlxAssociationInstances:={};
+  	in
+  	  model.addParent(FMMLx);
           Root.add(model);
           xmf.projectManager("MyProjects").add(project)
         end

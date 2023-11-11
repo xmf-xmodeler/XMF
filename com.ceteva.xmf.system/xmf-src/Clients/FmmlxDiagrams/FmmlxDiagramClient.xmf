@@ -220,6 +220,41 @@ context FmmlxDiagrams
                   .asSeq()])
     end
 
+    @Operation getAssociationTypes(requestID : Seq(Integer))
+      let
+        result = [];
+        p = self.getPackage(requestID);
+        assocTypes = {Associations::DefaultAssociation, Associations::Aggregation, Associations::Composition}
+      in
+        if p.hasSlot("associationTypes") then
+          assocTypes := p.associationTypes + assocTypes
+        end;        
+        @For aType in assocTypes do
+          result := [[
+            aType.name.toString(),
+            aType.path(),
+            aType.color,
+            aType.strokeWidth,
+            aType.dashArray,
+            aType.startDeco,
+            aType.endDeco,
+            aType.sourceType.path(),
+            aType.targetType.path(),
+            aType.sourceLevel+"",
+            aType.targetLevel+"",
+            aType.sourceMult+"",
+            aType.targetMult+"",
+            aType.colorLink,
+            aType.strokeWidthLink,
+            aType.dashArrayLink,
+            aType.startDecoLink,
+            aType.endDecoLink
+          ]] + result
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation getAllObjects(requestID : Seq(Integer))
         let
           result = [];
@@ -373,7 +408,7 @@ context FmmlxDiagrams
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
-    	          null, // 6 name 2
+    	          a.of().path(), // 6 name 2
     	          a.target.name.toString(), // 7 name start->end slot name
     	          a.source.name.toString(), // 8 name end->start slot name
     	          a.target.instLevel.minLevel, // 9 level of source
@@ -446,30 +481,6 @@ context FmmlxDiagrams
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
-
-/*    @Operation getAllAssociationInstances_OLD(requestID : Seq(Integer))
-        let
-          result = []
-        in
-    	  @For i in (if self.getPackage(requestID).fmmlxAssociationInstances = null then {} else self.getPackage(requestID).fmmlxAssociationInstances end) do
-
-    	      let
-    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createAssociationLinkKey(i.at(0).path(), i.at(1).path(), i.at(2).path()))
-    	      in
-    	        result := result.append([[
-    	          mappingInfo.id, // 0 ID
-    	          i.at(0).path(), // 1 start ID
-    	          i.at(1).path(), // 2 end ID
-    	          i.at(2).path(), // 3 assoc ID
-    	          mappingInfo.points, // 4 points
-    	          self.getMapping(requestID).getAllLabels(mappingInfo.id) // 5 labels
-    	        ]])
-    	      end // let
-    	  end;
-    	  // clean up mapping ?
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-        end
-    end*/
 
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
@@ -1758,6 +1769,57 @@ context FmmlxDiagrams
     end
 
     ////////////////// Operations for editing associations ///////////////////
+    
+  @Operation addAssociationType(requestID : Seq(Integer),
+      typeName        : String,
+      color           : String,
+      strokeWidth     : Integer,
+      dashArray       : String,
+      startDeco       : String,
+      endDeco         : String,
+      colorLink       : String,
+      strokeWidthLink : Integer,
+      dashArrayLink   : String,
+      startDecoLink   : String,
+      endDecoLink     : String,
+      sourcePath      : String,
+      targetPath      : String)
+    let 
+      m = FmmlxDiagrams::FmmlxManipulator();
+      p = self.getPackage(requestID)
+    then
+      sourceEval = m.evalString(sourcePath, self.getPackage(requestID));
+      targetEval = m.evalString(targetPath, self.getPackage(requestID));
+      problems = []
+    in
+      problems := if 
+        not typeName.isValidName() then [typeName + " is not a valid name"] elseif
+        not p.hasSlot("associationTypes") then ["Package " + p.name + "is not suitable for association types"] elseif
+        0 <> p.associationTypes->select(a | a.name.toString() = typeName).size() then [typeName + " is already in use"] elseif
+        sourceEval.at(1) <> null then [sourceEval.at(1)] elseif
+        targetEval.at(1) <> null then [targetEval.at(1)] else
+          let 
+            a = Associations::AssociationType(typeName, sourceEval.at(0), targetEval.at(0))
+          in           
+            a.color       := color;           
+            a.strokeWidth := strokeWidth;           
+            a.dashArray   := dashArray;           
+            a.startDeco   := startDeco;           
+            a.endDeco     := endDeco;
+            a.colorLink       := colorLink;           
+            a.strokeWidthLink := strokeWidthLink;           
+            a.dashArrayLink   := dashArrayLink;           
+            a.startDecoLink   := startDecoLink;           
+            a.endDecoLink     := endDecoLink;
+            p.associationTypes := {a} + p.associationTypes;
+            p.add(a);
+            []
+          end       
+        end;
+      
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) 
+    end
+  end
 
   @Operation addAssociation(requestID : Seq(Integer),
       classSourceName : String,
