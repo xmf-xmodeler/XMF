@@ -2162,7 +2162,9 @@ context FmmlxDiagrams
       let 
         classes1 = {obj1} + obj1.allAncestors()
       then
-        atts1 = classes1->collect(c | c.attributes)->flatten()
+        atts1 = classes1
+          ->select(c|c.isKindOf(Class))
+          ->collect(c | c.attributes)->flatten()
       then
         assoc = atts1
           ->select(a | a.isKindOf(Associations::End))
@@ -2184,9 +2186,10 @@ context FmmlxDiagrams
       role2Name : String)
 
       let
-  	    m = FmmlxDiagrams::FmmlxManipulator();
-  	    obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
-  	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
+  	    m = FmmlxDiagrams::FmmlxManipulator()
+  	  then
+  	    obj1 = m.evalString(obj1Name, self.getPackage(requestID)).at(0);//if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
+  	    obj2 = m.evalString(obj2Name, self.getPackage(requestID)).at(0)//if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
   	  then
         association = try self.findAssociation(obj1, role2Name) catch (e) self.findAssociation(obj1, obj2, role2Name) end
  	  then

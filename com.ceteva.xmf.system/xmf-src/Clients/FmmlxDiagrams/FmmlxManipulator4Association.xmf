@@ -49,6 +49,9 @@ import FmmlxDiagrams;
   	      
   	  // can a class symmetrically self-associate?   
   	  
+  	  elseif not source.isKindOf(assocType.sourceType) then ["Source " + source.name + " must be some kind of " + assocType.sourceType.name]
+  	  elseif not target.isKindOf(assocType.targetType) then ["Target " + target.name + " must be some kind of " + assocType.targetType.name]
+  	  
   	  else // all checks passed
         let 
           sourceFromTargetEnd = Associations::End(accessSourceFromTargetName,source,multTargetToSource);
