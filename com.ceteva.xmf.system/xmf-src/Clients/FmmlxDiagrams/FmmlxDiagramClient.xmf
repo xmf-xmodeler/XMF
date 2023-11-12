@@ -2327,9 +2327,10 @@ context FmmlxDiagrams
       roleName  : String,
       roleFillerName    : String)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        role = if self.getPackage(requestID).hasElement(roleName) then self.getPackage(requestID).getElement(roleName) else null end;
-        roleFiller = if self.getPackage(requestID).hasElement(roleFillerName) then self.getPackage(requestID).getElement(roleFillerName) else null end
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        role =  m.evalString(roleName, self.getPackage(requestID)).at(0);
+        roleFiller =  m.evalString(roleFillerName, self.getPackage(requestID)).at(0)
       then
         problems = m.setRoleFiller(role, roleFiller)
       in
@@ -3054,7 +3055,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level.minLevel+""],
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["abstract", class.isAbstract+""],
                       ["singleton", class.isSingleton+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
@@ -3063,9 +3064,8 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["name",class.name.toString()], 
-                      ["parents",""], // deprecated
                       ["abstract", class.isAbstract+""],
                       ["singleton", class.isSingleton+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
@@ -3074,9 +3074,10 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["name",class.name.toString()], 
-                      ["abstract", "false"]  // deprecated
+                      ["abstract", "false"], // deprecated
+					  ["singleton", "false"]
                       ]]
                  end
                end

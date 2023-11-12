@@ -81,7 +81,7 @@ import FmmlxDiagrams;
       let
         delegatorClass = delegateFrom.of()
       in
-        @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel <> delegateFrom.level) do
+        @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel.minLevel <> delegateFrom.level.minLevel) do
           delegatorClass := delegatorClass.of()
         end;
         if 
