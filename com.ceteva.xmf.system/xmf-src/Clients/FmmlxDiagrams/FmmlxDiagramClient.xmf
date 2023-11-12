@@ -1177,7 +1177,7 @@ context FmmlxDiagrams
               then
                 m.removeClass(newInstance, null)
               end;
-              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ok])
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID),ok, newInstance.name.toString()])
             end
           else
             self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), false])
