@@ -217,19 +217,39 @@ import FmmlxDiagrams;
     end   
      
   context FmmlxManipulator
-    @Operation changeAssociationAccessName(association, newEnd1Name, newEnd2Name)
-      /*if
-             (newEnd1Name <> null orelse newEnd1Name.toString() <> association.source.name.toString())
-             andthen self.checkAddAttribute(association.target.type, newEnd1Name, association.source.instLevel, association.source.type, null).isEmpty()
-      then
-        ["source name duplicate: " + newEnd1Name + "/" + association.source.name]
-      elseif (newEnd2Name <> null orelse newEnd2Name.toString() <> association.target.name.toString())
-             andthen self.checkAddAttribute(association.source.type, newEnd2Name, association.target.instLevel, association.target.type, null).isEmpty()
-      then
-        ["target name duplicate: " + newEnd2Name + "/" + association.target.name]
-      else
-        ["All checks have passed but t*/["The change operation has not been implemented yet"]
-      //end
+    @Operation changeAssociationAccessName(association, newSourceName, newTargetName)
+      let
+        oldSourceName = association.source.name.toString();
+        oldTargetName = association.target.name.toString();
+        problems = []
+      in
+        if 
+          newSourceName <> null andthen not oldSourceName.equals(newSourceName)
+        then
+          problems = problems + [self.migrateLinks(association.target, association.source, oldSourceName, newSourceName)]
+        end;
+        
+        if 
+          newTargetName <> null andthen not oldTargetName.equals(newTargetName)
+        then
+          problems = problems + [self.migrateLinks(association.source, association.target, oldTargetName, newTargetName)]
+        end;
+        
+        problems
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation migrateLinks(originEnd, destEnd, oldName, newName)
+      destEnd.name := newName.asSymbol();
+      if destEnd.visible then @For obj in originEnd.type.allMetaInstances()->select(i | originEnd.instLevel.minLevel = i.level.minLevel) do 
+        let
+          val = obj.get(oldName)
+        in
+          obj.removeStructuralFeature(oldName);
+          Kernel_addAtt(obj,newName.asSymbol(),val)
+        end
+      end end
     end
     
   context FmmlxManipulator
