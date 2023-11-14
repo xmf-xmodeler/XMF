@@ -116,7 +116,9 @@ context FmmlxDiagrams
         package.of() <> FMMLx::FmmlxPackage
       then
         package.setOf(FMMLx::FmmlxPackage);
-        Kernel_addAtt(package,"fmmlxAssociationInstances",{})
+        Kernel_addAtt(package,"associationTypes",{});
+        Kernel_addAtt(package,"importedPackages",{})
+        //Kernel_addAtt(package,"fmmlxAssociationInstances",{})
       end;
       //////////////////////////////////////////////////////
         
@@ -258,8 +260,18 @@ context FmmlxDiagrams
     @Operation getAllObjects(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).contents()
+          p = self.getPackage(requestID)
+        then
+          classes = p.contents()
         in
+          if
+            p.hasSlot("importedPackages")
+          then
+            @For iPack in p.importedPackages do
+              classes := classes + iPack.contents()
+            end
+          end;
+        
           self.cachedPaths := Table(classes.size());
     	  @For c in classes do
     	    if c <> null andthen (c.isKindOf(FMMLx::FmmlxObject) or c.isKindOf(Class)) then let 
@@ -387,7 +399,7 @@ context FmmlxDiagrams
     @Operation getAllAssociations(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).classes->select(c | c.isKindOf(FMMLx::MetaClass))
+          classes = self.getAllClasses(requestID)->select(c | c.isKindOf(FMMLx::MetaClass))
         then
           ends = classes->collect(c | c.attributes)->flatten()->select(a | a.isKindOf(Associations::End))
         then
@@ -485,7 +497,7 @@ context FmmlxDiagrams
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class))
+          classes = self.getAllClasses(requestID)
         in
           @For c in classes do
             let
@@ -534,10 +546,9 @@ context FmmlxDiagrams
     @Operation getAllOperations(requestID : Seq(Integer))
       let
         result = null;
-        classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class)).asSeq()
-//        O = 0;
-//        S = ""
+        classes = self.getAllClasses(requestID).asSeq()
       in
+//        ("classes.size(): " + classes.size()).println();
         // done in allObjects already: self.cachedPaths := Table(classes.size());
       
         result := Vector(classes.size());
@@ -552,7 +563,7 @@ context FmmlxDiagrams
             then
               let
                 allOps = if c.isKindOf(FMMLx::MetaClass) 
-                then c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
+                then (c.allOperations2() + c.allOperations()).asSet().asSeq()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
                 else c.allOperations()
                 end
               then
@@ -594,6 +605,7 @@ context FmmlxDiagrams
                     else
                       minLevel := (-1); maxLevel := (-1)
                     end;
+                    //("resultLocal: " + oCount + "/" + o.name).println();
                     resultLocal.put(oCount, [
                       o.name.toString(),
                       paramNames,
@@ -624,7 +636,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For c in self.getPackage(requestID).classes->select(x |  x.hasSlot("level") andthen x.level.minLevel > 0) do
+        @For c in self.getAllClasses(requestID)->select(x |  x.hasSlot("level") andthen x.level.minLevel > 0) do
           let
             localResult = []
           in
@@ -1072,7 +1084,7 @@ context FmmlxDiagrams
 
     @Operation addInstance(
             requestID : Seq(Integer),
-            ofName,
+            ofPath,
             name,
             minLevel,
             maxLevel,
@@ -1085,22 +1097,30 @@ context FmmlxDiagrams
         try
           let
             m = FmmlxDiagrams::FmmlxManipulator();
-            ofClass = if self.getPackage(requestID).hasElement(ofName) 
-                      then self.getPackage(requestID).getElement(ofName) 
-                      else null 
-                      end
-          then
-            level = if minLevel = -2 and maxLevel = -2 // legacy, old savefile, auto-level
-                    then FMMLx::Level(ofClass.level.minLevel-1, ofClass.level.maxLevel-1)
-                    else FMMLx::Level(minLevel, maxLevel)
-                    end
-          then
+            ofClass = null;
+            level = null;
             parentsList = self.getParentsList(requestID, parents);
             allParentsLegal = true
+          then
+            ofClassEval = m.evalString(ofPath, self.getPackage(requestID))
           in
+            if
+              ofClassEval.at(1) = null
+            then
+              ofClass := ofClassEval.at(0)
+            else
+              throw Exception("Class not found: " + ofClassEval.at(1))
+            end;            
+            
+            level := if minLevel = -2 and maxLevel = -2 // legacy, old savefile, auto-level
+                    then FMMLx::Level(ofClass.level.minLevel-1, ofClass.level.maxLevel-1)
+                    else FMMLx::Level(minLevel, maxLevel)
+                    end;
+         
             @For p in parentsList do
               if p.of() <> ofClass then allParentsLegal := false end
             end;
+            
             if 
               ofClass.isAbstract
             then 
@@ -1484,16 +1504,17 @@ context FmmlxDiagrams
 
     //////////////////////// Attribute Manipulations /////////////////////
 
-    @Operation addAttribute(requestID : Seq(Integer), className, name, minLevel, maxLevel, typeName, multiplicityV, isIntrinsic, isIncomplete, isOptional)
+    @Operation addAttribute(requestID : Seq(Integer), classPath, name, minLevel, maxLevel, typeName, multiplicityV, isIntrinsic, isIncomplete, isOptional)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
-//        class = self.getMapping(requestID).getMapping(classId).object;
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         type = m.getTypeForName(typeName, self.getPackage(requestID));
         multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then
-        problems = if class <> null then [] else ["Class not found"] end
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"] end else problems end
 //        problems = if class <> null then m.checkAddAttribute(class, name, if not isIntrinsic then null else FMMLx::Level(minLevel, maxLevel) end, typeName, multiplicity, isIncomplete, isOptional) else ["Class not found"] end
       in
         if
@@ -2414,15 +2435,20 @@ context FmmlxDiagrams
 
     @Operation addOperation(
       requestID  : Seq(Integer),
-      className  : String,
+      classPath  : String,
       level      : Integer,
       body       : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+        m = FmmlxDiagrams::FmmlxManipulator()
       then
-        problems = if class <> null then m.addOperation(class, FMMLx::Level(level), body) else ["Class not found"] end
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
+      then
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"]  end else problems end
+      then
+        problems = if problems = [] then m.addOperation(class, FMMLx::Level(level), body) else problems end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addOperation2", ["package", class.owner.path()],
@@ -2612,7 +2638,11 @@ context FmmlxDiagrams
         class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         constSymbol = constName.asSymbol()
       then
-        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, FMMLx::Level(instLevel), FMMLx::Severity::USER_DEFINED, "NO_SOLUTION") else ["Class "+classPath+" not found."] end
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"] end else problems end
+      then
+        problems = if problems = [] then  m.addConstraint(class, constSymbol, body, reason, FMMLx::Level(instLevel), FMMLx::Severity::USER_DEFINED, "NO_SOLUTION") else problems end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addConstraint", ["package", class.owner.path()],
@@ -3036,8 +3066,8 @@ context FmmlxDiagrams
          let
            maxLevel = 0;
            classes = package.classes;
-           associations = package.associations;
-           links = package.fmmlxAssociationInstances
+           associations = package.associations
+           //links = package.fmmlxAssociationInstances
          //then
            //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
          in
@@ -3578,4 +3608,20 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation getAllClasses(requestID) 
+      let
+        p = self.getPackage(requestID)
+      then
+        classes = p.contents()
+      in
+        if
+          p.hasSlot("importedPackages")
+        then
+          @For iPack in p.importedPackages do
+            classes := classes + iPack.contents()
+          end
+        end;
+        classes->select(x | x.isKindOf(Class))
+      end
+    end
 end

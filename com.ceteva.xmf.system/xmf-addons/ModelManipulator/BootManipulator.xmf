@@ -88,16 +88,20 @@ Compiler::compileFile(xmf.homeDir()+"/../xmf-addons/bike-challenge/BikeSetup.xmf
  
  
 let 
-  model = FMMLx::FmmlxPackage("BikePackage")
-//  model2 = Package("SecondPackage")
+  model = FMMLx::FmmlxPackage("BikePackage");
+  model2 = FMMLx::FmmlxPackage("BikePackage2")
 in 
   
   model.addParent(FMMLx);
   Root.add(model);
+  Root.add(model2);
   let 
-    project = Projects::Project(model, "BikeProject", null)
+    project = Projects::Project(model, "BikeProject", null);
+    project2 = Projects::Project(model2, "BikeProject2", null)
   in
     xmf.projectManager("MyProjects").add(project);
+    xmf.projectManager("MyProjects").add(project2);
+    model2.importedPackages := {model};
     xmf.projectManager("MyProjects").add(Projects::Project(FMMLx, "Fmmlx", null))
   end
   

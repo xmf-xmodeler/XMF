@@ -42,7 +42,7 @@ import FmmlxDiagrams;
         if
           operation.at(0) <> null
         then 
-          operation.at(0).isIntrinsic := level.minLevel = null andthen level.maxLevel = null;
+          operation.at(0).isIntrinsic := not (level.minLevel = null andthen level.maxLevel = null);
           operation.at(0).instLevel := level;
           problems := self.checkOperationAllowed(
                            class, 
