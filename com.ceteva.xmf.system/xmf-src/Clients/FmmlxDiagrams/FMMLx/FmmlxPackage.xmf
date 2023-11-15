@@ -8,97 +8,10 @@ context Root::FMMLx
   @Attribute associationTypes : Set(Associations::AssociationType) = {} end
   @Attribute importedPackages : Set(Package) = {} end
 
-/*
-
-  @Attribute fmmlxAssociationInstances : Set end
-  
-  @Operation addAssociationInstance(source, target, association)
-    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
-    self.fmmlxAssociationInstances := self.fmmlxAssociationInstances + {[source,target,association]}
-   end
-  
-  @Operation removeAssociationInstance(source, target, association) 
-    if self.fmmlxAssociationInstances = null then self.fmmlxAssociationInstances := {} end;
-    let
-      toBeRemoved = {}
-    in
-      @For link in self.fmmlxAssociationInstances do
-        if 
-          source = link.at(0) andthen target = link.at(1) andthen association = link.at(2)
-        then
-          toBeRemoved := toBeRemoved + {link}
-        end
-      end;
-      if 
-        toBeRemoved.size() <> 1 
-      then 
-        throw Exception("associationInstance not found") 
-      else
-        self.fmmlxAssociationInstances := self.fmmlxAssociationInstances - toBeRemoved
-      end
-    end
-  end
-   
-  @Operation hasAssociationInstance(source, target, association)
-    if self.fmmlxAssociationInstances = null then false 
-      else
-      let 
-        found = false
-      in
-        @For link in self.fmmlxAssociationInstances do
-          if link.at(0) = source andthen link.at(1) = target andthen link.at(2) = association then found := true end;
-          if link.at(1) = source andthen link.at(0) = target andthen link.at(2) = association then found := true end
-        end;
-        found
-      end
-    end 
+  @Operation getAssociations() 
+    self.classes->select(c|c.isKindOf(FMMLx::MetaClass))->collect(c | c.attributes)->flatten->select(a|a.isKindOf(Associations::End))->collect(e|e.association)
   end
   
-  @Operation getLinkEnds(obj:MetaClass, assocName:String) self.getLinkEnds(obj,assocName,true,true) end
-  
-  @Operation getLinkEnds(obj:MetaClass, assocName:String, findSourceEnds:Boolean, findTargetEnds:Boolean)
-    // findSourceEnds => find those where obj is target (at 1) and links to objects on the source (at 0) end
-    let
-      result = {}
-    in
-      @For link in self.fmmlxAssociationInstances do
-        if findTargetEnds andthen link.at(0) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(1)} end;
-        if findSourceEnds andthen link.at(1) = obj andthen link.at(2).name.toString() = assocName.toString() then result := result + {link.at(0)} end
-      end;
-      result
-    end
-  end
-  
-  @Operation hasAssociation(assocName:String)
-    let 
-      found = false
-    in
-      @For assoc in self.associations do
-        found := found orelse assoc.name.toString() = assocName.toString()
-      end;
-      found
-    end
-  end  
-  
-  @Operation getAssociation(assocName:String)
-    let 
-      found = null
-    in
-      @For assoc in self.associations do
-        if
-          found = null
-        then
-          if 
-            assoc.name.toString() = assocName.toString()
-          then
-            found := assoc
-          end
-        end
-      end;
-      found
-    end
-  end
-  */
 end
   
 context Root
