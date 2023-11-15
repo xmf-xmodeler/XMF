@@ -140,11 +140,10 @@ context Root
 
 context Root
   @Operation openXmlFile()
-    let file = xmf.openFile(xmf.projDir(),"*.xml") in
-      if file.fileExists() then
-        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().openXmlFile(file)
-      end
-    end
+	@Doc
+		This function sends a command to Java. Here a FileChooser is opened and the package which is contained will be loaded. 
+	end
+        xmf.findClient(Clients::FmmlxDiagrams::FmmlxDiagramClient).getCommunicator().openXmlFile()
   end
 
 context XmfFile
