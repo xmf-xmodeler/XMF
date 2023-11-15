@@ -226,13 +226,13 @@ import FmmlxDiagrams;
         if 
           newSourceName <> null andthen not oldSourceName.equals(newSourceName)
         then
-          problems = problems + [self.migrateLinks(association.target, association.source, oldSourceName, newSourceName)]
+          problems := problems + self.migrateLinks(association.target, association.source, oldSourceName, newSourceName)
         end;
         
         if 
           newTargetName <> null andthen not oldTargetName.equals(newTargetName)
         then
-          problems = problems + [self.migrateLinks(association.source, association.target, oldTargetName, newTargetName)]
+          problems := problems + self.migrateLinks(association.source, association.target, oldTargetName, newTargetName)
         end;
         
         problems
@@ -241,15 +241,24 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation migrateLinks(originEnd, destEnd, oldName, newName)
-      destEnd.name := newName.asSymbol();
-      if destEnd.visible then @For obj in originEnd.type.allMetaInstances()->select(i | originEnd.instLevel.minLevel = i.level.minLevel) do 
-        let
-          val = obj.get(oldName)
-        in
-          obj.removeStructuralFeature(oldName);
-          Kernel_addAtt(obj,newName.asSymbol(),val)
-        end
-      end end
+      if 
+        destEnd.type.allAttributes()
+          ->reject(a | a = destEnd)
+          ->exists(a | a.name.toString().equals(newName.toString()))
+      then
+        ["duplicate name " + newName]
+      else
+        destEnd.name := newName.asSymbol();
+        if destEnd.visible then @For obj in originEnd.type.allMetaInstances()->select(i | originEnd.instLevel.minLevel = i.level.minLevel) do 
+          let
+            val = obj.get(oldName)
+          in
+            obj.removeStructuralFeature(oldName);
+            Kernel_addAtt(obj,newName.asSymbol(),val)
+          end
+        end end;
+        []
+      end
     end
     
   context FmmlxManipulator
