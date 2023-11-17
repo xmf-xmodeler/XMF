@@ -26,19 +26,32 @@ context Root
           m.valueList2Multiplicity([0,-1,false,false]),
           m.valueList2Multiplicity([0, 2,true, false]),
   	      FMMLx::Level(4),FMMLx::Level(4), true, true, false, false);
-
-      m.addAssociation(p, p::A, p::B, "roleA", "roleB", "testAssoc", Associations::DefaultAssociation, 
-          m.valueList2Multiplicity([0,-1,false ,false]),
-          m.valueList2Multiplicity([0,-1,false, false]),
-  	      FMMLx::Level(1),FMMLx::Level(0), true, true, false, false);
   	      
-  	  m.addOperation2(p::Configuration, FMMLx::Level(4),  
+  	  let 
+        a = Associations::AssociationType("SpecialAssociation", p::A, p::B)
+      in           
+        a.color       := "0088ff";           
+        a.strokeWidth := 3;           
+        a.dashArray   := "";           
+        a.startDeco   := "arrow";           
+        a.endDeco     := "arrow";
+        a.colorLink       := "88ccff";           
+        a.strokeWidthLink := 2;           
+        a.dashArrayLink   := "20,10";           
+        a.startDecoLink   := "arrow";           
+        a.endDecoLink     := "arrow";
+        p.associationTypes := {a} + p.associationTypes;
+        p.add(a)
+      end;
+
+  	      
+  	  m.addOperation(p::Configuration, FMMLx::Level(4),  
       "  @Operation time[monitor=true]()
 "+    "    xmf.date()
 "+    "  end");
   	  
   	      
-  	  m.addOperation2(p::Configuration, FMMLx::Level(3),  
+  	  m.addOperation(p::Configuration, FMMLx::Level(3),  
       "  @Operation totalRevenues[monitor=true]()
 "+    "    self.allInstances().size() * 3.141592654
 "+    "  end");
@@ -79,7 +92,12 @@ context Root
       m.addAttribute(p::Bicycle, "partSalesPrice", FMMLx::Level(0), Float, m.valueList2Multiplicity([1,1,true,false]), false, false);
       m.addAttribute(p::Bicycle, "serialNo",       FMMLx::Level(0), String, m.valueList2Multiplicity([1,1,true,false]), false, false);
       
-  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
+      m.addAssociation(p, p::AA, p::BB, "roleA", "roleB", "testAssoc", BikePackage::SpecialAssociation, 
+          m.valueList2Multiplicity([0,-1,false ,false]),
+          m.valueList2Multiplicity([0,-1,false, false]),
+  	      FMMLx::Level(0),FMMLx::Level(0), false, true, false, false);
+  	      
+  	  m.addOperation(p::Configuration, FMMLx::Level(2), 
       "  @Operation highestPrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"N/A\"
@@ -94,7 +112,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, FMMLx::Level(2), 
+  	  m.addOperation(p::Configuration, FMMLx::Level(2), 
       "  @Operation averagePrice[monitor=true]()
 "+    "    if self.allInstances().size() = 0
 "+    "    then \"div/zero\"
@@ -110,7 +128,7 @@ context Root
 "+    "    end
 "+    "  end");
 
-  	  m.addOperation2(p::Configuration, FMMLx::Level(0), 
+  	  m.addOperation(p::Configuration, FMMLx::Level(0), 
       "  @Operation isBikeComplete[monitor=true]()
 "+    "    if self.frame = null then \"a Frame is missing\"
 "+    "    elseif self.fork = null then \"a Fork is missing\"

@@ -49,6 +49,9 @@ import FmmlxDiagrams;
   	      
   	  // can a class symmetrically self-associate?   
   	  
+  	  elseif not source.isKindOf(assocType.sourceType) then ["Source " + source.name + " must be some kind of " + assocType.sourceType.name]
+  	  elseif not target.isKindOf(assocType.targetType) then ["Target " + target.name + " must be some kind of " + assocType.targetType.name]
+  	  
   	  else // all checks passed
         let 
           sourceFromTargetEnd = Associations::End(accessSourceFromTargetName,source,multTargetToSource);
@@ -157,7 +160,7 @@ import FmmlxDiagrams;
               o.level.minLevel = targetFromSourceEndLevel) or 
               (o.isDescendantOf(targetClass) andthen 
               o.level.minLevel = sourceFromTargetEndLevel))) do
-              self.repairSlots(obj)
+              self.repairSlots(association)
             end;
             []
           end
@@ -165,36 +168,18 @@ import FmmlxDiagrams;
       end      
     end
     
-    /*context FmmlxManipulator
-    @Operation removeAssociation(association)
-      let
-        package = association.owner
-      in
-        // if an association exists, 
-        // it can be removed as long as the 
-        // association instances are removed first
-        
-        // remove instances
-        self.removeAllAssociationInstances(association);
-        
-        // then remove itself
-        package.associations := package.associations->excluding(association);
-        association.owner := null; []
-      end
-    end*/
-    
   context FmmlxManipulator
     @Operation changeAssociationForwardName(
       association : Association, 
       newName     : String) 
       let
-        package = association.owner;
+//        package = association.owner;
         nameChangeOk = true
       in
         if newName = null orelse "".equals(newName) then ["name not valid"] else
-          @For a in package.associations do
-            if newName.equals(a.name) then nameChangeOk := false end
-          end;
+//          @For a in package.associations do
+//            if newName.equals(a.name) then nameChangeOk := false end
+//          end; --> TODO check in both classes
           if nameChangeOk then 
             association.name := newName; []
           else
@@ -207,20 +192,20 @@ import FmmlxDiagrams;
   context FmmlxManipulator
     @Operation changeAssociationLevel(association, newEnd1Level, newEnd2Level)
       
-      if     newEnd1Level <> null andthen newEnd1Level < 0 
+      if     newEnd1Level <> null andthen newEnd1Level.minLevel < 0 
         then ["source level too small"]
-      elseif newEnd2Level <> null andthen newEnd2Level < 0 
+      elseif newEnd2Level <> null andthen newEnd2Level.minLevel < 0 
         then ["target level too small"]
-      elseif newEnd1Level <> null andthen newEnd1Level >= association.end1.type.level
+      elseif newEnd1Level <> null andthen newEnd1Level.minLevel >= association.source.type.level.minLevel
         then ["source level too high"]
-      elseif newEnd2Level <> null andthen newEnd2Level >= association.end2.type.level
+      elseif newEnd2Level <> null andthen newEnd2Level.minLevel >= association.target.type.level.minLevel
         then ["target level too high"]
-      elseif newEnd1Level <> null andthen newEnd1Level <> association.end1.instLevel 
-             andthen [] <> self.checkAddAttribute(association.end2.type, association.end1.name, newEnd1Level, association.end1.type, null)
-        then ["source level cannot be changed due to potential getter name collision"]
-      elseif newEnd2Level <> null andthen newEnd2Level <> association.end2.instLevel 
-             andthen [] <> self.checkAddAttribute(association.end1.type, association.end2.name, newEnd2Level, association.end2.type, null)
-        then ["target level cannot be changed due to potential getter name collision"]
+      elseif newEnd1Level <> null andthen newEnd1Level.minLevel <> association.source.instLevel.minLevel 
+             andthen [] <> self.checkAddAttribute(association.target.type, association.source.name, newEnd1Level, association.source.type, null)
+        then ["source level cannot be changed due to name collision"]
+      elseif newEnd2Level <> null andthen newEnd2Level.minLevel <> association.end2.instLevel.minLevel 
+             andthen [] <> self.checkAddAttribute(association.source.type, association.target.name, newEnd2Level, association.target.type, null)
+        then ["target level cannot be changed due to name collision"]
       else 
         ["All checks have passed but the change operation has not been implemented yet "]
       end
@@ -232,18 +217,47 @@ import FmmlxDiagrams;
     end   
      
   context FmmlxManipulator
-    @Operation changeAssociationAccessName(association, newEnd1Name, newEnd2Name)
-      if
-             (newEnd1Name <> null orelse newEnd1Name.toString() = association.end1.name)
-             andthen self.checkAddAttribute(association.end2.type, newEnd1Name, association.end1.instLevel, association.end1.type, null).isEmpty()
+    @Operation changeAssociationAccessName(association, newSourceName, newTargetName)
+      let
+        oldSourceName = association.source.name.toString();
+        oldTargetName = association.target.name.toString();
+        problems = []
+      in
+        if 
+          newSourceName <> null andthen not oldSourceName.equals(newSourceName)
+        then
+          problems := problems + self.migrateLinks(association.target, association.source, oldSourceName, newSourceName)
+        end;
+        
+        if 
+          newTargetName <> null andthen not oldTargetName.equals(newTargetName)
+        then
+          problems := problems + self.migrateLinks(association.source, association.target, oldTargetName, newTargetName)
+        end;
+        
+        problems
+      end
+    end
+    
+  context FmmlxManipulator
+    @Operation migrateLinks(originEnd, destEnd, oldName, newName)
+      if 
+        destEnd.type.allAttributes()
+          ->reject(a | a = destEnd)
+          ->exists(a | a.name.toString().equals(newName.toString()))
       then
-        ["source name duplicate"]
-      elseif (newEnd2Name <> null orelse newEnd2Name.toString() = association.end2.name)
-             andthen self.checkAddAttribute(association.end1.type, newEnd2Name, association.end2.instLevel, association.end2.type, null).isEmpty()
-      then
-        ["target name duplicate"]
+        ["duplicate name " + newName]
       else
-        ["All checks have passed but the change operation has not been implemented yet"]
+        destEnd.name := newName.asSymbol();
+        if destEnd.visible then @For obj in originEnd.type.allMetaInstances()->select(i | originEnd.instLevel.minLevel = i.level.minLevel) do 
+          let
+            val = obj.get(oldName)
+          in
+            obj.removeStructuralFeature(oldName);
+            Kernel_addAtt(obj,newName.asSymbol(),val)
+          end
+        end end;
+        []
       end
     end
     
@@ -251,15 +265,16 @@ import FmmlxDiagrams;
     @Operation changeAssociationMultiplicity(association, newSourceMult, newTargetMult)
       let 
         package = association.owner;
-        oldSourceMult = association.end1.mult();
-        oldTargetMult = association.end2.mult();
-        problems = [];
-        oldSourceCount = null;
-        oldTargetCount = null
+        oldSourceMult = association.source.mult();
+        oldTargetMult = association.target.mult();
+        problems = []
+        //;
+        //oldSourceCount = null;
+        //oldTargetCount = null
       in
         newSourceMult := if newSourceMult = null then oldSourceMult else newSourceMult end;
         newTargetMult := if newTargetMult = null then oldTargetMult else newTargetMult end;
-        
+        /*
         oldSourceCount := self.countOccurencesForType(association.end1.type,association.end1.instLevel,package,association,true,false);
         oldTargetCount := self.countOccurencesForType(association.end2.type,association.end2.instLevel,package,association,false,true); 
         
@@ -278,11 +293,16 @@ import FmmlxDiagrams;
         if newTargetMult.hasUpperBound andthen ((not oldTargetMult.hasUpperBound) orelse newTargetMult.upperBound < oldTargetMult.upperBound) then
           if oldTargetCount.at(1) <> null andthen oldTargetCount.at(1) > newTargetMult.upperBound then 
             problems := problems + ["Maximum multiplicity decrease for source not possible. "] end end;
-            
+        */    
         if problems.size() = 0 then 
-          association.end1.mult := newSourceMult;
-          association.end2.mult := newTargetMult
+          association.source.mult := newSourceMult;
+          association.target.mult := newTargetMult
         end;
+        
+        self.changeLinkContainer(association.target.type, association.source.name, association.source.instLevel.minLevel, 
+          oldSourceMult, newSourceMult);
+        self.changeLinkContainer(association.source.type, association.target.name, association.target.instLevel.minLevel, 
+          oldTargetMult, newTargetMult);
         
         problems
       end
@@ -299,7 +319,32 @@ import FmmlxDiagrams;
     // add assoc value (new val1, new val2)
     // remove assoc value (old val1, old val2)
     // replace assoc value (old val1, old val2, new val1, new val2) -> use remove + add?
-    
+  
+  context FmmlxManipulator
+    @Operation changeLinkContainer(class, slotName, slotLevel, oldMult, newMult) 
+      let 
+        oldIsSet = not (oldMult.hasUpperBound andthen oldMult.upperBound = 1);
+        newIsSet = not (newMult.hasUpperBound andthen newMult.upperBound = 1)
+      in
+        if 
+          oldIsSet <> newIsSet
+        then
+          @For instance in class.allMetaInstances()->select(i | i.level.minLevel = slotLevel) do
+            // the instance should have the slot, no check made
+            if newIsSet and not oldIsSet then
+              instance.set(slotName, if instance.get(slotName) = null then {} else {instance.get(slotName)} end) end;
+            if oldIsSet and not newIsSet then
+              let 
+                set = instance.get(slotName)
+              in
+                instance.set(slotName, if set = null orelse set.size() = 0 then null else set.asSeq().at(0) end)
+              end
+            end
+          end
+        end
+      end      
+    end
+  
   context FmmlxManipulator
     @Operation setAssociationEndVisibility(
       assoc          : Association,
@@ -307,8 +352,8 @@ import FmmlxDiagrams;
       newVisibility  : Boolean)
       
       let 
-        End       = if concernsTarget then assoc.end2 else assoc.end1 end;
-        class     = if concernsTarget then assoc.end1 else assoc.end2 end.type
+        End       = if concernsTarget then assoc.target else assoc.source end;
+        class     = if concernsTarget then assoc.source else assoc.target end.type
        then 
         type          = End.type;
         name          = End.name;
@@ -317,10 +362,18 @@ import FmmlxDiagrams;
         mult          = End.mult
       in
         End.visible := newVisibility;
-        if newVisibility and not oldVisibility then 
+        /*if newVisibility and not oldVisibility then 
           self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc, concernsTarget, mult) end;
         if oldVisibility and not newVisibility then 
-          self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;
+          self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;*/
+        @For obj in sourceClass.owner.classes->select(o | 
+          o.isKindOf(FMMLx::FmmlxObject) andthen
+          ((o.isDescendantOf(sourceClass) andthen 
+          o.level.minLevel = targetFromSourceEndLevel) or 
+          (o.isDescendantOf(targetClass) andthen 
+          o.level.minLevel = sourceFromTargetEndLevel))) do
+          self.repairSlots(obj)
+        end;
         []
       end
     end

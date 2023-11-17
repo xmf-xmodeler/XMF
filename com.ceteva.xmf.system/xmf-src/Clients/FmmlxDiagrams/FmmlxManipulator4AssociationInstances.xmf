@@ -69,8 +69,8 @@ context FmmlxManipulator
     in 
      // First check if they aren't there already ->
      // might be unnecessary, as Sets ignore duplicates anyway
-      if not p.hasAssociationInstance(objectS, objectT, a)
-      then
+     // if not p.hasAssociationInstance(objectS, objectT, a)
+     // then
         if self.isInstanceOf(objectS, typeS, instLevelS) andthen self.isInstanceOf(objectT, typeT, instLevelT)
         then typesOK := true 
         else if self.isInstanceOf(objectT, typeS, instLevelS) andthen self.isInstanceOf(objectS, typeT, instLevelT)
@@ -79,10 +79,17 @@ context FmmlxManipulator
         // Now it is checked if the objects fit the type (typesOK). If that is the case, objectS and objectT may have swapped to fit the type.
 
         if typesOK then 
-          let 
+          let
+            slotS2T = objectS.get(a.target.name);
+            slotT2S = if a.source.visible then objectT.get(a.source.name) else null end
+          then 
+            sCount = if slotS2T = null then 0 elseif slotS2T.isKindOf(Set(Element)) then slotS2T.size() else 1 end;
+            tCount = if a.source.visible then
+                       if slotT2S = null then 0 elseif slotT2S.isKindOf(Set(Element)) then slotT2S.size() else 1 end
+                     else null end;
             // countOccurences likely does not work anymore and always returns 0 
-            sCount = self.countOccurences(objectS, p, a, true, false); // how many links to t go out of objectS
-            tCount = self.countOccurences(objectT, p, a, false, true); // how many links to s go out of objectT
+            //sCount = self.countOccurences(objectS, p, a, true, false); // how many links to t go out of objectS
+            //tCount = self.countOccurences(objectT, p, a, false, true); // how many links to s go out of objectT
             sMult = a.target.mult;  // how many links to t are allowed for objectS
             tMult = a.source.mult // how many links to s are allowed for objectT
           in
@@ -131,9 +138,9 @@ context FmmlxManipulator
         else // types not OK
           ["The objects do not fit the type."]
         end // if typesOK
-      else // p already has
-        ["The link already exists."]
-      end // if not already there
+      //else // p already has
+      //  ["The link already exists."]
+      //end // if not already there
     end
   end
     

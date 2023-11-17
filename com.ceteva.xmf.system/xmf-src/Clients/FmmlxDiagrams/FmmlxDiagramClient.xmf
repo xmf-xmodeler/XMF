@@ -116,7 +116,9 @@ context FmmlxDiagrams
         package.of() <> FMMLx::FmmlxPackage
       then
         package.setOf(FMMLx::FmmlxPackage);
-        Kernel_addAtt(package,"fmmlxAssociationInstances",{})
+        Kernel_addAtt(package,"associationTypes",{});
+        Kernel_addAtt(package,"importedPackages",{})
+        //Kernel_addAtt(package,"fmmlxAssociationInstances",{})
       end;
       //////////////////////////////////////////////////////
         
@@ -220,11 +222,56 @@ context FmmlxDiagrams
                   .asSeq()])
     end
 
+    @Operation getAssociationTypes(requestID : Seq(Integer))
+      let
+        result = [];
+        p = self.getPackage(requestID);
+        assocTypes = {Associations::DefaultAssociation, Associations::Aggregation, Associations::Composition}
+      in
+        if p.hasSlot("associationTypes") then
+          assocTypes := p.associationTypes + assocTypes
+        end;        
+        @For aType in assocTypes do
+          result := [[
+            aType.name.toString(),
+            aType.path(),
+            aType.color,
+            aType.strokeWidth,
+            aType.dashArray,
+            aType.startDeco,
+            aType.endDeco,
+            aType.sourceType.path(),
+            aType.targetType.path(),
+            aType.sourceLevel+"",
+            aType.targetLevel+"",
+            aType.sourceMult+"",
+            aType.targetMult+"",
+            aType.colorLink,
+            aType.strokeWidthLink,
+            aType.dashArrayLink,
+            aType.startDecoLink,
+            aType.endDecoLink
+          ]] + result
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
     @Operation getAllObjects(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).contents()
+          p = self.getPackage(requestID)
+        then
+          classes = p.contents()
         in
+          if
+            p.hasSlot("importedPackages")
+          then
+            @For iPack in p.importedPackages do
+              classes := classes + iPack.contents()
+            end
+          end;
+        
           self.cachedPaths := Table(classes.size());
     	  @For c in classes do
     	    if c <> null andthen (c.isKindOf(FMMLx::FmmlxObject) or c.isKindOf(Class)) then let 
@@ -352,7 +399,7 @@ context FmmlxDiagrams
     @Operation getAllAssociations(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).classes->select(c | c.isKindOf(FMMLx::MetaClass))
+          classes = self.getAllClasses(requestID)->select(c | c.isKindOf(FMMLx::MetaClass))
         then
           ends = classes->collect(c | c.attributes)->flatten()->select(a | a.isKindOf(Associations::End))
         then
@@ -373,7 +420,7 @@ context FmmlxDiagrams
     	          -1, // 3 parent ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
-    	          null, // 6 name 2
+    	          a.of().path(), // 6 name 2
     	          a.target.name.toString(), // 7 name start->end slot name
     	          a.source.name.toString(), // 8 name end->start slot name
     	          a.target.instLevel.minLevel, // 9 level of source
@@ -447,34 +494,10 @@ context FmmlxDiagrams
       end
     end
 
-/*    @Operation getAllAssociationInstances_OLD(requestID : Seq(Integer))
-        let
-          result = []
-        in
-    	  @For i in (if self.getPackage(requestID).fmmlxAssociationInstances = null then {} else self.getPackage(requestID).fmmlxAssociationInstances end) do
-
-    	      let
-    	        mappingInfo = self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createAssociationLinkKey(i.at(0).path(), i.at(1).path(), i.at(2).path()))
-    	      in
-    	        result := result.append([[
-    	          mappingInfo.id, // 0 ID
-    	          i.at(0).path(), // 1 start ID
-    	          i.at(1).path(), // 2 end ID
-    	          i.at(2).path(), // 3 assoc ID
-    	          mappingInfo.points, // 4 points
-    	          self.getMapping(requestID).getAllLabels(mappingInfo.id) // 5 labels
-    	        ]])
-    	      end // let
-    	  end;
-    	  // clean up mapping ?
-    	  self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
-        end
-    end*/
-
     @Operation getAllAttributes(requestID : Seq(Integer))
         let
           result = [];
-          classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class))
+          classes = self.getAllClasses(requestID)
         in
           @For c in classes do
             let
@@ -523,10 +546,9 @@ context FmmlxDiagrams
     @Operation getAllOperations(requestID : Seq(Integer))
       let
         result = null;
-        classes = self.getPackage(requestID).contents()->select(x | x.isKindOf(Class)).asSeq()
-//        O = 0;
-//        S = ""
+        classes = self.getAllClasses(requestID).asSeq()
       in
+//        ("classes.size(): " + classes.size()).println();
         // done in allObjects already: self.cachedPaths := Table(classes.size());
       
         result := Vector(classes.size());
@@ -541,7 +563,7 @@ context FmmlxDiagrams
             then
               let
                 allOps = if c.isKindOf(FMMLx::MetaClass) 
-                then c.allOperations2()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
+                then (c.allOperations2() + c.allOperations()).asSet().asSeq()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
                 else c.allOperations()
                 end
               then
@@ -583,6 +605,7 @@ context FmmlxDiagrams
                     else
                       minLevel := (-1); maxLevel := (-1)
                     end;
+                    //("resultLocal: " + oCount + "/" + o.name).println();
                     resultLocal.put(oCount, [
                       o.name.toString(),
                       paramNames,
@@ -613,7 +636,7 @@ context FmmlxDiagrams
       let
         result = []
       in
-        @For c in self.getPackage(requestID).classes->select(x |  x.hasSlot("level") andthen x.level.minLevel > 0) do
+        @For c in self.getAllClasses(requestID)->select(x |  x.hasSlot("level") andthen x.level.minLevel > 0) do
           let
             localResult = []
           in
@@ -996,7 +1019,8 @@ context FmmlxDiagrams
         m = FmmlxDiagrams::FmmlxManipulator();
         parentsList = self.getParentsList(requestID, parents);
         problems = [];
-        allParentsLegal = true
+        allParentsLegal = true;
+        level = FMMLx::Level(minLevel,maxLevel)
       in
         @For p in parentsList do
           if p.of() <> FMMLx::MetaClass 
@@ -1004,6 +1028,7 @@ context FmmlxDiagrams
             orelse p.level.maxLevel <> maxLevel 
           then allParentsLegal := false end
         end;
+        problems := problems + if not (level.isValidForObject() and level.minLevel > 0) then ["Level not suitable for a class"] else [] end;
         problems := problems + if not allParentsLegal then ["Not all superclasses are legal."] else [] end;
         problems := problems + if not Symbol(name).isValidName() then ["name " + name + " not legal."] else [] end;
         problems := problems + if self.getPackage(requestID).hasElement(name) then ["name " + name + " already in use."] else [] end;
@@ -1059,7 +1084,7 @@ context FmmlxDiagrams
 
     @Operation addInstance(
             requestID : Seq(Integer),
-            ofName,
+            ofPath,
             name,
             minLevel,
             maxLevel,
@@ -1072,22 +1097,30 @@ context FmmlxDiagrams
         try
           let
             m = FmmlxDiagrams::FmmlxManipulator();
-            ofClass = if self.getPackage(requestID).hasElement(ofName) 
-                      then self.getPackage(requestID).getElement(ofName) 
-                      else null 
-                      end
-          then
-            level = if minLevel = -2 and maxLevel = -2 // legacy, old savefile, auto-level
-                    then FMMLx::Level(ofClass.level.minLevel-1, ofClass.level.maxLevel-1)
-                    else FMMLx::Level(minLevel, maxLevel)
-                    end
-          then
+            ofClass = null;
+            level = null;
             parentsList = self.getParentsList(requestID, parents);
             allParentsLegal = true
+          then
+            ofClassEval = m.evalString(ofPath, self.getPackage(requestID))
           in
+            if
+              ofClassEval.at(1) = null
+            then
+              ofClass := ofClassEval.at(0)
+            else
+              throw Exception("Class not found: " + ofClassEval.at(1))
+            end;            
+            
+            level := if minLevel = -2 and maxLevel = -2 // legacy, old savefile, auto-level
+                    then FMMLx::Level(ofClass.level.minLevel-1, ofClass.level.maxLevel-1)
+                    else FMMLx::Level(minLevel, maxLevel)
+                    end;
+         
             @For p in parentsList do
               if p.of() <> ofClass then allParentsLegal := false end
             end;
+            
             if 
               ofClass.isAbstract
             then 
@@ -1105,7 +1138,7 @@ context FmmlxDiagrams
             then 
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Not all superclasses are legal."]])
             elseif 
-              not ofClass.level.canBeInstantiatatedTo(level)
+              not ofClass.level.canBeInstantiatatedTo(level) and level.isValidForObject()
             then 
               self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ["Level " + ofClass.level.toString() + " cannot be instantiated to level " + level.toString() + "."]])
             else
@@ -1224,7 +1257,7 @@ context FmmlxDiagrams
               then
                 m.removeClass(newInstance, null)
               end;
-              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), ok])
+              self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID),ok, newInstance.name.toString()])
             end
           else
             self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), false])
@@ -1357,6 +1390,26 @@ context FmmlxDiagrams
         self.log := self.log + [["changeClassName", ["package", class.owner.path()], ["class", className] , ["newName",newName]]]
       end;
       self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), []])
+    end
+    
+    @Operation changeClassLevel(requestID : Seq(Integer), 
+            classPath, 
+            minLevel,
+            maxLevel)
+      let 
+        m = FmmlxDiagrams::FmmlxManipulator();
+        newLevel = FMMLx::Level(minLevel,maxLevel)
+      then
+        obj = m.evalString(classPath, self.getPackage(requestID)).at(0)
+      then
+        problems = try 
+          m.changeClassLevel(obj, newLevel);[]
+        catch (e)
+          [e.toString()]
+        end
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
     end
 
     @Operation setClassAbstract(requestID : Seq(Integer), className, isAbstract)
@@ -1511,16 +1564,17 @@ context FmmlxDiagrams
 
     //////////////////////// Attribute Manipulations /////////////////////
 
-    @Operation addAttribute(requestID : Seq(Integer), className, name, minLevel, maxLevel, typeName, multiplicityV, isIntrinsic, isIncomplete, isOptional)
+    @Operation addAttribute(requestID : Seq(Integer), classPath, name, minLevel, maxLevel, typeName, multiplicityV, isIntrinsic, isIncomplete, isOptional)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end;
-//        class = self.getMapping(requestID).getMapping(classId).object;
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         type = m.getTypeForName(typeName, self.getPackage(requestID));
         multiplicity = m.valueList2Multiplicity(self.vector2Seq(multiplicityV))
       then
-        problems = if class <> null then [] else ["Class not found"] end
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"] end else problems end
 //        problems = if class <> null then m.checkAddAttribute(class, name, if not isIntrinsic then null else FMMLx::Level(minLevel, maxLevel) end, typeName, multiplicity, isIncomplete, isOptional) else ["Class not found"] end
       in
         if
@@ -1585,11 +1639,11 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAttributeLevel(requestID : Seq(Integer), className, attName, oldLevel, newLevel)
+    @Operation changeAttributeLevel(requestID : Seq(Integer), classPath, attName, oldLevel, newLevel)
       let
         m = FmmlxDiagrams::FmmlxManipulator()
       then
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       then
         problems = if class <> null then m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel) else ["Class not found"] end
         //problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
@@ -1796,6 +1850,57 @@ context FmmlxDiagrams
     end
 
     ////////////////// Operations for editing associations ///////////////////
+    
+  @Operation addAssociationType(requestID : Seq(Integer),
+      typeName        : String,
+      color           : String,
+      strokeWidth     : Integer,
+      dashArray       : String,
+      startDeco       : String,
+      endDeco         : String,
+      colorLink       : String,
+      strokeWidthLink : Integer,
+      dashArrayLink   : String,
+      startDecoLink   : String,
+      endDecoLink     : String,
+      sourcePath      : String,
+      targetPath      : String)
+    let 
+      m = FmmlxDiagrams::FmmlxManipulator();
+      p = self.getPackage(requestID)
+    then
+      sourceEval = m.evalString(sourcePath, self.getPackage(requestID));
+      targetEval = m.evalString(targetPath, self.getPackage(requestID));
+      problems = []
+    in
+      problems := if 
+        not typeName.isValidName() then [typeName + " is not a valid name"] elseif
+        not p.hasSlot("associationTypes") then ["Package " + p.name + "is not suitable for association types"] elseif
+        0 <> p.associationTypes->select(a | a.name.toString() = typeName).size() then [typeName + " is already in use"] elseif
+        sourceEval.at(1) <> null then [sourceEval.at(1)] elseif
+        targetEval.at(1) <> null then [targetEval.at(1)] else
+          let 
+            a = Associations::AssociationType(typeName, sourceEval.at(0), targetEval.at(0))
+          in           
+            a.color       := color;           
+            a.strokeWidth := strokeWidth;           
+            a.dashArray   := dashArray;           
+            a.startDeco   := startDeco;           
+            a.endDeco     := endDeco;
+            a.colorLink       := colorLink;           
+            a.strokeWidthLink := strokeWidthLink;           
+            a.dashArrayLink   := dashArrayLink;           
+            a.startDecoLink   := startDecoLink;           
+            a.endDecoLink     := endDecoLink;
+            p.associationTypes := {a} + p.associationTypes;
+            p.add(a);
+            []
+          end       
+        end;
+      
+      self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) 
+    end
+  end
 
   @Operation addAssociation(requestID : Seq(Integer),
       classSourceName : String,
@@ -1968,7 +2073,8 @@ context FmmlxDiagrams
       newName       : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         assoc = self.findAssociation(sourceClass, targetName)
@@ -1978,9 +2084,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationForwardName(assoc, newName)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationForwardName", ["package", assoc.owner.path()], ["newFwName", newName], ["oldFwName", oldName]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationForwardName", ["package", assoc.owner.path()], ["newFwName", newName], ["oldFwName", oldName]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -1992,7 +2098,8 @@ context FmmlxDiagrams
       multV)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2002,9 +2109,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationMultiplicity(a, newMult, null)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationEnd2StartMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -2016,7 +2123,8 @@ context FmmlxDiagrams
       multV)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2026,9 +2134,9 @@ context FmmlxDiagrams
       then
         problems = m.changeAssociationMultiplicity(a, null, newMult)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
-        end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["changeAssociationStart2EndMultiplicity", ["package", a.owner.path()], ["name", a.name], ["multiplicity", FmmlxManipulator::multiplicity2ValueList(newMult)+""]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -2040,7 +2148,8 @@ context FmmlxDiagrams
       name)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2059,7 +2168,8 @@ context FmmlxDiagrams
       name)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
@@ -2077,13 +2187,14 @@ context FmmlxDiagrams
       targetName    : String,
       level)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
         // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.changeAssociationLevel(a, null, level)
+        problems = m.changeAssociationLevel(a, null, FMMLx::Level(level))
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -2095,13 +2206,14 @@ context FmmlxDiagrams
       targetName    : String, 
       level)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         a = self.findAssociation(sourceClass, targetName)
         // a = if self.getPackage(requestID).hasAssociation(assocName) then self.getPackage(requestID).getAssociation(assocName) else null end
       then
-        problems = m.changeAssociationLevel(a, level, null)
+        problems = m.changeAssociationLevel(a, FMMLx::Level(level), null)
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
@@ -2129,9 +2241,11 @@ context FmmlxDiagrams
     
     @Operation findAssociation(obj1, role2AccessName)
       let 
-        classes1 = obj1.allAncestors()
+        classes1 = {obj1} + obj1.allAncestors()
       then
-        atts1 = classes1->collect(c | c.attributes)->flatten()
+        atts1 = classes1
+          ->select(c|c.isKindOf(Class))
+          ->collect(c | c.attributes)->flatten()
       then
         assoc = atts1
           ->select(a | a.isKindOf(Associations::End))
@@ -2153,9 +2267,10 @@ context FmmlxDiagrams
       role2Name : String)
 
       let
-  	    m = FmmlxDiagrams::FmmlxManipulator();
-  	    obj1 = if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
-  	    obj2 = if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
+  	    m = FmmlxDiagrams::FmmlxManipulator()
+  	  then
+  	    obj1 = m.evalString(obj1Name, self.getPackage(requestID)).at(0);//if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
+  	    obj2 = m.evalString(obj2Name, self.getPackage(requestID)).at(0)//if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
   	  then
         association = try self.findAssociation(obj1, role2Name) catch (e) self.findAssociation(obj1, obj2, role2Name) end
  	  then
@@ -2293,9 +2408,10 @@ context FmmlxDiagrams
       roleName  : String,
       roleFillerName    : String)
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        role = if self.getPackage(requestID).hasElement(roleName) then self.getPackage(requestID).getElement(roleName) else null end;
-        roleFiller = if self.getPackage(requestID).hasElement(roleFillerName) then self.getPackage(requestID).getElement(roleFillerName) else null end
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then 
+        role =  m.evalString(roleName, self.getPackage(requestID)).at(0);
+        roleFiller =  m.evalString(roleFillerName, self.getPackage(requestID)).at(0)
       then
         problems = m.setRoleFiller(role, roleFiller)
       in
@@ -2358,12 +2474,12 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeOperationLevel(requestID : Seq(Integer), className, name, oldLevel, newLevel)
+    @Operation changeOperationLevel(requestID : Seq(Integer), classPath, name, oldLevel, newLevel)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
-        //class = self.getMapping(requestID).getMapping(classId).object
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       then
         o = m.findOperation(class,name)
       then
@@ -2377,17 +2493,22 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation addOperation2(
+    @Operation addOperation(
       requestID  : Seq(Integer),
-      className  : String,
+      classPath  : String,
       level      : Integer,
       body       : String)
 
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
-        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+        m = FmmlxDiagrams::FmmlxManipulator()
       then
-        problems = if class <> null then m.addOperation2(class, FMMLx::Level(level), body) else ["Class not found"] end
+        class = m.evalString(classPath, self.getPackage(requestID)).at(0)
+      then
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"]  end else problems end
+      then
+        problems = if problems = [] then m.addOperation(class, FMMLx::Level(level), body) else problems end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addOperation2", ["package", class.owner.path()],
@@ -2409,7 +2530,7 @@ context FmmlxDiagrams
             m = FmmlxDiagrams::FmmlxManipulator();
             class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
           then
-            problems = if class <> null then m.addOperation2(class, level, body) else ["Class not found"] end
+            problems = if class <> null then m.addOperation(class, level, body) else ["Class not found"] end
           in
             if problems.isEmpty() then
                 self.log := self.log + [["addOperation2", ["package", class.owner.path()],
@@ -2577,7 +2698,11 @@ context FmmlxDiagrams
         class = m.evalString(classPath, self.getPackage(requestID)).at(0);
         constSymbol = constName.asSymbol()
       then
-        problems = if class <> null then m.addConstraint(class, constSymbol, body, reason, FMMLx::Level(instLevel), FMMLx::Severity::USER_DEFINED, "NO_SOLUTION") else ["Class "+classPath+" not found."] end
+        problems = if class <> null then [] else ["Class "+classPath+" not found."] end
+      then
+        problems = if problems = [] then if class.owner = self.getPackage(requestID) then [] else ["Imported classes cannot be edited"] end else problems end
+      then
+        problems = if problems = [] then  m.addConstraint(class, constSymbol, body, reason, FMMLx::Level(instLevel), FMMLx::Severity::USER_DEFINED, "NO_SOLUTION") else problems end
       in
         if problems.isEmpty() then
             self.log := self.log + [["addConstraint", ["package", class.owner.path()],
@@ -2775,10 +2900,6 @@ context FmmlxDiagrams
 
     @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new)
       self.respondNotYetImplemented("changeOf", self.vector2Seq(requestID))
-    end
-
-    @Operation changeClassLevel(requestID : Seq(Integer), idO, newLevel)
-      self.respondNotYetImplemented("changeClassLevel", self.vector2Seq(requestID))
     end
 
     @Operation addEnumeration(requestID : Seq(Integer), newEnumName:String)
@@ -3005,8 +3126,8 @@ context FmmlxDiagrams
          let
            maxLevel = 0;
            classes = package.classes;
-           associations = package.associations;
-           links = package.fmmlxAssociationInstances
+           associations = package.associations
+           //links = package.fmmlxAssociationInstances
          //then
            //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
          in
@@ -3024,7 +3145,7 @@ context FmmlxDiagrams
                       ["package", class.owner.path()],
                       ["name", class.name.toString()],
                       ["level", class.level.minLevel+""],
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["abstract", class.isAbstract+""],
                       ["singleton", class.isSingleton+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
@@ -3033,9 +3154,8 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["name",class.name.toString()], 
-                      ["parents",""], // deprecated
                       ["abstract", class.isAbstract+""],
                       ["singleton", class.isSingleton+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
@@ -3044,9 +3164,10 @@ context FmmlxDiagrams
                       ["package", class.owner.path()], 
                       ["of", class.of().path()], 
                       ["level", class.level.minLevel+""], 
-                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.minLevel+"" end],
+                      ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["name",class.name.toString()], 
-                      ["abstract", "false"]  // deprecated
+                      ["abstract", "false"], // deprecated
+					  ["singleton", "false"]
                       ]]
                  end
                end
@@ -3547,4 +3668,20 @@ context FmmlxDiagrams
       end
     end
     
+    @Operation getAllClasses(requestID) 
+      let
+        p = self.getPackage(requestID)
+      then
+        classes = p.contents()
+      in
+        if
+          p.hasSlot("importedPackages")
+        then
+          @For iPack in p.importedPackages do
+            classes := classes + iPack.contents()
+          end
+        end;
+        classes->select(x | x.isKindOf(Class))
+      end
+    end
 end
