@@ -1,0 +1,246 @@
+parserImport XOCL;
+import Clients;
+import FmmlxDiagrams;
+
+context FmmlxDiagrams
+@Class Testing
+
+@Attribute currentDiagram : Element end		//The Package for the diagram
+@Attribute currentProject : Element end
+@Attribute classes : Element end
+@Attribute m : Clients::FmmlxDiagrams::FmmlxManipulator end
+
+@Operation setup[monitor=false,delToClassAllowed=false]():XCore::Element
+  let dataTypes = Seq{Integer,String,Boolean,Float /*,MonetaryValue,Currency,Date*/};
+      intValues = Seq{0,1,0 - 100,9999999999};
+      stringValues = Seq{"","A","A1","#","A1#"};
+      booleanValues = Seq{true,false};
+      floatValues = Seq{1,0.1,1000000.0,0 - 100,0 - 111.111};
+      dateValues = Seq{};
+      assocSpecs = [["testAssoc",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0],["tAssoc",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0]];	//for testing only later replaced by manual entry via console or by reading a text file
+      attrSpecs = [["testAttribute",2,0,0,0,Multiplicities::SingleMult(false)],["tAttribute",1,1,2,0,Multiplicities::SingleMult(false)]];
+      consSpecs = [["testConstraint","false","\"Test Reason\"",0,1,0],["tConstraint","true","\"Test Reason\"",0,2,0]];
+      classSpecs = [["TestClassA",1,false,3],["TestClassB",2,false,2]];
+      deleSpecs = [[1,1,1],[2,0,1]];
+      opSpecs = [[1,0,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",1,2],[2,1,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",0,1]];
+      instSpecs = [["testInstanceA",1,0,1,2,[],2],["testInstanceB",2,1,0,1,[],1]]
+      in
+  self.currentDiagram := FMMLx::FmmlxPackage("Test"+1);	//naming should be done with index later on
+  self.currentDiagram.addParent(FMMLx);
+  Root.add(currentDiagram);
+  self.currentProject := Projects::Project(currentDiagram,"Test" + 1 + "Project",null);
+  xmf.projectManager("MyProjects").add(currentProject);
+  self.m := Clients::FmmlxDiagrams::FmmlxManipulator();
+  
+     self.classSetup(classSpecs);
+       self.classes := currentDiagram.classes.asSeq();		//Classes have to be created beforehand
+     
+     self.attributeSetup(dataTypes,attrSpecs);
+     self.associationSetup(assocSpecs);
+     self.delegationSetup(deleSpecs);
+     self.operationSetup(opSpecs);
+     self.constraintSetup(consSpecs);
+     self.instanceSetup(instSpecs)
+  end		
+end
+
+
+@Operation classSetup[monitor=false,delToClassAllowed=false](classSpecs : XCore::Element):XCore::Element
+@Doc
+creates the Classes for the Diagram. Specs are formated as follows:
+[[name,lvl,abstract,numberOfClasses]]
+end
+	let i=0;i2=0
+	in
+		@While i < classSpecs.size() do
+		i2:=0;
+			@While i2<classSpecs.at(i).at(3) do
+			self.createClass(classSpecs.at(i).at(0)+i+"_"+i2, classSpecs.at(i).at(1), classSpecs.at(i).at(2));
+			i2:=i2+1
+			end;
+		i:=i+1
+		end
+	end
+end
+
+
+@Operation createClass[monitor=false,delToClassAllowed=false](name : XCore::Element,lvl : XCore::Element,abstract):XCore::Element
+m.addMetaClass(currentDiagram,name,lvl,Set{},abstract)
+end
+
+
+@Operation constraintSetup[monitor=false,delToClassAllowed=false](consSpecs):XCore::Element
+@Doc
+consSpecs is formated as follows:
+[[name,code,reason,lvl,numberOfConstraints,skipClasses]]
+end
+	let i=0;i2=0
+	in
+		@While i < consSpecs.size() do
+		i2:=consSpecs.at(i).at(5);
+			@While i2<consSpecs.at(i).at(4) do
+			self.addConstraint(classes.at(i2),consSpecs.at(i).at(0)+i+"_"+i2,consSpecs.at(i).at(1),consSpecs.at(i).at(2),consSpecs.at(i).at(3));
+			i2:=i2+1
+			end;
+		i:=i+1
+		end
+	end
+end
+
+
+@Operation addConstraint[monitor=false,delToClassAllowed=false](class,name,code,reason,lvl):XCore::Element
+m.addConstraint(class,name,code,reason,lvl,null,"solutionKey")
+end
+
+ 
+@Operation associationSetup[monitor=false,delToClassAllowed=false](assocSpecs):XCore::Element
+@Doc
+This method creates the associations according to the specs from assocSpecs.
+assocSpecs is a seq which contains seq with the specs for the different Associations. It is formatted like this:
+ [[name,multSource,multTarget,instLvlS,instLvlT,visibleFromS,visibleFromT,symmetric,transitive,createItBetweenThisManyClasses,skipTheFirstThisManyClasses]]
+end
+	let i=0;i2=0
+	in
+		@While i<assocSpecs.size() do 
+		i2:=assocSpecs.at(i).at(10);
+			@While i2<assocSpecs.at(i).at(9) and i2<classes.size()-1 do	//-1 because one class is not enough to create another association
+			self.addAssociation(classes.at(i2),classes.at(i2+1),assocSpecs.at(i).at(1),assocSpecs.at(i).at(2),assocSpecs.at(i).at(0)+i+"_"+i2,assocSpecs.at(i).at(3),assocSpecs.at(i).at(4),assocSpecs.at(i).at(5),assocSpecs.at(i).at(6),assocSpecs.at(i).at(7),assocSpecs.at(i).at(8));
+			i2:=i2+2
+			end;
+		i:=i+1
+		end
+	end
+end
+
+
+@Operation addAssociation[monitor=false,delToClassAllowed=false](source,target,multS,multT,name,instLvlS,instLvlT,visibleFromS,visibleFromT,symmetric,transitive):XCore::Element
+  m.addAssociation(currentDiagram,source,target,source.name+name,target.name+name,name,"reverseName",multS,multT,instLvlS,instLvlT,visibleFromT,visibleFromS,symmetric,transitive)
+end
+
+
+@Operation delegationSetup[monitor=false,delToClassAllowed=false](deleSpecs):XCore::Element
+@Doc
+This function creates Delegations between two classes. The selection is for now random and only filter out classes of a different level from the role filler.
+deleSpecs is formated as follows:
+[[level,skipThisNumberOfClasses,numberOfDelegations]]
+end
+	let i = 0
+	in
+		@While i < deleSpecs.size() do
+			let classesD = classes->reject(c | c.level <> deleSpecs.at(i).at(0));i2=deleSpecs.at(i).at(1) in
+				@While i2 < deleSpecs.at(i).at(2)+deleSpecs.at(i).at(1) and i2 < classesD.size()-1 do		//-1 cause at least two classes are always needed (see Associations as well)
+				self.addDelegation(classesD.at(i2),classesD.at(i2 + 1),deleSpecs.at(i).at(0));
+				i2 := i2 + 2
+				end
+			end;
+		i := i + 1
+		end
+	end
+end
+
+
+@Operation addDelegation[monitor=false,delToClassAllowed=false](filler : XCore::Element,role : XCore::Element,lvl : XCore::Element):XCore::Element
+  m.setDelegation(filler,role,lvl-1)
+end
+
+
+@Operation attributeSetup[monitor=false,delToClassAllowed=false](dataTypes : XCore::Element,attrSpecs : XCore::Element):XCore::Element
+@Doc
+attrSpecs define what attributes to add and is formed as follows:
+[[name,createItBetweenThisManyClasses,skipTheFirstThisManyClasses,type,lvl,mult]]
+type is Integer and refers to an  index of the dataTypes Sequence
+end
+	let mult = Multiplicities::SingleMult(false); i = 0; i2 = 0
+	in
+		@While i < attrSpecs.size() do
+		i2:=attrSpecs.at(i).at(2);
+			@While i2 < attrSpecs.at(i).at(1)+attrSpecs.at(i).at(2) and i2<classes.size() do
+			self.addAttribute(classes.at(i2),attrSpecs.at(i).at(0)+i+"_"+i2,attrSpecs.at(i).at(4),dataTypes.at(attrSpecs.at(i).at(3)),attrSpecs.at(i).at(5));
+			i2 := i2 + 1
+			end;	
+		i := i + 1
+		end
+	end
+end
+
+
+@Operation addAttribute[monitor=false,delToClassAllowed=false](class : XCore::Element,name : XCore::Element,lvl : XCore::Element,type : XCore::Element,mult : XCore::Element):XCore::Element
+m.addAttribute(class,name,lvl,type,mult)
+end
+
+
+@Operation operationSetup[monitor=false,delToClassAllowed=false](opSpecs):XCore::Element
+@Doc
+Generates operations according to parameters in opSpecs which is formated as follows:
+[[lvlOfClass,lvlOfOperation,body1,body2,skipNumberOfClasses,numberOfOperations]]
+Parameter body is seperated into two parts so that names can be assigned dynamically to the different operations.
+end
+	let i = 0
+	in
+		@While i < opSpecs.size() do
+			let i2 = opSpecs.at(i).at(4); classesOp = classes -> reject(c | c.level <> opSpecs.at(i).at(0)) in
+				@While i2 < opSpecs.at(i).at(5) + opSpecs.at(i).at(4) and i2 < classesOp.size() do
+				self.addOperation(classesOp.at(i2),opSpecs.at(i).at(1),opSpecs.at(i).at(2)+i+"_"+i2+opSpecs.at(i).at(3));	//body gets merged again with the numbers added to the name
+				i2:=i2+1
+				end
+			end;
+		i:=i+1
+		end
+	end
+end
+
+
+@Operation addOperation[monitor=false,delToClassAllowed=false](class : XCore::Element,lvl : XCore::Element,opString : XCore::Element):XCore::Element
+m.addOperation2(class,lvl,opString)
+end 
+
+
+@Operation instanceSetup[monitor=false,delToClassAllowed=false](instSpecs):XCore::Element
+@Doc
+instSpecs are formated as follows:
+[[name,classLvl,aLvl,skipNumberOfClasses,numberOfClasses,valueList,numberOfInstances]]
+numberOfClasses is of how many classes instances will be generated and numberOfInstances is the number of Instance which will be created per class.
+end
+	let i = 0
+	in
+		@While i < instSpecs.size() do
+			let i2=instSpecs.at(i).at(3); instClasses = classes->reject(c | c.level <> instSpecs.at(i).at(1)) in
+				@While i2 < instSpecs.at(i).at(4)+instSpecs.at(i).at(3) and i2 < instClasses.size() do
+				self.addInstance(instClasses.at(i2),instSpecs.at(i).at(0) + i + "_" + i2,instSpecs.at(i).at(2),instSpecs.at(i).at(5));				//slot value list ist immer [name,wert] wobei name der name einer variable ist
+				i2 := i2 + 1
+				end
+			end;
+		i := i + 1
+		end
+	end
+end 
+
+
+@Operation addInstance[monitor=false,delToClassAllowed=false](class : XCore::Element,name : XCore::Element,aLevel : XCore::Element,values : XCore::Element):XCore::Element
+m.addInstance(currentDiagram,class,name,aLevel,Set{},false,values)
+end
+
+/*
+@Operation associationInstanceSetup(assocInstSpecs)XCore::Element
+@Doc
+assocInstSpecs specifies how to instantiate an association as follows:
+[[assocNumber,skipNumberOfClasses,createThisMany]]	AssocNumber is the index of the association in currentDiagram.associations
+end
+	let i = 0;i2 = 0 in
+		@While i < assocInstSpecs.size() do
+		i2 := 0;
+				//Klassen mit falschem level muessen rausgefiltert werden JEWEILS für start und end inst lvl
+			@While i2 < assocInstSpecs.at(2)	//alle Associations ber package.classes->select(c|c.isKindOf(FMMLxMetaClass)->collect(c|c.attributes)->flatten->select(a|a.isKindOf(Associations::End))->collect(e|e.associations);
+			self.addAssociationInstance()
+			end
+		end
+	end
+end */
+
+
+@Operation addAssociationInstance():XCore::Element
+m.addAssociationInstance(currentDiagram,obj1,obj2,assocName)
+end
+
+
+end
