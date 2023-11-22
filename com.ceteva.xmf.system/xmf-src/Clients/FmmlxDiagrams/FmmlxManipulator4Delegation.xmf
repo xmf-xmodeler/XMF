@@ -10,7 +10,7 @@ import FmmlxDiagrams;
       then 
         ["The class " + delegateFrom.name + " already delegates to " + delegateFrom.delegatesTo.name]
       else*/if
-        delegateFrom.level <> delegateTo.level
+        delegateFrom.level.minLevel <> delegateTo.level.minLevel or delegateFrom.level.maxLevel <> delegateTo.level.maxLevel
       then 
         ["The class " + delegateFrom.name + " is not on the same level as " + delegateTo.name]
       elseif
@@ -18,7 +18,7 @@ import FmmlxDiagrams;
       then
         ["The class " + delegateTo.name + " already delegates to " + delegateFrom.name]
       elseif
-        delegateToLevel < 0
+        delegateToLevel.minLevel < 0
       then
         ["Delegation level cannot be negative"]
       elseif
@@ -38,7 +38,7 @@ import FmmlxDiagrams;
       then
         ["The class " + delegateFrom.name + " is already kind of " + delegateTo.name]
       elseif
-        delegateToLevel >= delegateTo.level
+        delegateToLevel.minLevel >= delegateTo.level.minLevel
       then
         ["Delegation level must be lower then the level where it is defined"]
       else
@@ -81,7 +81,7 @@ import FmmlxDiagrams;
       let
         delegatorClass = delegateFrom.of()
       in
-        @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel <> delegateFrom.level) do
+        @While delegatorClass <> delegatorClass.of() andthen (delegatorClass.delegatesTo = null or delegatorClass.delegatesToLevel.minLevel <> delegateFrom.level.minLevel) do
           delegatorClass := delegatorClass.of()
         end;
         if 

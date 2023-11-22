@@ -260,6 +260,11 @@ context Root
       Kernel_endUndoContext()
     end
     
+    @Operation endUndoable2() // Test for a safe endUndoable
+      self.startUndoable();
+      self.endUndoable()
+    end
+    
     @Operation ensureHeap(amount):Boolean
     
       // Try to ensure that the required number of heap words are

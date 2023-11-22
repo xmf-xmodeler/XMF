@@ -6,7 +6,7 @@ context Root::FMMLx
 
   @Class FmmlxObject extends NamedElement
   
-  @Attribute level : Integer end
+  @Attribute level : Level end
   @Attribute lastUpdated : Element end
 
     @Operation setLevel(level)
@@ -165,12 +165,11 @@ context Root::FMMLx
       end // test
     end // operation
 
-    // MOVED
     @Operation isDescendantOf(ancestor : MetaClass): XCore::Boolean
       if self = ancestor then false else
         let tmp = self
         in
-          @While tmp.level < ancestor.level and tmp <> FMMLx::MetaClass do
+          @While tmp <> FMMLx::MetaClass andthen (ancestor.level.maxLevel = null orelse tmp.level.minLevel < ancestor.level.maxLevel) do
             tmp := tmp.of()
           end;
           tmp = ancestor orelse tmp.inheritsFrom(ancestor)
@@ -289,6 +288,14 @@ context Root::FMMLx
       end;
       ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
     end
+  end
+  
+  @Operation allAncestors():Set(Class)
+    {self.of()} + self.of().allAncestors()
+  end
+  
+  @Operation repairSlots()
+    Clients::FmmlxDiagrams::FmmlxManipulator().repairSlots(self)
   end
   
 end

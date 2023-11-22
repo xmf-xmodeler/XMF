@@ -1,0 +1,30 @@
+parserImport XOCL;
+import Associations;
+
+context Associations
+  @Class AssociationType extends Class
+  
+    @Attribute sourceType  : Class end
+    @Attribute targetType  : Class end
+    @Attribute sourceLevel : Element end
+    @Attribute targetLevel : Element end
+    @Attribute sourceMult  : Element end
+    @Attribute targetMult  : Element end
+    
+    @Attribute color       : String end
+    @Attribute strokeWidth : Integer end
+    @Attribute dashArray   : String end
+    @Attribute startDeco   : String end
+    @Attribute endDeco     : String end
+    @Attribute colorLink       : String end
+    @Attribute strokeWidthLink : Integer end
+    @Attribute dashArrayLink   : String end
+    @Attribute startDecoLink   : String end
+    @Attribute endDecoLink     : String end
+    
+    
+    @Constructor(name, sourceType, targetType) // ! 
+      self.addParent(Associations::AbstractAssociation)
+    end
+    
+  end
