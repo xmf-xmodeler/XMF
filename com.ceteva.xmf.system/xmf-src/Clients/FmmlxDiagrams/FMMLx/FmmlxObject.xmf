@@ -275,7 +275,7 @@ context Root::FMMLx
       reports = [];
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
-      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
+      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel) do
         reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
@@ -296,6 +296,31 @@ context Root::FMMLx
   
   @Operation repairSlots()
     Clients::FmmlxDiagrams::FmmlxManipulator().repairSlots(self)
+  end
+  
+  @Constraint objectInstanceOfClass
+    self.of() = FMMLx::MetaClass orelse self.of().isKindOf(FMMLx::MetaClass)
+  fail
+    "This FMMLxObject is not a (recursive) instance of a MetaClass ."
+  end
+  
+  @Constraint levelCorrectness
+    (self.level.maxLevel = null orelse self.level.maxLevel >= self.level.minLevel)
+    andthen
+    (self.level.minLevel = 0 implies self.level.maxLevel = 0) // redundant
+    andthen
+    (self.level.minLevel = 1 implies self.level.maxLevel = 1)
+    andthen
+    let
+      ofLevel = if self.of()=FMMLx::MetaClass 
+        then Level(2,null) else self.of().level end
+    in
+      self.level.minLevel >= ofLevel.minLevel - 1 and (
+        ofLevel.maxLevel = null orelse
+        self.level.maxLevel <= ofLevel.maxLevel - 1)
+    end
+  fail
+    "The level is not correct"
   end
   
 end
