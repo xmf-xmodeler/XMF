@@ -20,6 +20,8 @@ context FmmlxDiagrams
   @Attribute views:Element end
   @Attribute options:Element end
   @Attribute umlMode:Boolean end
+  //The sequence contains elements of the datatype Clients::FmmlxDiagrams::Note 
+  @Attribute notes:Seq(Element) = [] end
 
     @Operation newDiagram()
         //@Command(self) newDiagramCommand(self) end;
@@ -50,5 +52,40 @@ context FmmlxDiagrams
       ("refreshName()").println();
       null // added for compatibility reasons
     end
+	
+	@Operation getNotes() 
+     notes
+    end
+	
+	@Operation getNote(id:Integer) 
+		let
+			note = notes->select(n | n.getId() = id).asSeq()
+		in
+			if
+				note.isEmpty()
+			then
+				throw(Exception("Diagram does not contain Note with id:" + id))
+			end;
+			note.at(0)
+		end
+    end
+	
+	@Operation getNextNoteId():Integer
+		let
+			notes = self.getNotes();
+			latestId = null
+		in 
+			if
+				notes.size() = 0
+			then
+				0
+			else
+				// the Id should be the highest Id in the diagram + 1
+				//gaps between Ids can occure but there will be no double id
+				latestId := notes.at(notes.size() - 1).getId();
+				latestId + 1
+			end
+		end
+	end
     
   end
