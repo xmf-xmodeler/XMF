@@ -684,6 +684,10 @@ context FmmlxDiagrams
 //    end
 
     @Operation getAllSlots(requestID : Seq(Integer), objectSlotList)
+		@Doc
+			The objectSlotList contains Sequences of Object-Names and Slots form this objects. From every slot the value is requested and sent back. 
+			For large collections this function is really slow because the objectList is compared against all objects from a package. For this purpose the next function was introduced
+		end
       let 
         result = []
       in
@@ -716,6 +720,32 @@ context FmmlxDiagrams
     	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
+	
+	@Operation getAllSlots(requestID : Seq(Integer))
+		@Doc
+			Return all slots of all Object in a Package. Objects that do not have slots are not contained in the result list.
+		end
+	let
+		package = self.getPackage(requestID)
+		then allObjects = package.classes;
+		result = []
+		in
+		@For object in allObjects do
+			let slots = object.slots()->select( s | s.type.owner.isKindOf(FMMLx::MetaClass) and s.type.of() = Attribute);
+			slotSeq = []
+			in
+			@For slot in slots do
+				let slotValue = if slot.value.of().isKindOf(Enum) then slot.value.name().toString() else slot.value.toString() end 
+					in 
+					slotSeq := slotSeq + [[slot.name.toString(), slotValue ]]
+				end
+			end;
+			if not slotSeq.isEmpty() then result := result + [[object.name.toString(), slotSeq]] end
+			end
+		end;
+		self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+	end
+end
 
     /*@Operation getSlots(requestID : Seq(Integer), objectName, slotList)
       let
