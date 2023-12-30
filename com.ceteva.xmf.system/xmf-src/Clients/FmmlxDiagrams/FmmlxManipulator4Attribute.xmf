@@ -225,16 +225,18 @@ import FmmlxDiagrams;
 	        attribute := att
 	      end
 	    end;
-        if oldLevel > newLevel then // move slots to instances
+        if oldLevel.minLevel > newLevel.minLevel then // move slots to instances
           self.changeAttributeLevelDown(class, attribute, oldLevel, newLevel) end;
-        if newLevel > oldLevel then // just remove and recreate Attribute as we can't use the slots anyway
+        if newLevel.minLevel > oldLevel.minLevel then // just remove and recreate Attribute as we can't use the slots anyway
 		  if attribute <> null then 
 		    let 		   
               type = attribute.type;
-              mult = attribute.mult()
+              mult = attribute.mult();
+              isIncomplete = attribute.isIncomplete;
+              isOptional = attribute.isOptional
             in 
               self.removeAttribute(class, attName, "strategy:delete");
-              self.addAttribute(class, attName, newLevel, type, mult) 
+              self.addAttribute(class, attName, newLevel, type, mult, isIncomplete, isOptional) 
             end // inner let
           end // if attribute <> null
         end // if newLevel > oldLevel
@@ -251,12 +253,14 @@ import FmmlxDiagrams;
         then 
           instLevel = attribute.instLevel; // = oldLevel
           type = attribute.type;
-          mult = attribute.mult()
+          mult = attribute.mult();
+          isIncomplete = attribute.isIncomplete;
+          isOptional = attribute.isOptional
         then  
-          newAtt = self.addAttribute(class, tempAttName, newLevel, type, mult) 
+          newAtt = self.addAttribute(class, tempAttName, newLevel, type, mult, isIncomplete, isOptional) 
         in
           @For instance in class.allMetaInstances() do
-            if instance.level = oldLevel then
+            if instance.level.minLevel = oldLevel.minLevel then
               // we found an old instance which ought to have a slot with a value
               let 
                 value = instance.get(attribute.name)

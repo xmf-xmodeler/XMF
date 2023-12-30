@@ -1596,9 +1596,13 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAttributeLevel(requestID : Seq(Integer), classPath, attName, oldLevel, newLevel)
+    @Operation changeAttributeLevel(requestID : Seq(Integer), classPath, attName, 
+                                    oldLevelMin, oldLevelMax, 
+                                    newLevelMin, newLevelMax)
       let
-        m = FmmlxDiagrams::FmmlxManipulator()
+        m = FmmlxDiagrams::FmmlxManipulator();
+        oldLevel = FMMLx::Level(oldLevelMin, oldLevelMax);
+        newLevel = FMMLx::Level(newLevelMin, newLevelMax)
       then
         class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       then
@@ -1606,8 +1610,8 @@ context FmmlxDiagrams
         //problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
       in
         if problems.isEmpty() then
-          m.changeAttributeLevel(class, attName, oldLevel, newLevel);
-          self.log := self.log + [["changeAttributeLevel", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
+          m.changeAttributeLevel(class, attName, oldLevel, newLevel)//;
+//          self.log := self.log + [["changeAttributeLevel", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end

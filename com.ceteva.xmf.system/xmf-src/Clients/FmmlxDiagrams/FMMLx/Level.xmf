@@ -126,4 +126,8 @@ context Root::FMMLx
       end
     end
     
+    @Operation getLevel() 
+      if self.minLevel = self.maxLevel then self.minLevel else -1 end
+    end
+    
   end
