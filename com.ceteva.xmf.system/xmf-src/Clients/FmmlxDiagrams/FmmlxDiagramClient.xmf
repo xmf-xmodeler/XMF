@@ -580,7 +580,7 @@ context FmmlxDiagrams
               let
                 allOps = if c.isKindOf(FMMLx::MetaClass) 
                 then (c.allOperations2() + c.allOperations()).asSet().asSeq()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
-                else c.allOperations()
+                else c.operations.asSeq()//c.allOperations()
                 end
               then
                 allOpSize = allOps.size()
@@ -740,7 +740,7 @@ context FmmlxDiagrams
 					slotSeq := slotSeq + [[slot.name.toString(), slotValue ]]
 				end
 			end;
-			if not slotSeq.isEmpty() then result := result + [[object.name.toString(), slotSeq]] end
+			if not slotSeq.isEmpty() then result := result + [[object.path(), slotSeq]] end
 			end
 		end;
 		self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])

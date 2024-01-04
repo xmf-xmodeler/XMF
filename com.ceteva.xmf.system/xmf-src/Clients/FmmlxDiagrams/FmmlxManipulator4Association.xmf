@@ -145,6 +145,10 @@ import FmmlxDiagrams;
       end
     end
     
+  context FmmlxManipulator
+    @Operation removeAssociation(association:Associations::AbstractAssociation)
+      self.removeAssociation(association.target.owner, association.target.name.toString())
+    end
     
   context FmmlxManipulator
     @Operation removeAssociation(sourceClass:FMMLx::MetaClass, targetName:String)
