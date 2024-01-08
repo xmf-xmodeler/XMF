@@ -158,6 +158,6 @@ context Associations
     end
     
     @Operation getID()
-      self.source.type.path() + "::" + self.target.name
+      "AssociationMapping: " + self.source.type.path() + "::" + self.target.name
     end
   end

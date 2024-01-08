@@ -59,7 +59,14 @@ import FmmlxDiagrams;
           let
             att = atts->select(a | a.name.toString() = attName).asSeq().at(0)
           in
-            Kernel_addAtt(obj,att.name,att.type.default())
+            let 
+              default = att.type.default()
+            in
+              if att.isKindOf(Associations::End) 
+              andthen not (att.mult.hasUpperBound andthen att.mult.upperBound <= 1)
+              then default := {} end;
+              Kernel_addAtt(obj,att.name,default)
+            end
           end
         end;
         @For attName in additionalSlotNames do
