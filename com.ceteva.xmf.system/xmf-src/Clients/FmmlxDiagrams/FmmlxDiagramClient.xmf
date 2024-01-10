@@ -3687,4 +3687,14 @@ end
         // even though it seems that XCore containing null is legit.
       end
     end
-end
+	
+	//send a Vector<String> with all ProjectNames contained in the current Session to Java
+	@Operation getAllProjectNames(requestID) 
+		let
+			projectNames = Projects::Project.allInstances()->collect(p | p.name.toString())
+		in
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), projectNames])
+		end
+	end
+	
+end //eof
