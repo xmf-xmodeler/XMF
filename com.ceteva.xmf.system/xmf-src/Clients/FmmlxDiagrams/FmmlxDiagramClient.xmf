@@ -3687,4 +3687,96 @@ end
         // even though it seems that XCore containing null is legit.
       end
     end
+  
+	/**
+	 *Adds note to diagram
+	 *@return id of new createdNote
+	 */
+	@Operation addNoteToDiagram(requestID:Seq(Integer), content:String, color:String) 
+		let 
+			diagram =  self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = Clients::FmmlxDiagrams::Note(diagram.getNextNoteId(), content, color)
+		in
+			diagram.notes :=  diagram.notes + Seq{note};
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), note.getId()])
+		end
+    end
+
+	@Operation sendNoteMappingToXMF(requestID:Seq(Integer), noteId:Integer, xPosition:Integer, yPosition:Integer, hidden:Boolean)
+		let 
+			mappingKey = FmmlxDiagramMapping::createNoteKey(self.getPackage(requestID).name, noteId);
+			mapping = self.getMapping(requestID)
+		then
+			newCreatedMapping = mapping.addOrGetObjectMapping(mappingKey)
+		in
+			mapping.setNewPosition(mappingKey, xPosition, yPosition, hidden);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), newCreatedMapping.toString()])
+		end
+	end
+	
+	@Operation getAllNotes(requestID : Seq(Integer))
+	let
+		result = [];
+		d = self.diagrams.get(self.vector2Seq(requestID).at(0))
+	then
+		notes = d.getNotes()
+	in
+		@For note in notes do
+			result := result.append([[
+			note.getId(),
+			note.getContent(),
+			note.getColor()]])
+		end;
+		self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+		end
+	end
+	
+	@Operation getNoteMappings(requestID : Seq(Integer))
+		let
+			mappingList = self.getMapping(requestID).mapping;
+			mappingSubstring = null;
+			result = []
+		in
+			@For mappingInfo in mappingList do
+			//a note id is build in the pattern "Root::PackageName::NoteMapping + NoteID" by the following instruction we find the last pasrt and can proof if it is a noteMapping
+				mappingSubstring := mappingInfo.id.splitBy("::",0,0).at(4);
+				if
+					mappingSubstring.truncate(11) = "NoteMapping" 
+				then 
+					result := result.append([[
+					mappingInfo.id,
+					mappingInfo.lastKnownDiagramX,
+					mappingInfo.lastKnownDiagramY,
+					mappingInfo.hidden]])
+				end
+			end;
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+		end
+	end
+	
+	@Operation removeNoteFromDiagram(requestID : Seq(Integer), noteId:Integer)
+		let
+			diagram = self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = diagram.getNote(noteId)
+		in 
+			diagram.mapping.removeNoteMapping(self.getPackage(requestID).name, noteId);	
+			diagram.notes := diagram.notes.excluding(note);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), "Note" + noteId + " was deleted"])
+		end
+	end
+	
+	@Operation updateNoteData(requestID : Seq(Integer), noteId:Integer, content:String, color:String)
+		let
+			diagram = self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = diagram.getNote(noteId)
+		in 
+			note.setContent(content);
+			note.setColor(color);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), "Note" + noteId + " was updated"])
+		end
+	end
+	
 end
