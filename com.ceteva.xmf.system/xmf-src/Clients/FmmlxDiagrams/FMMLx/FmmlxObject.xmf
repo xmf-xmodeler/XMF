@@ -290,4 +290,78 @@ context Root::FMMLx
     "The owner of this object does not contain it."
   end
   
+  @Constraint linksStructure
+    self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | (not s.type.mult.hasUpperBound) orelse
+                   s.type.mult.upperBound > 1)
+      ->forAll(s | s.value.isKindOf(Set(Element)))
+  fail
+    let falseSlots = self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | (not s.type.mult.hasUpperBound) orelse
+                   s.type.mult.upperBound > 1)
+      ->reject(s | s.value.isKindOf(Set(Element)))
+    in 
+    "Structural problem: The slots " + falseSlots.name + " must be lists."
+    end
+  end
+
+  @Constraint linksMultiplicity
+    self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->forAll(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+        then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
+        else s.value.size() >= s.type.mult.lowerBound and
+           (if s.type.mult.hasUpperBound then
+            s.value.size() <= s.type.mult.upperBound
+            else true end)
+        end)
+  fail
+    let falseSlots = self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->reject(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+        then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
+        else s.value.size() >= s.type.mult.lowerBound and
+           (if s.type.mult.hasUpperBound then
+            s.value.size() <= s.type.mult.upperBound
+            else true end)
+        end)
+    in
+    "The multiplicity does not allow the number of links specified for links in " + falseSlots.name
+    end
+  end
+
+@Constraint linksCorrectType
+  self.slots()
+    ->select(s | s.type.isKindOf(Associations::End))
+    ->forAll(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+      then
+        s.value.isKindOf(s.owner.type) and
+        s.value.level.conformsTo(s.owner.instLevel)
+      else
+        s.value->forAll(o |
+        o.isKindOf(s.type.type) and
+        o.level.conformsTo(s.type.instLevel))
+      end)
+  fail
+    let falseSlots = self.slots()
+    ->select(s | s.type.isKindOf(Associations::End))
+    ->reject(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+      then
+        s.value.isKindOf(s.owner.type) and
+        s.value.level.conformsTo(s.owner.instLevel)
+      else
+        s.value->forAll(o |
+        o.isKindOf(s.type.type) and
+        o.level.conformsTo(s.type.instLevel))
+      end)
+    in
+      "Some linked objects in "+falseSlots.name+" do not conform to the stated type and level"
+    end
+  end
 end

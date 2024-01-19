@@ -72,13 +72,21 @@ import FmmlxDiagrams;
              then // 
                null//intrinsicA := intrinsicA.including(a)
              else // otherwise it becomes a slot and is initialised
-               if a.init <> null
-               then
+               if a.isKindOf(Associations::End) then
+                 let 
+                   default = a.type.default()
+                 in
+                   if not (a.mult.hasUpperBound andthen a.mult.upperBound <= 1)
+                   then default := {} end;
+                   (a.name + " att init " + default).println();
+                   Kernel_addAtt(obj,a.name,default)
+                 end
+               elseif a.init <> null then
                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
                else
                  Kernel_addAtt(obj,a.name,a.type.default())
-               end;
-               if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+               end
+               //if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
              end;
              A := A->excluding(a) // we remove that attribute from the list as it has been handled
           end
