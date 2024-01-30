@@ -1,0 +1,38 @@
+parserImport XOCL;
+import Clients;
+import FmmlxDiagrams;		
+
+//This file is an extension of Testing and stores all the different test scenarios
+
+/*
+context Testing
+@Doc
+Tests Scenarios are just sequences with the different parameters for a diagram.
+They are include the different specs for the different kinds of elements in a diagram.
+These are then read out by the setup() method into the different variables which are then used as parameters for the various functions.
+The format is as follows:
+[
+classSpecs,
+assocSpecs,
+attrSpecs,
+consSpecs,
+opSpecs,
+deleSpecs,
+instSpecs
+]
+end;
+*/
+context Testing
+@Attribute scenario1 : Element =
+[
+[["TestClassA",3,3,false,3,false],["TestClassB",1,1,false,2,true]],	//classes
+[["testAssoc",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0],["tAssoc",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0]],	//AssocSpecs
+[["testAttribute",2,0,0,0,Multiplicities::SingleMult(false),false,false],["tAttribute",1,1,2,0,Multiplicities::SingleMult(false),false,false]],	//attributes
+[["testConstraint","false","\"Test Reason\"",0,1,0],["tConstraint","true","\"Test Reason\"",0,2,0]],	//constraints
+[[1,0,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",1,2],[2,1,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",0,1]],	//operations
+[[1,1,1,1],[3,3,0,1]],	//delegations
+[["testInstanceY",1,0,1,1,20,[],false,false],["testInstanceX",3,2,0,1,1,[],false,false]]	//instances
+]
+end
+
+
