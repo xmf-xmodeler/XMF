@@ -78,8 +78,13 @@ import FmmlxDiagrams;
                  in
                    if not (a.mult.hasUpperBound andthen a.mult.upperBound <= 1)
                    then default := {} end;
-                   (a.name + " att init " + default).println();
-                   Kernel_addAtt(obj,a.name,default)
+                   
+                   if a.visible then 
+                     //(a.name + " att init " + default).println(); 
+                     Kernel_addAtt(obj,a.name,default) 
+                   else
+                     null//(a.name + " att not visible ").println()
+                   end
                  end
                elseif a.init <> null then
                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))

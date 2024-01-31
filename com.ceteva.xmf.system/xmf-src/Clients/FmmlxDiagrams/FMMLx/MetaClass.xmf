@@ -452,12 +452,6 @@ context Root::FMMLx
         self.level.maxLevel = p.level.maxLevel else true end).name +
     " cannot inherit from each other."
   end
-  
-  @Constraint abstractClassNoInstance
-    not self.of().isAbstract
-  fail
-    "This object is an instance of an abstract class."
-  end
 
   @Constraint singletonOnlyOneInstance
     self.isSingleton implies

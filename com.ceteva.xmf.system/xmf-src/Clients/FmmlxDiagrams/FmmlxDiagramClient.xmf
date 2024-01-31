@@ -3744,14 +3744,15 @@ end
 	@Operation getNoteMappings(requestID : Seq(Integer))
 		let
 			mappingList = self.getMapping(requestID).mapping;
-			mappingSubstring = null;
+			//mappingSubstring = null;
 			result = []
 		in
 			@For mappingInfo in mappingList do
 			//a note id is build in the pattern "Root::PackageName::NoteMapping + NoteID" by the following instruction we find the last pasrt and can proof if it is a noteMapping
-				mappingSubstring := mappingInfo.id.splitBy("::",0,0).at(4);
+				//mappingSubstring := mappingInfo.id.splitBy("::",0,0).at(4);
 				if
-					mappingSubstring.truncate(11) = "NoteMapping" 
+					//mappingSubstring.truncate(11) = "NoteMapping"
+					(-1) <> mappingInfo.id.indexOf("::NoteMapping",0)
 				then 
 					result := result.append([[
 					mappingInfo.id,

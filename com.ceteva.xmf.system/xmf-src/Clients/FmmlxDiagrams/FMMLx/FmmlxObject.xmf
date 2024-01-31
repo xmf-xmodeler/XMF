@@ -283,6 +283,12 @@ context Root::FMMLx
   fail
     "An element on level 0 must not be a class "
   end
+
+  @Constraint abstractClassNoInstance
+    not self.of().isAbstract
+  fail
+    "This object is an instance of an abstract class."
+  end
   
   @Constraint associationWithPackage
     self.owner.classes.contains(self)
@@ -293,12 +299,14 @@ context Root::FMMLx
   @Constraint linksStructure
     self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
       ->select(s | (not s.type.mult.hasUpperBound) orelse
                    s.type.mult.upperBound > 1)
       ->forAll(s | s.value.isKindOf(Set(Element)))
   fail
     let falseSlots = self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
       ->select(s | (not s.type.mult.hasUpperBound) orelse
                    s.type.mult.upperBound > 1)
       ->reject(s | s.value.isKindOf(Set(Element)))
@@ -310,6 +318,7 @@ context Root::FMMLx
   @Constraint linksMultiplicity
     self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
       ->forAll(s | if s.type.mult.hasUpperBound 
                  andthen s.type.mult.upperBound = 1
         then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
@@ -321,6 +330,7 @@ context Root::FMMLx
   fail
     let falseSlots = self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
       ->reject(s | if s.type.mult.hasUpperBound 
                  andthen s.type.mult.upperBound = 1
         then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
@@ -337,31 +347,44 @@ context Root::FMMLx
 @Constraint linksCorrectType
   self.slots()
     ->select(s | s.type.isKindOf(Associations::End))
+    ->select(s | s.type.visible)
     ->forAll(s | if s.type.mult.hasUpperBound 
                  andthen s.type.mult.upperBound = 1
       then
-        s.value.isKindOf(s.owner.type) and
-        s.value.level.conformsTo(s.owner.instLevel)
+        s.value.isKindOf(s.type.type) and
+        (s.value = null orelse
+        s.value.level.matchesInstantiationLevel(s.type.instLevel))
       else
         s.value->forAll(o |
         o.isKindOf(s.type.type) and
-        o.level.conformsTo(s.type.instLevel))
+        o.level.matchesInstantiationLevel(s.type.instLevel))
       end)
   fail
     let falseSlots = self.slots()
     ->select(s | s.type.isKindOf(Associations::End))
+    ->select(s | s.type.visible)
     ->reject(s | if s.type.mult.hasUpperBound 
                  andthen s.type.mult.upperBound = 1
       then
-        s.value.isKindOf(s.owner.type) and
-        s.value.level.conformsTo(s.owner.instLevel)
+        s.value.isKindOf(s.type.type) and
+        (s.value = null orelse 
+        s.value.level.matchesInstantiationLevel(s.type.instLevel))
       else
         s.value->forAll(o |
         o.isKindOf(s.type.type) and
-        o.level.conformsTo(s.type.instLevel))
+        o.level.matchesInstantiationLevel(s.type.instLevel))
       end)
     in
       "Some linked objects in "+falseSlots.name+" do not conform to the stated type and level"
     end
   end
+  
+  @Constraint allElementNamesUnique
+    self.owner.classes->forAll(otherClass|
+      self.name.equals(otherClass.name) = (self = otherClass))
+  fail
+      "There is another element with the same name"
+  end
+  
+  
 end
