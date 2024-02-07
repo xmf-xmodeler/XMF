@@ -222,6 +222,54 @@ context FmmlxDiagrams
                   .asSeq()])
     end
     
+    @Operation setImportedPackages(requestID : Seq(Integer), importedPackagesVec) 
+      let
+        p = self.getPackage(requestID);
+        importedPackages = self.vector2Seq(importedPackagesVec);
+        set = {};
+        problems = [];
+        m = FmmlxDiagrams::FmmlxManipulator()
+      in
+        @For pac in importedPackages do
+           let 
+             eval = m.evalString(pac, self.getPackage(requestID))
+           in
+             if 
+               eval.at(1) = null
+             then
+               if 
+                 eval.at(0) = null
+               then
+                 problems := ["Cannot add null"] + problems
+               elseif
+                 not eval.at(0).isKindOf(Package)
+               then
+                 problems := [pac + " is not a Package"] + problems
+               elseif
+                 eval.at(0).hasSlot("importedPackages") andthen
+                 eval.at(0).importedPackages.contains(p)
+               then 
+                 problems := [pac + " already imports " + p.path()] + problems
+               elseif
+                 eval.at(0) = p
+               then
+                 problems := ["Cannot import itself"] + problems
+               else
+                 set := {eval.at(0)} + set
+               end
+             else
+               problems := [eval.at(1)] + problems
+             end
+           end
+        end;
+        problems.println();
+        if problems.isEmpty() then
+          p.importedPackages := set
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end 
+    
     @Operation getImportedPackages(requestID : Seq(Integer))
       let
         result = [];
@@ -229,6 +277,20 @@ context FmmlxDiagrams
       in
         @For imp in p.importedPackages do
           result := result + [imp.path()]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
+    @Operation getAvailablePackages(requestID : Seq(Integer), onlyFmmlx)
+      let
+        result = [];
+        p = self.getPackage(requestID)
+      then
+        P = if onlyFmmlx then FMMLx::FmmlxPackage else Package end.allInstances() - [p]
+      in
+        @For pac in P do
+          result := result + [pac.path()]
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
