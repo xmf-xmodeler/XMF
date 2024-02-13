@@ -35,4 +35,29 @@ context Testing
 ]
 end
 
+context Testing
+@Attribute scenario2 : Element =
+[
+[["TestClassA",3,3,false,3,false],["TestClassB",1,1,false,2,true],["TestClassC",2,2,false,1,true],["TestClassD",1,1,false,2,true]],	//classes
+[["testAssoc1",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0],["testAssoc2",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),0,0,true,true,false,false,2,0],["testAssoc2",Multiplicities::CollectionMult(false,true,0,100),Multiplicities::CollectionMult(false,true,0,100),1,2,true,true,false,false,2,0]],	//AssocSpecs
+[["testAttribute",2,0,0,0,Multiplicities::SingleMult(false),false,false],["tAttribute",1,1,2,0,Multiplicities::SingleMult(false),false,false]],	//attributes
+[["testConstraint","false","\"Test Reason\"",0,1,0],["tConstraint","true","\"Test Reason\"",0,2,0]],	//constraints
+[[1,0,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",1,2],[2,1,"@Operation testOp", "[monitor=false,delToClassAllowed=false]():XCore::Element true end",0,1]],	//operations
+[[1,1,1,1],[3,3,0,1]],	//delegations
+[["testInstanceY",1,0,1,1,2,[],false,false],["testInstanceX",3,2,0,1,1,[],false,false],["testInstanceZ",2,1,2,2,1,[],false,false]]	//instances
+]
+end
 
+
+context Testing
+@Attribute scenario3 : Element =
+[
+[["TestClassA",1,1,false,1,false]],	//classes
+[],	//AssocSpecs
+[["testAttribute",1,0,1,0,Multiplicities::SingleMult(false),false,false]],	//attributes
+[],	//constraints
+[],	//operations
+[],	//delegations
+[]	//instances
+]
+end

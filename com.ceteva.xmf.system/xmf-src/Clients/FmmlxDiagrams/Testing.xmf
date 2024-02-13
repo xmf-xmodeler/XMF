@@ -18,10 +18,11 @@ context FmmlxDiagrams
 //context Testing
 @Operation setScenarios():XCore::Element
 "Set Scenarios".println();
-scenario1.println();
 
 [
-scenario1
+scenario1,
+scenario2,
+scenario3
 ]
 end
 
@@ -94,7 +95,21 @@ end
      self.operationSetup(opSpecs);
      self.constraintSetup(consSpecs);
      self.instanceSetup(instSpecs);	//[[name,classLvl,aLvl,skipNumberOfClasses,numberOfClasses,numInstances,valueList,abstract,singleton]]
-     self.classes := currentDiagram.classes.asSeq()->select(c|c.isKindOf(FMMLx::MetaClass))			//Instanzen muessen hnzugefugt werden
+     self.classes := currentDiagram.classes.asSeq()->select(c|c.isKindOf(FMMLx::MetaClass))			//Instaces are added but not those on level 0 because those are not classes
+     
+end
+
+
+@Operation getClassesAndObjects(c):XCore::Element	//Returns every class and instance of a package including those on level 0
+let currentObjects = c.asSeq(); result=c.asSeq(); i=0 in
+	@While currentObjects.size()>i do
+	if currentObjects.at(i).level.minLevel > 0 then
+	result := result.asSeq() + self.getClassesAndObjects(currentObjects.at(i).allInstances()).asSeq()
+	end;
+	i:=i+1
+	end;
+	result.asSet()
+end
 end
 
 
@@ -135,7 +150,6 @@ end
 	"Exception caught:".println();
 	e.println()
 	end;
-	
 	
 		try
 	"Create Instance Test 2 (Singleton Forced)".println();
@@ -189,9 +203,9 @@ end
 		if classes->select(c|c.level.minLevel>0) then	//creates two instances of a singleton, should trigger exception
 		self.m.addInstance(self.currentDiagram,ofClass,"singletonTest1",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);
 		try
-		self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);	
+		self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[])	
 		catch(e)
-				self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);	
+				self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[])
 		end;
 		validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
@@ -420,7 +434,7 @@ end
 	 in
 		@While i < assocInstSpecs.size() do
 		i2 := 0;
-				let availableClasses = classes->reject(c|c.level.minLevel <> associations.end1.) in		//Klassen mit falschem level muessen rausgefiltert werden JEWEILS für start und end inst lvl
+				let availableClasses = classes->select(c|c.kindOf(FMMLx::MetaClass)<>) in		//Klassen mit falschem level muessen rausgefiltert werden JEWEILS für start und end inst lvl
 			@While i2 < assocInstSpecs.at(2) and i2 < assocInstClasses.size()	//alle Associations per package.classes->select(c|c.isKindOf(FMMLxMetaClass)->collect(c|c.attributes)->flatten->select(a|a.isKindOf(Associations::End))->collect(e|e.associations);
 			
 			self.addAssociationInstance()
