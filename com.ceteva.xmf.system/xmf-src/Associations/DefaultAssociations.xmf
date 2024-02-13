@@ -1,0 +1,52 @@
+parserImport XOCL;
+import Associations;
+
+Associations.add(Associations::AssociationType("DefaultAssociation", Object, Object));
+Associations.add(Associations::AssociationType("Aggregation", Object, Object));
+Associations.add(Associations::AssociationType("Composition", Object, Object));
+    
+Associations::Aggregation.addParent(Associations::DefaultAssociation);
+Associations::Composition.addParent(Associations::Aggregation);
+
+Associations::Aggregation.targetMult := [1,null,null,null];
+Associations::Composition.targetMult := [1,null,null,null];
+Associations::Composition.sourceMult := [1,1,1,1];
+
+Associations::DefaultAssociation.color := "000000";
+Associations::DefaultAssociation.strokeWidth := 1;
+Associations::DefaultAssociation.dashArray := "";
+Associations::DefaultAssociation.startDeco := "arrow";
+Associations::DefaultAssociation.startDeco := "arrow";
+
+Associations::Aggregation.color := "880000";
+Associations::Aggregation.strokeWidth := 1;
+Associations::Aggregation.dashArray := "";
+Associations::Aggregation.startDeco := "diamond";
+Associations::Aggregation.endDeco := "none";
+
+Associations::Composition.color := "008800";
+Associations::Composition.strokeWidth := 1;
+Associations::Composition.dashArray := "";
+Associations::Composition.startDeco := "filledDiamond";
+Associations::Composition.endDeco := "none";
+
+Associations::DefaultAssociation.colorLink := "555555";
+Associations::DefaultAssociation.strokeWidthLink := 1;
+Associations::DefaultAssociation.dashArrayLink := "10,10";
+Associations::DefaultAssociation.startDecoLink := "arrow";
+Associations::DefaultAssociation.startDecoLink := "arrow";
+
+Associations::Aggregation.colorLink := "5555ff";
+Associations::Aggregation.strokeWidthLink := 1;
+Associations::Aggregation.dashArrayLink := "10,20";
+Associations::Aggregation.startDecoLink := "diamond";
+Associations::Aggregation.endDecoLink := "none";
+
+Associations::Composition.colorLink := "ff5555";
+Associations::Composition.strokeWidthLink := 1;
+Associations::Composition.dashArrayLink := "20,10";
+Associations::Composition.startDecoLink := "filledDiamond";
+Associations::Composition.endDecoLink := "none";
+
+context DefaultAssociation
+  @Operation foo() null end

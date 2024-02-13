@@ -7,16 +7,18 @@ context FmmlxDiagrams
 
 @Class FmmlxDiagramMapping
 
+	//Set contains DataType MappingInfo
     @Attribute mapping : Set = {} end
     @Attribute labelMapping : Set = {} end
     @Attribute nextID : Integer = 0 end
     
-    @Operation addOrGetObjectMapping(o : Object)
+    @Operation addOrGetObjectMapping(oid : String)
+      if not oid.of() = String then throw Exception("id not String") end;
       let 
         foundMapping = null 
       in 
         @For mappingInfo in mapping do
-          if mappingInfo.object = o
+          if mappingInfo.id = oid
           then foundMapping := mappingInfo
           end // if
         end; // for
@@ -27,8 +29,8 @@ context FmmlxDiagrams
           let 
             newMappingInfo = MappingInfo()
           in
-            newMappingInfo.object := o;
-            newMappingInfo.id := if o.isKindOf(Symbol) then o.toString() else o.path() end;
+            //newMappingInfo.object := o;
+            newMappingInfo.id := oid;//if o.isKindOf(Symbol) then o.toString() else o.path() end;
             newMappingInfo.lastKnownDiagramX := 0;
             newMappingInfo.lastKnownDiagramY := 0;
             newMappingInfo.hidden := true;
@@ -40,12 +42,12 @@ context FmmlxDiagrams
       end // let 
     end
     
-    @Operation getMappingId(o : Object)
+    /*@Operation getMappingId(oid)
       let 
         foundMapping = null 
       in 
         @For mappingInfo in mapping do
-          if mappingInfo.object = o
+          if mappingInfo.id = oid
           then foundMapping := mappingInfo
           end // if
         end; // for
@@ -56,24 +58,34 @@ context FmmlxDiagrams
           null
         end // if 
       end // let 
-    end
+    end*/
     
     @Operation setNewPosition(objectID, x, y, hidden)
-      @For mappingInfo in mapping do
-        if mappingInfo.id = objectID
-        then
+      //("mapping.size:" + mapping.size()).println();
+      //("mapping.id:" + mapping.id).println();
+      let 
+        mappingInfo = self.addOrGetObjectMapping(objectID) //if mapping.id.contains(objectID)
+          //then mapping->select(m | m.id = objectID).asSeq().at(0)
+          //else self.addOrGetObjectMapping(objectID) end
+      in    
+      //if not mapping.id.contains
+      //@For mappingInfo in mapping do
+        //("Compare " + objectID + " to " + mappingInfo.id).println();
+        //if mappingInfo.id = objectID
+        //then
           mappingInfo.lastKnownDiagramX := x;
           mappingInfo.lastKnownDiagramY := y;
           mappingInfo.hidden := hidden;
           mappingInfo.points := null
-        end // if
-      end // for
+        //end // if
+      //end // for
+      end
     end
     
     @Operation setNewPositions(objectID, listOfPoints)
-      @For mappingInfo in mapping do
-        if mappingInfo.id = objectID
-        then
+      let 
+        mappingInfo = self.addOrGetObjectMapping(objectID)
+      in   
           mappingInfo.points := listOfPoints.asSeq();
           
           mappingInfo.lastKnownDiagramX := null;
@@ -81,8 +93,7 @@ context FmmlxDiagrams
           mappingInfo.hidden := null;
           
           @For i in 0.to(mappingInfo.points.size()-1) do mappingInfo.points := mappingInfo.points.replaceAt(i, mappingInfo.points.at(i).asSeq()) end          
-        end // if
-      end // for
+      end
     end
     
     @Operation getMapping(objectID) 
@@ -151,9 +162,36 @@ context FmmlxDiagrams
       end 
     end
     
-    @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo).asSymbol() end
-    @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent).asSymbol() end
-    @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc).asSymbol() end
-    @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller).asSymbol() end
+    @Operation createDelegationKey(delegatesFrom, delegatesTo) ("DelegationMapping: "+delegatesFrom+"/"+delegatesTo) end
+    @Operation createInheritanceKey(child, parent)             ("InheritanceMapping: "+child+"/"+parent) end
+    @Operation createAssociationKey(assoc)                     assoc.getID() end
+    @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc) end
+    @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller) end
     
+	@Operation createNoteKey(packageName:String, noteId:Integer)
+		("Root::" + packageName + "::NoteMapping" + noteId)
+	end
+	
+	@Operation removeNoteMapping(packageName:String, noteId:Integer)
+      let 
+        noteMappingId = self.createNoteKey(packageName, noteId)
+      in
+        self.removeMapping(noteMappingId)
+      end 
+    end
+	
+	@Operation removeMapping(mappingId:String)
+		let 
+			mappingInfo = self.addOrGetObjectMapping(mappingId)
+		in 
+			if
+				mapping.asSeq().contains(mappingInfo)
+			then	
+				self.mapping := mapping.asSeq().excluding(mappingInfo).asSet()
+			else 
+				throw(Exception("Can´t delete " + mappingInfo.id + ". Mapping was not in List"))
+			end
+		end
+	end
+		
 end // Class

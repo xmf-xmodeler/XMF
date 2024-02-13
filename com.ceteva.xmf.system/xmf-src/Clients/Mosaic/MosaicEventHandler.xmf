@@ -118,33 +118,25 @@ context Mosaic
          else 
            @TypeCase(type)
               Class do
-                let atts = type.allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel < type.level )
+                let atts = type.allAttributes()->asSeq->iterate(a col = Seq{} | if not (a.isIntrinsic andthen a.instLevel.minLevel < type.level.minLevel-1)
 												    then
 						    							col.including(Seq{"field",a.name.toString()})
-													else 
+													else
 														col
 													end);
-                    //ops = type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
-                    ops = type.allOperations()->asSeq->iterate(o col = Seq{} | if not (o.isIntrinsic andthen o.instLevel < (type.level-1) )
+                    ops = type.allOperations()->asSeq->iterate(o col = Seq{} | if not (o.isIntrinsic andthen o.instLevel.minLevel < (type.level.minLevel-1))
 												    then
 						    							col.including(Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})
 													else 
-														col//col.including(Seq{"operation","SKIPPED: " + o.instLevel +"<"+ (type.level-1) + " " + o.name.toString() + "(...)"})
+														col
 													end)
 				in
-//				then 
 				  @While type.hasStructuralFeature("delegatesTo") andthen type.delegatesTo <> null
 				  do 
 					//(type + " hasStructuralFeature delegatesTo").println();
 					type := type.delegatesTo;
 					atts := atts + type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
                     ops  := ops  + type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})                 
-//					let pi = 3 // type = type.delegatesTo 
-//					then atts = atts + type.allAttributes()->asSeq->collect(a | Seq{"field",a.name.toString()});
-//                         ops = ops + type.allOperations()->asSeq->collect(o | Seq{"operation",o.name.toString() + "(" + o.paramNames()->separateWith(",") + ")"})                 
-//                    in null end // let
-                    //;type.println()
-                    //;type.delegatesTo.println()
                   end; //while/do 
 				self.owner().commandInterpreter().consoleDot(atts + ops)
                 end //let/then/in
@@ -266,22 +258,24 @@ context Mosaic
     
     @Operation addProject(parameters) 
       if 
-        parameters.at(0).isValidName() 
+        parameters.at(0).isValidName()
+        andthen not
+        Root.contents.hasKey(parameters.at(0).asSymbol())
       then 
         let
           projectName = parameters.at(0)
         then
           model = FMMLx::FmmlxPackage(projectName)
-    	  then
+    	then
     	  project = Projects::Project(model, projectName, null)
   	    in
   	      model.addParent(FMMLx);
-          model.fmmlxAssociationInstances:={};
           Root.add(model);
           xmf.projectManager("MyProjects").add(project)
         end
+      else
+        throw(Exception("Cannot create project/package " + projectName)) 
       end
-        // throw(Exception("not yet implemented (param:" + projectName + ")")) 
     end
     
     @Operation addCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
@@ -291,7 +285,7 @@ context Mosaic
     @Operation renameProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation removeProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation assignCategoryToProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
-    @Operation unAassignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation unAssignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     
     @Operation addModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation renameModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end

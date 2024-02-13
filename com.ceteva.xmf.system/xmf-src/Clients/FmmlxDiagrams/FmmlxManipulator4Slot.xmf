@@ -34,3 +34,46 @@ import FmmlxDiagrams;
       end
       end // HACK
     end
+
+
+  context FmmlxManipulator
+    @Operation repairSlots(obj : FMMLx::FmmlxObject)
+      let
+        atts = obj.of()
+               .allAttributes()
+               ->select(a | (not a.isIntrinsic) orelse a.instLevel.minLevel = obj.level.minLevel)
+               ->reject(e | e.isKindOf(Associations::End) andthen not e.visible)
+      then
+        attNames  = atts.name->collect(n | n.toString());
+        slotNames = obj.getStructuralFeatureNames()->collect(n | n.toString())
+      then
+        additionalSlotNames = slotNames - attNames;
+        lackingSlotNames    = attNames  - slotNames
+      in
+        //("atts.size = " + atts.size()).println();
+        //("slots.size = " + slots.size()).println();
+        //("additionalSlotNames = " + additionalSlotNames).println();
+        //("lackingSlotNames = " + lackingSlotNames).println();
+        @For attName in lackingSlotNames do
+          //("Adding " + attName).println();
+          let
+            att = atts->select(a | a.name.toString() = attName).asSeq().at(0)
+          in
+            let 
+              default = att.type.default()
+            in
+              if att.isKindOf(Associations::End) 
+              andthen not (att.mult.hasUpperBound andthen att.mult.upperBound <= 1)
+              then default := {} end;
+              Kernel_addAtt(obj,att.name,default)
+            end
+          end
+        end;
+        @For attName in additionalSlotNames do
+          //("Removing " + attName).println();
+          obj.removeStructuralFeature(attName)
+        end;
+        null
+      end
+    end
+   

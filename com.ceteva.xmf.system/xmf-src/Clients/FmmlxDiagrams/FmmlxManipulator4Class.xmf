@@ -4,14 +4,15 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-    @Operation addMetaClass(package, name, level, parents, abstract)
-      let collectiveParents = parents->select(c | c.isCollective) in 
-        if collectiveParents.size() > 0 then self.error(collectiveParents.name + " cannot be superclasses as they are collective classes.") end end;
+    @Operation addMetaClass(package, name, level, parents, abstract, singleton)
+      let singletonParents = parents->select(c | c.isSingleton) in 
+        if singletonParents.size() > 0 then self.error(singletonParents.name + " cannot be superclasses as they are singletons.") end end;
       let 
         newClass = FMMLx::MetaClass(name, level)
       in
         package.add(newClass);
         newClass.isAbstract := abstract;
+        newClass.isSingleton := singleton; 
         if parents.size() > 0 then newClass.parents := parents.asSet() end;
 
         @For parent in newClass.parents do
@@ -30,117 +31,79 @@ import FmmlxDiagrams;
      
      The following operation assumes the former to have been checked. 
      Until proving the mandatory slots has been taken care of, all slots will be simply initiated with null.
-  
-  */
-  context FmmlxManipulator
-    @Operation addInstances(
-      package : Package, 
-      ofClass : MetaClass, 
-      name, 
-      parents, 
-      abstract : Boolean, 
-      slotValueList: Seq(Seq(String)),
-      number: Integer):Object
-      
-      @For i in 1.to(number) do 
-        self.addInstance(package, ofClass, name + i, parents, false, slotValueList)
-      end
-    end
-  
-  context FmmlxManipulator
-    @Operation addInstance(
-        package : Package, 
-        ofClass : MetaClass, 
-        name, 
-        aLevel, // a -> from arguments
-        parents, 
-        abstract : Boolean, 
-        slotValueList: Seq(Seq(String))):Object
-      self.addInstance(package, ofClass, name, aLevel, parents, abstract, false, slotValueList)
-    end
-    
+     */
+         
   context FmmlxManipulator
     @Operation addInstance(
       package : Package, 
       ofClass : MetaClass, 
       name, 
-      aLevel, // a -> from arguments
+      myLevel,
       parents, 
-      abstract : Boolean, 
-      collective : Boolean, 
+      abstract : Boolean,
+      singleton : Boolean,
       slotValueList: Seq(Seq(String))):Object
+      
+      //("Trying to instantiate " + ofClass.name + " on level " + ofClass.level.toString() + " to level " + myLevel.toString()).println();
+      if ofClass.isSingleton andthen ofClass.allInstances().size() > 0 then self.error("Class " + ofClass.name + " is a Singleton") end;
+      let singletonParents = parents->select(c | c.isSingleton) in 
+        if singletonParents.size() > 0 then self.error(singletonParents.name + " cannot be superclasses as they are singletons.") end end;
 
       // The following seems to be trivial, but better check once more
       if not ofClass.isKindOf(FMMLx::MetaClass) then self.error("Class " + ofClass.name + " is not an Fmmlx Class") end;
-      if (ofClass.level < 1 andthen ofClass.level <> -1) then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
-      if ofClass.isCollective then self.error(ofClass.name + " cannot be instantiated as it is a collective class.") end;
-      let collectiveParents = parents->select(c | c.isCollective) in 
-        if collectiveParents.size() > 0 then self.error(collectiveParents.name + " cannot be superclasses as they are collective classes.") end end;
+      if (ofClass.level.minLevel < 1/* andthen ofClass.level <> -1*/) then self.error("Level " + ofClass.level + " does not allow instantiation.") end;
       if not Symbol(name).isValidName()  then self.error("name " + name + " not legal.") end;
       
 	  // We instantiate a new object "obj", whereas the class is "ofClass". Therefore: obj.of() is equal to ofClass
       let 
           // create new Object
         obj = Kernel_mkObj(); 
-        myLevel = if ofClass.level = -1 then aLevel else ofClass.level - 1 end;
-        
-          // We prepare a set of all Attributes from the class and a set of all Operations
+          // We prepare a set of all Attributes from the class and (NO) a set of all Operations
           // !!! This needs to be changed to fit its purpose here.
           // !!! We need a list of all Attributes which are to be instantiated here.
         A = ofClass.allAttributes()
-        //;O = ofClass.allOperations()
-
-//          // We also prepare a set to put (which?) Attributes/Operations into to (do what?)
-//          // !!! This can probably be dropped
-//        intrinsicA = Set{};
-//        intrinsicO = Set{}
       in
-//        @For parent in parents do A := A + parent.allAttributes() end;
-//        A.name.pprint().println();   
-//      
         Kernel_setOf(obj,ofClass); // Now we set obj.of():=ofClass
       
          // Then we loop through the Attributes
         @While not A->isEmpty do
           let a = A->sel // pick any one Attribute
-          in if a.isIntrinsic andthen a.instLevel < myLevel
-             then // If it is intrinsic and not ready to become a slot the Attribute is put to the set we created before
+          in if a.isIntrinsic andthen a.instLevel.minLevel < myLevel.minLevel
+             then // 
                null//intrinsicA := intrinsicA.including(a)
              else // otherwise it becomes a slot and is initialised
-               if a.init <> null
-               then
+               if a.isKindOf(Associations::End) then
+                 let 
+                   default = a.type.default()
+                 in
+                   if not (a.mult.hasUpperBound andthen a.mult.upperBound <= 1)
+                   then default := {} end;
+                   
+                   if a.visible then 
+                     //(a.name + " att init " + default).println(); 
+                     Kernel_addAtt(obj,a.name,default) 
+                   else
+                     null//(a.name + " att not visible ").println()
+                   end
+                 end
+               elseif a.init <> null then
                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
                else
                  Kernel_addAtt(obj,a.name,a.type.default())
-               end;
-               if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+               end
+               //if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
              end;
              A := A->excluding(a) // we remove that attribute from the list as it has been handled
           end
         end;
-        
-        /*
-        ////////// We do nothing at all with Operations as they care for themselves
-        // Then we loop through the Operations
-        @While not O->isEmpty do
-          let op = O->sel // pick any one Operation
-          in if op.isIntrinsic andthen op.instLevel < myLevel 
-             then // If it is intrinsic and not ready to become available the Operation is put to the set we created before
-               intrinsicO := intrinsicO.including(op)
-             //else // otherwise it becomes available and we do nothing
-             end;
-             O := O->excluding(op) // we remove that attribute from the list as it has been handled
-          end
-        end; */
-        
-        
+           
         obj.level := myLevel;
         obj.setName(Symbol(name)); // todo: test name
         
         // copying the default super-classes and setting the initial superclasses.
         // skip for level = 0
         
-        if obj.level > 0 then 
+        if obj.level.minLevel > 0 then 
           if ofClass.inheritsFrom(Classifier) then
             obj.parents := obj.defaultParents()
           else
@@ -156,27 +119,26 @@ import FmmlxDiagrams;
   	      end
 
         end;
-        //then newClass.parents := parents.asSet() end; // test: may work or not...
-        
+                
         obj.init();
         
         ofClass.instances := ofClass.instances.including(obj);
         
         // todo: name, parents, abstract ...
         
-        if obj.level > 1 then // it's a metaclass, therefore its instances are classes
+        if obj.level.minLevel > 1 then // it's a metaclass, therefore its instances are classes
           package.add(obj);
+          obj.isSingleton := singleton; 
           obj.isAbstract := abstract; 
-          obj.isCollective := collective;
           obj.addParent(FMMLx::MetaClass)
         end;
-        if obj.level = 1 then // it's a simple class, therefore its instances are not classes
+        if obj.level.minLevel = 1 then // it's a simple class, therefore its instances are not classes
           package.add(obj);
+          obj.isSingleton := singleton; 
           obj.isAbstract := abstract;
-          obj.isCollective := collective;
           obj.addParent(FMMLx::FmmlxObject)
         end; 
-        if obj.level = 0 then //  it's not a class at all, and parent and abstract do not apply
+        if obj.level.minLevel = 0 then //  it's not a class at all, and parent and abstract do not apply
           // However, package.add does not add the object to the list of classes and it has to be done manually
           // Hopefully that has no side effects as the list of classes will contain non-classes
           // Alternatively, a second list for non-classes would be needed.
@@ -233,8 +195,20 @@ import FmmlxDiagrams;
       null
     end
     
+    
+  context FmmlxManipulator
+    @Operation changeClassLevel(class, newLevel)
+      if not class.isKindOf(FMMLx::MetaClass) then throw Exception("Only instances of FMMLx::MetaClass can have their level changed.") end;
+      if class.level.minLevel < 2 then throw Exception("Objects lower than level 2 cannot have their level changed.") end;
+      if not class.allInstances()->forAll(inst | newLevel.canBeInstantiatatedTo(inst.level)) then throw Exception("One of the instances does not match the new level") end;
+      if not newLevel.isValidForObject() then throw Exception("The new level is not valid") end;
+      class.level := newLevel;
+      null
+    end
+    
   context FmmlxManipulator
     @Operation removeClass(class, strategy)
+      //("before let").println();
       let 
         package = class.owner;
         associations = [];
@@ -244,6 +218,7 @@ import FmmlxDiagrams;
         ofClass = class.of()
       in
         //("remove Class "+class.name+" start").println();
+        if class.name.toString().equals("foo") then foo() end;
 
       // remove the instances
         @For instance in package.classes do
@@ -253,25 +228,25 @@ import FmmlxDiagrams;
         @For instance in instances do
           self.removeClass(instance, strategy) end;
           
-                // remove the associations first
-        @For association in package.associations do
-          if association.end1.type = class or association.end2.type = class then
-            associations := associations + [association] end end;
+        @For ae in if class.isKindOf(FMMLx::MetaClass) then class.attributes else {} end
+            ->select(a | a.isKindOf(Associations::End)) do 
+          associations := associations + [ae.association] end;
 //        ("found "+associations.size()+" associations").println();
         @For association in associations do
-            self.removeAssociation(association) end;
-            
+          self.removeAssociation(association) end;
 //        ("associations removed").println();
 
-      // remove all links
+      "!!! !!! TBD: remove links !!! !!!".println();
+
+   /*   // remove all links
         @For link in package.fmmlxAssociationInstances do
           if link.at(0) = class then links := links + [link] end;
           if link.at(1) = class then links := links + [link] end
         end;
         @For link in links do
           package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
-        end;        
-if class.isKindOf(FMMLx::MetaClass) then 
+        end;    */    
+      if class.isKindOf(FMMLx::MetaClass) then 
       // remove all inheritance in the subclasses
         @For heir in package.classes->select(h | h.isKindOf(FMMLx::MetaClass)) do
           if heir.parents.contains(class) then
@@ -295,7 +270,7 @@ if class.isKindOf(FMMLx::MetaClass) then
           ->select(d | d.isKindOf(FMMLx::MetaClass))
           ->select(d | d.delegatesTo = class) do 
           self.removeDelegation(delegator) end
-end; // only if class
+        end; // only if class
 
         @For role in package.classes
         ->select(r | r.isKindOf(FMMLx::FmmlxObject))
@@ -303,29 +278,34 @@ end; // only if class
         r.roleFiller := null end;
 
       // remove class
+//"removing Start".println();
         if 
           class.isKindOf(Class) 
         then 
+
+//"of Class".println();
           package.remove(class)
         else // As package.removeClass(...) is meant for classes, it does not work properly for non-classes
              // instead it's done manually.
+
+//"not of Class".println();
           package.remove(class);          
           package.removeClass(class)
         end;
         
         ofClass.instances := ofClass.instances.excluding(class)
-//        ("class removed").println()
+//        ;("class removed").println()
       end
     end
   
   context FmmlxManipulator  
     @Operation addParent(heir, parent)
-      if parent.level <> heir.level then ["Only classes from the same level may inherit from each other."]
+      if parent.level.minLevel <> heir.level.minLevel orelse parent.level.maxLevel <> heir.level.maxLevel then ["Only classes from the same level may inherit from each other."]
       // Check for circular inheritance
       elseif 
         parent.isDescendantOf(heir) then [parent.name + " is already descendant of " + heir.name + ". Circular inheritance not allowed."] 
       elseif
-        parent.isCollective then ["Collective class " + parent.name + " cannot be superclass."] 
+        parent.isSingleton then ["Singleton class " + parent.name + " cannot be superclass."] 
       else
         let 
           problems = []
@@ -434,7 +414,7 @@ end; // only if class
     @Operation changeClassAbstract(class, abstractNew)
       if abstractNew 
       then 
-        if class.level > 0 
+        if class.level.minLevel > 0 
         then 
           if class.allInstances()->select(i | i.of() = class).size() = 0 
           then class.isAbstract := true; []
@@ -446,17 +426,24 @@ end; // only if class
     end
     
   context FmmlxManipulator  
-    @Operation changeClassCollective(class, collectiveNew)
-      if collectiveNew 
+    @Operation changeClassSingleton(class, singletonNew)
+      if singletonNew 
       then 
-        if class.level > 0 
+        if class.level.minLevel > 0 
         then 
-          if class.getAllDescendants.size() = 0
-          then class.isCollective := true; []
-          else ["Classes with decendants cannot be made collective"] end
-        else ["Objects on level 0 cannot be made collective"] end
+          if class.allInstances()->select(i | i.of() = class).size() <= 1 
+          then 
+            if // TODO replace with something more efficient
+            // there is no class, which inherits from this class
+            class.owner.classes
+              ->select(c | c.isKindOf(Class))
+              ->forAll(subClass | not (subClass.parents.contains(class)))
+            then class.isSingleton := true; []
+            else ["Classes with subclasses cannot be made Singletons"] end
+          else ["Classes with more than one instance cannot be made Singletons"] end
+        else ["Objects on level 0 cannot be made Singletons"] end
       else
-        class.isCollective := false; []
+        class.isSingleton := false; []
       end
     end
     

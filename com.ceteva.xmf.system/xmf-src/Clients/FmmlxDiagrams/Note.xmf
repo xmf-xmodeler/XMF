@@ -1,0 +1,49 @@
+parserImport XOCL;
+
+import Clients;
+import FmmlxDiagrams;
+
+//Brauche ich die imports?
+
+context FmmlxDiagrams
+  @Class Note
+	
+
+	@Attribute id:Integer end
+	@Attribute content:String end
+	//takes hex-converted color from java
+	@Attribute color:String end
+	
+	//It seems that constructors do not allow to declare dataTyps for input. See datatype-def in attributes
+	@Constructor(id, content, color)
+		self.id := id;
+		self.content := content;
+		self.color := color;
+		self
+	end
+	
+	@Operation setContent(content:String)
+      self.content := content
+    end
+	
+	@Operation getContent()
+      content
+    end
+	
+	@Operation setId(id:Integer)
+      self.id := id
+    end
+	
+	@Operation getId()
+      id
+    end
+	
+	@Operation setColor(color:String)
+      self.color := color
+    end
+	
+	@Operation getColor()
+      color
+    end
+	
+  end
