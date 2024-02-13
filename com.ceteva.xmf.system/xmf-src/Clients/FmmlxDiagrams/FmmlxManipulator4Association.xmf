@@ -4,22 +4,22 @@ import Clients;
 import FmmlxDiagrams;
 
   context FmmlxManipulator
-   @Operation addAssociation(
-     p: Package,
-     source : MetaClass,
-     target : MetaClass,
-     accessSourceFromTargetName : String, // ref1
-     accessTargetFromSourceName : String, // ref2
-     fwName : String,
-     assocType : AssociationType,
-     multTargetToSource : XCore::Element,
-     multSourceToTarget : XCore::Element,
-     instLevelSource : XCore::Element,
-     instLevelTarget : XCore::Element,
-     sourceVisibleFromTarget : Boolean, 
-     targetVisibleFromSource : Boolean,
-     isSymmetric : Boolean,
-     isTransitive : Boolean):XCore::Element
+    @Operation addAssociation(
+      p: Package,
+      source : MetaClass,
+      target : MetaClass,
+      accessSourceFromTargetName : String, // ref1
+      accessTargetFromSourceName : String, // ref2
+      fwName : String,
+      assocType : AssociationType,
+      multTargetToSource : XCore::Element,
+      multSourceToTarget : XCore::Element,
+      instLevelSource : XCore::Element,
+      instLevelTarget : XCore::Element,
+      sourceVisibleFromTarget : Boolean,
+      targetVisibleFromSource : Boolean,
+      isSymmetric : Boolean,
+      isTransitive : Boolean):XCore::Element
 	      
   	  if // 1 check if fwName is valid and unique in p
   	    not fwName.isValidName()
@@ -47,10 +47,26 @@ import FmmlxDiagrams;
   	  //  5b if one multiplicity > 0, demand default value // or leave inconsistent and demand subsequent repair.
   	  //  6 check instLevel plausibility  	  
   	      
-  	  // can a class symmetrically self-associate?   
-  	  
-  	  elseif not source.isKindOf(assocType.sourceType) then ["Source " + source.name + " must be some kind of " + assocType.sourceType.name]
-  	  elseif not target.isKindOf(assocType.targetType) then ["Target " + target.name + " must be some kind of " + assocType.targetType.name]
+  	  // can a class symmetrically self-associate?
+  	    	  
+  	  elseif not 
+  	    if source.isKindOf(FMMLx::FmmlxObject) and assocType.sourceType.isKindOf(FMMLx::FmmlxObject)
+  	    then source.isDescendantOf(assocType.sourceType) 
+  	          andthen source.level.minLevel >= assocType.sourceLevel.minLevel 
+  	          andthen (assocType.sourceLevel.maxLevel = null orelse (source.level.maxLevel <> null andthen source.level.maxLevel <= assocType.sourceLevel.maxLevel))
+  	    else source.isKindOf(assocType.sourceType) 
+  	    end
+  	  then
+  	    ["Source " + source.name + " must be some kind of " + assocType.sourceType.name]
+  	  elseif not 
+  	    if target.isKindOf(FMMLx::FmmlxObject) and assocType.targetType.isKindOf(FMMLx::FmmlxObject)
+  	    then target.isDescendantOf(assocType.targetType) 
+  	          andthen target.level.minLevel >= assocType.targetLevel.minLevel 
+  	          andthen (assocType.targetLevel.maxLevel = null orelse (target.level.maxLevel <> null andthen target.level.maxLevel <= assocType.targetLevel.maxLevel))
+  	    else target.isKindOf(assocType.targetType) 
+  	    end
+  	  then
+  	    ["Target " + target.name + " must be some kind of " + assocType.targetType.name]
   	  
   	  else // all checks passed
         let 
@@ -129,6 +145,10 @@ import FmmlxDiagrams;
       end
     end
     
+  context FmmlxManipulator
+    @Operation removeAssociation(association:Associations::AbstractAssociation)
+      self.removeAssociation(association.target.owner, association.target.name.toString())
+    end
     
   context FmmlxManipulator
     @Operation removeAssociation(sourceClass:FMMLx::MetaClass, targetName:String)
@@ -160,7 +180,7 @@ import FmmlxDiagrams;
               o.level.minLevel = targetFromSourceEndLevel) or 
               (o.isDescendantOf(targetClass) andthen 
               o.level.minLevel = sourceFromTargetEndLevel))) do
-              self.repairSlots(association)
+              self.repairSlots(obj)
             end;
             []
           end

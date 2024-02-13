@@ -185,38 +185,6 @@ context XCore::String
     self
   end
 
-context XCore::CompiledOperation
-  @Operation edit()
-    /*@Doc
-    Launches an editor for a compiled operation. 
-    end*/
-    
-    //("editing " + self + "...").println();
-
-    let 
-      opBody = "parserImport XOCL;\n\ncontext " 
-      + self.owner.path() 
-      + "\n\n" 
-      + self.source()
-      + if self.isIntrinsic then 
-        "\n\n"
-        + self.owner.path() + "::" + self.name + ".isIntrinsic := true;"
-        + "\n"
-        + self.owner.path() + "::" + self.name + ".instLevel := "+self.instLevel+";"
-        else "" end;
-      fileName = "resources/tmp4ops/tempFileForOps" 
-        + xmf.javaClass("java.lang.System").currentTimeMillis()
-        +".xmf"
-    then 
-      foc = IO::FileOutputChannel(fileName)
-    in
-      foc.write(opBody);
-      foc.flush();
-      Clients::XmfFileTree::XmfFile(null,fileName).editText()
-    end;
-    self
-  end
-
 context Object
   @Operation addMissingSlot(attribute)
     let question = 

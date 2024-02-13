@@ -72,13 +72,26 @@ import FmmlxDiagrams;
              then // 
                null//intrinsicA := intrinsicA.including(a)
              else // otherwise it becomes a slot and is initialised
-               if a.init <> null
-               then
+               if a.isKindOf(Associations::End) then
+                 let 
+                   default = a.type.default()
+                 in
+                   if not (a.mult.hasUpperBound andthen a.mult.upperBound <= 1)
+                   then default := {} end;
+                   
+                   if a.visible then 
+                     //(a.name + " att init " + default).println(); 
+                     Kernel_addAtt(obj,a.name,default) 
+                   else
+                     null//(a.name + " att not visible ").println()
+                   end
+                 end
+               elseif a.init <> null then
                  Kernel_addAtt(obj,a.name,a.init.invoke(obj,Seq{}))
                else
                  Kernel_addAtt(obj,a.name,a.type.default())
-               end;
-               if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
+               end
+               //if a.hasProperty("visibility") then Kernel_setSlotVisibility(obj,a.name,a.visibility) end
              end;
              A := A->excluding(a) // we remove that attribute from the list as it has been handled
           end
@@ -195,7 +208,7 @@ import FmmlxDiagrams;
     
   context FmmlxManipulator
     @Operation removeClass(class, strategy)
-      //("before let").println(); keine Ahnung wofuer das ist aber das stoert beim testen
+      //("before let").println();
       let 
         package = class.owner;
         associations = [];
@@ -204,7 +217,7 @@ import FmmlxDiagrams;
         links = [];
         ofClass = class.of()
       in
-        ("remove Class "+class.name+" start").println();
+        //("remove Class "+class.name+" start").println();
         if class.name.toString().equals("foo") then foo() end;
 
       // remove the instances
@@ -215,25 +228,25 @@ import FmmlxDiagrams;
         @For instance in instances do
           self.removeClass(instance, strategy) end;
           
-                // remove the associations first
-        @For association in package.associations do
-          if association.end1.type = class or association.end2.type = class then
-            associations := associations + [association] end end;
+        @For ae in if class.isKindOf(FMMLx::MetaClass) then class.attributes else {} end
+            ->select(a | a.isKindOf(Associations::End)) do 
+          associations := associations + [ae.association] end;
 //        ("found "+associations.size()+" associations").println();
         @For association in associations do
-            self.removeAssociation(association) end;
-            
+          self.removeAssociation(association) end;
 //        ("associations removed").println();
 
-      // remove all links
+      "!!! !!! TBD: remove links !!! !!!".println();
+
+   /*   // remove all links
         @For link in package.fmmlxAssociationInstances do
           if link.at(0) = class then links := links + [link] end;
           if link.at(1) = class then links := links + [link] end
         end;
         @For link in links do
           package.removeAssociationInstance(link.at(0), link.at(1), link.at(2)) 
-        end;        
-if class.isKindOf(FMMLx::MetaClass) then 
+        end;    */    
+      if class.isKindOf(FMMLx::MetaClass) then 
       // remove all inheritance in the subclasses
         @For heir in package.classes->select(h | h.isKindOf(FMMLx::MetaClass)) do
           if heir.parents.contains(class) then
@@ -257,7 +270,7 @@ if class.isKindOf(FMMLx::MetaClass) then
           ->select(d | d.isKindOf(FMMLx::MetaClass))
           ->select(d | d.delegatesTo = class) do 
           self.removeDelegation(delegator) end
-end; // only if class
+        end; // only if class
 
         @For role in package.classes
         ->select(r | r.isKindOf(FMMLx::FmmlxObject))
@@ -265,23 +278,23 @@ end; // only if class
         r.roleFiller := null end;
 
       // remove class
-"removing Start".println();
+//"removing Start".println();
         if 
           class.isKindOf(Class) 
         then 
 
-"of Class".println();
+//"of Class".println();
           package.remove(class)
         else // As package.removeClass(...) is meant for classes, it does not work properly for non-classes
              // instead it's done manually.
 
-"not of Class".println();
+//"not of Class".println();
           package.remove(class);          
           package.removeClass(class)
         end;
         
         ofClass.instances := ofClass.instances.excluding(class)
-        ;("class removed").println()
+//        ;("class removed").println()
       end
     end
   

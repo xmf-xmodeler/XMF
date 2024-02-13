@@ -7,6 +7,7 @@ context FmmlxDiagrams
 
 @Class FmmlxDiagramMapping
 
+	//Set contains DataType MappingInfo
     @Attribute mapping : Set = {} end
     @Attribute labelMapping : Set = {} end
     @Attribute nextID : Integer = 0 end
@@ -167,4 +168,30 @@ context FmmlxDiagrams
     @Operation createAssociationLinkKey(end1, end2, assoc)     ("AssociationLinkMapping: "+end1+"/"+end2+"/"+assoc) end
     @Operation createRoleKey(role, roleFiller)                 ("RoleFillerMapping: "+role+"/"+roleFiller) end
     
+	@Operation createNoteKey(packageName:String, noteId:Integer)
+		("Root::" + packageName + "::NoteMapping" + noteId)
+	end
+	
+	@Operation removeNoteMapping(packageName:String, noteId:Integer)
+      let 
+        noteMappingId = self.createNoteKey(packageName, noteId)
+      in
+        self.removeMapping(noteMappingId)
+      end 
+    end
+	
+	@Operation removeMapping(mappingId:String)
+		let 
+			mappingInfo = self.addOrGetObjectMapping(mappingId)
+		in 
+			if
+				mapping.asSeq().contains(mappingInfo)
+			then	
+				self.mapping := mapping.asSeq().excluding(mappingInfo).asSet()
+			else 
+				throw(Exception("Can´t delete " + mappingInfo.id + ". Mapping was not in List"))
+			end
+		end
+	end
+		
 end // Class

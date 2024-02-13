@@ -221,6 +221,80 @@ context FmmlxDiagrams
                   .labelMapping
                   .asSeq()])
     end
+    
+    @Operation setImportedPackages(requestID : Seq(Integer), importedPackagesVec) 
+      let
+        p = self.getPackage(requestID);
+        importedPackages = self.vector2Seq(importedPackagesVec);
+        set = {};
+        problems = [];
+        m = FmmlxDiagrams::FmmlxManipulator()
+      in
+        @For pac in importedPackages do
+           let 
+             eval = m.evalString(pac, self.getPackage(requestID))
+           in
+             if 
+               eval.at(1) = null
+             then
+               if 
+                 eval.at(0) = null
+               then
+                 problems := ["Cannot add null"] + problems
+               elseif
+                 not eval.at(0).isKindOf(Package)
+               then
+                 problems := [pac + " is not a Package"] + problems
+               elseif
+                 eval.at(0).hasSlot("importedPackages") andthen
+                 eval.at(0).importedPackages.contains(p)
+               then 
+                 problems := [pac + " already imports " + p.path()] + problems
+               elseif
+                 eval.at(0) = p
+               then
+                 problems := ["Cannot import itself"] + problems
+               else
+                 set := {eval.at(0)} + set
+               end
+             else
+               problems := [eval.at(1)] + problems
+             end
+           end
+        end;
+        problems.println();
+        if problems.isEmpty() then
+          p.importedPackages := set
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end 
+    
+    @Operation getImportedPackages(requestID : Seq(Integer))
+      let
+        result = [];
+        p = self.getPackage(requestID)
+      in
+        @For imp in p.importedPackages do
+          result := result + [imp.path()]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
+    
+    @Operation getAvailablePackages(requestID : Seq(Integer), onlyFmmlx)
+      let
+        result = [];
+        p = self.getPackage(requestID)
+      then
+        P = if onlyFmmlx then FMMLx::FmmlxPackage else Package end.allInstances() - [p]
+      in
+        @For pac in P do
+          result := result + [pac.path()]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+      end
+    end
 
     @Operation getAssociationTypes(requestID : Seq(Integer))
       let
@@ -232,26 +306,32 @@ context FmmlxDiagrams
           assocTypes := p.associationTypes + assocTypes
         end;        
         @For aType in assocTypes do
-          result := [[
-            aType.name.toString(),
-            aType.path(),
-            aType.color,
-            aType.strokeWidth,
-            aType.dashArray,
-            aType.startDeco,
-            aType.endDeco,
-            aType.sourceType.path(),
-            aType.targetType.path(),
-            aType.sourceLevel+"",
-            aType.targetLevel+"",
-            aType.sourceMult+"",
-            aType.targetMult+"",
-            aType.colorLink,
-            aType.strokeWidthLink,
-            aType.dashArrayLink,
-            aType.startDecoLink,
-            aType.endDecoLink
-          ]] + result
+          let
+            sMin = if aType.sourceLevel = null then 1 else aType.sourceLevel.minLevel end;
+            sMax = if aType.sourceLevel = null then -1 elseif aType.sourceLevel.maxLevel = null then -1 else aType.sourceLevel.maxLevel end;
+            tMin = if aType.targetLevel = null then 1 else aType.targetLevel.minLevel end;
+            tMax = if aType.targetLevel = null then -1 elseif aType.targetLevel.maxLevel = null then -1 else aType.targetLevel.maxLevel end
+          in
+            result := [[
+              aType.name.toString(),
+              aType.path(),
+              aType.color,
+              aType.strokeWidth,
+              aType.dashArray,
+              aType.startDeco,
+              aType.endDeco,
+              aType.sourceType.path(),
+              aType.targetType.path(),
+	      sMin, sMax, tMin, tMax,
+              aType.sourceMult+"",
+              aType.targetMult+"",
+              aType.colorLink,
+              aType.strokeWidthLink,
+              aType.dashArrayLink,
+              aType.startDecoLink,
+              aType.endDecoLink
+            ]] + result
+          end
         end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
@@ -373,10 +453,8 @@ context FmmlxDiagrams
       in
         @For object in self.getPackage(requestID).classes do
           if object.isKindOf(Class) then @For parent in object.parents do
-            if parent.isKindOf(FMMLx::MetaClass) then
+//            if parent.isKindOf(FMMLx::MetaClass) then
               let
-//                childPath = self.getMapping(requestID).addOrGetObjectMapping(object).object.path();
-//                parentPath = self.getMapping(requestID).addOrGetObjectMapping(parent).object.path()
                 childPath = object.path();
                 parentPath = parent.path()
               then
@@ -388,7 +466,7 @@ context FmmlxDiagrams
   	            parentPath, // 2 end ID
   	            mappingInfo.points // 3 points
   	          ]])
-              end
+//              end
             end end
           end
         end;
@@ -564,7 +642,7 @@ context FmmlxDiagrams
               let
                 allOps = if c.isKindOf(FMMLx::MetaClass) 
                 then (c.allOperations2() + c.allOperations()).asSet().asSeq()->select(o | o.owner <> null)->select(o | o.owner.isKindOf(FMMLx::MetaClass))
-                else c.allOperations()
+                else c.operations.asSeq()//c.allOperations()
                 end
               then
                 allOpSize = allOps.size()
@@ -668,6 +746,10 @@ context FmmlxDiagrams
 //    end
 
     @Operation getAllSlots(requestID : Seq(Integer), objectSlotList)
+		@Doc
+			The objectSlotList contains Sequences of Object-Names and Slots form this objects. From every slot the value is requested and sent back. 
+			For large collections this function is really slow because the objectList is compared against all objects from a package. For this purpose the next function was introduced
+		end
       let 
         result = []
       in
@@ -700,6 +782,32 @@ context FmmlxDiagrams
     	self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
+	
+	@Operation getAllSlots(requestID : Seq(Integer))
+		@Doc
+			Return all slots of all Object in a Package. Objects that do not have slots are not contained in the result list.
+		end
+	let
+		package = self.getPackage(requestID)
+		then allObjects = package.classes;
+		result = []
+		in
+		@For object in allObjects do
+			let slots = object.slots()->select( s | s.type.owner.isKindOf(FMMLx::MetaClass) and s.type.of() = Attribute);
+			slotSeq = []
+			in
+			@For slot in slots do
+				let slotValue = if slot.value.of().isKindOf(Enum) then slot.value.name().toString() else slot.value.toString() end 
+					in 
+					slotSeq := slotSeq + [[slot.name.toString(), slotValue ]]
+				end
+			end;
+			if not slotSeq.isEmpty() then result := result + [[object.path(), slotSeq]] end
+			end
+		end;
+		self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+	end
+end
 
     /*@Operation getSlots(requestID : Seq(Integer), objectName, slotList)
       let
@@ -873,6 +981,7 @@ context FmmlxDiagrams
         result = []
       in
         @For obj in self.getPackage(requestID).contents()->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
+        //("checking " + obj.path()).println();
         //@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMMLx::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
         //  then
 		  /*@For slot in obj.slots() do
@@ -909,7 +1018,7 @@ context FmmlxDiagrams
 //		      self.getMapping(requestID).addOrGetObjectMapping(obj).id,
 //		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
 //		  end;
-		  @For assoc in self.getPackage(requestID).associations do
+/*		  @For assoc in self.getPackage(requestID).associations do
 		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end2.instLevel) // if obj fits sourceDef
 		    then
 		      let
@@ -965,7 +1074,7 @@ context FmmlxDiagrams
 		      end // let
 		    end // if instance of
 		  end; // for assoc
-		  
+		  */
 		  let 
 		    constraintReport = obj.checkConstraints()
 		  in
@@ -1579,9 +1688,13 @@ context FmmlxDiagrams
       end
     end
 
-    @Operation changeAttributeLevel(requestID : Seq(Integer), classPath, attName, oldLevel, newLevel)
+    @Operation changeAttributeLevel(requestID : Seq(Integer), classPath, attName, 
+                                    oldLevelMin, oldLevelMax, 
+                                    newLevelMin, newLevelMax)
       let
-        m = FmmlxDiagrams::FmmlxManipulator()
+        m = FmmlxDiagrams::FmmlxManipulator();
+        oldLevel = FMMLx::Level(oldLevelMin, oldLevelMax);
+        newLevel = FMMLx::Level(newLevelMin, newLevelMax)
       then
         class = m.evalString(classPath, self.getPackage(requestID)).at(0)
       then
@@ -1589,8 +1702,8 @@ context FmmlxDiagrams
         //problems = m.checkChangeAttributeLevel(class, attName, oldLevel, newLevel)
       in
         if problems.isEmpty() then
-          m.changeAttributeLevel(class, attName, oldLevel, newLevel);
-          self.log := self.log + [["changeAttributeLevel", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
+          m.changeAttributeLevel(class, attName, oldLevel, newLevel)//;
+//          self.log := self.log + [["changeAttributeLevel", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldLevel", oldLevel+""] , ["newLevel", newLevel+""]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
@@ -1804,7 +1917,11 @@ context FmmlxDiagrams
       startDecoLink   : String,
       endDecoLink     : String,
       sourcePath      : String,
-      targetPath      : String)
+      targetPath      : String,
+      sourceMinLevel  : Integer,
+      sourceMaxLevel  : Integer,
+      targetMinLevel  : Integer,
+      targetMaxLevel  : Integer)
     let 
       m = FmmlxDiagrams::FmmlxManipulator();
       p = self.getPackage(requestID)
@@ -1821,12 +1938,14 @@ context FmmlxDiagrams
         targetEval.at(1) <> null then [targetEval.at(1)] else
           let 
             a = Associations::AssociationType(typeName, sourceEval.at(0), targetEval.at(0))
-          in           
-            a.color       := color;           
-            a.strokeWidth := strokeWidth;           
-            a.dashArray   := dashArray;           
-            a.startDeco   := startDeco;           
-            a.endDeco     := endDeco;
+          in   
+            a.sourceLevel     := FMMLx::Level(sourceMinLevel,sourceMaxLevel);
+            a.targetLevel     := FMMLx::Level(targetMinLevel,targetMaxLevel);        
+            a.color           := color;           
+            a.strokeWidth     := strokeWidth;           
+            a.dashArray       := dashArray;           
+            a.startDeco       := startDeco;           
+            a.endDeco         := endDeco;
             a.colorLink       := colorLink;           
             a.strokeWidthLink := strokeWidthLink;           
             a.dashArrayLink   := dashArrayLink;           
@@ -2206,13 +2325,17 @@ context FmmlxDiagrams
       obj2Name  : String,
       role2Name : String)
 
+      //("addLink: "+obj1Name+"/"+obj2Name+"/"+role2Name).println();
       let
   	    m = FmmlxDiagrams::FmmlxManipulator()
   	  then
   	    obj1 = m.evalString(obj1Name, self.getPackage(requestID)).at(0);//if self.getPackage(requestID).hasElement(obj1Name) then self.getPackage(requestID).getElement(obj1Name) else null end;
   	    obj2 = m.evalString(obj2Name, self.getPackage(requestID)).at(0)//if self.getPackage(requestID).hasElement(obj2Name) then self.getPackage(requestID).getElement(obj2Name) else null end
   	  then
-        association = try self.findAssociation(obj1, role2Name) catch (e) self.findAssociation(obj1, obj2, role2Name) end
+        association = 
+          try self.findAssociation(obj1, role2Name) catch (e) 
+          try self.findAssociation(obj2, role2Name) catch (f) 
+              self.findAssociation(obj1, obj2, role2Name) end end
  	  then
         problems = m.addAssociationInstance(self.getPackage(requestID), obj1, obj2, association)
   	  in
@@ -2259,9 +2382,9 @@ context FmmlxDiagrams
       then
         problems = m.removeAssociationInstance(association,obj1,obj2)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["removeLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
-  	    end;
+//        if problems.isEmpty() then
+//          self.log := self.log + [["removeLink", ["package", association.owner.path()], ["name", association.name.toString()], ["classSource", obj1.path()], ["classTarget", obj2.path()]]]
+//  	    end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -3251,7 +3374,7 @@ context FmmlxDiagrams
                log := log + [["addDelegation", ["package", class.owner.path()],
                                          ["delegateFrom",  class.path()],
                                          ["delegateTo",  class.delegatesTo.path()],
-                                         ["delegateToLevel",  class.delegatesToLevel+""]]]
+                                         ["delegateToLevel",  class.delegatesToLevel.minLevel+""]]]
              end
            end;
            @For class in classes do
@@ -3621,7 +3744,111 @@ context FmmlxDiagrams
             classes := classes + iPack.contents()
           end
         end;
-        classes->select(x | x.isKindOf(Class))
+        classes->select(x | x.isKindOf(Class))-{null} 
+        // it seems that XCore contains null, so that has to be filtered out explicitely to avoid nullpointerexceptions, 
+        // even though it seems that XCore containing null is legit.
       end
     end
+	
+	//send a Vector<String> with all ProjectNames contained in the current Session to Java
+	@Operation getAllProjectNames(requestID) 
+		let
+			projectNames = Projects::Project.allInstances()->collect(p | p.name.toString())
+		in
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), projectNames])
+		end
+	end
+  
+	/**
+	 *Adds note to diagram
+	 *@return id of new createdNote
+	 */
+	@Operation addNoteToDiagram(requestID:Seq(Integer), content:String, color:String) 
+		let 
+			diagram =  self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = Clients::FmmlxDiagrams::Note(diagram.getNextNoteId(), content, color)
+		in
+			diagram.notes :=  diagram.notes + Seq{note};
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), note.getId()])
+		end
+    end
+
+	@Operation sendNoteMappingToXMF(requestID:Seq(Integer), noteId:Integer, xPosition:Integer, yPosition:Integer, hidden:Boolean)
+		let 
+			mappingKey = FmmlxDiagramMapping::createNoteKey(self.getPackage(requestID).name, noteId);
+			mapping = self.getMapping(requestID)
+		then
+			newCreatedMapping = mapping.addOrGetObjectMapping(mappingKey)
+		in
+			mapping.setNewPosition(mappingKey, xPosition, yPosition, hidden);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), newCreatedMapping.toString()])
+		end
+	end
+	
+	@Operation getAllNotes(requestID : Seq(Integer))
+	let
+		result = [];
+		d = self.diagrams.get(self.vector2Seq(requestID).at(0))
+	then
+		notes = d.getNotes()
+	in
+		@For note in notes do
+			result := result.append([[
+			note.getId(),
+			note.getContent(),
+			note.getColor()]])
+		end;
+		self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+		end
+	end
+	
+	@Operation getNoteMappings(requestID : Seq(Integer))
+		let
+			mappingList = self.getMapping(requestID).mapping;
+			//mappingSubstring = null;
+			result = []
+		in
+			@For mappingInfo in mappingList do
+			//a note id is build in the pattern "Root::PackageName::NoteMapping + NoteID" by the following instruction we find the last pasrt and can proof if it is a noteMapping
+				//mappingSubstring := mappingInfo.id.splitBy("::",0,0).at(4);
+				if
+					//mappingSubstring.truncate(11) = "NoteMapping"
+					(-1) <> mappingInfo.id.indexOf("::NoteMapping",0)
+				then 
+					result := result.append([[
+					mappingInfo.id,
+					mappingInfo.lastKnownDiagramX,
+					mappingInfo.lastKnownDiagramY,
+					mappingInfo.hidden]])
+				end
+			end;
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
+		end
+	end
+	
+	@Operation removeNoteFromDiagram(requestID : Seq(Integer), noteId:Integer)
+		let
+			diagram = self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = diagram.getNote(noteId)
+		in 
+			diagram.mapping.removeNoteMapping(self.getPackage(requestID).name, noteId);	
+			diagram.notes := diagram.notes.excluding(note);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), "Note" + noteId + " was deleted"])
+		end
+	end
+	
+	@Operation updateNoteData(requestID : Seq(Integer), noteId:Integer, content:String, color:String)
+		let
+			diagram = self.diagrams.get(self.vector2Seq(requestID).at(0))
+		then
+			note = diagram.getNote(noteId)
+		in 
+			note.setContent(content);
+			note.setColor(color);
+			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), "Note" + noteId + " was updated"])
+		end
+	end
+	
 end

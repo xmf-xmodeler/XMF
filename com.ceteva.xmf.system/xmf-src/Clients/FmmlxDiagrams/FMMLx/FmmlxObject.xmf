@@ -176,54 +176,7 @@ context Root::FMMLx
         end
       end
     end
-
-    /* This is not used internally for invoking operations which would cause an infinite loop 
-       It is invoked by sendInstance and finds all Operations by starting with itself, 
-       adding all operation to the results, 
-       where the level is higher and recursively checking all parent classes and metaclasses.
-    */ 
-    @Operation allOperations2():Seq(Operation)
-      let
-        myOps = {};
-        alreadyChecked = {};
-        toBeChecked = [self];
-        currentClass = null
-      in
-        @While toBeChecked.size() > 0 do 
-          currentClass := toBeChecked.at(0);
-          toBeChecked := toBeChecked - [currentClass];
-          //("Checking " + currentClass.name).println();
-          @For o in currentClass.operations do
-            if (o.isIntrinsic andthen o.instLevel <= self.level - 1)        // intrinsic and right level
-                                                                            or
-              ((not o.isIntrinsic) andthen currentClass.level = self.level) // non-intrinsic and one above the instance
-            then
-              myOps := myOps + {o}
-            end
-          end;
-          alreadyChecked := alreadyChecked + {currentClass};
-          @For p in currentClass.parents do                                 // inheritance
-            if p.isKindOf(FMMLx::MetaClass) then
-              if not alreadyChecked.contains(p) then
-                toBeChecked := toBeChecked + [p]
-              end
-            end
-          end;
-          let OF = Kernel_of(currentClass) in
-            if (not OF = null) // instantiation
-              /*andthen OF.isKindOf(FMMLx::MetaClass) */
-              andthen OF <> Class
-            then                    
-              if not alreadyChecked.contains(OF) then
-                toBeChecked := toBeChecked + [OF]
-              end
-            end
-          end
-        end; // while
-        myOps.asSeq()
-      end // let
-    end // operation
-  
+   
   @Operation getOperationsAvailableThroughDelegateToClass()
     if self.of().isKindOf(MetaClass) then 
      let 
@@ -275,7 +228,7 @@ context Root::FMMLx
       reports = [];
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
-      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel = self.level) do
+      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel) do
         reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
@@ -290,6 +243,8 @@ context Root::FMMLx
     end
   end
   
+  @Operation getLevel() self.level.getLevel() end
+  
   @Operation allAncestors():Set(Class)
     {self.of()} + self.of().allAncestors()
   end
@@ -297,5 +252,139 @@ context Root::FMMLx
   @Operation repairSlots()
     Clients::FmmlxDiagrams::FmmlxManipulator().repairSlots(self)
   end
+  
+  @Constraint objectInstanceOfClass
+    self.of() = FMMLx::MetaClass orelse self.of().isKindOf(FMMLx::MetaClass)
+  fail
+    "This FMMLxObject is not a (recursive) instance of a MetaClass ."
+  end
+  
+  @Constraint levelCorrectness
+    (self.level.maxLevel = null orelse self.level.maxLevel >= self.level.minLevel)
+    andthen
+    (self.level.minLevel = 0 implies self.level.maxLevel = 0) // redundant
+    andthen
+    (self.level.minLevel = 1 implies self.level.maxLevel = 1)
+    andthen
+    let
+      ofLevel = if self.of()=FMMLx::MetaClass 
+        then Level(2,null) else self.of().level end
+    in
+      self.level.minLevel >= ofLevel.minLevel - 1 and (
+        ofLevel.maxLevel = null orelse
+        self.level.maxLevel <= ofLevel.maxLevel - 1)
+    end
+  fail
+    "The level is not correct"
+  end
+  
+  @Constraint noClassOnLevelZero
+    self.isKindOf(FMMLx::MetaClass) implies self.level.minLevel > 0
+  fail
+    "An element on level 0 must not be a class "
+  end
+
+  @Constraint abstractClassNoInstance
+    not self.of().isAbstract
+  fail
+    "This object is an instance of an abstract class."
+  end
+  
+  @Constraint associationWithPackage
+    self.owner.classes.contains(self)
+  fail
+    "The owner of this object does not contain it."
+  end
+  
+  @Constraint linksStructure
+    self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
+      ->select(s | (not s.type.mult.hasUpperBound) orelse
+                   s.type.mult.upperBound > 1)
+      ->forAll(s | s.value.isKindOf(Set(Element)))
+  fail
+    let falseSlots = self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
+      ->select(s | (not s.type.mult.hasUpperBound) orelse
+                   s.type.mult.upperBound > 1)
+      ->reject(s | s.value.isKindOf(Set(Element)))
+    in 
+    "Structural problem: The slots " + falseSlots.name + " must be lists."
+    end
+  end
+
+  @Constraint linksMultiplicity
+    self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
+      ->forAll(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+        then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
+        else s.value.size() >= s.type.mult.lowerBound and
+           (if s.type.mult.hasUpperBound then
+            s.value.size() <= s.type.mult.upperBound
+            else true end)
+        end)
+  fail
+    let falseSlots = self.slots()
+      ->select(s | s.type.isKindOf(Associations::End))
+      ->select(s | s.type.visible)
+      ->reject(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+        then (if s.type.mult.lowerBound = 1 then s.value <> null else true end)
+        else s.value.size() >= s.type.mult.lowerBound and
+           (if s.type.mult.hasUpperBound then
+            s.value.size() <= s.type.mult.upperBound
+            else true end)
+        end)
+    in
+    "The multiplicity does not allow the number of links specified for links in " + falseSlots.name
+    end
+  end
+
+@Constraint linksCorrectType
+  self.slots()
+    ->select(s | s.type.isKindOf(Associations::End))
+    ->select(s | s.type.visible)
+    ->forAll(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+      then
+        s.value.isKindOf(s.type.type) and
+        (s.value = null orelse
+        s.value.level.matchesInstantiationLevel(s.type.instLevel))
+      else
+        s.value->forAll(o |
+        o.isKindOf(s.type.type) and
+        o.level.matchesInstantiationLevel(s.type.instLevel))
+      end)
+  fail
+    let falseSlots = self.slots()
+    ->select(s | s.type.isKindOf(Associations::End))
+    ->select(s | s.type.visible)
+    ->reject(s | if s.type.mult.hasUpperBound 
+                 andthen s.type.mult.upperBound = 1
+      then
+        s.value.isKindOf(s.type.type) and
+        (s.value = null orelse 
+        s.value.level.matchesInstantiationLevel(s.type.instLevel))
+      else
+        s.value->forAll(o |
+        o.isKindOf(s.type.type) and
+        o.level.matchesInstantiationLevel(s.type.instLevel))
+      end)
+    in
+      "Some linked objects in "+falseSlots.name+" do not conform to the stated type and level"
+    end
+  end
+  
+  @Constraint allElementNamesUnique
+    self.owner.classes->forAll(otherClass|
+      self.name.equals(otherClass.name) = (self = otherClass))
+  fail
+      "There is another element with the same name"
+  end
+  
   
 end

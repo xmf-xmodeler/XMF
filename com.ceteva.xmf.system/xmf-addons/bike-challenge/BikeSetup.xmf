@@ -29,12 +29,14 @@ context Root
   	      
   	  let 
         a = Associations::AssociationType("SpecialAssociation", p::A, p::B)
-      in           
-        a.color       := "0088ff";           
-        a.strokeWidth := 3;           
-        a.dashArray   := "";           
-        a.startDeco   := "arrow";           
-        a.endDeco     := "arrow";
+      in
+        a.sourceLevel     := FMMLx::Level(1,null);
+        a.targetLevel     := FMMLx::Level(1,null);
+        a.color           := "0088ff";           
+        a.strokeWidth     := 3;           
+        a.dashArray       := "";           
+        a.startDeco       := "arrow";           
+        a.endDeco         := "arrow";
         a.colorLink       := "88ccff";           
         a.strokeWidthLink := 2;           
         a.dashArrayLink   := "20,10";           

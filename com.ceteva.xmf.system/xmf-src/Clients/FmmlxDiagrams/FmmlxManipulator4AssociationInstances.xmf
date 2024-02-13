@@ -58,7 +58,7 @@ context FmmlxManipulator
     objectS : Object,
     objectT : Object,
     a       : Association)
-  
+    
     let 
       typeS = a.source.type;
       typeT = a.target.type;
@@ -93,8 +93,8 @@ context FmmlxManipulator
             sMult = a.target.mult;  // how many links to t are allowed for objectS
             tMult = a.source.mult // how many links to s are allowed for objectT
           in
-            if ((not sMult.hasUpperBound) orelse (sMult.upperBound > sCount)) andthen 
-               ((not tMult.hasUpperBound) orelse (tMult.upperBound > tCount))  
+            if (                      (not sMult.hasUpperBound) orelse (sMult.upperBound > sCount))  andthen 
+               (tCount = null orelse ((not tMult.hasUpperBound) orelse (tMult.upperBound > tCount)))  
             then
               //p.addAssociationInstance(objectS, objectT, a);
               // source->target

@@ -258,7 +258,9 @@ context Mosaic
     
     @Operation addProject(parameters) 
       if 
-        parameters.at(0).isValidName() 
+        parameters.at(0).isValidName()
+        andthen not
+        Root.contents.hasKey(parameters.at(0).asSymbol())
       then 
         let
           projectName = parameters.at(0)
@@ -266,13 +268,14 @@ context Mosaic
           model = FMMLx::FmmlxPackage(projectName)
     	then
     	  project = Projects::Project(model, projectName, null)
-  	in
-  	  model.addParent(FMMLx);
+  	    in
+  	      model.addParent(FMMLx);
           Root.add(model);
           xmf.projectManager("MyProjects").add(project)
         end
+      else
+        throw(Exception("Cannot create project/package " + projectName)) 
       end
-        // throw(Exception("not yet implemented (param:" + projectName + ")")) 
     end
     
     @Operation addCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
@@ -282,7 +285,7 @@ context Mosaic
     @Operation renameProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation removeProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation assignCategoryToProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
-    @Operation unAassignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
+    @Operation unAssignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     
     @Operation addModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation renameModel(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
