@@ -180,7 +180,7 @@ end
 @Operation nameChangeClassTest[monitor=false,delToClassAllowed=false]():XCore::Element	//for now simple but can be extenden in the future
 	let diagramCopy = currentDiagram in
 		self.m.changeClassName(classes.at(0),classes.at(1).name);		//tries to assign a duplicate name, should trigger an exception
-		validateModel();
+		self.validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
 	end
 end
@@ -191,7 +191,7 @@ end
 		if classes->select(c|c.level.minLevel>0) then	//creates two instances of a singleton, should trigger exception
 		self.m.addInstance(self.currentDiagram,ofClass,"singletonTest1",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);
 		self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);	
-		validateModel();
+		self.validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
 		end
 	end
@@ -207,7 +207,7 @@ end
 		catch(e)
 				self.m.addInstance(self.currentDiagram,ofClass,"singletonTest2",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[])
 		end;
-		validateModel();
+		self.validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
 		end
 	end
@@ -218,7 +218,7 @@ end
 	let diagramCopy = currentDiagram; ofClass = classes->select(c|c.level.minLevel>1 and c.singleton <> true) in	//ofClass has to be changend between tests depending on what has to be tested
 		if classes->select(c|c.level.minLevel>0) then	//creates one instance of a class (min. level 1) which is not a singleton, should not trigger exception
 		self.m.addInstance(self.currentDiagram,ofClass,"simpleInstanceTest",FMMLx::Level(ofClass.level.minLevel-1),Set{},false,false,[]);
-		validateModel();
+		self.validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
 		end
 	end
@@ -228,7 +228,7 @@ end
 @Operation removeClassTest[monitor=false,delToClassAllowed=false]():XCore::Element	//for now simple but can be extenden in the future
 	let diagramCopy = currentDiagram in
 		self.m.removeClass(classes.at(0),null);	//strategy parameter never used
-		validateModel();
+		self.validateModel();
 		currentDiagram = diagramCopy		//reset Diagram to previous state
 	end
 end
