@@ -344,7 +344,7 @@ context Root::FMMLx
     end
   end
 
-@Constraint linksCorrectType
+/*@Constraint linksCorrectType
   self.slots()
     ->select(s | s.type.isKindOf(Associations::End))
     ->select(s | s.type.visible)
@@ -377,7 +377,7 @@ context Root::FMMLx
     in
       "Some linked objects in "+falseSlots.name+" do not conform to the stated type and level"
     end
-  end
+  end*/
   
   @Constraint allElementNamesUnique
     self.owner.classes->forAll(otherClass|

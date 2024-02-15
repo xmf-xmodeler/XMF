@@ -1009,72 +1009,6 @@ end
 		          FMMLx::Severity::NORMAL.name.toString()]]
 			end
 		  end end; // for/if delegation */
-//		  if obj.of().isKindOf(FMMLx::MetaClass) andthen obj.of().delegatesTo <> null and obj.roleFiller = null
-//		  then result := result + [[
-//		    "NO_ROLE_FILLER",
-//		    "A role filler is required",
-//		    [self.getMapping(requestID).addOrGetObjectMapping(obj).id],
-//		    ["addRoleFiller",
-//		      self.getMapping(requestID).addOrGetObjectMapping(obj).id,
-//		      self.getMapping(requestID).addOrGetObjectMapping(obj.of().delegatesTo).id]]]
-//		  end;
-/*		  @For assoc in self.getPackage(requestID).associations do
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end1.type, assoc.end2.instLevel) // if obj fits sourceDef
-		    then
-		      let
-		        count = FmmlxManipulator::countOccurences(obj, self.getPackage(requestID), assoc, true, false) // how many links go out of obj as source
-		      in
-		        if
-		          count < assoc.end2.mult().lowerBound()
-		        then
-		          result := result + [[
-		            "ASSOC_MULT_LOW",
-		            "The association " + assoc.name + " requires more links.",
-		            [obj.path()],
-		            ["addMissingLink", obj.path(), self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createAssociationKey(assoc)).id],
-		            FMMLx::Severity::NORMAL.name.toString()]]
-		        end;
-		        if
-		          assoc.end2.mult().hasUpperBound() andthen count > assoc.end2.mult().upperBound()
-		        then
-		          result := result + [[
-		            "ASSOC_MULT_HIGH",
-		            "The association " + assoc.name + " requires fewer links.",
-		            [obj.path()],
-		            ["removeTooManyLinks", obj.path(), self.getMapping(requestID).addOrGetObjectMapping(FmmlxDiagramMapping::createAssociationKey(assoc)).id],
-		            FMMLx::Severity::NORMAL.name.toString()]]
-		        end
-		      end // let
-		    end; // if instance of
-		    if FmmlxManipulator::isInstanceOf(obj, assoc.end2.type, assoc.end1.instLevel) // if obj fits targetDef
-		    then
-		      let
-		        count = FmmlxManipulator::countOccurences(obj, self.getPackage(requestID), assoc, false, true)
-		      in
-		        if
-		          count < assoc.end1.mult().lowerBound()
-		        then
-		          result := result + [[
-		            "ASSOC_MULT_LOW",
-		            "The association " + assoc.name + " requires more links.",
-		            [obj.path()],
-		            ["addMissingLink", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMMLx::Severity::NORMAL.name.toString()]]
-		        end;
-		        if
-		          assoc.end1.mult().hasUpperBound() andthen count > assoc.end1.mult().upperBound()
-		        then
-		          result := result + [[
-		            "ASSOC_MULT_HIGH",
-		            "The association " + assoc.name + " requires fewer links.",
-		            [obj.path()],
-		            ["removeTooManyLinks", self.getMapping(requestID).addOrGetObjectMapping(obj).id, self.getMapping(requestID).addOrGetObjectMapping(assoc).id],
-		            FMMLx::Severity::NORMAL.name.toString()]]
-		        end
-		      end // let
-		    end // if instance of
-		  end; // for assoc
-		  */
 		  let 
 		    constraintReport = obj.checkConstraints()
 		  in
@@ -1920,8 +1854,10 @@ end
       targetPath      : String,
       sourceMinLevel  : Integer,
       sourceMaxLevel  : Integer,
+      sourceMult      : String,
       targetMinLevel  : Integer,
-      targetMaxLevel  : Integer)
+      targetMaxLevel  : Integer,
+      targetMult      : String)
     let 
       m = FmmlxDiagrams::FmmlxManipulator();
       p = self.getPackage(requestID)
@@ -1939,18 +1875,20 @@ end
           let 
             a = Associations::AssociationType(typeName, sourceEval.at(0), targetEval.at(0))
           in   
-            a.sourceLevel     := FMMLx::Level(sourceMinLevel,sourceMaxLevel);
-            a.targetLevel     := FMMLx::Level(targetMinLevel,targetMaxLevel);        
-            a.color           := color;           
-            a.strokeWidth     := strokeWidth;           
-            a.dashArray       := dashArray;           
-            a.startDeco       := startDeco;           
-            a.endDeco         := endDeco;
-            a.colorLink       := colorLink;           
-            a.strokeWidthLink := strokeWidthLink;           
-            a.dashArrayLink   := dashArrayLink;           
-            a.startDecoLink   := startDecoLink;           
-            a.endDecoLink     := endDecoLink;
+            a.sourceLevel      := FMMLx::Level(sourceMinLevel,sourceMaxLevel);
+            a.targetLevel      := FMMLx::Level(targetMinLevel,targetMaxLevel);        
+            a.color            := color;           
+            a.strokeWidth      := strokeWidth;           
+            a.dashArray        := dashArray;           
+            a.startDeco        := startDeco;           
+            a.endDeco          := endDeco;
+            a.colorLink        := colorLink;           
+            a.strokeWidthLink  := strokeWidthLink;           
+            a.dashArrayLink    := dashArrayLink;           
+            a.startDecoLink    := startDecoLink;           
+            a.endDecoLink      := endDecoLink;
+            a.sourceMult       := sourceMult;
+            a.targetMult       := targetMult;
             p.associationTypes := {a} + p.associationTypes;
             p.add(a);
             []
@@ -2110,7 +2048,8 @@ end
       newVisibility  : Boolean)
       
       let
-        m = FmmlxDiagrams::FmmlxManipulator();
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         assoc = self.findAssociation(sourceClass, targetName)
@@ -3188,12 +3127,9 @@ end
        in
          let
            maxLevel = 0;
-           classes = package.classes;
-           associations = package.associations
-           //links = package.fmmlxAssociationInstances
-         //then
-           //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
+           classes = package.classes
          in
+           //sort classes; //TODO ????? how to sort? if impossible leave it to java (consider parents)
            @For class in classes do
              if class.isKindOf(FMMLx::MetaClass) andthen class.level.minLevel>maxLevel then
                maxLevel := class.level.minLevel
@@ -3235,6 +3171,29 @@ end
                  end
                end
              end
+           end;
+           @For associationType in package.associationTypes do
+             log := log + [["addAssociationType",
+                           ["sourceType",associationType.sourceType.path()],
+                           ["targetType",associationType.targetType.path()],
+                           ["sourceMult",associationType.sourceMult],
+                           ["targetMult",associationType.targetMult],
+                           ["sourceLevelMin",associationType.sourceLevel.minLevel],
+                           ["targetLevelMin",associationType.targetLevel.minLevel],
+                           ["sourceLevelMax",if associationType.sourceLevel.maxLevel = null then none else associationType.sourceLevel.maxLevel end],
+                           ["targetLevelMax",if associationType.targetLevel.maxLevel = null then none else associationType.targetLevel.maxLevel end],
+                           ["color",associationType.color],
+                           ["strokeWidth",associationType.strokeWidth],
+                           ["dashArray",associationType.dashArray],
+                           ["startDeco",associationType.startDeco],
+                           ["endDeco",associationType.endDeco],
+                           ["colorLink",associationType.colorLink],
+                           ["strokeWidthLink",associationType.strokeWidthLink],
+                           ["dashArrayLink",associationType.dashArrayLink],
+                           ["startDecoLink",associationType.startDecoLink],
+                           ["endDecoLink",associationType.endDecoLink],
+                           ["strokeWidthLink",associationType.strokeWidthLink],
+                           ["dashArrayLink",associationType.dashArrayLink]]                          ]
            end;
            @For enumClass in classes->select(c | c.isKindOf(Enum)) do
              let
