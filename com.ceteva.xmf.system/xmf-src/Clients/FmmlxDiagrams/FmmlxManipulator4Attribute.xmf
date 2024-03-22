@@ -191,7 +191,7 @@ import FmmlxDiagrams;
         attribute.name := newName.asSymbol();
                 
         @For instance in allInst do
-          if instance.level.minLevel = attribute.instLevel then 
+          if instance.level.minLevel = attribute.instLevel.minLevel then 
             Kernel_addAtt(instance,newName,instance.get(oldName));
             instance.removeStructuralFeature(oldName)
           end

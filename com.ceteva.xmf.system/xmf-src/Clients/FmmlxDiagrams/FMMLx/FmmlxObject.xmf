@@ -222,13 +222,16 @@ context Root::FMMLx
     end
   end
     
-  @Operation checkConstraints():Seq(ConstraintReport)
+  @Operation checkConstraints(extended:Boolean):Seq(ConstraintReport)
     let
       constraints = self.of().allConstraints();
       reports = [];
       LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
     in
-      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel) do
+      @For constraint in constraints
+        ->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel)
+        ->select(c | extended orelse c.owner.isKindOf(FMMLx::FmmlxObject))
+      do
         reports := [
           try 
             if constraint.body.invoke(self,Seq{self.of(), LEVEL})
@@ -315,7 +318,7 @@ context Root::FMMLx
     end
   end
 
-  @Constraint linksMultiplicity
+  /*@Constraint linksMultiplicity
     self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
       ->select(s | s.type.visible)
@@ -342,48 +345,146 @@ context Root::FMMLx
     in
     "The multiplicity does not allow the number of links specified for links in " + falseSlots.name
     end
+  end */
+
+  @Operation allRelevantAssociationEnds()
+    self.of().allAttributes()
+      ->select(a | a.isKindOf(Associations::End))
+      ->select(a | a.instLevel.minLevel = self.level.minLevel)
+      ->select(a | a.visible)
   end
 
-/*@Constraint linksCorrectType
-  self.slots()
-    ->select(s | s.type.isKindOf(Associations::End))
-    ->select(s | s.type.visible)
-    ->forAll(s | if s.type.mult.hasUpperBound 
-                 andthen s.type.mult.upperBound = 1
-      then
-        s.value.isKindOf(s.type.type) and
-        (s.value = null orelse
-        s.value.level.matchesInstantiationLevel(s.type.instLevel))
-      else
-        s.value->forAll(o |
-        o.isKindOf(s.type.type) and
-        o.level.matchesInstantiationLevel(s.type.instLevel))
-      end)
+  @Constraint associationSlotExistence
+    self.allRelevantAssociationEnds()
+      ->forAll(e | self.hasSlot(e.name))
   fail
-    let falseSlots = self.slots()
-    ->select(s | s.type.isKindOf(Associations::End))
-    ->select(s | s.type.visible)
-    ->reject(s | if s.type.mult.hasUpperBound 
-                 andthen s.type.mult.upperBound = 1
-      then
-        s.value.isKindOf(s.type.type) and
-        (s.value = null orelse 
-        s.value.level.matchesInstantiationLevel(s.type.instLevel))
-      else
-        s.value->forAll(o |
-        o.isKindOf(s.type.type) and
-        o.level.matchesInstantiationLevel(s.type.instLevel))
-      end)
-    in
-      "Some linked objects in "+falseSlots.name+" do not conform to the stated type and level"
-    end
-  end*/
+    "This element lacks a slot from an association"
+  end
   
+  @Constraint associationSlotStructure
+    self.allRelevantAssociationEnds()
+      ->forAll(e | 
+        (e.mult.hasUpperBound andthen e.mult.upperBound=1)
+          <>
+        self.get(e.name).isKindOf(Set(Element)))
+  fail
+    "Some slots "+
+    (self.allRelevantAssociationEnds()
+      ->reject(e | 
+        (e.mult.hasUpperBound andthen e.mult.upperBound=1)
+          <>
+        self.get(e.name).isKindOf(Set(Element))).name)
+    +" have the wrong structure"
+  end
+  
+  @Constraint associationSlotMultiplicity
+    self.allRelevantAssociationEnds()
+      ->forAll(e | let
+          val = self.get(e.name)
+        in
+          if 
+            e.mult.hasUpperBound andthen e.mult.upperBound = 1
+          then        
+            e.mult.lowerBound = 1 implies val <> null
+          else 
+            (e.mult.hasUpperBound implies
+              val.size() <= e.mult.upperBound) andthen
+            val.size() >= e.mult.lowerBound
+          end end)
+  fail
+    let fails = self.allRelevantAssociationEnds()
+      ->reject(e | let
+          val = self.get(e.name)
+        in
+          if 
+            e.mult.hasUpperBound andthen e.mult.upperBound = 1
+          then        
+            e.mult.lowerBound = 1 implies val <> null
+          else 
+            (e.mult.hasUpperBound implies
+              val.size() <= e.mult.upperBound) andthen
+            val.size() >= e.mult.lowerBound
+          end end)
+    in
+      "Some links ("+fails.name+") do not adhere to their multiplicity"
+    end
+  end
+  
+  @Constraint associationSlotConformity
+    self.allRelevantAssociationEnds()
+      ->forAll(e | let
+          val = self.get(e.name);
+          otherEnd = if e.association.source = e 
+                     then e.association.target
+                     else e.association.source end
+        in
+          if 
+            e.mult.hasUpperBound andthen e.mult.upperBound=1
+          then        
+            val.isDescendantOf(e.type) andthen 
+            (val = null orelse (
+              val.level.matchesInstantiationLevel(otherEnd.instLevel)))
+          else 
+            val->forAll(item | 
+              item <> null andthen item.isDescendantOf(e.type) andthen
+              item.level.matchesInstantiationLevel(otherEnd.instLevel))
+          end end)
+  fail
+    let fails = self.allRelevantAssociationEnds()
+      ->reject(e | let
+          val = self.get(e.name);
+          otherEnd = if e.association.source = e 
+                     then e.association.target
+                     else e.association.source end
+        in
+          if 
+            e.mult.hasUpperBound andthen e.mult.upperBound=1
+          then        
+            val.isDescendantOf(e.type) andthen 
+            (val = null orelse (
+              val.level.matchesInstantiationLevel(otherEnd.instLevel)))
+          else 
+            val->forAll(item | 
+              item <> null andthen item.isDescendantOf(e.type) andthen
+              item.level.matchesInstantiationLevel(otherEnd.instLevel))
+          end end)
+    in 
+      "Some slots ("+fails.name+") contain values not adhering to the required type"
+    end 
+  end
+
   @Constraint allElementNamesUnique
     self.owner.classes->forAll(otherClass|
       self.name.equals(otherClass.name) = (self = otherClass))
   fail
       "There is another element with the same name"
+  end
+  
+  @Operation getRoleFillerClass()
+    let 
+      roleFillerDefs = //if self.of() = FMMLx::MetaClass then {} else
+        self.allAncestors()
+          ->select(a | a.delegatesTo <> null)
+          ->select(a | a.delegatesToLevel.minLevel = self.level.minLevel) //end
+    in
+      if roleFillerDefs.size() = 0 then null
+      elseif roleFillerDefs.size() = 1 then roleFillerDefs->sel 
+      else throw Exception("More than two delegations found: " + roleFillerDefs)
+      end
+    end
+  end
+  
+  @Constraint roleFillerPresent
+    let 
+      roleFillerClass = self.getRoleFillerClass()
+    in
+      roleFillerClass = null orelse (
+      self.roleFiller <> null andthen 
+      self.roleFiller.isDescendantOf(roleFillerClass.delegatesTo) andthen
+      self.roleFiller.level.minLevel = self.level.minLevel)
+    end
+  fail
+    "The role filler is not set or does not conform to the delegation definition"
   end
   
   

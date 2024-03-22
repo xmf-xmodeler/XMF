@@ -238,6 +238,8 @@ import FmmlxDiagrams;
 
       "!!! !!! TBD: remove links !!! !!!".println();
 
+		self.removeAllLinksTo(class);
+
    /*   // remove all links
         @For link in package.fmmlxAssociationInstances do
           if link.at(0) = class then links := links + [link] end;
@@ -298,6 +300,26 @@ import FmmlxDiagrams;
       end
     end
   
+  context FmmlxManipulator
+    @Operation removeAllLinksTo(obj) 
+	  // does only remove links if both objects are in the same package
+	  @For otherObj in obj.owner.classes do
+	    @For associationSlot in otherObj.slots()->select(s | s.type.isKindOf(Associations::End)) do
+	      // associationSlot is any slot in any (other) object. it may be relevant or not 
+	      // however we check whether it is a set or not and then if it refers to this object
+	      if 
+	        associationSlot.value.isKindOf(Set(Element)) and associationSlot.value <> null
+	      then
+	        // it is a set. Then simply remove this element from the set and put it back
+	        associationSlot.value := associationSlot.value - {obj}
+	      else
+	        // it is not a set. Then if it is a reference to obj, remove it.
+	        if associationSlot.value = obj then associationSlot.value:=null end
+	      end
+	    end
+	  end      
+    end   
+    
   context FmmlxManipulator  
     @Operation addParent(heir, parent)
       if parent.level.minLevel <> heir.level.minLevel orelse parent.level.maxLevel <> heir.level.maxLevel then ["Only classes from the same level may inherit from each other."]

@@ -372,9 +372,9 @@ import FmmlxDiagrams;
       newVisibility  : Boolean)
       
       let 
-        End       = if concernsTarget then assoc.target else assoc.source end;
-        class     = if concernsTarget then assoc.source else assoc.target end.type
-       then 
+        End        = if concernsTarget then assoc.target else assoc.source end;
+        class      = if concernsTarget then assoc.source else assoc.target end.type
+      then 
         type          = End.type;
         name          = End.name;
         instLevel     = End.instLevel;
@@ -386,12 +386,12 @@ import FmmlxDiagrams;
           self.addGettersAndSetters4Links(class, name.toString(), instLevel, type, assoc, concernsTarget, mult) end;
         if oldVisibility and not newVisibility then 
           self.removeGettersAndSetters(class, name.toString(), instLevel, type) end;*/
-        @For obj in sourceClass.owner.classes->select(o | 
+        @For obj in class.owner.classes->select(o | 
           o.isKindOf(FMMLx::FmmlxObject) andthen
-          ((o.isDescendantOf(sourceClass) andthen 
-          o.level.minLevel = targetFromSourceEndLevel) or 
-          (o.isDescendantOf(targetClass) andthen 
-          o.level.minLevel = sourceFromTargetEndLevel))) do
+          ((o.isDescendantOf(assoc.target.type) andthen 
+          o.level.minLevel = assoc.source.instLevel.minLevel) or 
+          (o.isDescendantOf(assoc.source.type) andthen 
+          o.level.minLevel = assoc.target.instLevel.minLevel))) do
           self.repairSlots(obj)
         end;
         []

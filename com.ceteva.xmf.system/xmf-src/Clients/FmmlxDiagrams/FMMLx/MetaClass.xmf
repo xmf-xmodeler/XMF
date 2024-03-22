@@ -400,28 +400,7 @@ context Root::FMMLx
        result
     end
   end
-    
-  @Operation checkConstraints():Seq(ConstraintReport)
-    let
-      constraints = self.of().allConstraints();
-      reports = [];
-      LEVEL = 1 // body and reason require a level, should be 1 for classic constraints
-    in
-      @For constraint in constraints->select(c | (not c.body.isIntrinsic) orelse c.body.instLevel.minLevel = self.level.minLevel) do
-        reports := [
-          try 
-            if constraint.body.invoke(self,Seq{self.of(), LEVEL})
-              then ConstraintReport(self,constraint,true)
-              else ConstraintReport(self,constraint,false,constraint.reason.invoke(self,Seq{self.of(), LEVEL}))
-    	    end
-          catch(exception)
-            ConstraintReport(self,constraint,false,"Error in constraint " + constraint.name + ": " + exception.message)
-          end] + reports
-      end;
-      ConstraintReport(self,null,reports->forAll(r | r.satisfied()),"",reports)
-    end
-  end
-  
+     
   @Operation allAncestors():Set(Class)
     let 
       myAncestors = {self.of()} + self.parents
@@ -499,6 +478,19 @@ context Root::FMMLx
       ->forAll(e | e.association.source = e)
   fail
     "Target End must be visible"
+  end
+  
+  @Constraint noDelegationDuplicates
+    let 
+      roleFillerDefs = (self.allAncestors() + {self})
+        ->select(a | a.delegatesTo <> null)
+    in
+      roleFillerDefs->forAll(a1 | roleFillerDefs->forAll(a2 | 
+        a1 <> a2 implies a1.delegatesToLevel.minLevel 
+          <> a2.delegatesToLevel.minLevel))
+    end
+  fail
+    "Delegation must not have duplicates"
   end
 
 end

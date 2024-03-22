@@ -976,41 +976,13 @@ end
       end
     end
 
-    @Operation getAllIssues(requestID : Seq(Integer))
+    @Operation getAllIssues(requestID : Seq(Integer), extended:Boolean)
       let
         result = []
       in
         @For obj in self.getPackage(requestID).contents()->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
-        //("checking " + obj.path()).println();
-        //@For obj in self.getPackage(requestID).classes do if obj <> null andthen obj.isKindOf(FMMLx::MetaClass) // andthen not self.getMapping(requestID).addOrGetObjectMapping(obj).hidden 
-        //  then
-		  /*@For slot in obj.slots() do
-		    if self.getPackage(requestID).classes.contains(slot.type.owner) then
-		      if slot.type.mult().lowerBound > 0 andthen slot.value = null then
-		        result := result + [[
-		        "SLOT_NULL",
-		        "The slot " + slot.name + " must not be empty.",
-		        [obj.path()],
-		        ["setSlotValue", obj.path(), slot.name.toString()],
-		        FMMLx::Severity::NORMAL.name.toString()]]
-		      end // if null and mandatory
-		    end // if slot fmmlx
-		  end; // for slots */
-/*		  if obj.hasSlot("delegatesTo") andthen obj.delegatesTo <> null then @For otherObj in self.getPackage(requestID).classes do // if for (check delegation)
-		    if FmmlxManipulator::isInstanceOf(otherObj, obj, obj.delegatesToLevel) andthen 
-		     ( otherObj.roleFiller = null orelse not FmmlxManipulator::isInstanceOf(otherObj.roleFiller, obj.delegatesTo, obj.delegatesToLevel))
-			then result := result + [[
-			    "NO_ROLE_FILLER",
-			    "A role filler is required",
-			    [self.getMapping(requestID).addOrGetObjectMapping(otherObj).id],
-			    ["addRoleFiller",
-			     otherObj.path(),
-			      obj.delegatesTo.path()],
-		          FMMLx::Severity::NORMAL.name.toString()]]
-			end
-		  end end; // for/if delegation */
 		  let 
-		    constraintReport = obj.checkConstraints()
+		    constraintReport = obj.checkConstraints(extended)
 		  in
 		    @For crItem in constraintReport.failures() do //constraintReport.children() do
 		      if 
@@ -2400,7 +2372,7 @@ end
       then
         problems = ["This change has been accepted but not been propagated. Check the role fillers."]
       in
-        c.delegatesToLevel := level;
+        c.delegatesToLevel := FMMLx::Level(level);
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
       end
     end
@@ -2485,7 +2457,7 @@ end
       then
         o = m.findOperation(class,name)
       then
-        problems = if class <> null then m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o)) else ["Class not found"] end
+        problems = if class <> null then m.changeOperationLevel(class, o, FMMLx::Level(newLevel), self.isOperationMonitored(o)) else ["Class not found"] end
         //problems = m.changeOperationLevel(class, o, newLevel, self.isOperationMonitored(o))
       in
         if problems.isEmpty() then
@@ -3555,9 +3527,13 @@ end
         then o.path()
       elseif try o.of().owner() = Auxiliary catch(e) false end // all classes in that package are supposed have that operation
         then o.toParseableString()
+      elseif o.isKindOf(Seq(Element)) or o.isKindOf(Set(Element))
+        then o->collect(i | self.toParseableString(i,p)).toString()
       else
-        ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();
-        "null"
+        try o.path() catch(E) 
+          ("The object " + o + " of type " + o.of().path() + " cannot be saved.").println();
+          "null"
+        end
       end
     end
 
