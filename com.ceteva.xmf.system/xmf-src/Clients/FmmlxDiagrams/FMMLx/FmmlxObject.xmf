@@ -366,14 +366,14 @@ context Root::FMMLx
       ->forAll(e | 
         (e.mult.hasUpperBound andthen e.mult.upperBound=1)
           <>
-        self.get(e.name).isKindOf(Set(Element)))
+        self.get(e.name).isReallyKindOf(Set(Element)))
   fail
     "Some slots "+
     (self.allRelevantAssociationEnds()
       ->reject(e | 
         (e.mult.hasUpperBound andthen e.mult.upperBound=1)
           <>
-        self.get(e.name).isKindOf(Set(Element))).name)
+        self.get(e.name).isReallyKindOf(Set(Element))).name)
     +" have the wrong structure"
   end
   
@@ -420,10 +420,9 @@ context Root::FMMLx
         in
           if 
             e.mult.hasUpperBound andthen e.mult.upperBound=1
-          then        
-            val.isDescendantOf(e.type) andthen 
-            (val = null orelse (
-              val.level.matchesInstantiationLevel(otherEnd.instLevel)))
+          then
+            val = null orelse (val.isDescendantOf(e.type) andthen
+              val.level.matchesInstantiationLevel(otherEnd.instLevel))
           else 
             val->forAll(item | 
               item <> null andthen item.isDescendantOf(e.type) andthen
@@ -439,10 +438,9 @@ context Root::FMMLx
         in
           if 
             e.mult.hasUpperBound andthen e.mult.upperBound=1
-          then        
-            val.isDescendantOf(e.type) andthen 
-            (val = null orelse (
-              val.level.matchesInstantiationLevel(otherEnd.instLevel)))
+          then
+            val = null orelse (val.isDescendantOf(e.type) andthen
+              val.level.matchesInstantiationLevel(otherEnd.instLevel))
           else 
             val->forAll(item | 
               item <> null andthen item.isDescendantOf(e.type) andthen

@@ -695,7 +695,8 @@ context FmmlxDiagrams
                       ownerPath,
                       [0,1,false,true], // to-do: multiplicity
                       self.isOperationMonitored(o),
-                      let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end
+                      let P = o.properties(); b = false in @For p in P do if p->head() = "delToClassAllowed" then b := p->tail() end end; b end,
+                      let P = o.properties(); b = false in @For p in P do if p->head() = "getterKey" orelse p->head() = "setterKey" then b := true end end; b end
                     ])
                   end // let
                 end end; // for+if
@@ -975,6 +976,10 @@ end
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), result])
       end
     end
+    
+    @Operation getAllIssues(requestID : Seq(Integer))
+      self.getAllIssues(requestID, true)
+    end
 
     @Operation getAllIssues(requestID : Seq(Integer), extended:Boolean)
       let
@@ -990,14 +995,14 @@ end
 		      then
 		        result := [[
 		          "CONSTRAINT_FAILURE",
-		          crItem.reason,
+		          crItem.constraint.name+": "+crItem.reason,
 		          [obj.path()],
 		          [crItem.constraint.getSolution(obj)],
 		          crItem.constraint.severity.name.toString()]] + result
 		      else
     	        result := [[
 		          "CONSTRAINT_FAILURE",
-		          crItem.reason,
+		          crItem.constraint.name+": "+crItem.reason,
 		          [obj.path()],
 		          ["no solution available"],
 		          FMMLx::Severity::USER_DEFINED.name.toString()]] + result
