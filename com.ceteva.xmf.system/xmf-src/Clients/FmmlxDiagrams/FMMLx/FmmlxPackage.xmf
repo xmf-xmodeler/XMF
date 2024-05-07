@@ -10,6 +10,26 @@ context Root::FMMLx
 
   @Operation getAssociations() 
     self.classes->select(c|c.isKindOf(FMMLx::MetaClass))->collect(c | c.attributes)->flatten->select(a|a.isKindOf(Associations::End))->collect(e|e.association)
+  end  
+  
+  @Operation findUsage(query:Symbol):Seq(Element)
+    let 
+      results = [] 
+    in 
+      @For class in self.classes->select(c | c.isKindOf(FMMLx::MetaClass)) do
+        @For o in class.operations do
+          let 
+            symbols = o.codeBox.constants().asSeq()->select(a | a.isReallyKindOf(Symbol))
+          in
+            if symbols.contains(query) then
+              //("Found " + query + " in " + class.name + "::" + o.name + "(" + o.arity + ")").println();
+              results := [o] + results
+            end
+          end
+        end
+      end;
+    results
+    end
   end
   
 end
@@ -257,4 +277,5 @@ context Root
         end
       end
     end
-  end
+    
+end

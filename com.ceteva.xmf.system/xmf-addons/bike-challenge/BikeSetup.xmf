@@ -41,7 +41,9 @@ context Root
         a.strokeWidthLink := 2;           
         a.dashArrayLink   := "20,10";           
         a.startDecoLink   := "arrow";           
-        a.endDecoLink     := "arrow";
+        a.endDecoLink     := "arrow";     
+        a.sourceMult      := [0,null,0,null];
+        a.targetMult      := [0,null,0,null];
         p.associationTypes := {a} + p.associationTypes;
         p.add(a)
       end;

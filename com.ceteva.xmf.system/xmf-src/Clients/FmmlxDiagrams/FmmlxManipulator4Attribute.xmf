@@ -200,7 +200,21 @@ import FmmlxDiagrams;
         //self.removeGettersAndSetters(class, oldName.toString(), attribute.instLevel, attribute.type); 
         //self.addGettersAndSetters(class, newName.toString(), attribute.instLevel, attribute.type);    
         
-        null
+        if class.owner.isKindOf(FMMLx::FmmlxPackage) then
+          let operations = class.owner.findUsage(oldName.asSymbol());
+              text = "The following operations contain the usage of "+oldName+":"
+          in
+            if operations.size() = 0 then [] else
+              @For operation in operations do
+                text := text + "\n" + operation.name + "(" + operation.arity + ") in " + operation.owner.name
+              end;
+              [text]
+            end            
+          end
+        else
+          []
+        end
+        
       end
     end
     

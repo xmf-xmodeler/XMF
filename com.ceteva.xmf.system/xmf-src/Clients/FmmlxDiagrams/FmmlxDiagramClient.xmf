@@ -1592,7 +1592,7 @@ end
         problems = if class <> null then m.checkChangeAttributeName(class, oldName, newName) else ["Class not found"] end
       in
         if problems.isEmpty() then
-          m.changeAttributeName(class, oldName, newName);
+          problems := m.changeAttributeName(class, oldName, newName);
           self.log := self.log + [["changeAttributeName", ["package", class.owner.path()], ["class", class.path()] , ["oldName", oldName] , ["newName", newName]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
@@ -1841,6 +1841,8 @@ end
     then
       sourceEval = m.evalString(sourcePath, self.getPackage(requestID));
       targetEval = m.evalString(targetPath, self.getPackage(requestID));
+      sourceMultArray = m.evalString(sourceMult, self.getPackage(requestID));
+      targetMultArray = m.evalString(targetMult, self.getPackage(requestID));
       problems = []
     in
       problems := if 
@@ -1848,7 +1850,9 @@ end
         not p.hasSlot("associationTypes") then ["Package " + p.name + "is not suitable for association types"] elseif
         0 <> p.associationTypes->select(a | a.name.toString() = typeName).size() then [typeName + " is already in use"] elseif
         sourceEval.at(1) <> null then [sourceEval.at(1)] elseif
-        targetEval.at(1) <> null then [targetEval.at(1)] else
+        targetEval.at(1) <> null then [targetEval.at(1)] elseif
+        sourceMultArray.at(1) <> null then [sourceMultArray.at(1)] elseif
+        targetMultArray.at(1) <> null then [targetMultArray.at(1)] else
           let 
             a = Associations::AssociationType(typeName, sourceEval.at(0), targetEval.at(0))
           in   
@@ -1864,8 +1868,8 @@ end
             a.dashArrayLink    := dashArrayLink;           
             a.startDecoLink    := startDecoLink;           
             a.endDecoLink      := endDecoLink;
-            a.sourceMult       := sourceMult;
-            a.targetMult       := targetMult;
+            a.sourceMult       := sourceMultArray.at(0);
+            a.targetMult       := targetMultArray.at(0);
             p.associationTypes := {a} + p.associationTypes;
             p.add(a);
             []
@@ -3150,27 +3154,28 @@ end
              end
            end;
            @For associationType in package.associationTypes do
-             log := log + [["addAssociationType",
+             log := log + [["addAssociationType", 
+                           ["name",associationType.name+""],
                            ["sourceType",associationType.sourceType.path()],
                            ["targetType",associationType.targetType.path()],
-                           ["sourceMult",associationType.sourceMult],
-                           ["targetMult",associationType.targetMult],
-                           ["sourceLevelMin",associationType.sourceLevel.minLevel],
-                           ["targetLevelMin",associationType.targetLevel.minLevel],
-                           ["sourceLevelMax",if associationType.sourceLevel.maxLevel = null then none else associationType.sourceLevel.maxLevel end],
-                           ["targetLevelMax",if associationType.targetLevel.maxLevel = null then none else associationType.targetLevel.maxLevel end],
+                           ["sourceMult",associationType.sourceMult+""],
+                           ["targetMult",associationType.targetMult+""],
+                           ["sourceLevelMin",associationType.sourceLevel.minLevel+""],
+                           ["targetLevelMin",associationType.targetLevel.minLevel+""],
+                           ["sourceLevelMax",if associationType.sourceLevel.maxLevel = null then "none" else (associationType.sourceLevel.maxLevel+"") end],
+                           ["targetLevelMax",if associationType.targetLevel.maxLevel = null then "none" else (associationType.targetLevel.maxLevel+"") end],
+                           
                            ["color",associationType.color],
-                           ["strokeWidth",associationType.strokeWidth],
+                           ["strokeWidth",associationType.strokeWidth+""],
                            ["dashArray",associationType.dashArray],
                            ["startDeco",associationType.startDeco],
                            ["endDeco",associationType.endDeco],
+                           
                            ["colorLink",associationType.colorLink],
-                           ["strokeWidthLink",associationType.strokeWidthLink],
+                           ["strokeWidthLink",associationType.strokeWidthLink+""],
                            ["dashArrayLink",associationType.dashArrayLink],
                            ["startDecoLink",associationType.startDecoLink],
-                           ["endDecoLink",associationType.endDecoLink],
-                           ["strokeWidthLink",associationType.strokeWidthLink],
-                           ["dashArrayLink",associationType.dashArrayLink]]                          ]
+                           ["endDecoLink",associationType.endDecoLink]]]
            end;
            @For enumClass in classes->select(c | c.isKindOf(Enum)) do
              let
@@ -3263,16 +3268,21 @@ end
                          ->select(a | a.isKindOf(Associations::End))
                          ->collect(e | e.association) do
 //           @For assoc in associations.asSeq() do
-             log := log + [["addAssociation", ["package", assoc.source.type.owner.path()],
-                                     ["classSource", assoc.source.type.path()] ,["classTarget", assoc.target.type.path()] ,
-                                     ["accessSourceFromTargetName", assoc.source.name.toString()] , ["accessTargetFromSourceName", assoc.target.name.toString()] ,
-                                     ["fwName", assoc.name.toString()+""],
-                                     ["reverseName", "-1"],
-                                     ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.source.mult())+""] , ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.target.mult())+""] ,
-                                     ["instLevelSource", assoc.target.instLevel.minLevel+""] , ["instLevelTarget", assoc.source.instLevel.minLevel+""] ,
-                                     ["sourceVisibleFromTarget", assoc.source.visible+""] , ["targetVisibleFromSource", assoc.target.visible+""]
+             log := log + [["addAssociation", 
+                             ["package", assoc.source.type.owner.path()],
+                             ["classSource", assoc.source.type.path()] ,["classTarget", assoc.target.type.path()] ,
+                             ["accessSourceFromTargetName", assoc.source.name.toString()] , ["accessTargetFromSourceName", assoc.target.name.toString()] ,
+                             ["fwName", assoc.name.toString()+""],
+                             ["reverseName", "-1"],
+                             ["multTargetToSource", FmmlxManipulator::multiplicity2ValueList(assoc.source.mult())+""], 
+                             ["multSourceToTarget", FmmlxManipulator::multiplicity2ValueList(assoc.target.mult())+""] ,
+                             ["instLevelSource", assoc.target.instLevel.minLevel+""], 
+                             ["instLevelTarget", assoc.source.instLevel.minLevel+""],
+                             ["sourceVisibleFromTarget", assoc.source.visible+""], 
+                             ["targetVisibleFromSource", assoc.target.visible+""], 
+                             ["associationType", assoc.of().path()]
 //                                     ,["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]
-                                     ]]
+                             ]]
            end;
            @For object in self.getPackage(requestID).classes do
              @For slot in object.slots()

@@ -62,7 +62,7 @@ context FmmlxDiagrams
     
     @Operation setNewPosition(objectID, x, y, hidden)
       //("mapping.size:" + mapping.size()).println();
-      //("mapping.id:" + mapping.id).println();
+      //("adding mapping:" + objectID).println();
       let 
         mappingInfo = self.addOrGetObjectMapping(objectID) //if mapping.id.contains(objectID)
           //then mapping->select(m | m.id = objectID).asSeq().at(0)
