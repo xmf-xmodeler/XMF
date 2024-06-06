@@ -31,6 +31,21 @@ context Root::FMMLx
     results
     end
   end
+
+  @Operation setAssociationDependsOn(assocDepending : String, assocDependsOn : String) : Element 
+    let 
+      allAssociations = self.allClasses()->collect(c | c.attributes)->flatten->select(a | a.of() = Associations::End)->collect(e|e.association)
+    then
+      assoc0 = allAssociations->select(a | a.name.toString() = assocDepending);
+      assoc1 = allAssociations->select(a | a.name.toString() = assocDependsOn)
+    in
+      if     assoc0.size() <> 1 then throw Exception(assocDepending + " not found / is ambiguous") 
+      elseif assoc1.size() <> 1 then throw Exception(assocDependsOn + " not found / is ambiguous")
+      else
+        (assoc0->sel).dependsOn := assoc1->sel
+      end
+    end
+  end
   
 end
   
@@ -277,5 +292,7 @@ context Root
         end
       end
     end
+    
+
     
 end

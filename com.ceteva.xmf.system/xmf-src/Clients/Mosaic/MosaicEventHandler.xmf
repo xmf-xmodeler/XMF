@@ -278,12 +278,61 @@ context Mosaic
       end
     end
     
+    @Operation renameProject(parameters) 
+      let
+        packagePath = parameters.at(0);
+        newName = parameters.at(1).asSymbol()
+      then
+        parseResult = Clients::FmmlxDiagrams::FmmlxManipulator().evalString(packagePath, Root)
+      in
+        if
+          parseResult.at(1) <> null orelse parseResult.at(0) = null orelse not parseResult.at(0).isKindOf(Package) 
+        then
+          throw(Exception("Package" + parameters.get(0) + " not found"))
+        elseif
+          (not newName.isValidName()) orelse Root.contents.hasKey(newName)
+        then
+          throw(Exception("New name" + newName + " not valid or not free"))
+        else
+          let
+            package = parseResult.at(0)
+          then
+            oldName = package.name
+          in
+            //package.nameChanged(package,newName,oldName);
+            package.name := newName;
+            Root.nameChanged(package,newName,oldName)
+          end
+        end
+      end
+    end
+
+    @Operation removeProject(parameters)
+      let
+        packagePath = parameters.at(0)
+      then
+        parseResult = Clients::FmmlxDiagrams::FmmlxManipulator().evalString(packagePath, Root)
+      in
+        if
+          parseResult.at(1) <> null orelse parseResult.at(0) = null orelse not parseResult.at(0).isKindOf(Package) 
+        then
+          throw(Exception("Package" + parameters.get(0) + " not found"))
+        else
+          let
+            package = parseResult.at(0)
+          in
+            package.owner.remove(package)
+          end
+        end
+      end
+    end
+
+
+
     @Operation addCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation renameCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation removeCategory(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     
-    @Operation renameProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
-    @Operation removeProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation assignCategoryToProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     @Operation unAssignCategoryFromProject(parameters) throw(Exception("not yet implemented (param:" + parameters + ")")) end
     

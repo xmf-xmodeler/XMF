@@ -495,7 +495,7 @@ context FmmlxDiagrams
     	          a.getID(), // 0 ID
     	          a.source.type.path(), // 1 source ID
     	          a.target.type.path(), // 2 target ID
-    	          -1, // 3 parent ID
+    	          if a.dependsOn = null then "" else a.name+"" end, // 3 "parent" ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
     	          a.of().path(), // 6 name 2

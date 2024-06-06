@@ -410,6 +410,64 @@ context Root::FMMLx
     end
   end
   
+  @Constraint associationDependency
+    self.allRelevantAssociationEnds()
+      ->select(e | e.association.dependsOn <> null)
+      ->forAll(e | let
+          val = self.get(e.name);
+          dependsOn = e.association.dependsOn;
+          reversed = e.association.source = e          
+      then
+        links = if val = null then {null} elseif val.isKindOf(Set(Element)) then val else {val} end
+      in
+        links->forAll(link | 
+          // there must also be another link of dependsOn in the ancestors
+          // so we check all ancestors for slots which belong to dependsOn
+          // we also check all ancestors of the other side
+          // the ancestors on both sides should be a manageable amount
+          self.allAncestors()->exists(anc1 |
+            // not yet: link.allAncestors->exists(anc2 |
+            // now we have two candidates
+            // anc1 is ancestor of self, anc2 of the link target
+            // we do not care whether anc1 or anc2 are able to have a link of depends on
+            // we do care if they have one (which includes the former and saves a lot of additional checks)
+            // we further assume that the navigability and direction of dependsOn is the same as that of the other association
+            // so if self knows the link target, anc1 must know anc2, 
+            // whether anc2 knows anc1 is irrelevant
+            let 
+              val2 = try anc1.get(if reversed then dependsOn.source else dependsOn.target end.name) catch (ex) null end
+            then                    
+              links2 = if val2 = null then {null} elseif val.isKindOf(Set(Element)) then val2 else {val2} end
+            in
+              link.allAncestors()->exists(anc2 | links2.contains(anc2))
+            end))
+      end)
+  fail
+    "Links to " + 
+    (self.allRelevantAssociationEnds()
+      ->select(e | e.association.dependsOn <> null)
+      ->collect(e | let
+          val = self.get(e.name);
+          dependsOn = e.association.dependsOn;
+          reversed = e.association.source = e          
+      then
+        links = if val = null then {null} elseif val.isKindOf(Set(Element)) then val else {val} end
+      in
+        links->reject(link | 
+          self.allAncestors()->exists(anc1 |
+            let 
+              val2 = try anc1.get(if reversed then dependsOn.source else dependsOn.target end.name) catch (ex) null end
+            then                    
+              links2 = if val2 = null then {null} elseif val.isKindOf(Set(Element)) then val2 else {val2} end
+            in
+              link.allAncestors()->exists(anc2 | links2.contains(anc2))
+            end))
+      end))->flatten.name
+      + 
+      " are invalid. (Check 'dependsOn' in association)"
+      
+  end
+  
   @Constraint associationSlotConformity
     self.allRelevantAssociationEnds()
       ->forAll(e | let
@@ -483,7 +541,6 @@ context Root::FMMLx
     end
   fail
     "The role filler is not set or does not conform to the delegation definition"
-  end
-  
+  end  
   
 end
