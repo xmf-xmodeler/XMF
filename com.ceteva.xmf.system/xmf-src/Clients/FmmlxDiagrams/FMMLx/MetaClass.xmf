@@ -492,5 +492,29 @@ context Root::FMMLx
   fail
     "Delegation must not have duplicates"
   end
+  
+  @Constraint associationTypeCardinality
+    // this only checks local associations, as any association must be local somewhere
+    self.attributes
+      ->select(a | a.isKindOf(Associations::End))
+      ->collect(e | e.association)
+      ->forAll(assoc | assoc.checkMultiplicities().size() = 0)
+  fail
+    let
+      text = "The following cardinalities are inconsistent:\n";
+      allAssocs = self.attributes
+        ->select(a | a.isKindOf(Associations::End))
+        ->collect(e | e.association)
+    in
+      @For assoc in allAssocs do 
+        let 
+          issues = assoc.checkMultiplicities()
+        in 
+          text := if issues.size()=0 then text else text + assoc.name + ":"+issues+"\n" end
+        end // let
+      end; // for
+      text
+    end // let
+  end // constraint
 
 end

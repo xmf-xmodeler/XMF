@@ -498,4 +498,60 @@ import FmmlxDiagrams;
 "+        "  end")*/
         end
       end
-    end    
+    end
+   
+  context FmmlxManipulator
+    @Operation removeAssociationDependency(sourceClass:FMMLx::MetaClass, targetName:String)
+      let 
+        associationEnds = sourceClass.allAttributes()
+          ->select(a | a.name.toString() = targetName)
+      then
+        association = if associationEnds.size() = 1 
+          then associationEnds.asSeq().at(0).association
+          else null
+        end
+      in
+        if
+          association = null
+        then
+          ["Association " + sourceClass + "::" + targetName + " not found"]
+        else
+          association.dependsOn = null;[]
+        end
+      end      
+    end
+    
+    
+  context FmmlxManipulator
+    @Operation addAssociationDependency(sourceClass:FMMLx::MetaClass, targetName:String, dependsOnAssocName)
+      let 
+        associationEnds = sourceClass.allAttributes()
+          ->select(a | a.name.toString() = targetName)
+      then
+        association = if associationEnds.size() = 1 
+          then associationEnds.asSeq().at(0).association
+          else null
+        end
+      in
+        if
+          association = null
+        then
+          ["Association " + sourceClass + "::" + targetName + " not found"]
+        else
+          let
+            allAssociations = (sourceClass.allAncestors()+{sourceClass})->collect(c | c.attributes)->flatten->select(a | a.of() = Associations::End)->collect(e|e.association)
+          then
+            assoc1 = allAssociations->select(a | a.name.toString() = assocDependsOn)
+          in
+            if 
+              assoc1.size() <> 1 
+            then
+              [assocDependsOn + " not found / is ambiguous"]
+            else
+              association.dependsOn := assoc1->sel;[]
+            end
+          end
+        end
+      end      
+    end
+    

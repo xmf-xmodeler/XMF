@@ -89,29 +89,29 @@ context Associations
         then
           issues := issues + {"No multiplicity rules for source supplied."}
         elseif
-          not self.source.mult.isKindOf(Multiplicity::CollectionMult)
+          not self.source.mult.isKindOf(Multiplicities::CollectionMult)
         then 
-          issues := issues + {"Source multiplicity must be of type Multiplicity::CollectionMult."}
+          issues := issues + {"Source multiplicity must be of type Multiplicities::CollectionMult."}
         else
-          if self.source.lowerBound < self.of().sourceMult.at(0) then 
+          if self.source.mult.lowerBound < self.of().sourceMult.at(0) then 
             issues := issues + {"Source lower bound too small"} end;
-          if self.of().sourceMult.at(1) <> null andthen self.source.lowerBound > self.of().sourceMult.at(1) then 
+          if self.of().sourceMult.at(1) <> null andthen self.source.mult.lowerBound > self.of().sourceMult.at(1) then 
             issues := issues + {"Source lower bound too large"} end;
-          if self.source.hasUpperBound then
+          if self.source.mult.hasUpperBound then
             if 
               self.of().sourceMult.at(2) = null 
             then 
               issues := issues + {"Source must not have an upper bound"} 
             else
-              if self.of().sourceMult.at(2) < self.source.upperBound then 
+              if self.of().sourceMult.at(2) < self.source.mult.upperBound then 
                 issues := issues + {"Source upper bound too small"} end
             end
           end;
           if self.of().sourceMult.at(3) <> null then
             if 
-              self.source.hasUpperBound
+              self.source.mult.hasUpperBound
             then
-              if self.source.lowerBound > self.of().sourceMult.at(3) then 
+              if self.source.mult.lowerBound > self.of().sourceMult.at(3) then 
                 issues := issues + {"Source upper bound too large"} end
             else
               issues := issues + {"Source must have an upper bound"} 
@@ -124,29 +124,29 @@ context Associations
         then
           issues := issues + {"No multiplicity rules for target supplied."}
         elseif
-          not self.target.mult.isKindOf(Multiplicity::CollectionMult)
+          not self.target.mult.isKindOf(Multiplicities::CollectionMult)
         then 
           issues := issues + {"Target multiplicity must be of type Multiplicity::CollectionMult."}
         else
-          if self.target.lowerBound < self.of().targetMult.at(0) then 
+          if self.target.mult.lowerBound < self.of().targetMult.at(0) then 
             issues := issues + {"Target lower bound too small"} end;
-          if self.of().targetMult.at(1) <> null andthen self.target.lowerBound > self.of().targetMult.at(1) then 
+          if self.of().targetMult.at(1) <> null andthen self.target.mult.lowerBound > self.of().targetMult.at(1) then 
             issues := issues + {"Target lower bound too large"} end;
-          if self.target.hasUpperBound then
+          if self.target.mult.hasUpperBound then
             if 
               self.of().targetMult.at(2) = null 
             then 
               issues := issues + {"Target must not have an upper bound"} 
             else
-              if self.of().targetMult.at(2) < self.target.upperBound then 
+              if self.of().targetMult.at(2) < self.target.mult.upperBound then 
                 issues := issues + {"Target upper bound too small"} end
             end
           end;
           if self.of().targetMult.at(3) <> null then
             if 
-              self.target.hasUpperBound
+              self.target.mult.hasUpperBound
             then
-              if self.target.lowerBound > self.of().targetMult.at(3) then 
+              if self.target.mult.lowerBound > self.of().targetMult.at(3) then 
                 issues := issues + {"Target upper bound too large"} end
             else
               issues := issues + {"Target must have an upper bound"} 

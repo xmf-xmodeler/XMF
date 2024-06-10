@@ -495,7 +495,7 @@ context FmmlxDiagrams
     	          a.getID(), // 0 ID
     	          a.source.type.path(), // 1 source ID
     	          a.target.type.path(), // 2 target ID
-    	          if a.dependsOn = null then "" else a.name+"" end, // 3 "parent" ID
+    	          if a.dependsOn = null then "" else a.dependsOn.name+"" end, // 3 "parent" ID
     	          mappingInfo.points, // 4 points
     	          a.name.toString(), // 5 name 1
     	          a.of().path(), // 6 name 2
@@ -3800,5 +3800,39 @@ end
 			self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), "Note" + noteId + " was updated"])
 		end
 	end
+	
+	
+    @Operation removeAssociationDependency(
+      requestID     : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String)
+
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        problems = m.removeAssociationDependency(sourceClass, targetName)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end	
+    
+    @Operation addAssociationDependency(
+      requestID     : Seq(Integer),
+      sourcePath    : String,
+      targetName    : String,
+      dependsOnAssociationName    : String)
+
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
+      then
+        problems = m.addAssociationDependency(sourceClass, targetName, dependsOnAssociationName)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
 	
 end
