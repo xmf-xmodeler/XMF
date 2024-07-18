@@ -516,5 +516,27 @@ context Root::FMMLx
       text
     end // let
   end // constraint
+/*
+  @Constraint attributeCorrectLevel
+    self.attributes
+      ->reject(a | a.isKindOf(Associations::End))
+      ->reject(a | not a.isIntrinsic)
+      ->forAll(a | (a.instLevel.minLevel = a.instLevel.maxLevel) and 
+        [a.instLevel.minLevel, a.instLevel.maxLevel]->forAll(l | l > 0 and 
+          ((not a.isOptional) andthen l < self.level.minLevel or
+          (a.isOptional andthen 
+            (self.level.maxLevel = null orelse l < self.level.maxLevel)))))
+  fail
+    "The attributes "+
+    self.attributes
+      ->reject(a | a.isKindOf(Associations::End))
+      ->reject(a | not a.isIntrinsic)
+      ->reject(a | (a.instLevel.minLevel = a.instLevel.maxLevel) and 
+        [a.instLevel.minLevel, a.instLevel.maxLevel]->forAll(l | l > 0 and 
+          ((not a.isOptional) andthen l < self.level.minLevel or
+          (a.isOptional andthen 
+            (self.level.maxLevel = null orelse l < self.level.maxLevel)))))
+    +" do not have a valid level"
+  end*/
 
 end

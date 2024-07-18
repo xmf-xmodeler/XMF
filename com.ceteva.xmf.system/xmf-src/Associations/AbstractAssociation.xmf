@@ -103,7 +103,7 @@ context Associations
             then 
               issues := issues + {"Source must not have an upper bound"} 
             else
-              if self.of().sourceMult.at(2) < self.source.mult.upperBound then 
+              if self.of().sourceMult.at(2) > self.source.mult.upperBound then 
                 issues := issues + {"Source upper bound too small"} end
             end
           end;
@@ -138,7 +138,7 @@ context Associations
             then 
               issues := issues + {"Target must not have an upper bound"} 
             else
-              if self.of().targetMult.at(2) < self.target.mult.upperBound then 
+              if self.of().targetMult.at(2) > self.target.mult.upperBound then 
                 issues := issues + {"Target upper bound too small"} end
             end
           end;

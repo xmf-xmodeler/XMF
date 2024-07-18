@@ -541,7 +541,7 @@ import FmmlxDiagrams;
           let
             allAssociations = (sourceClass.allAncestors()+{sourceClass})->collect(c | c.attributes)->flatten->select(a | a.of() = Associations::End)->collect(e|e.association)
           then
-            assoc1 = allAssociations->select(a | a.name.toString() = assocDependsOn)
+            assoc1 = allAssociations->select(a | a.name.toString() = dependsOnAssocName)
           in
             if 
               assoc1.size() <> 1 
@@ -551,6 +551,37 @@ import FmmlxDiagrams;
               association.dependsOn := assoc1->sel;[]
             end
           end
+        end
+      end      
+    end
+    
+  context FmmlxManipulator
+    @Operation addAssociationDependency(sourceClass0:FMMLx::MetaClass, targetName0:String, sourceClass1:FMMLx::MetaClass, targetName1:String)
+      let 
+        associationEnds0 = sourceClass0.allAttributes()
+          ->select(a | a.name.toString() = targetName0);
+        associationEnds1 = sourceClass1.allAttributes()
+          ->select(a | a.name.toString() = targetName1)
+      then
+        association0 = if associationEnds0.size() = 1 
+          then associationEnds0.asSeq().at(0).association
+          else null
+        end;
+        association1 = if associationEnds1.size() = 1 
+          then associationEnds1.asSeq().at(0).association
+          else null
+        end
+      in
+        if
+          association0 = null
+        then
+          ["Depending Association " + sourceClass0.name + "::" + targetName0 + " not found"]
+        elseif 
+          association1 = null
+        then
+          ["Parent Association " + sourceClass1.name + "::" + targetName1 + " not found"]
+        else
+          association0.dependsOn := association1;[]
         end
       end      
     end

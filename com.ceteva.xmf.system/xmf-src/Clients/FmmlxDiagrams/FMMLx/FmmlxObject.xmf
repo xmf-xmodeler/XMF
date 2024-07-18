@@ -292,6 +292,104 @@ context Root::FMMLx
   fail
     "This object is an instance of an abstract class."
   end
+  /*
+  @Constraint attributeSlotExistence
+    self.allRelevantAttributes()
+      ->forAll(a | self.hasSlot(a.name))
+  fail
+    "This element lacks a slot from the attributes " + 
+    (self.allRelevantAttributes()->reject(a | self.hasSlot(a.name))).name
+  end
+  
+  @Constraint attributeSlotStructure
+    self.allRelevantAttributes()
+      ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+      ->forAll(a | 
+        (a.mult().hasUpperBound andthen a.mult().upperBound=1)
+          <>
+        (self.get(a.name).isKindOf(Set(Element)) or
+        self.get(a.name).isKindOf(Seq(Element))))
+  fail
+    "The slots " + (
+      self.allRelevantAttributes()
+      ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+      ->reject(a | 
+        (a.mult().hasUpperBound andthen a.mult().upperBound=1)  <>
+        (self.get(a.name).isKindOf(Set(Element)) or
+        self.get(a.name).isKindOf(Seq(Element))))
+    ).name + " have the wrong structure"
+  end
+  
+  @Constraint attributeSlotMultiplicity
+    self.allRelevantAttributes()
+      ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+      ->forAll(a | let
+        val = self.get(a.name)
+      in
+        if 
+          a.mult().hasUpperBound andthen a.mult().upperBound = 1
+        then        
+          a.mult().lowerBound = 1 implies val <> null
+        else 
+          (a.mult().hasUpperBound implies
+            val.size() <= a.mult().upperBound) andthen
+          val.size() >= a.mult().lowerBound
+        end end)
+  fail
+    "The slots " + (
+    self.allRelevantAttributes()
+      ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+      ->reject(a | let
+        val = self.get(a.name)
+      in
+        if 
+          a.mult().hasUpperBound andthen a.mult().upperBound = 1
+        then        
+          a.mult().lowerBound = 1 implies val <> null
+        else 
+          (a.mult.hasUpperBound implies
+            val.size() <= a.mult().upperBound) andthen
+          val.size() >= a.mult().lowerBound
+        end end)
+    ).name + " do not conform to their multiplicity"
+  end
+
+  @Constraint attributeSlotConformity
+  self.allRelevantAttributes()
+    ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+    ->forAll(a | let
+        val = self.get(a.name);
+        type = a.type
+      in
+        @While type.isKindOf(Set) orelse type.isKindOf(Seq) do type := type.elementType end; //legacy?
+        if 
+          a.mult().hasUpperBound andthen a.mult().upperBound=1
+        then        
+          val.isKindOf(type) 
+        else 
+          val->forAll(item | 
+            item <> null andthen item.isKindOf(type))
+        end end)
+  fail
+    "The slots " + (
+    self.allRelevantAttributes()
+    ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
+    ->reject(a | let
+        val = self.get(a.name);
+        type = a.type
+      in
+        @While type.isKindOf(Set) orelse type.isKindOf(Seq) do type := type.elementType end; //legacy?
+        if 
+          a.mult().hasUpperBound andthen a.mult().upperBound=1
+        then        
+          val.isKindOf(type) 
+        else 
+          val->forAll(item | 
+            item <> null andthen item.isKindOf(type))
+        end end)
+    ).name + " contain values not conforming to the required type"
+  end
+  */
   
   @Constraint associationWithPackage
     self.owner.classes.contains(self)
@@ -299,6 +397,7 @@ context Root::FMMLx
     "The owner of this object does not contain it."
   end
   
+  /* Duplicates
   @Constraint linksStructure
     self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
@@ -318,7 +417,7 @@ context Root::FMMLx
     end
   end
 
-  /*@Constraint linksMultiplicity
+  @Constraint linksMultiplicity
     self.slots()
       ->select(s | s.type.isKindOf(Associations::End))
       ->select(s | s.type.visible)
@@ -347,6 +446,13 @@ context Root::FMMLx
     end
   end */
 
+  @Operation allRelevantAttributes()
+    self.of().allAttributes()
+      ->reject(a | a.isKindOf(Associations::End))
+      ->select(a | (a.isIntrinsic andthen a.instLevel.minLevel = self.level.minLevel) 
+        orelse ((not a.isIntrinsic) and self.isKindOf(a.owner)))
+  end
+   
   @Operation allRelevantAssociationEnds()
     self.of().allAttributes()
       ->select(a | a.isKindOf(Associations::End))
@@ -406,7 +512,7 @@ context Root::FMMLx
             val.size() >= e.mult.lowerBound
           end end)
     in
-      "Some links ("+fails.name+") do not adhere to their multiplicity"
+      "Some links ("+fails.name+") do not conform to their multiplicity"
     end
   end
   
@@ -505,7 +611,7 @@ context Root::FMMLx
               item.level.matchesInstantiationLevel(otherEnd.instLevel))
           end end)
     in 
-      "Some slots ("+fails.name+") contain values not adhering to the required type"
+      "Some slots ("+fails.name+") contain values not conforming to the required type"
     end 
   end
 

@@ -5,15 +5,15 @@ Associations.add(Associations::AssociationType("DefaultAssociation", Object, Obj
 Associations.add(Associations::AssociationType("Aggregation", Object, Object));
 Associations.add(Associations::AssociationType("Composition", Object, Object));
     
-Associations::Aggregation.addParent(Associations::DefaultAssociation);
-Associations::Composition.addParent(Associations::Aggregation);
+//Associations::Aggregation.addParent(Associations::DefaultAssociation);
+//Associations::Composition.addParent(Associations::Aggregation);
 
 Associations::DefaultAssociation.sourceMult := [0,null,0,null];
 Associations::DefaultAssociation.targetMult := [0,null,0,null];
-Associations::Aggregation.sourceMult := [0,null,0,null];
-Associations::Aggregation.targetMult := [1,null,null,null];
+Associations::Aggregation.sourceMult := [0,0,1,1];
+Associations::Aggregation.targetMult := [0,null,0,null];
 Associations::Composition.sourceMult := [1,1,1,1];
-Associations::Composition.targetMult := [1,null,null,null];
+Associations::Composition.targetMult := [0,null,0,null];
 
 Associations::DefaultAssociation.color := "000000";
 Associations::DefaultAssociation.strokeWidth := 1;

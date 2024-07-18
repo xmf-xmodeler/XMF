@@ -985,7 +985,7 @@ end
       let
         result = []
       in
-        @For obj in self.getPackage(requestID).contents()->select(x | x.isKindOf(FMMLx::FmmlxObject)) do
+        @For obj in self.getPackage(requestID).contents()->select(x | x <> null andthen x.isKindOf(FMMLx::FmmlxObject)) do
 		  let 
 		    constraintReport = obj.checkConstraints(extended)
 		  in
@@ -2038,9 +2038,9 @@ end
       then
         problems = m.setAssociationEndVisibility(assoc, concernsTarget, newVisibility)
       in
-        if problems.isEmpty() then
-          self.log := self.log + [["setAssociationEndVisibility", ["package", assoc.owner.path()], ["concernsTarget", concernsTarget+""], ["newVisibility", newVisibility+""]]]
-        end;
+//        if problems.isEmpty() then
+//         self.log := self.log + [["setAssociationEndVisibility", ["package", assoc.owner.path()], ["concernsTarget", concernsTarget+""], ["newVisibility", newVisibility+""]]]
+//        end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
     end
@@ -3284,6 +3284,20 @@ end
 //                                     ,["isSymmetric", assoc.symmetric()+""] , ["isTransitive", assoc.transitive()+""]
                              ]]
            end;
+           @For assoc in classes
+                         ->select(c | c.isKindOf(FMMLx::MetaClass))
+                         ->collect(c | c.allAttributes())
+                         ->flatten()
+                         ->select(a | a.isKindOf(Associations::End))
+                         ->collect(e | e.association) 
+                         ->select(as | as.dependsOn <> null) do
+             log := log + [["associationDependsOn", 
+                          ["classAssoc0", assoc.target.owner.path()],
+                          ["idAssoc0", assoc.target.name+""],
+                          ["classAssoc1", assoc.dependsOn.target.owner.path()],
+                          ["idAssoc1", assoc.dependsOn.target.name+""]
+                          ]]
+           end;
            @For object in self.getPackage(requestID).classes do
              @For slot in object.slots()
                ->select(s | s.type.of() = Associations::End)
@@ -3818,7 +3832,7 @@ end
       end
     end	
     
-    @Operation addAssociationDependency(
+    @Operation addAssociationDependency3(
       requestID     : Seq(Integer),
       sourcePath    : String,
       targetName    : String,
@@ -3830,6 +3844,26 @@ end
         sourceClass = m.evalString(sourcePath, self.getPackage(requestID)).at(0)
       then
         problems = m.addAssociationDependency(sourceClass, targetName, dependsOnAssociationName)
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
+    end
+    
+    @Operation addAssociationDependency(
+      requestID     : Seq(Integer),
+      sourcePath0    : String,
+      targetName0    : String,
+      /// 0 depends on 1 ///
+      sourcePath1    : String,
+      targetName1    : String)
+
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        sourceClass0 = m.evalString(sourcePath0, self.getPackage(requestID)).at(0);
+        sourceClass1 = m.evalString(sourcePath1, self.getPackage(requestID)).at(0)
+      then
+        problems = m.addAssociationDependency(sourceClass0, targetName0, sourceClass1, targetName1)
       in
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
       end
