@@ -292,7 +292,7 @@ context Root::FMMLx
   fail
     "This object is an instance of an abstract class."
   end
-  /*
+  
   @Constraint attributeSlotExistence
     self.allRelevantAttributes()
       ->forAll(a | self.hasSlot(a.name))
@@ -347,7 +347,7 @@ context Root::FMMLx
         then        
           a.mult().lowerBound = 1 implies val <> null
         else 
-          (a.mult.hasUpperBound implies
+          (a.mult().hasUpperBound implies
             val.size() <= a.mult().upperBound) andthen
           val.size() >= a.mult().lowerBound
         end end)
@@ -389,7 +389,6 @@ context Root::FMMLx
         end end)
     ).name + " contain values not conforming to the required type"
   end
-  */
   
   @Constraint associationWithPackage
     self.owner.classes.contains(self)
@@ -543,7 +542,7 @@ context Root::FMMLx
             let 
               val2 = try anc1.get(if reversed then dependsOn.source else dependsOn.target end.name) catch (ex) null end
             then                    
-              links2 = if val2 = null then {null} elseif val.isKindOf(Set(Element)) then val2 else {val2} end
+              links2 = if val2 = null then {null} elseif val2.isKindOf(Set(Element)) then val2 else {val2} end
             in
               ({link}+link.allAncestors())->exists(anc2 | links2.contains(anc2))
             end))

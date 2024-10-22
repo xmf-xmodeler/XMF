@@ -378,7 +378,7 @@ context FmmlxDiagrams
                 mappingInfo.lastKnownDiagramX, // 6
                 mappingInfo.lastKnownDiagramY, // 7
                 mappingInfo.hidden,            // 8: visibility in this diagram
-    	      					           -1, // 9: UNUSED
+    	      	if c.isKindOf(FMMLx::MetaClass) then c.isControlClass else false end,           // 9: control class flag
     	        self.getCachedPath(c),         // 10: ownPath
     	        self.getCachedPath(c.of()),    // 11: ofPath
     	        parents                        // 12: parentsPaths
