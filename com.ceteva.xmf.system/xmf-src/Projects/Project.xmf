@@ -111,7 +111,6 @@ context Projects
       then
         if newOwner = null and self.owner <> null
         then
-          xmf.warning("Project "+self.name()+" will be deleted as package "+package.name()+" is its root package.");
           NameSpace::remove.invoke(self.owner,Seq{self}); // do not attempt to delete package;
           self.removeDaemons()
         end
