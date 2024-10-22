@@ -307,17 +307,17 @@ context Root::FMMLx
       ->forAll(a | 
         (a.mult().hasUpperBound andthen a.mult().upperBound=1)
           <>
-        (self.get(a.name).isKindOf(Set(Element)) or
-        self.get(a.name).isKindOf(Seq(Element))))
+        ((self.get(a.name) <> null) andthen (self.get(a.name).isKindOf(Set(Element)) or
+        self.get(a.name).isKindOf(Seq(Element)))))
   fail
     "The slots " + (
       self.allRelevantAttributes()
       ->select(a | a.mult().isKindOf(Multiplicities::CollectionMult))
       ->reject(a | 
         (a.mult().hasUpperBound andthen a.mult().upperBound=1)  <>
-        (self.get(a.name).isKindOf(Set(Element)) or
-        self.get(a.name).isKindOf(Seq(Element))))
-    ).name + " have the wrong structure"
+        ((self.get(a.name) <> null) andthen (self.get(a.name).isKindOf(Set(Element)) or
+        self.get(a.name).isKindOf(Seq(Element)))))
+    ).name + " have the wrong data structure. They should be a sequence or set but aren't. Or they aren't but should be."
   end
   
   @Constraint attributeSlotMultiplicity

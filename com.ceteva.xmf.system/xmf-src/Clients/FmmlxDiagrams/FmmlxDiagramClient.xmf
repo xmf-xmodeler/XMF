@@ -69,14 +69,31 @@ context FmmlxDiagrams
     
     @Operation findDiagram(package,name)   
       let
-        selectedName = name;
+        //selectedName = name;
         keys = self.diagrams.keys();
         key = null;
         keyCount = 0
       in
-        @While key = null and keyCount < keys.size() do
-        if diagrams.get(keys.at(keyCount)).diagramName.toString() = selectedName.toString() then key := keys.at(keyCount) end;
+        @While key = null and keyCount < keys.size() do         
+          if 
+            diagrams.get(keys.at(keyCount)).diagramName.toString() = name.toString() 
+          andthen
+            diagrams.get(keys.at(keyCount)).package.name.toString() = package.toString()
+          then 
+            key := keys.at(keyCount) 
+          end;
           keyCount := keyCount + 1
+        end;
+        if key = null then 
+          keyCount := 0;
+          @While key = null and keyCount < keys.size() do         
+            if 
+              diagrams.get(keys.at(keyCount)).diagramName.toString() = name.toString() 
+            then 
+              key := keys.at(keyCount) 
+            end;
+            keyCount := keyCount + 1
+          end
         end;
         key
       end
