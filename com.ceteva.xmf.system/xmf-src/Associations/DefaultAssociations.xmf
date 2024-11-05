@@ -10,46 +10,47 @@ Associations.add(Associations::AssociationType("Composition", Object, Object));
 
 Associations::DefaultAssociation.sourceMult := [0,null,0,null];
 Associations::DefaultAssociation.targetMult := [0,null,0,null];
-Associations::Aggregation.sourceMult := [0,0,1,1];
+//Associations::Aggregation.sourceMult := [0,0,1,1];
+Associations::Aggregation.sourceMult := [0,null,0,null];
 Associations::Aggregation.targetMult := [0,null,0,null];
-Associations::Composition.sourceMult := [1,1,1,1];
-Associations::Composition.targetMult := [0,null,0,null];
+Associations::Composition.sourceMult := [0,null,0,null];
+Associations::Composition.targetMult := [0,1,1,1];
 
 Associations::DefaultAssociation.color := "000000";
 Associations::DefaultAssociation.strokeWidth := 1;
 Associations::DefaultAssociation.dashArray := "";
-Associations::DefaultAssociation.startDeco := "arrow";
-Associations::DefaultAssociation.endDeco := "arrow";
+Associations::DefaultAssociation.startDeco := "ARROW";
+Associations::DefaultAssociation.endDeco := "ARROW";
 
-Associations::Aggregation.color := "880000";
+Associations::Aggregation.color := "000000";
 Associations::Aggregation.strokeWidth := 1;
 Associations::Aggregation.dashArray := "";
-Associations::Aggregation.startDeco := "diamond";
-Associations::Aggregation.endDeco := "none";
+Associations::Aggregation.startDeco := "NONE";
+Associations::Aggregation.endDeco := "RHOMBUS";
 
-Associations::Composition.color := "008800";
+Associations::Composition.color := "000000";
 Associations::Composition.strokeWidth := 1;
 Associations::Composition.dashArray := "";
-Associations::Composition.startDeco := "filledDiamond";
-Associations::Composition.endDeco := "none";
+Associations::Composition.startDeco := "NONE";
+Associations::Composition.endDeco := "FILLED_RHOMBUS";
 
 Associations::DefaultAssociation.colorLink := "555555";
 Associations::DefaultAssociation.strokeWidthLink := 1;
 Associations::DefaultAssociation.dashArrayLink := "10,10";
-Associations::DefaultAssociation.startDecoLink := "arrow";
-Associations::DefaultAssociation.startDecoLink := "arrow";
+Associations::DefaultAssociation.startDecoLink := "ARROW";
+Associations::DefaultAssociation.startDecoLink := "ARROW";
 
-Associations::Aggregation.colorLink := "5555ff";
+Associations::Aggregation.colorLink := "555555";
 Associations::Aggregation.strokeWidthLink := 1;
 Associations::Aggregation.dashArrayLink := "10,20";
-Associations::Aggregation.startDecoLink := "diamond";
-Associations::Aggregation.endDecoLink := "none";
+Associations::Aggregation.startDecoLink := "NONE";
+Associations::Aggregation.endDecoLink := "RHOMBUS";
 
-Associations::Composition.colorLink := "ff5555";
+Associations::Composition.colorLink := "555555";
 Associations::Composition.strokeWidthLink := 1;
 Associations::Composition.dashArrayLink := "20,10";
-Associations::Composition.startDecoLink := "filledDiamond";
-Associations::Composition.endDecoLink := "none";
+Associations::Composition.startDecoLink := "NONE";
+Associations::Composition.endDecoLink := "FILLED_RHOMBUS";
 
 context DefaultAssociation
   @Operation foo() null end

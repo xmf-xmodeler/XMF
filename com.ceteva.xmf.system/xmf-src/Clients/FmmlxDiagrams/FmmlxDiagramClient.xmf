@@ -3144,7 +3144,8 @@ end
                       ["level", class.level.minLevel+""],
                       ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["abstract", class.isAbstract+""],
-                      ["singleton", class.isSingleton+""]]]
+                      ["singleton", class.isSingleton+""],
+                      ["isControlClass", class.isControlClass+""]]]
                  elseif class.isKindOf(FMMLx::MetaClass) then
                    log := log + 
                      [["addInstance", 
@@ -3154,7 +3155,8 @@ end
                       ["maxLevel", if class.level.maxLevel = null then "none" else class.level.maxLevel+"" end],
                       ["name",class.name.toString()], 
                       ["abstract", class.isAbstract+""],
-                      ["singleton", class.isSingleton+""]]]
+                      ["singleton", class.isSingleton+""],
+                      ["isControlClass", class.isControlClass+""]]]
                  else // must be FMMLx::FmmlxObject only and therefore on level 0
                    log := log + 
                      [["addInstance", 
