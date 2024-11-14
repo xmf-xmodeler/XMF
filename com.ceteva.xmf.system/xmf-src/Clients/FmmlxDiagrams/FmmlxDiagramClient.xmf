@@ -1403,6 +1403,20 @@ end
       end
     end
     
+        @Operation setClassControl(requestID : Seq(Integer), className, isControlClass)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator();
+        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+      then
+        problems = if class <> null then m.changeClassControl(class, isControlClass) else ["Class not found"] end
+      in
+        if problems.isEmpty() then
+          self.log := self.log + [["setClassControl", ["package", class.owner.path()], ["class", class.path()] , ["control",isControlClass+""]]]
+        end;
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems])
+      end
+    end
+    
     @Operation setClassSingleton(requestID : Seq(Integer), className, isSingleton)
       let
         m = FmmlxDiagrams::FmmlxManipulator();

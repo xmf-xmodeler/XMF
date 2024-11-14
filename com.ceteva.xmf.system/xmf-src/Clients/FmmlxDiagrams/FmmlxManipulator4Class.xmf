@@ -447,6 +447,25 @@ import FmmlxDiagrams;
       end
     end
     
+    
+      context FmmlxManipulator  
+    @Operation changeClassControl(class, controlNew)
+      if controlNew 
+      then 
+        if class.level.minLevel > 0 
+        then 
+		  class.isControlClass := true;
+		  []
+        else
+          ["Objects on level 0 cannot be defined as control class."]
+        end
+      else
+        class.isControlClass := false;
+        []
+      end
+    end
+    
+    
   context FmmlxManipulator  
     @Operation changeClassSingleton(class, singletonNew)
       if singletonNew 
