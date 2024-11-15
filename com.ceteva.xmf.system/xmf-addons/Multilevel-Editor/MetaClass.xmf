@@ -401,7 +401,7 @@ context Root::FMML
   end
   
   
-  @Operation addObject[monitor=false,delToClassAllowed=false](id: String, diaName: String,x: Integer, y: Integer):XCore::Element
+  @Operation addObject[monitor=false,delToClassAllowed=false](id: String, diaName: String,x: Integer, y: Integer, isHidden: Boolean):XCore::Element
     let diagram = null;
       mappingInfo = null;
       obj = null
@@ -409,11 +409,11 @@ context Root::FMML
       diagram := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
                   d.diagramName = diaName).asSeq().at(0);
       mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
-      mappingInfo.hidden := false;
+      mappingInfo.hidden := isHidden;
       mappingInfo.lastKnownDiagramX := x;
       mappingInfo.lastKnownDiagramY := y
     end;
-  Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+    Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
   end
   
 end
