@@ -539,5 +539,20 @@ context Root::FMMLx
             (self.level.maxLevel = null orelse l < self.level.maxLevel)))))
     +" do not have a valid level"
   end*/
+  
+    @Operation addObject[monitor=false,delToClassAllowed=false](id: String, diaName: String,x: Integer, y: Integer, isHidden: Boolean):XCore::Element
+    let diagram = null;
+      mappingInfo = null;
+      obj = null
+    in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(self.owner,self,id,self.level.minusOne(),Seq{},false,false,Seq{});
+      diagram := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
+                  d.diagramName = diaName).asSeq().at(0);
+      mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
+      mappingInfo.hidden := isHidden;
+      mappingInfo.lastKnownDiagramX := x;
+      mappingInfo.lastKnownDiagramY := y
+    end;
+    Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+  end
 
 end
