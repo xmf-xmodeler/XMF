@@ -7,7 +7,9 @@ context Root::FMMLx
   @Class FmmlxObject extends NamedElement
   
   @Attribute level : Level end
-  @Attribute lastUpdated : Element end
+  @Attribute created : Auxiliary::Date end
+  @Attribute lastUpdated : Auxiliary::Date end
+ 
 
     @Operation setLevel(level)
       if self.of() <> FMMLx::MetaClass then
