@@ -4,6 +4,7 @@ parserImport Manifests;
 import Projects;
 
 @Manifest FMMLx
+  @File Auxiliaries end
   FMMLx = @File FMMLx end
   @File ^None Boot end
   @File Level end
@@ -12,6 +13,6 @@ import Projects;
   @File FmmlxPackage end
   @File MetaClass end
   @File Issue end
-  @File Auxiliaries end
+
 do Project(FMMLx,dir,self)
 end;
