@@ -9,6 +9,7 @@ context Root::FMMLx
     @Attribute isSingleton:Boolean end
     @Attribute isControlClass:Boolean end
 
+
     @Constructor(name, level)
       if self.of() <> FMMLx::MetaClass then
         self.error("This constructor is only allowed for instantiating FMMLx::MetaClass") end;
@@ -540,19 +541,26 @@ context Root::FMMLx
     +" do not have a valid level"
   end*/
   
-    @Operation addObject[monitor=false,delToClassAllowed=false](id: String, diaName: String,x: Integer, y: Integer, isHidden: Boolean):XCore::Element
-    let diagram = null;
+  /* This operation adds and displays a new instance to all open diagrams that show the package, self is part of
+  
+@Operation addInstanceToAllDiagrams[monitor=false,delToClassAllowed=false](id : String,x : Integer,y : Integer,toHide : Boolean):XCore::Element
+  let diagrams = null;
       mappingInfo = null;
       obj = null
-    in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(self.owner,self,id,self.level.minusOne(),Seq{},false,false,Seq{});
-      diagram := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
-                  d.diagramName = diaName).asSeq().at(0);
-      mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
-      mappingInfo.hidden := isHidden;
-      mappingInfo.lastKnownDiagramX := x;
-      mappingInfo.lastKnownDiagramY := y
-    end;
-    Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+  in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(self.owner,self,id,self.level.minusOne(),Seq{},false,false,Seq{});
+     diagrams := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
+                   d.package = self.owner).asSeq();
+     @While not diagrams->isEmpty do
+       let diagram = diagrams->sel
+       in mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
+          mappingInfo.hidden := toHide;
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y;
+          diagrams := diagrams->excluding(diagram)
+       end;
+       Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+     end
   end
+end
 
 end
