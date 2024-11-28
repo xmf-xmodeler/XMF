@@ -9,10 +9,10 @@ context Root::Extensions
 
   @Class MetaAdaptor metaclass Class extends Class
 
-    @Attribute created : Integer end
+
     @Attribute instances : *Element end
     @Attribute subclasses : *Element end
-    @Attribute lastUpdated : Element end
+
  
   @Operation deleteRecursive()
     self.of().instances := self.of().instances.excluding(self);
