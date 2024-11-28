@@ -401,19 +401,22 @@ context Root::FMML
   end
   
   
+
+  
   @Operation addObject[monitor=false,delToClassAllowed=false](id: String, diaName: String,x: Integer, y: Integer):XCore::Element
-    let diagram = null;
+    let diagrams = null;
       mappingInfo = null;
       obj = null
     in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(self.owner,self,id,self.level.minusOne(),Seq{},false,false,Seq{});
-      diagram := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
-                  d.diagramName = diaName).asSeq().at(0);
+      diagrams := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
+                  d.diagramName = diaName).asSeq().at(0)
+@While not diagrams->isEmpty do
+let diagram = N->sel
+in
       mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
       mappingInfo.hidden := false;
       mappingInfo.lastKnownDiagramX := x;
       mappingInfo.lastKnownDiagramY := y
-    end;
-  Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
-  end
-  
+end
+end
 end
