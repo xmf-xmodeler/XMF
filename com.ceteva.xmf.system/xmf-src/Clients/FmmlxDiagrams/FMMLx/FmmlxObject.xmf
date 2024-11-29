@@ -7,9 +7,13 @@ context Root::FMMLx
   @Class FmmlxObject extends NamedElement
   
   @Attribute level : Level end
+<<<<<<< XMF_Ulrich_Test
   @Attribute created : Auxiliary::Date end
 //  @Attribute lastUpdated : Auxiliary::Date end
  
+=======
+  @Attribute lastUpdated : Element end
+>>>>>>> 2ea5216 extended with attribute "created: Date"
 
     @Operation setLevel(level)
       if self.of() <> FMMLx::MetaClass then
