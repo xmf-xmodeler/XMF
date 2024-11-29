@@ -2,18 +2,15 @@ parserImport XOCL;
 
 import Root::FMMLx;
 
+import Root::Auxiliary;
+
 context Root::FMMLx
 
   @Class FmmlxObject extends NamedElement
   
   @Attribute level : Level end
-<<<<<<< XMF_Ulrich_Test
   @Attribute created : Auxiliary::Date end
-//  @Attribute lastUpdated : Auxiliary::Date end
- 
-=======
-  @Attribute lastUpdated : Element end
->>>>>>> 2ea5216 extended with attribute "created: Date"
+  @Attribute lastUpdated : Auxiliary::Date end
 
     @Operation setLevel(level)
       if self.of() <> FMMLx::MetaClass then
@@ -464,6 +461,39 @@ context Root::FMMLx
       ->select(a | a.instLevel.minLevel = self.level.minLevel)
       ->select(a | a.visible)
   end
+  
+    @Operation countReverseLinks (a: Associations::End)
+(a.type).allMetaInstances()
+      ->select(i | a.instLevel.minLevel = i.level.minLevel)
+      ->select(i | a.instLevel.maxLevel = i.level.maxLevel)
+      ->select(i | 
+         let       otherEnd = if a.association.source = a 
+                     then a.association.target
+                     else a.association.source end
+        then
+        val = i.get(otherEnd.name)
+        in
+        {val}->flatten().contains(self)
+          end).size()
+  end
+  
+    @Constraint associationReverseMultiplicity
+        self.of().allAttributes()
+      ->select(a | a.isKindOf(Associations::End))
+      ->select(a | a.instLevel.minLevel = self.level.minLevel)
+      ->reject(a | a.visible)
+      ->forAll(a | (a.mult.hasUpperBound or a.mult.lowerBound > 0) implies
+      let
+        n = self.countReverseLinks(a)
+        in
+         a.mult.lowerBound <= n andthen 
+         (a.mult.hasUpperBound implies a.mult.upperBound >= n)
+        end
+      )
+  fail
+    "Constraint associationReverseMultiplicity failed."
+  end
+  
 
   @Constraint associationSlotExistence
     self.allRelevantAssociationEnds()
