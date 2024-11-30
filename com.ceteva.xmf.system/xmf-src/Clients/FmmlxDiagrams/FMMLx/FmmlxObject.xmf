@@ -320,7 +320,7 @@ context Root::FMMLx
         (a.mult().hasUpperBound andthen a.mult().upperBound=1)  <>
         ((self.get(a.name) <> null) andthen (self.get(a.name).isKindOf(Set(Element)) or
         self.get(a.name).isKindOf(Seq(Element)))))
-    ).name + " have the wrong data structure. They should be a sequence or set but aren't. Or they aren't but should be."
+    ).name + " have the wrong data structure. They use a single-value data structure but should use a multi-value structure (sequence or set) or vice versa"
   end
   
   @Constraint attributeSlotMultiplicity
