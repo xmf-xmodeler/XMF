@@ -463,6 +463,8 @@ context Root::FMMLx
   end
   
     @Operation countReverseLinks (a: Associations::End)
+    let val = []
+    in
 (a.type).allMetaInstances()
       ->select(i | a.instLevel.minLevel = i.level.minLevel)
       ->select(i | a.instLevel.maxLevel = i.level.maxLevel)
@@ -471,10 +473,14 @@ context Root::FMMLx
                      then a.association.target
                      else a.association.source end
         then
-        val = i.get(otherEnd.name)
+ //       val = i.get(otherEnd.name)
+          val = val->including(i.get(otherEnd.name))
         in
-        {val}->flatten().contains(self)
+//       {val}->flatten().contains(self)
+          val.contains(self)
           end).size()
+       end
+  end
   end
   
     @Constraint associationReverseMultiplicity
@@ -491,7 +497,7 @@ context Root::FMMLx
         end
       )
   fail
-    "Constraint associationReverseMultiplicity failed."
+    "Cardinality specified for "+self.of().name.toString() + " are violated."
   end
   
 
@@ -501,7 +507,7 @@ context Root::FMMLx
   fail
     "This element lacks a slot from an association"
   end
-  
+ 
   @Constraint associationSlotStructure
     self.allRelevantAssociationEnds()
       ->forAll(e | 
