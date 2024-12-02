@@ -462,7 +462,8 @@ context Root::FMMLx
       ->select(a | a.visible)
   end
   
-    @Operation countReverseLinks (a: Associations::End)
+
+     @Operation countReverseLinks (a: Associations::End)
     let val = []
     in
 (a.type).allMetaInstances()
@@ -479,11 +480,10 @@ context Root::FMMLx
 //       {val}->flatten().contains(self)
           val.contains(self)
           end).size()
-       end
   end
-  end
-  
-    @Constraint associationReverseMultiplicity
+  end 
+
+   @Constraint associationReverseMultiplicity
         self.of().allAttributes()
       ->select(a | a.isKindOf(Associations::End))
       ->select(a | a.instLevel.minLevel = self.level.minLevel)
@@ -497,9 +497,11 @@ context Root::FMMLx
         end
       )
   fail
-    "Cardinality specified for "+self.of().name.toString() + " are violated."
+    "Cardinality defined with "+self.name.toString()+ " violated."
   end
+
   
+
 
   @Constraint associationSlotExistence
     self.allRelevantAssociationEnds()
