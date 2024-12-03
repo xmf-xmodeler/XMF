@@ -463,9 +463,8 @@ context Root::FMMLx
   end
   
 
-     @Operation countReverseLinks (a: Associations::End)
-    let val = []
-    in
+@Operation countReverseLinks (a: Associations::End)
+
 (a.type).allMetaInstances()
       ->select(i | a.instLevel.minLevel = i.level.minLevel)
       ->select(i | a.instLevel.maxLevel = i.level.maxLevel)
@@ -474,13 +473,13 @@ context Root::FMMLx
                      then a.association.target
                      else a.association.source end
         then
- //       val = i.get(otherEnd.name)
-          val = val->including(i.get(otherEnd.name))
+         val = i.get(otherEnd.name) 
         in
-//       {val}->flatten().contains(self)
-          val.contains(self)
+          if val.isReallyKindOf(Set(Element)) then val.contains(self)
+       else
+          val = self
+       end  
           end).size()
-  end
   end 
 
    @Constraint associationReverseMultiplicity
