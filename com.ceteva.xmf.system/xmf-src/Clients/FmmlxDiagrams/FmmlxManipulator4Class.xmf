@@ -13,6 +13,7 @@ import FmmlxDiagrams;
         package.add(newClass);
         newClass.isAbstract := abstract;
         newClass.isSingleton := singleton; 
+        newClass.created := Auxiliary::Date();
         if parents.size() > 0 then newClass.parents := parents.asSet() end;
 
         @For parent in newClass.parents do
@@ -130,18 +131,21 @@ import FmmlxDiagrams;
           package.add(obj);
           obj.isSingleton := singleton; 
           obj.isAbstract := abstract; 
+          obj.created := Auxiliary::Date();
           obj.addParent(FMMLx::MetaClass)
         end;
         if obj.level.minLevel = 1 then // it's a simple class, therefore its instances are not classes
           package.add(obj);
           obj.isSingleton := singleton; 
           obj.isAbstract := abstract;
-          obj.addParent(FMMLx::FmmlxObject)
+          obj.addParent(FMMLx::FmmlxObject);
+          obj.created := Auxiliary::Date()
         end; 
         if obj.level.minLevel = 0 then //  it's not a class at all, and parent and abstract do not apply
           // However, package.add does not add the object to the list of classes and it has to be done manually
           // Hopefully that has no side effects as the list of classes will contain non-classes
           // Alternatively, a second list for non-classes would be needed.
+          obj.created := Auxiliary::Date();
           package.addClass(obj);
           package.add(obj)
         end;        

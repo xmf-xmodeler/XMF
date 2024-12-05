@@ -10,7 +10,7 @@ context Root::FMMLx
   
   @Attribute level : Level end
   @Attribute created : Auxiliary::Date end
-  @Attribute lastUpdated : Element end
+  @Attribute lastUpdated : Auxiliary::Date end
 
     @Operation setLevel(level)
       if self.of() <> FMMLx::MetaClass then
@@ -462,7 +462,9 @@ context Root::FMMLx
       ->select(a | a.visible)
   end
   
-    @Operation countReverseLinks (a: Associations::End)
+
+@Operation countReverseLinks (a: Associations::End)
+
 (a.type).allMetaInstances()
       ->select(i | a.instLevel.minLevel = i.level.minLevel)
       ->select(i | a.instLevel.maxLevel = i.level.maxLevel)
@@ -471,13 +473,16 @@ context Root::FMMLx
                      then a.association.target
                      else a.association.source end
         then
-        val = i.get(otherEnd.name)
+         val = i.get(otherEnd.name) 
         in
-        {val}->flatten().contains(self)
+          if val.isReallyKindOf(Set(Element)) then val.contains(self)
+       else
+          val = self
+       end  
           end).size()
-  end
-  
-    @Constraint associationReverseMultiplicity
+  end 
+
+   @Constraint associationReverseMultiplicity
         self.of().allAttributes()
       ->select(a | a.isKindOf(Associations::End))
       ->select(a | a.instLevel.minLevel = self.level.minLevel)
@@ -491,9 +496,11 @@ context Root::FMMLx
         end
       )
   fail
-    "Constraint associationReverseMultiplicity failed."
+    "Cardinality defined for "+self.name.toString()+ " violated."
   end
+
   
+
 
   @Constraint associationSlotExistence
     self.allRelevantAssociationEnds()
@@ -501,7 +508,7 @@ context Root::FMMLx
   fail
     "This element lacks a slot from an association"
   end
-  
+ 
   @Constraint associationSlotStructure
     self.allRelevantAssociationEnds()
       ->forAll(e | 
