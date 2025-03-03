@@ -462,18 +462,17 @@ context Root::FMMLx
       ->select(a | a.visible)
   end
   
-
-@Operation countReverseLinks (a: Associations::End)
-
-(a.type).allMetaInstances()
+    @Operation countReverseLinks (a: Associations::End)
+      (a.type).allMetaInstances()
       ->select(i | a.instLevel.minLevel = i.level.minLevel)
       ->select(i | a.instLevel.maxLevel = i.level.maxLevel)
       ->select(i | 
-         let       otherEnd = if a.association.source = a 
+        let 
+          otherEnd = if a.association.source = a 
                      then a.association.target
                      else a.association.source end
         then
-         val = i.get(otherEnd.name) 
+          val = i.get(otherEnd.name) 
         in
           if val.isReallyKindOf(Set(Element)) then val.contains(self)
        else
@@ -498,9 +497,7 @@ context Root::FMMLx
   fail
     "Cardinality defined for "+self.name.toString()+ " violated."
   end
-
   
-
 
   @Constraint associationSlotExistence
     self.allRelevantAssociationEnds()
@@ -508,7 +505,7 @@ context Root::FMMLx
   fail
     "This element lacks a slot from an association"
   end
- 
+  
   @Constraint associationSlotStructure
     self.allRelevantAssociationEnds()
       ->forAll(e | 

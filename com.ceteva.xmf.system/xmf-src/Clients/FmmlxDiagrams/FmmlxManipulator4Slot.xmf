@@ -37,6 +37,16 @@ import FmmlxDiagrams;
 
 
   context FmmlxManipulator
+    @Operation repairSlotsRecursively(root : FMMLx::FmmlxObject)
+      self.repairSlots(root);
+      if root.isReallyKindOf(Class) then 
+        @For i in root.allInstances() do
+          self.repairSlotsRecursively(i)
+        end
+      end
+    end
+
+  context FmmlxManipulator
     @Operation repairSlots(obj : FMMLx::FmmlxObject)
       let
         atts = obj.of()
