@@ -49,6 +49,29 @@ context Root::FMML
     end 
   end
   
+@Operation addInstanceOfToAllDiagrams[monitor=false,delToClassAllowed=false](mClass : aMetaClass, id : String, x : Integer,y : Integer,toHide : Boolean):XCore::Element
+  let diagrams = null;
+      mappingInfo = null;
+      obj = null
+  in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(mClass.owner,self,id,mClass.level.minusOne(),Seq{},false,false,Seq{});
+     diagrams := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
+                   d.package = self.owner).asSeq();
+     @While not diagrams->isEmpty do
+       let diagram = diagrams->sel
+       in mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
+          mappingInfo.hidden := toHide;
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y;
+          diagrams := diagrams->excluding(diagram)
+       end;
+       Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+     end
+  end
+end
+    
+  
+  
+  
   @Operation getLinkEnds(obj:MetaClass, assocName:String) self.getLinkEnds(obj,assocName,true,true) end
   
   @Operation getLinkEnds(obj:MetaClass, assocName:String, findSourceEnds:Boolean, findTargetEnds:Boolean)
