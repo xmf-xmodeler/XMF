@@ -1,0 +1,131 @@
+parserImport XOCL;
+parserImport Parser::BNF;
+
+  
+context Root
+  @Class Mitigation
+    
+    @Attribute command:String end 
+    @Attribute info:String end 
+    @Attribute action:Operation end 
+    @Constructor(command,action) ! end
+ end
+
+context Root
+  @Class ExtendedConstraintHelper
+    //@Grammar extends OCL::OCL.grammar
+    //end
+  
+    @Attribute type:Class end
+    @Attribute noGood:Operation end
+    @Attribute explain:Operation end
+    @Attribute mitigate:Mitigation end
+    @Constructor(type,noGood,explain,mitigate) ! end
+    
+  /*
+  noGood:ClassPair = {ClassPair(c1,c2) | c1 <- self.classes(), ..., ?(c1.name=c2.name and c1<>c2)}
+  13:00 
+  */
+  
+  end
+  
+  context Root
+  @Class IllegalAttribute
+    @Attribute class1:Class end
+    @Attribute class2:Class end
+    @Attribute name:String end
+    @Constructor(class1,class2,name) ! end
+  end
+  
+  context Root
+
+  @Operation mitigate1(ia:IllegalAttribute):[Mitigation]
+    @Case ia of
+      IllageAttribute(c1,c2,name) do
+        [Mitigation("name of attribute in " + c2 + " will be changed",@Operation(ia) let newName = xmf.getString("Change name","new Name",name.toString()) in format(stdout,"Change Name to ~S~%",[newName]) end end),
+        Mitigation("no action",@Operation(ia) null end)]
+      end
+      else []
+    end
+  end
+  
+  Root::example1 := ExtendedConstraintHelper(Attribute,
+    @Operation check(c) if c.isKindOf(FMMLx::MetaClass) then c.attributes->select(a | a.name.toString().size() < 3) else {} end end,
+    @Operation explain(a) "The attribute name " + a.name + " is too short." end,
+      [
+        Mitigation("rename", "Invoke a dialog for a new name", 
+          @Operation(a) 
+            let 
+              newName = xmf.getString("Change name","new Name",name.toString()) 
+            in
+              a.name := newName
+            end
+          end )
+      ,
+        Mitigation("ignore", "Nothing happens", 
+          @Operation(a) null end)
+      ]);
+      
+  Root::example2 := ExtendedConstraintHelper(IllegalAttribute,
+    @Operation check(p) 
+         { IllegalAttribute(c1,c2,a1.name) |
+               c1 <- p.classes->select(c|c.isKindOf(FMMLx::MetaClass)),
+               c2 <- p.classes->select(c|c.isKindOf(FMMLx::MetaClass)), 
+               a1 <- c1.attributes,
+               a2 <- c2.attributes,
+               //?c2.inheritsFrom(c1) and a1.name = a2.name and a1.type <> a2.type } else {} end end,
+               ?a1.name = a2.name and a1 <> a2} end,
+    @Operation explain1(ia:IllegalAttribute):String
+      @Case ia of
+        IllegalAttribute(c1,c2,name) do
+          c2.name + " cannot inherit from " + c1.name +
+          " because the definition of attribute " + name + " is inconsistent."
+          end
+        else "huh?"
+      end
+    end,
+    mitigate1);
+
+  
+      
+  context Root
+    @Operation checkConstraint(
+      constraint:ExtendedConstraintHelper,
+      scope:set(Element))
+      let 
+        candidateCr = {};
+        overallFail = false
+      in      
+        @For candidate in scope do 
+          let 
+            noGoods = (constraint.noGood)(candidate);
+            noGoodsCr = {}
+          in
+            @For noGood in noGoods do
+              noGoodsCr := noGoodsCr + {
+                ConstraintReport(candidate, 
+                                 Constraint("anonymous constraint"), 
+                                 false, 
+                                 (constraint.explain)(noGood))}
+            end;
+            candidateCr := candidateCr + {                
+              ConstraintReport(candidate, 
+                               Constraint("anonymous constraint"), 
+                               noGoodsCr = {}, 
+                               "see inside...",
+                               noGoodsCr)};
+            overallFail := overallFail or (noGoodsCr <> {})
+          end
+        end;
+        ConstraintReport(null, 
+                         Constraint("anonymous constraint"), 
+                         not overallFail, 
+                         "see inside...",
+                         candidateCr)
+      end
+       
+    end
+      
+      
+      
+    

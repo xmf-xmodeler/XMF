@@ -431,9 +431,46 @@ import FmmlxDiagrams;
       self.migrateInstance(instance, null)
     end
     
+    
+  context FmmlxManipulator
+    @Operation checkClassMigration(instance, newClass)
+      // todo: check Associations
+      // todo: check Loops
+      if 
+        newClass = FMMLx::MetaClass
+      then 
+        [] // effectively removing any user defined class. MetaClass should always work. (unless assocs make trouble)
+      else
+        if
+          newClass.isKindOf(FMMLx::FmmlxObject) andthen newClass.level.canBeInstantiatatedTo(instance.level)
+        then
+          [] // levels match
+        else
+          ["The level of " + newClass.name + " cannot be instantiated to the level of " + instance.name]
+        end
+      end
+    end
+    
   context FmmlxManipulator  
     @Operation migrateInstance(instance, newClass)
-      ["The operation \"migrateInstance\" has not been implemented yet. Try to remove instance instead."]
+      let
+        checkResults = self.checkClassMigration(instance, newClass)
+      in
+        if checkResults.isEmpty()
+          then
+          
+          //set of
+          Kernel_setOf(instance, newClass);
+          
+          //repair slots
+          self.repairSlotsRecursively(instance);
+        
+          // return success
+          []
+        else
+          checkResults
+        end
+      end
     end
     
   context FmmlxManipulator  

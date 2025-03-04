@@ -2912,8 +2912,23 @@ end
       self.respondNotYetImplemented("changeOperationType", self.vector2Seq(requestID))
     end
 
-    @Operation changeOf(requestID : Seq(Integer), idO, idC_old, idC_new)
-      self.respondNotYetImplemented("changeOf", self.vector2Seq(requestID))
+    @Operation changeOf(requestID : Seq(Integer), objPath, idC_old, newOfPath)
+      let
+        m = FmmlxDiagrams::FmmlxManipulator()
+      then
+        obj =      m.evalString(objPath,   self.getPackage(requestID)).at(0);
+        newClass = m.evalString(newOfPath, self.getPackage(requestID)).at(0)
+      then
+        problems = if obj = null 
+                   then ["Object "+objPath+" not found."]
+                   elseif newClass = null
+                   then ["Class "+newOfPath+" not found."]
+                   else
+                        m.migrateInstance(obj, newClass)
+                   end
+      in
+        self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
+      end
     end
 
     @Operation addEnumeration(requestID : Seq(Integer), newEnumName:String)
