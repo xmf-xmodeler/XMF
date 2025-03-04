@@ -47,7 +47,29 @@ context Root::FMMLx
     end
   end
   
+  @Operation addInstanceOfToAllDiagrams[monitor=false,delToClassAllowed=false](mClass : Element, id : String, x : Integer,y : Integer,toHide : Boolean):XCore::Element
+  let diagrams = null;
+      mappingInfo = null;
+      obj = null
+  in obj := Clients::FmmlxDiagrams::FmmlxManipulator().addInstance(self, mClass, id, mClass.level.minusOne(),Seq{},false,false,Seq{});
+     diagrams := Clients::FmmlxDiagrams::FmmlxDiagram.allInstances()->select(d |
+                   d.package = self).asSeq();
+     @While not diagrams->isEmpty do
+       let diagram = diagrams->sel
+       in mappingInfo := diagram.mapping.addOrGetObjectMapping(obj.path());
+          mappingInfo.hidden := toHide;
+          mappingInfo.lastKnownDiagramX := x;
+          mappingInfo.lastKnownDiagramY := y;
+          diagrams := diagrams->excluding(diagram)
+       end;
+       Clients::FmmlxDiagrams::FmmlxDiagramClient.allInstances().at(0).communicator.triggerUpdate()
+     end
+  end
 end
+  
+end
+
+
   
 context Root
   @Operation getSuperClasses(c : Class)
