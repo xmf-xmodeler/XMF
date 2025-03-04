@@ -454,7 +454,8 @@ import FmmlxDiagrams;
   context FmmlxManipulator  
     @Operation migrateInstance(instance, newClass)
       let
-        checkResults = self.checkClassMigration(instance, newClass)
+        checkResults = self.checkClassMigration(instance, newClass);
+        oldClass = instance.of()
       in
         if checkResults.isEmpty()
           then
@@ -462,8 +463,13 @@ import FmmlxDiagrams;
           //set of
           Kernel_setOf(instance, newClass);
           
+          //register Instance
+          newClass.instances := newClass.instances.including(instance);
+          oldClass.instances := oldClass.instances.excluding(instance);
+          
           //repair slots
           self.repairSlotsRecursively(instance);
+          
         
           // return success
           []
