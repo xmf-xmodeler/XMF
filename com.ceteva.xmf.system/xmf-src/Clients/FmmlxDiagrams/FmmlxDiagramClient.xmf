@@ -1651,16 +1651,16 @@ end
       end
     end
 
-    @Operation changeAttributeType(requestID : Seq(Integer), className, attName, oldTypeName, newTypeName)
+    @Operation changeAttributeType(requestID : Seq(Integer), className, attName, oldTypeName, newTypeName, converter)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-          class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
         //class = self.getMapping(requestID).getMapping(classId).object
       then
         problems = if class <> null then m.checkChangeAttributeType(class, attName, oldTypeName, newTypeName, self.getPackage(requestID)) else ["Class not found"] end
       in
         if problems.isEmpty() then
-          m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.getPackage(requestID));
+          m.changeAttributeType(class, attName, oldTypeName, newTypeName, converter, self.getPackage(requestID));
           self.log := self.log + [["changeAttributeType", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldType", oldTypeName] , ["newType", newTypeName]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
