@@ -2675,18 +2675,17 @@ end
               (propName + " -> " + propAction).println();
               if "DROP".equals(propAction) then
                 ("action: removeAttribute(" + propOwner + "," + propName + ")").println();
-                m.removeAttribute(owner, propName, null);
-                self.log := self.log + [["removeAttribute", ["package", owner.owner.path()], ["class", owner.path()], ["name", propName]]]
+                m.removeAttribute(owner, propName, null)
               elseif "KEEP_AS".equals(propAction) then
                 ("action: changeAttributeName(" + propOwner + "," + propName + "," + propArg0 + ")").println();
-                m.changeAttributeName(owner, propName, propArg0);
-                self.log := self.log + [["changeAttributeName", ["package", owner.owner.path()], ["class", owner.path()] , ["oldName", propName] , ["newName", propArg0]]]
+                m.changeAttributeName(owner, propName, propArg0)
               elseif "MERGE_INTO".equals(propAction) then
                 ("not yet implemented: mergeSlotValuesInto(" + propOwner + "," + propName + "," + propArg0 + ")").println()
               elseif "PULL_UP".equals(propAction) then
                 ("action: changeAttributeOwner(" + propOwner + "," + propName + "," + class.name + ")").println();
-                m.changeAttributeOwner(propOwner, propName, propArg0);
-                self.log := self.log + [["changeAttributeOwner",["package", propOwner.owner.path()],["oldName", oldName],["name", name],["newName", newName]]]
+                ("owner.of(): " + owner.of()).println();
+                ("class.of(): " + class.of()).println();
+                m.changeAttributeOwner(owner, propName, class)
               else
                 ("Command not yet implemented: " + propAction).println()
               end // if action
