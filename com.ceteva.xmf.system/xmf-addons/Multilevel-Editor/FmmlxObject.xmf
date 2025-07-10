@@ -533,7 +533,6 @@ context Root::FMMLx
           // we also check all ancestors of the other side
           // the ancestors on both sides should be a manageable amount
           ({self}+self.allAncestors())->exists(anc1 |
-            // not yet: link.allAncestors->exists(anc2 |
             // now we have two candidates
             // anc1 is ancestor of self, anc2 of the link target
             // we do not care whether anc1 or anc2 are able to have a link of depends on

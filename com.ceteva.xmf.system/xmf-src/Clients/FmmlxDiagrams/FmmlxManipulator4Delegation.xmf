@@ -76,7 +76,7 @@ import FmmlxDiagrams;
       end
     end      
     
-  context FmmlxManipulator
+  /*context FmmlxManipulator
     @Operation setRoleFiller(delegateFrom, delegateTo)
       let
         delegatorClass = delegateFrom.of()
@@ -96,7 +96,27 @@ import FmmlxDiagrams;
           [delegateTo + " cannot be role filler for " + delegateFrom +"."]
         end
       end
+    end*/
+    
+    context FmmlxManipulator // TEST, do not do any checks, just do it and hope for the constraint to complain
+    @Operation setRoleFiller(delegateFrom, delegateTo)
+      let 
+        o = delegateTo;
+        list = ""
+      in
+        while o <> null andThen o <> delegateFrom do list := list + o.name + "<-"; o := o.roleFiller end;
+        if 
+          o = delegateFrom 
+        then 
+          ["Delegation Role Filler Loop Detected:" + list + delegateFrom.name]
+        else
+          delegateFrom.roleFiller := delegateTo;[]
+        end
+      end
+      
+      
     end
+    
     
   context FmmlxManipulator
     @Operation transitivelyDelegatesTo(delegateFrom, delegateTo)
