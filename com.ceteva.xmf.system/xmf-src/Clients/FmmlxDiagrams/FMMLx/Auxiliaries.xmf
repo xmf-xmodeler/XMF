@@ -222,6 +222,14 @@ context Root::Auxiliary
         dateClass().getDifference(self.time, other.time)
       end
     end
+    
+   	@Operation diffInDays(other):String
+      let 
+        dateClass = xmf.javaClass("tool.helper.XDate")
+      in 
+        dateClass().getDifferenceInDays(self.time, other.time)
+      end
+    end
 
     @Operation toString():String
       let 

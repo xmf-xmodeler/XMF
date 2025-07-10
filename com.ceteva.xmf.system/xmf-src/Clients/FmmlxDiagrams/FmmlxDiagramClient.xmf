@@ -2685,7 +2685,7 @@ end
                 ("not yet implemented: mergeSlotValuesInto(" + propOwner + "," + propName + "," + propArg0 + ")").println()
               elseif "PULL_UP".equals(propAction) then
                 ("action: changeAttributeOwner(" + propOwner + "," + propName + "," + class.name + ")").println();
-                m.changeAttributeOwner(propOwner, propName, propArg0);
+                m.changeAttributeOwner(propOwner, propName, class.name);
                 self.log := self.log + [["changeAttributeOwner",["package", propOwner.owner.path()],["oldName", oldName],["name", name],["newName", newName]]]
               else
                 ("Command not yet implemented: " + propAction).println()
