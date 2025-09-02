@@ -38,6 +38,38 @@ context FmmlxDiagrams
       end;
       self.communicator
     end
+    
+    @Operation deleteDiagram(modelName:String,diagramName:String)
+    	let
+     		key = self.findDiagram(modelName,diagramName)
+     	in
+     		self.diagrams.remove(key)
+     	end
+    end
+    
+    @Operation changeDiagramName(modelName:String,oldDiagramName:String,newDiagramName:String)
+    	let
+    		key = self.findDiagram(modelName,oldDiagramName)
+    	then
+    		diagram = self.diagrams.get(key)
+    	in
+    		diagram.diagramName := newDiagramName.asSymbol()
+    	end
+    end
+    
+    @Operation toggleUmlMode(modelName:String,diagramName:String)
+    	let
+    		key = self.findDiagram(modelName,diagramName)
+    	then
+    		diagram = self.diagrams.get(key)
+    	in
+    		if diagram.umlMode = true then
+    			diagram.umlMode := false
+    		else
+    			diagram.umlMode := true
+    		end    	
+    	end
+    end
 
     /* this (3) operation(s) is invoked when "show in diagram" 
        in the menu of the package is invoked.
