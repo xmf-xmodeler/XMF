@@ -22,7 +22,7 @@ import FmmlxDiagrams;
       let
         class = instanceWhereTheSlotResides.of()
       then
-        atts = class.allAttributesForLevel(instanceWhereTheSlotResides.level);
+        atts = class.allAttributesForLevel(instanceWhereTheSlotResides.level).union(class.attributes); //PM 17.11.25 union with class attributes added for non-intrinsic attributes
         foundAtt = null
       in
         @For att in atts do

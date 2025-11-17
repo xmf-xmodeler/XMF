@@ -256,6 +256,7 @@ context Root::FMMLx
       end
     end
 
+//PM 2025/Nov/17 Operation "allAttributesForLevel" does not work for non-intrinsic / contingent attributes --> changed findAttributesForSlot in FMMLxManipulator
     @Operation allAttributesForLevel(attLevel):Set(Attribute)
       let
         result = {};
