@@ -267,6 +267,9 @@ context Root::FMMLx
             if att.instLevel.minLevel = attLevel.minLevel then 
               result := result.union({att})
             end
+          end;
+          if not att.isIntrinsic then
+          		result := result.union({att})
           end
         end;
         result

@@ -104,7 +104,7 @@ import FmmlxDiagrams;
         o = delegateTo;
         list = ""
       in
-        while o <> null andThen o <> delegateFrom do list := list + o.name + "<-"; o := o.roleFiller end;
+        @While ((o <> null) and (o <> delegateFrom)) do list := list + o.name + "<-"; o := o.roleFiller end;
         if 
           o = delegateFrom 
         then 
