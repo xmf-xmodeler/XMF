@@ -3281,7 +3281,7 @@ end
                log := log + [["addAttribute", ["package", class.owner.path()],
                              ["class", class.path()],
                              ["name", att.name.toString()],
-                             ["level", att.instLevel.minLevel+""],
+                             ["level", if att.isIntrinsic then att.instLevel.minLevel+"" else "-1" end],
                              ["type", att.type.path()],
                              ["multiplicity",  FmmlxManipulator::multiplicity2ValueList(att.mult())+""]]]
              end;
