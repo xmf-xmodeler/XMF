@@ -215,7 +215,7 @@ context Mosaic
 	        diagram=diagrams.get(key)
 	      in
 	      	if diagram.package.path()=packagePath then
-	      	  result:=result+[[key,diagram.diagramName.toString(),diagram.diagramType.name.toString()]]
+	      	  result:=result+[[key,diagram.diagramName.toString(),diagram.diagramType.name.toString(),diagram.umlMode]]
 	        end	  
 	      end  
 	    end;

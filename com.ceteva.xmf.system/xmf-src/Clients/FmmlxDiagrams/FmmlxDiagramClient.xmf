@@ -38,6 +38,38 @@ context FmmlxDiagrams
       end;
       self.communicator
     end
+    
+    @Operation deleteDiagram(modelName:String,diagramName:String)
+    	let
+     		key = self.findDiagram(modelName,diagramName)
+     	in
+     		self.diagrams.remove(key)
+     	end
+    end
+    
+    @Operation changeDiagramName(modelName:String,oldDiagramName:String,newDiagramName:String)
+    	let
+    		key = self.findDiagram(modelName,oldDiagramName)
+    	then
+    		diagram = self.diagrams.get(key)
+    	in
+    		diagram.diagramName := newDiagramName.asSymbol()
+    	end
+    end
+    
+    @Operation toggleUmlMode(modelName:String,diagramName:String)
+    	let
+    		key = self.findDiagram(modelName,diagramName)
+    	then
+    		diagram = self.diagrams.get(key)
+    	in
+    		if diagram.umlMode = true then
+    			diagram.umlMode := false
+    		else
+    			diagram.umlMode := true
+    		end    	
+    	end
+    end
 
     /* this (3) operation(s) is invoked when "show in diagram" 
        in the menu of the package is invoked.
@@ -1651,16 +1683,16 @@ end
       end
     end
 
-    @Operation changeAttributeType(requestID : Seq(Integer), className, attName, oldTypeName, newTypeName)
+    @Operation changeAttributeType(requestID : Seq(Integer), className, attName, oldTypeName, newTypeName, converter)
       let
         m = FmmlxDiagrams::FmmlxManipulator();
-          class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
+        class = if self.getPackage(requestID).hasElement(className) then self.getPackage(requestID).getElement(className) else null end
         //class = self.getMapping(requestID).getMapping(classId).object
       then
         problems = if class <> null then m.checkChangeAttributeType(class, attName, oldTypeName, newTypeName, self.getPackage(requestID)) else ["Class not found"] end
       in
         if problems.isEmpty() then
-          m.changeAttributeType(class, attName, oldTypeName, newTypeName, self.getPackage(requestID));
+          m.changeAttributeType(class, attName, oldTypeName, newTypeName, converter, self.getPackage(requestID));
           self.log := self.log + [["changeAttributeType", ["package", class.owner.path()], ["class", class.path()] , ["name", attName] , ["oldType", oldTypeName] , ["newType", newTypeName]]]
           end;
         self.getCommunicator().sendMessageToJava([self.vector2Seq(requestID), problems]) // return null or problems
@@ -2673,20 +2705,19 @@ end
           in
             if "Attribute".equals(propType) then
               (propName + " -> " + propAction).println();
-              if "DROP".equals(propAction) then
+				 if "DROP".equals(propAction) then
                 ("action: removeAttribute(" + propOwner + "," + propName + ")").println();
-                m.removeAttribute(owner, propName, null);
-                self.log := self.log + [["removeAttribute", ["package", owner.owner.path()], ["class", owner.path()], ["name", propName]]]
+                m.removeAttribute(owner, propName, null)
               elseif "KEEP_AS".equals(propAction) then
                 ("action: changeAttributeName(" + propOwner + "," + propName + "," + propArg0 + ")").println();
-                m.changeAttributeName(owner, propName, propArg0);
-                self.log := self.log + [["changeAttributeName", ["package", owner.owner.path()], ["class", owner.path()] , ["oldName", propName] , ["newName", propArg0]]]
+                m.changeAttributeName(owner, propName, propArg0)
               elseif "MERGE_INTO".equals(propAction) then
                 ("not yet implemented: mergeSlotValuesInto(" + propOwner + "," + propName + "," + propArg0 + ")").println()
               elseif "PULL_UP".equals(propAction) then
                 ("action: changeAttributeOwner(" + propOwner + "," + propName + "," + class.name + ")").println();
-                m.changeAttributeOwner(propOwner, propName, propArg0);
-                self.log := self.log + [["changeAttributeOwner",["package", propOwner.owner.path()],["oldName", oldName],["name", name],["newName", newName]]]
+                ("owner.of(): " + owner.of()).println();
+                ("class.of(): " + class.of()).println();
+                m.changeAttributeOwner(owner, propName, class)
               else
                 ("Command not yet implemented: " + propAction).println()
               end // if action

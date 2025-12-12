@@ -219,6 +219,20 @@ import FmmlxDiagrams;
     end
     
   context FmmlxManipulator
+    @Operation changeAttributeOwner(oldClass, attName, newClass)
+      let 
+        att = oldClass.getAttribute(attName)
+      in
+        oldClass.remove(att);
+        newClass.add(att);
+        att.owner := newClass;
+        self.repairSlotsRecursively(newClass);
+        self.repairSlotsRecursively(oldClass);
+        [] // return no problems
+      end
+    end
+    
+  context FmmlxManipulator
     @Operation changeAttributeLevel(class, attName, oldLevel, newLevel)
       let 
         attribute = null 
@@ -283,7 +297,7 @@ import FmmlxDiagrams;
       end
       
     context FmmlxManipulator
-    @Operation changeAttributeType(class, attName, oldTypeName, newTypeName, env:Package)
+    @Operation changeAttributeType(class, attName, oldTypeName, newTypeName, converterString, env:Package)
       let 
         attribute = null;
         problems = [];
@@ -298,7 +312,44 @@ import FmmlxDiagrams;
 	    if parseResult.at(0) <> null then 
 	      attribute.type := parseResult.at(0) 
 	    else throw parseResult.at(1)
+	    end;
+	    // now, the type has been changed, slot value conversion is next
+	    // first try to create the converter operation, which should work, 
+	    // as it has been checked on the gui already, therefore only basic eception handling
+	    let 
+	      converterOperation = try 
+	        let 
+	          opAS = OCL::OCL.grammar.parseString(converterString,"Exp1",Seq{XOCL})
+  	        then
+	          opASfun = Compiler::compileToFun("",opAS,Seq{},Seq{Seq{2|Root.contents},Seq{2|XCore.contents}},true)
+	        in
+	          opASfun()
+	        end
+	      catch(exc)
+	        exc.println()
+	      end
+	    in
+	      if converterOperation <> null then 
+	        // the operation has been made available
+	        // next: loop through all slots
+	        @For o in class.allMetaInstances()->select(o | 
+	            o.level.minLevel = attribute.instLevel.minLevel andthen 
+	            o.level.maxLevel = attribute.instLevel.maxLevel) do
+	          try
+	            let 
+	              oldVal = o.get(attName)
+	            then
+	              newVal = converterOperation.invoke(o,Seq{oldVal})
+	            in
+	              o.set(attName, newVal)
+	            end
+	          catch(exc)
+	            exc.println() // converter failed
+	          end
+	        end
+	      end
 	    end
+	    
 	  end; null
     end
     
